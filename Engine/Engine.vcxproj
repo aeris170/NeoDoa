@@ -108,6 +108,7 @@
     <ClCompile Include="DoaAnimations.cpp" />
     <ClCompile Include="DoaCamera.cpp" />
     <ClCompile Include="DoaEngine.cpp" />
+    <ClCompile Include="DoaEzRenderer.cpp" />
     <ClCompile Include="DoaGameObject.cpp" />
     <ClCompile Include="DoaKeyboard.cpp" />
     <ClCompile Include="DoaLight.cpp" />
@@ -130,6 +131,7 @@
     <ClInclude Include="DoaScene.h" />
     <ClInclude Include="DoaShaders.h" />
     <ClInclude Include="DoaTextures.h" />
+    <ClInclude Include="DoaEzRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Engine.licenseheader" />

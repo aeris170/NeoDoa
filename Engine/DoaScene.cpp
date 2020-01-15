@@ -82,11 +82,11 @@ namespace doa::scene {
 	}
 
 	void Scene::update() {
-		std::for_each(m_objects->begin(), m_objects->end(), [&](const GameObject *o) { o->update(*this, m_objects, m_lights); });
+		std::for_each(m_objects->begin(), m_objects->end(), [&](GameObject *o) { o->update(*this, *m_objects, *m_lights); });
 	}
 
 	void Scene::render() {
-		std::for_each(m_objects->begin(), m_objects->end(), [&](const GameObject *o) { o->render(*this, m_objects, m_lights); });
+		std::for_each(m_objects->begin(), m_objects->end(), [&](const GameObject *o) { o->render(*this, *m_objects, *m_lights); });
 	}
 }
 

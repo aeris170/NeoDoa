@@ -1,4 +1,5 @@
 #include "doa.h"
+#include "Square.h"
 
 using namespace doa;
 
@@ -68,14 +69,14 @@ int main() {
 	scene->Add(&r1);
 	scene->Add(&r2);
 
-	scene2->Add(&r3);
+//	scene2->Add(&r3);
 
-	scene2->SetAmbientLight(.06f, .06f, .1f);
+//	scene2->SetAmbientLight(.06f, .06f, .1f);
 
 	scene::PointLight light{ glm::vec3(145, 155, 1000), glm::vec3(1, 1, 1), 100 };
 	light.SetRadius(300);
 
-	scene2->Add(&light);
+//	scene2->Add(&light);
 
 	scene::ACTIVE_SCENE = scene2;
 
@@ -89,6 +90,10 @@ int main() {
 	animation::Animation* a{ animation::CreateAnimation("testAnim", frames, std::chrono::seconds(3)) };
 	r3.SetDisplayMode(primitives::COLOR_OVER_ANIMATION);
 	r3.SetAnimation(a);
+
+	Square sqqq;
+
+	scene2->Add(&sqqq);
 
 	Loop();
 	Purge();

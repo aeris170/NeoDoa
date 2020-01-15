@@ -48,9 +48,9 @@ namespace doa {
 			delete[] m_colors;
 		}
 
-		void Primitive::update(const scene::Scene& parent, const std::vector<GameObject*>* const objects, const std::vector<scene::Light*>* const lights) const {}
+		void Primitive::update(const scene::Scene& parent, const std::vector<scene::GameObject*>& objects, const std::vector<scene::Light*>& lights) {}
 
-		void Primitive::render(const scene::Scene& parent, const std::vector<GameObject*>* const objects, const std::vector<scene::Light*>* const lights) const {
+		void Primitive::render(const scene::Scene& parent, const std::vector<scene::GameObject*>& objects, const std::vector<scene::Light*>& lights) const {
 			glUseProgram(*m_shader);
 			glBindVertexArray(m_VAO);
 
@@ -158,7 +158,7 @@ namespace doa {
 				li << intens << i << "]";
 				lr << radi << i << "]";
 
-				scene::Light* l = (*lights)[i];
+				scene::Light* l = lights[i];
 
 				GLint lightPositionsLocation = glGetUniformLocation(*m_shader, lp.str().c_str());
 				glm::vec3 pos = *l->GetPosition();

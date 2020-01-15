@@ -32,7 +32,7 @@ namespace doa::scene {
 		virtual inline const shader::ShaderProgram* GetShaderProgramID() const { return m_shader; }
 		virtual inline void SetShaderProgram(shader::ShaderProgram* shader) { m_shader = shader; }
 
-		virtual void update(const Scene& parent, const std::vector<GameObject*>* const objects, const std::vector<Light*>* const lights) const = 0;
-		virtual void render(const Scene& parent, const std::vector<GameObject*>* const objects, const std::vector<Light*>* const lights) const = 0;
+		virtual void update(const Scene& parent, const std::vector<GameObject*>& objects, const std::vector<Light*>& lights) = 0;
+		virtual void render(const Scene& parent, const std::vector<GameObject*>& objects, const std::vector<Light*>& lights) const = 0;
 	};
 }

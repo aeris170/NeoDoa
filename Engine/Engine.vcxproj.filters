@@ -37,6 +37,9 @@
     <ClCompile Include="DoaAnimations.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DoaEzRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="doa.h">
@@ -73,6 +76,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DoaAnimations.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DoaEzRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

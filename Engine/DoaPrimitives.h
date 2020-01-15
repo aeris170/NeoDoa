@@ -38,7 +38,7 @@ namespace doa::primitives {
 		void next_frame() const;
 
 	public:
-		Primitive(Type type, RenderMode rMode, DisplayMode dMode);
+		Primitive(Type type, RenderMode rMode = FILL, DisplayMode dMode = COLOR);
 		virtual ~Primitive();
 
 		virtual inline const Type GetType() const { return m_type; }
@@ -88,10 +88,10 @@ namespace doa::primitives {
 		virtual inline void SetTexture(texture::Texture *texture) { m_texture = texture; }
 
 		virtual inline const animation::Animation* GetAnimation() const { return m_anim; }
-		virtual inline void SetAnimation(animation::Animation *anim) { m_anim = anim; m_current_animation_frame = (*anim->frames)[0]; }
+		virtual inline void SetAnimation(animation::Animation *anim) { m_anim = anim; if(anim) m_current_animation_frame = (*anim->frames)[0]; }
 
-		virtual void update(const scene::Scene& parent, const std::vector<GameObject*>* const objects, const std::vector<scene::Light*>* const lights) const;
-		virtual void render(const scene::Scene& parent, const std::vector<GameObject*>* const objects, const std::vector<scene::Light*>* const lights) const;
+		virtual void update(const scene::Scene& parent, const std::vector<scene::GameObject*>& objects, const std::vector<scene::Light*>& lights) override;
+		virtual void render(const scene::Scene& parent, const std::vector<scene::GameObject*>& objects, const std::vector<scene::Light*>& lights) const override;
 
 	private:
 		static GLfloat s_triangle_vertices[];

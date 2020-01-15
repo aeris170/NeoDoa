@@ -70,6 +70,7 @@ namespace doa {
 			}
 			primitives::Primitive::generate_buffers();
 			shader::CreateShaderProgram("primitives-shader", "Shaders/vShader", "Shaders/fShader");
+			internal::ezrender::instantiate_primitives();
 		}
 
 		glEnable(GL_DEPTH_TEST);
@@ -123,6 +124,7 @@ namespace doa {
 		internal::texture::purge();
 		internal::scene::purge();
 		internal::shader::purge();
+		internal::ezrender::purge();
 		primitives::Primitive::purge();
 		glfwDestroyWindow(m_window);
 		glfwTerminate();

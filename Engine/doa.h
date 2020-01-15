@@ -50,6 +50,7 @@
 #include "DoaKeyboard.h"
 #include "DoaMouse.h"
 #include "DoaCamera.h"
+#include "DoaEzRenderer.h"
 
 #ifndef STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
