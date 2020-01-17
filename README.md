@@ -86,7 +86,7 @@ int main() {
 
 	Square s;
 
-	scene2->Add(&s);
+	sampleScene->Add(&s);
 
 	Loop();
 	Purge();
