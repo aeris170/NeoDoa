@@ -17,10 +17,10 @@ NeoDoa is still under development. Below are the finished features.
 * **Audio**
     * To be done.
 * **Resource Loading**
-    * Simple and fast texture loading
+    * Simple and fast texture loading using [stb_image](https://github.com/nothings/stb/blob/master/stb_image.h)
 * **Scripting system**
 	* Scene based objects and logic.
-	* Add objects to scenes and select and active scene.  
+	* Add objects to scenes and select an active scene.  
     * Extend __scene::GameObject__
 >   Write object's behaviors to __update()__, and write object's appearance to __render()__
 * **Input**
