@@ -78,7 +78,7 @@ using namespace doa;
 
 int main() {
 	Init();
-	Window *window{ doa::CreateWindow("Spinning Square Demo", 960, 540, false) };
+	Window *window{ CreateWindow("Spinning Square Demo", 960, 540, false) };
 
 	scene::Scene *sampleScene{ new scene::Scene("sample") };
 
