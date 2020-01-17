@@ -30,7 +30,7 @@ NeoDoa is still under development. Below are the finished features.
 
 Here's a super-simple example - a spinning red square using __EZ Rendering__!
 
-### Sqaure.h
+### Square.h
 ```c++
 #pragma once
 #include "doa.h"
@@ -47,7 +47,7 @@ public:
 };
 ```
 
-### Sqaure.cpp
+### Square.cpp
 ```c++
 #include "Square.h"
 
