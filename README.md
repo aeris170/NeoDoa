@@ -1,4 +1,4 @@
-![NeoDoa](https://user-images.githubusercontent.com/25724155/72556769-60f09300-38b0-11ea-8c18-252950ba1343.png "NeoDoa Logo")
+![NeoDoa](https://user-images.githubusercontent.com/25724155/72576385-9ca35100-38e0-11ea-9f10-5de3852e6df3.png "NeoDoa Logo")
 
 # NeoDoa 2D Game Engine
 
@@ -21,11 +21,8 @@ NeoDoa is still under development. Below are the finished features.
 * **Scripting system**
 	* Scene based objects and logic.
 	* Add objects to scenes and select and active scene.  
->
->
-	* Extend __scene::GameObject__
-    * Write object's behaviors to __update()__
-	* Write object's appearance to __render()__
+    * Extend __scene::GameObject__
+>   Write object's behaviors to __update()__, and write object's appearance to __render()__
 * **Input**
     * Mouse, Keyboard.
 
