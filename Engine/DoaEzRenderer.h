@@ -7,21 +7,25 @@ namespace doa::ezrender {
 	enum Mode { POINTS, DRAW, FILL };
 
 	DOA_API void Translate(const glm::vec3& offset);
+	DOA_API void Translate(const float x, const float y, const float z);
 	DOA_API void TranslateX(const float x);
 	DOA_API void TranslateY(const float y);
 	DOA_API void TranslateZ(const float z);
 
 	DOA_API void Rotate(const glm::vec3& amount);
+	DOA_API void Rotate(const float x, const float y, const float z);
 	DOA_API void RotateX(const float x);
 	DOA_API void RotateY(const float y);
 	DOA_API void RotateZ(const float z);
 
 	DOA_API void Scale(const glm::vec2& factor);
+	DOA_API void Scale(const float x, const float y);
 	DOA_API void ScaleX(const float x);
 	DOA_API void ScaleY(const float y);
 
 	DOA_API void Color(const glm::vec3& color);
 	DOA_API void Color(const glm::vec4& color);
+	DOA_API void Color(const float r, const float g, const float b, const float a = 1);
 	DOA_API void ColorR(const float r);
 	DOA_API void ColorG(const float g);
 	DOA_API void ColorB(const float b);

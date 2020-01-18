@@ -7,6 +7,11 @@ namespace doa::ezrender {
 	void Translate(const glm::vec3& offset) {
 		*translation = offset;
 	}
+	void Translate(const float x, const float y, const float z) {
+		translation->x = x;
+		translation->y = y;
+		translation->z = z;
+	}
 	void TranslateX(const float x) {
 		translation->x = x;
 	}
@@ -19,6 +24,11 @@ namespace doa::ezrender {
 
 	void Rotate(const glm::vec3& amount) {
 		*rotation = amount;
+	}
+	void Rotate(const float x, const float y, const float z) {
+		rotation->x = x;
+		rotation->y = y;
+		rotation->z = z;
 	}
 	void RotateX(const float x) {
 		rotation->x = x;
@@ -33,6 +43,10 @@ namespace doa::ezrender {
 	void Scale(const glm::vec2& factor) {
 		*scale = factor;
 	}
+	void Scale(const float x, const float y) {
+		scale->x = x;
+		scale->y = y;
+	}
 	void ScaleX(const float x) {
 		scale->x = x;
 	}
@@ -46,6 +60,13 @@ namespace doa::ezrender {
 	}
 	void Color(const glm::vec4& c) {
 		*color = c;
+		isUsingColor = true;
+	}
+	void Color(const float r, const float g, const float b, const float a) {
+		color->r = r;
+		color->g = g;
+		color->b = b;
+		color->a = a;
 		isUsingColor = true;
 	}
 	void ColorR(float r) {
