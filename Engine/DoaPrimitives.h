@@ -15,7 +15,7 @@ namespace doa::primitives {
 
 		bool m_is_fixed{ false };
 
-		GLfloat *m_colors{ NULL };
+		GLfloat* m_colors{ NULL };
 		int m_colors_count{ 0 };
 		mutable bool m_colors_changed{ false };
 
@@ -29,10 +29,10 @@ namespace doa::primitives {
 		GLuint m_indices_IBO{ 0 };
 		GLuint m_line_indices_IBO{ 0 };
 
-		texture::Texture *m_texture{ 0 };
+		texture::Texture* m_texture{ NULL };
 
-		animation::Animation *m_anim{ 0 };
-		mutable animation::AnimationFrame *m_current_animation_frame{ 0 };
+		animation::Animation* m_anim{ NULL };
+		mutable animation::AnimationFrame* m_current_animation_frame{ NULL };
 		mutable int m_current_animation_index{ 0 };
 
 		void next_frame() const;

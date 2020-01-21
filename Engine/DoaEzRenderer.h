@@ -46,12 +46,12 @@ namespace doa::ezrender {
 
 namespace internal::ezrender {
 
-	extern glm::vec3 *translation;
-	extern glm::vec3 *rotation;
-	extern glm::vec2 *scale;
-	extern glm::vec4 *color;
-	extern doa::texture::Texture *tex;
-	extern doa::animation::Animation *anim;
+	extern glm::vec3* translation;
+	extern glm::vec3* nrotation;
+	extern glm::vec2* scale;
+	extern glm::vec4* color;
+	extern doa::texture::Texture* tex;
+	extern doa::animation::Animation* anim;
 	extern enum doa::ezrender::Shape shape;
 	extern enum doa::ezrender::Mode mode;
 
@@ -59,15 +59,15 @@ namespace internal::ezrender {
 	extern bool isUsingTexture;
 	extern bool isUsingAnimation;
 
-	extern doa::primitives::Primitive *base_triangle;
-	extern doa::primitives::Primitive *base_square;
-	extern doa::primitives::Primitive *base_pentagon;
-	extern doa::primitives::Primitive *base_hexagon;
-	extern doa::primitives::Primitive *base_heptagon;
-	extern doa::primitives::Primitive *base_octagon;
-	extern doa::primitives::Primitive *base_nonagon;
-	extern doa::primitives::Primitive *base_decagon;
-	extern doa::primitives::Primitive *base_circle;
+	extern doa::primitives::Primitive* base_triangle;
+	extern doa::primitives::Primitive* base_square;
+	extern doa::primitives::Primitive* base_pentagon;
+	extern doa::primitives::Primitive* base_hexagon;
+	extern doa::primitives::Primitive* base_heptagon;
+	extern doa::primitives::Primitive* base_octagon;
+	extern doa::primitives::Primitive* base_nonagon;
+	extern doa::primitives::Primitive* base_decagon;
+	extern doa::primitives::Primitive* base_circle;
 
 	void instantiate_primitives();
 	void reset_primitive(doa::primitives::Primitive& p);

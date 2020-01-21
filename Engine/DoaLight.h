@@ -5,8 +5,8 @@ namespace doa::scene {
 
 	class DOA_API Light {
 	protected:
-		glm::vec3 *m_position;
-		glm::vec3 *m_color;
+		glm::vec3* m_position;
+		glm::vec3* m_color;
 		float m_radius;
 		float m_intensity;
 

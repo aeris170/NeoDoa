@@ -5,11 +5,11 @@ namespace doa::scene {
 
 	class DOA_API GameObject {
 	protected:
-		glm::vec3 *m_position;
-		glm::vec3 *m_rotation;
-		glm::vec2 *m_scale;
+		glm::vec3* m_position;
+		glm::vec3* m_rotation;
+		glm::vec2* m_scale;
 
-		shader::ShaderProgram *m_shader{ 0 };
+		shader::ShaderProgram* m_shader{ NULL };
 
 	public:
 		GameObject(const glm::vec3& position = glm::vec3(0, 0, 0), const glm::vec3& rotation = glm::vec3(0, 0, 0), const glm::vec2& scale = glm::vec2(1, 1));

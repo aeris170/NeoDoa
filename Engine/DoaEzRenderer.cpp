@@ -187,10 +187,10 @@ namespace internal::ezrender {
 
 	glm::vec3* translation{ new glm::vec3() };
 	glm::vec3* rotation{ new glm::vec3() };
-	glm::vec2* scale{ new glm::vec2() };
+	glm::vec2* scale{ new glm::vec2(1, 1) };
 	glm::vec4* color{ new glm::vec4(-1, -1, -1, 1) };
-	doa::texture::Texture* tex{ 0 };
-	doa::animation::Animation* anim{ 0 };
+	doa::texture::Texture* tex{ NULL };
+	doa::animation::Animation* anim{ NULL };
 	enum doa::ezrender::Shape shape { doa::ezrender::SQUARE };
 	enum doa::ezrender::Mode mode {	doa::ezrender::FILL	};
 
@@ -198,15 +198,15 @@ namespace internal::ezrender {
 	bool isUsingTexture = false;
 	bool isUsingAnimation = false;
 
-	doa::primitives::Primitive *base_triangle { 0 };
-	doa::primitives::Primitive *base_square   { 0 };
-	doa::primitives::Primitive *base_pentagon { 0 };
-	doa::primitives::Primitive *base_hexagon  { 0 };
-	doa::primitives::Primitive *base_heptagon { 0 };
-	doa::primitives::Primitive *base_octagon  { 0 };
-	doa::primitives::Primitive *base_nonagon  { 0 };
-	doa::primitives::Primitive *base_decagon  { 0 };
-	doa::primitives::Primitive *base_circle   { 0 };
+	doa::primitives::Primitive* base_triangle { NULL };
+	doa::primitives::Primitive* base_square   { NULL };
+	doa::primitives::Primitive* base_pentagon { NULL };
+	doa::primitives::Primitive* base_hexagon  { NULL };
+	doa::primitives::Primitive* base_heptagon { NULL };
+	doa::primitives::Primitive* base_octagon  { NULL };
+	doa::primitives::Primitive* base_nonagon  { NULL };
+	doa::primitives::Primitive* base_decagon  { NULL };
+	doa::primitives::Primitive* base_circle   { NULL };
 
 	void instantiate_primitives() {
 		base_triangle = { new doa::primitives::Primitive(doa::primitives::TRIANGLE) };

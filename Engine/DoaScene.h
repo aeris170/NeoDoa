@@ -6,10 +6,10 @@ namespace doa::scene {
 	class GameObject;
 	class DOA_API Scene {
 	private:
-		std::string *m_name;
-		std::vector<GameObject*> *m_objects;
-		std::vector<Light*> *m_lights;
-		glm::vec3 *m_ambientLight{ new glm::vec3(1, 1, 1) };
+		std::string* m_name;
+		std::vector<GameObject*>* m_objects;
+		std::vector<Light*>* m_lights;
+		glm::vec3* m_ambientLight{ new glm::vec3(1, 1, 1) };
 
 		virtual void update();
 		virtual void render();

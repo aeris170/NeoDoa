@@ -16,7 +16,7 @@ namespace internal::texture {
 
 	typedef GLuint Texture;
 
-	Texture* const CreateTexture(const std::string& pathToTextureImage);
+	Texture* const create_texture(const std::string& pathToTextureImage);
 
 	void purge();
 }

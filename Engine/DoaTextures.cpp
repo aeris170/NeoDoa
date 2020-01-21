@@ -7,8 +7,7 @@ namespace doa::texture {
 	std::map<std::string, Texture*> TEXTURES;
 
 	Texture* const CreateTexture(const std::string& name, const std::string& pathToTextureImage) {
-		//name hiding,     v v v     v v v   must explicitly state the namespace!
-		Texture* texture{ internal::texture::CreateTexture(pathToTextureImage) };
+		Texture* texture{ create_texture(pathToTextureImage) };
 		if (TEXTURES[name]) {
 			glDeleteTextures(1, TEXTURES[name]);
 			delete TEXTURES[name];
@@ -24,7 +23,7 @@ namespace doa::texture {
 
 namespace internal::texture {
 
-	Texture* const CreateTexture(const std::string& pathToTextureImage) {
+	Texture* const create_texture(const std::string& pathToTextureImage) {
 		Texture* texture{ new Texture };
 
 		glGenTextures(1, texture);
@@ -37,14 +36,13 @@ namespace internal::texture {
 
 		int width, height, nrChannels;
 		stbi_set_flip_vertically_on_load(true);
-		unsigned char *data{ stbi_load(pathToTextureImage.c_str(), &width, &height, &nrChannels, STBI_rgb_alpha) };
+		unsigned char* data{ stbi_load(pathToTextureImage.c_str(), &width, &height, &nrChannels, STBI_rgb_alpha) };
 		if (data) {
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 			glGenerateMipmap(GL_TEXTURE_2D);
-		}
-		else {
+		} else {
 			std::cout << "Doa fucked up while loading texture " << pathToTextureImage << "\n";
-			std::cout << stbi_failure_reason() << std::endl;
+			std::cout << stbi_failure_reason() << "\n";
 		}
 
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -54,9 +52,8 @@ namespace internal::texture {
 	}
 
 	void purge() {
-		for (auto itr = doa::texture::TEXTURES.begin(); itr != doa::texture::TEXTURES.end(); ++itr)
-		{
-			Texture *t = itr->second;
+		for (auto itr{ doa::texture::TEXTURES.begin() }; itr != doa::texture::TEXTURES.end(); ++itr) {
+			Texture* t = itr->second;
 			glDeleteTextures(1, t);
 			delete t;
 		}

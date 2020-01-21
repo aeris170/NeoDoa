@@ -33,7 +33,7 @@ namespace doa {
 		m_window = glfwCreateWindow(width, height, name, isFullscreen ? glfwGetPrimaryMonitor() : NULL, NULL);
 
 		if (!m_window) {
-			std::cout << "Doa fucked up while creating GLFWwindow!\n";
+			std::cout << "Fucked up while creating GLFWwindow!\n";
 		}
 
 		glViewport(0, 0, width, height);
@@ -64,7 +64,7 @@ namespace doa {
 		{ //GLEW INIT
 			glewExperimental = GL_TRUE;
 			if (glewInit() != GLEW_OK) {
-				std::cout << "Doa fucked up while initializing glew!\n";
+				std::cout << "Fucked up while initializing glew!\n";
 				glfwDestroyWindow(m_window);
 				glfwTerminate();
 			}
@@ -133,7 +133,7 @@ namespace doa {
 
 namespace internal {
 
-	Window *m_window{ NULL };
+	Window* m_window{ NULL };
 
 	glm::mat4 m_view_matrix;
 	glm::mat4 m_fixed_view_matrix{ glm::lookAt(glm::vec3(0, 0, 5000), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0)) };
@@ -167,14 +167,14 @@ namespace internal {
 		}
 	}
 
-	void on_window_resize(Window *window, int width, int height) {
+	void on_window_resize(Window* window, int width, int height) {
 		doa::window_width = width;
 		doa::window_height = height;
 		glViewport(0, 0, width, height);
 		calculate_projection_matrix();
 	}
 
-	void on_mouse_button_click_and_release(Window *window, int button, int action, int mods) {
+	void on_mouse_button_click_and_release(Window* window, int button, int action, int mods) {
 		switch (action) {
 		case GLFW_RELEASE:
 			internal::mouse::press[button] = false;
@@ -188,22 +188,21 @@ namespace internal {
 		}
 	}
 
-	void on_mouse_move(Window *window, double xpos, double ypos) {
+	void on_mouse_move(Window* window, double xpos, double ypos) {
 		doa::mouse::x = (float)xpos - doa::window_width * .5f;
 		doa::mouse::y = doa::window_height * .5f - (float)ypos;
 	}
 
-	void on_mouse_scroll(Window *window, double xoffset, double yoffset) {
+	void on_mouse_scroll(Window* window, double xoffset, double yoffset) {
 		doa::mouse::z += (float)yoffset * doa::mouse::step_z;
 		if (doa::mouse::z < doa::mouse::min_z) {
 			doa::mouse::z = doa::mouse::min_z;
-		}
-		else if (doa::mouse::z > doa::mouse::max_z) {
+		} else if (doa::mouse::z > doa::mouse::max_z) {
 			doa::mouse::z = doa::mouse::max_z;
 		}
 	}
 
-	void on_key_press_and_release(Window *window, int key, int scancode, int action, int mods) {
+	void on_key_press_and_release(Window* window, int key, int scancode, int action, int mods) {
 		switch (action) {
 		case GLFW_RELEASE:
 			internal::keyboard::press[key] = false;

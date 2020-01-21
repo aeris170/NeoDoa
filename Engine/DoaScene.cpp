@@ -93,9 +93,8 @@ namespace doa::scene {
 namespace internal::scene {
 
 	void purge() {
-		for (auto itr{ doa::scene::SCENES.begin() }; itr != doa::scene::SCENES.end(); ++itr)
-		{
-			delete (itr->second);
+		for (auto itr{ doa::scene::SCENES.begin() }; itr != doa::scene::SCENES.end(); ++itr) {
+			delete itr->second;
 		}
 		doa::scene::SCENES.clear();
 	}

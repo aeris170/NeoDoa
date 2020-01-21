@@ -21,10 +21,10 @@ namespace doa::camera {
 	float tween_z{ .025f };
 
 	bool follow_enabled{ false };
-	scene::GameObject *follow_target{ NULL };
+	scene::GameObject* follow_target{ NULL };
 
 	bool zoom_enabled{ false };
-	scene::GameObject *zoom_target{ NULL };
+	scene::GameObject* zoom_target{ NULL };
 }
 
 namespace internal::camera {

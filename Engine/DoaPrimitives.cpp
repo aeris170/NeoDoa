@@ -147,7 +147,7 @@ namespace doa {
 			const char intens[] = "lightIntensities[";
 			const char radi[] = "lightRadii[";
 
-			for (int i = 0; i < lightCount; ++i) {
+			for (int i{ 0 }; i < lightCount; ++i) {
 				lp.clear();
 				lc.clear();
 				li.clear();
@@ -676,7 +676,7 @@ namespace doa {
 		GLuint Primitive::s_circle_indices_IBO = 0;
 		GLuint Primitive::s_circle_line_indices_IBO = 0;
 
-		void Primitive::get_buffers(Primitive *p) {
+		void Primitive::get_buffers(Primitive* p) {
 			switch (p->m_type) {
 			case TRIANGLE:
 				p->m_VAO = s_triangle_VAO;

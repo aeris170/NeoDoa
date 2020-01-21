@@ -16,9 +16,9 @@ namespace doa::camera {
 	extern DOA_API float tween_y;
 	extern DOA_API float tween_z;
 	extern DOA_API bool follow_enabled;
-	extern DOA_API doa::scene::GameObject *follow_target;
+	extern DOA_API doa::scene::GameObject* follow_target;
 	extern DOA_API bool zoom_enabled;
-	extern DOA_API doa::scene::GameObject *zoom_target;
+	extern DOA_API doa::scene::GameObject* zoom_target;
 }
 
 namespace internal::camera {

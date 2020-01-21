@@ -67,7 +67,7 @@ namespace internal::shader {
 	GLuint add_shader_to(ShaderProgram shaderProgram, const std::string& name, const char *shaderCode, GLenum shaderType) {
 		GLuint shader{ glCreateShader(shaderType) };
 
-		const GLchar *code[1];
+		const GLchar* code[1];
 		code[0] = shaderCode;
 
 		GLint length[1];
@@ -113,9 +113,8 @@ namespace internal::shader {
 	}
 
 	void purge() {
-		for (auto itr = doa::shader::SHADERS.begin(); itr != doa::shader::SHADERS.end(); ++itr)
-		{
-			ShaderProgram *p = itr->second;
+		for (auto itr{ doa::shader::SHADERS.begin() }; itr != doa::shader::SHADERS.end(); ++itr) {
+			ShaderProgram* p = itr->second;
 			glDeleteProgram(*p);
 			delete p;
 		}

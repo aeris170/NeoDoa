@@ -39,6 +39,9 @@
 
 #include <vld.h>
 
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
 #include "DoaEngine.h"
 #include "DoaShaders.h"
 #include "DoaTextures.h"
@@ -55,5 +58,5 @@
 #ifndef STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_STATIC
-#include "stb_image.h"
+#include <stb_image.h>
 #endif
