@@ -86,23 +86,23 @@ namespace doa::ezrender {
 		isUsingColor = true;
 	}
 
-	void Texture(texture::Texture* t) {
+	void Texture(texture::Texture* const t) {
 		tex = t;
 		isUsingTexture = true;
 		isUsingAnimation = false;
 	}
 
-	void Animation(animation::Animation* a) {
+	void Animation(animation::Animation* const a) {
 		anim = a;
 		isUsingAnimation = true;
 		isUsingTexture = false;
 	}
 
-	void Shape(enum Shape s) {
+	void Shape(const enum Shape s) {
 		shape = s;
 	}
 
-	void Mode(enum Mode m) {
+	void Mode(const enum Mode m) {
 		mode = m;
 	}
 

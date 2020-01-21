@@ -31,9 +31,9 @@ namespace doa::ezrender {
 	DOA_API void ColorB(const float b);
 	DOA_API void ColorA(const float a);
 
-	DOA_API void Texture(const texture::Texture* const t);
+	DOA_API void Texture(texture::Texture* const t);
 
-	DOA_API void Animation(const animation::Animation* const a);
+	DOA_API void Animation(animation::Animation* const a);
 
 	DOA_API void Shape(const enum Shape s);
 
@@ -47,7 +47,7 @@ namespace doa::ezrender {
 namespace internal::ezrender {
 
 	extern glm::vec3* translation;
-	extern glm::vec3* nrotation;
+	extern glm::vec3* rotation;
 	extern glm::vec2* scale;
 	extern glm::vec4* color;
 	extern doa::texture::Texture* tex;
