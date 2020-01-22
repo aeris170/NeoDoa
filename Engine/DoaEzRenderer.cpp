@@ -86,6 +86,10 @@ namespace doa::ezrender {
 		isUsingColor = true;
 	}
 
+	void Shader(shader::ShaderProgram* const s) {
+		sha = s;
+	}
+
 	void Texture(texture::Texture* const t) {
 		tex = t;
 		isUsingTexture = true;
@@ -163,7 +167,9 @@ namespace doa::ezrender {
 				p->SetDisplayMode(primitives::COLOR);
 			}
 		}
-
+		if (sha) {
+			p->SetShaderProgram(sha);
+		}
 		p->render(parent, objects, lights);
 		reset_primitive(*p);
 	}
@@ -173,8 +179,9 @@ namespace doa::ezrender {
 		*rotation = glm::vec3(0, 0, 0);
 		*scale = glm::vec3(0, 0, 0);
 		*color = glm::vec4(0, 0, 0, 1);
-		tex = 0;
-		anim = 0;
+		sha = NULL;
+		tex = NULL;
+		anim = NULL;
 		shape = SQUARE;
 		mode = FILL;
 		isUsingColor = false;
@@ -189,6 +196,7 @@ namespace internal::ezrender {
 	glm::vec3* rotation{ new glm::vec3() };
 	glm::vec2* scale{ new glm::vec2(1, 1) };
 	glm::vec4* color{ new glm::vec4(-1, -1, -1, 1) };
+	doa::shader::ShaderProgram* sha{ NULL };
 	doa::texture::Texture* tex{ NULL };
 	doa::animation::Animation* anim{ NULL };
 	enum doa::ezrender::Shape shape { doa::ezrender::SQUARE };
@@ -225,6 +233,7 @@ namespace internal::ezrender {
 		p.SetRotation(0.f, 0.f, 0.f);
 		p.SetScale(1.f, 1.f);
 		p.SetAllVerticesColors(glm::vec4(0, 0, 0, 1));
+		p.SetShaderProgram(doa::shader::SHADERS["primitives-shader"]);
 		p.SetTexture(0);
 		p.SetAnimation(0);
 		p.SetDisplayMode(doa::primitives::COLOR);
