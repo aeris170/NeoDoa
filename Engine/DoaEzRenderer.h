@@ -62,18 +62,18 @@ namespace internal::ezrender {
 	extern bool isUsingTexture;
 	extern bool isUsingAnimation;
 
-	extern doa::primitives::Primitive* base_triangle;
-	extern doa::primitives::Primitive* base_square;
-	extern doa::primitives::Primitive* base_pentagon;
-	extern doa::primitives::Primitive* base_hexagon;
-	extern doa::primitives::Primitive* base_heptagon;
-	extern doa::primitives::Primitive* base_octagon;
-	extern doa::primitives::Primitive* base_nonagon;
-	extern doa::primitives::Primitive* base_decagon;
-	extern doa::primitives::Primitive* base_circle;
+	extern doa::primitive::Primitive* base_triangle;
+	extern doa::primitive::Primitive* base_square;
+	extern doa::primitive::Primitive* base_pentagon;
+	extern doa::primitive::Primitive* base_hexagon;
+	extern doa::primitive::Primitive* base_heptagon;
+	extern doa::primitive::Primitive* base_octagon;
+	extern doa::primitive::Primitive* base_nonagon;
+	extern doa::primitive::Primitive* base_decagon;
+	extern doa::primitive::Primitive* base_circle;
 
 	void instantiate_primitives();
-	void reset_primitive(doa::primitives::Primitive& p);
+	void reset_primitive(doa::primitive::Primitive& p);
 
 	void purge();
 }

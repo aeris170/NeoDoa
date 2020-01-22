@@ -111,7 +111,7 @@ namespace doa::ezrender {
 	}
 
 	void Render(const scene::Scene& parent, const std::vector<scene::GameObject*>& objects, const std::vector<scene::Light*>& lights) {
-		primitives::Primitive *p{ 0 };
+		primitive::Primitive *p{ 0 };
 		switch (shape) {
 		case TRIANGLE:
 			p = base_triangle;
@@ -148,23 +148,23 @@ namespace doa::ezrender {
 			p->SetAllVerticesColors(*color);
 			if (isUsingTexture) {
 				p->SetTexture(tex);
-				p->SetDisplayMode(primitives::COLOR_OVER_TEXTURE);
+				p->SetDisplayMode(primitive::COLOR_OVER_TEXTURE);
 			} else if(isUsingAnimation) {
 				p->SetAnimation(anim);
-				p->SetDisplayMode(primitives::COLOR_OVER_ANIMATION);
+				p->SetDisplayMode(primitive::COLOR_OVER_ANIMATION);
 			} else {
-				p->SetDisplayMode(primitives::COLOR);
+				p->SetDisplayMode(primitive::COLOR);
 			}
 		} else {
 			if (isUsingTexture) {
 				p->SetTexture(tex);
-				p->SetDisplayMode(primitives::TEXTURE);
+				p->SetDisplayMode(primitive::TEXTURE);
 			} else if (isUsingAnimation) {
 				p->SetAnimation(anim);
-				p->SetDisplayMode(primitives::ANIMATION);
+				p->SetDisplayMode(primitive::ANIMATION);
 			} else {
 				p->SetAllVerticesColors(glm::vec3(0, 0, 0));
-				p->SetDisplayMode(primitives::COLOR);
+				p->SetDisplayMode(primitive::COLOR);
 			}
 		}
 		if (sha) {
@@ -206,29 +206,29 @@ namespace internal::ezrender {
 	bool isUsingTexture = false;
 	bool isUsingAnimation = false;
 
-	doa::primitives::Primitive* base_triangle { NULL };
-	doa::primitives::Primitive* base_square   { NULL };
-	doa::primitives::Primitive* base_pentagon { NULL };
-	doa::primitives::Primitive* base_hexagon  { NULL };
-	doa::primitives::Primitive* base_heptagon { NULL };
-	doa::primitives::Primitive* base_octagon  { NULL };
-	doa::primitives::Primitive* base_nonagon  { NULL };
-	doa::primitives::Primitive* base_decagon  { NULL };
-	doa::primitives::Primitive* base_circle   { NULL };
+	doa::primitive::Primitive* base_triangle { NULL };
+	doa::primitive::Primitive* base_square   { NULL };
+	doa::primitive::Primitive* base_pentagon { NULL };
+	doa::primitive::Primitive* base_hexagon  { NULL };
+	doa::primitive::Primitive* base_heptagon { NULL };
+	doa::primitive::Primitive* base_octagon  { NULL };
+	doa::primitive::Primitive* base_nonagon  { NULL };
+	doa::primitive::Primitive* base_decagon  { NULL };
+	doa::primitive::Primitive* base_circle   { NULL };
 
 	void instantiate_primitives() {
-		base_triangle = { new doa::primitives::Primitive(doa::primitives::TRIANGLE) };
-		base_square   = { new doa::primitives::Primitive(doa::primitives::SQUARE)   };
-		base_pentagon = { new doa::primitives::Primitive(doa::primitives::PENTAGON) };
-		base_hexagon  = { new doa::primitives::Primitive(doa::primitives::HEXAGON)  };
-		base_heptagon = { new doa::primitives::Primitive(doa::primitives::HEPTAGON) };
-		base_octagon  = { new doa::primitives::Primitive(doa::primitives::OCTAGON)  };
-		base_nonagon  = { new doa::primitives::Primitive(doa::primitives::NONAGON)  };
-		base_decagon  = { new doa::primitives::Primitive(doa::primitives::DECAGON)  };
-		base_circle   = { new doa::primitives::Primitive(doa::primitives::CIRCLE)   };
+		base_triangle = { new doa::primitive::Primitive(doa::primitive::TRIANGLE) };
+		base_square   = { new doa::primitive::Primitive(doa::primitive::SQUARE)   };
+		base_pentagon = { new doa::primitive::Primitive(doa::primitive::PENTAGON) };
+		base_hexagon  = { new doa::primitive::Primitive(doa::primitive::HEXAGON)  };
+		base_heptagon = { new doa::primitive::Primitive(doa::primitive::HEPTAGON) };
+		base_octagon  = { new doa::primitive::Primitive(doa::primitive::OCTAGON)  };
+		base_nonagon  = { new doa::primitive::Primitive(doa::primitive::NONAGON)  };
+		base_decagon  = { new doa::primitive::Primitive(doa::primitive::DECAGON)  };
+		base_circle   = { new doa::primitive::Primitive(doa::primitive::CIRCLE)   };
 	}
 
-	void reset_primitive(doa::primitives::Primitive& p) {
+	void reset_primitive(doa::primitive::Primitive& p) {
 		p.SetPosition(0.f, 0.f);
 		p.SetRotation(0.f, 0.f, 0.f);
 		p.SetScale(1.f, 1.f);
@@ -236,8 +236,8 @@ namespace internal::ezrender {
 		p.SetShaderProgram(doa::shader::SHADERS["primitives-shader"]);
 		p.SetTexture(0);
 		p.SetAnimation(0);
-		p.SetDisplayMode(doa::primitives::COLOR);
-		p.SetRenderMode(doa::primitives::FILL);
+		p.SetDisplayMode(doa::primitive::COLOR);
+		p.SetRenderMode(doa::primitive::FILL);
 	}
 
 	void purge() {

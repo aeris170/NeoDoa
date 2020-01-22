@@ -19,9 +19,6 @@
     <ClCompile Include="DoaMouse.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DoaPrimitives.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DoaScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -40,6 +37,9 @@
     <ClCompile Include="DoaEzRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DoaPrimitive.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="doa.h">
@@ -55,9 +55,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DoaMouse.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DoaPrimitives.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DoaScene.h">
@@ -79,6 +76,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DoaEzRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DoaText.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DoaPrimitive.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

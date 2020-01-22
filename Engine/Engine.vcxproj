@@ -113,7 +113,7 @@
     <ClCompile Include="DoaKeyboard.cpp" />
     <ClCompile Include="DoaLight.cpp" />
     <ClCompile Include="DoaMouse.cpp" />
-    <ClCompile Include="DoaPrimitives.cpp" />
+    <ClCompile Include="DoaPrimitive.cpp" />
     <ClCompile Include="DoaScene.cpp" />
     <ClCompile Include="DoaShaders.cpp" />
     <ClCompile Include="DoaTextures.cpp" />
@@ -127,9 +127,10 @@
     <ClInclude Include="DoaKeyboard.h" />
     <ClInclude Include="DoaLight.h" />
     <ClInclude Include="DoaMouse.h" />
-    <ClInclude Include="DoaPrimitives.h" />
+    <ClInclude Include="DoaPrimitive.h" />
     <ClInclude Include="DoaScene.h" />
     <ClInclude Include="DoaShaders.h" />
+    <ClInclude Include="DoaText.h" />
     <ClInclude Include="DoaTextures.h" />
     <ClInclude Include="DoaEzRenderer.h" />
   </ItemGroup>
