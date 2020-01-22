@@ -6,8 +6,8 @@ namespace doa::texture {
 
 	std::map<std::string, Texture*> TEXTURES;
 
-	Texture* const CreateTexture(const std::string& name, const std::string& pathToTextureImage) {
-		Texture* texture{ create_texture(pathToTextureImage) };
+	Texture* const CreateTexture(const std::string& name, const std::string& pathToTextureImage, const int minFilter, const int magFilter) {
+		Texture* texture{ create_texture(pathToTextureImage, minFilter, magFilter) };
 		if (TEXTURES[name]) {
 			glDeleteTextures(1, TEXTURES[name]);
 			delete TEXTURES[name];
@@ -23,7 +23,7 @@ namespace doa::texture {
 
 namespace internal::texture {
 
-	Texture* const create_texture(const std::string& pathToTextureImage) {
+	Texture* const create_texture(const std::string& pathToTextureImage, const int minFilter, const int magFilter) {
 		Texture* texture{ new Texture };
 
 		glGenTextures(1, texture);
@@ -31,8 +31,8 @@ namespace internal::texture {
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, 0.f);
 
 		int width, height, nrChannels;
