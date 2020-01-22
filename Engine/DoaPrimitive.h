@@ -1,7 +1,7 @@
 // NeoDoa 2019, v0.1 ALPHA
 #pragma once
 
-namespace doa::primitives {
+namespace doa::primitive {
 
 	enum Type { TRIANGLE = 3, SQUARE = 4, PENTAGON = 5, HEXAGON = 6, HEPTAGON = 7, OCTAGON = 8, NONAGON = 9, DECAGON = 10, CIRCLE = 100 };
 	enum RenderMode { POINTS, DRAW, FILL };

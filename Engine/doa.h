@@ -49,7 +49,7 @@
 #include "DoaScene.h"
 #include "DoaGameObject.h"
 #include "DoaAnimations.h"
-#include "DoaPrimitives.h"
+#include "DoaPrimitive.h"
 #include "DoaKeyboard.h"
 #include "DoaMouse.h"
 #include "DoaCamera.h"

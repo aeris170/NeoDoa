@@ -2,7 +2,7 @@
 #include "doa.h"
 
 namespace doa {
-	namespace primitives {
+	namespace primitive {
 
 		Primitive::Primitive(Type type, RenderMode rMode, DisplayMode dMode) : GameObject(), m_type{ type }, m_rMode{ rMode }, m_dMode{ dMode } {
 			get_buffers(this);
