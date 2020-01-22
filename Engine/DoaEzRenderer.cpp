@@ -233,7 +233,7 @@ namespace internal::ezrender {
 		p.SetRotation(0.f, 0.f, 0.f);
 		p.SetScale(1.f, 1.f);
 		p.SetAllVerticesColors(glm::vec4(0, 0, 0, 1));
-		p.SetShaderProgram(doa::shader::SHADERS["primitives-shader"]);
+		p.SetShaderProgram(doa::shader::SHADERS["primitive-shader"]);
 		p.SetTexture(0);
 		p.SetAnimation(0);
 		p.SetDisplayMode(doa::primitive::COLOR);

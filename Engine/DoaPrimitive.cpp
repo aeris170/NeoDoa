@@ -15,7 +15,7 @@ namespace doa {
 				m_colors[i + 3] = 1;
 			}
 
-			m_shader = doa::shader::SHADERS["primitives-shader"];
+			m_shader = doa::shader::SHADERS["primitive-shader"];
 
 			glBindVertexArray(m_VAO);
 			glBindBuffer(GL_ARRAY_BUFFER, m_vertices_VBO);
@@ -42,8 +42,7 @@ namespace doa {
 			glBindVertexArray(0);
 		}
 
-		Primitive::~Primitive()
-		{
+		Primitive::~Primitive() {
 			glDeleteBuffers(1, &m_colors_VBO);
 			delete[] m_colors;
 		}
