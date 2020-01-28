@@ -11,13 +11,15 @@ NeoDoa is still under development. Below are the finished features.
 * **Graphics**
     * OpenGL 4.5 Core Profile based renderer
     * Point and spot and custom lights
-	* __EZ Rendering__ mode for quick and easy rendering
+	* High Quality Text Rendering using [Signed Distance Fields](https://steamcdn-a.akamaihd.net/apps/valve/2007/SIGGRAPH2007_AlphaTestedMagnification.pdf)
+	* __EZ Rendering__ mode for quick and easy shape rendering
 * **Collision & Physics**
     * To be done.
 * **Audio**
     * To be done.
 * **Resource Loading**
-    * Simple and fast texture loading using [stb_image](https://github.com/nothings/stb/blob/master/stb_image.h)
+	* Simple and easy TrueType Font(.ttf) loading and Signed Distance Field generation using [SDFont](https://www.gamedev.net/forums/topic.asp?topic_id=491938) (modified for use)
+    * Simple and fast Texture loading via [stb_image](https://github.com/nothings/stb/blob/master/stb_image.h)
 * **Scripting system**
 	* Scene based objects and logic.
 	* Add objects to scenes and select an active scene.  
@@ -31,7 +33,7 @@ NeoDoa is still under development. Below are the finished features.
 Here's a super-simple example - a spinning red square using __EZ Rendering__!
 
 ### Square.h
-```c++
+```cpp
 #pragma once
 #include "doa.h"
 
@@ -39,58 +41,69 @@ using namespace doa;
 
 class Square : public scene::GameObject {
 private:
-	float rot = 0;
+    float rot = 0;
 
 public:
-	void update(const scene::Scene& parent, const std::vector<GameObject*>& objects, const std::vector<scene::Light*>& lights) override;
-	void render(const scene::Scene& parent, const std::vector<GameObject*>& objects, const std::vector<scene::Light*>& lights) const override;
+    void update(const scene::Scene& parent, const std::vector<GameObject*>& objects, const std::vector<scene::Light*>& lights) override;
+    void render(const scene::Scene& parent, const std::vector<GameObject*>& objects, const std::vector<scene::Light*>& lights) const override;
 };
 ```
 
 ### Square.cpp
-```c++
+```cpp
 #include "Square.h"
 
 void Square::update(const scene::Scene& parent, const std::vector<GameObject*>& objects, const std::vector<scene::Light*>& lights) {
-	rot += .1f;
+    rot += .1f;
 }
 
 
 void Square::render(const scene::Scene& parent, const std::vector<GameObject*>& objects, const std::vector<scene::Light*>& lights) const {
-	using namespace ezrender;
+    using namespace ezrender;
 
-	Translate(glm::vec3(0, 0, 0));
-	Rotate(glm::vec3(0, 0, rot));
-	Scale(glm::vec2(150, 150));
-	Shape(SQUARE);
-	Color(glm::vec3(1, .5, .5));
-	Mode(FILL);
-	Render(parent, objects, lights);
+    //EZRenderer is a state machine
+    //Configure the machine
+    RotateZ(rot);
+    Scale(150, 150);
+    Shape(SQUARE);
+    Color(1, .5, .5); //RGB[0, 1]
+    Mode(FILL);
+
+    //And press the big red button to render!
+    Render(parent, objects, lights);
 }
 ```
 
 ### main.cpp
-```c++
+```cpp
 #include "doa.h"
 #include "Square.h"
 
 using namespace doa;
 
 int main() {
-	Init();
-	Window *window{ CreateWindow("Spinning Square Demo", 960, 540, false) };
+    //Initialize Doa
+    Init();
 
-	scene::Scene *sampleScene{ new scene::Scene("sample") };
+    //Create Window
+    CreateWindow("Spinning Square Demo", 960, 540, false);
 
-	scene::ACTIVE_SCENE = sampleScene;
+    //Create a scene
+    scene::Scene *sampleScene{ new scene::Scene("sample") };
 
-	Square s;
+    //Set the scene as active scene
+    scene::ACTIVE_SCENE = sampleScene;
 
-	sampleScene->Add(&s);
+    Square s;
 
-	Loop();
-	Purge();
-	return 0;
+    sampleScene->Add(&s);
+
+    //Start the game loop
+    Loop();
+
+    //Let Doa Clean up everything
+    Purge();
+    return 0;
 }
 ```
 
@@ -106,7 +119,7 @@ You need Visual Studio 2017 to build NeoDoa in the most convenient and easy way 
  * Select "Doa.sln" in the root of repo
  * Hit F7
  
-A single dll file with the name "Engine" will be generated in _repo-root_/x64/ folder.
+A single dll file with the name "Engine" will be generated in _repo-root_/x64/_build-config_ folder.
 
 
 ## C# Bindings
@@ -140,7 +153,8 @@ Please follow these steps to report a bug
 
 ## NeoDoa Platform
 
-NeoDoa is an open source 2D game engine which you can use to develop games and it is strictly for Windows PC (at the moment). If you want to bring multi-platform support, fell free to get your hands dirty.
+NeoDoa is an open source 2D game engine which you can use to develop games and it is strictly for Windows PC (at the moment).
+If you want to bring multi-platform support, fell free to get your hands dirty. All help is welcome!
 
 ## License
 

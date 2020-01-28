@@ -18,6 +18,12 @@ namespace doa {
 				return 1;
 			}
 		}
+		{ //GLFW INIT
+			if (FT_Init_FreeType(&internal::text::ft)) {
+				std::cout << "Fucked up while initializing FreeType!\n";
+				return 1;
+			}
+		}
 		return 0;
 	}
 
@@ -68,14 +74,16 @@ namespace doa {
 				glfwDestroyWindow(m_window);
 				glfwTerminate();
 			}
-			primitives::Primitive::generate_buffers();
-			shader::CreateShaderProgram("primitives-shader", "Shaders/vShader", "Shaders/fShader");
+			primitive::Primitive::generate_buffers();
+			shader::CreateShaderProgram("primitive-shader", "Shaders/primitiveVShader.vert", "Shaders/primitiveFShader.frag");
+			shader::CreateShaderProgram("text-shader", "Shaders/textVShader.vert", "Shaders/textFShader.frag");
 			internal::ezrender::instantiate_primitives();
 		}
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_MULTISAMPLE);
-
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		return m_window;
 	}
 
@@ -125,7 +133,8 @@ namespace doa {
 		internal::scene::purge();
 		internal::shader::purge();
 		internal::ezrender::purge();
-		primitives::Primitive::purge();
+		internal::text::purge();
+		primitive::Primitive::purge();
 		glfwDestroyWindow(m_window);
 		glfwTerminate();
 	}

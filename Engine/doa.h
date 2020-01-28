@@ -42,6 +42,8 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
+#include <SDF.h>
+
 #include "DoaEngine.h"
 #include "DoaShaders.h"
 #include "DoaTextures.h"
@@ -54,6 +56,7 @@
 #include "DoaMouse.h"
 #include "DoaCamera.h"
 #include "DoaEzRenderer.h"
+#include "DoaText.h"
 
 #ifndef STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
