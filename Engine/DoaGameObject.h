@@ -5,9 +5,11 @@ namespace doa::scene {
 
 	class DOA_API GameObject {
 	protected:
-		glm::vec3* m_position;
-		glm::vec3* m_rotation;
-		glm::vec2* m_scale;
+		glm::vec3* m_position{ NULL };
+		glm::vec3* m_rotation{ NULL };
+		glm::vec2* m_scale{ NULL };
+
+		bool m_is_fixed{ false };
 
 		shader::ShaderProgram* m_shader{ NULL };
 
@@ -28,6 +30,9 @@ namespace doa::scene {
 		virtual inline glm::vec2* GetScale() const { return m_scale; }
 		virtual inline void SetScale(const glm::vec2& newScale) { *m_scale = newScale; }
 		virtual inline void SetScale(float newScaleX, float newScaleY) { m_scale->x = newScaleX; m_scale->y = newScaleY; }
+
+		virtual inline const bool IsFixed() const { return m_is_fixed; }
+		virtual inline void SetFixed(const bool isFixed) { m_is_fixed = isFixed; }
 
 		virtual inline const shader::ShaderProgram* GetShaderProgramID() const { return m_shader; }
 		virtual inline void SetShaderProgram(shader::ShaderProgram* shader) { m_shader = shader; }

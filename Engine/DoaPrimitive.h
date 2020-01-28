@@ -13,8 +13,6 @@ namespace doa::primitive {
 		RenderMode m_rMode;
 		DisplayMode m_dMode;
 
-		bool m_is_fixed{ false };
-
 		GLfloat* m_colors{ NULL };
 		int m_colors_count{ 0 };
 		mutable bool m_colors_changed{ false };
@@ -47,8 +45,6 @@ namespace doa::primitive {
 		virtual inline void SetRenderMode(const RenderMode rMode) { m_rMode = rMode; }
 		virtual inline const DisplayMode GetDisplayMode() const { return m_dMode; }
 		virtual inline void SetDisplayMode(const DisplayMode dMode) { m_dMode = dMode; }
-		virtual inline const bool IsFixed() const { return m_is_fixed; }
-		virtual inline void SetFixed(const bool isFixed) { m_is_fixed = isFixed; }
 		virtual inline float* GetVertexColors() const { return m_colors; }
 		virtual inline void SetVertexColor(const int vertex_index, const glm::vec3& color) {
 			if (vertex_index < 0 || vertex_index > m_type) return;
