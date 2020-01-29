@@ -82,8 +82,7 @@ namespace doa {
 			GLint viewMatrixLocation = glGetUniformLocation(*m_shader, "viewMatrix");
 			if (m_is_fixed) {
 				glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(internal::m_fixed_view_matrix));
-			}
-			else {
+			} else {
 				glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(internal::m_view_matrix));
 			}
 
