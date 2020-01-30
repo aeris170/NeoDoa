@@ -8,73 +8,80 @@ namespace doa::text {
 
 	Font* CreateANSIFont(const char* name, const char* path, int atlasSize, int charCount) {
 		Font* f{ new Font() };
-		SDF::render_signed_distance_font(ft, path, atlasSize, charCount);
-		//SDF TEX GEN START
-		texture::Texture* texture{ new texture::Texture };
+		if (SDF::render_signed_distance_font(ft, path, atlasSize, charCount)) {
+			//SDF TEX GEN START
+			texture::Texture* texture{ new texture::Texture };
 
-		glGenTextures(1, texture);
-		glBindTexture(GL_TEXTURE_2D, *texture);
+			glGenTextures(1, texture);
+			glBindTexture(GL_TEXTURE_2D, *texture);
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, 0.f);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, 0.f);
 
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, atlasSize, atlasSize, 0, GL_RGBA, GL_UNSIGNED_BYTE, SDF::pdata.data());
-		glGenerateMipmap(GL_TEXTURE_2D);
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, atlasSize, atlasSize, 0, GL_RGBA, GL_UNSIGNED_BYTE, SDF::pdata.data());
+			glGenerateMipmap(GL_TEXTURE_2D);
 
-		glBindTexture(GL_TEXTURE_2D, 0);
+			glBindTexture(GL_TEXTURE_2D, 0);
 
-		f->m_sdf_size = atlasSize;
-		f->m_sdf_tex = texture;
-		//SDF TEX GEN END
-		//SDF CHAR GEN START
-		for (auto itr{ SDF::all_glyphs.begin() }; itr != SDF::all_glyphs.end(); ++itr) {
-			(*f->m_chars)[(*itr)->ID] = *itr;
+			f->m_sdf_size = atlasSize;
+			f->m_sdf_tex = texture;
+			//SDF TEX GEN END
+			//SDF CHAR GEN START
+			for (auto itr{ SDF::all_glyphs.begin() }; itr != SDF::all_glyphs.end(); ++itr) {
+				(*f->m_chars)[(*itr)->ID] = *itr;
+			}
+			//SDF CHAR GEN END
+			if (FONTS[name]) {
+				delete FONTS[name];
+			}
+			FONTS[name] = f;
+		} else{
+			std::cout << "Fucked up creating font " << name << "!\n";
 		}
-		//SDF CHAR GEN END
-		if (FONTS[name]) {
-			delete FONTS[name];
-		}
-		FONTS[name] = f;
 		return f;
 	}
 
 	Font* CreateUnicodeFont(const char* name, const char* path, int atlasSize, int charCount) {
 		Font* f{ new Font() };
-		SDF::render_signed_distance_font(ft, path, atlasSize, charCount);
-		//SDF TEX GEN START
-		texture::Texture* texture{ new texture::Texture };
+		if (SDF::render_signed_distance_font(ft, path, atlasSize, charCount)) {
+			//SDF TEX GEN START
+			texture::Texture* texture{ new texture::Texture };
 
-		glGenTextures(1, texture);
-		glBindTexture(GL_TEXTURE_2D, *texture);
+			glGenTextures(1, texture);
+			glBindTexture(GL_TEXTURE_2D, *texture);
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, 0.f);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, 0.f);
 
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, atlasSize, atlasSize, 0, GL_RGBA, GL_UNSIGNED_BYTE, SDF::pdata.data());
-		glGenerateMipmap(GL_TEXTURE_2D);
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, atlasSize, atlasSize, 0, GL_RGBA, GL_UNSIGNED_BYTE, SDF::pdata.data());
+			glGenerateMipmap(GL_TEXTURE_2D);
 
-		glBindTexture(GL_TEXTURE_2D, 0);
+			glBindTexture(GL_TEXTURE_2D, 0);
 
-		f->m_sdf_size = atlasSize;
-		f->m_sdf_tex = texture;
-		//SDF TEX GEN END
-		//SDF CHAR GEN START
-		for (auto itr{ SDF::all_glyphs.begin() }; itr != SDF::all_glyphs.end(); ++itr) {
-			(*f->m_chars)[(*itr)->ID] = *itr;
+			f->m_sdf_size = atlasSize;
+			f->m_sdf_tex = texture;
+			//SDF TEX GEN END
+			//SDF CHAR GEN START
+			for (auto itr{ SDF::all_glyphs.begin() }; itr != SDF::all_glyphs.end(); ++itr) {
+				(*f->m_chars)[(*itr)->ID] = *itr;
+			}
+			//SDF CHAR GEN END
+			if (FONTS[name]) {
+				delete FONTS[name];
+			}
+			FONTS[name] = f;
 		}
-		//SDF CHAR GEN END
-		if (FONTS[name]) {
-			delete FONTS[name];
+		else {
+			std::cout << "Fucked up creating font " << name << "!\n";
 		}
-		FONTS[name] = f;
 		return f;
 	}
 
