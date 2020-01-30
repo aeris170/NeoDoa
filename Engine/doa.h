@@ -39,7 +39,12 @@
 
 #include <vld.h>
 
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include FT_GLYPH_H
+
 #include <SDF.h>
+#include <BinPacker.h>
 
 #include "DoaEngine.h"
 #include "DoaShaders.h"
