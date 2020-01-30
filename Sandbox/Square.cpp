@@ -1,7 +1,7 @@
 #include "Square.h"
 
 Square::Square() {
-	doa::text::CreateANSIFont("arial", "C:\\Users\\Doga\\Desktop\\arial.ttf");
+	doa::text::CreateANSIFont("arial", "Font\\Arial.ttf");
 	doa::texture::CreateTexture("pencil", "Textures\\pencil.png");
 	t = new doa::text::Text(doa::text::Get("arial"), "test TEXT :D :) :P");
 	t2 = new doa::text::Text(doa::text::Get("arial"), "WASD to move, Mousewheel to zoom");
