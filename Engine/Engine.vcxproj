@@ -68,7 +68,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <AdditionalLibraryDirectories>$(SolutionDir)External Libs\GLFW\lib-vc2019;$(SolutionDir)External Libs\GLEW\lib\release\$(Platform);$(SolutionDir)External Libs\Freetype\win64;$(SolutionDir)External Libs\SDFont\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3.lib;freetype.lib;SDFont.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3.lib;SDFont.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <NoEntryPoint>false</NoEntryPoint>
       <IgnoreSpecificDefaultLibraries>libcmt.lib;libcmtd.lib;msvcrt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
@@ -93,7 +93,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <AdditionalLibraryDirectories>$(SolutionDir)External Libs\GLFW\lib-vc2019;$(SolutionDir)External Libs\GLEW\lib\release\$(Platform);$(SolutionDir)External Libs\Freetype\win64;$(SolutionDir)External Libs\SDFont\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3.lib;freetype.lib;SDFont.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3.lib;SDFont.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <NoEntryPoint>false</NoEntryPoint>
       <IgnoreSpecificDefaultLibraries>libcmt.lib;libcmtd.lib;msvcrtd.lib</IgnoreSpecificDefaultLibraries>
     </Link>

@@ -39,9 +39,6 @@
 
 #include <vld.h>
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
-
 #include <SDF.h>
 
 #include "DoaEngine.h"
