@@ -7,16 +7,16 @@ namespace doa::texture {
 
 	extern std::map<std::string, Texture*> TEXTURES;
 
-	DOA_API Texture* const CreateTexture(const std::string& name, const std::string& pathToTextureImage, const int minFilter = GL_NEAREST_MIPMAP_NEAREST, const int magFilter = GL_NEAREST);
+	DOA_API Texture* const CreateTexture(const char* name, const char* pathToTextureImage, const int minFilter = GL_NEAREST_MIPMAP_NEAREST, const int magFilter = GL_NEAREST);
 
-	DOA_API Texture* const Get(const std::string& name);
+	DOA_API Texture* const Get(const char* name);
 }
 
 namespace internal::texture {
 
 	typedef GLuint Texture;
 
-	Texture* const create_texture(const std::string& pathToTextureImage, const int minFilter, const int magFilter);
+	Texture* const create_texture(const char* pathToTextureImage, const int minFilter, const int magFilter);
 
 	void purge();
 }

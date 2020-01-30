@@ -6,12 +6,12 @@ namespace doa::shader {
 
 	std::map<std::string, ShaderProgram*> SHADERS;
 
-	ShaderProgram* const CreateShaderProgram(const std::string& name, const std::string& pathToVertexShader, const std::string& pathToFragmentShader) {
-		if (name.length() == 0) {
+	ShaderProgram* const CreateShaderProgram(const char* name, const char* pathToVertexShader, const char* pathToFragmentShader) {
+		if (name[0] == 0) {
 			std::cout << "doa::shader::CreateShader cannot accept empty string as name!\n";
 			throw - 1;
 		}
-		if (pathToVertexShader.length() == 0) {
+		if (pathToVertexShader[0] == 0) {
 			std::cout << "doa::shader::CreateShader cannot accept empty string as pathToVertexShader!\n";
 			throw - 1;
 		}
@@ -20,7 +20,7 @@ namespace doa::shader {
 		*shaderProgram = glCreateProgram();
 
 		if (!shaderProgram) {
-			std::cout << "Doa fucked up while creating shader!\n";
+			std::cout << "Fucked up while creating shader!\n";
 			return NULL;
 		}
 
@@ -33,7 +33,7 @@ namespace doa::shader {
 		GLuint vs = add_shader_to(*shaderProgram, name, vShaderCode.c_str(), GL_VERTEX_SHADER);
 
 		GLuint fs = -1;
-		if (pathToFragmentShader.length() > 0) {
+		if (pathToFragmentShader[0] > 0) {
 			std::ifstream fShaderFile{ pathToFragmentShader };
 			std::string fShaderCode;
 			fShaderFile.seekg(0, std::ios::end);
@@ -57,14 +57,14 @@ namespace doa::shader {
 		return shaderProgram;
 	}
 
-	ShaderProgram* const Get(const std::string& name) {
+	ShaderProgram* const Get(const char* name) {
 		return SHADERS[name];
 	}
 }
 
 namespace internal::shader {
 
-	GLuint add_shader_to(ShaderProgram shaderProgram, const std::string& name, const char *shaderCode, GLenum shaderType) {
+	GLuint add_shader_to(ShaderProgram shaderProgram, const char* name, const char *shaderCode, GLenum shaderType) {
 		GLuint shader{ glCreateShader(shaderType) };
 
 		const GLchar* code[1];
@@ -93,7 +93,7 @@ namespace internal::shader {
 		return shader;
 	}
 
-	void link_and_validate_shader_program(ShaderProgram shader, const std::string& name) {
+	void link_and_validate_shader_program(ShaderProgram shader, const char* name) {
 		GLint result{ 0 };
 		GLchar errorLog[1024] = { 0 };
 		glLinkProgram(shader);

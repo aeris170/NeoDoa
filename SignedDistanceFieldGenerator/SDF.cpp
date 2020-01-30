@@ -15,7 +15,10 @@ namespace SDF {
 		pdata.clear();
 
 		FT_Face ft_face;
-		FT_New_Face(ft_lib, font_file, 0, &ft_face);
+		if (FT_New_Face(ft_lib, font_file, 0, &ft_face)) {
+			printf("Signed Distance Field Generator couldn't load %s! Check if file exists!\n", font_file);
+			return false;
+		}
 
 		int max_unicode_char{ charCount };
 

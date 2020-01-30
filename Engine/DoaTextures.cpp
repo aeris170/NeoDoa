@@ -6,7 +6,15 @@ namespace doa::texture {
 
 	std::map<std::string, Texture*> TEXTURES;
 
-	Texture* const CreateTexture(const std::string& name, const std::string& pathToTextureImage, const int minFilter, const int magFilter) {
+	Texture* const CreateTexture(const char* name, const char* pathToTextureImage, const int minFilter, const int magFilter) {
+		if (name[0] == 0) {
+			std::cout << "doa::texture::CreateTexture cannot accept empty string as name!\n";
+			throw - 1;
+		}
+		if (pathToTextureImage[0] == 0) {
+			std::cout << "doa::texture::CreateTexture cannot accept empty string as pathToTextureImage!\n";
+			throw - 1;
+		}
 		Texture* texture{ create_texture(pathToTextureImage, minFilter, magFilter) };
 		if (TEXTURES[name]) {
 			glDeleteTextures(1, TEXTURES[name]);
@@ -16,14 +24,14 @@ namespace doa::texture {
 		return texture;
 	}
 
-	Texture* const Get(const std::string& name) {
+	Texture* const Get(const char* name) {
 		return TEXTURES[name];
 	}
 }
 
 namespace internal::texture {
 
-	Texture* const create_texture(const std::string& pathToTextureImage, const int minFilter, const int magFilter) {
+	Texture* const create_texture(const char* pathToTextureImage, const int minFilter, const int magFilter) {
 		Texture* texture{ new Texture };
 
 		glGenTextures(1, texture);
@@ -37,7 +45,7 @@ namespace internal::texture {
 
 		int width, height, nrChannels;
 		stbi_set_flip_vertically_on_load(true);
-		unsigned char* data{ stbi_load(pathToTextureImage.c_str(), &width, &height, &nrChannels, STBI_rgb_alpha) };
+		unsigned char* data{ stbi_load(pathToTextureImage, &width, &height, &nrChannels, STBI_rgb_alpha) };
 		if (data) {
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 			glGenerateMipmap(GL_TEXTURE_2D);
