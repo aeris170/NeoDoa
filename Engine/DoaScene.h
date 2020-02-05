@@ -3,12 +3,16 @@
 
 namespace doa::scene {
 
+	class Scene;
+	extern DOA_API std::map<const char*, Scene*, internal::char_cmp> SCENES;
+	extern DOA_API Scene* ACTIVE_SCENE;
+
 	class GameObject;
 	class DOA_API Scene {
 	private:
-		char* m_name;
-		std::vector<GameObject*>* m_objects;
-		std::vector<Light*>* m_lights;
+		char* m_name{ NULL };
+		std::vector<GameObject*>* m_objects{ NULL };
+		std::vector<Light*>* m_lights{ NULL };
 		glm::vec3* m_ambientLight{ new glm::vec3(1, 1, 1) };
 
 		virtual void update();
@@ -43,6 +47,14 @@ namespace doa::scene {
 				std::cout << "doa::scene::Scene::SetName cannot accept 0-length char* as name!\n";
 				throw - 1;
 			}
+			if (SCENES[name]) {
+				std::cout << "doa::scene::Scene::SetName cannot accept a name that already exists in doa::scene::SCENES!\n";
+				throw - 1;
+			}
+			if (m_name) {
+				SCENES.erase(m_name);
+				SCENES[name] = this;
+			}
 			delete[] m_name;
 			int length = strlen(name);
 			m_name = new char[length + 1];
@@ -59,9 +71,6 @@ namespace doa::scene {
 			m_ambientLight->b = b;
 		}
 	};
-
-	extern DOA_API std::map<const char*, Scene*, internal::char_cmp> SCENES;
-	extern DOA_API Scene* ACTIVE_SCENE;
 
 	DOA_API Scene* const Get(const char* name);
 }

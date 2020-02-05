@@ -8,19 +8,7 @@ namespace doa::scene {
 	Scene* ACTIVE_SCENE{ NULL };
 
 	Scene::Scene(const char* name, const std::vector<GameObject*>& objects, const std::vector<Light*>& lights) : m_objects{ new std::vector(objects) }, m_lights{ new std::vector(lights) } {
-		if (!name) {
-			std::cout << "doa::scene::Scene::Scene cannot accept NULL as name!\n";
-			throw - 1;
-		}
-		if (name[0] == 0) {
-			std::cout << "doa::scene::Scene::Scene cannot accept 0-length char* as name!\n";
-			throw - 1;
-		}
-		int length = strlen(name);
-		m_name = new char[length + 1];
-		for (int i{ 0 }; i < length + 1; ++i) {
-			m_name[i] = name[i];
-		}
+		SetName(name);
 		if (SCENES[name]) {
 			delete SCENES[name];
 		}
