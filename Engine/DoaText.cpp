@@ -118,7 +118,11 @@ namespace doa::text {
 	}
 
 	Font* Get(const char* name) {
-		return FONTS[name];
+		Font* f = FONTS[name];
+		if (!f) {
+			std::cout << "doa::text::FONTS[" + std::string(name) + "] returned NULL!";
+		}
+		return f;
 	}
 
 	Font::Font() {}

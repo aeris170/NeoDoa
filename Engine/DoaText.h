@@ -7,7 +7,7 @@ namespace doa::text {
 
 	class Font;
 
-	extern std::map<const char*, Font*, internal::char_cmp> FONTS;
+	extern DOA_API std::map<const char*, Font*, internal::char_cmp> FONTS;
 
 	DOA_API Font* CreateANSIFont(const char* name, const char* path, int atlasSize = 256, int charCount = 255);
 	DOA_API Font* CreateUnicodeFont(const char* name, const char* path, int atlasSize = 2048, int charCount = 65535);

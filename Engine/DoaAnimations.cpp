@@ -63,7 +63,11 @@ namespace doa::animation {
 	}
 
 	Animation* const Get(const char* name) {
-		return ANIMATIONS[name];
+		Animation* a = ANIMATIONS[name];
+		if (!a) {
+			std::cout << "doa::animation::Animation[" + std::string(name) + "] returned NULL!";
+		}
+		return a;
 	}
 
 	AnimationFrame::~AnimationFrame() {

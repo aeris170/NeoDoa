@@ -66,7 +66,11 @@ namespace doa::shader {
 	}
 
 	ShaderProgram* const Get(const char* name) {
-		return SHADERS[name];
+		ShaderProgram* s = SHADERS[name];
+		if (!s) {
+			std::cout << "doa::shader::SHADERS[" + std::string(name) + "] returned NULL!";
+		}
+		return s;
 	}
 }
 

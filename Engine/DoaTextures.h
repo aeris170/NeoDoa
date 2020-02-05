@@ -5,7 +5,7 @@ namespace doa::texture {
 
 	typedef GLuint Texture;
 
-	extern std::map<const char*, Texture*, internal::char_cmp> TEXTURES;
+	extern DOA_API std::map<const char*, Texture*, internal::char_cmp> TEXTURES;
 
 	DOA_API Texture* const CreateTexture(const char* name, const char* pathToTextureImage, const int minFilter = GL_NEAREST_MIPMAP_NEAREST, const int magFilter = GL_NEAREST);
 

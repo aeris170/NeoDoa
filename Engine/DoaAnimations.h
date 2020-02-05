@@ -6,7 +6,7 @@ namespace doa::animation {
 	struct DOA_API Animation;
 	struct DOA_API AnimationFrame;
 
-	extern std::map<const char*, Animation*, internal::char_cmp> ANIMATIONS;
+	extern DOA_API std::map<const char*, Animation*, internal::char_cmp> ANIMATIONS;
 
 	DOA_API Animation* const CreateAnimation(const char* name, const std::vector<doa::texture::Texture*>& textures, const std::chrono::milliseconds& durationOfAFrame);
 	DOA_API Animation* const CreateAnimation(const char* name, const std::vector<doa::texture::Texture*>& textures, const std::vector<std::chrono::milliseconds>& durationsOfFrames);

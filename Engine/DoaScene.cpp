@@ -101,6 +101,14 @@ namespace doa::scene {
 	void Scene::render() {
 		std::for_each(m_objects->begin(), m_objects->end(), [&](const GameObject *o) { ezrender::Reset(); o->render(*this, *m_objects, *m_lights); });
 	}
+
+	Scene* const Get(const char* name) {
+		Scene* s = SCENES[name];
+		if (!s) {
+			std::cout << "doa::scene::SCENES[" + std::string(name) + "] returned NULL!";
+		}
+		return s;
+	}
 }
 
 namespace internal::scene {

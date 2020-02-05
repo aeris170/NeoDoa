@@ -33,7 +33,11 @@ namespace doa::texture {
 	}
 
 	Texture* const Get(const char* name) {
-		return TEXTURES[name];
+		Texture* t = TEXTURES[name];
+		if (!t) {
+			std::cout << "doa::texture::TEXTURES[" + std::string(name) + "] returned NULL!";
+		}
+		return t;
 	}
 }
 

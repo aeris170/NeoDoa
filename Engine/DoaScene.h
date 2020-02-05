@@ -62,6 +62,8 @@ namespace doa::scene {
 
 	extern DOA_API std::map<const char*, Scene*, internal::char_cmp> SCENES;
 	extern DOA_API Scene* ACTIVE_SCENE;
+
+	DOA_API Scene* const Get(const char* name);
 }
 
 namespace internal::scene {
