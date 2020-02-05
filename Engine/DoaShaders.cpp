@@ -94,7 +94,7 @@ namespace internal::shader {
 		glGetShaderiv(shader, GL_COMPILE_STATUS, &result);
 		if (!result) {
 			glGetShaderInfoLog(shader, sizeof(errorLog), NULL, errorLog);
-			std::cout << "Doa fucked up while compiling shader " << name << "!\n" << errorLog << "\n";
+			std::cout << "Fucked up while compiling shader " << name << "!\n" << errorLog << "\n";
 			return -1;
 		}
 
@@ -112,14 +112,14 @@ namespace internal::shader {
 		glGetProgramiv(shader, GL_LINK_STATUS, &result);
 		if (!result) {
 			glGetProgramInfoLog(shader, sizeof(errorLog), NULL, errorLog);
-			std::cout << "Doa fucked up while linking shader " << name << "!\n" << errorLog << "\n";
+			std::cout << "Fucked up while linking shader " << name << "!\n" << errorLog << "\n";
 			return;
 		}
 		glValidateProgram(shader);
 		glGetProgramiv(shader, GL_VALIDATE_STATUS, &result);
 		if (!result) {
 			glGetProgramInfoLog(shader, sizeof(errorLog), NULL, errorLog);
-			std::cout << "Doa fucked up while validating shader " << name << "!\n" << errorLog << "\n";
+			std::cout << "Fucked up while validating shader " << name << "!\n" << errorLog << "\n";
 			return;
 		}
 	}
