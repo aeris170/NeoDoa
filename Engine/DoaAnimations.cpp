@@ -4,9 +4,21 @@
 namespace doa::animation {
 	using namespace internal::animation;
 
-	std::map<std::string, Animation*> ANIMATIONS;
+	std::map<const char*, Animation*, internal::char_cmp> ANIMATIONS;
 
-	Animation* const CreateAnimation(const std::string& name, const std::vector<doa::texture::Texture*>& textures, const std::chrono::milliseconds& durationOfAFrame) {
+	Animation* const CreateAnimation(const char* name, const std::vector<doa::texture::Texture*>& textures, const std::chrono::milliseconds& durationOfAFrame) {
+		if (!name) {
+			std::cout << "doa::animation::CreateAnimation cannot accept NULL as name!\n";
+			throw - 1;
+		}
+		if (name[0] == 0) {
+			std::cout << "doa::animation::CreateAnimation cannot accept 0-length char* as name!\n";
+			throw - 1;
+		}
+		if (textures.size() == 0) {
+			std::cout << "doa::animation::CreateAnimation cannot accept 0-length std::vector<doa::texture::Texture*> as textures!\n";
+			throw - 1;
+		}
 		Animation* anim{ new Animation() };
 		anim->frames = new std::vector<AnimationFrame*>(textures.size());
 		for (int i{ 0 }; i < textures.size(); ++i) {
@@ -22,7 +34,19 @@ namespace doa::animation {
 		return anim;
 	}
 
-	Animation* const CreateAnimation(const std::string& name, const std::vector<doa::texture::Texture*>& textures, const std::vector<std::chrono::milliseconds>& durations) {
+	Animation* const CreateAnimation(const char* name, const std::vector<doa::texture::Texture*>& textures, const std::vector<std::chrono::milliseconds>& durations) {
+		if (!name) {
+			std::cout << "doa::animation::CreateAnimation cannot accept NULL as name!\n";
+			throw - 1;
+		}
+		if (name[0] == 0) {
+			std::cout << "doa::animation::CreateAnimation cannot accept 0-length char* as name!\n";
+			throw - 1;
+		}
+		if (textures.size() == 0) {
+			std::cout << "doa::animation::CreateAnimation cannot accept 0-length std::vector<doa::texture::Texture*> as textures!\n";
+			throw - 1;
+		}
 		Animation* anim{ new Animation() };
 		anim->frames = new std::vector<AnimationFrame*>(textures.size());
 		for (int i{ 0 }; i < textures.size(); ++i) {
@@ -38,7 +62,7 @@ namespace doa::animation {
 		return anim;
 	}
 
-	Animation* const Get(const std::string& name) {
+	Animation* const Get(const char* name) {
 		return ANIMATIONS[name];
 	}
 

@@ -4,15 +4,23 @@
 namespace doa::texture {
 	using namespace internal::texture;
 
-	std::map<std::string, Texture*> TEXTURES;
+	std::map<const char*, Texture*, internal::char_cmp> TEXTURES;
 
 	Texture* const CreateTexture(const char* name, const char* pathToTextureImage, const int minFilter, const int magFilter) {
+		if (!name) {
+			std::cout << "doa::texture::CreateTexture cannot accept NULL as name!\n";
+			throw - 1;
+		}
+		if (!pathToTextureImage) {
+			std::cout << "doa::texture::CreateTexture cannot accept NULL as pathToTextureImage!\n";
+			throw - 1;
+		}
 		if (name[0] == 0) {
-			std::cout << "doa::texture::CreateTexture cannot accept empty string as name!\n";
+			std::cout << "doa::texture::CreateTexture cannot accept 0-length char* as name!\n";
 			throw - 1;
 		}
 		if (pathToTextureImage[0] == 0) {
-			std::cout << "doa::texture::CreateTexture cannot accept empty string as pathToTextureImage!\n";
+			std::cout << "doa::texture::CreateTexture cannot accept 0-length char* as pathToTextureImage!\n";
 			throw - 1;
 		}
 		Texture* texture{ create_texture(pathToTextureImage, minFilter, magFilter) };

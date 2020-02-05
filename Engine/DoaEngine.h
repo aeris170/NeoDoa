@@ -35,4 +35,11 @@ namespace internal {
 	void on_key_press_and_release(Window* window, int key, int scancode, int action, int mods);
 	void calculate_view_matrix();
 	void calculate_projection_matrix();
+
+	struct char_cmp {
+		bool operator () (const char* a, const char* b) const
+		{
+			return strcmp(a, b) < 0;
+		}
+	};
 }

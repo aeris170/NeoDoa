@@ -4,11 +4,27 @@
 namespace doa::text {
 	using namespace internal::text;
 
-	std::map<std::string, Font*> FONTS;
+	std::map<const char*, Font*, internal::char_cmp> FONTS;
 
-	Font* CreateANSIFont(const char* name, const char* path, int atlasSize, int charCount) {
+	Font* CreateANSIFont(const char* name, const char* pathToFont, int atlasSize, int charCount) {
+		if (!name) {
+			std::cout << "doa::text::CreateANSIFont cannot accept NULL as name!\n";
+			throw - 1;
+		}
+		if (!pathToFont) {
+			std::cout << "doa::text::CreateANSIFont cannot accept NULL as pathToFont!\n";
+			throw - 1;
+		}
+		if (name[0] == 0) {
+			std::cout << "doa::text::CreateANSIFont cannot accept 0-length char* as name!\n";
+			throw - 1;
+		}
+		if (pathToFont[0] == 0) {
+			std::cout << "doa::text::CreateANSIFont cannot accept 0-length char* as pathToFont!\n";
+			throw - 1;
+		}
 		Font* f{ new Font() };
-		if (SDF::render_signed_distance_font(ft, path, atlasSize, charCount)) {
+		if (SDF::render_signed_distance_font(ft, pathToFont, atlasSize, charCount)) {
 			//SDF TEX GEN START
 			texture::Texture* texture{ new texture::Texture };
 
@@ -45,9 +61,25 @@ namespace doa::text {
 		return f;
 	}
 
-	Font* CreateUnicodeFont(const char* name, const char* path, int atlasSize, int charCount) {
+	Font* CreateUnicodeFont(const char* name, const char* pathToFont, int atlasSize, int charCount) {
+		if (!name) {
+			std::cout << "doa::text::CreateUnicodeFont cannot accept NULL as name!\n";
+			throw - 1;
+		}
+		if (!pathToFont) {
+			std::cout << "doa::text::CreateUnicodeFont cannot accept NULL as pathToFont!\n";
+			throw - 1;
+		}
+		if (name[0] == 0) {
+			std::cout << "doa::text::CreateUnicodeFont cannot accept 0-length char* as name!\n";
+			throw - 1;
+		}
+		if (pathToFont[0] == 0) {
+			std::cout << "doa::text::CreateUnicodeFont cannot accept 0-length char* as pathToFont!\n";
+			throw - 1;
+		}
 		Font* f{ new Font() };
-		if (SDF::render_signed_distance_font(ft, path, atlasSize, charCount)) {
+		if (SDF::render_signed_distance_font(ft, pathToFont, atlasSize, charCount)) {
 			//SDF TEX GEN START
 			texture::Texture* texture{ new texture::Texture };
 
@@ -85,7 +117,7 @@ namespace doa::text {
 		return f;
 	}
 
-	Font* Get(const std::string& name) {
+	Font* Get(const char* name) {
 		return FONTS[name];
 	}
 

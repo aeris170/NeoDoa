@@ -5,7 +5,7 @@ namespace doa::shader {
 
 	typedef GLuint ShaderProgram;
 
-	extern std::map<std::string, ShaderProgram*> SHADERS;
+	extern std::map<const char*, ShaderProgram*, internal::char_cmp> SHADERS;
 
 	DOA_API ShaderProgram* const CreateShaderProgram(const char* name, const char* pathToVertexShader, const char* pathToFragmentShader = NULL);
 

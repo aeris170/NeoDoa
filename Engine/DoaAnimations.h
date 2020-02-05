@@ -6,12 +6,12 @@ namespace doa::animation {
 	struct DOA_API Animation;
 	struct DOA_API AnimationFrame;
 
-	extern std::map<std::string, Animation*> ANIMATIONS;
+	extern std::map<const char*, Animation*, internal::char_cmp> ANIMATIONS;
 
-	DOA_API Animation* const CreateAnimation(const std::string& name, const std::vector<doa::texture::Texture*>& textures, const std::chrono::milliseconds& durationOfAFrame);
-	DOA_API Animation* const CreateAnimation(const std::string& name, const std::vector<doa::texture::Texture*>& textures, const std::vector<std::chrono::milliseconds>& durationsOfFrames);
+	DOA_API Animation* const CreateAnimation(const char* name, const std::vector<doa::texture::Texture*>& textures, const std::chrono::milliseconds& durationOfAFrame);
+	DOA_API Animation* const CreateAnimation(const char* name, const std::vector<doa::texture::Texture*>& textures, const std::vector<std::chrono::milliseconds>& durationsOfFrames);
 
-	DOA_API Animation* const Get(const std::string& name);
+	DOA_API Animation* const Get(const char* name);
 
 	struct DOA_API AnimationFrame {
 		std::chrono::milliseconds* duration{ 0 };
@@ -27,8 +27,8 @@ namespace doa::animation {
 
 	private:
 
-		friend Animation* const animation::CreateAnimation(const std::string& name, const std::vector<doa::texture::Texture*>& textures, const std::chrono::milliseconds& durationOfAFrame);
-		friend Animation* const animation::CreateAnimation(const std::string& name, const std::vector<doa::texture::Texture*>& textures, const std::vector<std::chrono::milliseconds>& durationsOfFrames);
+		friend Animation* const animation::CreateAnimation(const char* name, const std::vector<doa::texture::Texture*>& textures, const std::chrono::milliseconds& durationOfAFrame);
+		friend Animation* const animation::CreateAnimation(const char* name, const std::vector<doa::texture::Texture*>& textures, const std::vector<std::chrono::milliseconds>& durationsOfFrames);
 	};
 }
 

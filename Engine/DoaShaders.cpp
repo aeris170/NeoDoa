@@ -4,15 +4,23 @@
 namespace doa::shader {
 	using namespace internal::shader;
 
-	std::map<std::string, ShaderProgram*> SHADERS;
+	std::map<const char*, ShaderProgram*, internal::char_cmp> SHADERS;
 
 	ShaderProgram* const CreateShaderProgram(const char* name, const char* pathToVertexShader, const char* pathToFragmentShader) {
+		if (!name) {
+			std::cout << "doa::shader::CreateShader cannot accept NULL as name!\n";
+			throw - 1;
+		}
+		if (!pathToVertexShader) {
+			std::cout << "doa::shader::CreateShader cannot accept NULL as pathToVertexShader!\n";
+			throw - 1;
+		}
 		if (name[0] == 0) {
-			std::cout << "doa::shader::CreateShader cannot accept empty string as name!\n";
+			std::cout << "doa::shader::CreateShader cannot accept 0-length char* as name!\n";
 			throw - 1;
 		}
 		if (pathToVertexShader[0] == 0) {
-			std::cout << "doa::shader::CreateShader cannot accept empty string as pathToVertexShader!\n";
+			std::cout << "doa::shader::CreateShader cannot accept 0-length char* as pathToVertexShader!\n";
 			throw - 1;
 		}
 

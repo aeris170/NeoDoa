@@ -4,10 +4,23 @@
 namespace doa::scene {
 	using namespace internal::scene;
 
-	std::map<std::string, Scene*> SCENES;
+	std::map<const char*, Scene*, internal::char_cmp> SCENES;
 	Scene* ACTIVE_SCENE{ NULL };
 
-	Scene::Scene(const std::string& name, const std::vector<GameObject*>& objects, const std::vector<Light*>& lights) : m_name{ new std::string(name) }, m_objects{ new std::vector(objects) }, m_lights{ new std::vector(lights) } {
+	Scene::Scene(const char* name, const std::vector<GameObject*>& objects, const std::vector<Light*>& lights) : m_objects{ new std::vector(objects) }, m_lights{ new std::vector(lights) } {
+		if (!name) {
+			std::cout << "doa::scene::Scene::Scene cannot accept NULL as name!\n";
+			throw - 1;
+		}
+		if (name[0] == 0) {
+			std::cout << "doa::scene::Scene::Scene cannot accept 0-length char* as name!\n";
+			throw - 1;
+		}
+		int length = strlen(name);
+		m_name = new char[length + 1];
+		for (int i{ 0 }; i < length + 1; ++i) {
+			m_name[i] = name[i];
+		}
 		if (SCENES[name]) {
 			delete SCENES[name];
 		}
