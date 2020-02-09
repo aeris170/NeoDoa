@@ -44,7 +44,7 @@ For example:
 ```cpp
 // Notice there is no new line before the opening brace
 int main() {
-	return 0;
+    return 0;
 }
 ```
 
@@ -128,10 +128,10 @@ Variables should be declared one per line. (This one is permissive, there are ti
 ```cpp
 void foo() {
     std::string x = "I'm a string";
-	cout << x << "\n";
-	
-	int x = 3;
-	cout << x << "\n";
+    cout << x << "\n";
+    
+    int x = 3;
+    cout << x << "\n";
 }
 ```
 
@@ -142,10 +142,10 @@ Performance wise \n is a tiiiiiiny bit faster.
 ```cpp
 void foo() {
     std::string x = "I'm a string";
-	cout << x << std::endl; // don't do this
-	
+    cout << x << std::endl; // don't do this
+    
     std::string x = "I'm a string";
-	cout << x << "\n"; // do this
+    cout << x << "\n"; // do this
 }
 ```
 
@@ -158,7 +158,7 @@ Don't exit functions early, let it naturally fall into the return statement at t
 void IncrementIfNotZero(int x) {
     if(x == 0) {
         return x;
-	}
+    }
     return x + 1;
 };
 ```
@@ -168,7 +168,7 @@ void IncrementIfNotZero(int x) {
 void IncrementIfNotZero(int x) {
     if(x != 0) {
         ++x;
-	}
+    }
     return x;
 };
 ```
@@ -187,32 +187,32 @@ namespace doa::camera {}
 
 // Global variables should be snake_case
 namespace doa::camera {
-	float cam_x = 1.f;
+    float cam_x = 1.f;
 }
 
 // Global functions should be PascalCase
 namespace doa::camera {
-	
-	float cam_x = 1.f;
 
-	void UselessFunction() {}
+    float cam_x = 1.f;
+
+    void UselessFunction() {}
 }
 
 // Classes should be PascalCase
 class SampleClass {
-	...
+    ...
 };
 
 // Member variables should start with m_ prefix and be snake_case
 class IntArray {
 private:
-	int* m_array_of_ints;
+    int* m_array_of_ints;
 };
 
 // Member functions should be PascalCase
 class Direction {
 public:
-	void Foo();
+    void Foo();
 };
 
 // Constants should be ALL_CAPITALS separated by underscores.
@@ -227,15 +227,15 @@ namespace internal::camera {}
 
 // Global variables should be snake_case
 namespace internal::camera {
-	float some_internal_data_the_end_user_will_never_need = 1.f;
+    float some_internal_data_the_end_user_will_never_need = 1.f;
 }
 
 // Global functions should be snake_case
 namespace internal::camera {
-	
-	float some_internal_data_the_end_user_will_never_need = 1.f;
+    
+    float some_internal_data_the_end_user_will_never_need = 1.f;
 
-	void useless_function() {}
+    void useless_function() {}
 }
 
 // Constants should be ALL_CAPITALS separated by underscores.
@@ -268,15 +268,15 @@ Variables should be privatized. If you don't want to provide getters and setters
 ```cpp
 class Point2D {
 private:
-	int x;
-	int y;
+    int x;
+    int y;
 };
 ```
 or
 ```cpp
 struct Point2D {
-	int x;
-	int y;
+    int x;
+    int y;
 };
 ```
 It is better to choose struct over a class when representing smaller data, like a point. Use classes for complex types such as a Player or an NPC.
@@ -296,25 +296,25 @@ Take a look at the example below:
 // Get a shader by name
 namespace doa::shader {
 
-	typedef GLuint ShaderProgram;
+    typedef GLuint ShaderProgram;
 
-	extern std::map<std::string, ShaderProgram*> SHADERS; //unexposed part in doa yet it is here
+    extern DOA_API std::map<std::string, ShaderProgram*> SHADERS;
 
-	DOA_API ShaderProgram* const CreateShaderProgram(const std::string& name, const std::string& pathToVertexShader, const std::string& pathToFragmentShader);
+    DOA_API ShaderProgram* const CreateShaderProgram(const std::string& name, const std::string& pathToVertexShader, const std::string& pathToFragmentShader);
 
-	DOA_API ShaderProgram* const Get(const std::string& name);
+    DOA_API ShaderProgram* const Get(const std::string& name);
 }
 
 //Namespace internal has the functionality no game dev needs.
 //Linking and validating shaders are not the job of the game dev, but it is the job of the engine.
 namespace internal::shader {
 
-	typedef GLuint ShaderProgram;
+    typedef GLuint ShaderProgram;
 
-	GLuint add_shader_to(ShaderProgram shaderProgram, const std::string& name, const char *shaderCode, GLenum shaderType);
-	void link_and_validate_shader_program(ShaderProgram shader, const std::string& name);
+    GLuint add_shader_to(ShaderProgram shaderProgram, const std::string& name, const char *shaderCode, GLenum shaderType);
+    void link_and_validate_shader_program(ShaderProgram shader, const std::string& name);
 
-	void purge();
+    void purge();
 }
 ```
 
@@ -325,9 +325,9 @@ If a member function is to be defined in the header, it should be tagged virtual
 ```cpp
 class Direction {
 private:
-	bool m_is_north;
+    bool m_is_north;
 public:
-	virtual inline const bool IsNorth() { return m_is_north; }
+    virtual inline const bool IsNorth() { return m_is_north; }
 };
 ```
 
