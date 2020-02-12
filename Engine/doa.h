@@ -44,7 +44,8 @@
 #include FT_GLYPH_H
 
 #include <SDF.h>
-#include <BinPacker.h>
+
+#include <poly2tri.h>
 
 #include "DoaEngine.h"
 #include "DoaShaders.h"

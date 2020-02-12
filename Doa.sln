@@ -6,6 +6,7 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "Engine\Engine.vcxproj", "{701EBDC6-0773-4CDF-9B5A-8042F0CFE00D}"
 	ProjectSection(ProjectDependencies) = postProject
 		{05326708-4ACB-49D6-AED6-4061DC6FE975} = {05326708-4ACB-49D6-AED6-4061DC6FE975}
+		{F73B63DC-3AA9-421B-AAAD-F1399F138838} = {F73B63DC-3AA9-421B-AAAD-F1399F138838}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sandbox", "Sandbox\Sandbox.vcxproj", "{04676700-5E26-4C0B-B74A-5F1D0A3018B1}"
@@ -14,6 +15,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sandbox", "Sandbox\Sandbox.
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SignedDistanceFieldGenerator", "SignedDistanceFieldGenerator\SignedDistanceFieldGenerator.vcxproj", "{05326708-4ACB-49D6-AED6-4061DC6FE975}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DelaunayTriangulator", "DelaunayTriangulator\DelaunayTriangulator.vcxproj", "{F73B63DC-3AA9-421B-AAAD-F1399F138838}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +36,10 @@ Global
 		{05326708-4ACB-49D6-AED6-4061DC6FE975}.Debug|x64.Build.0 = Debug|x64
 		{05326708-4ACB-49D6-AED6-4061DC6FE975}.Release|x64.ActiveCfg = Release|x64
 		{05326708-4ACB-49D6-AED6-4061DC6FE975}.Release|x64.Build.0 = Release|x64
+		{F73B63DC-3AA9-421B-AAAD-F1399F138838}.Debug|x64.ActiveCfg = Debug|x64
+		{F73B63DC-3AA9-421B-AAAD-F1399F138838}.Debug|x64.Build.0 = Debug|x64
+		{F73B63DC-3AA9-421B-AAAD-F1399F138838}.Release|x64.ActiveCfg = Release|x64
+		{F73B63DC-3AA9-421B-AAAD-F1399F138838}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
