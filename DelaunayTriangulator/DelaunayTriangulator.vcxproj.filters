@@ -15,15 +15,40 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="triangle.h">
+    <ClInclude Include="sweep\advancing_front.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="sweep\cdt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\shapes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sweep\sweep.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sweep\sweep_context.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="poly2tri.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="tricall.c">
+    <ClCompile Include="sweep\advancing_front.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="triangle.c">
+    <ClCompile Include="sweep\cdt.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="common\shapes.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sweep\sweep.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sweep\sweep_context.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
