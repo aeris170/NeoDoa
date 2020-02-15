@@ -62,7 +62,7 @@
 #include "DoaText.h"
 
 #ifndef STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_STATIC
-#include <stb_image.h>
+	#define STB_IMAGE_IMPLEMENTATION
+	#define STB_IMAGE_STATIC
+	#include <stb_image.h>
 #endif
