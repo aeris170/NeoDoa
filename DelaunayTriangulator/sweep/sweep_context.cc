@@ -31,11 +31,9 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "sweep_context.h"
-#include <algorithm>
-#include "advancing_front.h"
+#include "../poly2tri.h"
 
-namespace p2t {
+namespace P2T {
 
     SweepContext::SweepContext(std::vector<Point*> polyline) : front_(0), head_(0), tail_(0), af_head_(0), af_middle_(0), af_tail_(0) {
         basin = Basin();

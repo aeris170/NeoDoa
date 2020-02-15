@@ -31,9 +31,9 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "cdt.h"
+#include "../poly2tri.h"
 
-namespace p2t {
+namespace P2T {
 
     CDT::CDT(std::vector<Point*> polyline)
     {
@@ -55,12 +55,12 @@ namespace p2t {
         sweep_->Triangulate(*sweep_context_);
     }
 
-    std::vector<p2t::Triangle*> CDT::GetTriangles()
+    std::vector<P2T::Triangle*> CDT::GetTriangles()
     {
         return sweep_context_->GetTriangles();
     }
 
-    std::list<p2t::Triangle*> CDT::GetMap()
+    std::list<P2T::Triangle*> CDT::GetMap()
     {
         return sweep_context_->GetMap();
     }

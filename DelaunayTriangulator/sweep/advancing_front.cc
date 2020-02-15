@@ -30,9 +30,10 @@ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "advancing_front.h"
 
-namespace p2t {
+#include "../poly2tri.h"
+
+namespace P2T {
 
     AdvancingFront::AdvancingFront(Node& head, Node& tail) {
         head_ = &head;

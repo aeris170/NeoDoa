@@ -31,13 +31,9 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <stdexcept>
-#include "sweep.h"
-#include "sweep_context.h"
-#include "advancing_front.h"
-#include "../common/utils.h"
+#include "../poly2tri.h"
 
-namespace p2t {
+namespace P2T {
 
     void Sweep::Triangulate(SweepContext& tcx) {
         tcx.InitTriangulation();

@@ -31,10 +31,30 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef POLY2TRI_H
-#define POLY2TRI_H
+#pragma once
+
+#ifdef P2T_BUILD_DLL
+#define DLL_EXPORT __declspec(dllexport)
+#else
+#define DLL_EXPORT __declspec(dllimport)
+#endif
+
+#define _USE_MATH_DEFINES
+
+#include <list>
+#include <cmath>
+#include <vector>
+#include <math.h>
+#include <iostream>
+#include <assert.h>
+#include <exception>
+#include <algorithm>
+#include <stdexcept>
 
 #include "common/shapes.h"
-#include "sweep/cdt.h"
+#include "common/utils.h"
 
-#endif
+#include "sweep/advancing_front.h"
+#include "sweep/sweep.h"
+#include "sweep/sweep_context.h"
+#include "sweep/cdt.h"

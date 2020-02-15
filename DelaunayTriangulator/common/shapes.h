@@ -31,19 +31,13 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SHAPES_H
-#define SHAPES_H
+#pragma once
 
-#include <vector>
-#include <cstddef>
-#include <assert.h>
-#include <cmath>
+namespace P2T {
 
-namespace p2t {
+    struct DLL_EXPORT Edge;
 
-    struct Edge;
-
-    struct Point {
+    struct DLL_EXPORT Point {
 
         std::vector<Edge*> edge_list;
         double x, y;
@@ -94,7 +88,7 @@ namespace p2t {
         }
     };
 
-    struct Edge {
+    struct DLL_EXPORT Edge {
 
         Point* p, *q;
 
@@ -117,7 +111,7 @@ namespace p2t {
     // Triangle-based data structures are know to have better performance than quad-edge structures
     // See: J. Shewchuk, "Triangle: Engineering a 2D Quality Mesh Generator and Delaunay Triangulator"
     // "Triangulations in CGAL"
-    class Triangle {
+    class DLL_EXPORT Triangle {
     public:
 
         Triangle(Point& a, Point& b, Point& c);
@@ -204,4 +198,3 @@ namespace p2t {
     inline Point Cross(const Point& a, double s) { return Point(s * a.y, -s * a.x); }
     inline Point Cross(const double s, const Point& a) { return Point(-s * a.y, s * a.x); }
 }
-#endif

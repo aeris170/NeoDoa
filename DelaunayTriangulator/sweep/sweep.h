@@ -39,18 +39,15 @@ International Journal of Geographical Information Science
 "FlipScan" Constrained Edge Algorithm invented by Thomas Åhlén, thahlen@gmail.com
 */
 
-#ifndef SWEEP_H
-#define SWEEP_H
+#pragma once
 
-#include <vector>
+namespace P2T {
 
-namespace p2t {
-
-    class Triangle;
+    class DLL_EXPORT Triangle;
     class SweepContext;
     struct Node;
-    struct Point;
-    struct Edge;
+    struct DLL_EXPORT Point;
+    struct DLL_EXPORT Edge;
 
     class Sweep {
     public:
@@ -102,4 +99,3 @@ namespace p2t {
         void FinalizationPolygon(SweepContext& tcx);
     };
 }
-#endif

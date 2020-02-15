@@ -31,12 +31,9 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef ADVANCED_FRONT_H
-#define ADVANCED_FRONT_H
+#pragma once
 
-#include "../common/shapes.h"
-
-namespace p2t {
+namespace P2T {
 
     struct Node {
         Point* point;
@@ -71,4 +68,3 @@ namespace p2t {
         Node* FindSearchNode(const double& x);
     };
 }
-#endif

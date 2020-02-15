@@ -31,10 +31,9 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "shapes.h"
-#include <iostream>
+#include "../poly2tri.h"
 
-namespace p2t {
+namespace P2T {
 
     Triangle::Triangle(Point& a, Point& b, Point& c) {
         points_[0] = &a; points_[1] = &b; points_[2] = &c;

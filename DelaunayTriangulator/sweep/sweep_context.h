@@ -31,14 +31,9 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SWEEP_CONTEXT_H
-#define SWEEP_CONTEXT_H
+#pragma once
 
-#include <list>
-#include <vector>
-#include <cstddef>
-
-namespace p2t {
+namespace P2T {
 
     // Inital triangle factor, seed triangle will extend 30% of
     // PointSet width to both left and right.
@@ -125,4 +120,3 @@ namespace p2t {
         friend class Sweep;
     };
 }
-#endif

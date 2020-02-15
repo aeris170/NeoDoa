@@ -31,21 +31,16 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CDT_H
-#define CDT_H
-
-#include "advancing_front.h"
-#include "sweep_context.h"
-#include "sweep.h"
+#pragma once
 
 /**
 *
 * @author Mason Green <mason.green@gmail.com>
 *
 */
-namespace p2t {
+namespace P2T {
 
-    class CDT {
+    class DLL_EXPORT CDT {
     public:
         CDT(std::vector<Point*> polyline);
         ~CDT();
@@ -61,4 +56,3 @@ namespace p2t {
         Sweep* sweep_;
     };
 }
-#endif
