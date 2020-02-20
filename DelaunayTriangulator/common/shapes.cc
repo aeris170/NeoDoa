@@ -196,6 +196,7 @@ namespace P2T {
             return points_[1];
         }
         assert(0);
+        return NULL;
     }
 
     Point* Triangle::PointCCW(Point& point) {
@@ -207,6 +208,7 @@ namespace P2T {
             return points_[0];
         }
         assert(0);
+        return NULL;
     }
 
     Triangle* Triangle::NeighborCW(Point& point) {

@@ -664,8 +664,8 @@ namespace P2T {
             // Left
             return *ot.PointCW(op);
         } else{
-            //throw new RuntimeException("[Unsupported] Opposing point on constrained edge");
             assert(0);
+            exit(1);
         }
     }
 
