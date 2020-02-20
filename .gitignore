@@ -8,4 +8,5 @@
 Engine/x64/
 Sandbox/x64/
 SignedDistanceFieldGenerator/x64/
-DelaunayTriangulator
+DelaunayTriangulator/x64
+Box2D/x64
