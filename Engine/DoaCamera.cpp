@@ -31,7 +31,7 @@ namespace internal::camera {
 
 	void update() {
 		if (doa::camera::follow_enabled) {
-			glm::vec3 pos{ *doa::camera::follow_target->GetPosition() }; // if errs, remove uniform initialization and turn into copy initialization
+			glm::vec3& pos{ *doa::camera::follow_target->GetPosition() }; // if errs, remove uniform initialization and turn into copy initialization
 			doa::camera::x += (pos.x - doa::camera::x - doa::window_width / 2.f) * doa::camera::tween_x;
 			doa::camera::y += (pos.y - doa::camera::y - doa::window_height / 2.f) * doa::camera::tween_y;
 		}

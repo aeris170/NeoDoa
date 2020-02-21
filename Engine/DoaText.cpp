@@ -328,6 +328,12 @@ namespace internal::text {
 
 	FontLoader ft;
 
+	void init() {
+		if (FT_Init_FreeType(&internal::text::ft)) {
+			std::cout << "Fucked up while initializing FreeType!\n";
+		}
+	}
+
 	void purge() {
 		for (auto itr{ doa::text::FONTS.begin() }; itr != doa::text::FONTS.end(); ++itr) {
 			delete itr->second;

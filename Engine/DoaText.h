@@ -94,5 +94,6 @@ namespace internal::text {
 
 	extern FontLoader ft;
 
+	void init();
 	void purge();
 }
