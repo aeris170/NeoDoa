@@ -1,0 +1,22 @@
+# NeoDoa Public Licence
+
+> Copyright(C)[2021][Doga Oruc]
+
+> NeoDoa Public Licence
+> TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+
+1. Do whatever you like with the original work, just don't be a dick.
+
+   Being a dick includes - but is not limited to - the following instances:
+
+ 1a. Outright copyright infringement - Don't just copy this and change the name.
+ 1b. Selling the unmodified original with no work done what - so - ever, that's REALLY being a dick.
+ 1c. Modifying the original work to contain hidden harmful content. That would make you a PROPER dick.
+
+2. If you become rich through modifications, related works / services, or supporting the original work,
+share the love. Only a dick would make loads off this work and not buy the original work's
+creator(s) a pint.
+
+3. Software is provided with no warranty. Asking for help won't make you a dick, but asking someone to
+write your code for you makes you a DONKEY dick. If you happen to solve your problem before any help arrives,
+you would submit the fix back to regain your status of non-dick.

@@ -1,0 +1,302 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Core">
+      <UniqueIdentifier>{dce40c83-8d7c-49be-b3d4-c73206346fe8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene">
+      <UniqueIdentifier>{33f5b6d1-7cf7-49a0-be96-c6986a969f1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ImGui">
+      <UniqueIdentifier>{67a3651b-6690-4f93-a2b7-cb23590c01f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer">
+      <UniqueIdentifier>{f2a0fc05-6e3f-4b3c-aaca-8cdfa60fe107}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Log">
+      <UniqueIdentifier>{d1d7c52f-18b3-47d9-bc75-a6394b5732c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Asset">
+      <UniqueIdentifier>{7f6569ef-221f-4998-88ae-0f9a0633f801}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Asset\Script">
+      <UniqueIdentifier>{a01999ce-82b7-40ce-813f-15db2b4737c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Asset\Texture">
+      <UniqueIdentifier>{e36699f6-a520-4163-8b1b-10a80572c5ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Asset\Model">
+      <UniqueIdentifier>{4314fd8e-54a6-46e9-afa2-f8946191c35e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Asset\Shader">
+      <UniqueIdentifier>{712f9e9e-5b88-4a93-8c51-505b0d55acb5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Asset\Manager">
+      <UniqueIdentifier>{5d58f596-830d-4922-828d-a52090d2eaa0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Asset\Script\Modules">
+      <UniqueIdentifier>{e0c4992a-be43-4725-89a7-721e9a92c86f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Core.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Window.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Input.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGuiRenderer.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGuiRenderCommand.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="OrthoCamera.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="PerspectiveCamera.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="FrameBuffer.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Angel.cpp">
+      <Filter>Asset\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="Log.cpp">
+      <Filter>Log</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Asset\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Asset\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Asset\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>Asset\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="AssetManager.cpp">
+      <Filter>Asset\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="ScriptComponent.cpp">
+      <Filter>Asset\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelRenderer.cpp">
+      <Filter>Asset\Script\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Module.cpp">
+      <Filter>Asset\Script\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Tag.cpp">
+      <Filter>Asset\Script\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Transform.cpp">
+      <Filter>Asset\Script\Modules</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="NeoDoa.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Window.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.hpp">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Input.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGuiRenderer.hpp">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGuiRenderCommand.hpp">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.hpp">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameBuffer.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="OrthoCamera.hpp">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="PerspectiveCamera.hpp">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="TypedefsAndConstants.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.hpp">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Angel.hpp">
+      <Filter>Asset\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="Log.hpp">
+      <Filter>Log</Filter>
+    </ClInclude>
+    <ClInclude Include="PropertyData.hpp">
+      <Filter>Asset\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="EnumValue.hpp">
+      <Filter>Asset\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.hpp">
+      <Filter>Asset\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.hpp">
+      <Filter>Asset\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.hpp">
+      <Filter>Asset\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.hpp">
+      <Filter>Asset\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Vertex.hpp">
+      <Filter>Asset\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="AssetManager.h">
+      <Filter>Asset\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="ScriptComponent.hpp">
+      <Filter>Asset\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="Module.hpp">
+      <Filter>Asset\Script\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelRenderer.hpp">
+      <Filter>Asset\Script\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="Tag.hpp">
+      <Filter>Asset\Script\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="Transform.hpp">
+      <Filter>Asset\Script\Modules</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Shaders\simpleFragmentShader.frag">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Shaders\simpleVertexShader.vert">
+      <Filter>Resource Files</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Images\neodoalogo.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\missing_texture.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\ch.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\neodoalogo-16_x_16.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\neodoalogo-32_x_32.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\neodoalogo-48_x_48.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\neodoalogo-64_x_64.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\neodoalogo-128_x_128.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\neodoalogo-256_x_256.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\social.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="Fonts\OpenSans-ExtraBoldItalic.ttf">
+      <Filter>Resource Files</Filter>
+    </Font>
+    <Font Include="Fonts\OpenSans-Italic.ttf">
+      <Filter>Resource Files</Filter>
+    </Font>
+    <Font Include="Fonts\OpenSans-Light.ttf">
+      <Filter>Resource Files</Filter>
+    </Font>
+    <Font Include="Fonts\OpenSans-LightItalic.ttf">
+      <Filter>Resource Files</Filter>
+    </Font>
+    <Font Include="Fonts\OpenSans-Regular.ttf">
+      <Filter>Resource Files</Filter>
+    </Font>
+    <Font Include="Fonts\OpenSans-SemiBold.ttf">
+      <Filter>Resource Files</Filter>
+    </Font>
+    <Font Include="Fonts\OpenSans-SemiBoldItalic.ttf">
+      <Filter>Resource Files</Filter>
+    </Font>
+    <Font Include="Fonts\OpenSans-Bold.ttf">
+      <Filter>Resource Files</Filter>
+    </Font>
+    <Font Include="Fonts\OpenSans-BoldItalic.ttf">
+      <Filter>Resource Files</Filter>
+    </Font>
+    <Font Include="Fonts\OpenSans-ExtraBold.ttf">
+      <Filter>Resource Files</Filter>
+    </Font>
+    <Font Include="Fonts\fa-regular-400.ttf">
+      <Filter>Resource Files</Filter>
+    </Font>
+    <Font Include="Fonts\fa-solid-900.ttf">
+      <Filter>Resource Files</Filter>
+    </Font>
+    <Font Include="Fonts\fa-regular-400-pro.ttf">
+      <Filter>Resource Files</Filter>
+    </Font>
+    <Font Include="Fonts\fa-solid-900-pro.ttf">
+      <Filter>Resource Files</Filter>
+    </Font>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Models\12140_Skull_v3_L2.mtl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Models\12140_Skull_v3_L2.obj">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Models\Christmas tree N260410.3ds">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+</Project>

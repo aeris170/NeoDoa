@@ -1,0 +1,10 @@
+^C:\USERS\SIMGE\DESKTOP\DOA\TEST\NEODOA\GLM\BIN\CMAKEFILES\6633E4CD4EEB7E4EBE25C715101F69EA\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Simge/Desktop/DOA/Test/NeoDoa/GLM -BC:/Users/Simge/Desktop/DOA/Test/NeoDoa/GLM/bin --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/Simge/Desktop/DOA/Test/NeoDoa/GLM/bin/glm.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

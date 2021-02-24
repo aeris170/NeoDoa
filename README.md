@@ -10,18 +10,19 @@ NeoDoa is still under development. Below are the finished and upcoming features.
 
 * **Graphics**
     * OpenGL 4.5 Core Profile based renderer
-    * Soon: Point and spot and custom lights
-	* Soon: High Quality Text Rendering using [Signed Distance Fields](https://steamcdn-a.akamaihd.net/apps/valve/2007/SIGGRAPH2007_AlphaTestedMagnification.pdf)
-	* Soon: Shadows
-	* Soon: Waters
-	* Soon: Skybox
-	* Soon: Deferred Shading
-	* Soon: Skeletal Animation
+	* Agressive Instancing and Batched Rendering!!
+    * WIP: Point and spot and custom lights
+	* WIP: High Quality Text Rendering using [Signed Distance Fields](https://steamcdn-a.akamaihd.net/apps/valve/2007/SIGGRAPH2007_AlphaTestedMagnification.pdf)
+	* WIP: Shadows
+	* WIP: Waters
+	* WIP: Skybox
+	* WIP: Deferred Shading
+	* WIP: Skeletal Animation
 * **Collision & Physics**
-    * Soon: With PhysX
+    * WIP: With PhysX
 * **Audio**
-    * Soon: With OpenAL
-* **Asset Loading
+    * WIP: With OpenAL
+* **Asset Loading**
 	* 3D models loading via [Assimp](https://www.assimp.org/)
 	* Texture loading via [stb_image](https://github.com/nothings/stb)
 * **Scripting system**
@@ -29,8 +30,22 @@ NeoDoa is still under development. Below are the finished and upcoming features.
 	* Create a script, fill in the "Execute" function, attach it to an Entity!
 * **Input**
     * Mouse, Keyboard. 
-	* Soon: Controller
-	* Soon: Joystick
+	* WIP: Controller
+	* WIP: Joystick
+* **Editor**
+	* WIP: Project system with Scene serialization
+	* WIP: Asset Manager
+	* WIP: Code Editor
+	* WIP: Custom Shaders
+	* WIP: Mouse Picking to select Entity
+	* WIP: Outlining of selected Entity
+	* WIP: Editor Camera
+	* WIP: Camera Component
+	* WIP: Terrain Editor
+	* WIP: Tree Maker
+	* WIP: Skeletal Animation/Ragdoll Editor
+	* ... and many more
+	* ... help :(
 
 ## How to build
 
