@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -58,7 +58,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>DOA_WINDOWS;DOA_BUILD_DLL</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)SignedDistanceFieldGenerator;$(SolutionDir)External Libs\GLFW\include;$(SolutionDir)External Libs\GLEW\include;$(SolutionDir)External Libs\GLM;$(SolutionDir)External Libs\STB;$(SolutionDir)External Libs\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)SignedDistanceFieldGenerator;$(SolutionDir)DelaunayTriangulator;$(SolutionDir)Box2D\include;$(SolutionDir)External Libs\GLFW\include;$(SolutionDir)External Libs\GLEW\include;$(SolutionDir)External Libs\GLM;$(SolutionDir)External Libs\STB;$(SolutionDir)External Libs\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>doa.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
@@ -68,7 +68,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <AdditionalLibraryDirectories>$(SolutionDir)$(Platform)\$(Configuration);$(SolutionDir)External Libs\GLFW\lib-vc2019;$(SolutionDir)External Libs\GLEW\lib\release\$(Platform);$(SolutionDir)External Libs\Freetype\win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3.lib;freetype.lib;SignedDistanceFieldGenerator.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3.lib;freetype.lib;SignedDistanceFieldGenerator.lib;DelaunayTriangulator.lib;box2d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <NoEntryPoint>false</NoEntryPoint>
       <IgnoreSpecificDefaultLibraries>libcmt.lib;libcmtd.lib;msvcrt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
@@ -81,7 +81,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>DOA_WINDOWS;DOA_BUILD_DLL</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)SignedDistanceFieldGenerator;$(SolutionDir)External Libs\GLFW\include;$(SolutionDir)External Libs\GLEW\include;$(SolutionDir)External Libs\GLM;$(SolutionDir)External Libs\STB;$(SolutionDir)External Libs\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)SignedDistanceFieldGenerator;$(SolutionDir)DelaunayTriangulator;$(SolutionDir)Box2D\include;$(SolutionDir)External Libs\GLFW\include;$(SolutionDir)External Libs\GLEW\include;$(SolutionDir)External Libs\GLM;$(SolutionDir)External Libs\STB;$(SolutionDir)External Libs\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>doa.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
@@ -93,7 +93,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <AdditionalLibraryDirectories>$(SolutionDir)$(Platform)\$(Configuration);$(SolutionDir)External Libs\GLFW\lib-vc2019;$(SolutionDir)External Libs\GLEW\lib\release\$(Platform);$(SolutionDir)External Libs\Freetype\win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3.lib;freetype.lib;SignedDistanceFieldGenerator.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3.lib;freetype.lib;SignedDistanceFieldGenerator.lib;DelaunayTriangulator.lib;box2d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <NoEntryPoint>false</NoEntryPoint>
       <IgnoreSpecificDefaultLibraries>libcmt.lib;libcmtd.lib;msvcrtd.lib</IgnoreSpecificDefaultLibraries>
     </Link>
@@ -109,13 +109,16 @@
     </ClCompile>
     <ClCompile Include="DoaAnimations.cpp" />
     <ClCompile Include="DoaCamera.cpp" />
+    <ClCompile Include="DoaCollider.cpp" />
     <ClCompile Include="DoaEngine.cpp" />
     <ClCompile Include="DoaEzRenderer.cpp" />
     <ClCompile Include="DoaGameObject.cpp" />
     <ClCompile Include="DoaKeyboard.cpp" />
     <ClCompile Include="DoaLight.cpp" />
     <ClCompile Include="DoaMouse.cpp" />
+    <ClCompile Include="DoaPhysics.cpp" />
     <ClCompile Include="DoaPrimitive.cpp" />
+    <ClCompile Include="DoaRenderer.cpp" />
     <ClCompile Include="DoaScene.cpp" />
     <ClCompile Include="DoaShaders.cpp" />
     <ClCompile Include="DoaText.cpp" />
@@ -125,12 +128,15 @@
     <ClInclude Include="doa.h" />
     <ClInclude Include="DoaAnimations.h" />
     <ClInclude Include="DoaCamera.h" />
+    <ClInclude Include="DoaCollider.h" />
     <ClInclude Include="DoaEngine.h" />
     <ClInclude Include="DoaGameObject.h" />
     <ClInclude Include="DoaKeyboard.h" />
     <ClInclude Include="DoaLight.h" />
     <ClInclude Include="DoaMouse.h" />
+    <ClInclude Include="DoaPhysics.h" />
     <ClInclude Include="DoaPrimitive.h" />
+    <ClInclude Include="DoaRenderer.h" />
     <ClInclude Include="DoaScene.h" />
     <ClInclude Include="DoaShaders.h" />
     <ClInclude Include="DoaText.h" />

@@ -44,13 +44,19 @@
 #include FT_GLYPH_H
 
 #include <SDF.h>
-#include <BinPacker.h>
+
+#include <poly2tri.h>
+
+#include <box2d/box2d.h>
 
 #include "DoaEngine.h"
 #include "DoaShaders.h"
+#include "DoaPhysics.h"
 #include "DoaTextures.h"
 #include "DoaLight.h"
 #include "DoaScene.h"
+#include "DoaRenderer.h"
+#include "DoaCollider.h"
 #include "DoaGameObject.h"
 #include "DoaAnimations.h"
 #include "DoaPrimitive.h"
@@ -61,7 +67,7 @@
 #include "DoaText.h"
 
 #ifndef STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_STATIC
-#include <stb_image.h>
+	#define STB_IMAGE_IMPLEMENTATION
+	#define STB_IMAGE_STATIC
+	#include <stb_image.h>
 #endif

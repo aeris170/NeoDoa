@@ -1,4 +1,5 @@
 // NeoDoa 2019, v0.1 ALPHA
+//Precompiled Header
 #include "doa.h"
 
 /*							  |

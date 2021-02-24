@@ -18,12 +18,8 @@ namespace doa {
 				return 1;
 			}
 		}
-		{ //GLFW INIT
-			if (FT_Init_FreeType(&internal::text::ft)) {
-				std::cout << "Fucked up while initializing FreeType!\n";
-				return 1;
-			}
-		}
+		internal::text::init();
+		internal::physics::init();
 		return 0;
 	}
 
@@ -134,6 +130,7 @@ namespace doa {
 		internal::shader::purge();
 		internal::ezrender::purge();
 		internal::text::purge();
+		internal::physics::purge();
 		primitive::Primitive::purge();
 		glfwDestroyWindow(m_window);
 		glfwTerminate();

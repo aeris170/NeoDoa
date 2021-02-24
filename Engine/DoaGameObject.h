@@ -13,6 +13,9 @@ namespace doa::scene {
 
 		shader::ShaderProgram* m_shader{ NULL };
 
+		std::vector<Renderer*>* m_renderers;
+		std::vector<Collider*>* m_colliders;
+
 	public:
 		GameObject(const glm::vec3& position = glm::vec3(0, 0, 0), const glm::vec3& rotation = glm::vec3(0, 0, 0), const glm::vec2& scale = glm::vec2(1, 1));
 		virtual ~GameObject() = 0;
