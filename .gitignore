@@ -1,12 +1,2 @@
-#Documentation of ext. libraries
-*.html
-*.js
-*.css
-
-/x64/
+bin/
 .vs/
-Engine/x64/
-Sandbox/x64/
-SignedDistanceFieldGenerator/x64/
-DelaunayTriangulator/x64
-Box2D/x64
