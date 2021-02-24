@@ -1,16 +1,18 @@
 #include "doa.h"
 #include "Square.h"
-#include <chrono>
 
 using namespace doa;
 
 int main() {
 	Init();
-	Window *window{ doa::CreateWindow("DoaWindow", 960, 540, false) };
+
+	CreateWindow("DoaWindow", 1920, 1080);
 
 	scene::Scene *scene{ new scene::Scene("alt") };
 
-	scene::ACTIVE_SCENE = scene;
+	scene->SetName("hello");
+
+	scene::ACTIVE_SCENE = scene::SCENES["hello"];
 
 	Square sq;
 	scene->Add(&sq);

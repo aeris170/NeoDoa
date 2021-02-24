@@ -47,11 +47,16 @@
 
 #include <poly2tri.h>
 
+#include <box2d/box2d.h>
+
 #include "DoaEngine.h"
 #include "DoaShaders.h"
+#include "DoaPhysics.h"
 #include "DoaTextures.h"
 #include "DoaLight.h"
 #include "DoaScene.h"
+#include "DoaRenderer.h"
+#include "DoaCollider.h"
 #include "DoaGameObject.h"
 #include "DoaAnimations.h"
 #include "DoaPrimitive.h"

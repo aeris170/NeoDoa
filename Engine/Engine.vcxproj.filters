@@ -43,6 +43,15 @@
     <ClCompile Include="DoaMouse.cpp">
       <Filter>Source Files\IO</Filter>
     </ClCompile>
+    <ClCompile Include="DoaRenderer.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="DoaCollider.cpp">
+      <Filter>Source Files\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="DoaPhysics.cpp">
+      <Filter>Source Files\Physics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="doa.h">
@@ -87,6 +96,15 @@
     <ClInclude Include="DoaPrimitive.h">
       <Filter>Header Files\Scene</Filter>
     </ClInclude>
+    <ClInclude Include="DoaRenderer.h">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="DoaCollider.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="DoaPhysics.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
@@ -118,6 +136,12 @@
     </Filter>
     <Filter Include="Source Files\IO">
       <UniqueIdentifier>{1113a12f-3b59-42f6-abd7-6b94de43b257}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Physics">
+      <UniqueIdentifier>{9a6928b5-ca1f-4117-8442-62b204d2c1e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Physics">
+      <UniqueIdentifier>{e1cc2dcd-85b6-4677-a735-a2683a664b89}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
