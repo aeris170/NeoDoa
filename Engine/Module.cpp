@@ -10,7 +10,7 @@ Module::Module(std::string_view name, asIScriptObject* module) noexcept :
 }
 
 Module::~Module() noexcept {
-    //if (_module) _module->Release();
+    if (_module) _module->Release();
 }
 
 Module::Module(Module&& other) noexcept {
@@ -19,7 +19,7 @@ Module::Module(Module&& other) noexcept {
 
 Module& Module::operator=(Module&& other) noexcept {
     _name = std::move(other._name);
-    //if (_module) _module->Release();
+    if (_module) _module->Release();
     std::swap(_module, other._module);
     return *this;
 }

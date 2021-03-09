@@ -6,7 +6,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-constexpr const char* GLSL_VERSION = "#version 330";
+constexpr const char* GLSL_VERSION = "#version 430";
 constexpr int OPGL_VERSION_MAJ = 3;
 constexpr int OPGL_VERSION_MIN = 3;
 

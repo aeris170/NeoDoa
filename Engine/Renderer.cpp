@@ -157,12 +157,6 @@ void Renderer::Render(entt::registry& registry, Camera* cam) {
 
 			for (auto& mesh : modelPtr->_meshes) {
 				glBindVertexArray(mesh._vao);
-				FindTexture("!!missing!!").value().lock()->Bind();
-				int i = 1;
-				for (auto& tex : mesh._textures) {
-					if (i == 17) break; //too many textures...
-					tex.lock()->Bind(i++);
-				}
 				shader->Uniformi("missing", 0);
 				shader->Uniformi("texture1", 1);
 				shader->Uniformi("texture2", 2);
@@ -180,6 +174,12 @@ void Renderer::Render(entt::registry& registry, Camera* cam) {
 				shader->Uniformi("texture14", 14);
 				shader->Uniformi("texture15", 15);
 				shader->Uniformi("texture16", 16);
+				FindTexture("!!missing!!").value().lock()->Bind();
+				int i = 1;
+				for (auto& tex : mesh._textures) {
+					if (i == 17) break; //too many textures...
+					tex.lock()->Bind(i++);
+				}
 				if (mesh._ebo > 0) {
 					glDrawElementsInstanced(GL_TRIANGLES, mesh._indices.size(), GL_UNSIGNED_INT, 0, instances.size());
 				} else {

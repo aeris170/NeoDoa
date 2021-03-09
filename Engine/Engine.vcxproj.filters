@@ -243,6 +243,21 @@
     <Image Include="Images\social.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="Images\default_texture.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\default_texture_x.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\default_texture_y.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\default_texture_z.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\gradient_box.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Font Include="Fonts\OpenSans-ExtraBoldItalic.ttf">
@@ -296,6 +311,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="Models\Christmas tree N260410.3ds">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Models\troll_yeni.fbx">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

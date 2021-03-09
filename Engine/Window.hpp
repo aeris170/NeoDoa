@@ -10,6 +10,8 @@ struct ImGuiContext;
 struct Window {
 	int _width;
 	int _height;
+	int _content_width;
+	int _content_height;
 	std::string _title;
 	bool _isFullscreen;
 	GLFWwindow* _glfwWindow;

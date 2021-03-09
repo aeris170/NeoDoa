@@ -3,6 +3,9 @@
 #include "TypedefsAndConstants.hpp"
 
 struct FrameBuffer {
+	int _width;
+	int _height;
+
 	FBO _fbo{ 0 };
 	TEX _tex{ 0 };
 	RBO _rbo{ 0 };

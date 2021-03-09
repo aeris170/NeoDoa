@@ -1,4 +1,4 @@
-#version 330 core
+#version 430 core
 
 layout (location = 0) out vec4 FragColor;
 
@@ -30,26 +30,43 @@ void main() {
     vec4 colorContrib = useColors == 1 ? v_color : vec4(1, 1, 1, 1);
 
     vec4 texContrib = vec4(1, 1, 1, 1);
-    if(useTexture == 1) {
-		switch(v_texIndex) {
-		case 0: texContrib = texture(texture1, v_uv); break;
-		case 1: texContrib = texture(texture2, v_uv); break;
-		case 2: texContrib = texture(texture3, v_uv); break;
-		case 3: texContrib = texture(texture4, v_uv); break;
-		case 4: texContrib = texture(texture5, v_uv); break;
-		case 5: texContrib = texture(texture6, v_uv); break;
-		case 6: texContrib = texture(texture7, v_uv); break;
-		case 7: texContrib = texture(texture8, v_uv); break;
-		case 8: texContrib = texture(texture9, v_uv); break;
-		case 9: texContrib = texture(texture10, v_uv); break;
-		case 10: texContrib = texture(texture11, v_uv); break;
-		case 11: texContrib = texture(texture12, v_uv); break;
-		case 12: texContrib = texture(texture13, v_uv); break;
-		case 13: texContrib = texture(texture14, v_uv); break;
-		case 14: texContrib = texture(texture15, v_uv); break;
-		case 15: texContrib = texture(texture16, v_uv); break;
-		default: texContrib = texture(missing, v_uv); break;
-		}
-    }
+
+	vec4 tex1    = texture(texture1,  v_uv);
+	vec4 tex2    = texture(texture2,  v_uv);
+	vec4 tex3    = texture(texture3,  v_uv);
+	vec4 tex4    = texture(texture4,  v_uv);
+	vec4 tex5    = texture(texture5,  v_uv);
+	vec4 tex6    = texture(texture6,  v_uv);
+	vec4 tex7    = texture(texture7,  v_uv);
+	vec4 tex8    = texture(texture8,  v_uv);
+	vec4 tex9    = texture(texture9,  v_uv);
+	vec4 tex10   = texture(texture10, v_uv);
+	vec4 tex11   = texture(texture11, v_uv);
+	vec4 tex12   = texture(texture12, v_uv);
+	vec4 tex13   = texture(texture13, v_uv);
+	vec4 tex14   = texture(texture14, v_uv);
+	vec4 tex15   = texture(texture15, v_uv);
+	vec4 tex16   = texture(texture16, v_uv);
+	vec4 missing = texture(missing,   v_uv);
+
+	switch(v_texIndex) {
+	case 0:  texContrib = tex1;    break;
+	case 1:  texContrib = tex2;    break;
+	case 2:  texContrib = tex3;    break;
+	case 3:  texContrib = tex4;    break;
+	case 4:  texContrib = tex5;    break;
+	case 5:  texContrib = tex6;    break;
+	case 6:  texContrib = tex7;    break;
+	case 7:  texContrib = tex8;    break;
+	case 8:  texContrib = tex9;    break;
+	case 9:  texContrib = tex10;   break;
+	case 10: texContrib = tex11;   break;
+	case 11: texContrib = tex12;   break;
+	case 12: texContrib = tex13;   break;
+	case 13: texContrib = tex14;   break;
+	case 14: texContrib = tex15;   break;
+	case 15: texContrib = tex16;   break;
+	default: texContrib = missing; break;
+	}
     FragColor = colorContrib * texContrib;
 }

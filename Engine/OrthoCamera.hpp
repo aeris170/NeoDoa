@@ -3,10 +3,6 @@
 #include "Camera.hpp"
 
 struct OrthoCamera : Camera {
-	glm::vec3 position{ 0, 0, 0 };
-	float rotation{ 0 };
-	float zoom{ 1 };
-
 	float _left;
 	float _right;
 	float _bottom;

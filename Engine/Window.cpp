@@ -25,11 +25,12 @@ Window::Window(int width, int height, const char* title, bool isFullscreen, cons
 #ifdef _DEBUG
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE); //TODO add support
 #endif
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_SAMPLES, 4);
     _glfwWindow = glfwCreateWindow(width, height, title, isFullscreen ? glfwGetPrimaryMonitor() : nullptr, nullptr);
+    glfwGetWindowSize(_glfwWindow, &_content_width, &_content_height);
 
     #pragma region Window Icon Initialization
     GLFWimage img[6];
@@ -92,6 +93,7 @@ static void glfwWindowOnResize(GLFWwindow* window, int width, int height) {
     Window* w = ((Window*)glfwGetWindowUserPointer(window));
     w->_width = width;
     w->_height = height;
+    glfwGetWindowSize(w->_glfwWindow, &w->_content_width, &w->_content_height);
 }
 
 static void glfwWindowOnKeyStateChange(GLFWwindow* window, int key, int scancode, int action, int mods) {

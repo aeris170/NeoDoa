@@ -9,6 +9,9 @@
 #include "Shader.hpp"
 #include "Texture.hpp"
 #include "FrameBuffer.hpp"
+#include "Vertex.hpp"
+#include "Mesh.hpp"
+#include "Model.hpp"
 #include "ImGuiRenderer.hpp"
 
 static std::unique_ptr<Core> _core;
@@ -28,11 +31,134 @@ std::unique_ptr<Core>& CreateCore(int width, int height, const char* title, bool
 #pragma endregion
 
 #pragma region Built-in Stuff Initialization
+    std::weak_ptr<Texture> def = CreateTexture("!!default!!", "Images/default_texture.png").value();
+    std::weak_ptr<Texture> x = CreateTexture("!!default_x!!", "Images/default_texture_x.png").value();
+    std::weak_ptr<Texture> y = CreateTexture("!!default_y!!", "Images/default_texture_y.png").value();
+    std::weak_ptr<Texture> z = CreateTexture("!!default_z!!", "Images/default_texture_z.png").value();
     CreateTexture("!!missing!!", "Images/missing_texture.png").value().lock()->Bind(0);
     CreateShader("Simple Shader", "Shaders/simpleVertexShader.vert", "Shaders/simpleFragmentShader.frag");
 
+    std::vector<Vertex> vertices;
+    std::vector<GLuint> indices;
+    std::vector<std::weak_ptr<Texture>> textures;
+    std::vector<Mesh> meshes;
+#pragma region Cube
+    // front face
+    vertices.emplace_back(Vertex{ { -1, -1,  1 }, {  0,  0,  1 }, {  1,  1,  1,  1 }, {  0,  0 }, 2 });
+    vertices.emplace_back(Vertex{ {  1, -1,  1 }, {  0,  0,  1 }, {  1,  1,  1,  1 }, {  1,  0 }, 2 });
+    vertices.emplace_back(Vertex{ {  1,  1,  1 }, {  0,  0,  1 }, {  1,  1,  1,  1 }, {  1,  1 }, 2 });
+    vertices.emplace_back(Vertex{ { -1,  1,  1 }, {  0,  0,  1 }, {  1,  1,  1,  1 }, {  0,  1 }, 2 });
+
+    // back face
+    vertices.emplace_back(Vertex{ { -1, -1, -1 }, {  0,  0, -1 }, {  1,  1,  1,  1 }, {  0,  0 }, 2 });
+    vertices.emplace_back(Vertex{ {  1, -1, -1 }, {  0,  0, -1 }, {  1,  1,  1,  1 }, {  1,  0 }, 2 });
+    vertices.emplace_back(Vertex{ {  1,  1, -1 }, {  0,  0, -1 }, {  1,  1,  1,  1 }, {  1,  1 }, 2 });
+    vertices.emplace_back(Vertex{ { -1,  1, -1 }, {  0,  0, -1 }, {  1,  1,  1,  1 }, {  0,  1 }, 2 });
+
+    // top face
+    vertices.emplace_back(Vertex{ { -1,  1,  1 }, {  0,  1,  0 }, {  1,  1,  1,  1 }, {  0,  0 }, 1 });
+    vertices.emplace_back(Vertex{ {  1,  1,  1 }, {  0,  1,  0 }, {  1,  1,  1,  1 }, {  1,  0 }, 1 });
+    vertices.emplace_back(Vertex{ {  1,  1, -1 }, {  0,  1,  0 }, {  1,  1,  1,  1 }, {  1,  1 }, 1 });
+    vertices.emplace_back(Vertex{ { -1,  1, -1 }, {  0,  1,  0 }, {  1,  1,  1,  1 }, {  0,  1 }, 1 });
+
+    // bottom face
+    vertices.emplace_back(Vertex{ { -1, -1,  1 }, {  0, -1,  0 }, {  1,  1,  1,  1 }, {  0,  0 }, 1 });
+    vertices.emplace_back(Vertex{ {  1, -1,  1 }, {  0, -1,  0 }, {  1,  1,  1,  1 }, {  1,  0 }, 1 });
+    vertices.emplace_back(Vertex{ {  1, -1, -1 }, {  0, -1,  0 }, {  1,  1,  1,  1 }, {  1,  1 }, 1 });
+    vertices.emplace_back(Vertex{ { -1, -1, -1 }, {  0, -1,  0 }, {  1,  1,  1,  1 }, {  0,  1 }, 1 });
+
+    // right face
+    vertices.emplace_back(Vertex{ {  1, -1,  1 }, {  1,  0,  0 }, {  1,  1,  1,  1 }, {  0,  0 }, 0 });
+    vertices.emplace_back(Vertex{ {  1, -1, -1 }, {  1,  0,  0 }, {  1,  1,  1,  1 }, {  1,  0 }, 0 });
+    vertices.emplace_back(Vertex{ {  1,  1, -1 }, {  1,  0,  0 }, {  1,  1,  1,  1 }, {  1,  1 }, 0 });
+    vertices.emplace_back(Vertex{ {  1,  1,  1 }, {  1,  0,  0 }, {  1,  1,  1,  1 }, {  0,  1 }, 0 });
+
+    // left face
+    vertices.emplace_back(Vertex{ { -1, -1,  1 }, { -1,  0,  0 }, {  1,  1,  1,  1 }, {  0,  0 }, 0 });
+    vertices.emplace_back(Vertex{ { -1, -1, -1 }, { -1,  0,  0 }, {  1,  1,  1,  1 }, {  1,  0 }, 0 });
+    vertices.emplace_back(Vertex{ { -1,  1, -1 }, { -1,  0,  0 }, {  1,  1,  1,  1 }, {  1,  1 }, 0 });
+    vertices.emplace_back(Vertex{ { -1,  1,  1 }, { -1,  0,  0 }, {  1,  1,  1,  1 }, {  0,  1 }, 0 });
+
+    indices.push_back(0);
+    indices.push_back(1);
+    indices.push_back(2);
+    indices.push_back(2);
+    indices.push_back(3);
+    indices.push_back(0);
+
+    indices.push_back(6);
+    indices.push_back(5);
+    indices.push_back(4);
+    indices.push_back(4);
+    indices.push_back(7);
+    indices.push_back(6);
+
+    indices.push_back(8);
+    indices.push_back(9);
+    indices.push_back(10);
+    indices.push_back(10);
+    indices.push_back(11);
+    indices.push_back(8);
+
+    indices.push_back(14);
+    indices.push_back(13);
+    indices.push_back(12);
+    indices.push_back(12);
+    indices.push_back(15);
+    indices.push_back(14);
+
+    indices.push_back(16);
+    indices.push_back(17);
+    indices.push_back(18);
+    indices.push_back(18);
+    indices.push_back(19);
+    indices.push_back(16);
+
+    indices.push_back(22);
+    indices.push_back(21);
+    indices.push_back(20);
+    indices.push_back(20);
+    indices.push_back(23);
+    indices.push_back(22);
+
+    textures.emplace_back(x);
+    textures.emplace_back(y);
+    textures.emplace_back(z);
+
+    meshes.emplace_back(std::move(vertices), std::move(indices), std::move(textures));
+
+    CreateModelFromMesh("Cube", meshes);
+    vertices.clear();
+    indices.clear();
+    textures.clear();
+    meshes.clear();
+#pragma endregion
+#pragma region Quad
+    vertices.emplace_back(Vertex{ { -1, -1,  0 }, {  0,  0,  1 }, {  1,  1,  1,  1 }, {  0,  0 }, 0 });
+    vertices.emplace_back(Vertex{ {  1, -1,  0 }, {  0,  0,  1 }, {  1,  1,  1,  1 }, {  1,  0 }, 0 });
+    vertices.emplace_back(Vertex{ {  1,  1,  0 }, {  0,  0,  1 }, {  1,  1,  1,  1 }, {  1,  1 }, 0 });
+    vertices.emplace_back(Vertex{ { -1,  1,  0 }, {  0,  0,  1 }, {  1,  1,  1,  1 }, {  0,  1 }, 0 });
+
+    indices.push_back(0);
+    indices.push_back(1);
+    indices.push_back(2);
+    indices.push_back(2);
+    indices.push_back(3);
+    indices.push_back(0);
+
+    textures.push_back(def);
+
+    meshes.emplace_back(std::move(vertices), std::move(indices), std::move(textures));
+
+    CreateModelFromMesh("Quad", meshes);
+    vertices.clear();
+    indices.clear();
+    textures.clear();
+    meshes.clear();
+#pragma endregion
+
     if (renderOffscreen) {
-        _core->_offscreenBuffer = std::make_unique<FrameBuffer>(2000, 2000);
+        _core->_offscreenBuffer = std::make_unique<FrameBuffer>(1920, 1080);
     }
 #pragma endregion
 
@@ -57,20 +183,20 @@ void Core::Start() {
         currentTime = glfwGetTime();
         glClearColor(ClearColor.x, ClearColor.y, ClearColor.z, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glViewport(0, 0, _window->_width, _window->_height);
+        glViewport(0, 0, _window->_content_width, _window->_content_height);
 
         auto scene = FindActiveScene().lock();
         if (_playing) {
             scene->Update(_angel, currentTime - lastTime);
         }
         if (renderingOffscreen) {
-            glViewport(0, 0, 2000, 2000);
+            glViewport(0, 0, _offscreenBuffer->_width, _offscreenBuffer->_height);
             glBindFramebuffer(GL_FRAMEBUFFER, _offscreenBuffer->_fbo);
             glClearColor(ClearColor.x, ClearColor.y, ClearColor.z, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
             scene->Render(_angel);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            glViewport(0, 0, _window->_width, _window->_height);
+            glViewport(0, 0, _window->_content_width, _window->_content_height);
         } else {
             scene->Render(_angel);
         }

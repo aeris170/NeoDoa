@@ -31,7 +31,7 @@ Mesh::Mesh(std::vector<Vertex>&& vertices, std::vector<GLuint>&& indices, std::v
 	glVertexAttribPointer(7, 2, GL_FLOAT, GL_FALSE, vertexSize, (GLvoid*)offsetof(Vertex, uv));
 	glEnableVertexAttribArray(7);
 
-	glVertexAttribPointer(8, 1, GL_INT, GL_FALSE, vertexSize, (GLvoid*)offsetof(Vertex, texIndex));
+	glVertexAttribIPointer(8, 1, GL_SHORT, vertexSize, (GLvoid*)offsetof(Vertex, texIndex));
 	glEnableVertexAttribArray(8);
 
 	if (_indices.size() > 0) {

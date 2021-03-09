@@ -9,17 +9,14 @@
 ScriptComponent::ScriptComponent(int id) noexcept :
 	_id(id) {}
 
-ScriptComponent::~ScriptComponent() noexcept {
-	for (const auto& [name, module] : _modules) {
-		module->Release();
-	}
-}
+ScriptComponent::~ScriptComponent() noexcept {}
 
 ScriptComponent::ScriptComponent(ScriptComponent&& other) noexcept {
 	*this = std::move(other);
 }
 
 ScriptComponent& ScriptComponent::operator=(ScriptComponent&& other) noexcept {
+	std::swap(_id, other._id);
 	_modules.swap(other._modules);
 	return *this;
 }
@@ -43,8 +40,8 @@ Module& ScriptComponent::operator[](std::string_view moduleType) {
 
 int ScriptComponent::IndexOf(std::string_view moduleType) {
 	int i = 0;
-	for (const auto& [name, module] : _modules) {
-		if (name == moduleType) {
+	for (const auto& module : _modules) {
+		if (module._name == moduleType) {
 			return i;
 		}
 		i++;

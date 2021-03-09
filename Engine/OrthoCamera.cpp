@@ -13,11 +13,10 @@ OrthoCamera::OrthoCamera(float left, float right, float bottom, float top, float
 	_far(far) {}
 
 void OrthoCamera::UpdateView() {
-	glm::mat4 m(1); // identity
-	m = glm::scale(m, { zoom, zoom, 1 });
-	m *= glm::toMat4(glm::quat({ 0, 0, rotation }));
-	m = glm::translate(m, -position);
-	_viewMatrix = m;
+	forward = glm::normalize(forward);
+	up = glm::normalize(up);
+	_viewMatrix = glm::lookAt(eye, eye + forward, up);
+	_viewMatrix = glm::scale(_viewMatrix, { 1, 1, 1 / zoom });
 }
 
 void OrthoCamera::UpdateProjection() {
