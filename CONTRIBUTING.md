@@ -164,7 +164,7 @@ int IncrementIfNotZero(int x) {
 };
 // or this
 void IncrementIfNotZero(int x) {
-	++x; // logic before "early-return" is a NO-NO
+    x++; // logic before "early-return" is a NO-NO
     if(x - 1 == 0) { return 0; }
     return x;
 };
@@ -198,8 +198,8 @@ struct IntArray {
 
     int* arrayOfInts;	
 	
-	//If however, the member should be private (read-only, from outside the class), an '_' character is appended to its name.
-	int _size;
+    // If however, the member should be private (read-only, from outside the class), an '_' character is appended to its name.
+    int _size;
 };
 
 // Member functions names are PascalCase
@@ -240,7 +240,7 @@ class Singleton {
 ### DON'T make member variables private, mark them as "read-only"
 
 If a member should be private and appropriate getters are to be provided, we say "fuck that" to that and make it public anyways,
-but append an '_' character in front of the variable's name. Variables that have an '_' character in front of their names are to be
+but append an '\_' character in front of the variable's name. Variables that have an '\_' character in front of their names are to be
 considered read-only from outside of the class.
 ```cpp
 // DON'T
@@ -270,17 +270,17 @@ If a member function is to be defined in the header, you better have a good reas
 ```cpp
 struct Example {
 
-	bool foo;
+    bool foo;
+
+    void DoStuff(); // good
+
+    void DoMoreStuff() { // go to the cpp file please...
+        int x = 5; 
+    }
 	
-	void DoStuff(); // good
-	
-	void DoMoreStuff() { // go to the cpp file please...
-		int x = 5; 
-	}
-	
-	template<typename T>
-	void DoEvenMoreStuff() { // good
-		int xxx = 999;
-	}
+    template<typename T>
+    void DoEvenMoreStuff() { // good
+        int xxx = 999;
+    }
 };
 ```
