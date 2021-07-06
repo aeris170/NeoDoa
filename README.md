@@ -8,7 +8,7 @@ NeoDoa is a simple, open-source and easy-to-use game engine developed with C++ f
 
 ## Features
 
-NeoDoa is still under development. Below are the finished and upcoming features.
+NeoDoa is still under development and is not ready for producing games, but it will be 😎 Below are the finished and upcoming features.
 
 * **Graphics**
     * OpenGL 4.5 Core Profile based renderer
