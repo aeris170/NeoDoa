@@ -35,13 +35,13 @@ NeoDoa is still under development and is not ready for producing games, but it w
 	* WIP: Controller
 	* WIP: Joystick
 * **Editor**
-	* WIP: Project system with Scene serialization
-	* WIP: Asset Manager
+	* Project system with Scene serialization with [TinyXML2](https://github.com/leethomason/tinyxml2)
+	* Asset Manager
 	* WIP: Code Editor
 	* WIP: Custom Shaders
 	* WIP: Mouse Picking to select Entity
 	* WIP: Outlining of selected Entity
-	* WIP: Editor Camera
+	* Editor Camera
 	* WIP: Camera Component
 	* WIP: Terrain Editor
 	* WIP: Tree Maker
