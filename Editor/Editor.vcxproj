@@ -61,7 +61,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Engine\;$(SolutionDir)GLFW\include\;$(SolutionDir)GLEW\include\;$(SolutionDir)GLM\;$(SolutionDir)ImGui\;$(SolutionDir)EnTT\;$(SolutionDir)AngelScript\include\;$(SolutionDir)AngelScript\add_on\;$(SolutionDir)IconFontCppHeaders\;$(SolutionDir)TinyFD\;$(SolutionDir)YAML-CPP\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Engine\;$(SolutionDir)GLFW\include\;$(SolutionDir)GLEW\include\;$(SolutionDir)GLM\;$(SolutionDir)ImGui\;$(SolutionDir)EnTT\;$(SolutionDir)AngelScript\include\;$(SolutionDir)AngelScript\add_on\;$(SolutionDir)IconFontCppHeaders\;$(SolutionDir)TinyFD\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>Default</LanguageStandard_C>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -82,7 +82,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Engine\;$(SolutionDir)GLFW\include\;$(SolutionDir)GLEW\include\;$(SolutionDir)GLM\;$(SolutionDir)ImGui\;$(SolutionDir)EnTT\;$(SolutionDir)AngelScript\include\;$(SolutionDir)AngelScript\add_on\;$(SolutionDir)IconFontCppHeaders\;$(SolutionDir)TinyFD\;$(SolutionDir)YAML-CPP\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Engine\;$(SolutionDir)GLFW\include\;$(SolutionDir)GLEW\include\;$(SolutionDir)GLM\;$(SolutionDir)ImGui\;$(SolutionDir)EnTT\;$(SolutionDir)AngelScript\include\;$(SolutionDir)AngelScript\add_on\;$(SolutionDir)IconFontCppHeaders\;$(SolutionDir)TinyFD\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
