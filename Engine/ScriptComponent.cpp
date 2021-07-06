@@ -34,7 +34,7 @@ Module& ScriptComponent::operator[](std::string_view moduleType) {
 	if (index != -1) {
 		return _modules[index];
 	}
-	DOA_LOG_ERROR("Module not found");
+	DOA_LOG_ERROR("Module %s not found.", moduleType.data());
 	throw;
 }
 
@@ -49,24 +49,23 @@ int ScriptComponent::IndexOf(std::string_view moduleType) {
 	return -1;
 }
 
-Module& ScriptComponent::Get(std::string_view moduleType) {
+std::optional<std::reference_wrapper<Module>> ScriptComponent::TryGet(std::string_view moduleType) {
 	int index = IndexOf(moduleType);
 	if (index != -1) {
 		return _modules[index];
 	}
-	DOA_LOG_TRACE("Cannot find component %s. Returned nullptr!", moduleType.data());
-	throw;
+	return std::nullopt;
 }
 
 Module& ScriptComponent::Attach(std::string_view moduleType, bool callerIsEngine) {
 	int index = IndexOf(moduleType);
 	if (index != -1) {
 		if (callerIsEngine) {
-			DOA_LOG_TRACE("Didn't attach. Component already has %s!", moduleType.data());
+			DOA_LOG_TRACE("Didn't attach. Entity already has %s!", moduleType.data());
 		} else {
-			CLI_LOG_TRACE("Didn't attach. Component already has %s!", moduleType.data());
+			CLI_LOG_TRACE("Didn't attach. Entity already has %s!", moduleType.data());
 		}
-		return Get(moduleType);
+		return operator[](moduleType);
 	}
 	return _modules.emplace_back(GetCore()->_angel->InstantiateModule(moduleType, _id));
 }
@@ -79,6 +78,17 @@ void ScriptComponent::Detach(std::string_view moduleType, bool callerIsEngine) {
 		} else {
 			CLI_LOG_TRACE("Didn't detach. %s not present!", moduleType.data());
 		}
+		return;
+	}
+	Module& module = _modules[index];
+	if(module._isDef) {
+		if (callerIsEngine) {
+			DOA_LOG_TRACE("Didn't detach. %s is an essential module!", moduleType.data());
+		}
+		else {
+			CLI_LOG_TRACE("Didn't detach. %s is an essential module!", moduleType.data());
+		}
+		return;
 	}
 	_modules.erase(_modules.begin() + index);
 }

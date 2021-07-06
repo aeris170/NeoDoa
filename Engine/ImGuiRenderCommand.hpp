@@ -4,6 +4,5 @@
 
 class ImGuiRenderCommand {
 public:
-	virtual void operator() (void) = 0;
-	operator ImGuiFunction() const;
+	virtual void operator() (float delta) = 0;
 };

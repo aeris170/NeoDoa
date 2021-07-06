@@ -81,13 +81,13 @@ ImGuiContext* ImGuiInit(GLFWwindow* window) {
 	return context;
 }
 
-void ImGuiRender() {
+void ImGuiRender(float delta) {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
 	for (auto& command : commands) {
-		command();
+		command(delta);
 	}
 
 	ImGui::Render();

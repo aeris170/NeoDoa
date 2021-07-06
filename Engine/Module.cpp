@@ -6,7 +6,9 @@
 Module::Module(std::string_view name, asIScriptObject* module) noexcept :
     _name(name),
     _module(module) {
-    _module->AddRef();
+    if(_module) {
+        _module->AddRef();
+    }
 }
 
 Module::~Module() noexcept {
@@ -21,19 +23,35 @@ Module& Module::operator=(Module&& other) noexcept {
     _name = std::move(other._name);
     if (_module) _module->Release();
     std::swap(_module, other._module);
+    _isDef = other._isDef;
     return *this;
 }
 
 EntityID Module::GetID() const {
-    auto* entity = (asIScriptObject*)_module->GetAddressOfProperty(0);
-    return EntityID(*(int*)entity->GetAddressOfProperty(0));
+    if(_module) {
+        auto* entity = static_cast<asIScriptObject*>(_module->GetAddressOfProperty(0));
+        return EntityID(*static_cast<int*>(entity->GetAddressOfProperty(0)));
+    }
+    return NULL_ENTT;
 }
 
 void Module::SetID(int id) {
-    auto* entity = (asIScriptObject*)_module->GetAddressOfProperty(0);
-    *(int*)entity->GetAddressOfProperty(0) = id;
+    if (!_module) {
+        return;
+    }
+    auto* entity = static_cast<asIScriptObject*>(_module->GetAddressOfProperty(0));
+    *static_cast<int*>(entity->GetAddressOfProperty(0)) = id;
 }
 
 void Module::SetID(EntityID id) {
     SetID(static_cast<int>(id));
+}
+
+
+std::vector<PropertyData>& Module::Properties() {
+    return GetCore()->_angel->_modules[_module->GetObjectType()->GetName()];
+}
+
+void* Module::GetAddressOfPropertyAt(int index) {
+    return _module->GetAddressOfProperty(index);
 }

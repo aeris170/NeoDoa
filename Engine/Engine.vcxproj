@@ -57,11 +57,11 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;BUILD_DLL;_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <CompileAs>Default</CompileAs>
-      <AdditionalIncludeDirectories>$(SolutionDir)GLFW\include\;$(SolutionDir)GLEW\include\;$(SolutionDir)GLM\;$(SolutionDir)ImGui\;$(SolutionDir)STB\;$(SolutionDir)Assimp\include\;$(SolutionDir)EnTT\;$(SolutionDir)AngelScript\include\;$(SolutionDir)AngelScript\add_on\;$(SolutionDir)IconFontCppHeaders\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)GLFW\include\;$(SolutionDir)GLEW\include\;$(SolutionDir)GLM\;$(SolutionDir)ImGui\;$(SolutionDir)STB\;$(SolutionDir)Assimp\include\;$(SolutionDir)EnTT\;$(SolutionDir)AngelScript\include\;$(SolutionDir)AngelScript\add_on\;$(SolutionDir)IconFontCppHeaders\;$(SolutionDir)TinyXML2\;$(SolutionDir)YAML-CPP\</AdditionalIncludeDirectories>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <AdditionalOptions>-D_CRT_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
@@ -74,7 +74,7 @@
       <AdditionalLibraryDirectories>$(SolutionDir)bin\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Lib>
-      <AdditionalDependencies>GLFW.lib;GLEW.lib;ImGui.lib;STB.lib;Assimp.lib;AngelScript.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>GLFW.lib;GLEW.lib;ImGui.lib;STB.lib;Assimp.lib;AngelScript.lib;TinyXML2.lib;YAML-CPP.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)bin\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
@@ -84,11 +84,11 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;BUILD_DLL;_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <CompileAs>Default</CompileAs>
-      <AdditionalIncludeDirectories>$(SolutionDir)GLFW\include\;$(SolutionDir)GLEW\include\;$(SolutionDir)GLM\;$(SolutionDir)ImGui\;$(SolutionDir)STB\;$(SolutionDir)Assimp\include\;$(SolutionDir)EnTT\;$(SolutionDir)AngelScript\include\;$(SolutionDir)AngelScript\add_on\;$(SolutionDir)IconFontCppHeaders\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)GLFW\include\;$(SolutionDir)GLEW\include\;$(SolutionDir)GLM\;$(SolutionDir)ImGui\;$(SolutionDir)STB\;$(SolutionDir)Assimp\include\;$(SolutionDir)EnTT\;$(SolutionDir)AngelScript\include\;$(SolutionDir)AngelScript\add_on\;$(SolutionDir)IconFontCppHeaders\;$(SolutionDir)TinyXML2\;</AdditionalIncludeDirectories>
       <DebugInformationFormat>None</DebugInformationFormat>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <AdditionalOptions>-D_CRT_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
@@ -104,7 +104,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)bin\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>GLFW.lib;GLEW.lib;ImGui.lib;STB.lib;Assimp.lib;AngelScript.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>GLFW.lib;GLEW.lib;ImGui.lib;STB.lib;Assimp.lib;AngelScript.lib;TinyXML2.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -115,21 +115,24 @@
     <ClCompile Include="ModelRenderer.cpp" />
     <ClCompile Include="Module.cpp" />
     <ClCompile Include="OrthoCamera.cpp" />
-    <ClCompile Include="ImGuiRenderCommand.cpp" />
     <ClCompile Include="ImGuiRenderer.cpp" />
     <ClCompile Include="PerspectiveCamera.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Core.cpp" />
     <ClCompile Include="Input.cpp" />
+    <ClCompile Include="Project.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="SceneDeserializer.cpp" />
+    <ClCompile Include="SceneSerializer.cpp" />
     <ClCompile Include="ScriptComponent.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClInclude Include="Angel.hpp" />
-    <ClInclude Include="AssetManager.h" />
+    <ClInclude Include="AssetManager.hpp" />
     <ClInclude Include="Camera.hpp" />
     <ClInclude Include="EnumValue.hpp" />
+    <ClInclude Include="FileNode.hpp" />
     <ClInclude Include="FrameBuffer.hpp" />
     <ClInclude Include="Log.hpp" />
     <ClInclude Include="ModelRenderer.hpp" />
@@ -138,12 +141,15 @@
     <ClInclude Include="ImGuiRenderCommand.hpp" />
     <ClInclude Include="ImGuiRenderer.hpp" />
     <ClInclude Include="PerspectiveCamera.hpp" />
+    <ClInclude Include="Project.hpp" />
     <ClInclude Include="PropertyData.hpp" />
     <ClInclude Include="Mesh.hpp" />
     <ClInclude Include="Input.hpp" />
     <ClInclude Include="Model.hpp" />
     <ClInclude Include="Renderer.hpp" />
     <ClInclude Include="Scene.hpp" />
+    <ClInclude Include="SceneDeserializer.hpp" />
+    <ClInclude Include="SceneSerializer.hpp" />
     <ClInclude Include="ScriptComponent.hpp" />
     <ClInclude Include="Shader.hpp" />
     <ClCompile Include="Tag.cpp" />
@@ -381,6 +387,8 @@
     <None Include="Models\12140_Skull_v3_L2.mtl">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

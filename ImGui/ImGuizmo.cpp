@@ -26,7 +26,7 @@
 #endif
 #include "imgui_internal.h"
 #include "ImGuizmo.h"
-#if !defined(_WIN32) 
+#if !defined(_WIN32)
 #define _malloca(x) alloca(x)
 #else
 #include <malloc.h>
@@ -853,7 +853,7 @@ namespace ImGuizmo
       gContext.mDrawList = drawlist ? drawlist : ImGui::GetWindowDrawList();
    }
 
-   void SetImGuiContext(ImGuiContext* ctx) 
+   void SetImGuiContext(ImGuiContext* ctx)
    {
       ImGui::SetCurrentContext(ctx);
    }
@@ -950,7 +950,7 @@ namespace ImGuizmo
       projectionInverse.Inverse(gContext.mViewProjection);
       far.Transform(makeVect(0, 0, 10.f, 1.f), projectionInverse);
       gContext.mReversed = (far.z/far.w) < 0.f;
-      
+
       // compute scale from the size of camera right vector projected on screen at the matrix position
       vec_t pointRight = viewInverse.v.right;
       pointRight.TransformPoint(gContext.mViewProjection);

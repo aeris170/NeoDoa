@@ -2,6 +2,7 @@
 
 #include <string>
 #include <utility>
+#include <optional>
 #include <unordered_map>
 
 #include "Module.hpp"
@@ -25,7 +26,7 @@ struct ScriptComponent {
 	Module& operator[](std::string_view componentType);
 
 	int IndexOf(std::string_view componentType);
-	Module& Get(std::string_view componentType);
+	std::optional<std::reference_wrapper<Module>> TryGet(std::string_view componentType);
 	Module& Attach(std::string_view componentType, bool callerIsEngine = true);
 	void Detach(std::string_view componentType, bool callerIsEngine = true);
 };

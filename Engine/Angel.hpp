@@ -6,6 +6,7 @@
 #include <thread>
 #include <unordered_map>
 #include <unordered_set>
+#include <mutex>
 
 #include <angelscript.h>
 #include <scriptbuilder/scriptbuilder.h>
@@ -34,6 +35,7 @@ struct Angel {
 	std::unordered_map<std::string, std::vector<EnumValue>> _enums;
 
 	std::atomic<bool> _scriptLoaderRunning{ true };
+	std::mutex _scriptLoaderMutex;
 	std::thread _scriptLoaderDeamon;
 
 	Angel() noexcept;

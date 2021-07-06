@@ -7,7 +7,7 @@ struct ImGuiContext;
 
 ImGuiContext* ImGuiInit(GLFWwindow* window);
 
-void ImGuiRender();
+void ImGuiRender(float delta);
 void ImGuiAddRenderCommand(ImGuiFunction function);
 
 void ImGuiClean();

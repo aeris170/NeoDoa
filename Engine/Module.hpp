@@ -1,13 +1,17 @@
 #pragma once
 
+#include <any>
+
 #include <angelscript.h>
 
+#include "PropertyData.hpp"
 #include "TypedefsAndConstants.hpp"
 
 struct Module {
 
 	std::string _name;
 	asIScriptObject* _module{ nullptr };
+	bool _isDef{ false };
 
 	Module(std::string_view name, asIScriptObject* module) noexcept;
 	~Module() noexcept;
@@ -23,6 +27,10 @@ struct Module {
 	void SetID(int id);
 	void SetID(EntityID id);
 
+	std::vector<PropertyData>& Properties();
+
+	void* GetAddressOfPropertyAt(int index);
+
 	template<typename T>
 	T& As() {
 		return static_cast<T&>(*this);
@@ -33,4 +41,3 @@ struct Module {
 		return *static_cast<T*>(_module->GetAddressOfProperty(index));
 	}
 };
-

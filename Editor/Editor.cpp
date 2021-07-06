@@ -2,11 +2,15 @@
 
 #include "NeoDoa.hpp"
 
+#include <cmath>
 #include <iostream>
 #include <sstream>
+#include <fstream>
+#include <algorithm>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 
@@ -15,8 +19,16 @@
 #include <IconsFontAwesome5.h>
 #include <tinyfiledialogs.h>
 
+#include <imgui_internal.h>
+
 #include "Tag.hpp"
 #include "Transform.hpp"
+
+#include "SceneSerializer.hpp"
+#include "SceneDeserializer.hpp"
+
+static void NewScene(FNode* parent, std::string_view name);
+static void OpenScene(Editor* editor, FNode* sceneFile);
 
 static void DrawConsole() {
 	ImGui::Begin("Console", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
@@ -199,86 +211,166 @@ static void DrawConsole() {
 	ImGui::End();
 }
 
-static void DrawAssetManager(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene) {
-	ImGui::Begin("Assets");
+static void DrawDirectoryRecursive(Editor* editor, FNode* root, EntityID& selectedEntity) {
+	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 
+	if (!root->_isDir) {
+		flags |= ImGuiTreeNodeFlags_Leaf;
+	}
+
+	std::string title = root->_name;
+	std::string titleNoIcon = title;
+	if (root->_ext == ".as" || root->_ext == ".sh") {
+		title.insert(0, ICON_FA_CODE " ");
+	} else if (root->_ext == ".fbx") {
+		title.insert(0, ICON_FA_CUBE " ");
+	} else if (root->_ext == ".scn") {
+		title.insert(0, ICON_FA_PROJECT_DIAGRAM " ");
+	} else if (root->_ext == ".doa") {
+		title.insert(0, ICON_FA_ARCHIVE " ");
+	} else if (root->_ext == ".ttf") {
+		title.insert(0, ICON_FA_FONT " ");
+	} else if (root->_ext == ".conf") {
+		title.insert(0, ICON_FA_COG " ");
+	} else if (root->_ext == ".mat") {
+		title.insert(0, ICON_FA_CIRCLE " ");
+	} else if (root->_ext == ".png" || root->_ext == ".jpg" || root->_ext == ".jpeg") {
+		title.insert(0, ICON_FA_FILE_IMAGE " ");
+	} else if (root->_isDir) {
+		title.insert(0, ICON_FA_FOLDER " ");
+	} else {
+		title.insert(0, ICON_FA_FILE " ");
+	}
+
+	if (ImGui::TreeNodeEx(title.c_str(), flags)) {
+		if (root->_isDir) {
+			for (auto& child : root->_children) {
+				DrawDirectoryRecursive(editor, &child, selectedEntity);
+			}
+		} else if (root->_isFile) {
+			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
+				if (root->_ext == ".scn") {
+					selectedEntity = NULL_ENTT;
+					OpenScene(editor, root);
+					// change scene
+				} else if (root->_ext == ".as" || root->_ext == ".sh" || root->_ext == ".mat") {
+					// open txt file
+				} else if (root->_ext == ".png" || root->_ext == ".jpg" || root->_ext == ".jpeg") {
+					// preview image
+				}
+			}
+		}
+		if (ImGui::BeginPopupContextWindow(nullptr, ImGuiPopupFlags_MouseButtonRight)) {
+			if (ImGui::MenuItem("Create New Scene")) {
+				const char* name = nullptr;
+				bool nameOK = false;
+				while (!nameOK) {
+					name = tinyfd_inputBox("Enter a name for the new scene", "Enter a name for the new scene", "New Scene");
+					if (name) {
+						nameOK = std::string(name) != "";
+						if (!nameOK) {
+							tinyfd_messageBox("Warning", "Scenes cannot be unnamed.", "ok", "warning", 1);
+						}
+					} else {
+						break;
+					}
+				}
+				if(nameOK) {
+					NewScene(root, name);
+				}
+			}
+			ImGui::EndPopup();
+		}
+		ImGui::TreePop();
+	}
+}
+
+static void DrawAssetManager(Editor* editor, std::unique_ptr<Core>& core, EntityID& selectedEntity) {
+	static FNode* assetRoot = nullptr;
+
+	auto& proj = editor->_openProject;
+	ImGui::Begin("Assets", 0, ImGuiWindowFlags_MenuBar);
+	if (ImGui::BeginMenuBar()) {
+		if (ImGui::MenuItem("Refresh")) {
+			if (proj) {
+				proj->_assets.ReScan();
+			} else {
+				DOA_LOG_WARNING("Didn't refresh! No open project.");
+			}
+		}
+		ImGui::EndMenuBar();
+	}
+	if (proj) {
+		assetRoot = &proj->_assets._root;
+	}
+	if (assetRoot) {
+		DrawDirectoryRecursive(editor, assetRoot, selectedEntity);
+	}
 	ImGui::End();
 }
 
 static void DrawSceneSettings(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, ImVec2 viewportSize) {
+	auto ready = !scene.expired();
 	auto ptr = scene.lock();
 
 	ImGui::ShowDemoWindow();
 
 	ImGui::Begin("Scene Stats/Settings");
-	ImGui::Text("Draw Calls: %d", ptr->_renderer.drawCalls);
-	ImGui::Text("Vertices: %d", ptr->_renderer.vertices);
-	ImGui::Text("Indices: %d", ptr->_renderer.indices);
-	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-	ImGui::ColorEdit3("Clear Color", &core->ClearColor[0]);
+	if(ready) {
+		ImGui::Text("Draw Calls: %d", ptr->_renderer.drawCalls);
+		ImGui::Text("Vertices: %d", ptr->_renderer.vertices);
+		ImGui::Text("Indices: %d", ptr->_renderer.indices);
+		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		ImGui::ColorEdit3("Clear Color", &ptr->ClearColor[0]);
 
-	ImGui::Separator();
-	static int camSelection = 1;
-	ImGui::RadioButton("Ortho", &camSelection, 0);
-	ImGui::RadioButton("Perspective", &camSelection, 1);
-	ImGui::NewLine();
-	ImGui::Text("Active Camera: %s", camSelection == 0 ? "Ortho" : "Perspective");
-	ImGui::Text("Properties: ");
-	if (camSelection == 0) {
-		ImGui::DragFloat("Left", &ptr->_oc._left);
-		ImGui::DragFloat("Right", &ptr->_oc._right);
-		ImGui::DragFloat("Bottom", &ptr->_oc._bottom);
-		ImGui::DragFloat("Top", &ptr->_oc._top);
-		ImGui::DragFloat("Near", &ptr->_oc._near);
-		ImGui::DragFloat("Far", &ptr->_oc._far);
-	} else if (camSelection == 1) {
-		static float fov = 90, near = 0.001, far = 1000;
-		ImGui::DragFloat("FOV", &ptr->_pc._fov, 1, 1, 179);
-		ImGui::DragFloat("Near", &ptr->_pc._near);
-		ImGui::DragFloat("Far", &ptr->_pc._far);
-		ptr->_pc._aspect = viewportSize.x / viewportSize.y;
+		ImGui::Separator();
+		static int camSelection = 1;
+		ImGui::RadioButton("Ortho", &camSelection, 0);
+		ImGui::RadioButton("Perspective", &camSelection, 1);
+		ImGui::NewLine();
+		ImGui::Text("Active Camera: %s", camSelection == 0 ? "Ortho" : "Perspective");
+		ImGui::Text("Properties: ");
+		if (camSelection == 0) {
+			ptr->_activeCamera = &ptr->_oc;
+			ImGui::DragFloat("Left", &ptr->_oc._left);
+			ImGui::DragFloat("Right", &ptr->_oc._right);
+			ImGui::DragFloat("Bottom", &ptr->_oc._bottom);
+			ImGui::DragFloat("Top", &ptr->_oc._top);
+			ImGui::DragFloat("Near", &ptr->_oc._near);
+			ImGui::DragFloat("Far", &ptr->_oc._far);
+		} else if (camSelection == 1) {
+			ptr->_activeCamera = &ptr->_pc;
+			ImGui::DragFloat("FOV", &ptr->_pc._fov, 1, 45, 135);
+			ImGui::DragFloat("Near", &ptr->_pc._near);
+			ImGui::DragFloat("Far", &ptr->_pc._far);
+			ptr->_pc._aspect = viewportSize.x / viewportSize.y;
+		}
 	}
 	ImGui::End();
 
 	ImGui::Begin("Camera Controls");
-	if (camSelection == 0) {
-		FancyVectorWidget("Position", ptr->_oc.position, 0);
-		glm::vec3 rot{ 0, 0, ptr->_oc.rotation };
-		FancyVectorWidget("Rotation", rot, 0, Z);
-		ptr->_oc.rotation = glm::radians(rot).z;
-		glm::vec3 zoom{ 0, 0, ptr->_oc.zoom };
-		FancyVectorWidget("Zoom", zoom, 1, Z);
-		ptr->_oc.zoom = zoom.z;
-	}
-	else if (camSelection == 1) {
-		FancyVectorWidget("Position", ptr->_pc.position, 0);
-		FancyVectorWidget("Rotation", ptr->_pc.rotation, 0);
-		glm::vec3 zoom{ 0, 0, ptr->_pc.zoom };
-		FancyVectorWidget("Zoom", zoom, 1, Z);
-		ptr->_pc.zoom = zoom.z;
+	if (ready) {
+		FancyVectorWidget("Eye", ptr->_activeCamera->eye, 0);
+		FancyVectorWidget("Forward", ptr->_activeCamera->forward, 0);
+		FancyVectorWidget("Up", ptr->_activeCamera->up, 0);
+		FloatWidget("Zoom", ptr->_activeCamera->zoom);
 	}
 	ImGui::End();
 }
 
-static void DrawGizmos(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID selectedEntity, ImGuizmo::OPERATION gizmoType) {
-	if (selectedEntity != NULL_ENTT) {
-		auto ptr = scene.lock();
+static void DrawGizmos(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID selectedEntity, ImVec2 viewportPosition, ImVec2 viewportSize, ImGuizmo::OPERATION gizmoType, ImGuizmo::MODE gizmoMode) {
+	auto ptr = scene.lock();
+	ImGuizmo::SetDrawlist();
+	if (ptr->_activeCamera == &ptr->_pc) {
 		ImGuizmo::SetOrthographic(false);
-		ImGuizmo::SetDrawlist();
+	} else if (ptr->_activeCamera == &ptr->_oc) {
+		ImGuizmo::SetOrthographic(true);
+	}
+	glm::mat4 proj = ptr->_activeCamera->_projectionMatrix;
+	glm::mat4 view = ptr->_activeCamera->_viewMatrix;
 
-		float windowWidth = (float)ImGui::GetWindowWidth();
-		float windowHeight = (float)ImGui::GetWindowHeight();
-		ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
-
-		glm::mat4 proj, view;
-		if (ptr->_activeCamera == &ptr->_pc) {
-			proj = ptr->_pc._projectionMatrix;
-			view = ptr->_pc._viewMatrix;
-		}
-		else if (ptr->_activeCamera == &ptr->_oc) {
-			proj = ptr->_oc._projectionMatrix;
-			view = ptr->_oc._viewMatrix;
-		}
+	if (selectedEntity != NULL_ENTT) {
+		ImGuizmo::SetRect(viewportPosition.x, viewportPosition.y, viewportSize.x, viewportSize.y);
 
 		// Entity transform
 		Transform& transform = ptr->Modules(selectedEntity)["Transform"].As<Transform>();
@@ -289,7 +381,10 @@ static void DrawGizmos(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, 
 		if (gizmoType == ImGuizmo::OPERATION::ROTATE) { snapValue = 5.0f; }
 		float snapValues[3] = { snapValue, snapValue, snapValue };
 
-		ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(proj), gizmoType, ImGuizmo::LOCAL, glm::value_ptr(mm), nullptr, snap ? snapValues : nullptr);
+		//glm::mat4 onlyTranslation = glm::mat4(1);
+		//onlyTranslation = glm::translate(onlyTranslation, transform.Translation());
+		//ImGuizmo::DrawGrid(glm::value_ptr(view), glm::value_ptr(proj), glm::value_ptr(onlyTranslation), 5);
+		ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(proj), gizmoType, gizmoMode, glm::value_ptr(mm), nullptr, snap ? snapValues : nullptr);
 
 		if (ImGuizmo::IsUsing()) {
 			{ // Decompose model matrix returned by ImGuizmo
@@ -317,7 +412,7 @@ static void DrawGizmos(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, 
 					}
 
 					// Compute X scale factor and normalize first row.
-					auto scale = transform.Scale();
+					auto& scale = transform.Scale();
 					scale.x = length(Row[0]);
 					Row[0] = glm::detail::scale(Row[0], static_cast<float>(1));
 					scale.y = length(Row[1]);
@@ -341,8 +436,23 @@ static void DrawGizmos(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, 
 	}
 }
 
-static ImVec2 DrawViewport(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID selectedEntity) {
+static void DrawCubeControl(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, ImVec2 viewportPosition, ImVec2 viewportSize, float& yaw, float& pitch) {
+	auto ptr = scene.lock();
+	glm::mat4 proj = ptr->_activeCamera->_projectionMatrix;
+	glm::mat4 view = ptr->_activeCamera->_viewMatrix;
+	ImGuizmo::ViewManipulate(glm::value_ptr(view), 8, { viewportPosition.x + viewportSize.x - 128 , viewportPosition.y }, { 128, 128 }, 0x10101080);
+	ptr->_activeCamera->forward = glm::normalize(glm::vec3(-view[0].z, -view[1].z, -view[2].z)); // forward is INVERTED!!!
+
+	// don't change up vector, fuck space sims. up being something other than 0, 1, 0 is VERBOTEN!
+	//ptr->_activeCamera->up = glm::normalize(glm::vec3(view[0].y, view[1].y, view[2].y));
+
+	yaw = glm::degrees(atan2(ptr->_activeCamera->forward.z, ptr->_activeCamera->forward.x));
+	pitch = glm::degrees(asin(ptr->_activeCamera->forward.y));
+}
+
+static ImVec2 DrawViewport(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID selectedEntity, float deltaTime) {
 	static bool drawGizmos = true;
+	static auto gizmoMode = ImGuizmo::MODE::LOCAL;
 	static auto gizmoType = ImGuizmo::OPERATION::TRANSLATE;
 
 	ImGui::Begin("Viewport");
@@ -368,6 +478,20 @@ static ImVec2 DrawViewport(std::unique_ptr<Core>& core, std::weak_ptr<Scene> sce
 
 	float lineHeight = font->FontSize + ImGui::GetStyle().FramePadding.y * 2.0f;
 	ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
+
+	ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0, 0, 0, 0 });
+	if (gizmoMode == ImGuizmo::MODE::WORLD) {
+		if (ImGui::Button(ICON_FA_GLOBE " World")) {
+			gizmoMode = ImGuizmo::MODE::LOCAL;
+		}
+	} else if (gizmoMode == ImGuizmo::MODE::LOCAL) {
+		if (ImGui::Button(ICON_FA_MALE " Local")) {
+			gizmoMode = ImGuizmo::MODE::WORLD;
+		}
+	}
+	ImGui::PopStyleColor(2);
+	ImGui::SameLine();
 
 	if (gizmoType == ImGuizmo::OPERATION::TRANSLATE) {
 		ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
@@ -402,30 +526,106 @@ static ImVec2 DrawViewport(std::unique_ptr<Core>& core, std::weak_ptr<Scene> sce
 	ImGui::Dummy({ ImGui::GetContentRegionAvail().x - buttonSize.x, buttonSize.y });
 	ImGui::SameLine();
 
-	if (core->_playing) {
-		if (ImGui::Button(ICON_FA_STOP, buttonSize)) {
-			core->_playing = false;
+	bool ready = !scene.expired();
+	if (ready) {
+		if (core->_playing) {
+			if (ImGui::Button(ICON_FA_STOP, buttonSize)) {
+				core->_playing = false;
+			}
+		} else if (ImGui::Button(ICON_FA_PLAY, buttonSize)) {
+			core->_playing = true;
 		}
-	} else if (ImGui::Button(ICON_FA_PLAY, buttonSize)) {
-		core->_playing = true;
 	}
 
 	ImGui::PopFont();
 	ImGui::PopStyleVar();
 	ImGui::PopStyleVar();
-	ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
-	ImGui::Image((void*)core->_offscreenBuffer->_tex, { viewportPanelSize.x, viewportPanelSize.y }, { 0, 1 }, { 1, 0 });
-	if (drawGizmos) {
-		DrawGizmos(core, scene, selectedEntity, gizmoType);
+	ImVec2 viewportSize = ImGui::GetContentRegionAvail();
+	ImVec2 viewportPosition = { ImGui::GetWindowPos().x + ImGui::GetCursorPos().x, ImGui::GetWindowPos().y + ImGui::GetCursorPos().y };
+
+	if (ready) {
+		ImGui::Image((void*)core->_offscreenBuffer->_tex, { viewportSize.x, viewportSize.y }, { 0, 1 }, { 1, 0 });
+
+		// Below is scene cam controls and gizmos
+		static float yaw = -90, pitch = 0;
+		if (drawGizmos) {
+			DrawGizmos(core, scene, selectedEntity, viewportPosition, viewportSize, gizmoType, gizmoMode);
+		}
+		DrawCubeControl(core, scene, viewportPosition, viewportSize, yaw, pitch);
+
+		std::shared_ptr<Scene> ptr = scene.lock();
+		glm::vec3& eye = ptr->_activeCamera->eye;
+		glm::vec3& forward = ptr->_activeCamera->forward;
+		glm::vec3& up = ptr->_activeCamera->up;
+		float& zoom = ptr->_activeCamera->zoom;
+
+		static ImVec2 oldDelta;
+		static bool rightClick = false; // true when right clicked when mouse was on image, stays true until right click is released.
+		if (ImGui::IsItemHovered()) {
+			zoom += ImGui::GetIO().MouseWheel / 100;
+			zoom = std::max(1.f, zoom);
+			if (ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
+				rightClick = true;
+				glfwSetInputMode(core->_window->_glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			} else {
+				rightClick = false;
+			}
+			if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
+				//select object
+				//glReadPixels(x, y, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+			}
+		}
+
+		if (!ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
+			rightClick = false;
+			oldDelta = { 0, 0 };
+			glfwSetInputMode(core->_window->_glfwWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		}
+
+		static float cameraSpeed = 30;
+		if (rightClick) {
+			ImVec2 v = ImGui::GetMouseDragDelta(ImGuiMouseButton_Right);
+			ImVec2 delta = { (v.x - oldDelta.x) / 10, (oldDelta.y - v.y) / 10 };
+			if (ptr->_activeCamera == &ptr->_oc) {
+				eye.x -= delta.x; // want the movement of the camera to be the inverse
+				eye.y -= delta.y; // of mouse. like how you phone's touch screen works.
+			} else if (ptr->_activeCamera == &ptr->_pc) {
+				glm::vec3 right = glm::normalize(glm::cross(forward, up)) * (cameraSpeed * deltaTime);
+				glm::vec3 fwd = glm::normalize(forward) * (cameraSpeed * deltaTime);
+				if (IsKeyPressed(KEY_W)) {
+					eye += fwd;
+				}
+				if (IsKeyPressed(KEY_A)) {
+					eye -= right;
+				}
+				if (IsKeyPressed(KEY_S)) {
+					eye -= fwd;
+				}
+				if (IsKeyPressed(KEY_D)) {
+					eye += right;
+				}
+				yaw += delta.x;
+				pitch += delta.y;
+				if (pitch > 89.0f) {
+					pitch = 89.0f;
+				} else if (pitch < -89.0f) {
+					pitch = -89.0f;
+				}
+				glm::vec3 direction;
+				direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+				direction.y = sin(glm::radians(pitch));
+				direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+				forward = glm::normalize(direction);
+			}
+			oldDelta = v;
+		}
 	}
 	ImGui::End();
 
-	return viewportPanelSize;
+	return viewportSize;
 }
 
-static void DrawGameObjectNode(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID entity, EntityID* selectedEntity) {
-	static ImGuiTreeNodeFlags flags;
-
+static void DrawGameObjectNode(float delta, std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID entity, EntityID* selectedEntity, EntityID& highlightedEntity) {
 	auto ptr = scene.lock();
 	ScriptComponent& scr = ptr->Modules(entity);
 	std::string label = scr["Tag"].As<Tag>().Label();
@@ -437,17 +637,53 @@ static void DrawGameObjectNode(std::unique_ptr<Core>& core, std::weak_ptr<Scene>
 	title.append(label);
 	title.append("###GameObject");
 	title.append(std::to_string(static_cast<std::uint32_t>(entity)));
+
+	static ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth;
+	static float time = 0;
+	static const float highlightExpire = 2;
 	bool isLeaf = children->GetSize() == 0;
 	if (!isLeaf) {
-		flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+		flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 	} else {
 		flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 	}
 	if (entity == *selectedEntity) {
 		flags |= ImGuiTreeNodeFlags_Selected;
 	}
+	if (entity == highlightedEntity) {
+		flags |= ImGuiTreeNodeFlags_Selected;
+		static auto origHeaderColor = ImGui::GetStyleColorVec4(ImGuiCol_Header);
+		static auto origTextColor = ImGui::GetStyleColorVec4(ImGuiCol_Text);
+		float factor = time / highlightExpire;
+		ImGui::PushStyleColor(ImGuiCol_Header, {
+			std::lerp(1.0f, origHeaderColor.x, factor),
+			std::lerp(1.0f, origHeaderColor.y, factor),
+			std::lerp(0.31f, origHeaderColor.z, factor),
+			1
+		});
+		ImGui::PushStyleColor(ImGuiCol_Text, {
+			std::lerp(0.0f, origTextColor.x, factor),
+			std::lerp(0.0f, origTextColor.y, factor),
+			std::lerp(0.0f, origTextColor.z, factor),
+			1
+		});
+		time += delta;
 
+		static EntityID lastHighlighted = highlightedEntity;
+		// if highlighted entity changed during the highlight anim., restart the anim
+		if (lastHighlighted != highlightedEntity) {
+			time = 0;
+		}
+		lastHighlighted = highlightedEntity;
+	}
 	bool opened = ImGui::TreeNodeEx(title.c_str(), flags);
+	if (entity == highlightedEntity) {
+		ImGui::PopStyleColor(2);
+		if (time > highlightExpire) {
+			time = 0;
+			highlightedEntity = NULL_ENTT;
+		}
+	}
 	if (ImGui::BeginDragDropSource()) {
 		ImGui::SetDragDropPayload("SELECTED_ENTT", &entity, sizeof(EntityID));
 		std::string txt;
@@ -492,7 +728,7 @@ static void DrawGameObjectNode(std::unique_ptr<Core>& core, std::weak_ptr<Scene>
 		for (int i = 0; i < children->GetSize(); i++) {
 			auto** obj = (asIScriptObject**)children->At(i);
 			int entityID = *(int*)(*obj)->GetAddressOfProperty(0);
-			DrawGameObjectNode(core, scene, (EntityID)entityID, selectedEntity);
+			DrawGameObjectNode(delta, core, scene, (EntityID)entityID, selectedEntity, highlightedEntity);
 		}
 		if (!isLeaf) {
 			ImGui::TreePop();
@@ -500,25 +736,11 @@ static void DrawGameObjectNode(std::unique_ptr<Core>& core, std::weak_ptr<Scene>
 	}
 }
 
-static EntityID DrawSceneHierarchy(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene) {
-	static EntityID selectedEntity{ NULL_ENTT };
-
+static EntityID DrawSceneHierarchy(float delta, std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID& selectedEntity, EntityID& highlightedEntity) {
+	auto ready = !scene.expired();
 	auto ptr = scene.lock();
 	ImGui::Begin("Scene");
-	if (ImGui::BeginDragDropTarget()) {
-		auto* payload = ImGui::AcceptDragDropPayload("SELECTED_ENTT");
-		if (payload != nullptr) {
-			EntityID dropped = *((EntityID*)payload->Data);
-			Transform& transform = ptr->Modules(dropped)["Transform"].As<Transform>();
-			asIScriptObject*& parent = transform.GetAt<asIScriptObject*>(4);
-			//transform.Parent().Disown(transform); //TODO add children and parent to Transform class
-			ImGui::EndDragDropTarget();
-		}
-	}
-	std::string title(ICON_FA_PROJECT_DIAGRAM " ");
-	title.reserve(64);
-	title.append(ptr->_name);
-	if (ImGui::CollapsingHeader(title.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
+	if (ready) {
 		if (ImGui::BeginDragDropTarget()) {
 			auto* payload = ImGui::AcceptDragDropPayload("SELECTED_ENTT");
 			if (payload != nullptr) {
@@ -529,29 +751,63 @@ static EntityID DrawSceneHierarchy(std::unique_ptr<Core>& core, std::weak_ptr<Sc
 				ImGui::EndDragDropTarget();
 			}
 		}
-		ptr->_registry.view<ScriptComponent>().each([&core, &scene](EntityID e, ScriptComponent& scr) {
-			asIScriptObject*& parent = scr["Transform"].GetAt<asIScriptObject*>(4); //TODO add children and parent to Transform class
-			//if (scr["Transform"].As<Transform>().Parent() == nullptr) {
-			if (parent == nullptr) {
-				DrawGameObjectNode(core, scene, e, &selectedEntity);
+		std::string title(ICON_FA_PROJECT_DIAGRAM " ");
+		title.reserve(64);
+		title.append(ptr->_name);
+		if (ImGui::CollapsingHeader(title.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
+			if (ImGui::BeginDragDropTarget()) {
+				auto* payload = ImGui::AcceptDragDropPayload("SELECTED_ENTT");
+				if (payload != nullptr) {
+					EntityID dropped = *((EntityID*)payload->Data);
+					Transform& transform = ptr->Modules(dropped)["Transform"].As<Transform>();
+					asIScriptObject*& parent = transform.GetAt<asIScriptObject*>(4);
+					//transform.Parent().Disown(transform); //TODO add children and parent to Transform class
+					ImGui::EndDragDropTarget();
+				}
 			}
-		});
-	}
-	if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered()) {
-		selectedEntity = NULL_ENTT;
-	}
-	if (ImGui::BeginPopupContextWindow(0, ImGuiMouseButton_Right, false)) {
-		if (ImGui::MenuItem("Create New Entity")) {
-			ptr->CreateEntity();
+			ptr->_registry.view<ScriptComponent>().each([&delta, &core, &scene, &selectedEntity, &highlightedEntity](EntityID e, ScriptComponent& scr) {
+				asIScriptObject*& parent = scr["Transform"].GetAt<asIScriptObject*>(4); //TODO add children and parent to Transform class
+				//if (scr["Transform"].As<Transform>().Parent() == nullptr) {
+				if (parent == nullptr) {
+					DrawGameObjectNode(delta, core, scene, e, &selectedEntity, highlightedEntity);
+				}
+			});
 		}
-		ImGui::EndPopup();
+		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered()) {
+			selectedEntity = NULL_ENTT;
+		}
+		if (ImGui::BeginPopupContextWindow(0, ImGuiMouseButton_Right, false)) {
+			if (ImGui::MenuItem("Create New Entity")) {
+				ptr->CreateEntity();
+			}
+			ImGui::Separator();
+			if (ImGui::MenuItem("Cube")) {
+				EntityID id = ptr->CreateEntity("Cube");
+				ScriptComponent& modules = ptr->Modules(id);
+				ModelRenderer& mr = modules.Attach("ModelRenderer").As<ModelRenderer>();
+				mr.Shader() = &*FindShader("Simple Shader").value().lock();
+				mr.Model() = &*FindModel("Cube").value().lock();
+			}
+			if (ImGui::MenuItem("Quad")) {
+				EntityID id = ptr->CreateEntity("Quad");
+				ScriptComponent& modules = ptr->Modules(id);
+				ModelRenderer& mr = modules.Attach("ModelRenderer").As<ModelRenderer>();
+				mr.Shader() = &*FindShader("Simple Shader").value().lock();
+				mr.Model() = &*FindModel("Quad").value().lock();
+			}
+			ImGui::Separator();
+			if (ImGui::MenuItem("Close Scene")) {
+				ChangeScene({});
+			}
+			ImGui::EndPopup();
+		}
 	}
 	ImGui::End();
 
 	return selectedEntity;
 }
 
-static void DrawObjectModules(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID selectedEntity) {
+static void DrawObjectModules(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID selectedEntity, EntityID& highlightedEntity) {
 	auto ptr = scene.lock();
 	ScriptComponent& scr = ptr->Modules(selectedEntity);
 	for (Module& module : scr._modules) {
@@ -560,8 +816,9 @@ static void DrawObjectModules(std::unique_ptr<Core>& core, std::weak_ptr<Scene> 
 			ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
 		}
 		std::string title = module._name;
-		title.insert(0, ICON_FA_FILE_CODE " ");
-		if (ImGui::CollapsingHeader(title.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
+		std::string withIcon = title;
+		withIcon.insert(0, ICON_FA_FILE_CODE " ");
+		if (ImGui::CollapsingHeader(withIcon.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
 			if (core->_angel->IsDefModule(type)) {
 				ImGui::PopFont();
 			}
@@ -573,7 +830,7 @@ static void DrawObjectModules(std::unique_ptr<Core>& core, std::weak_ptr<Scene> 
 				}
 				ImGui::EndPopup();
 			}
-			std::vector<PropertyData>& props = core->_angel->_modules[type->GetName()];
+			std::vector<PropertyData>& props = module.Properties();
 			for (int i = 1; i < props.size(); i++) { // starting from 1, the property at 0 is always the "entity" and it's never shown on the editor
 				PropertyData& prop = props[i];
 				if (prop.isPrivate || prop.isProtected) { continue; } // don't show private or protected variables in editor!
@@ -622,14 +879,18 @@ static void DrawObjectModules(std::unique_ptr<Core>& core, std::weak_ptr<Scene> 
 							text.append(prop.typeName);
 							text.append(" (");
 							Module m("tm", o);
-							auto& mModules = ptr->Modules(m.GetID()); //GetID retrrns garbage :(
+							auto& mModules = ptr->Modules(m.GetID()); //GetID returns garbage :(
 							text.append(mModules["Tag"].As<Tag>().Label());
 						}
 						text.append(")");
 						UneditableStringWidget(prop.prettyName.c_str(), text);
 						if (ImGui::BeginPopupContextItem(0, ImGuiPopupFlags_MouseButtonRight)) {
 							if (ImGui::MenuItem("Reset")) {
-								//o = nullptr;
+								o->Release();
+								o = nullptr;
+							}
+							if (ImGui::MenuItem("Highlight Source")) {
+								highlightedEntity = (Module{ "tm", o }).GetID(); // highlight
 							}
 							ImGui::EndPopup();
 						}
@@ -640,30 +901,37 @@ static void DrawObjectModules(std::unique_ptr<Core>& core, std::weak_ptr<Scene> 
 								auto& droppedModules = ptr->Modules(e);
 								for (auto& module : droppedModules._modules) {
 									if (module._name == prop.typeName) {
-										//o = module;
+										o = module;
+										o->AddRef();
 									}
 								}
 							}
 							ImGui::EndDragDropTarget();
 						}
+						if (ImGui::IsItemClicked()) {
+							highlightedEntity = (Module{ "tm", o }).GetID(); // highlight
+						}
 					} else {
 						std::string name = prop.prettyName;
 						name.append(" (Read-Only " ICON_FA_LOCK " )");
 						Module m("tmp", &module.GetAt<asIScriptObject>(i));
-						int id = static_cast<int>(m.GetID());
-						if (id == -1) {
+						EntityID id = m.GetID();
+						if (id == NULL_ENTT) {
 							text.append("unassigned (");
 							text.append(prop.typeName);
 						} else {
 							text.append(prop.typeName);
 							text.append(" (");
-							text.append(ptr->Modules(m.GetID())["Tag"].As<Tag>().Label());
+							text.append(ptr->Modules(id)["Tag"].As<Tag>().Label());
 						}
 						text.append(")");
 						UneditableStringWidget(name.c_str(), text);
 						if (ImGui::BeginPopupContextItem(0, ImGuiPopupFlags_MouseButtonRight)) {
 							if (ImGui::MenuItem("Reset")) {
-								m.SetID(-1);
+								m.SetID(NULL_ENTT);
+							}
+							if (ImGui::MenuItem("Highlight Source")) {
+								highlightedEntity = m.GetID(); // highlight
 							}
 							ImGui::EndPopup();
 						}
@@ -680,9 +948,9 @@ static void DrawObjectModules(std::unique_ptr<Core>& core, std::weak_ptr<Scene> 
 							}
 							ImGui::EndDragDropTarget();
 						}
-					}
-					if (ImGui::IsItemClicked()) {
-						// focus...
+						if (ImGui::IsItemClicked()) {
+							highlightedEntity = m.GetID(); // highlight
+						}
 					}
 				}
 			}
@@ -694,36 +962,39 @@ static void DrawObjectModules(std::unique_ptr<Core>& core, std::weak_ptr<Scene> 
 	}
 }
 
-static void DrawObserverPanel(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID selectedEntity) {
+static void DrawObserverPanel(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID selectedEntity, EntityID& highlightedEntity) {
+	auto ready = !scene.expired();
 	auto ptr = scene.lock();
 
 	std::ostringstream title;
-	if (selectedEntity != NULL_ENTT) {
+	if (ready && selectedEntity != NULL_ENTT) {
 		ScriptComponent& scr = ptr->Modules(selectedEntity);
 		title << scr["Tag"].As<Tag>().Label();
 		title << " - ";
 	}
 	title << "Observer";
 	title << "###Observer";
-	ImGui::Begin(title.str().c_str());
-	if (selectedEntity != NULL_ENTT) {
-		DrawObjectModules(core, scene, selectedEntity);
-	} else {
-		const char* text = "Select an object from the scene :)";
-		ImVec2 size = ImGui::GetContentRegionAvail();
-		ImVec2 txtSize = ImGui::CalcTextSize(text);
-		ImGui::PushStyleColor(ImGuiCol_Text, { core->ClearColor.x, core->ClearColor.y, core->ClearColor.z, 1 });
-		for (int i = 0; i < 5; i++) {
-			ImGui::SameLine((size.x - txtSize.x) / 2, 0);
-			ImGui::Text(text);
-			ImGui::NewLine();
+	ImGui::Begin(title.str().c_str(), NULL);
+	if(ready) {
+		if (selectedEntity != NULL_ENTT) {
+			DrawObjectModules(core, scene, selectedEntity, highlightedEntity);
+		} else {
+			const char* text = "Select an object from the scene :)";
+			ImVec2 size = ImGui::GetContentRegionAvail();
+			ImVec2 txtSize = ImGui::CalcTextSize(text);
+			ImGui::PushStyleColor(ImGuiCol_Text, { ptr->ClearColor.x, ptr->ClearColor.y, ptr->ClearColor.z, 1 });
+			for (int i = 0; i < 5; i++) {
+				ImGui::SameLine((size.x - txtSize.x) / 2, 0);
+				ImGui::Text(text);
+				ImGui::NewLine();
+			}
+			ImGui::PopStyleColor();
 		}
-		ImGui::PopStyleColor();
 	}
 	ImGui::End();
 }
 
-void LicenceNotice(const char* name, const char* licence) {
+static void LicenceNotice(const char* name, const char* licence) {
 	ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
 	ImGui::TextColored({ 0.7, 0.7, 0.7, 1 }, name);
 	ImGui::PopFont();
@@ -735,18 +1006,107 @@ void LicenceNotice(const char* name, const char* licence) {
 	}
 }
 
+static void NewProject(Editor* editor) {
+	editor->_openProject->Close();
+	editor->_openProject.reset();
+	const char* path = tinyfd_selectFolderDialog("Select a folder for New Project", "");
+	if (path) {
+		const char* name = nullptr;
+		bool nameOK = false;
+		while (!nameOK) {
+			name = tinyfd_inputBox("Enter a name for the New Project", "Enter a name for the New Project", "New Project");
+			nameOK = name && std::string(name) != "";
+			if (!nameOK) {
+				tinyfd_messageBox("Warning", "Projects cannot be unnamed.", "ok", "warning", 1);
+			}
+		}
+		editor->_openProject = std::make_shared<Project>(path, name);
+		editor->_openProject->Serialize(path);
+		DOA_LOG_INFO("Succesfully created a new project named %s", name);
+	}
+	ChangeScene(std::weak_ptr<Scene>());
+}
+
+static void OpenProject(std::unique_ptr<Core>& core, Editor* editor) {
+	editor->_openProject->Close();
+	editor->_openProject.reset();
+	const char* const types[] = { "*.doa" };
+	core->_angel->_scriptLoaderMutex.lock();
+	const char* path = tinyfd_openFileDialog("Select Project File", "C:\\", 1, types, "NeoDoa Project Files", 0);
+	core->_angel->_scriptLoaderMutex.unlock();
+	if (path) {
+		editor->_openProject = std::make_shared<Project>(path);
+		ChangeScene(editor->_openProject->_startupScene);
+	}
+}
+
+static void NewScene(FNode* parent, std::string_view name) {
+	bool exists = false;
+	for (auto& node : parent->_children) {
+		if (node._name_noext == name && node._ext == ".scn") {
+			exists = true;
+			break;
+		}
+	}
+	if (exists) {
+		tinyfd_messageBox("Error", "A scene with the same name exists.", "ok", "error", 0);
+		return;
+	}
+	std::stringstream path;
+	path << parent->_path;
+	path << '\\';
+	path << name;
+	path << ".scn";
+
+	std::stringstream name_;
+	name_ << name;
+	name_ << ".scn";
+	FNode& node = parent->_children.emplace_back(FNode {
+		path.str(),
+		name_.str(),
+		name.data(),
+		".scn",
+		parent,
+		{},
+		true,
+		false
+	});
+
+	std::weak_ptr<Scene> scene = CreateScene(name);
+	std::ofstream fout(node._path);
+	fout << SerializeScene(scene);
+	fout.close();
+}
+
+static void OpenScene(Editor* editor, FNode* sceneFile) {
+	ChangeScene(DeserializeScene(sceneFile));
+}
+
+static void SaveScene(Editor* editor, std::weak_ptr<Scene> scene) {
+	auto ptr = scene.lock();
+	for (FNode*& node : editor->_openProject->_assets._scenes) {
+		if (node->_name_noext == ptr->_name) {
+			std::ofstream fout(node->_path);
+			fout << SerializeScene(scene);
+			fout.close();
+			return;
+		}
+	}
+
+}
+
 Editor::Editor() noexcept {
 	neodoaBanner = CreateTexture("!!neodoa!!", "Images/social.png").value();
 }
 
-void Editor::operator() (void) {
+void Editor::operator() (float delta) {
 	static std::unique_ptr<Core>& core = GetCore();
 	std::weak_ptr<Scene> scene = FindActiveScene();
 
 	static bool dockspaceOpen = true;
 	static bool opt_fullscreen_persistant = true;
 	bool opt_fullscreen = opt_fullscreen_persistant;
-	static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+	static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_NoCloseButton;
 
 	ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
 	if (opt_fullscreen) {
@@ -787,18 +1147,31 @@ void Editor::operator() (void) {
 	bool ab = false, ab_open = true, lib_open = true;
 	if (ImGui::BeginMenuBar()) {
 		if (ImGui::BeginMenu("File")) {
-			if (ImGui::MenuItem("New", "Ctrl+N")) {
-				//NewScene();
+			if (ImGui::MenuItem("New Project", "Ctrl+Shift+N")) {
+				if (_openProject) {
+					if (tinyfd_messageBox("Warning", "You may have unsaved changes. Are you sure you want to create a new project?", "yesno", "warning", 0)) {
+						NewProject(this);
+					}
+				} else {
+					NewProject(this);
+				}
 			}
-			if (ImGui::MenuItem("Open...", "Ctrl+O")) {
-				//OpenScene();
+			if (ImGui::MenuItem("Open Project...", "Ctrl+Shift+O")) {
+				if (_openProject) {
+					if (tinyfd_messageBox("Warning", "You may have unsaved changes. Are you sure you want to open another project?", "yesno", "warning", 0)) {
+						OpenProject(core, this);
+					}
+				} else {
+					OpenProject(core, this);
+				}
 			}
-			if (ImGui::MenuItem("Save...", "Ctrl+S")) {
-				//SaveScene();
+			ImGui::Separator();
+			if (ImGui::MenuItem("Save Current Scene...", "Ctrl+S")) {
+				if (_openProject && !scene.expired()) {
+					SaveScene(this, scene);
+				}
 			}
-			if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S")) {
-				//SaveAsScene();
-			}
+			ImGui::Separator();
 			if (ImGui::MenuItem("Exit")){
 				if (tinyfd_messageBox("Warning", "You may have unsaved changes. Are you sure you want to quit?", "yesno", "warning", 0)) {
 					core->Stop();
@@ -1246,17 +1619,19 @@ void Editor::operator() (void) {
 		ImGui::EndPopup();
 	}
 
-	EntityID selected = DrawSceneHierarchy(core, scene);
+	static EntityID selectedEntity{ NULL_ENTT }; // obvious
+	static EntityID highlightedEntity{ NULL_ENTT }; // set when user clicks a reference field of a script
+	DrawSceneHierarchy(delta, core, scene, selectedEntity, highlightedEntity);
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
-	ImVec2 viewportPanelSize = DrawViewport(core, scene, selected);
+	ImVec2 viewportSize = DrawViewport(core, scene, selectedEntity, delta);
 	ImGui::PopStyleVar();
 
-	DrawSceneSettings(core, scene, viewportPanelSize);
-	DrawObserverPanel(core, scene, selected);
+	DrawSceneSettings(core, scene, viewportSize);
+	DrawObserverPanel(core, scene, selectedEntity, highlightedEntity);
 
 	DrawConsole();
-	DrawAssetManager(core, scene);
+	DrawAssetManager(this, core, selectedEntity);
 
 	ImGui::End();
 }

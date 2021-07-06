@@ -11,12 +11,15 @@
 #include "OrthoCamera.hpp"
 #include "PerspectiveCamera.hpp"
 #include "TypedefsAndConstants.hpp"
+#include "FileNode.hpp"
 
 struct Angel;
 struct ScriptComponent;
 
 struct Scene {
 	std::string _name;
+	glm::vec3 ClearColor{ 0.2f, 0.3f, 0.3f };
+
 	std::vector<EntityID> _entities;
 	Renderer _renderer;
 
@@ -28,7 +31,7 @@ struct Scene {
 	std::unordered_map<int, std::vector<std::string>> _attachList; // scripts that call Attach add to this map
 	std::unordered_map<int, std::vector<std::string>> _detachList; // scripts that call Detach add to this map
 
-	EntityID CreateEntity(const char* name = "Entity");
+	EntityID CreateEntity(const char* name = "Entity", int desiredID = -1);
 	void DeleteEntity(EntityID id);
 	bool ContainsEntity(EntityID id);
 
@@ -41,7 +44,7 @@ struct Scene {
 	void Render(const std::unique_ptr<Angel>& angel);
 
 	//don't call, use CreateScene
-	Scene(const char* name) noexcept;
+	Scene(std::string_view name) noexcept;
 	~Scene() noexcept;
 	Scene(const Scene&) = delete;
 	Scene(const Scene&&) = delete;
@@ -49,7 +52,8 @@ struct Scene {
 	Scene& operator=(const Scene&&) = delete;
 };
 
-std::weak_ptr<Scene> CreateScene(const char* name = "New Scene");
+std::weak_ptr<Scene> CreateScene(std::string_view name = "New Scene");
 void ChangeScene(std::weak_ptr<Scene> scene);
-std::weak_ptr<Scene> FindSceneByName(const char* name);
+std::weak_ptr<Scene> FindSceneByName(std::string_view name);
 std::weak_ptr<Scene> FindActiveScene();
+void DeleteAllScenes();

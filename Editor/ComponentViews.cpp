@@ -133,6 +133,7 @@ void FancyVectorWidget(const char* label, float* values, float reset, int flags)
 static void BeginWidget(const char* label) {
 	float w = ImGui::GetContentRegionAvail().x;
 
+	ImGui::PushID(label);
 	ImGui::Columns(2);
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { ImGui::GetStyle().ItemSpacing.x, 0 });
 	ImGui::SetColumnWidth(0, w - compFieldWidth);
@@ -153,6 +154,7 @@ static void EndWidget() {
 	ImGui::PopStyleVar(2);
 	ImGui::Columns(1);
 	ImGui::PopItemWidth();
+	ImGui::PopID();
 }
 
 void EnumWidget(const char* label, int& value, const std::vector<EnumValue>& values) {
@@ -227,6 +229,6 @@ void UneditableStringWidget(const char* label, const std::string& value) {
 	ss << "##" << label;
 	char buf[128]{ 0 };
 	strcpy_s(buf, value.c_str());
-	ImGui::InputText(ss.str().c_str(), buf, 128);
+	ImGui::InputText(ss.str().c_str(), buf, 128, ImGuiInputTextFlags_ReadOnly);
 	EndWidget();
 }

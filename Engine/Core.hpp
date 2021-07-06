@@ -9,8 +9,6 @@ struct Window;
 struct FrameBuffer;
 
 struct Core {
-	glm::vec3 ClearColor{ 0.2f, 0.3f, 0.3f };
-
 	bool _running{ false };
 	bool _playing{ false };
 

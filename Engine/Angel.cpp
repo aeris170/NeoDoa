@@ -462,10 +462,11 @@ Angel::Angel() noexcept :
 
 	_scriptCtx = _scriptEngine->CreateContext();
 	FindAndBuildScripts();
-
 	_scriptLoaderDeamon = std::thread([&]() {
 		while (_scriptLoaderRunning) {
+			_scriptLoaderMutex.lock();
 			FindAndBuildScripts();
+			_scriptLoaderMutex.unlock();
 			using namespace std::chrono_literals;
 			std::this_thread::sleep_for(1s);
 		}
@@ -475,6 +476,7 @@ Angel::Angel() noexcept :
 Angel::~Angel() noexcept {
 	_scriptLoaderRunning = false;
 	_scriptLoaderDeamon.join();
+	_scriptModule->Discard();
 	_scriptCtx->Release();
 	_scriptEngine->ShutDownAndRelease();
 }
@@ -507,8 +509,6 @@ Module Angel::InstantiateModule(std::string_view moduleType, int ID) {
 	asIScriptObject* obj = *(asIScriptObject**)_scriptCtx->GetAddressOfReturnValue();
 	Module m(moduleType, obj);
 	m.SetID(ID);
-	//auto* entity = (asIScriptObject*)obj->GetAddressOfProperty(0);
-	//*(int*)entity->GetAddressOfProperty(0) = ID;
 	return m;
 }
 
@@ -516,7 +516,7 @@ void Angel::FindAndBuildScripts() {
 	std::string path = "Scripts"; // TODO change this!
 	std::vector<std::string> files;
 	std::vector<std::string> filesContent;
-	auto it = std::filesystem::recursive_directory_iterator(path);
+	auto it = std::filesystem::recursive_directory_iterator(path, std::filesystem::directory_options::skip_permission_denied);
 	for (const auto& entry : it) {
 		if (!entry.is_directory() && entry.path().extension().string() == ".as") {
 			files.emplace_back(entry.path().string());

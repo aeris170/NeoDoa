@@ -1,19 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
     <Filter Include="Core">
       <UniqueIdentifier>{dce40c83-8d7c-49be-b3d4-c73206346fe8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Scene">
-      <UniqueIdentifier>{33f5b6d1-7cf7-49a0-be96-c6986a969f1d}</UniqueIdentifier>
     </Filter>
     <Filter Include="ImGui">
       <UniqueIdentifier>{67a3651b-6690-4f93-a2b7-cb23590c01f6}</UniqueIdentifier>
@@ -49,6 +42,15 @@
     <Filter Include="Asset\Script\Modules">
       <UniqueIdentifier>{e0c4992a-be43-4725-89a7-721e9a92c86f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Project">
+      <UniqueIdentifier>{183a45e2-9a01-44b4-800c-43be9755bba0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Project\Scene">
+      <UniqueIdentifier>{33f5b6d1-7cf7-49a0-be96-c6986a969f1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Project\Scene\Serialize">
+      <UniqueIdentifier>{e30f8424-d248-4ec4-9c06-372a4c21ab65}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core.cpp">
@@ -58,7 +60,7 @@
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="Scene.cpp">
-      <Filter>Scene</Filter>
+      <Filter>Project\Scene</Filter>
     </ClCompile>
     <ClCompile Include="Input.cpp">
       <Filter>Core</Filter>
@@ -66,17 +68,14 @@
     <ClCompile Include="ImGuiRenderer.cpp">
       <Filter>ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="ImGuiRenderCommand.cpp">
-      <Filter>ImGui</Filter>
-    </ClCompile>
     <ClCompile Include="Renderer.cpp">
       <Filter>Renderer</Filter>
     </ClCompile>
     <ClCompile Include="OrthoCamera.cpp">
-      <Filter>Scene</Filter>
+      <Filter>Project\Scene</Filter>
     </ClCompile>
     <ClCompile Include="PerspectiveCamera.cpp">
-      <Filter>Scene</Filter>
+      <Filter>Project\Scene</Filter>
     </ClCompile>
     <ClCompile Include="FrameBuffer.cpp">
       <Filter>Core</Filter>
@@ -117,6 +116,15 @@
     <ClCompile Include="Transform.cpp">
       <Filter>Asset\Script\Modules</Filter>
     </ClCompile>
+    <ClCompile Include="Project.cpp">
+      <Filter>Project</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneSerializer.cpp">
+      <Filter>Project\Scene\Serialize</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneDeserializer.cpp">
+      <Filter>Project\Scene\Serialize</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NeoDoa.hpp">
@@ -129,7 +137,7 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Scene.hpp">
-      <Filter>Scene</Filter>
+      <Filter>Project\Scene</Filter>
     </ClInclude>
     <ClInclude Include="Input.hpp">
       <Filter>Core</Filter>
@@ -147,16 +155,16 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="OrthoCamera.hpp">
-      <Filter>Scene</Filter>
+      <Filter>Project\Scene</Filter>
     </ClInclude>
     <ClInclude Include="PerspectiveCamera.hpp">
-      <Filter>Scene</Filter>
+      <Filter>Project\Scene</Filter>
     </ClInclude>
     <ClInclude Include="TypedefsAndConstants.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Camera.hpp">
-      <Filter>Scene</Filter>
+      <Filter>Project\Scene</Filter>
     </ClInclude>
     <ClInclude Include="Angel.hpp">
       <Filter>Asset\Script</Filter>
@@ -185,9 +193,6 @@
     <ClInclude Include="Vertex.hpp">
       <Filter>Asset\Model</Filter>
     </ClInclude>
-    <ClInclude Include="AssetManager.h">
-      <Filter>Asset\Manager</Filter>
-    </ClInclude>
     <ClInclude Include="ScriptComponent.hpp">
       <Filter>Asset\Script</Filter>
     </ClInclude>
@@ -202,6 +207,21 @@
     </ClInclude>
     <ClInclude Include="Transform.hpp">
       <Filter>Asset\Script\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="AssetManager.hpp">
+      <Filter>Asset\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="FileNode.hpp">
+      <Filter>Asset\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="Project.hpp">
+      <Filter>Project</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneSerializer.hpp">
+      <Filter>Project\Scene\Serialize</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneDeserializer.hpp">
+      <Filter>Project\Scene\Serialize</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
