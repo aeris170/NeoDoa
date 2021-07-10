@@ -5,7 +5,7 @@
 1. Read the coding standards below.
 2. Keep PR simple and focused - one PR per feature.
 3. Make a Pull Request.
-4. Check back in any revisions are requested.
+4. Check back if any revisions are requested.
 5. ???
 6. Profit :)
 
@@ -104,7 +104,7 @@ if (x == 0) {
 }
 ```
 
-On save, set your text editor to remove trailing white spaces and ensure there is no empty line at the end of the file.
+On save, set your text editor to remove trailing white spaces.
 
 ### Use spaces between operators and put one space after commas
 
@@ -117,8 +117,7 @@ int x = RandomNumberBetween(0, 100);
 ### Prefer ++i over i++ when i is an iterator
 
 ```cpp
-// Assume i is an iterator :P
-for(int i = 0; i < 5; ++i) {
+for(auto itr = someIterable.begin(); itr != someIterable.end(); ++itr) {
     // do something
 }
 ```
@@ -140,7 +139,7 @@ glm::vec3 *vector{ 1, 1, 1 };
 
 Variable declarations should only appear in a function when the variable itself is needed.
 
-Variables should be declared one per line. (This one is permissive, there are times where you can break this rule, we leave it up to you.) 
+Variables should be declared one per line. (This one is permissive, there are times where you can break this rule, left it up to you.) 
 
 ```cpp
 void foo() {
@@ -154,7 +153,7 @@ void foo() {
 
 ### Adopt the "early-return" policy
 
-Exit functions early if needed, however, make sure no logic takes place before the exits.
+Exit functions early if needed, however, try to make sure no logic takes place before the exits.
 
 ```cpp
 // Don't do this
@@ -180,7 +179,7 @@ void IncrementIfNotZero(int x) {
 
 ## Naming and Structure
 
-Namespaces, classes (use struct keyword), private members (see below), and global variables are banned.  Global functions are preferred instead of Factory pattern.
+Namespaces, classes (use struct keyword), private members (see below), and global variables are banned.  Global functions are preferred instead of dodgy Factory pattern implementations.
 
 ### Capitalization
 
@@ -228,7 +227,7 @@ class Singleton {
 	static Singleton* _this;
 	
 	Singleton() {
-		if(_this) throw "This is a singleton!"
+		if(_this) throw "This is a singleton!" // not so thread-safe but ¯\_(ツ)_/¯
 		
 		_this = this;
 	}
@@ -241,7 +240,7 @@ class Singleton {
 
 If a member should be private and appropriate getters are to be provided, we say "fuck that" to that and make it public anyways,
 but append an '\_' character in front of the variable's name. Variables that have an '\_' character in front of their names are to be
-considered read-only from outside of the class.
+considered read-only from outside of the class. "Private" (read-only) variables with setters are oxymoron, and are strictly banned.
 ```cpp
 // DON'T
 class Point2D { //now you see why class is also banned :)
@@ -261,7 +260,7 @@ struct Point2D {
 
 ## Namespaces and Classes
 
-Again, namespaces and classes are banned. End of the story.  
+Again, namespaces and classes are banned. End of the story :)
 
 ### Don't define member functions in the header, unless you have to
 
@@ -274,7 +273,7 @@ struct Example {
 
     void DoStuff(); // good
 
-    void DoMoreStuff() { // go to the cpp file please...
+    inline void DoMoreStuff() { // go to the cpp file please...
         int x = 5; 
     }
 	
