@@ -14,6 +14,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 
+#include <EZEasing.hpp>
+
 #include "ComponentViews.hpp"
 
 #include <IconsFontAwesome5.h>
@@ -656,15 +658,15 @@ static void DrawGameObjectNode(float delta, std::unique_ptr<Core>& core, std::we
 		static auto origTextColor = ImGui::GetStyleColorVec4(ImGuiCol_Text);
 		float factor = time / highlightExpire;
 		ImGui::PushStyleColor(ImGuiCol_Header, {
-			std::lerp(1.0f, origHeaderColor.x, factor),
-			std::lerp(1.0f, origHeaderColor.y, factor),
-			std::lerp(0.31f, origHeaderColor.z, factor),
+			eze::easeInSine(1.0f, origHeaderColor.x, factor),
+			eze::easeInSine(1.0f, origHeaderColor.y, factor),
+			eze::easeInSine(0.31f, origHeaderColor.z, factor),
 			1
 		});
 		ImGui::PushStyleColor(ImGuiCol_Text, {
-			std::lerp(0.0f, origTextColor.x, factor),
-			std::lerp(0.0f, origTextColor.y, factor),
-			std::lerp(0.0f, origTextColor.z, factor),
+			eze::easeInSine(0.0f, origTextColor.x, factor),
+			eze::easeInSine(0.0f, origTextColor.y, factor),
+			eze::easeInSine(0.0f, origTextColor.z, factor),
 			1
 		});
 		time += delta;
