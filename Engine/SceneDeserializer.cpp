@@ -46,7 +46,7 @@ std::shared_ptr<Scene> DeserializeScene(FNode* file) {
 		scene->ClearColor = { clearColor->FloatAttribute("r"), clearColor->FloatAttribute("g"), clearColor->FloatAttribute("b") };
 
 		tinyxml2::XMLElement* selectionOutlineColor = configNode->FirstChildElement("selectionOutlineColor");
-		scene->SelectionOutlineColor = { clearColor->FloatAttribute("r"), clearColor->FloatAttribute("g"), clearColor->FloatAttribute("b") };
+		scene->SelectionOutlineColor = { selectionOutlineColor->FloatAttribute("r"), selectionOutlineColor->FloatAttribute("g"), selectionOutlineColor->FloatAttribute("b") };
 
 		tinyxml2::XMLElement* camera = configNode->FirstChildElement("camera");
 		std::string camType = camera->Attribute("type");
