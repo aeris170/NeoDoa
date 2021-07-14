@@ -211,6 +211,14 @@ void DoubleWidget(const char* label, double& value) {
 	EndWidget();
 }
 
+void BoolWidget(const char* label, bool& value) {
+	BeginWidget(label);
+	std::stringstream ss;
+	ss << "##" << label;
+	ImGui::Checkbox(ss.str().c_str(), &value);
+	EndWidget();
+}
+
 void StringWidget(const char* label, std::string& value) {
 	BeginWidget(label);
 	std::stringstream ss;

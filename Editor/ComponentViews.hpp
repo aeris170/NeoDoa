@@ -25,6 +25,8 @@ void FloatWidget(const char* label, float& value);
 
 void DoubleWidget(const char* label, double& value);
 
+void BoolWidget(const char* label, bool& value);
+
 void StringWidget(const char* label, std::string& value);
 
 void UneditableStringWidget(const char* label, const std::string& value);
