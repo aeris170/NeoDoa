@@ -1,5 +1,6 @@
 #version 450 core
 
+layout (location = 0) in mat4 modelMatrix;
 layout (location = 4) in vec3 pos;
 layout (location = 5) in vec3 normal;
 layout (location = 6) in vec4 color;
@@ -10,7 +11,6 @@ out vec4 v_color;
 out vec2 v_uv;
 flat out int v_texIndex;
 
-uniform mat4 modelMatrix;
 uniform mat4 viewProjMatrix;
 
 void main() {

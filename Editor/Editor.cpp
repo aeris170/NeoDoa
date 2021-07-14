@@ -42,8 +42,8 @@ static void DrawObjectModules(std::unique_ptr<Core>& core, std::weak_ptr<Scene> 
 static void DrawConsole();
 
 // Asset Manager
-static void DrawAssetManager(Editor* editor, std::unique_ptr<Core>& core, EntityID& selectedEntity);
-static void DrawDirectoryRecursive(Editor* editor, FNode* root, EntityID& selectedEntity);
+static void DrawAssetManager(Editor* editor, std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID& selectedEntity);
+static void DrawDirectoryRecursive(Editor* editor, std::weak_ptr<Scene> scene, FNode* root, EntityID& selectedEntity);
 
 // Licence Notice
 static void LicenceNotice(const char* name, const char* licence);
@@ -261,7 +261,7 @@ static void DrawConsole() {
 	ImGui::End();
 }
 
-static void DrawDirectoryRecursive(Editor* editor, FNode* root, EntityID& selectedEntity) {
+static void DrawDirectoryRecursive(Editor* editor, std::weak_ptr<Scene> scene, FNode* root, EntityID& selectedEntity) {
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 
 	if (!root->_isDir) {
@@ -295,11 +295,14 @@ static void DrawDirectoryRecursive(Editor* editor, FNode* root, EntityID& select
 	if (ImGui::TreeNodeEx(title.c_str(), flags)) {
 		if (root->_isDir) {
 			for (auto& child : root->_children) {
-				DrawDirectoryRecursive(editor, &child, selectedEntity);
+				DrawDirectoryRecursive(editor, scene, &child, selectedEntity);
 			}
 		} else if (root->_isFile) {
 			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
 				if (root->_ext == ".scn") {
+					if (!scene.expired() && selectedEntity != NULL_ENTT) {
+						scene.lock()->Modules(selectedEntity)["Transform"].As<Transform>().Selected() = false;
+					}
 					selectedEntity = NULL_ENTT;
 					OpenScene(editor, root);
 					// change scene
@@ -335,7 +338,7 @@ static void DrawDirectoryRecursive(Editor* editor, FNode* root, EntityID& select
 	}
 }
 
-static void DrawAssetManager(Editor* editor, std::unique_ptr<Core>& core, EntityID& selectedEntity) {
+static void DrawAssetManager(Editor* editor, std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID& selectedEntity) {
 	static FNode* assetRoot = nullptr;
 
 	auto& proj = editor->_openProject;
@@ -354,7 +357,7 @@ static void DrawAssetManager(Editor* editor, std::unique_ptr<Core>& core, Entity
 		assetRoot = &proj->_assets._root;
 	}
 	if (assetRoot) {
-		DrawDirectoryRecursive(editor, assetRoot, selectedEntity);
+		DrawDirectoryRecursive(editor, scene, assetRoot, selectedEntity);
 	}
 	ImGui::End();
 }
@@ -372,6 +375,7 @@ static void DrawSceneSettings(std::unique_ptr<Core>& core, std::weak_ptr<Scene> 
 		ImGui::Text("Indices: %d", ptr->_renderer.indices);
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::ColorEdit3("Clear Color", &ptr->ClearColor[0]);
+		ImGui::ColorEdit3("Selection Outline Color", &ptr->SelectionOutlineColor[0]);
 
 		ImGui::Separator();
 		static int camSelection = 1;
@@ -680,7 +684,7 @@ static void DrawGameObjectNode(float delta, std::unique_ptr<Core>& core, std::we
 	ScriptComponent& scr = ptr->Modules(entity);
 	std::string label = scr["Tag"].As<Tag>().Label();
 	Transform& transform = scr["Transform"].As<Transform>();
-	auto* children = (CScriptArray*)transform._module->GetAddressOfProperty(5); //TODO add children and parent to Transform class
+	auto& children = transform.Children(); //TODO add children and parent to Transform class
 	std::string title;
 	title.reserve(64);
 	title.append(ICON_FA_CUBE " ");
@@ -691,7 +695,7 @@ static void DrawGameObjectNode(float delta, std::unique_ptr<Core>& core, std::we
 	static ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth;
 	static float time = 0;
 	static const float highlightExpire = 2;
-	bool isLeaf = children->GetSize() == 0;
+	bool isLeaf = children.GetSize() == 0;
 	if (!isLeaf) {
 		flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 	} else {
@@ -750,7 +754,7 @@ static void DrawGameObjectNode(float delta, std::unique_ptr<Core>& core, std::we
 			auto* parentTransform = &transform;
 			while (parentTransform != nullptr) {
 				allParents.emplace_back(static_cast<int>(parentTransform->GetID()));
-				//parentTransform = *(asIScriptObject**)t->GetAddressOfProperty(5); //TODO add children and parent to Transform class
+				parentTransform = parentTransform->Parent();
 			}
 			if (std::find(allParents.begin(), allParents.end(), (int)dropped) == allParents.end()) {
 				Transform& droppedTransform = ptr->Modules(dropped)["Transform"].As<Transform>();
@@ -760,7 +764,11 @@ static void DrawGameObjectNode(float delta, std::unique_ptr<Core>& core, std::we
 		}
 	}
 	if (ImGui::IsItemHovered(ImGuiHoveredFlags_None) && ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+		if (*selectedEntity != NULL_ENTT) {
+			ptr->Modules(*selectedEntity)["Transform"].As<Transform>().Selected() = false;
+		}
 		*selectedEntity = entity;
+		ptr->Modules(*selectedEntity)["Transform"].As<Transform>().Selected() = true;
 	}
 	if (ImGui::BeginPopupContextItem(0, ImGuiPopupFlags_MouseButtonRight)) {
 		if (ImGui::BeginMenu("Attach Module")) {
@@ -775,10 +783,10 @@ static void DrawGameObjectNode(float delta, std::unique_ptr<Core>& core, std::we
 		ImGui::EndPopup();
 	}
 	if (opened) {
-		for (int i = 0; i < children->GetSize(); i++) {
-			auto** obj = (asIScriptObject**)children->At(i);
-			int entityID = *(int*)(*obj)->GetAddressOfProperty(0);
-			DrawGameObjectNode(delta, core, scene, (EntityID)entityID, selectedEntity, highlightedEntity);
+		for (int i = 0; i < children.GetSize(); i++) {
+			auto** obj = (asIScriptObject**)children.At(i);
+			Module tmp("tmp", *obj);
+			DrawGameObjectNode(delta, core, scene, tmp.GetID(), selectedEntity, highlightedEntity);
 		}
 		if (!isLeaf) {
 			ImGui::TreePop();
@@ -796,8 +804,7 @@ static EntityID DrawSceneHierarchy(float delta, std::unique_ptr<Core>& core, std
 			if (payload != nullptr) {
 				EntityID dropped = *((EntityID*)payload->Data);
 				Transform& transform = ptr->Modules(dropped)["Transform"].As<Transform>();
-				asIScriptObject*& parent = transform.GetAt<asIScriptObject*>(4);
-				//transform.Parent().Disown(transform); //TODO add children and parent to Transform class
+				transform.Parent()->Disown(transform);
 				ImGui::EndDragDropTarget();
 			}
 		}
@@ -810,20 +817,20 @@ static EntityID DrawSceneHierarchy(float delta, std::unique_ptr<Core>& core, std
 				if (payload != nullptr) {
 					EntityID dropped = *((EntityID*)payload->Data);
 					Transform& transform = ptr->Modules(dropped)["Transform"].As<Transform>();
-					asIScriptObject*& parent = transform.GetAt<asIScriptObject*>(4);
-					//transform.Parent().Disown(transform); //TODO add children and parent to Transform class
+					transform.Parent()->Disown(transform);
 					ImGui::EndDragDropTarget();
 				}
 			}
 			ptr->_registry.view<ScriptComponent>().each([&delta, &core, &scene, &selectedEntity, &highlightedEntity](EntityID e, ScriptComponent& scr) {
-				asIScriptObject*& parent = scr["Transform"].GetAt<asIScriptObject*>(4); //TODO add children and parent to Transform class
-				//if (scr["Transform"].As<Transform>().Parent() == nullptr) {
-				if (parent == nullptr) {
+				if (scr["Transform"].As<Transform>().Parent() == nullptr) {
 					DrawGameObjectNode(delta, core, scene, e, &selectedEntity, highlightedEntity);
 				}
 			});
 		}
 		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered()) {
+			if (selectedEntity != NULL_ENTT) {
+				ptr->Modules(selectedEntity)["Transform"].As<Transform>().Selected() = false;
+			}
 			selectedEntity = NULL_ENTT;
 		}
 		if (ImGui::BeginPopupContextWindow(0, ImGuiMouseButton_Right, false)) {
@@ -835,14 +842,14 @@ static EntityID DrawSceneHierarchy(float delta, std::unique_ptr<Core>& core, std
 				EntityID id = ptr->CreateEntity("Cube");
 				ScriptComponent& modules = ptr->Modules(id);
 				ModelRenderer& mr = modules.Attach("ModelRenderer").As<ModelRenderer>();
-				mr.Shader() = &*FindShader("Simple Shader").value().lock();
+				mr.Shader() = &*FindShader("Simple Instanced Shader").lock();
 				mr.Model() = &*FindModel("Cube").value().lock();
 			}
 			if (ImGui::MenuItem("Quad")) {
 				EntityID id = ptr->CreateEntity("Quad");
 				ScriptComponent& modules = ptr->Modules(id);
 				ModelRenderer& mr = modules.Attach("ModelRenderer").As<ModelRenderer>();
-				mr.Shader() = &*FindShader("Simple Shader").value().lock();
+				mr.Shader() = &*FindShader("Simple Instanced Shader").lock();
 				mr.Model() = &*FindModel("Quad").value().lock();
 			}
 			ImGui::Separator();
@@ -887,12 +894,14 @@ static void DrawObjectModules(std::unique_ptr<Core>& core, std::weak_ptr<Scene> 
 				auto it = core->_angel->_enums.find(prop.typeName);
 				if (it != core->_angel->_enums.end()) {
 					EnumWidget(prop.prettyName.c_str(), module.GetAt<int>(i), it->second);
-				} else if (prop.typeName == "int") {
+				}else if (prop.typeName == "int") {
 					IntWidget(prop.prettyName.c_str(), module.GetAt<int>(i));
 				} else if (prop.typeName == "float") {
 					FloatWidget(prop.prettyName.c_str(), module.GetAt<float>(i));
 				} else if (prop.typeName == "double") {
 					DoubleWidget(prop.prettyName.c_str(), module.GetAt<double>(i));
+				} else if (prop.typeName == "bool") {
+					BoolWidget(prop.prettyName.c_str(), module.GetAt<bool>(i));
 				} else if (prop.typeName == "string") {
 					StringWidget(prop.prettyName.c_str(), module.GetAt<std::string>(i));
 				} else if (prop.typeName == "vec2") {
@@ -1708,7 +1717,7 @@ void Editor::operator() (float delta) {
 	DrawObserverPanel(core, scene, selectedEntity, highlightedEntity);
 
 	DrawConsole();
-	DrawAssetManager(this, core, selectedEntity);
+	DrawAssetManager(this, core, scene, selectedEntity);
 
 	ImGui::End();
 }

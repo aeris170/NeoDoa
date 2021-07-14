@@ -15,6 +15,9 @@
 #include "Log.hpp"
 #include "ImGuiRenderer.hpp"
 #include "AssetManager.hpp"
+#include "ScriptComponent.hpp"
+#include "Transform.hpp"
+#include "ModelRenderer.hpp"
 
 static std::unique_ptr<Core> _core;
 
@@ -49,8 +52,11 @@ std::unique_ptr<Core>& CreateCore(int width, int height, const char* title, bool
     std::weak_ptr<Texture> defx = CreateTexture("!!default_x!!", "Images/default_texture_x.png").value();
     std::weak_ptr<Texture> defy = CreateTexture("!!default_y!!", "Images/default_texture_y.png").value();
     std::weak_ptr<Texture> defz = CreateTexture("!!default_z!!", "Images/default_texture_z.png").value();
-    CreateTexture("!!missing!!", "Images/missing_texture.png").value().lock()->Bind(0);
+    CreateTexture("!!missing!!", "Images/missing_texture.png").value().lock()->Bind();
+    CreateShader("!!pick!!", "Shaders/mousePickVertexShader.vert", "Shaders/mousePickFragmentShader.frag");
+    CreateShader("Simple Instanced Shader", "Shaders/simpleVertexShaderInstanced.vert", "Shaders/simpleFragmentShaderInstanced.frag");
     CreateShader("Simple Shader", "Shaders/simpleVertexShader.vert", "Shaders/simpleFragmentShader.frag");
+    CreateShader("Solid Color Shader", "Shaders/solidColorVertexShader.vert", "Shaders/solidColorFragmentShader.frag");
 
     std::vector<Vertex> vertices;
     std::vector<GLuint> indices;
@@ -174,14 +180,14 @@ std::unique_ptr<Core>& CreateCore(int width, int height, const char* title, bool
     if (renderOffscreen) {
         _core->_offscreenBuffer = std::make_unique<FrameBuffer>(1920, 1080);
     }
-
-
 #pragma endregion
 
+#pragma region KHR_debug
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
     glDebugMessageCallback(message_callback, nullptr);
+#pragma endregion
 
     return _core;
 }
@@ -193,11 +199,10 @@ void Core::Start() {
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
+
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
-
-    glEnable(GL_STENCIL_TEST);
 
     _running = true;
     while (_running) {

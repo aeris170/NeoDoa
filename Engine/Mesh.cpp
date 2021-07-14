@@ -14,7 +14,7 @@ Mesh::Mesh(std::vector<Vertex>&& vertices, std::vector<GLuint>&& indices, std::v
 	auto totalSize = vertexCount * vertexSize * 10;
 
 	glCreateBuffers(1, &_vbo);
-	glNamedBufferData(_vbo, totalSize, _vertices.data(), GL_STATIC_DRAW);
+	glNamedBufferData(_vbo, totalSize, _vertices.data(), GL_STATIC_DRAW); // if crash, driver bug
 
 	glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, vertexSize);
 

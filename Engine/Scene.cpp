@@ -1,5 +1,7 @@
 #include "Scene.hpp"
 
+#include <glm/gtc/type_ptr.hpp>
+
 #include "Shader.hpp"
 #include "Model.hpp"
 #include "ModelRenderer.hpp"
@@ -11,6 +13,7 @@
 #include "Tag.hpp"
 #include "Transform.hpp"
 #include "Log.hpp"
+#include "Texture.hpp"
 
 static std::shared_ptr<Scene> ACTIVE_SCENE;
 static std::unordered_map<std::string, std::shared_ptr<Scene>> SCENES;
@@ -110,6 +113,21 @@ void Scene::Render(const std::unique_ptr<Angel>& angel) {
 		}
 	});
 	_renderer.Render(_registry, _activeCamera);
+
+#ifdef EDITOR
+	// Find selected objects
+	std::vector<std::tuple<Transform&, ModelRenderer&>> selecteds;
+	_registry.view<ScriptComponent>().each([&](EntityID entity, ScriptComponent& script) {
+		Transform& t = script["Transform"].As<Transform>();
+		if (t.Selected()) {
+			ModelRenderer& mr = script["ModelRenderer"].As<ModelRenderer>();
+			selecteds.push_back({ t, mr });
+		}
+	});
+
+	// Outline them
+	_outlineRenderer.Render(selecteds, _activeCamera, SelectionOutlineColor);
+#endif
 }
 
 //-----------------------------------------------------------------

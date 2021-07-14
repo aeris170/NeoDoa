@@ -7,6 +7,7 @@
 #include <entt.hpp>
 
 #include "Renderer.hpp"
+#include "OutlineRenderer.hpp"
 #include "OrthoCamera.hpp"
 #include "PerspectiveCamera.hpp"
 
@@ -18,9 +19,11 @@ struct ScriptComponent;
 struct Scene {
 	std::string _name;
 	glm::vec3 ClearColor{ 0.2f, 0.3f, 0.3f };
+	glm::vec3 SelectionOutlineColor{ 0.68f, 0.49f, 0 };
 
 	std::vector<EntityID> _entities;
 	Renderer _renderer;
+	OutlineRenderer _outlineRenderer;
 
 	OrthoCamera _oc{ OrthoCamera(-1, 1, -1, 1, -1, 1) };
 	PerspectiveCamera _pc{ PerspectiveCamera(110, 19.f/9.f, 0.001, 1000) };

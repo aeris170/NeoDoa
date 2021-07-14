@@ -113,7 +113,7 @@ void Renderer::Render(entt::registry& registry, Camera* cam) {
 	glDeleteBuffers(toBeDeleted.size(), toBeDeleted.data());
 	// done
 	for (auto& pair : _current) {
-		auto shader = pair.first;
+		auto& shader = pair.first;
 		shader->Use();
 		shader->UniformMat4("viewProjMatrix", glm::value_ptr(cam->_viewProjectionMatrix));
 		for (auto& tuple : pair.second) {

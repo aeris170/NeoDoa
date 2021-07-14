@@ -31,6 +31,12 @@ std::string SerializeScene(std::weak_ptr<Scene> scene) {
 			printer.PushAttribute("b", ptr->ClearColor.b);
 			printer.CloseElement();
 
+			printer.OpenElement("selectionOutlineColor");
+			printer.PushAttribute("r", ptr->SelectionOutlineColor.r);
+			printer.PushAttribute("g", ptr->SelectionOutlineColor.g);
+			printer.PushAttribute("b", ptr->SelectionOutlineColor.b);
+			printer.CloseElement();
+
 			printer.OpenElement("camera");
 			{
 				bool isPerspective = ptr->_activeCamera == &ptr->_pc;

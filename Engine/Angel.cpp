@@ -126,7 +126,7 @@ static bool hasModule(unsigned int ID, const std::string& type) {
 }
 static Shader* findShader(const std::string& name) {
 	auto rv = FindShader(name);
-	if (rv.has_value()) return &*(rv.value().lock());
+	if (!rv.expired()) return &*(rv.lock());
 	GetCore()->_angel->_scriptCtx->SetException("Shader not found exception");
 	return nullptr;
 }
@@ -595,6 +595,7 @@ bool Angel::Rebuild() {
 			quat Rotation = quat(vec3(0, 0, 0));
 			vec3 Scale = vec3(1, 1, 1);
 
+			private bool selected = false;
 			private Transform@ parent;
 			private array<Transform@> children;
 

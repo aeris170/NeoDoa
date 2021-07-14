@@ -54,31 +54,31 @@ bool Shader::Uniformiv(std::string_view name, int* values, int size) {
     return true;
 }
 
-bool Shader::Uniform1f(std::string_view name, float value) {
+bool Shader::Uniform1f(std::string_view name, float* values, int count) {
     UniformLocation loc = UniformLoc(name);
     if (loc == -1) { return false; }
-    glProgramUniform1f(_glProgramID, loc, value);
+    glProgramUniform1fv(_glProgramID, loc, count, values);
     return true;
 }
 
-bool Shader::Uniform2f(std::string_view name, float* values) {
+bool Shader::Uniform2f(std::string_view name, float* values, int count) {
     UniformLocation loc = UniformLoc(name);
     if (loc == -1) { return false; }
-    glProgramUniform2fv(_glProgramID, loc, 2, values);
+    glProgramUniform2fv(_glProgramID, loc, count, values);
     return true;
 }
 
-bool Shader::Uniform3f(std::string_view name, float* values) {
+bool Shader::Uniform3f(std::string_view name, float* values, int count) {
     UniformLocation loc = UniformLoc(name);
     if (loc == -1) { return false; }
-    glProgramUniform3fv(_glProgramID, loc, 3, values);
+    glProgramUniform3fv(_glProgramID, loc, count, values);
     return true;
 }
 
-bool Shader::Uniform4f(std::string_view name, float* values) {
+bool Shader::Uniform4f(std::string_view name, float* values, int count) {
     UniformLocation loc = UniformLoc(name);
     if (loc == -1) { return false; }
-    glProgramUniform4fv(_glProgramID, loc, 4, values);
+    glProgramUniform4fv(_glProgramID, loc, count, values);
     return true;
 }
 
@@ -105,7 +105,7 @@ UniformLocation Shader::UniformLoc(std::string_view name) {
 
 //-----------------------------------------------------------------
 
-std::optional<std::weak_ptr<Shader>> CreateShader(std::string_view name, const char* vertexPath, const char* fragmentPath) {
+std::weak_ptr<Shader> CreateShader(std::string_view name, const char* vertexPath, const char* fragmentPath) {
     std::string vertexCode, fragmentCode;
     std::ifstream vShaderFile, fShaderFile;
 
@@ -129,7 +129,7 @@ std::optional<std::weak_ptr<Shader>> CreateShader(std::string_view name, const c
         fragmentCode = fShaderStream.str();
     } catch (std::ifstream::failure ex) {
         DOA_LOG_ERROR("Shader %s coudln't be created. One or both of the source files couldn't be read!", name);
-        return {};
+        return std::weak_ptr<Shader>();
     }
 
     const char* vShaderCode = vertexCode.c_str();
@@ -150,7 +150,7 @@ std::optional<std::weak_ptr<Shader>> CreateShader(std::string_view name, const c
     if (!success) {
         glGetShaderInfoLog(v, 512, NULL, infoLog);
         DOA_LOG_ERROR(infoLog);
-        return {};
+        return std::weak_ptr<Shader>();
     }
 
     glCompileShader(f);
@@ -158,7 +158,7 @@ std::optional<std::weak_ptr<Shader>> CreateShader(std::string_view name, const c
     if (!success) {
         glGetShaderInfoLog(v, 512, NULL, infoLog);
         DOA_LOG_ERROR(infoLog);
-        return {};
+        return std::weak_ptr<Shader>();
     }
 
     glAttachShader(ID, v);
@@ -169,7 +169,7 @@ std::optional<std::weak_ptr<Shader>> CreateShader(std::string_view name, const c
     if (!success) {
         glGetProgramInfoLog(ID, 512, NULL, infoLog);
         DOA_LOG_ERROR(infoLog);
-        return {};
+        return std::weak_ptr<Shader>();
     }
 
     glDetachShader(ID, v);
@@ -183,11 +183,11 @@ std::optional<std::weak_ptr<Shader>> CreateShader(std::string_view name, const c
     return rv;
 }
 
-std::optional<std::weak_ptr<Shader>> FindShader(std::string_view name) {
+std::weak_ptr<Shader> FindShader(std::string_view name) {
     auto it = SHADERS.find(name.data());
     if (it == SHADERS.end()) {
         DOA_LOG_WARNING("FindShader failed. There is no Shader named %s!", name);
-        return {};
+        return std::weak_ptr<Shader>();
     }
     return it->second;
 }

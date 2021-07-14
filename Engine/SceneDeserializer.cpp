@@ -45,6 +45,9 @@ std::shared_ptr<Scene> DeserializeScene(FNode* file) {
 		tinyxml2::XMLElement* clearColor = configNode->FirstChildElement("clearColor");
 		scene->ClearColor = { clearColor->FloatAttribute("r"), clearColor->FloatAttribute("g"), clearColor->FloatAttribute("b") };
 
+		tinyxml2::XMLElement* selectionOutlineColor = configNode->FirstChildElement("selectionOutlineColor");
+		scene->SelectionOutlineColor = { clearColor->FloatAttribute("r"), clearColor->FloatAttribute("g"), clearColor->FloatAttribute("b") };
+
 		tinyxml2::XMLElement* camera = configNode->FirstChildElement("camera");
 		std::string camType = camera->Attribute("type");
 		if (camType == "perspective") {
@@ -140,9 +143,9 @@ std::shared_ptr<Scene> DeserializeScene(FNode* file) {
 						}
 					} else if (typeName == "Shader") {
 						Shader** ptr = static_cast<Shader**>(address);
-						auto opt_model = FindShader(property->Attribute("value"));
-						if (opt_model.has_value()) {
-							*ptr = opt_model.value().lock().get();
+						auto shader_ptr = FindShader(property->Attribute("value"));
+						if (!shader_ptr.expired()) {
+							*ptr = shader_ptr.lock().get();
 						} else {
 							*ptr = nullptr;
 						}

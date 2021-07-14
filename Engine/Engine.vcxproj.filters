@@ -125,6 +125,9 @@
     <ClCompile Include="SceneDeserializer.cpp">
       <Filter>Project\Scene\Serialize</Filter>
     </ClCompile>
+    <ClCompile Include="OutlineRenderer.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NeoDoa.hpp">
@@ -223,12 +226,33 @@
     <ClInclude Include="SceneDeserializer.hpp">
       <Filter>Project\Scene\Serialize</Filter>
     </ClInclude>
+    <ClInclude Include="OutlineRenderer.hpp">
+      <Filter>Renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="Shaders\simpleFragmentShader.frag">
+    <Text Include="Shaders\simpleFragmentShaderInstanced.frag">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Shaders\simpleVertexShaderInstanced.vert">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Shaders\mousePickVertexShader.vert">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Shaders\mousePickFragmentShader.frag">
       <Filter>Resource Files</Filter>
     </Text>
     <Text Include="Shaders\simpleVertexShader.vert">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Shaders\solidColorFragmentShader.frag">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Shaders\solidColorVertexShader.vert">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Shaders\simpleFragmentShader.frag">
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>
