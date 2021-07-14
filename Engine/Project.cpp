@@ -1,7 +1,5 @@
 #include "Project.hpp"
 
-#include <iostream>
-
 #include "tinyxml2.h"
 
 #include "SceneDeserializer.hpp"

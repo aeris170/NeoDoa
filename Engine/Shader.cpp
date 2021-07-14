@@ -12,7 +12,25 @@ static std::unordered_map<std::string, std::shared_ptr<Shader>> SHADERS;
 
 Shader::Shader(std::string_view name, ProgramID glProgramID) noexcept :
     _name(name),
-    _glProgramID(glProgramID) {}
+    _glProgramID(glProgramID) {
+    Uniformi("missing", 0);
+    Uniformi("texture1", 1);
+    Uniformi("texture2", 2);
+    Uniformi("texture3", 3);
+    Uniformi("texture4", 4);
+    Uniformi("texture5", 5);
+    Uniformi("texture6", 6);
+    Uniformi("texture7", 7);
+    Uniformi("texture8", 8);
+    Uniformi("texture9", 9);
+    Uniformi("texture10", 10);
+    Uniformi("texture11", 11);
+    Uniformi("texture12", 12);
+    Uniformi("texture13", 13);
+    Uniformi("texture14", 14);
+    Uniformi("texture15", 15);
+    Uniformi("texture16", 16);
+}
 
 Shader::~Shader() {
     glDeleteProgram(_glProgramID);
@@ -25,56 +43,56 @@ void Shader::Use() {
 bool Shader::Uniformi(std::string_view name, int value) {
     UniformLocation loc = UniformLoc(name);
     if (loc == -1) { return false; }
-    glUniform1i(loc, value);
+    glProgramUniform1i(_glProgramID, loc, value);
     return true;
 }
 
 bool Shader::Uniformiv(std::string_view name, int* values, int size) {
     UniformLocation loc = UniformLoc(name);
     if (loc == -1) { return false; }
-    glUniform1iv(loc, size, values);
+    glProgramUniform1iv(_glProgramID, loc, size, values);
     return true;
 }
 
 bool Shader::Uniform1f(std::string_view name, float value) {
     UniformLocation loc = UniformLoc(name);
     if (loc == -1) { return false; }
-    glUniform1f(loc, value);
+    glProgramUniform1f(_glProgramID, loc, value);
     return true;
 }
 
 bool Shader::Uniform2f(std::string_view name, float* values) {
     UniformLocation loc = UniformLoc(name);
     if (loc == -1) { return false; }
-    glUniform2fv(loc, 2, values);
+    glProgramUniform2fv(_glProgramID, loc, 2, values);
     return true;
 }
 
 bool Shader::Uniform3f(std::string_view name, float* values) {
     UniformLocation loc = UniformLoc(name);
     if (loc == -1) { return false; }
-    glUniform3fv(loc, 3, values);
+    glProgramUniform3fv(_glProgramID, loc, 3, values);
     return true;
 }
 
 bool Shader::Uniform4f(std::string_view name, float* values) {
     UniformLocation loc = UniformLoc(name);
     if (loc == -1) { return false; }
-    glUniform4fv(loc, 4, values);
+    glProgramUniform4fv(_glProgramID, loc, 4, values);
     return true;
 }
 
 bool Shader::UniformMat3(std::string_view name, float* values, bool transpose) {
     UniformLocation loc = UniformLoc(name);
     if (loc == -1) { return false; }
-    glUniformMatrix3fv(loc, 1, transpose, values);
+    glProgramUniformMatrix3fv(_glProgramID, loc, 1, transpose, values);
     return true;
 }
 
 bool Shader::UniformMat4(std::string_view name, float* values, bool transpose) {
     UniformLocation loc = UniformLoc(name);
     if (loc == -1) { return false; }
-    glUniformMatrix4fv(loc, 1, transpose, values);
+    glProgramUniformMatrix4fv(_glProgramID, loc, 1, transpose, values);
     return true;
 }
 

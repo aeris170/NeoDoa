@@ -19,7 +19,6 @@ typedef GLuint EBO;
 typedef GLuint FBO;
 typedef GLuint TEX;
 typedef GLuint RBO;
-typedef GLuint TextureID;
 typedef GLuint ProgramID;
 typedef GLint UniformLocation;
 

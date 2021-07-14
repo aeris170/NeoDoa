@@ -14,6 +14,7 @@
 #include "Transform.hpp"
 #include "FileNode.hpp"
 #include "PropertyData.hpp"
+#include "FileNode.hpp"
 
 static tinyxml2::XMLElement* findComponentByNameIn(tinyxml2::XMLElement* parent, std::string_view name) {
 	for (tinyxml2::XMLElement* comp = parent->FirstChildElement(); comp != nullptr; comp = comp->NextSiblingElement()) {

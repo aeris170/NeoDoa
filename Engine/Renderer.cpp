@@ -1,9 +1,7 @@
-#include <iostream>
+#include "Renderer.hpp"
 
 #include <GL/glew.h>
 #include <glm/gtc/type_ptr.hpp>
-
-#include "Renderer.hpp"
 
 #include "Model.hpp"
 #include "Shader.hpp"
@@ -16,6 +14,8 @@
 #include "Core.hpp"
 #include "ScriptComponent.hpp"
 #include "Transform.hpp"
+
+#include "Log.hpp"
 
 static constexpr int defaultSize = 10;
 static constexpr int defaultGrowthFactor = 2;
@@ -48,39 +48,40 @@ void Renderer::Register(std::weak_ptr<Shader> shader, std::weak_ptr<Model> model
 			if (prevModel.lock() == model.lock()) {
 				vec.reserve(prevSize);
 				_current[ptr].emplace_back(std::make_tuple(model, vec, prevSize, prevVbo));
-				prevVbo = 0;
+				prevVbo = 0; // previous will get wiped, null prevVbo so it stays alive! :)
 				return;
 			}
 		}
 	}
 
+	// if we are here, didn't return in previous if clause, therefore we need a new vbo for our mesh
 	auto v4s = sizeof(glm::vec4);
 	auto m4s = sizeof(glm::mat4);
 
 	VBO vbo;
-	glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, defaultSize * m4s, nullptr, GL_DYNAMIC_DRAW);
+	glCreateBuffers(1, &vbo);
+	glNamedBufferData(vbo, defaultSize * m4s, nullptr, GL_DYNAMIC_DRAW);
 
 	for (auto& mesh : model.lock()->_meshes) {
-		glBindVertexArray(mesh._vao);
-		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, m4s, 0);
-		glEnableVertexAttribArray(0);
-		glVertexAttribDivisor(0, 1);
+		glVertexArrayVertexBuffer(mesh._vao, 1, vbo, 0, m4s);
 
-		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, m4s, (void*)v4s);
-		glEnableVertexAttribArray(1);
-		glVertexAttribDivisor(1, 1);
+		glEnableVertexArrayAttrib(mesh._vao, 0);
+		glEnableVertexArrayAttrib(mesh._vao, 1);
+		glEnableVertexArrayAttrib(mesh._vao, 2);
+		glEnableVertexArrayAttrib(mesh._vao, 3);
 
-		glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, m4s, (void*)(v4s * 2));
-		glEnableVertexAttribArray(2);
-		glVertexAttribDivisor(2, 1);
+		glVertexArrayAttribBinding(mesh._vao, 0, 1);
+		glVertexArrayAttribBinding(mesh._vao, 1, 1);
+		glVertexArrayAttribBinding(mesh._vao, 2, 1);
+		glVertexArrayAttribBinding(mesh._vao, 3, 1);
 
-		glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, m4s, (void*)(v4s * 3));
-		glEnableVertexAttribArray(3);
-		glVertexAttribDivisor(3, 1);
+		glVertexArrayAttribFormat(mesh._vao, 0, 4, GL_FLOAT, GL_FALSE, v4s * 0);
+		glVertexArrayAttribFormat(mesh._vao, 1, 4, GL_FLOAT, GL_FALSE, v4s * 1);
+		glVertexArrayAttribFormat(mesh._vao, 2, 4, GL_FLOAT, GL_FALSE, v4s * 2);
+		glVertexArrayAttribFormat(mesh._vao, 3, 4, GL_FLOAT, GL_FALSE, v4s * 3);
+
+		glVertexArrayBindingDivisor(mesh._vao, 1, 1);
 	}
-	glBindVertexArray(0);
 
 	vec.reserve(defaultSize);
 	_current[ptr].emplace_back(std::make_tuple(model, vec, defaultSize, vbo));
@@ -121,70 +122,41 @@ void Renderer::Render(entt::registry& registry, Camera* cam) {
 
 			auto v4s = sizeof(glm::vec4);
 			auto m4s = sizeof(glm::mat4);
-			glBindBuffer(GL_ARRAY_BUFFER, vbo);
 			if (instances.size() > size) {
+				// need to realloc! find new size
 				while (size <= instances.size()) {
 					size *= defaultGrowthFactor;
 				}
-				glBufferData(GL_ARRAY_BUFFER, size * m4s, nullptr, GL_DYNAMIC_DRAW);
-
-				for (auto& mesh : modelPtr->_meshes) {
-					glBindVertexArray(mesh._vao);
-					glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, m4s, 0);
-					glEnableVertexAttribArray(0);
-					glVertexAttribDivisor(0, 1);
-
-					glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, m4s, (void*)v4s);
-					glEnableVertexAttribArray(1);
-					glVertexAttribDivisor(1, 1);
-
-					glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, m4s, (void*)(v4s * 2));
-					glEnableVertexAttribArray(2);
-					glVertexAttribDivisor(2, 1);
-
-					glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, m4s, (void*)(v4s * 3));
-					glEnableVertexAttribArray(3);
-					glVertexAttribDivisor(3, 1);
-				}
-			} else {
-				std::vector<glm::mat4> transforms;
-				transforms.reserve(size);
-				for (auto entity : instances) {
-					transforms.emplace_back(CreateModelMatrixFromTransform(registry.get<ScriptComponent>(entity)["Transform"]));
-				}
-				glBufferSubData(GL_ARRAY_BUFFER, 0, transforms.size() * m4s, transforms.data());
+				// realloc!
+				glNamedBufferData(vbo, size * m4s, nullptr, GL_DYNAMIC_DRAW);
 			}
 
+			std::vector<glm::mat4> transforms;
+			transforms.reserve(size);
+			for (auto entity : instances) {
+				transforms.emplace_back(CreateModelMatrixFromTransform(registry.get<ScriptComponent>(entity)["Transform"]));
+			}
+			glNamedBufferSubData(vbo, 0, transforms.size() * m4s, transforms.data());
+
 			for (auto& mesh : modelPtr->_meshes) {
-				glBindVertexArray(mesh._vao);
-				shader->Uniformi("missing", 0);
-				shader->Uniformi("texture1", 1);
-				shader->Uniformi("texture2", 2);
-				shader->Uniformi("texture3", 3);
-				shader->Uniformi("texture4", 4);
-				shader->Uniformi("texture5", 5);
-				shader->Uniformi("texture6", 6);
-				shader->Uniformi("texture7", 7);
-				shader->Uniformi("texture8", 8);
-				shader->Uniformi("texture9", 9);
-				shader->Uniformi("texture10", 10);
-				shader->Uniformi("texture11", 11);
-				shader->Uniformi("texture12", 12);
-				shader->Uniformi("texture13", 13);
-				shader->Uniformi("texture14", 14);
-				shader->Uniformi("texture15", 15);
-				shader->Uniformi("texture16", 16);
-				FindTexture("!!missing!!").value().lock()->Bind();
+				FindTexture("!!missing!!").value().lock()->Bind(); // override possible overrides to missing texture.
 				int i = 1;
 				for (auto& tex : mesh._textures) {
-					if (i == 17) break; //too many textures...
+					if (i == 17) {
+						DOA_LOG_WARNING("Model %s has too many textures! Rendering may look incorrect.", modelPtr->_name);
+						break; //too many textures...
+					}
 					tex.lock()->Bind(i++);
 				}
+
+				glBindVertexArray(mesh._vao);
 				if (mesh._ebo > 0) {
 					glDrawElementsInstanced(GL_TRIANGLES, mesh._indices.size(), GL_UNSIGNED_INT, 0, instances.size());
 				} else {
 					glDrawArraysInstanced(GL_TRIANGLES, 0, mesh._vertices.size(), instances.size());
 				}
+				glBindVertexArray(0);
+
 				vertices += mesh._vertices.size();
 				indices += mesh._indices.size();
 				drawCalls++;

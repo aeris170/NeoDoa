@@ -8,14 +8,6 @@
 #include <fstream>
 #include <algorithm>
 
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/quaternion.hpp>
-#include <glm/gtx/rotate_vector.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/matrix_decompose.hpp>
-
-#include <EZEasing.hpp>
-
 #include "ComponentViews.hpp"
 
 #include <IconsFontAwesome5.h>
@@ -23,15 +15,41 @@
 
 #include <imgui_internal.h>
 
-#include "Tag.hpp"
-#include "Transform.hpp"
-
-#include "SceneSerializer.hpp"
-#include "SceneDeserializer.hpp"
-
+// New/Open/Save
+static void NewProject(Editor* editor);
+static void OpenProject(std::unique_ptr<Core>& core, Editor* editor);
 static void NewScene(FNode* parent, std::string_view name);
 static void OpenScene(Editor* editor, FNode* sceneFile);
+static void SaveScene(Editor* editor, std::weak_ptr<Scene> scene);
 
+// Scene Hierarchy
+static EntityID DrawSceneHierarchy(float delta, std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID& selectedEntity, EntityID& highlightedEntity);
+static void DrawGameObjectNode(float delta, std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID entity, EntityID* selectedEntity, EntityID& highlightedEntity);
+
+// Viewport
+static ImVec2 DrawViewport(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID selectedEntity, float deltaTime);
+static void DrawGizmos(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID selectedEntity, ImVec2 viewportPosition, ImVec2 viewportSize, ImGuizmo::OPERATION gizmoType, ImGuizmo::MODE gizmoMode);
+static void DrawCubeControl(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, ImVec2 viewportPosition, ImVec2 viewportSize, float& yaw, float& pitch);
+
+// Scene Settings
+static void DrawSceneSettings(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, ImVec2 viewportSize);
+
+// Observer Panel
+static void DrawObserverPanel(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID selectedEntity, EntityID& highlightedEntity);
+static void DrawObjectModules(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID selectedEntity, EntityID& highlightedEntity);
+
+// Console
+static void DrawConsole();
+
+// Asset Manager
+static void DrawAssetManager(Editor* editor, std::unique_ptr<Core>& core, EntityID& selectedEntity);
+static void DrawDirectoryRecursive(Editor* editor, FNode* root, EntityID& selectedEntity);
+
+// Licence Notice
+static void LicenceNotice(const char* name, const char* licence);
+
+
+// Impls
 static void DrawConsole() {
 	ImGui::Begin("Console", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 	ImGui::SetWindowFontScale(0.9);
@@ -148,37 +166,62 @@ static void DrawConsole() {
 
 			const char* icon;
 			ImVec4 color;
+			const char* tooltipMessage;
 
 			float oldX = ImGui::GetCursorPosX();
 			switch (message._severity) {
 			case LogSeverity::TRACE:
 				icon = ICON_FA_INFO;
 				color = { 0.7, 0.7, 0.7, 1 };
+				tooltipMessage = "General purpose hints/clues";
 				ImGui::SetCursorPosX(oldX + 14);
 				break;
 			case LogSeverity::INFO:
 				icon = ICON_FA_INFO;
 				color = { 0.7, 1, 0.7, 1 };
+				tooltipMessage = "General notices";
 				ImGui::SetCursorPosX(oldX + 14);
 				break;
 			case LogSeverity::WARNING:
 				icon = ICON_FA_EXCLAMATION_CIRCLE;
 				color = { 1, 0.5, 0.1, 1 };
+				tooltipMessage = "Explanations to potentially unwanted situations";
 				ImGui::SetCursorPosX(oldX + 9);
 				break;
 			case LogSeverity::ERRO:
 				icon = ICON_FA_EXCLAMATION_TRIANGLE;
 				color = { 1, 0.6, 0.6, 1 };
+				tooltipMessage = "Unexpected behavior";
 				ImGui::SetCursorPosX(oldX + 8);
 				break;
 			case LogSeverity::FATAL:
 				icon = ICON_FA_EXCLAMATION_TRIANGLE;
 				color = { 1, 0.4, 0.4, 1 };
+				tooltipMessage = "Expected(!), but potentially very fragile situations. These will crash your game if you ship it with these :)";
 				ImGui::SetCursorPosX(oldX + 8);
+				break;
+			case LogSeverity::OPENGL:
+				icon = ICON_FA_SERVER;
+				color = { 0.32, 0.51, 0.62, 1 };
+				tooltipMessage = "OpenGL Server message";
+				ImGui::SetCursorPosX(oldX + 9);
+				break;
+			case LogSeverity::VULKAN:
+				icon = ICON_FA_SERVER;
+				color = { 0.62, 0.11, 0.13, 1 };
+				tooltipMessage = "Vulkan Server message";
+				ImGui::SetCursorPosX(oldX + 9);
+				break;
+			case LogSeverity::DIRECTX:
+				icon = ICON_FA_SERVER;
+				color = { 0.48, 0.71, 0, 1 };
+				tooltipMessage = "Direct-X Server message";
+				ImGui::SetCursorPosX(oldX + 9);
 				break;
 			default:
 				icon = "??";
 				color = { 1, 0, 1, 1 };
+				tooltipMessage = "this shouldn't be here";
 				break;
 			}
 
@@ -186,6 +229,11 @@ static void DrawConsole() {
 
 			ImGui::PushFont(font);
 			ImGui::Text(icon);
+			if (ImGui::IsItemHovered()) {
+				ImGui::BeginTooltip();
+				ImGui::Text(tooltipMessage);
+				ImGui::EndTooltip();
+			}
 			ImGui::SetCursorPosX(oldX);
 			ImGui::PopFont();
 
@@ -1614,6 +1662,34 @@ void Editor::operator() (float delta) {
 
 	3. This notice may not be removed or altered from any source
 	distribution.)");
+
+			LicenceNotice("EZEasing", R"(Zamazingo Licence[2021 - 2021 Doga Oruc]
+
+	From now on, the term "library owner" refers to "Doga Oruc[aeris170]"
+
+	Redistribution and use in source and binary forms,
+	with or without modification, are permitted provided
+	that the following conditions are met :
+
+		1.  Redistributions of source code must retain this
+			copyright notice in whole.Without any modification(s).
+
+		2.	Redistributions in binary form must reproduce this
+			copyright notice in whole.Without any modification(s).
+
+		3.	Redistributions	must acknowledge the fact that this library
+			is created and maintained by the library owner.
+
+		4.  Redistributions must give credit if this library is used in
+			production of a software.
+
+		5.	In no event shall the library owner be liable for any direct,
+			indirect, incidental, special, exemplary, or consequential damages
+			(including, but not limited to, procurement of substitute goods or
+			services; loss of use, data, or profits; or business interruption)
+
+	In the event that YOU, the library user, accept these terms, you are free
+	to use this software free of charge, with or without modifications.Have fun : )");
 
 			ImGui::EndPopup();
 		}

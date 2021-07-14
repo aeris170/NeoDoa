@@ -6,43 +6,41 @@ Mesh::Mesh(std::vector<Vertex>&& vertices, std::vector<GLuint>&& indices, std::v
 	_vertices(std::move(vertices)),
 	_indices(std::move(indices)),
 	_textures(std::move(textures)) {
-	glGenVertexArrays(1, &_vao);
-	glBindVertexArray(_vao);
-
-	glGenBuffers(1, &_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+	glCreateVertexArrays(1, &_vao);
 
 	auto vertexCount = _vertices.size();
 	auto vertexSize = sizeof(Vertex);
 
-	auto totalSize = vertexCount * vertexSize;
+	auto totalSize = vertexCount * vertexSize * 10;
 
-	glBufferData(GL_ARRAY_BUFFER, totalSize, _vertices.data(), GL_STATIC_DRAW);
+	glCreateBuffers(1, &_vbo);
+	glNamedBufferData(_vbo, totalSize, _vertices.data(), GL_STATIC_DRAW);
 
-	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, vertexSize, 0);
-	glEnableVertexAttribArray(4);
+	glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, vertexSize);
 
-	glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, vertexSize, (GLvoid*)offsetof(Vertex, normal));
-	glEnableVertexAttribArray(5);
+	glEnableVertexArrayAttrib(_vao, 4);
+	glEnableVertexArrayAttrib(_vao, 5);
+	glEnableVertexArrayAttrib(_vao, 6);
+	glEnableVertexArrayAttrib(_vao, 7);
+	glEnableVertexArrayAttrib(_vao, 8);
 
-	glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, vertexSize, (GLvoid*)offsetof(Vertex, color));
-	glEnableVertexAttribArray(6);
+	glVertexArrayAttribBinding(_vao, 4, 0);
+	glVertexArrayAttribBinding(_vao, 5, 0);
+	glVertexArrayAttribBinding(_vao, 6, 0);
+	glVertexArrayAttribBinding(_vao, 7, 0);
+	glVertexArrayAttribBinding(_vao, 8, 0);
 
-	glVertexAttribPointer(7, 2, GL_FLOAT, GL_FALSE, vertexSize, (GLvoid*)offsetof(Vertex, uv));
-	glEnableVertexAttribArray(7);
-
-	glVertexAttribIPointer(8, 1, GL_SHORT, vertexSize, (GLvoid*)offsetof(Vertex, texIndex));
-	glEnableVertexAttribArray(8);
+	glVertexArrayAttribFormat(_vao, 4, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, position));
+	glVertexArrayAttribFormat(_vao, 5, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, normal));
+	glVertexArrayAttribFormat(_vao, 6, 4, GL_FLOAT, GL_FALSE, offsetof(Vertex, color));
+	glVertexArrayAttribFormat(_vao, 7, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, uv));
+	glVertexArrayAttribIFormat(_vao, 8, 1, GL_SHORT, offsetof(Vertex, texIndex));
 
 	if (_indices.size() > 0) {
-		glGenBuffers(1, &_ebo);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indices.size() * sizeof(GLuint), _indices.data(), GL_STATIC_DRAW);
+		glCreateBuffers(1, &_ebo);
+		glNamedBufferData(_ebo, _indices.size() * sizeof(_indices[0]), _indices.data(), GL_STATIC_DRAW);
+		glVertexArrayElementBuffer(_vao, _ebo);
 	}
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 Mesh::~Mesh() {

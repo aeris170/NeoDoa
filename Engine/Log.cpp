@@ -36,10 +36,14 @@ void Log::SaveMessage(LogSource src, LogSeverity sev, const char* fmt, ...) {
 #define RESET	"\033[0m"				// Ordinary console...
 #define DATE	"\033[96m"				// Date/Time
 #define WHITE	"\033[97m"				// TRACE
-#define GREEN	"\033[92m"				// INFO
+#define GREEN	"\033[92m"				// INFO, OPENGL
 #define ORANGE	"\033[33m"				// WARNING
 #define RED		"\033[31m"				// ERROR
 #define REDF	"\033[30m\u001b[41m"	// FATAL
+
+#define GL		"\033[36m"	// OpenGL
+#define VK		"\033[91m"	// Vulkan
+#define DX		"\033[92m"	// Direct-X
 
 void Log::Print(LogSource src, LogSeverity sev, const char* fmt, ...) {
 	const char* type;
@@ -51,13 +55,22 @@ void Log::Print(LogSource src, LogSeverity sev, const char* fmt, ...) {
 		type = GREEN "[INFO]:" RESET "\t ";
 		break;
 	case LogSeverity::WARNING:
-		type = ORANGE "[WARNING]:" RESET " ";
+		type = ORANGE "[WARNING]:" RESET "\t ";
 		break;
 	case LogSeverity::ERRO:
 		type = RED "[ERROR]:" RESET "\t ";
 		break;
 	case LogSeverity::FATAL:
 		type = REDF "[FATAL]:" RESET "\t ";
+		break;
+	case LogSeverity::OPENGL:
+		type = GL "[OPENGL]:" RESET "\t ";
+		break;
+	case LogSeverity::VULKAN:
+		type = GL "[VULKAN]:" RESET "\t ";
+		break;
+	case LogSeverity::DIRECTX:
+		type = GL "[DIRECTX]:" RESET "\t ";
 		break;
 	default:
 		type = "??!";

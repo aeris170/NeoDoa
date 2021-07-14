@@ -3,15 +3,14 @@
 #include <memory>
 #include <vector>
 #include <unordered_map>
-#include <any>
 
 #include <entt.hpp>
 
 #include "Renderer.hpp"
 #include "OrthoCamera.hpp"
 #include "PerspectiveCamera.hpp"
+
 #include "TypedefsAndConstants.hpp"
-#include "FileNode.hpp"
 
 struct Angel;
 struct ScriptComponent;

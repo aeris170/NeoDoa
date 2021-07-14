@@ -7,30 +7,23 @@
 FrameBuffer::FrameBuffer(int width, int height) :
     _width(width),
     _height(height) {
-    glGenFramebuffers(1, &_fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+    glCreateFramebuffers(1, &_fbo);
 
-    glGenTextures(1, &_tex);
-    glActiveTexture(GL_TEXTURE17);
-    glBindTexture(GL_TEXTURE_2D, _tex);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _width, _height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glCreateTextures(GL_TEXTURE_2D, 1, &_tex);
+    glTextureParameteri(_tex, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(_tex, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTextureStorage2D(_tex, 1, GL_RGB8, _width, _height);
 
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _tex, 0);
+    glNamedFramebufferTexture(_fbo, GL_COLOR_ATTACHMENT0, _tex, 0);
 
-    glGenRenderbuffers(1, &_rbo);
-    glBindRenderbuffer(GL_RENDERBUFFER, _rbo);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, _width, _height);
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    glCreateRenderbuffers(1, &_rbo);
+    glNamedRenderbufferStorage(_rbo, GL_DEPTH24_STENCIL8, _width, _height);
 
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _rbo);
+    glNamedFramebufferRenderbuffer(_fbo, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _rbo);
 
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+    if (glCheckNamedFramebufferStatus(_fbo, GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         DOA_LOG_FATAL("Offscreen buffer couldn't initialize!");
     }
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 FrameBuffer::~FrameBuffer() {

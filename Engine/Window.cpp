@@ -1,7 +1,5 @@
 #include "Window.hpp"
 
-#include <windows.h>
-
 #include <GLFW/glfw3.h>
 #include <stb_image.h>
 
@@ -12,7 +10,6 @@ static void glfwWindowOnKeyStateChange(GLFWwindow* window, int key, int scancode
 static void glfwWindowOnMouseButtonStateChange(GLFWwindow* window, int button, int action, int mods);
 static void glfwWindowOnMouseMove(GLFWwindow* window, double xpos, double ypos);
 static void glfwWindowOnMouseScroll(GLFWwindow* window, double width, double height);
-static void glfwOnError(int error, const char* description);
 
 Window::Window(int width, int height, const char* title, bool isFullscreen, const char* windowIcon) noexcept :
     _width(width),
@@ -26,7 +23,7 @@ Window::Window(int width, int height, const char* title, bool isFullscreen, cons
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE); //TODO add support
 #endif
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_SAMPLES, 4);
     _glfwWindow = glfwCreateWindow(width, height, title, isFullscreen ? glfwGetPrimaryMonitor() : nullptr, nullptr);
@@ -76,7 +73,6 @@ Window::Window(int width, int height, const char* title, bool isFullscreen, cons
     glfwSetMouseButtonCallback(_glfwWindow, glfwWindowOnMouseButtonStateChange);
     glfwSetCursorPosCallback(_glfwWindow, glfwWindowOnMouseMove);
     glfwSetScrollCallback(_glfwWindow, glfwWindowOnMouseScroll);
-    glfwSetErrorCallback(glfwOnError);
 
     _imGuiContext = ImGuiInit(_glfwWindow);
 }
@@ -112,12 +108,4 @@ static void glfwWindowOnMouseMove(GLFWwindow* window, double xpos, double ypos) 
 static void glfwWindowOnMouseScroll(GLFWwindow* window, double xoffset, double yoffset) {
     ((Window*)glfwGetWindowUserPointer(window))->_mouse._scrollx = xoffset;
     ((Window*)glfwGetWindowUserPointer(window))->_mouse._scrolly = yoffset;
-}
-
-static void glfwOnError(int error, const char* description) {
-    wchar_t* wString = new wchar_t[4096];
-    MultiByteToWideChar(CP_ACP, 0, description, -1, wString, 4096);
-    wchar_t* wString2 = new wchar_t[4096];
-    MultiByteToWideChar(CP_ACP, 0, "GLFW error", -1, wString2, 4096);
-    MessageBox(NULL, wString, wString2, MB_OK);
 }

@@ -11,19 +11,17 @@ static std::unordered_map<std::string, std::shared_ptr<Texture>> TEXTURES;
 Texture::Texture(std::string_view name, int width, int height, unsigned char* pixelData, bool hasTransparency) noexcept :
 	_name(name),
 	_pixelData(pixelData) {
-	glGenTextures(1, &_glTextureID);
-	Bind(18);
+	glCreateTextures(GL_TEXTURE_2D, 1, &_glTextureID);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTextureParameteri(_glTextureID, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTextureParameteri(_glTextureID, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTextureParameteri(_glTextureID, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTextureParameteri(_glTextureID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, hasTransparency ? GL_RGBA : GL_RGB, width, height, 0, hasTransparency ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, pixelData);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -0.5f);
-
-	glBindTexture(GL_TEXTURE_2D, 0);
+	glTextureStorage2D(_glTextureID, 1, hasTransparency ? GL_RGBA8 : GL_RGB8, width, height);
+	glTextureSubImage2D(_glTextureID, 0, 0, 0, width, height, hasTransparency ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, pixelData);
+	glGenerateTextureMipmap(_glTextureID);
+	glTextureParameterf(_glTextureID, GL_TEXTURE_LOD_BIAS, -0.5f);
 }
 
 Texture::~Texture() noexcept {
@@ -45,8 +43,7 @@ Texture& Texture::operator=(Texture&& other) noexcept {
 }
 
 void Texture::Bind(int slot) {
-	glActiveTexture(GL_TEXTURE0 + slot);
-	glBindTexture(GL_TEXTURE_2D, _glTextureID);
+	glBindTextureUnit(slot, _glTextureID);
 }
 
 //-----------------------------------------------------------------

@@ -6,7 +6,7 @@
 
 struct Texture : std::enable_shared_from_this<Texture> {
 	std::string _name;
-	TextureID _glTextureID{ 0 };
+	TEX _glTextureID{ 0 };
 	unsigned char* _pixelData;
 
 	void Bind(int slot = 0);
