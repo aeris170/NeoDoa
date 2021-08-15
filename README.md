@@ -40,7 +40,7 @@ NeoDoa is still under development and is not ready for producing games, but it w
 	* WIP: Code Editor
 	* WIP: Custom Shaders
 	* WIP: Mouse Picking to select Entity
-	* WIP: Outlining of selected Entity
+	* Outlining of selected Entity
 	* Editor Camera
 	* WIP: Camera Component
 	* WIP: Terrain Editor
