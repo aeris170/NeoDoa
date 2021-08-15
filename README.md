@@ -11,19 +11,19 @@ NeoDoa is a simple, open-source and easy-to-use game engine developed with C++ f
 NeoDoa is still under development and is not ready for producing games, but it will be 😎 Below are the finished and upcoming features.
 
 * **Graphics**
-    * OpenGL 4.5 Core Profile based renderer
+	* OpenGL 4.5 Core Profile based renderer
 	* Agressive Instancing and Batched Rendering!!
-    * WIP: Point and spot and custom lights
+	* WIP: Point and spot and custom lights
 	* WIP: High Quality Text Rendering using [Signed Distance Fields](https://steamcdn-a.akamaihd.net/apps/valve/2007/SIGGRAPH2007_AlphaTestedMagnification.pdf)
 	* WIP: Shadows
 	* WIP: Waters
 	* WIP: Skybox
 	* WIP: Deferred Shading
-	* WIP: Skeletal Animation
+	* WIP: Skeletal Animations
 * **Collision & Physics**
-    * WIP: With PhysX
+	* WIP: With PhysX
 * **Audio**
-    * WIP: With OpenAL
+ 	* WIP: With OpenAL
 * **Asset Loading**
 	* 3D models loading via [Assimp](https://www.assimp.org/)
 	* Texture loading via [stb_image](https://github.com/nothings/stb)
@@ -31,7 +31,7 @@ NeoDoa is still under development and is not ready for producing games, but it w
 	* Scripting via [AngelScript](https://www.angelcode.com/angelscript/)
 	* Create a script, fill in the "Execute" function, attach it to an Entity!
 * **Input**
-    * Mouse, Keyboard. 
+	* Mouse, Keyboard. 
 	* WIP: Controller
 	* WIP: Joystick
 * **Editor**
