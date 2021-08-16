@@ -120,8 +120,11 @@ void Scene::Render(const std::unique_ptr<Angel>& angel) {
 	_registry.view<ScriptComponent>().each([&](EntityID entity, ScriptComponent& script) {
 		Transform& t = script["Transform"].As<Transform>();
 		if (t.Selected()) {
-			ModelRenderer& mr = script["ModelRenderer"].As<ModelRenderer>();
-			selecteds.push_back({ t, mr });
+			auto opt = script.TryGet("ModelRenderer");
+			if(opt.has_value()) {
+				ModelRenderer& mr = opt.value().get().As<ModelRenderer>();
+				selecteds.push_back({ t, mr });
+			}
 		}
 	});
 
