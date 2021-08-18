@@ -55,7 +55,7 @@ void Log::Print(LogSource src, LogSeverity sev, const char* fmt, ...) {
 		type = GREEN "[INFO]:" RESET "\t ";
 		break;
 	case LogSeverity::WARNING:
-		type = ORANGE "[WARNING]:" RESET "\t ";
+		type = ORANGE "[WARNING]:" RESET " ";
 		break;
 	case LogSeverity::ERRO:
 		type = RED "[ERROR]:" RESET "\t ";
@@ -70,7 +70,7 @@ void Log::Print(LogSource src, LogSeverity sev, const char* fmt, ...) {
 		type = GL "[VULKAN]:" RESET "\t ";
 		break;
 	case LogSeverity::DIRECTX:
-		type = GL "[DIRECTX]:" RESET "\t ";
+		type = GL "[DIRECTX]:" RESET " ";
 		break;
 	default:
 		type = "??!";
