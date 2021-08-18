@@ -15,6 +15,9 @@
 
 #include <imgui_internal.h>
 
+static EntityID selectedEntity{ NULL_ENTT }; // obvious
+static EntityID highlightedEntity{ NULL_ENTT }; // set when user clicks a reference field of a script
+
 // New/Open/Save
 static void NewProject(Editor* editor);
 static void OpenProject(std::unique_ptr<Core>& core, Editor* editor);
@@ -23,27 +26,28 @@ static void OpenScene(Editor* editor, FNode* sceneFile);
 static void SaveScene(Editor* editor, std::weak_ptr<Scene> scene);
 
 // Scene Hierarchy
-static EntityID DrawSceneHierarchy(float delta, std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID& selectedEntity, EntityID& highlightedEntity);
-static void DrawGameObjectNode(float delta, std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID entity, EntityID* selectedEntity, EntityID& highlightedEntity);
+static EntityID DrawSceneHierarchy(float delta, std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene);
+static void DrawGameObjectNode(float delta, std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID entity);
 
 // Viewport
-static ImVec2 DrawViewport(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID selectedEntity, float deltaTime);
-static void DrawGizmos(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID selectedEntity, ImVec2 viewportPosition, ImVec2 viewportSize, ImGuizmo::OPERATION gizmoType, ImGuizmo::MODE gizmoMode);
+static ImVec2 DrawViewport(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, float deltaTime);
+static void DrawGizmos(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, ImVec2 viewportPosition, ImVec2 viewportSize, ImGuizmo::OPERATION gizmoType, ImGuizmo::MODE gizmoMode);
 static void DrawCubeControl(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, ImVec2 viewportPosition, ImVec2 viewportSize, float& yaw, float& pitch);
 
 // Scene Settings
 static void DrawSceneSettings(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, ImVec2 viewportSize);
 
 // Observer Panel
-static void DrawObserverPanel(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID selectedEntity, EntityID& highlightedEntity);
-static void DrawObjectModules(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID selectedEntity, EntityID& highlightedEntity);
+static void DrawObserverPanel(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene);
+static void DrawObjectModules(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene);
+static void DrawModulePropertyGUI(Module& module, PropertyData& property, int propertyIndex);
 
 // Console
 static void DrawConsole();
 
 // Asset Manager
-static void DrawAssetManager(Editor* editor, std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID& selectedEntity);
-static void DrawDirectoryRecursive(Editor* editor, std::weak_ptr<Scene> scene, FNode* root, EntityID& selectedEntity);
+static void DrawAssetManager(Editor* editor, std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene);
+static void DrawDirectoryRecursive(Editor* editor, std::weak_ptr<Scene> scene, FNode* root);
 
 // Licence Notice
 static void LicenceNotice(const char* name, const char* licence);
@@ -261,7 +265,7 @@ static void DrawConsole() {
 	ImGui::End();
 }
 
-static void DrawDirectoryRecursive(Editor* editor, std::weak_ptr<Scene> scene, FNode* root, EntityID& selectedEntity) {
+static void DrawDirectoryRecursive(Editor* editor, std::weak_ptr<Scene> scene, FNode* root) {
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 
 	if (!root->_isDir) {
@@ -295,7 +299,7 @@ static void DrawDirectoryRecursive(Editor* editor, std::weak_ptr<Scene> scene, F
 	if (ImGui::TreeNodeEx(title.c_str(), flags)) {
 		if (root->_isDir) {
 			for (auto& child : root->_children) {
-				DrawDirectoryRecursive(editor, scene, &child, selectedEntity);
+				DrawDirectoryRecursive(editor, scene, &child);
 			}
 		} else if (root->_isFile) {
 			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
@@ -338,7 +342,7 @@ static void DrawDirectoryRecursive(Editor* editor, std::weak_ptr<Scene> scene, F
 	}
 }
 
-static void DrawAssetManager(Editor* editor, std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID& selectedEntity) {
+static void DrawAssetManager(Editor* editor, std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene) {
 	static FNode* assetRoot = nullptr;
 
 	auto& proj = editor->_openProject;
@@ -357,7 +361,7 @@ static void DrawAssetManager(Editor* editor, std::unique_ptr<Core>& core, std::w
 		assetRoot = &proj->_assets._root;
 	}
 	if (assetRoot) {
-		DrawDirectoryRecursive(editor, scene, assetRoot, selectedEntity);
+		DrawDirectoryRecursive(editor, scene, assetRoot);
 	}
 	ImGui::End();
 }
@@ -412,7 +416,7 @@ static void DrawSceneSettings(std::unique_ptr<Core>& core, std::weak_ptr<Scene> 
 	ImGui::End();
 }
 
-static void DrawGizmos(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID selectedEntity, ImVec2 viewportPosition, ImVec2 viewportSize, ImGuizmo::OPERATION gizmoType, ImGuizmo::MODE gizmoMode) {
+static void DrawGizmos(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, ImVec2 viewportPosition, ImVec2 viewportSize, ImGuizmo::OPERATION gizmoType, ImGuizmo::MODE gizmoMode) {
 	auto ptr = scene.lock();
 	ImGuizmo::SetDrawlist();
 	if (ptr->_activeCamera == &ptr->_pc) {
@@ -504,7 +508,7 @@ static void DrawCubeControl(std::unique_ptr<Core>& core, std::weak_ptr<Scene> sc
 	pitch = glm::degrees(asin(ptr->_activeCamera->forward.y));
 }
 
-static ImVec2 DrawViewport(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID selectedEntity, float deltaTime) {
+static ImVec2 DrawViewport(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, float deltaTime) {
 	static bool drawGizmos = true;
 	static auto gizmoMode = ImGuizmo::MODE::LOCAL;
 	static auto gizmoType = ImGuizmo::OPERATION::TRANSLATE;
@@ -603,7 +607,7 @@ static ImVec2 DrawViewport(std::unique_ptr<Core>& core, std::weak_ptr<Scene> sce
 		// Below is scene cam controls and gizmos
 		static float yaw = -90, pitch = 0;
 		if (drawGizmos) {
-			DrawGizmos(core, scene, selectedEntity, viewportPosition, viewportSize, gizmoType, gizmoMode);
+			DrawGizmos(core, scene, viewportPosition, viewportSize, gizmoType, gizmoMode);
 		}
 		DrawCubeControl(core, scene, viewportPosition, viewportSize, yaw, pitch);
 
@@ -679,7 +683,7 @@ static ImVec2 DrawViewport(std::unique_ptr<Core>& core, std::weak_ptr<Scene> sce
 	return viewportSize;
 }
 
-static void DrawGameObjectNode(float delta, std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID entity, EntityID* selectedEntity, EntityID& highlightedEntity) {
+static void DrawGameObjectNode(float delta, std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID entity) {
 	auto ptr = scene.lock();
 	ScriptComponent& scr = ptr->Modules(entity);
 	std::string label = scr["Tag"].As<Tag>().Label();
@@ -701,7 +705,7 @@ static void DrawGameObjectNode(float delta, std::unique_ptr<Core>& core, std::we
 	} else {
 		flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 	}
-	if (entity == *selectedEntity) {
+	if (entity == selectedEntity) {
 		flags |= ImGuiTreeNodeFlags_Selected;
 	}
 	if (entity == highlightedEntity) {
@@ -764,11 +768,11 @@ static void DrawGameObjectNode(float delta, std::unique_ptr<Core>& core, std::we
 		}
 	}
 	if (ImGui::IsItemHovered(ImGuiHoveredFlags_None) && ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
-		if (*selectedEntity != NULL_ENTT) {
-			ptr->Modules(*selectedEntity)["Transform"].As<Transform>().Selected() = false;
+		if (selectedEntity != NULL_ENTT) {
+			ptr->Modules(selectedEntity)["Transform"].As<Transform>().Selected() = false;
 		}
-		*selectedEntity = entity;
-		ptr->Modules(*selectedEntity)["Transform"].As<Transform>().Selected() = true;
+		selectedEntity = entity;
+		ptr->Modules(selectedEntity)["Transform"].As<Transform>().Selected() = true;
 	}
 	if (ImGui::BeginPopupContextItem(0, ImGuiPopupFlags_MouseButtonRight)) {
 		if (ImGui::BeginMenu("Attach Module")) {
@@ -786,7 +790,7 @@ static void DrawGameObjectNode(float delta, std::unique_ptr<Core>& core, std::we
 		for (int i = 0; i < children.GetSize(); i++) {
 			auto** obj = (asIScriptObject**)children.At(i);
 			Module tmp("tmp", *obj);
-			DrawGameObjectNode(delta, core, scene, tmp.GetID(), selectedEntity, highlightedEntity);
+			DrawGameObjectNode(delta, core, scene, tmp.GetID());
 		}
 		if (!isLeaf) {
 			ImGui::TreePop();
@@ -794,7 +798,7 @@ static void DrawGameObjectNode(float delta, std::unique_ptr<Core>& core, std::we
 	}
 }
 
-static EntityID DrawSceneHierarchy(float delta, std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID& selectedEntity, EntityID& highlightedEntity) {
+static EntityID DrawSceneHierarchy(float delta, std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene) {
 	auto ready = !scene.expired();
 	auto ptr = scene.lock();
 	ImGui::Begin("Scene");
@@ -821,9 +825,9 @@ static EntityID DrawSceneHierarchy(float delta, std::unique_ptr<Core>& core, std
 					ImGui::EndDragDropTarget();
 				}
 			}
-			ptr->_registry.view<ScriptComponent>().each([&delta, &core, &scene, &selectedEntity, &highlightedEntity](EntityID e, ScriptComponent& scr) {
+			ptr->_registry.view<ScriptComponent>().each([&delta, &core, &scene](EntityID e, ScriptComponent& scr) {
 				if (scr["Transform"].As<Transform>().Parent() == nullptr) {
-					DrawGameObjectNode(delta, core, scene, e, &selectedEntity, highlightedEntity);
+					DrawGameObjectNode(delta, core, scene, e);
 				}
 			});
 		}
@@ -864,7 +868,135 @@ static EntityID DrawSceneHierarchy(float delta, std::unique_ptr<Core>& core, std
 	return selectedEntity;
 }
 
-static void DrawObjectModules(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID selectedEntity, EntityID& highlightedEntity) {
+static void DrawModulePropertyGUI(Module& module, PropertyData& property, int propertyIndex) {
+	static auto& core = GetCore();
+	auto ptr = FindActiveScene().lock();
+	auto it = core->_angel->_enums.find(property.typeName);
+	if (it != core->_angel->_enums.end()) {
+		EnumWidget(property.prettyName.c_str(), module.GetAt<int>(propertyIndex), it->second);
+	} else if (property.typeName == "int") {
+		IntWidget(property.prettyName.c_str(), module.GetAt<int>(propertyIndex));
+	} else if (property.typeName == "float") {
+		FloatWidget(property.prettyName.c_str(), module.GetAt<float>(propertyIndex));
+	} else if (property.typeName == "double") {
+		DoubleWidget(property.prettyName.c_str(), module.GetAt<double>(propertyIndex));
+	} else if (property.typeName == "bool") {
+		BoolWidget(property.prettyName.c_str(), module.GetAt<bool>(propertyIndex));
+	} else if (property.typeName == "string") {
+		StringWidget(property.prettyName.c_str(), module.GetAt<std::string>(propertyIndex));
+	} else if (property.typeName == "vec2") {
+		FancyVectorWidget(property.prettyName.c_str(), module.GetAt<glm::vec2>(propertyIndex));
+	} else if (property.typeName == "vec3") {
+		FancyVectorWidget(property.prettyName.c_str(), module.GetAt<glm::vec3>(propertyIndex), property.name == "Scale" ? 1 : 0);
+	} else if (property.typeName == "vec4") {
+		FancyVectorWidget(property.prettyName.c_str(), module.GetAt<glm::vec4>(propertyIndex));
+	} else if (property.typeName == "quat") {
+		glm::quat& quat = module.GetAt<glm::quat>(propertyIndex);
+		glm::vec3 eulersDeg(glm::degrees(glm::eulerAngles(quat)));
+		glm::vec3 old(eulersDeg);
+		FancyVectorWidget(property.prettyName.c_str(), eulersDeg, 0);
+		quat = quat * glm::quat(glm::radians(eulersDeg - old));
+	} else if (property.typeName == "Model") {
+		std::string title(ICON_FA_INDUSTRY " ");
+		title.reserve(64);
+		title.append(property.prettyName);
+		UneditableStringWidget(title.c_str(), module.GetAt<Model*>(propertyIndex)->_name);
+	} else if (property.typeName == "Shader") {
+		std::string title(ICON_FA_FILE_ALT " ");
+		title.reserve(64);
+		title.append(property.prettyName);
+		UneditableStringWidget(title.c_str(), module.GetAt<Shader*>(propertyIndex)->_name);
+	} else {
+		std::string text;
+		text.reserve(32);
+		if (!property.isReference) {
+			asIScriptObject*& o = module.GetAt<asIScriptObject*>(propertyIndex);
+			if (o == nullptr) {
+				text.append("nullptr (");
+				text.append(property.typeName);
+			}
+			else {
+				text.append(property.typeName);
+				text.append(" (");
+				Module m("tm", o);
+				auto& mModules = ptr->Modules(m.GetID()); //GetID returns garbage :(
+				text.append(mModules["Tag"].As<Tag>().Label());
+			}
+			text.append(")");
+			UneditableStringWidget(property.prettyName.c_str(), text);
+			if (ImGui::BeginPopupContextItem(0, ImGuiPopupFlags_MouseButtonRight)) {
+				if (ImGui::MenuItem("Reset")) {
+					o->Release();
+					o = nullptr;
+				}
+				if (ImGui::MenuItem("Highlight Source")) {
+					highlightedEntity = (Module{ "tm", o }).GetID(); // highlight
+				}
+				ImGui::EndPopup();
+			}
+			if (ImGui::BeginDragDropTarget()) {
+				auto* payload = ImGui::AcceptDragDropPayload("SELECTED_ENTT");
+				if (payload != nullptr) {
+					EntityID e = *(EntityID*)payload->Data;
+					auto& droppedModules = ptr->Modules(e);
+					for (auto& module : droppedModules._modules) {
+						if (module._name == property.typeName) {
+							o = module;
+							o->AddRef();
+						}
+					}
+				}
+				ImGui::EndDragDropTarget();
+			}
+			if (ImGui::IsItemClicked()) {
+				highlightedEntity = (Module{ "tm", o }).GetID(); // highlight
+			}
+		} else {
+			std::string name = property.prettyName;
+			name.append(" (Read-Only " ICON_FA_LOCK " )");
+			Module m("tmp", &module.GetAt<asIScriptObject>(propertyIndex));
+			EntityID id = m.GetID();
+			if (id == NULL_ENTT) {
+				text.append("unassigned (");
+				text.append(property.typeName);
+			}
+			else {
+				text.append(property.typeName);
+				text.append(" (");
+				text.append(ptr->Modules(id)["Tag"].As<Tag>().Label());
+			}
+			text.append(")");
+			UneditableStringWidget(name.c_str(), text);
+			if (ImGui::BeginPopupContextItem(0, ImGuiPopupFlags_MouseButtonRight)) {
+				if (ImGui::MenuItem("Reset")) {
+					m.SetID(NULL_ENTT);
+				}
+				if (ImGui::MenuItem("Highlight Source")) {
+					highlightedEntity = m.GetID(); // highlight
+				}
+				ImGui::EndPopup();
+			}
+			if (ImGui::BeginDragDropTarget()) {
+				auto* payload = ImGui::AcceptDragDropPayload("SELECTED_ENTT");
+				if (payload != nullptr) {
+					EntityID e = *(EntityID*)payload->Data;
+					auto& droppedModules = ptr->Modules(e);
+					for (auto& module : droppedModules._modules) {
+						if (module._name == property.typeName) {
+							m.SetID(module.GetID());
+						}
+					}
+				}
+				ImGui::EndDragDropTarget();
+			}
+			if (ImGui::IsItemClicked()) {
+				highlightedEntity = m.GetID(); // highlight
+			}
+		}
+	}
+}
+
+static void DrawObjectModules(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene) {
 	auto ptr = scene.lock();
 	ScriptComponent& scr = ptr->Modules(selectedEntity);
 	for (Module& module : scr._modules) {
@@ -887,132 +1019,15 @@ static void DrawObjectModules(std::unique_ptr<Core>& core, std::weak_ptr<Scene> 
 				}
 				ImGui::EndPopup();
 			}
+			module.BeforePropertiesGUI();
 			std::vector<PropertyData>& props = module.Properties();
-			for (int i = 1; i < props.size(); i++) { // starting from 1, the property at 0 is always the "entity" and it's never shown on the editor
-				PropertyData& prop = props[i];
-				if (prop.isPrivate || prop.isProtected) { continue; } // don't show private or protected variables in editor!
-				auto it = core->_angel->_enums.find(prop.typeName);
-				if (it != core->_angel->_enums.end()) {
-					EnumWidget(prop.prettyName.c_str(), module.GetAt<int>(i), it->second);
-				}else if (prop.typeName == "int") {
-					IntWidget(prop.prettyName.c_str(), module.GetAt<int>(i));
-				} else if (prop.typeName == "float") {
-					FloatWidget(prop.prettyName.c_str(), module.GetAt<float>(i));
-				} else if (prop.typeName == "double") {
-					DoubleWidget(prop.prettyName.c_str(), module.GetAt<double>(i));
-				} else if (prop.typeName == "bool") {
-					BoolWidget(prop.prettyName.c_str(), module.GetAt<bool>(i));
-				} else if (prop.typeName == "string") {
-					StringWidget(prop.prettyName.c_str(), module.GetAt<std::string>(i));
-				} else if (prop.typeName == "vec2") {
-					FancyVectorWidget(prop.prettyName.c_str(), module.GetAt<glm::vec2>(i));
-				} else if (prop.typeName == "vec3") {
-					FancyVectorWidget(prop.prettyName.c_str(), module.GetAt<glm::vec3>(i), prop.name == "Scale" ? 1 : 0);
-				} else if (prop.typeName == "vec4") {
-					FancyVectorWidget(prop.prettyName.c_str(), module.GetAt<glm::vec4>(i));
-				} else if (prop.typeName == "quat") {
-					glm::quat& quat = module.GetAt<glm::quat>(i);
-					glm::vec3 eulersDeg(glm::degrees(glm::eulerAngles(quat)));
-					glm::vec3 old(eulersDeg);
-					FancyVectorWidget(prop.prettyName.c_str(), eulersDeg, 0);
-					quat = quat * glm::quat(glm::radians(eulersDeg - old));
-				} else if (prop.typeName == "Model") {
-					std::string title(ICON_FA_INDUSTRY " ");
-					title.reserve(64);
-					title.append(prop.prettyName);
-					UneditableStringWidget(title.c_str(), module.GetAt<Model*>(i)->_name);
-				} else if (prop.typeName == "Shader") {
-					std::string title(ICON_FA_FILE_ALT " ");
-					title.reserve(64);
-					title.append(prop.prettyName);
-					UneditableStringWidget(title.c_str(), module.GetAt<Shader*>(i)->_name);
-				} else {
-					std::string text;
-					text.reserve(32);
-					if (!prop.isReference) {
-						asIScriptObject*& o = module.GetAt<asIScriptObject*>(i);
-						if (o == nullptr) {
-							text.append("nullptr (");
-							text.append(prop.typeName);
-						} else {
-							text.append(prop.typeName);
-							text.append(" (");
-							Module m("tm", o);
-							auto& mModules = ptr->Modules(m.GetID()); //GetID returns garbage :(
-							text.append(mModules["Tag"].As<Tag>().Label());
-						}
-						text.append(")");
-						UneditableStringWidget(prop.prettyName.c_str(), text);
-						if (ImGui::BeginPopupContextItem(0, ImGuiPopupFlags_MouseButtonRight)) {
-							if (ImGui::MenuItem("Reset")) {
-								o->Release();
-								o = nullptr;
-							}
-							if (ImGui::MenuItem("Highlight Source")) {
-								highlightedEntity = (Module{ "tm", o }).GetID(); // highlight
-							}
-							ImGui::EndPopup();
-						}
-						if (ImGui::BeginDragDropTarget()) {
-							auto* payload = ImGui::AcceptDragDropPayload("SELECTED_ENTT");
-							if (payload != nullptr) {
-								EntityID e = *(EntityID*)payload->Data;
-								auto& droppedModules = ptr->Modules(e);
-								for (auto& module : droppedModules._modules) {
-									if (module._name == prop.typeName) {
-										o = module;
-										o->AddRef();
-									}
-								}
-							}
-							ImGui::EndDragDropTarget();
-						}
-						if (ImGui::IsItemClicked()) {
-							highlightedEntity = (Module{ "tm", o }).GetID(); // highlight
-						}
-					} else {
-						std::string name = prop.prettyName;
-						name.append(" (Read-Only " ICON_FA_LOCK " )");
-						Module m("tmp", &module.GetAt<asIScriptObject>(i));
-						EntityID id = m.GetID();
-						if (id == NULL_ENTT) {
-							text.append("unassigned (");
-							text.append(prop.typeName);
-						} else {
-							text.append(prop.typeName);
-							text.append(" (");
-							text.append(ptr->Modules(id)["Tag"].As<Tag>().Label());
-						}
-						text.append(")");
-						UneditableStringWidget(name.c_str(), text);
-						if (ImGui::BeginPopupContextItem(0, ImGuiPopupFlags_MouseButtonRight)) {
-							if (ImGui::MenuItem("Reset")) {
-								m.SetID(NULL_ENTT);
-							}
-							if (ImGui::MenuItem("Highlight Source")) {
-								highlightedEntity = m.GetID(); // highlight
-							}
-							ImGui::EndPopup();
-						}
-						if (ImGui::BeginDragDropTarget()) {
-							auto* payload = ImGui::AcceptDragDropPayload("SELECTED_ENTT");
-							if (payload != nullptr) {
-								EntityID e = *(EntityID*)payload->Data;
-								auto& droppedModules = ptr->Modules(e);
-								for (auto& module : droppedModules._modules) {
-									if (module._name == prop.typeName) {
-										m.SetID(module.GetID());
-									}
-								}
-							}
-							ImGui::EndDragDropTarget();
-						}
-						if (ImGui::IsItemClicked()) {
-							highlightedEntity = m.GetID(); // highlight
-						}
-					}
+			for (int i = 0; i < props.size(); i++) { // starting from 1, the property at 0 is always the "entity" and it's never shown on the editor
+				PropertyData prop = props[i];
+				if(module.OnDrawPropertyGUI(prop, i)) {
+					DrawModulePropertyGUI(module, prop, i);
 				}
 			}
+			module.AfterPropertiesGUI();
 		} else {
 			if (core->_angel->IsDefModule(type)) {
 				ImGui::PopFont();
@@ -1021,7 +1036,7 @@ static void DrawObjectModules(std::unique_ptr<Core>& core, std::weak_ptr<Scene> 
 	}
 }
 
-static void DrawObserverPanel(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene, EntityID selectedEntity, EntityID& highlightedEntity) {
+static void DrawObserverPanel(std::unique_ptr<Core>& core, std::weak_ptr<Scene> scene) {
 	auto ready = !scene.expired();
 	auto ptr = scene.lock();
 
@@ -1036,7 +1051,7 @@ static void DrawObserverPanel(std::unique_ptr<Core>& core, std::weak_ptr<Scene> 
 	ImGui::Begin(title.str().c_str(), NULL);
 	if(ready) {
 		if (selectedEntity != NULL_ENTT) {
-			DrawObjectModules(core, scene, selectedEntity, highlightedEntity);
+			DrawObjectModules(core, scene);
 		} else {
 			const char* text = "Select an object from the scene :)";
 			ImVec2 size = ImGui::GetContentRegionAvail();
@@ -1705,19 +1720,18 @@ void Editor::operator() (float delta) {
 		ImGui::EndPopup();
 	}
 
-	static EntityID selectedEntity{ NULL_ENTT }; // obvious
-	static EntityID highlightedEntity{ NULL_ENTT }; // set when user clicks a reference field of a script
-	DrawSceneHierarchy(delta, core, scene, selectedEntity, highlightedEntity);
+	DrawSceneHierarchy(delta, core, scene);
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
-	ImVec2 viewportSize = DrawViewport(core, scene, selectedEntity, delta);
+	ImVec2 viewportSize = DrawViewport(core, scene, delta);
 	ImGui::PopStyleVar();
 
 	DrawSceneSettings(core, scene, viewportSize);
-	DrawObserverPanel(core, scene, selectedEntity, highlightedEntity);
+	DrawObserverPanel(core, scene);
 
 	DrawConsole();
-	DrawAssetManager(this, core, scene, selectedEntity);
+	DrawAssetManager(this, core, scene);
 
 	ImGui::End();
 }
+
