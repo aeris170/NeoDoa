@@ -32,6 +32,7 @@ struct Angel {
 	std::unordered_map<std::string, std::vector<PropertyData>> _modules;
 	std::unordered_map<std::string, asIScriptFunction*> _moduleCtors;
 	std::unordered_map<std::string, asIScriptFunction*> _moduleUpdates;
+	std::unordered_map<std::string, std::vector<asIScriptFunction*>> _moduleFunctions;
 	std::unordered_map<std::string, std::vector<EnumValue>> _enums;
 
 	std::atomic<bool> _scriptLoaderRunning{ true };
@@ -44,8 +45,9 @@ struct Angel {
 	bool IsModule(asITypeInfo* type);
 	bool IsDefModule(asITypeInfo* type);
 
-	void ExecuteModule(asIScriptObject* sys, float deltaTime);
 	Module InstantiateModule(std::string_view moduleType, int ID);
+	void ExecuteModule(asIScriptObject* module, float deltaTime);
+	void* CallModuleFunction(asIScriptObject* module, std::string_view functionName, std::vector<std::string> parameterTypes, std::vector<void*> parameterValues);
 private:
 	Angel(const Angel&) = delete;
 	Angel(const Angel&&) = delete;

@@ -169,6 +169,17 @@ static std::string beautify(const std::string& str) {
 	}
 	return rv;
 }
+static std::vector<std::string> split(std::string str, std::string_view delimeter) {
+	std::vector<std::string> rv;
+	auto pos = str.find(delimeter);
+	while (pos != str.npos) {
+		rv.emplace_back(str.substr(0, pos));
+		str = str.substr(pos + delimeter.size());
+		pos = str.find(delimeter);
+	}
+	rv.emplace_back(str);
+	return rv;
+}
 
 Angel::Angel() noexcept :
 	_scriptEngine(asCreateScriptEngine()) {
@@ -475,6 +486,20 @@ Angel::Angel() noexcept :
 
 Angel::~Angel() noexcept {
 	_scriptLoaderRunning = false;
+
+	for (auto& ctor : _moduleCtors) {
+		ctor.second->Release();
+	}
+	for (auto& update : _moduleUpdates) {
+		update.second->Release();
+	}
+	for (auto& pair : _moduleFunctions) {
+		auto& funcVector = pair.second;
+		for (auto& func : funcVector) {
+			func->Release();
+		}
+	}
+
 	_scriptLoaderDeamon.join();
 	_scriptModule->Discard();
 	_scriptCtx->Release();
@@ -489,16 +514,6 @@ bool Angel::IsDefModule(asITypeInfo* type) {
 	return type->DerivesFrom(_defModuleBaseType);
 }
 
-void Angel::ExecuteModule(asIScriptObject* sys, float deltaTime) {
-	_scriptCtx->Prepare(_moduleUpdates[sys->GetObjectType()->GetName()]);
-	_scriptCtx->SetArgFloat(0, deltaTime);
-	_scriptCtx->SetObject(sys);
-	if (_scriptCtx->Execute() == asEXECUTION_EXCEPTION) {
-		auto* func = _scriptCtx->GetExceptionFunction();
-		DOA_LOG_FATAL("Uncaught exception '%s' in %s::%s (line %d)!", _scriptCtx->GetExceptionString(), func->GetObjectName(), func->GetName(), _scriptCtx->GetExceptionLineNumber());
-	}
-}
-
 Module Angel::InstantiateModule(std::string_view moduleType, int ID) {
 	if (_moduleCtors.count(moduleType.data()) == 0) {
 		DOA_LOG_ERROR("No such module type!");
@@ -510,6 +525,67 @@ Module Angel::InstantiateModule(std::string_view moduleType, int ID) {
 	Module m(moduleType, obj);
 	m.SetID(ID);
 	return m;
+}
+
+void Angel::ExecuteModule(asIScriptObject* module, float deltaTime) {
+	_scriptCtx->Prepare(_moduleUpdates[module->GetObjectType()->GetName()]);
+	_scriptCtx->SetArgFloat(0, deltaTime);
+	_scriptCtx->SetObject(module);
+	if (_scriptCtx->Execute() == asEXECUTION_EXCEPTION) {
+		auto* func = _scriptCtx->GetExceptionFunction();
+		DOA_LOG_FATAL("Uncaught exception '%s' in %s::%s (line %d)!", _scriptCtx->GetExceptionString(), func->GetObjectName(), func->GetName(), _scriptCtx->GetExceptionLineNumber());
+	}
+}
+
+void* Angel::CallModuleFunction(asIScriptObject* module, std::string_view functionName, std::vector<std::string> parameterTypes, std::vector<void*> parameterValues) {
+	auto functions = _moduleFunctions[module->GetObjectType()->GetName()];
+	int paramCount = parameterTypes.size();
+	decltype(functions) candidates;
+	for (auto function : functions) {
+		if (function->GetName() == functionName && function->GetParamCount() == paramCount) {
+			candidates.push_back(function);
+		}
+	}
+	asIScriptFunction* functionToCall = nullptr;
+	for(auto candidate:candidates) {
+		auto decl = std::string(candidate->GetDeclaration(false, false, false));
+		decl = decl.substr(decl.find("(") + 1, decl.find(")") - decl.find("(") - 1); // get what's between "(" and ")"
+		auto paramTypes = split(decl, ", ");
+		bool suitable = true;
+		for (int i = 0; i < paramCount; i++) {
+			if (paramTypes[i] != parameterTypes[i]) {
+				suitable = false;
+			}
+		}
+		if (suitable) {
+			functionToCall = candidate;
+		}
+	}
+	if (functionToCall != nullptr) {
+		_scriptCtx->Prepare(functionToCall);
+		for (int i = 0; i < paramCount; i++) {
+			std::string& paramType = parameterTypes[i];
+			void* param = parameterValues[i];
+			if (paramType == "bool") {
+				_scriptCtx->SetArgByte(i, *(bool*)param);
+			} else if (paramType == "int") {
+				_scriptCtx->SetArgDWord(i, *(int*)param);
+			} else if (paramType == "float") {
+				_scriptCtx->SetArgFloat(i, *(float*)param);
+			} else if (paramType == "double") {
+				_scriptCtx->SetArgDouble(i, *(double*)param);
+			} else {
+				_scriptCtx->SetArgObject(i, (void*)param);// ??
+			}
+		}
+		_scriptCtx->SetObject(module);
+		if (_scriptCtx->Execute() == asEXECUTION_EXCEPTION) {
+			auto* func = _scriptCtx->GetExceptionFunction();
+			DOA_LOG_FATAL("Uncaught exception '%s' in %s::%s (line %d)!", _scriptCtx->GetExceptionString(), func->GetObjectName(), func->GetName(), _scriptCtx->GetExceptionLineNumber());
+		}
+		return _scriptCtx->GetAddressOfReturnValue();
+	}
+	return nullptr;
 }
 
 void Angel::FindAndBuildScripts() {
@@ -582,6 +658,14 @@ bool Angel::Rebuild() {
 			bool Has(const string type) const final {
 				return __has(entity.id, type);
 			}
+
+			void BeforePropertiesGUI() {}
+			bool OnDrawPropertyGUI(PropertyData property, int propertyIndex) {
+				if (propertyIndex == 0) return false;
+				if (property.isPrivate || property.isProtected) return false;
+				return true;
+			}
+			void AfterPropertiesGUI() {}
 		}
 
 		abstract class DefModule : Module {}
@@ -613,11 +697,25 @@ bool Angel::Rebuild() {
 					@child.parent = null;
 				}
 			}
+
+			void AfterPropertiesGUI() {
+				if(ImGui::Button("Reset All")) {
+					Translation = vec3(0, 0, 0);
+					Rotation = quat(vec3(0, 0, 0));
+					Scale = vec3(1, 1, 1);
+				}
+			}
 		}
 
 		class ModelRenderer : DefModule {
 			Model@ model;
 			Shader@ shader;
+		}
+
+		class Camera : DefModule {
+			Projection projection = Perspective;
+		} enum Projection {
+			Orthographic, Perspective
 		}
 	)") < 0) {
 		// Senpai... Senpai... I... I... I fucked up senpai!!
@@ -644,8 +742,24 @@ bool Angel::Rebuild() {
 		_moduleBaseType = _scriptModule->GetTypeInfoByDecl("Module");
 		_defModuleBaseType = _scriptModule->GetTypeInfoByDecl("DefModule");
 		_modules.clear();
+
+		for (auto& ctor : _moduleCtors) {
+			ctor.second->Release();
+		}
 		_moduleCtors.clear();
+
+		for (auto& update : _moduleUpdates) {
+			update.second->Release();
+		}
 		_moduleUpdates.clear();
+
+		for (auto& pair : _moduleFunctions) {
+			auto& funcVector = pair.second;
+			for (auto& func : funcVector) {
+				func->Release();
+			}
+		}
+		_moduleFunctions.clear();
 	}
 
 	{//enumerate and store all components and systems
@@ -691,9 +805,21 @@ bool Angel::Rebuild() {
 					default: d.typeName = _scriptEngine->GetTypeInfoById(d.typeId)->GetName(); break;
 					}
 					_modules[name].emplace_back(d);
-					_moduleCtors.insert({ name, type->GetFactoryByIndex(0) });
-					_moduleUpdates.insert({  name, type->GetMethodByDecl("void Execute(float)") });
 					printf("\t\t\t\t\t\t  %d --> %s %s\n", j, d.typeName.c_str(), d.name.c_str());
+				}
+				auto ctor = type->GetFactoryByIndex(0);
+				ctor->AddRef();
+				_moduleCtors.insert({ name, ctor });
+
+				auto update = type->GetMethodByDecl("void Execute(float)");
+				update->AddRef();
+				_moduleUpdates.insert({ name, update });
+
+				auto& functions = _moduleFunctions.insert({ name, {} }).first->second;
+				for (int i = 0; i < type->GetMethodCount(); i++) {
+					auto func = type->GetMethodByIndex(i);
+					func->AddRef();
+					functions.push_back(func);
 				}
 			}
 		}

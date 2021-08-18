@@ -10,6 +10,7 @@
 struct Module {
 
 	std::string _name;
+
 	asIScriptObject* _module{ nullptr };
 	bool _isDef{ false };
 
@@ -21,7 +22,7 @@ struct Module {
 	Module& operator=(Module&&) noexcept;
 
 	operator EntityID() const { return GetID(); }
-	operator asIScriptObject*() const { return _module; }
+	operator asIScriptObject* () const { return _module; }
 
 	EntityID GetID() const;
 	void SetID(int id);
@@ -30,6 +31,12 @@ struct Module {
 	std::vector<PropertyData>& Properties();
 
 	void* GetAddressOfPropertyAt(int index);
+
+#ifdef EDITOR
+	void BeforePropertiesGUI();
+	bool OnDrawPropertyGUI(PropertyData& property, int propertyIndex);
+	void AfterPropertiesGUI();
+#endif
 
 	template<typename T>
 	T& As() {

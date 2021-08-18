@@ -47,7 +47,6 @@ void Module::SetID(EntityID id) {
     SetID(static_cast<int>(id));
 }
 
-
 std::vector<PropertyData>& Module::Properties() {
     return GetCore()->_angel->_modules[_module->GetObjectType()->GetName()];
 }
@@ -55,3 +54,18 @@ std::vector<PropertyData>& Module::Properties() {
 void* Module::GetAddressOfPropertyAt(int index) {
     return _module->GetAddressOfProperty(index);
 }
+
+#ifdef EDITOR
+void Module::BeforePropertiesGUI(){
+    GetCore()->_angel->CallModuleFunction(*this, "BeforePropertiesGUI", {}, {});
+}
+
+bool Module::OnDrawPropertyGUI(PropertyData& property, int propertyIndex) {
+    //if (property.isPrivate || property.isProtected) { return false; } // don't show private or protected variables in editor!
+    return *(bool*)GetCore()->_angel->CallModuleFunction(*this, "OnDrawPropertyGUI", { "PropertyData" , "int" }, { &property, &propertyIndex });
+}
+
+void Module::AfterPropertiesGUI() {
+    GetCore()->_angel->CallModuleFunction(*this, "AfterPropertiesGUI", {}, {});
+}
+#endif
