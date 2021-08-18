@@ -99,7 +99,7 @@ void Renderer::Submit(std::weak_ptr<Shader> shader, std::weak_ptr<Model> model, 
 	}
 }
 
-void Renderer::Render(entt::registry& registry, Camera* cam) {
+void Renderer::Render(entt::registry& registry, ACamera* cam) {
 	vertices = 0;
 	indices = 0;
 	drawCalls = 0;

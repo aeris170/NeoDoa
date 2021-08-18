@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Camera.hpp"
+#include "ACamera.hpp"
 
-struct PerspectiveCamera : Camera {
+struct PerspectiveCamera : ACamera {
 	float _fov;
 	float _aspect;
 	float _near;

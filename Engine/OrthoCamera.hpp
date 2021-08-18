@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Camera.hpp"
+#include "ACamera.hpp"
 
-struct OrthoCamera : Camera {
+struct OrthoCamera : ACamera {
 	float _left;
 	float _right;
 	float _bottom;

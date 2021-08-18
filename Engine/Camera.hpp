@@ -1,21 +1,11 @@
 #pragma once
 
-#include <glm/glm.hpp>
+#include <angelscript.h>
 
-struct Camera {
+#include "Module.hpp"
 
-	glm::vec3 eye{ 0, 0, 0 };
-	glm::vec3 forward{ 0, 0, -1 };
-	glm::vec3 up{ 0, 1, 0 };
-	float zoom{ 1 };
+struct Camera : Module {
 
-	glm::mat4 _viewMatrix;
-	glm::mat4 _projectionMatrix;
-	glm::mat4 _viewProjectionMatrix;
+	using Module::Module; // inherit ctors
 
-	virtual ~Camera() = default;
-
-	virtual void UpdateView() = 0;
-	virtual void UpdateProjection() = 0;
-	virtual void UpdateViewProjection() = 0;
 };

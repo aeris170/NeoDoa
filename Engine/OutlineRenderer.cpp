@@ -20,7 +20,7 @@ OutlineRenderer::~OutlineRenderer() noexcept {}
 
 //-----------------------------------------------------------------
 
-void OutlineRenderer::Render(std::vector<std::tuple<Transform&, ModelRenderer&>>& objects, Camera* cam, glm::vec3 outlineColor) {
+void OutlineRenderer::Render(std::vector<std::tuple<Transform&, ModelRenderer&>>& objects, ACamera* cam, glm::vec3 outlineColor) {
 	vertices = 0;
 	indices = 0;
 	drawCalls = 0;

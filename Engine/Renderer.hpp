@@ -10,7 +10,7 @@
 
 struct Model;
 struct Shader;
-struct Camera;
+struct ACamera;
 
 struct Renderer {
 
@@ -31,5 +31,5 @@ struct Renderer {
 	void Register(std::weak_ptr<Shader> shader, std::weak_ptr<Model> model);
 	void Submit(std::weak_ptr<Shader> shader, std::weak_ptr<Model> model, EntityID instance);
 
-	void Render(entt::registry& registry, Camera* cam);
+	void Render(entt::registry& registry, ACamera* cam);
 };

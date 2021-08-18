@@ -36,9 +36,6 @@
     <Filter Include="Asset\Shader">
       <UniqueIdentifier>{712f9e9e-5b88-4a93-8c51-505b0d55acb5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Asset\Manager">
-      <UniqueIdentifier>{5d58f596-830d-4922-828d-a52090d2eaa0}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Asset\Script\Modules">
       <UniqueIdentifier>{e0c4992a-be43-4725-89a7-721e9a92c86f}</UniqueIdentifier>
     </Filter>
@@ -50,6 +47,9 @@
     </Filter>
     <Filter Include="Project\Scene\Serialize">
       <UniqueIdentifier>{e30f8424-d248-4ec4-9c06-372a4c21ab65}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Asset\Manager">
+      <UniqueIdentifier>{5d58f596-830d-4922-828d-a52090d2eaa0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -128,6 +128,9 @@
     <ClCompile Include="OutlineRenderer.cpp">
       <Filter>Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Asset\Script\Modules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NeoDoa.hpp">
@@ -166,7 +169,7 @@
     <ClInclude Include="TypedefsAndConstants.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Camera.hpp">
+    <ClInclude Include="ACamera.hpp">
       <Filter>Project\Scene</Filter>
     </ClInclude>
     <ClInclude Include="Angel.hpp">
@@ -228,6 +231,9 @@
     </ClInclude>
     <ClInclude Include="OutlineRenderer.hpp">
       <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.hpp">
+      <Filter>Asset\Script\Modules</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

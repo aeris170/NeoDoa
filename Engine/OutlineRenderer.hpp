@@ -5,7 +5,7 @@
 
 struct Transform;
 struct ModelRenderer;
-struct Camera;
+struct ACamera;
 
 struct OutlineRenderer {
 
@@ -20,5 +20,5 @@ struct OutlineRenderer {
 	OutlineRenderer& operator=(const OutlineRenderer&) = delete;
 	OutlineRenderer& operator=(const OutlineRenderer&&) = delete;
 
-	void Render(std::vector<std::tuple<Transform&, ModelRenderer&>>& objects, Camera* cam, glm::vec3 outlineColor);
+	void Render(std::vector<std::tuple<Transform&, ModelRenderer&>>& objects, ACamera* cam, glm::vec3 outlineColor);
 };

@@ -110,6 +110,7 @@
   <ItemGroup>
     <ClCompile Include="Angel.cpp" />
     <ClCompile Include="AssetManager.cpp" />
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="FrameBuffer.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="ModelRenderer.cpp" />
@@ -132,6 +133,7 @@
     <ClInclude Include="Angel.hpp" />
     <ClInclude Include="AssetManager.hpp" />
     <ClInclude Include="Camera.hpp" />
+    <ClInclude Include="ACamera.hpp" />
     <ClInclude Include="EnumValue.hpp" />
     <ClInclude Include="FileNode.hpp" />
     <ClInclude Include="FrameBuffer.hpp" />

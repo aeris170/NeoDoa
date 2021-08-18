@@ -27,7 +27,7 @@ struct Scene {
 
 	OrthoCamera _oc{ OrthoCamera(-1, 1, -1, 1, -1, 1) };
 	PerspectiveCamera _pc{ PerspectiveCamera(110, 19.f/9.f, 0.001, 1000) };
-	Camera* _activeCamera; // address of active cam
+	ACamera* _activeCamera; // address of active cam
 
 	entt::registry _registry;
 	std::unordered_map<int, std::vector<std::string>> _attachList; // scripts that call Attach add to this map
