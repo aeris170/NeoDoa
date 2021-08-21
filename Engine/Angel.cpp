@@ -171,8 +171,8 @@ static std::string beautify(const std::string& str) {
 	std::string rv;
 	rv.reserve(32);
 	rv.replace(0, 1, 1, str[0] >= 'a' ? (char)toupper(str[0]) : str[0]); // probably incorrect usage
-	int i = 1;
-	int j = 1;
+	auto i = 1;
+	auto j = 1;
 	char ch;
 	while ((ch = str[i]) != 0) {
 		if (ch >= 'A' && ch <= 'Z') {
