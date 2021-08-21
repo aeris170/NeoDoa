@@ -885,19 +885,36 @@ static void DrawModulePropertyGUI(Module& module, PropertyData& property, int pr
 	} else if (property.typeName == "string") {
 		StringWidget(property.prettyName.c_str(), module.GetAt<std::string>(propertyIndex));
 	} else if (property.typeName == "vec2") {
-		FancyVectorWidget(property.prettyName.c_str(), module.GetAt<glm::vec2>(propertyIndex));
+		std::string title(ICON_FA_EXTERNAL_LINK_SQUARE_ALT " ");
+		title.reserve(64);
+		title.append(property.prettyName);
+		FancyVectorWidget(title.c_str(), module.GetAt<glm::vec2>(propertyIndex));
 	} else if (property.typeName == "vec3") {
-		FancyVectorWidget(property.prettyName.c_str(), module.GetAt<glm::vec3>(propertyIndex), property.name == "Scale" ? 1 : 0);
+		std::string title(ICON_FA_EXTERNAL_LINK_SQUARE_ALT " ");
+		title.reserve(64);
+		title.append(property.prettyName);
+		FancyVectorWidget(title.c_str(), module.GetAt<glm::vec3>(propertyIndex), property.name == "Scale" ? 1 : 0);
 	} else if (property.typeName == "vec4") {
-		FancyVectorWidget(property.prettyName.c_str(), module.GetAt<glm::vec4>(propertyIndex));
+		std::string title(ICON_FA_EXTERNAL_LINK_SQUARE_ALT " ");
+		title.reserve(64);
+		title.append(property.prettyName);
+		FancyVectorWidget(title.c_str(), module.GetAt<glm::vec4>(propertyIndex));
 	} else if (property.typeName == "quat") {
 		glm::quat& quat = module.GetAt<glm::quat>(propertyIndex);
 		glm::vec3 eulersDeg(glm::degrees(glm::eulerAngles(quat)));
 		glm::vec3 old(eulersDeg);
-		FancyVectorWidget(property.prettyName.c_str(), eulersDeg, 0);
+		std::string title(ICON_FA_EXTERNAL_LINK_SQUARE_ALT " ");
+		title.reserve(64);
+		title.append(property.prettyName);
+		FancyVectorWidget(title.c_str(), eulersDeg, 0);
 		quat = quat * glm::quat(glm::radians(eulersDeg - old));
+	} else if (property.typeName == "Color") {
+		std::string title(ICON_FA_PALETTE " ");
+		title.reserve(64);
+		title.append(property.prettyName);
+		ColorWidget(title.c_str(), module.GetAt<Color>(propertyIndex));
 	} else if (property.typeName == "Model") {
-		std::string title(ICON_FA_INDUSTRY " ");
+		std::string title(ICON_FA_WINE_GLASS " ");
 		title.reserve(64);
 		title.append(property.prettyName);
 		UneditableStringWidget(title.c_str(), module.GetAt<Model*>(propertyIndex)->_name);
