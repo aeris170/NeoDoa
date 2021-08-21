@@ -108,6 +108,9 @@
 #include "FileNode.hpp"
 #include "AssetManager.hpp"
 #pragma endregion
+#pragma region Color
+#include "Color.hpp"
+#pragma endregion
 #pragma region Model
 #include "Vertex.hpp"
 #include "Mesh.hpp"
