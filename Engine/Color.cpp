@@ -63,6 +63,7 @@ Color& Color::operator+=(const Color& rhs) {
     return *this;
 }
 
+float* Color::Data() { return &r; }
 const float* Color::Data() const { return &r; }
 
 unsigned int Color::ToUInt() const {

@@ -240,3 +240,11 @@ void UneditableStringWidget(const char* label, const std::string& value) {
 	ImGui::InputText(ss.str().c_str(), buf, 128, ImGuiInputTextFlags_ReadOnly);
 	EndWidget();
 }
+
+void ColorWidget(const char* label, Color& value) {
+	BeginWidget(label);
+	std::stringstream ss;
+	ss << "##" << label;
+	ImGui::ColorEdit4(ss.str().c_str(), value.Data());
+	EndWidget();
+}

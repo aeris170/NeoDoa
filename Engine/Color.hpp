@@ -41,6 +41,7 @@ struct Color {
 	Color operator-(const Color& rhs) const;
 	Color& operator+=(const Color& rhs);
 
+	float* Data();
 	const float* Data() const;
 
 	unsigned int ToUInt() const;

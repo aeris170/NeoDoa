@@ -30,3 +30,5 @@ void BoolWidget(const char* label, bool& value);
 void StringWidget(const char* label, std::string& value);
 
 void UneditableStringWidget(const char* label, const std::string& value);
+
+void ColorWidget(const char* label, Color& value);
