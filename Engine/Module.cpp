@@ -21,7 +21,6 @@ Module::Module(Module&& other) noexcept {
 
 Module& Module::operator=(Module&& other) noexcept {
     _name = std::move(other._name);
-    if (_module) _module->Release();
     std::swap(_module, other._module);
     _isDef = other._isDef;
     return *this;
