@@ -92,3 +92,12 @@ protected:
 	float SaturationHSL(float min, float max) const;
 	void FromHCM(float h, float c, float m);
 };
+
+namespace std {
+	template <>
+	struct hash<Color> {
+		size_t operator()(const Color& color) const {
+			return color.ToHash();
+		}
+	};
+}
