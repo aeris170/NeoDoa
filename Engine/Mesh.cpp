@@ -1,6 +1,7 @@
 #include "Mesh.hpp"
 
 #include <cstddef>
+#include "Log.hpp"
 
 Mesh::Mesh(std::vector<Vertex>&& vertices, std::vector<GLuint>&& indices, std::vector<std::weak_ptr<Texture>>&& textures) noexcept :
 	_vertices(std::move(vertices)),
@@ -11,12 +12,19 @@ Mesh::Mesh(std::vector<Vertex>&& vertices, std::vector<GLuint>&& indices, std::v
 	auto vertexCount = _vertices.size();
 	auto vertexSize = sizeof(Vertex);
 
-	auto totalSize = vertexCount * vertexSize * 10;
+	auto totalSize = vertexCount * vertexSize;
 
 	glCreateBuffers(1, &_vbo);
-	glNamedBufferData(_vbo, totalSize, _vertices.data(), GL_STATIC_DRAW); // if crash, driver bug
+	int a = glGetError();
+	DOA_LOG_INFO("%d", a);
+	//glNamedBufferData(_vbo, totalSize, _vertices.data(), GL_STATIC_DRAW); // if crash, driver bug
+	glNamedBufferStorage(_vbo, totalSize, _vertices.data(), 0); // TODO investigate this shit
+	a = glGetError();
+	DOA_LOG_INFO("%d", a);
 
 	glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, vertexSize);
+	a = glGetError();
+	DOA_LOG_INFO("%d", a);
 
 	glEnableVertexArrayAttrib(_vao, 4);
 	glEnableVertexArrayAttrib(_vao, 5);
