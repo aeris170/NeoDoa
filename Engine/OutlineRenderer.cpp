@@ -47,6 +47,12 @@ void OutlineRenderer::Render(std::vector<std::tuple<Transform&, ModelRenderer&>>
 				tex.lock()->Bind(i++);
 			}
 
+			if (!mr._isActive) {
+				glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+			} else {
+				glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+			}
+
 			glBindVertexArray(mesh._vao);
 			if (mesh._ebo > 0) {
 				glDrawElements(GL_TRIANGLES, mesh._indices.size(), GL_UNSIGNED_INT, 0);
@@ -62,12 +68,13 @@ void OutlineRenderer::Render(std::vector<std::tuple<Transform&, ModelRenderer&>>
 	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
 	glStencilMask(0x00); // disable writing to the stencil buffer
 	glDisable(GL_DEPTH_TEST);
+	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 	stdShader = FindShader("Solid Color Shader");
 	shader = stdShader.lock();
 	shader->Use();
 	for (auto& [t, mr] : objects) {
 		glm::vec3 origScale = t.Scale();
-		t.Scale() *= 1.1;
+		t.Scale() += std::clamp(glm::distance(cam->eye, t.Translation()) / 50, 0.01f, 20.0f);
 		shader->UniformMat4("modelMatrix", (float*)glm::value_ptr(CreateModelMatrixFromTransform(t)));
 		shader->UniformMat4("viewProjMatrix", glm::value_ptr(cam->_viewProjectionMatrix));
 		shader->Uniform4f("color", glm::value_ptr(outlineColor));

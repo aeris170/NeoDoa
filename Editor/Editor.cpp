@@ -10,13 +10,19 @@
 
 #include "ComponentViews.hpp"
 
-#include <IconsFontAwesome5.h>
+#include <IconsFontAwesome5Pro.h>
 #include <tinyfiledialogs.h>
 
 #include <imgui_internal.h>
 
 static EntityID selectedEntity{ NULL_ENTT }; // obvious
 static EntityID highlightedEntity{ NULL_ENTT }; // set when user clicks a reference field of a script
+static std::unordered_map<std::string, std::string> moduleIcons {
+	{ "Tag", ICON_FA_TAG " "},
+	{ "Transform", ICON_FA_MAP_MARKER_ALT " "},
+	{ "Camera", ICON_FA_VIDEO " "},
+	{ "ModelRenderer", ICON_FA_COCKTAIL " "},
+};
 
 // New/Open/Save
 static void NewProject(Editor* editor);
@@ -775,11 +781,17 @@ static void DrawGameObjectNode(float delta, std::unique_ptr<Core>& core, std::we
 		ptr->Modules(selectedEntity)["Transform"].As<Transform>().Selected() = true;
 	}
 	if (ImGui::BeginPopupContextItem(0, ImGuiPopupFlags_MouseButtonRight)) {
-		if (ImGui::BeginMenu("Attach Module")) {
+		if (ImGui::BeginMenu(ICON_FA_LINK " Attach Module")) {
 			for (auto& pair : core->_angel->_modules) {
-				const char* name = pair.first.c_str();
-				if (ImGui::MenuItem(name)) {
-					scr.Attach(name);
+				std::string name = pair.first;
+				auto icon = moduleIcons.find(name);
+				if (icon != moduleIcons.end()) {
+					name.insert(0, icon->second);
+				} else {
+					name.insert(0, ICON_FA_FILE_CODE " ");
+				}
+				if (ImGui::MenuItem(name.c_str())) {
+					scr.Attach(pair.first);
 				}
 			}
 			ImGui::EndMenu();
@@ -838,18 +850,18 @@ static EntityID DrawSceneHierarchy(float delta, std::unique_ptr<Core>& core, std
 			selectedEntity = NULL_ENTT;
 		}
 		if (ImGui::BeginPopupContextWindow(0, ImGuiMouseButton_Right, false)) {
-			if (ImGui::MenuItem("Create New Entity")) {
+			if (ImGui::MenuItem(ICON_FA_PLUS " Create New Entity")) {
 				ptr->CreateEntity();
 			}
 			ImGui::Separator();
-			if (ImGui::MenuItem("Cube")) {
+			if (ImGui::MenuItem(ICON_FA_CUBE " Cube")) {
 				EntityID id = ptr->CreateEntity("Cube");
 				ScriptComponent& modules = ptr->Modules(id);
 				ModelRenderer& mr = modules.Attach("ModelRenderer").As<ModelRenderer>();
 				mr.Shader() = &*FindShader("Simple Instanced Shader").lock();
 				mr.Model() = &*FindModel("Cube").value().lock();
 			}
-			if (ImGui::MenuItem("Quad")) {
+			if (ImGui::MenuItem(ICON_FA_SQUARE " Quad")) {
 				EntityID id = ptr->CreateEntity("Quad");
 				ScriptComponent& modules = ptr->Modules(id);
 				ModelRenderer& mr = modules.Attach("ModelRenderer").As<ModelRenderer>();
@@ -857,7 +869,7 @@ static EntityID DrawSceneHierarchy(float delta, std::unique_ptr<Core>& core, std
 				mr.Model() = &*FindModel("Quad").value().lock();
 			}
 			ImGui::Separator();
-			if (ImGui::MenuItem("Close Scene")) {
+			if (ImGui::MenuItem(ICON_FA_WINDOW_CLOSE " Close Scene")) {
 				ChangeScene({});
 			}
 			ImGui::EndPopup();
@@ -883,7 +895,10 @@ static void DrawModulePropertyGUI(Module& module, PropertyData& property, int pr
 	} else if (property.typeName == "bool") {
 		BoolWidget(property.prettyName.c_str(), module.GetAt<bool>(propertyIndex));
 	} else if (property.typeName == "string") {
-		StringWidget(property.prettyName.c_str(), module.GetAt<std::string>(propertyIndex));
+		std::string title(ICON_FA_TEXT " ");
+		title.reserve(64);
+		title.append(property.prettyName);
+		StringWidget(title.c_str(), module.GetAt<std::string>(propertyIndex));
 	} else if (property.typeName == "vec2") {
 		std::string title(ICON_FA_EXTERNAL_LINK_SQUARE_ALT " ");
 		title.reserve(64);
@@ -1018,37 +1033,56 @@ static void DrawObjectModules(std::unique_ptr<Core>& core, std::weak_ptr<Scene> 
 	ScriptComponent& scr = ptr->Modules(selectedEntity);
 	for (Module& module : scr._modules) {
 		asITypeInfo* type = module._module->GetObjectType();
-		if (core->_angel->IsDefModule(type)) {
-			ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
-		}
 		std::string title = module._name;
+		if (!module._isActive) {
+			title += " (Deactivated)";
+		}
 		std::string withIcon = title;
-		withIcon.insert(0, ICON_FA_FILE_CODE " ");
-		if (ImGui::CollapsingHeader(withIcon.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
+		auto icon = moduleIcons.find(module._name);
+		if (icon != moduleIcons.end()) {
+			withIcon.insert(0, icon->second);
+		} else {
+			if (core->_angel->IsDefModule(type)) {
+				ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
+			}
+			withIcon.insert(0, ICON_FA_FILE_CODE " ");
 			if (core->_angel->IsDefModule(type)) {
 				ImGui::PopFont();
 			}
+		}
+		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen;
+		if (!module._isActive) {
+			flags |= ImGuiTreeNodeFlags_Leaf;
+		}
+		if (ImGui::CollapsingHeader(withIcon.c_str(), flags)) {
 			if (ImGui::BeginPopupContextItem(0, ImGuiPopupFlags_MouseButtonRight)) {
-				if (ImGui::MenuItem("Detach")) {
-					scr.Detach(title.c_str());
-					ImGui::EndPopup();
-					break; // iterator is invalidated!
+				if (!module._isDef) {
+					if (ImGui::MenuItem(ICON_FA_UNLINK " Detach")) {
+						scr.Detach(title.c_str());
+						ImGui::EndPopup();
+						break; // iterator is invalidated!
+					}
+					if (ImGui::MenuItem(module._isActive ? ICON_FA_POWER_OFF " Deactivate" : ICON_FA_POWER_OFF " Activate")) {
+						module._isActive = !module._isActive;
+						ImGui::EndPopup();
+						break; // iterator is invalidated!
+					}
 				}
 				ImGui::EndPopup();
 			}
-			module.BeforePropertiesGUI();
-			std::vector<PropertyData>& props = module.Properties();
-			for (int i = 0; i < props.size(); i++) { // starting from 1, the property at 0 is always the "entity" and it's never shown on the editor
-				PropertyData prop = props[i];
-				if(module.OnDrawPropertyGUI(prop, i)) {
-					DrawModulePropertyGUI(module, prop, i);
+
+			if (module._isActive) {
+				module.BeforePropertiesGUI();
+				std::vector<PropertyData>& props = module.Properties();
+				for (int i = 0; i < props.size(); i++) { // starting from 1, the property at 0 is always the "entity" and it's never shown on the editor
+					PropertyData prop = props[i];
+					if(module.OnDrawPropertyGUI(prop, i)) {
+						DrawModulePropertyGUI(module, prop, i);
+					}
 				}
+				module.AfterPropertiesGUI();
 			}
-			module.AfterPropertiesGUI();
-		} else {
-			if (core->_angel->IsDefModule(type)) {
-				ImGui::PopFont();
-			}
+			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 5);
 		}
 	}
 }

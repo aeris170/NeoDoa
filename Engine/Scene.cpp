@@ -83,8 +83,10 @@ void Scene::Update(const std::unique_ptr<Angel>& angel, float deltaTime) {
 	_detachList.clear();
 	// this will need optimization... anti-pattern to ECS!
 	_registry.view<ScriptComponent>().each([this, &angel, deltaTime](EntityID entity, ScriptComponent& script) {
-		for (auto& [name, module, isDef] : script._modules) {
-			angel->ExecuteModule(module, deltaTime);
+		for (auto& [name, isActive, module, isDef] : script._modules) {
+			if(isActive) {
+				angel->ExecuteModule(module, deltaTime);
+			}
 		}
 	});
 }
@@ -95,7 +97,7 @@ void Scene::Render(const std::unique_ptr<Angel>& angel) {
 	_activeCamera->UpdateViewProjection();
 	_registry.view<ScriptComponent>().each([this, &angel](EntityID entity, ScriptComponent& script) {
 		for (auto& module : script._modules) {
-			if (module._name == "ModelRenderer") {
+			if (module._name == "ModelRenderer" && module._isActive) {
 				auto& modelRenderer = module.As<ModelRenderer>();
 				Model*& mdl = modelRenderer.Model();
 				Shader*& shdr = modelRenderer.Shader();

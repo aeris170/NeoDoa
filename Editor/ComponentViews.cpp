@@ -137,7 +137,7 @@ static void BeginWidget(const char* label) {
 	ImGui::Columns(2);
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { ImGui::GetStyle().ItemSpacing.x, 0 });
 	ImGui::SetColumnWidth(0, w - compFieldWidth);
-	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f);
+	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f + 3);
 	ImGui::Text(label);
 	ImGui::NextColumn();
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });

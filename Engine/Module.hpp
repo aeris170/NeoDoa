@@ -10,6 +10,7 @@
 struct Module {
 
 	std::string _name;
+	bool _isActive;
 
 	asIScriptObject* _module{ nullptr };
 	bool _isDef{ false };
