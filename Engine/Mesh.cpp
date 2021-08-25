@@ -15,16 +15,10 @@ Mesh::Mesh(std::vector<Vertex>&& vertices, std::vector<GLuint>&& indices, std::v
 	auto totalSize = vertexCount * vertexSize;
 
 	glCreateBuffers(1, &_vbo);
-	int a = glGetError();
-	DOA_LOG_INFO("%d", a);
 	//glNamedBufferData(_vbo, totalSize, _vertices.data(), GL_STATIC_DRAW); // if crash, driver bug
 	glNamedBufferStorage(_vbo, totalSize, _vertices.data(), 0); // TODO investigate this shit
-	a = glGetError();
-	DOA_LOG_INFO("%d", a);
 
 	glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, vertexSize);
-	a = glGetError();
-	DOA_LOG_INFO("%d", a);
 
 	glEnableVertexArrayAttrib(_vao, 4);
 	glEnableVertexArrayAttrib(_vao, 5);
