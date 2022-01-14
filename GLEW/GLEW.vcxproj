@@ -62,7 +62,7 @@
       <CompileAs>Default</CompileAs>
       <AdditionalIncludeDirectories>$(SolutionDir)GLEW\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-D_WIN32 -D_WIN32_MEAN_AND_LEAN -D_VC_EXTRALEAN -D_CRT_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -87,7 +87,7 @@
       <AdditionalOptions>-D_WIN32 -D_WIN32_MEAN_AND_LEAN -D_VC_EXTRALEAN -D_CRT_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
       <DebugInformationFormat>None</DebugInformationFormat>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>

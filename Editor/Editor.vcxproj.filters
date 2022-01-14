@@ -13,6 +13,33 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="UI">
+      <UniqueIdentifier>{6961c7ad-7d6d-466b-93cc-b67df2ab32aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Language">
+      <UniqueIdentifier>{9d8f1abc-714d-4f38-8ba8-1b7f2d9f315b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\Components">
+      <UniqueIdentifier>{f7d56c94-3602-4d1c-b25b-3e286fb51ee3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\GUI">
+      <UniqueIdentifier>{bca19ae4-4c74-4f02-a88b-65494f775b90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\GUI\Observer">
+      <UniqueIdentifier>{433042ff-49cb-4768-ac26-4222c0eabac6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\GUI\Console">
+      <UniqueIdentifier>{d92e51bc-d669-4dbd-9463-72ff31fa040d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\GUI\SceneHierarchy">
+      <UniqueIdentifier>{b02c8f77-175e-4060-9c05-9f3ee503b471}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\GUI\AssetManager">
+      <UniqueIdentifier>{580c38d3-bf31-4e04-a488-fe53dff8b4a7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\GUI\MenuBar">
+      <UniqueIdentifier>{f2a21c9f-f215-4d84-aa1a-f3d58f3d7ffb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -21,19 +48,67 @@
     <ClCompile Include="Editor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ComponentViews.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="CodeGenerator.cpp">
+      <Filter>Language</Filter>
+    </ClCompile>
+    <ClCompile Include="ComponentUI.cpp">
+      <Filter>UI\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="ComponentWidgets.cpp">
+      <Filter>UI\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI.cpp">
+      <Filter>UI\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="MenuBar.cpp">
+      <Filter>UI\GUI\MenuBar</Filter>
+    </ClCompile>
+    <ClCompile Include="Observer.cpp">
+      <Filter>UI\GUI\Observer</Filter>
+    </ClCompile>
+    <ClCompile Include="Console.cpp">
+      <Filter>UI\GUI\Console</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneHierarchy.cpp">
+      <Filter>UI\GUI\SceneHierarchy</Filter>
+    </ClCompile>
+    <ClCompile Include="AssetManager.cpp">
+      <Filter>UI\GUI\AssetManager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ComponentViews.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CodeGenerator.hpp">
+      <Filter>Language</Filter>
+    </ClInclude>
+    <ClInclude Include="ComponentUI.hpp">
+      <Filter>UI\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="ComponentWidgets.hpp">
+      <Filter>UI\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI.hpp">
+      <Filter>UI\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="MenuBar.hpp">
+      <Filter>UI\GUI\MenuBar</Filter>
+    </ClInclude>
+    <ClInclude Include="Observer.hpp">
+      <Filter>UI\GUI\Observer</Filter>
+    </ClInclude>
+    <ClInclude Include="Console.hpp">
+      <Filter>UI\GUI\Console</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneHierarchy.hpp">
+      <Filter>UI\GUI\SceneHierarchy</Filter>
+    </ClInclude>
+    <ClInclude Include="AssetManager.hpp">
+      <Filter>UI\GUI\AssetManager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -48,6 +123,12 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\Engine\Images\neodoalogo.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\document.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\folder.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

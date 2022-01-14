@@ -51,8 +51,23 @@
     <Filter Include="Asset\Color">
       <UniqueIdentifier>{8fca64b3-d885-4e60-86c1-076abdd8c437}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Asset\Script\Modules">
-      <UniqueIdentifier>{e0c4992a-be43-4725-89a7-721e9a92c86f}</UniqueIdentifier>
+    <Filter Include="ECS">
+      <UniqueIdentifier>{f7867c68-06fa-4724-9232-c640fb26eaca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ECS\Components">
+      <UniqueIdentifier>{34d6103c-fa16-49d5-9e7a-7704ebf76d4a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ECS\Systems">
+      <UniqueIdentifier>{929d2981-d50b-4931-908a-fbd35c51e06b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ECS\Components\Script">
+      <UniqueIdentifier>{727a50c3-de1f-48c7-b8f5-5f6afff1dc97}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ECS\Entity">
+      <UniqueIdentifier>{4add9540-7c21-4c9e-83b5-8d25b8200492}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Project\Serialize">
+      <UniqueIdentifier>{9fd92fd9-1af8-4b7f-8190-17c1b0658f9a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -104,21 +119,6 @@
     <ClCompile Include="AssetManager.cpp">
       <Filter>Asset\Manager</Filter>
     </ClCompile>
-    <ClCompile Include="ScriptComponent.cpp">
-      <Filter>Asset\Script</Filter>
-    </ClCompile>
-    <ClCompile Include="ModelRenderer.cpp">
-      <Filter>Asset\Script\Modules</Filter>
-    </ClCompile>
-    <ClCompile Include="Module.cpp">
-      <Filter>Asset\Script\Modules</Filter>
-    </ClCompile>
-    <ClCompile Include="Tag.cpp">
-      <Filter>Asset\Script\Modules</Filter>
-    </ClCompile>
-    <ClCompile Include="Transform.cpp">
-      <Filter>Asset\Script\Modules</Filter>
-    </ClCompile>
     <ClCompile Include="Project.cpp">
       <Filter>Project</Filter>
     </ClCompile>
@@ -131,11 +131,44 @@
     <ClCompile Include="OutlineRenderer.cpp">
       <Filter>Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>Asset\Script\Modules</Filter>
-    </ClCompile>
     <ClCompile Include="Color.cpp">
       <Filter>Asset\Color</Filter>
+    </ClCompile>
+    <ClCompile Include="TransformComponent.cpp">
+      <Filter>ECS\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="BehaviourComponent.cpp">
+      <Filter>ECS\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="System.cpp">
+      <Filter>ECS\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="ScriptStorageComponent.cpp">
+      <Filter>ECS\Components\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="ScriptComponent.cpp">
+      <Filter>ECS\Components\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="IDComponent.cpp">
+      <Filter>ECS\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Entity.cpp">
+      <Filter>ECS\Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="ParentComponent.cpp">
+      <Filter>ECS\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="ChildComponent.cpp">
+      <Filter>ECS\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="ProjectSerializer.cpp">
+      <Filter>Project\Serialize</Filter>
+    </ClCompile>
+    <ClCompile Include="ProjectDeserializer.cpp">
+      <Filter>Project\Serialize</Filter>
+    </ClCompile>
+    <ClCompile Include="FileNode.cpp">
+      <Filter>Asset\Manager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -202,21 +235,6 @@
     <ClInclude Include="Vertex.hpp">
       <Filter>Asset\Model</Filter>
     </ClInclude>
-    <ClInclude Include="ScriptComponent.hpp">
-      <Filter>Asset\Script</Filter>
-    </ClInclude>
-    <ClInclude Include="Module.hpp">
-      <Filter>Asset\Script\Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="ModelRenderer.hpp">
-      <Filter>Asset\Script\Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="Tag.hpp">
-      <Filter>Asset\Script\Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="Transform.hpp">
-      <Filter>Asset\Script\Modules</Filter>
-    </ClInclude>
     <ClInclude Include="AssetManager.hpp">
       <Filter>Asset\Manager</Filter>
     </ClInclude>
@@ -235,14 +253,50 @@
     <ClInclude Include="OutlineRenderer.hpp">
       <Filter>Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Camera.hpp">
-      <Filter>Asset\Script\Modules</Filter>
-    </ClInclude>
     <ClInclude Include="Color.hpp">
       <Filter>Asset\Color</Filter>
     </ClInclude>
     <ClInclude Include="TypedefsAndConstants.hpp">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformComponent.hpp">
+      <Filter>ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviourComponent.hpp">
+      <Filter>ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="System.hpp">
+      <Filter>ECS\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="IDComponent.hpp">
+      <Filter>ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="ScriptComponent.hpp">
+      <Filter>ECS\Components\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="ScriptStorageComponent.hpp">
+      <Filter>ECS\Components\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="Entity.hpp">
+      <Filter>ECS\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry.hpp">
+      <Filter>ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="ParentComponent.hpp">
+      <Filter>ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="ChildComponent.hpp">
+      <Filter>ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="ScriptComponentData.hpp">
+      <Filter>ECS\Components\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="ProjectSerializer.hpp">
+      <Filter>Project\Serialize</Filter>
+    </ClInclude>
+    <ClInclude Include="ProjectDeserializer.hpp">
+      <Filter>Project\Serialize</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

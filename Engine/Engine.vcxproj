@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -52,6 +52,8 @@
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)bin\tmp\$(ProjectName)\$(Configuration)\</IntDir>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -59,9 +61,9 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;BUILD_DLL;EDITOR;_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <CompileAs>Default</CompileAs>
-      <AdditionalIncludeDirectories>$(SolutionDir)GLFW\include\;$(SolutionDir)GLEW\include\;$(SolutionDir)GLM\;$(SolutionDir)ImGui\;$(SolutionDir)STB\;$(SolutionDir)Assimp\include\;$(SolutionDir)EnTT\;$(SolutionDir)AngelScript\include\;$(SolutionDir)AngelScript\add_on\;$(SolutionDir)IconFontCppHeaders\;$(SolutionDir)TinyXML2\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)GLFW\include\;$(SolutionDir)GLEW\include\;$(SolutionDir)GLM\;$(SolutionDir)ImGui\;$(SolutionDir)STB\;$(SolutionDir)Assimp\include\;$(SolutionDir)EnTT\;$(SolutionDir)AngelScript\include\;$(SolutionDir)AngelScript\add_on\;$(SolutionDir)IconFontCppHeaders\;$(SolutionDir)TinyXML2\;$(SolutionDir)Utility\</AdditionalIncludeDirectories>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <AdditionalOptions>-D_CRT_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
@@ -86,13 +88,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;BUILD_DLL;EDITOR;_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <CompileAs>Default</CompileAs>
-      <AdditionalIncludeDirectories>$(SolutionDir)GLFW\include\;$(SolutionDir)GLEW\include\;$(SolutionDir)GLM\;$(SolutionDir)ImGui\;$(SolutionDir)STB\;$(SolutionDir)Assimp\include\;$(SolutionDir)EnTT\;$(SolutionDir)AngelScript\include\;$(SolutionDir)AngelScript\add_on\;$(SolutionDir)IconFontCppHeaders\;$(SolutionDir)TinyXML2\;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)GLFW\include\;$(SolutionDir)GLEW\include\;$(SolutionDir)GLM\;$(SolutionDir)ImGui\;$(SolutionDir)STB\;$(SolutionDir)Assimp\include\;$(SolutionDir)EnTT\;$(SolutionDir)AngelScript\include\;$(SolutionDir)AngelScript\add_on\;$(SolutionDir)IconFontCppHeaders\;$(SolutionDir)TinyXML2\;$(SolutionDir)Utility\</AdditionalIncludeDirectories>
       <DebugInformationFormat>None</DebugInformationFormat>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <AdditionalOptions>-D_CRT_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <EnablePREfast>true</EnablePREfast>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -109,66 +112,79 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Angel.cpp" />
-    <ClCompile Include="AssetManager.cpp" />
-    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Assets.cpp" />
+    <ClCompile Include="BehaviourComponent.cpp" />
+    <ClCompile Include="ChildComponent.cpp" />
     <ClCompile Include="Color.cpp" />
+    <ClCompile Include="Entity.cpp" />
+    <ClCompile Include="FileNode.cpp" />
     <ClCompile Include="FrameBuffer.cpp" />
+    <ClCompile Include="IDComponent.cpp" />
     <ClCompile Include="Log.cpp" />
-    <ClCompile Include="ModelRenderer.cpp" />
-    <ClCompile Include="Module.cpp" />
     <ClCompile Include="OrthoCamera.cpp" />
     <ClCompile Include="ImGuiRenderer.cpp" />
     <ClCompile Include="OutlineRenderer.cpp" />
+    <ClCompile Include="ParentComponent.cpp" />
     <ClCompile Include="PerspectiveCamera.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Core.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Project.cpp" />
+    <ClCompile Include="ProjectDeserializer.cpp" />
+    <ClCompile Include="ProjectSerializer.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneDeserializer.cpp" />
     <ClCompile Include="SceneSerializer.cpp" />
     <ClCompile Include="ScriptComponent.cpp" />
+    <ClCompile Include="ScriptStorageComponent.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClInclude Include="Angel.hpp" />
-    <ClInclude Include="AssetManager.hpp" />
-    <ClInclude Include="Camera.hpp" />
+    <ClInclude Include="Assets.hpp" />
+    <ClInclude Include="BehaviourComponent.hpp" />
     <ClInclude Include="ACamera.hpp" />
+    <ClInclude Include="ChildComponent.hpp" />
     <ClInclude Include="Color.hpp" />
+    <ClInclude Include="Entity.hpp" />
     <ClInclude Include="EnumValue.hpp" />
     <ClInclude Include="FileNode.hpp" />
     <ClInclude Include="FrameBuffer.hpp" />
+    <ClInclude Include="IDComponent.hpp" />
     <ClInclude Include="Log.hpp" />
-    <ClInclude Include="ModelRenderer.hpp" />
-    <ClInclude Include="Module.hpp" />
     <ClInclude Include="OrthoCamera.hpp" />
     <ClInclude Include="ImGuiRenderCommand.hpp" />
     <ClInclude Include="ImGuiRenderer.hpp" />
     <ClInclude Include="OutlineRenderer.hpp" />
+    <ClInclude Include="ParentComponent.hpp" />
     <ClInclude Include="PerspectiveCamera.hpp" />
     <ClInclude Include="Project.hpp" />
+    <ClInclude Include="ProjectDeserializer.hpp" />
+    <ClInclude Include="ProjectSerializer.hpp" />
     <ClInclude Include="PropertyData.hpp" />
     <ClInclude Include="Mesh.hpp" />
     <ClInclude Include="Input.hpp" />
     <ClInclude Include="Model.hpp" />
+    <ClInclude Include="Registry.hpp" />
     <ClInclude Include="Renderer.hpp" />
     <ClInclude Include="Scene.hpp" />
     <ClInclude Include="SceneDeserializer.hpp" />
     <ClInclude Include="SceneSerializer.hpp" />
     <ClInclude Include="ScriptComponent.hpp" />
+    <ClInclude Include="ScriptComponentData.hpp" />
+    <ClInclude Include="ScriptStorageComponent.hpp" />
     <ClInclude Include="Shader.hpp" />
-    <ClCompile Include="Tag.cpp" />
+    <ClCompile Include="System.cpp" />
     <ClCompile Include="Texture.cpp" />
-    <ClCompile Include="Transform.cpp" />
+    <ClCompile Include="TransformComponent.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core.hpp" />
     <ClInclude Include="NeoDoa.hpp" />
-    <ClInclude Include="Tag.hpp" />
+    <ClInclude Include="System.hpp" />
     <ClInclude Include="Texture.hpp" />
-    <ClInclude Include="Transform.hpp" />
+    <ClInclude Include="TransformComponent.hpp" />
     <ClInclude Include="TypedefsAndConstants.hpp" />
     <ClInclude Include="Vertex.hpp" />
     <ClInclude Include="Window.hpp" />
