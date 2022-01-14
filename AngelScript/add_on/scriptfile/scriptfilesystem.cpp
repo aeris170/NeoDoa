@@ -1,5 +1,6 @@
 #include "scriptfilesystem.h"
 #include "../autowrapper/aswrappedcall.h"
+#include <string.h> // strstr()
 
 #if defined(_WIN32)
 #include <direct.h> // _getcwd
@@ -383,6 +384,7 @@ asINT64 CScriptFileSystem::GetSize(const string &path) const
 //       - path not found
 //       - access denied
 // TODO: Should be able to define the permissions for the directory
+// TODO: Should support recursively creating directories
 int CScriptFileSystem::MakeDir(const string &path)
 {
 	string search;

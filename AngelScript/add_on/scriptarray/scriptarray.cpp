@@ -1332,6 +1332,19 @@ void CScriptArray::Copy(void *dst, void *src)
 
 
 // internal
+// Swap two elements
+// Even in arrays of objects the objects are allocated on 
+// the heap and the array stores the pointers to the objects.
+void CScriptArray::Swap(void* a, void* b)
+{
+	asBYTE tmp[16];
+	Copy(tmp, a);
+	Copy(a, b);
+	Copy(b, tmp);
+}
+
+
+// internal
 // Return pointer to array item (object handle or primitive value)
 void *CScriptArray::GetArrayItemPointer(int index)
 {
@@ -1574,32 +1587,31 @@ void CScriptArray::Sort(asIScriptFunction *func, asUINT startAt, asUINT count)
 	if (cmpContext == 0)
 		cmpContext = objType->GetEngine()->RequestContext();
 
-	// Insertion sort
-	asBYTE tmp[16];
-	for (asUINT i = start + 1; i < end; i++)
+	// TODO: Security issue: If the array is accessed from the callback while the sort is going on the result may be unpredictable
+	//       For example, the callback resizes the array in the middle of the sort
+	//       Possible solution: set a lock flag on the array, and prohibit modifications while the lock flag is set
+
+	// Bubble sort
+	// TODO: optimize: Use an efficient sort algorithm
+	for (asUINT i = start; i+1 < end; i++)
 	{
-		Copy(tmp, GetArrayItemPointer(i));
-
-		asUINT j = i - 1;
-
-		while (j != 0xFFFFFFFF && j >= start )
+		asUINT best = i;
+		for (asUINT j = i + 1; j < end; j++)
 		{
 			cmpContext->Prepare(func);
-			cmpContext->SetArgAddress(0, GetDataPointer(tmp));
-			cmpContext->SetArgAddress(1, At(j));
+			cmpContext->SetArgAddress(0, At(j));
+			cmpContext->SetArgAddress(1, At(best));
 			int r = cmpContext->Execute();
 			if (r != asEXECUTION_FINISHED)
 				break;
 			if (*(bool*)(cmpContext->GetAddressOfReturnValue()))
-			{
-				Copy(GetArrayItemPointer(j + 1), GetArrayItemPointer(j));
-				j--;
-			}
-			else
-				break;
+				best = j;
 		}
 
-		Copy(GetArrayItemPointer(j + 1), tmp);
+		// With Swap we guarantee that the array always sees all references
+		// if the GC calls the EnumReferences in the middle of the sorting
+		if( best != i )
+			Swap(GetArrayItemPointer(i), GetArrayItemPointer(best));
 	}
 
 	if (cmpContext)
@@ -2170,8 +2182,9 @@ static void RegisterScriptArray_Generic(asIScriptEngine *engine)
 	r = engine->RegisterObjectMethod("array<T>", "int findByRef(uint startAt, const T&in if_handle_then_const value) const", asFUNCTION(ScriptArrayFindByRef2_Generic), asCALL_GENERIC); assert( r >= 0 );
 	r = engine->RegisterObjectMethod("array<T>", "bool opEquals(const array<T>&in) const", asFUNCTION(ScriptArrayEquals_Generic), asCALL_GENERIC); assert( r >= 0 );
 	r = engine->RegisterObjectMethod("array<T>", "bool isEmpty() const", asFUNCTION(ScriptArrayIsEmpty_Generic), asCALL_GENERIC); assert( r >= 0 );
-	r = engine->RegisterFuncdef("bool array<T>::less(const T&in a, const T&in b)");
+	r = engine->RegisterFuncdef("bool array<T>::less(const T&in if_handle_then_const a, const T&in if_handle_then_const b)");
 	r = engine->RegisterObjectMethod("array<T>", "void sort(const less &in, uint startAt = 0, uint count = uint(-1))", asFUNCTION(ScriptArraySortCallback_Generic), asCALL_GENERIC); assert(r >= 0);
+
 #if AS_USE_STLNAMES != 1 && AS_USE_ACCESSORS == 1
 	r = engine->RegisterObjectMethod("array<T>", "uint get_length() const property", asFUNCTION(ScriptArrayLength_Generic), asCALL_GENERIC); assert( r >= 0 );
 	r = engine->RegisterObjectMethod("array<T>", "void set_length(uint) property", asFUNCTION(ScriptArrayResize_Generic), asCALL_GENERIC); assert( r >= 0 );
