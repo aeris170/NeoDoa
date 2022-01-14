@@ -20,18 +20,19 @@ enum class LogSource {
 };
 
 struct LogMessage {
-	std::string _message;
-	LogSeverity _severity;
+	const std::string _message;
+	const LogSeverity _severity;
 
-	LogMessage(LogSeverity severity, const std::string& message);
+	LogMessage(LogSeverity severity, const std::string& message) noexcept;
+	LogMessage(LogSeverity severity, std::string&& message) noexcept;
 };
 
 struct Log {
 	inline static std::vector<LogMessage> _messages;
 
-	//Please use the #define's below, don't call this methods directly. See Log.hpp for #defines.
+	// Please use the #define's below, don't call this method directly. See Log.hpp for #defines.
 	static void Print(LogSource src, LogSeverity sev, const char* fmt, ...);
-	//Please use the #define's below, don't call this methods directly. See Log.hpp for #defines.
+	// Please use the #define's below, don't call this method directly. See Log.hpp for #defines.
 	static void SaveMessage(LogSource src, LogSeverity sev, const char* fmt, ...);
 
 	static void Clear();

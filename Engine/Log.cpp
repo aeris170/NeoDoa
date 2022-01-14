@@ -3,9 +3,13 @@
 #include <ctime>
 #include <cstdarg>
 
-LogMessage::LogMessage(LogSeverity severity, const std::string& message) :
+LogMessage::LogMessage(LogSeverity severity, const std::string& message) noexcept :
 	_severity(severity),
 	_message(message) {}
+
+LogMessage::LogMessage(LogSeverity severity, std::string&& message) noexcept :
+	_severity(severity),
+	_message(std::move(message)) {}
 
 void Log::SaveMessage(LogSource src, LogSeverity sev, const char* fmt, ...) {
 	char buffer[1024];
@@ -30,7 +34,7 @@ void Log::SaveMessage(LogSource src, LogSeverity sev, const char* fmt, ...) {
 		break;
 	};
 	ss.append(buffer);
-	_messages.push_back({ sev, ss });
+	_messages.emplace_back(sev, std::move(ss));
 }
 
 #define RESET	"\033[0m"				// Ordinary console...
