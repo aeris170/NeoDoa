@@ -82,6 +82,20 @@ Window::~Window() noexcept {
     glfwTerminate();
 }
 
+std::string Window::GetTitle() const {
+    return _title;
+}
+
+void Window::SetTitle(const std::string& title) {
+    _title = title;
+    glfwSetWindowTitle(_glfwWindow, title.c_str());
+}
+
+void Window::SetTitle(std::string&& title) {
+    _title = std::move(title);
+    glfwSetWindowTitle(_glfwWindow, title.c_str());
+}
+
 //-----------------------------------------------------------------
 
 static void glfwWindowOnResize(GLFWwindow* window, int width, int height) {

@@ -33,4 +33,9 @@ struct Window {
 	Window(const Window&&) = delete;
 	Window& operator=(const Window&) = delete;
 	Window& operator=(const Window&&) = delete;
+
+	std::string GetTitle() const;
+	void SetTitle(const std::string& title);
+	void SetTitle(std::string&& title);
+
 };
