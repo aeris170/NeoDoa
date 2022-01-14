@@ -39,8 +39,8 @@
 #endif
 
 // This is a workaround for the fact that glfw3.h needs to export APIENTRY (for
-// example to allow applications to correctly declare a GL_ARB_debug_output
-// callback) but windows.h assumes no one will define APIENTRY before it does
+// example to allow applications to correctly declare a GL_KHR_debug callback)
+// but windows.h assumes no one will define APIENTRY before it does
 #undef APIENTRY
 
 // GLFW on Windows is Unicode only and does not work in MBCS mode
@@ -77,6 +77,9 @@
 #ifndef WM_DWMCOMPOSITIONCHANGED
  #define WM_DWMCOMPOSITIONCHANGED 0x031E
 #endif
+#ifndef WM_DWMCOLORIZATIONCOLORCHANGED
+ #define WM_DWMCOLORIZATIONCOLORCHANGED 0x0320
+#endif
 #ifndef WM_COPYGLOBALDATA
  #define WM_COPYGLOBALDATA 0x0049
 #endif
@@ -99,7 +102,7 @@
  #define DISPLAY_DEVICE_ACTIVE 0x00000001
 #endif
 #ifndef _WIN32_WINNT_WINBLUE
- #define _WIN32_WINNT_WINBLUE 0x0602
+ #define _WIN32_WINNT_WINBLUE 0x0603
 #endif
 #ifndef _WIN32_WINNT_WIN8
  #define _WIN32_WINNT_WIN8 0x0602
@@ -215,10 +218,6 @@ typedef enum
  #define DIDFT_OPTIONAL 0x80000000
 #endif
 
-// winmm.dll function pointer typedefs
-typedef DWORD (WINAPI * PFN_timeGetTime)(void);
-#define timeGetTime _glfw.win32.winmm.GetTime
-
 // xinput.dll function pointer typedefs
 typedef DWORD (WINAPI * PFN_XInputGetCapabilities)(DWORD,DWORD,XINPUT_CAPABILITIES*);
 typedef DWORD (WINAPI * PFN_XInputGetState)(DWORD,XINPUT_STATE*);
@@ -247,9 +246,11 @@ typedef BOOL (WINAPI * PFN_AdjustWindowRectExForDpi)(LPRECT,DWORD,BOOL,DWORD,UIN
 typedef HRESULT (WINAPI * PFN_DwmIsCompositionEnabled)(BOOL*);
 typedef HRESULT (WINAPI * PFN_DwmFlush)(VOID);
 typedef HRESULT(WINAPI * PFN_DwmEnableBlurBehindWindow)(HWND,const DWM_BLURBEHIND*);
+typedef HRESULT (WINAPI * PFN_DwmGetColorizationColor)(DWORD*,BOOL*);
 #define DwmIsCompositionEnabled _glfw.win32.dwmapi.IsCompositionEnabled
 #define DwmFlush _glfw.win32.dwmapi.Flush
 #define DwmEnableBlurBehindWindow _glfw.win32.dwmapi.EnableBlurBehindWindow
+#define DwmGetColorizationColor _glfw.win32.dwmapi.GetColorizationColor
 
 // shcore.dll function pointer typedefs
 typedef HRESULT (WINAPI * PFN_SetProcessDpiAwareness)(PROCESS_DPI_AWARENESS);
@@ -316,9 +317,13 @@ typedef struct _GLFWwindowWin32
     GLFWbool            transparent;
     GLFWbool            scaleToMonitor;
 
+    // Cached size used to filter out duplicate events
+    int                 width, height;
+
     // The last received cursor position, regardless of source
     int                 lastCursorPosX, lastCursorPosY;
-
+    // The last recevied high surrogate when decoding pairs of UTF-16 messages
+    WCHAR               highSurrogate;
 } _GLFWwindowWin32;
 
 // Win32-specific global data
@@ -340,11 +345,6 @@ typedef struct _GLFWlibraryWin32
     RAWINPUT*           rawInput;
     int                 rawInputSize;
     UINT                mouseTrailSize;
-
-    struct {
-        HINSTANCE                       instance;
-        PFN_timeGetTime                 GetTime;
-    } winmm;
 
     struct {
         HINSTANCE                       instance;
@@ -373,6 +373,7 @@ typedef struct _GLFWlibraryWin32
         PFN_DwmIsCompositionEnabled     IsCompositionEnabled;
         PFN_DwmFlush                    Flush;
         PFN_DwmEnableBlurBehindWindow   EnableBlurBehindWindow;
+        PFN_DwmGetColorizationColor     GetColorizationColor;
     } dwmapi;
 
     struct {
@@ -385,7 +386,6 @@ typedef struct _GLFWlibraryWin32
         HINSTANCE                       instance;
         PFN_RtlVerifyVersionInfo        RtlVerifyVersionInfo_;
     } ntdll;
-
 } _GLFWlibraryWin32;
 
 // Win32-specific per-monitor data
@@ -400,7 +400,6 @@ typedef struct _GLFWmonitorWin32
     char                publicDisplayName[32];
     GLFWbool            modesPruned;
     GLFWbool            modeChanged;
-
 } _GLFWmonitorWin32;
 
 // Win32-specific per-cursor data
@@ -408,16 +407,13 @@ typedef struct _GLFWmonitorWin32
 typedef struct _GLFWcursorWin32
 {
     HCURSOR             handle;
-
 } _GLFWcursorWin32;
 
 // Win32-specific global timer data
 //
 typedef struct _GLFWtimerWin32
 {
-    GLFWbool            hasPC;
     uint64_t            frequency;
-
 } _GLFWtimerWin32;
 
 // Win32-specific thread local storage data
@@ -426,7 +422,6 @@ typedef struct _GLFWtlsWin32
 {
     GLFWbool            allocated;
     DWORD               index;
-
 } _GLFWtlsWin32;
 
 // Win32-specific mutex data
@@ -435,7 +430,6 @@ typedef struct _GLFWmutexWin32
 {
     GLFWbool            allocated;
     CRITICAL_SECTION    section;
-
 } _GLFWmutexWin32;
 
 
