@@ -1,22 +1,22 @@
-#include "ComponentViews.hpp"
+#include "ComponentWidgets.hpp"
 
 #include <imgui.h>
 #include <imgui_internal.h>
 
-void FancyVectorWidget(const char* label, glm::vec2& vec, float reset, int flags) {
+void FancyVectorWidget(const std::string& label, glm::vec2& vec, float reset, int flags) {
 	FancyVectorWidget(label, &vec.x, reset, flags);
 }
 
-void FancyVectorWidget(const char* label, glm::vec3& vec, float reset, int flags) {
+void FancyVectorWidget(const std::string& label, glm::vec3& vec, float reset, int flags) {
 	FancyVectorWidget(label, &vec.x, reset, flags);
 }
 
-void FancyVectorWidget(const char* label, glm::vec4& vec, float reset, int flags) {
+void FancyVectorWidget(const std::string& label, glm::vec4& vec, float reset, int flags) {
 	FancyVectorWidget(label, &vec.x, reset, flags);
 }
 
 // Courtesy of Yan Chernikov, a.k.a The Cherno Project
-void FancyVectorWidget(const char* label, float* values, float reset, int flags) {
+void FancyVectorWidget(const std::string& label, float* values, float reset, int flags) {
 	float divisor = 0;
 	if (flags & X) divisor++;
 	if (flags & Y) divisor++;
@@ -30,13 +30,13 @@ void FancyVectorWidget(const char* label, float* values, float reset, int flags)
 	ImGuiIO& io = ImGui::GetIO();
 	auto boldFont = io.Fonts->Fonts[0];
 
-	ImGui::PushID(label);
+	ImGui::PushID(label.c_str());
 
 	ImGui::Columns(2);
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { ImGui::GetStyle().ItemSpacing.x, 0 });
 	ImGui::SetColumnWidth(0, w - compFieldWidth);
 	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f);
-	ImGui::Text(label);
+	ImGui::Text(label.c_str());
 	ImGui::NextColumn();
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
 	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f);
@@ -60,7 +60,7 @@ void FancyVectorWidget(const char* label, float* values, float reset, int flags)
 
 		ImGui::SameLine();
 		ImGui::PushItemWidth(compFieldWidth / divisor -  buttonSize.x);
-		ImGui::DragFloat("##X", &values[0], 0.1f, 0.0f, 0.0f, "%.2f");
+		ImGui::DragFloat("##X", &values[0], 0.1f, 0.0f, 0.0f, "%.3f");
 		ImGui::PopItemWidth();
 		if (flags & Y) {
 			ImGui::SameLine();
@@ -80,7 +80,7 @@ void FancyVectorWidget(const char* label, float* values, float reset, int flags)
 
 		ImGui::SameLine();
 		ImGui::PushItemWidth(compFieldWidth / divisor - buttonSize.x);
-		ImGui::DragFloat("##Y", &values[1], 0.1f, 0.0f, 0.0f, "%.2f");
+		ImGui::DragFloat("##Y", &values[1], 0.1f, 0.0f, 0.0f, "%.3f");
 		ImGui::PopItemWidth();
 		if (flags & Z) {
 			ImGui::SameLine();
@@ -100,7 +100,7 @@ void FancyVectorWidget(const char* label, float* values, float reset, int flags)
 
 		ImGui::SameLine();
 		ImGui::PushItemWidth(compFieldWidth / divisor - buttonSize.x);
-		ImGui::DragFloat("##Z", &values[2], 0.1f, 0.0f, 0.0f, "%.2f");
+		ImGui::DragFloat("##Z", &values[2], 0.1f, 0.0f, 0.0f, "%.3f");
 		ImGui::PopItemWidth();
 		if(flags & W) {
 			ImGui::SameLine();
@@ -120,7 +120,7 @@ void FancyVectorWidget(const char* label, float* values, float reset, int flags)
 
 		ImGui::SameLine();
 		ImGui::PushItemWidth(compFieldWidth / divisor - buttonSize.x);
-		ImGui::DragFloat("##W", &values[3], 0.1f, 0.0f, 0.0f, "%.2f");
+		ImGui::DragFloat("##W", &values[3], 0.1f, 0.0f, 0.0f, "%.3f");
 		ImGui::PopItemWidth();
 	}
 	ImGui::PopStyleVar(2);
@@ -130,15 +130,15 @@ void FancyVectorWidget(const char* label, float* values, float reset, int flags)
 	ImGui::PopID();
 }
 
-static void BeginWidget(const char* label) {
+void detail::BeginWidget(const std::string& label) {
 	float w = ImGui::GetContentRegionAvail().x;
 
-	ImGui::PushID(label);
+	ImGui::PushID(label.c_str());
 	ImGui::Columns(2);
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { ImGui::GetStyle().ItemSpacing.x, 0 });
 	ImGui::SetColumnWidth(0, w - compFieldWidth);
 	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f + 3);
-	ImGui::Text(label);
+	ImGui::Text(label.c_str());
 	ImGui::NextColumn();
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
 	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f);
@@ -149,7 +149,7 @@ static void BeginWidget(const char* label) {
 	ImGui::PushFont(boldFont);
 }
 
-static void EndWidget() {
+void detail::EndWidget() {
 	ImGui::PopFont();
 	ImGui::PopStyleVar(2);
 	ImGui::Columns(1);
@@ -157,7 +157,7 @@ static void EndWidget() {
 	ImGui::PopID();
 }
 
-void EnumWidget(const char* label, int& value, const std::vector<EnumValue>& values) {
+void EnumWidget(const std::string& label, int& value, const std::vector<EnumValue>& values) {
 	BeginWidget(label);
 	std::stringstream ss;
 	ss << "##" << label;
@@ -187,7 +187,24 @@ void EnumWidget(const char* label, int& value, const std::vector<EnumValue>& val
 	EndWidget();
 }
 
-void IntWidget(const char* label, int& value) {
+void EntityWidget(const std::string& label, Entity& value) {
+	BeginWidget(label);
+	std::stringstream ss;
+	ss << "##" << label;
+	int val = EntityTo<int>(value);
+	ImGui::DragInt(ss.str().c_str(), &val);
+	value = static_cast<Entity>(val);
+	EndWidget();
+}
+
+void UneditableEntityWidget(const std::string& label, const Entity value) {
+	BeginWidget(label);
+	int val = EntityTo<int>(value);
+	ImGui::Text(std::to_string(val).c_str());
+	EndWidget();
+}
+
+void IntWidget(const std::string& label, int& value) {
 	BeginWidget(label);
 	std::stringstream ss;
 	ss << "##" << label;
@@ -195,7 +212,7 @@ void IntWidget(const char* label, int& value) {
 	EndWidget();
 }
 
-void FloatWidget(const char* label, float& value) {
+void FloatWidget(const std::string& label, float& value) {
 	BeginWidget(label);
 	std::stringstream ss;
 	ss << "##" << label;
@@ -203,7 +220,7 @@ void FloatWidget(const char* label, float& value) {
 	EndWidget();
 }
 
-void DoubleWidget(const char* label, double& value) {
+void DoubleWidget(const std::string& label, double& value) {
 	BeginWidget(label);
 	std::stringstream ss;
 	ss << "##" << label;
@@ -211,7 +228,7 @@ void DoubleWidget(const char* label, double& value) {
 	EndWidget();
 }
 
-void BoolWidget(const char* label, bool& value) {
+void BoolWidget(const std::string& label, bool& value) {
 	BeginWidget(label);
 	std::stringstream ss;
 	ss << "##" << label;
@@ -219,7 +236,7 @@ void BoolWidget(const char* label, bool& value) {
 	EndWidget();
 }
 
-void StringWidget(const char* label, std::string& value) {
+void StringWidget(const std::string& label, std::string& value) {
 	BeginWidget(label);
 	std::stringstream ss;
 	ss << "##" << label;
@@ -231,17 +248,13 @@ void StringWidget(const char* label, std::string& value) {
 	EndWidget();
 }
 
-void UneditableStringWidget(const char* label, const std::string& value) {
+void UneditableStringWidget(const std::string& label, const std::string& value) {
 	BeginWidget(label);
-	std::stringstream ss;
-	ss << "##" << label;
-	char buf[128]{ 0 };
-	strcpy_s(buf, value.c_str());
-	ImGui::InputText(ss.str().c_str(), buf, 128, ImGuiInputTextFlags_ReadOnly);
+	ImGui::Text(value.c_str());
 	EndWidget();
 }
 
-void ColorWidget(const char* label, Color& value) {
+void ColorWidget(const std::string& label, Color& value) {
 	BeginWidget(label);
 	std::stringstream ss;
 	ss << "##" << label;

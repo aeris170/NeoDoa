@@ -1,4 +1,4 @@
-#include "AssetManager.hpp"
+#include "Assets.hpp"
 
 #include <fstream>
 #include <sstream>
@@ -7,20 +7,16 @@
 
 #include <stb_image.h>
 
+#include "Project.hpp"
 #include "Log.hpp"
+#include "SceneSerializer.hpp"
 
 static void ReadRecursive(FNode& root);
-static void FindFilesFor(AssetManager& assetManager, FNode& root);
-static bool IsSceneFile(const FNode& node);
-static bool IsScriptFile(const FNode& node);
-static bool IsTextureFile(const FNode& node);
-static bool IsModelFile(const FNode& node);
-static bool IsMaterialFile(const FNode& node);
-static bool IsShaderFile(const FNode& node);
+static void FindFilesFor(Assets& assetManager, FNode& root);
 
-AssetManager::AssetManager(std::string_view dir) noexcept :
-	_dir(dir) {
-	auto path = std::filesystem::path(_dir);
+Assets::Assets(const Project* owner) noexcept :
+	project(owner) {
+	auto path = std::filesystem::path(project->_workspace);
 	_root._path = path.string();
 	_root._name = path.filename().string();
 	_root._name_noext = _root._name.substr(0, _root._name.find_last_of("."));
@@ -32,29 +28,28 @@ AssetManager::AssetManager(std::string_view dir) noexcept :
 	ReScan();
 }
 
-AssetManager::AssetManager(AssetManager&& other) noexcept {
-	*this = std::move(other);
+FNode* Assets::CreateNewSceneFileNode(std::string_view relativePath, std::string_view name) {
+	tinyxml2::XMLDocument doc;
+	doc.Parse(SerializeScene(Scene(name)).c_str());
+
+	std::string path = project->_workspace;
+	path.append("\\");
+	path.append(relativePath);
+	path.append(name);
+	path.append(SCENE_EXT);
+	doc.SaveFile(path.c_str());
+
+	ReScan();
+	return Find(path);
 }
 
-AssetManager& AssetManager::operator=(AssetManager&& other) noexcept {
-	_dir = std::move(other._dir);
-	_root = std::move(other._root);
-	_scenes = std::move(other._scenes);
-	_scripts = std::move(other._scripts);
-	_textures = std::move(other._textures);
-	_models = std::move(other._models);
-	_materials = std::move(other._materials);
-	_shaders = std::move(other._shaders);
-	return *this;
-}
-
-void AssetManager::ReScan() {
+void Assets::ReScan() {
 	_root._children.clear();
 	ReadRecursive(_root);
 	FindFilesFor(*this, _root);
 }
 
-FNode* AssetManager::Find(std::string fullpath) {
+FNode* Assets::Find(std::string fullpath) {
 	FNode* cur = &_root;
 	do {
 		auto index = fullpath.find_first_of('\\');
@@ -76,6 +71,30 @@ FNode* AssetManager::Find(std::string fullpath) {
 		return nullptr;
 	}
 	return cur;
+}
+
+bool Assets::IsSceneFile(const FNode& node) {
+	return node._ext == ".scn";
+}
+
+bool Assets::IsScriptFile(const FNode& node) {
+	return node._ext == ".as";
+}
+
+bool Assets::IsTextureFile(const FNode& node) {
+	return node._ext == ".png" || node._ext == ".jpg" || node._ext == ".jpeg";
+}
+
+bool Assets::IsModelFile(const FNode& node) {
+	return node._ext == ".obj" || node._ext == ".fbx" || node._ext == "3ds";
+}
+
+bool Assets::IsMaterialFile(const FNode& node) {
+	return node._ext == ".mat";
+}
+
+bool Assets::IsShaderFile(const FNode& node) {
+	return node._ext == ".sh";
 }
 
 //-----------------------------------------------------------------
@@ -104,48 +123,24 @@ static void ReadRecursive(FNode& root) {
 	}
 }
 
-static void FindFilesFor(AssetManager& assetManager, FNode& root) {
+static void FindFilesFor(Assets& assetManager, FNode& root) {
 	for (auto& node : root._children) {
 		if(node._isFile) {
-			if (IsSceneFile(node)) {
+			if (Assets::IsSceneFile(node)) {
 				assetManager._scenes.push_back(&node);
-			} else if (IsScriptFile(node)) {
+			} else if (Assets::IsScriptFile(node)) {
 				assetManager._scripts.push_back(&node);
-			} else if (IsTextureFile(node)) {
+			} else if (Assets::IsTextureFile(node)) {
 				assetManager._textures.push_back(&node);
-			} else if (IsModelFile(node)) {
+			} else if (Assets::IsModelFile(node)) {
 				assetManager._models.push_back(&node);
-			} else if (IsMaterialFile(node)) {
+			} else if (Assets::IsMaterialFile(node)) {
 				assetManager._materials.push_back(&node);
-			} else if (IsShaderFile(node)) {
+			} else if (Assets::IsShaderFile(node)) {
 				assetManager._shaders.push_back(&node);
 			}
 		} else if (node._isDir) {
 			FindFilesFor(assetManager, node);
 		}
 	}
-}
-
-static bool IsSceneFile(const FNode& node) {
-	return node._ext == ".scn";
-}
-
-static bool IsScriptFile(const FNode& node) {
-	return node._ext == ".as";
-}
-
-static bool IsTextureFile(const FNode& node) {
-	return node._ext == ".png" || node._ext == ".jpg" || node._ext == ".jpeg";
-}
-
-static bool IsModelFile(const FNode& node) {
-	return node._ext == ".obj" || node._ext == ".fbx" || node._ext == "3ds";
-}
-
-static bool IsMaterialFile(const FNode& node) {
-	return node._ext == ".mat";
-}
-
-static bool IsShaderFile(const FNode& node) {
-	return node._ext == ".sh";
 }
