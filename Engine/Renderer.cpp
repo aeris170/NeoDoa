@@ -13,16 +13,11 @@
 #include "Texture.hpp"
 #include "Core.hpp"
 #include "ScriptComponent.hpp"
-#include "Transform.hpp"
 
 #include "Log.hpp"
 
 static constexpr int defaultSize = 10;
 static constexpr int defaultGrowthFactor = 2;
-
-Renderer::Renderer() noexcept {}
-
-Renderer::~Renderer() noexcept {}
 
 //-----------------------------------------------------------------
 

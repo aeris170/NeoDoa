@@ -22,13 +22,6 @@ struct Renderer {
 	int indices = 0;
 	int drawCalls = 0;
 
-	Renderer() noexcept;
-	~Renderer() noexcept;
-	Renderer(const Renderer&) = delete;
-	Renderer(const Renderer&&) = delete;
-	Renderer& operator=(const Renderer&) = delete;
-	Renderer& operator=(const Renderer&&) = delete;
-
 	void Register(std::weak_ptr<Shader> shader, std::weak_ptr<Model> model);
 	void Submit(std::weak_ptr<Shader> shader, std::weak_ptr<Model> model, EntityID instance);
 
