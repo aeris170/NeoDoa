@@ -53,7 +53,7 @@ int main() {
 Also use the following style for 'if' statements:
 
 ```cpp
-if(true) {
+if (true) {
     // do something
 } else {
     // do something else
@@ -72,7 +72,7 @@ if (true) {
 ### Keep simple ifs one line
 
 ```cpp
-if(condition) { then(); }
+if (condition) { then(); }
 else { then2(); }
 ```
 
