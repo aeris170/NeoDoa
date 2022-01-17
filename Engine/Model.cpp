@@ -23,9 +23,7 @@ static std::vector<std::weak_ptr<Texture>> loadMaterialTextures(aiMaterial* mat,
         aiString str;
         mat->GetTexture(type, i, &str);
         auto t = CreateTexture(str.C_Str(), std::string("Images/").append(str.C_Str()).c_str());
-        if (t.has_value()) {
-            textures.emplace_back(t.value());
-        }
+        if (!t.expired()) { textures.emplace_back(t); }
     }
     return textures;
 }
