@@ -16,6 +16,7 @@
 //-----------------------------------------------------------------
 
 void OutlineRenderer::Render(std::vector<std::tuple<Transform&, ModelRenderer&>>& objects, ACamera* cam, glm::vec3 outlineColor) {
+	/*
 	vertices = 0;
 	indices = 0;
 	drawCalls = 0;
@@ -101,4 +102,5 @@ void OutlineRenderer::Render(std::vector<std::tuple<Transform&, ModelRenderer&>>
 	glEnable(GL_DEPTH_TEST);
 	glStencilFunc(GL_ALWAYS, 1, 0xFF);
 	glDisable(GL_STENCIL_TEST);
+	*/
 }
