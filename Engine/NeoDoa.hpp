@@ -115,7 +115,7 @@
 #include "Mesh.hpp"
 #include "Model.hpp"
 #pragma endregion
-#pragma region Script
+#pragma region ScriptComponent
 #pragma region Modules
 #include "ModelRenderer.hpp"
 #pragma endregion
