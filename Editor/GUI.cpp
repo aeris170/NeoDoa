@@ -7,6 +7,8 @@
 #include <Window.hpp>
 #include <Texture.hpp>
 
+#include "SVGPathway.hpp"
+
 const std::unordered_map<std::string, const std::string> GUI::CUSTOM_SCRIPT_ICONS = {
 	{ "IDComponent", ICON_FA_TAG " " },
 	{ "TransformComponent", ICON_FA_MAP_MARKER_ALT " " },
@@ -24,6 +26,8 @@ GUI::GUI(std::unique_ptr<Core>& core) noexcept :
 	con(this),
 	am(this),
 	delta(0) {
+	ImVec4 txtColor = ImGui::GetStyle().Colors[ImGuiCol_Text];
+	SVGPathway::Initialize({ txtColor.x, txtColor.y, txtColor.z, txtColor.w });
 	core->_window->SetTitle(defaultWindowName);
 	texIcons[FOLDER_ICON_KEY] = CreateTexture(FOLDER_ICON_KEY, "Images/folder.png");
 	texIcons[FILE_ICON_KEY] = CreateTexture(FILE_ICON_KEY, "Images/document.png");
