@@ -7,6 +7,7 @@
 struct Angel;
 struct Window;
 struct FrameBuffer;
+struct Project;
 
 struct Core {
 	bool _running{ false };
@@ -15,6 +16,10 @@ struct Core {
 	std::unique_ptr<Angel> _angel{ nullptr };
 	std::unique_ptr<Window> _window{ nullptr };
 	std::unique_ptr<FrameBuffer> _offscreenBuffer{ nullptr };
+	Project* _project{ nullptr };
+
+	void LoadProject(const Project& project);
+	void UnloadProject();
 
 	void Start();
 	void Stop();
