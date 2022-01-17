@@ -23,7 +23,7 @@ struct Renderer {
 	int drawCalls = 0;
 
 	void Register(std::weak_ptr<Shader> shader, std::weak_ptr<Model> model);
-	void Submit(std::weak_ptr<Shader> shader, std::weak_ptr<Model> model, EntityID instance);
+	void Submit(std::weak_ptr<Shader> shader, std::weak_ptr<Model> model, Entity instance);
 
 	void Render(entt::registry& registry, ACamera* cam);
 };
