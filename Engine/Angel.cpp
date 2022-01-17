@@ -20,7 +20,10 @@
 
 #include <imgui.h>
 
+#include <prettify.hpp>
+
 #include "ScriptComponent.hpp"
+#include "ScriptStorageComponent.hpp"
 #include "Input.hpp"
 #include "TypedefsAndConstants.hpp"
 #include "Log.hpp"
@@ -28,8 +31,6 @@
 #include "Mesh.hpp"
 #include "Model.hpp"
 #include "Shader.hpp"
-#include "Module.hpp"
-#include "Tag.hpp"
 #include "Color.hpp"
 
 static void logTrace(const std::string& in) { CLI_LOG_TRACE("%s", in.c_str()); }
@@ -111,38 +112,8 @@ static void colorCtorVec4(void* memory, const glm::vec4& color) { new(memory) Co
 static void meshCtor(void* memory) { new(memory) Mesh(std::vector<Vertex>(), std::vector<GLuint>(), std::vector<std::weak_ptr<Texture>>()); }
 static void meshDtor(void* memory) { ((Mesh*)memory)->~Mesh(); }
 
-static Model* modelCtor(const std::string& name, std::vector<Mesh> meshes) { return &*(CreateModelFromMesh(name, meshes).lock()); }
+static Model* modelCtor(const std::string& name, std::vector<Mesh>&& meshes) { return &*(CreateModelFromMesh(name, std::move(meshes)).lock()); }
 
-static asIScriptObject* getModule(int ID, const std::string& name) {
-	auto& modules = FindActiveScene().lock()->Modules(static_cast<EntityID>(ID));
-	int index = modules.IndexOf(name);
-	if (index == -1) {
-		std::string s;
-		s.reserve(128);
-		s.append(modules["Tag"].As<Tag>().Label());
-		s.append("(");
-		s.append(std::to_string(ID));
-		s.append(")");
-		s.append(" does not have ");
-		s.append(name);
-		s.append("!");
-		GetCore()->_angel->_scriptCtx->SetException(s.c_str());
-		return nullptr;
-	}
-	asIScriptObject* mdl = modules[index];
-	mdl->AddRef();
-	return mdl;
-}
-static void attachModule(unsigned int ID, const std::string& name) {
-	FindActiveScene().lock()->_attachList[ID].emplace_back(name);
-}
-static void detachModule(unsigned int ID, const std::string& name) {
-	FindActiveScene().lock()->_detachList[ID].emplace_back(name);
-}
-static bool hasModule(unsigned int ID, const std::string& type) {
-	auto& modules = FindActiveScene().lock()->Modules(static_cast<EntityID>(ID));
-	return modules.IndexOf(type) != -1;
-}
 static Shader* findShader(const std::string& name) {
 	auto rv = FindShader(name);
 	if (!rv.expired()) return &*(rv.lock());
@@ -164,40 +135,6 @@ static void MessageCallback(const asSMessageInfo* msg, void* param) {
 	} else {
 		DOA_LOG_ERROR("%s (%d, %d) : %s", msg->section, msg->row, msg->col, msg->message);
 	}
-}
-
-// prettify a string, ie. "myVar" becomes "My Var"
-static std::string beautify(const std::string& str) {
-	std::string rv;
-	rv.reserve(32);
-	rv.replace(0, 1, 1, str[0] >= 'a' ? (char)toupper(str[0]) : str[0]); // probably incorrect usage
-	auto i = 1;
-	auto j = 1;
-	char ch;
-	while ((ch = str[i]) != 0) {
-		if (ch >= 'A' && ch <= 'Z') {
-			rv.replace(j, 1, " ");
-			rv.replace(j + 1, 1, 1, ch);
-			j++;
-		}
-		else {
-			rv.replace(j, 1, 1, ch);
-		}
-		i++;
-		j++;
-	}
-	return rv;
-}
-static std::vector<std::string> split(std::string str, std::string_view delimeter) {
-	std::vector<std::string> rv;
-	auto pos = str.find(delimeter);
-	while (pos != str.npos) {
-		rv.emplace_back(str.substr(0, pos));
-		str = str.substr(pos + delimeter.size());
-		pos = str.find(delimeter);
-	}
-	rv.emplace_back(str);
-	return rv;
 }
 
 Angel::Angel() noexcept :
@@ -474,10 +411,6 @@ Angel::Angel() noexcept :
 	r = _scriptEngine->RegisterGlobalFunction("Shader@ FindShader(const string &in)", asFUNCTION(findShader), asCALL_CDECL); assert(r >= 0);
 	r = _scriptEngine->RegisterGlobalFunction("Model@ FindModel(const string &in)", asFUNCTION(findModel), asCALL_CDECL); assert(r >= 0);
 
-	r = _scriptEngine->RegisterGlobalFunction("__module@ __get(int, const string)", asFUNCTION(getModule), asCALL_CDECL); assert(r >= 0);
-	r = _scriptEngine->RegisterGlobalFunction("void __attach(uint, const string)", asFUNCTION(attachModule), asCALL_CDECL); assert(r >= 0);
-	r = _scriptEngine->RegisterGlobalFunction("void __detach(uint, const string)", asFUNCTION(detachModule), asCALL_CDECL); assert(r >= 0);
-	r = _scriptEngine->RegisterGlobalFunction("bool __has(uint, const string)", asFUNCTION(hasModule), asCALL_CDECL); assert(r >= 0);
 #pragma endregion
 #pragma region Print Functions
 	r = _scriptEngine->RegisterGlobalFunction("void trace(const string &in)", asFUNCTIONPR(logTrace, (const std::string&), void), asCALL_CDECL); assert(r >= 0);
@@ -537,7 +470,7 @@ Angel::Angel() noexcept :
 
 	r = _scriptEngine->RegisterGlobalFunction("vec2 GetContentRegionMax()", asFUNCTIONPR([]() { auto v = ImGui::GetContentRegionMax(); return glm::vec2(v.x, v.y); }, (), glm::vec2), asCALL_CDECL); assert(r >= 0);
 	r = _scriptEngine->RegisterGlobalFunction("vec2 GetContentRegionAvail()", asFUNCTIONPR([]() { auto v = ImGui::GetContentRegionAvail(); return glm::vec2(v.x, v.y); }, (), glm::vec2), asCALL_CDECL); assert(r >= 0);
-	r = _scriptEngine->RegisterGlobalFunction("float GetContentRegionAvailWidth()", asFUNCTIONPR(ImGui::GetContentRegionAvailWidth, (), float), asCALL_CDECL); assert(r >= 0);
+	//r = _scriptEngine->RegisterGlobalFunction("float GetContentRegionAvailWidth()", asFUNCTIONPR(ImGui::GetContentRegionAvailWidth, (), float), asCALL_CDECL); assert(r >= 0);
 	r = _scriptEngine->RegisterGlobalFunction("vec2 GetWindowContentRegionMin()", asFUNCTIONPR([]() { auto v = ImGui::GetWindowContentRegionMin(); return glm::vec2(v.x, v.y); }, (), glm::vec2), asCALL_CDECL); assert(r >= 0);
 	r = _scriptEngine->RegisterGlobalFunction("vec2 GetWindowContentRegionMax()", asFUNCTIONPR([]() { auto v = ImGui::GetWindowContentRegionMax(); return glm::vec2(v.x, v.y); }, (), glm::vec2), asCALL_CDECL); assert(r >= 0);
 	r = _scriptEngine->RegisterGlobalFunction("float GetWindowRegionWidth()", asFUNCTIONPR(ImGui::GetWindowContentRegionWidth, (), float), asCALL_CDECL); assert(r >= 0);
@@ -575,7 +508,7 @@ Angel::Angel() noexcept :
 	r = _scriptEngine->RegisterGlobalFunction("float GetScrollMaxY()", asFUNCTIONPR(ImGui::GetScrollMaxY, (), float), asCALL_CDECL); assert(r >= 0);
 	r = _scriptEngine->RegisterGlobalFunction("void SetScrollX(float)", asFUNCTIONPR(ImGui::SetScrollX, (float), void), asCALL_CDECL); assert(r >= 0);
 	r = _scriptEngine->RegisterGlobalFunction("void SetScrollY(float)", asFUNCTIONPR(ImGui::SetScrollY, (float), void), asCALL_CDECL); assert(r >= 0);
-	r = _scriptEngine->RegisterGlobalFunction("void SetScrollHere(float = 0.5f)", asFUNCTIONPR(ImGui::SetScrollHere, (float), void), asCALL_CDECL); assert(r >= 0);
+	//r = _scriptEngine->RegisterGlobalFunction("void SetScrollHere(float = 0.5f)", asFUNCTIONPR(ImGui::SetScrollHere, (float), void), asCALL_CDECL); assert(r >= 0);
 	r = _scriptEngine->RegisterGlobalFunction("void SetScrollFromPosY(float, float = 0.5f)", asFUNCTIONPR(ImGui::SetScrollFromPosY, (float, float), void), asCALL_CDECL); assert(r >= 0);
 
 
@@ -747,9 +680,9 @@ Angel::Angel() noexcept :
 	r = _scriptEngine->RegisterGlobalFunction("bool TreeNode(const string &in)", asFUNCTIONPR([](const std::string& id) { return ImGui::TreeNode(id.c_str()); }, (const std::string&), bool), asCALL_CDECL); assert(r >= 0);
 	r = _scriptEngine->RegisterGlobalFunction("void TreePush(const string &in)", asFUNCTIONPR([](const std::string& id) { ImGui::TreePush(id.c_str()); }, (const std::string&), void), asCALL_CDECL); assert(r >= 0);
 	r = _scriptEngine->RegisterGlobalFunction("void TreePop()", asFUNCTIONPR(ImGui::TreePop, (), void), asCALL_CDECL); assert(r >= 0);
-	r = _scriptEngine->RegisterGlobalFunction("void TreeAdvanceToLabelPos()", asFUNCTIONPR(ImGui::TreeAdvanceToLabelPos, (), void), asCALL_CDECL); assert(r >= 0);
-	r = _scriptEngine->RegisterGlobalFunction("float GetTreeNodeToLabelSpacing()", asFUNCTIONPR(ImGui::GetTreeNodeToLabelSpacing, (), float), asCALL_CDECL); assert(r >= 0);
-	r = _scriptEngine->RegisterGlobalFunction("void SetNextTreeNodeOpen(bool)", asFUNCTIONPR([](bool val) { ImGui::SetNextTreeNodeOpen(val); }, (bool), void), asCALL_CDECL); assert(r >= 0);
+	//r = _scriptEngine->RegisterGlobalFunction("void TreeAdvanceToLabelPos()", asFUNCTIONPR(ImGui::TreeAdvanceToLabelPos, (), void), asCALL_CDECL); assert(r >= 0);
+	//r = _scriptEngine->RegisterGlobalFunction("float GetTreeNodeToLabelSpacing()", asFUNCTIONPR(ImGui::GetTreeNodeToLabelSpacing, (), float), asCALL_CDECL); assert(r >= 0);
+	//r = _scriptEngine->RegisterGlobalFunction("void SetNextTreeNodeOpen(bool)", asFUNCTIONPR([](bool val) { ImGui::SetNextTreeNodeOpen(val); }, (bool), void), asCALL_CDECL); assert(r >= 0);
 	r = _scriptEngine->RegisterGlobalFunction("bool CollapsingHeader(const string &in)", asFUNCTIONPR([](const std::string& n) { return ImGui::CollapsingHeader(n.c_str()); }, (const std::string&), bool), asCALL_CDECL); assert(r >= 0);
 	r = _scriptEngine->RegisterGlobalFunction("bool CollapsingHeader(const string &in, bool &inout)", asFUNCTIONPR([](const std::string& n, bool& v) { return ImGui::CollapsingHeader(n.c_str(), &v); }, (const std::string&, bool&), bool), asCALL_CDECL); assert(r >= 0);
 
@@ -878,17 +811,8 @@ Angel::Angel() noexcept :
 Angel::~Angel() noexcept {
 	_scriptLoaderRunning = false;
 
-	for (auto& ctor : _moduleCtors) {
+	for (auto& ctor : _scriptComponentCtors) {
 		ctor.second->Release();
-	}
-	for (auto& update : _moduleUpdates) {
-		update.second->Release();
-	}
-	for (auto& pair : _moduleFunctions) {
-		auto& funcVector = pair.second;
-		for (auto& func : funcVector) {
-			func->Release();
-		}
 	}
 
 	_scriptLoaderDeamon.join();
@@ -897,86 +821,18 @@ Angel::~Angel() noexcept {
 	_scriptEngine->ShutDownAndRelease();
 }
 
-bool Angel::IsModule(asITypeInfo* type) {
-	return type->DerivesFrom(_moduleBaseType);
-}
-
-bool Angel::IsDefModule(asITypeInfo* type) {
-	return type->DerivesFrom(_defModuleBaseType);
-}
-
-Module Angel::InstantiateModule(std::string_view moduleType, int ID) {
-	if (_moduleCtors.count(moduleType.data()) == 0) {
-		DOA_LOG_ERROR("No such module type!");
+ScriptComponent Angel::InstantiateScriptComponentIncomplete(std::string_view componentType) {
+	if (_scriptComponentCtors.count(componentType.data()) == 0) {
+		DOA_LOG_ERROR("No such script component defined!");
 		throw;
 	}
-	_scriptCtx->Prepare(_moduleCtors[moduleType.data()]);
+	_scriptCtx->Prepare(_scriptComponentCtors[componentType.data()]);
 	_scriptCtx->Execute();
 	asIScriptObject* obj = *(asIScriptObject**)_scriptCtx->GetAddressOfReturnValue();
-	Module m(moduleType, obj);
-	m.SetID(ID);
+	ScriptComponent m;
+	m._name = componentType;
+	m._underlyingInstance = obj;
 	return m;
-}
-
-void Angel::ExecuteModule(asIScriptObject* module, float deltaTime) {
-	_scriptCtx->Prepare(_moduleUpdates[module->GetObjectType()->GetName()]);
-	_scriptCtx->SetArgFloat(0, deltaTime);
-	_scriptCtx->SetObject(module);
-	if (_scriptCtx->Execute() == asEXECUTION_EXCEPTION) {
-		auto* func = _scriptCtx->GetExceptionFunction();
-		DOA_LOG_FATAL("Uncaught exception '%s' in %s::%s (line %d)!", _scriptCtx->GetExceptionString(), func->GetObjectName(), func->GetName(), _scriptCtx->GetExceptionLineNumber());
-	}
-}
-
-void* Angel::CallModuleFunction(asIScriptObject* module, std::string_view functionName, std::vector<std::string> parameterTypes, std::vector<void*> parameterValues) {
-	auto functions = _moduleFunctions[module->GetObjectType()->GetName()];
-	int paramCount = parameterTypes.size();
-	decltype(functions) candidates;
-	for (auto function : functions) {
-		if (function->GetName() == functionName && function->GetParamCount() == paramCount) {
-			candidates.push_back(function);
-		}
-	}
-	asIScriptFunction* functionToCall = nullptr;
-	for(auto candidate:candidates) {
-		auto decl = std::string(candidate->GetDeclaration(false, false, false));
-		decl = decl.substr(decl.find("(") + 1, decl.find(")") - decl.find("(") - 1); // get what's between "(" and ")"
-		auto paramTypes = split(decl, ", ");
-		bool suitable = true;
-		for (int i = 0; i < paramCount; i++) {
-			if (paramTypes[i] != parameterTypes[i]) {
-				suitable = false;
-			}
-		}
-		if (suitable) {
-			functionToCall = candidate;
-		}
-	}
-	if (functionToCall != nullptr) {
-		_scriptCtx->Prepare(functionToCall);
-		for (int i = 0; i < paramCount; i++) {
-			std::string& paramType = parameterTypes[i];
-			void* param = parameterValues[i];
-			if (paramType == "bool") {
-				_scriptCtx->SetArgByte(i, *(bool*)param);
-			} else if (paramType == "int") {
-				_scriptCtx->SetArgDWord(i, *(int*)param);
-			} else if (paramType == "float") {
-				_scriptCtx->SetArgFloat(i, *(float*)param);
-			} else if (paramType == "double") {
-				_scriptCtx->SetArgDouble(i, *(double*)param);
-			} else {
-				_scriptCtx->SetArgObject(i, (void*)param);// ??
-			}
-		}
-		_scriptCtx->SetObject(module);
-		if (_scriptCtx->Execute() == asEXECUTION_EXCEPTION) {
-			auto* func = _scriptCtx->GetExceptionFunction();
-			DOA_LOG_FATAL("Uncaught exception '%s' in %s::%s (line %d)!", _scriptCtx->GetExceptionString(), func->GetObjectName(), func->GetName(), _scriptCtx->GetExceptionLineNumber());
-		}
-		return _scriptCtx->GetAddressOfReturnValue();
-	}
-	return nullptr;
 }
 
 void Angel::FindAndBuildScripts() {
@@ -1012,107 +868,7 @@ bool Angel::Rebuild() {
 		return false;
 	}
 	_scriptModule = _scriptEngine->GetModule("Scripts");
-	if (_scriptBuilder.AddSectionFromMemory("Module", R"(
-		class Entity {
-			private int _id;
 
-			int id {
-				get const {	return _id; }
-			}
-
-			Entity() { _id = -1; }
-			Entity(int id) { _id = id; }
-			Entity(const Entity &in other) { this._id = other._id; }
-			Entity@ opAssign(const Entity &in other) {
-				this._id = other._id;
-				return this;
-			}
-		}
-
-		abstract class Module : __module {
-			Entity entity;
-
-			void Execute(float delta) {}
-
-			Module@ Get(const string type) const final {
-				return cast<Module>(__get(entity.id, type));
-			}
-
-			void Attach(const string type) final {
-				__attach(entity.id, type);
-			}
-
-			void Detach(const string type) final {
-				__detach(entity.id, type);
-			}
-
-			bool Has(const string type) const final {
-				return __has(entity.id, type);
-			}
-
-			void BeforePropertiesGUI() {}
-			bool OnDrawPropertyGUI(PropertyData property, int propertyIndex) {
-				if (propertyIndex == 0) return false;
-				if (property.isPrivate || property.isProtected) return false;
-				return true;
-			}
-			void AfterPropertiesGUI() {}
-		}
-
-		abstract class DefModule : Module {}
-
-		class Tag : DefModule {
-			string label;
-		}
-
-		class Transform : DefModule {
-			vec3 Translation = vec3(0, 0, 0);
-			quat Rotation = quat(vec3(0, 0, 0));
-			vec3 Scale = vec3(1, 1, 1);
-
-			private bool selected = false;
-			private Transform@ parent;
-			private array<Transform@> children;
-
-			void Adopt(Transform@ child) {
-				if (@child.parent != null) {
-					child.parent.Disown(child);
-				}
-				children.insertLast(child);
-				@child.parent = @this;
-			}
-
-			void Disown(Transform@ child) {
-				if(@child.parent == @this) {
-					children.removeAt(children.findByRef(child));
-					@child.parent = null;
-				}
-			}
-
-			void AfterPropertiesGUI() {
-				if(ImGui::Button("Reset All")) {
-					Translation = vec3(0, 0, 0);
-					Rotation = quat(vec3(0, 0, 0));
-					Scale = vec3(1, 1, 1);
-				}
-			}
-		}
-
-		class ModelRenderer : DefModule {
-			Model@ model;
-			Shader@ shader;
-		}
-
-		class Camera : DefModule {
-			Projection projection = Perspective;
-		} enum Projection {
-			Orthographic, Perspective
-		}
-	)") < 0) {
-		// Senpai... Senpai... I... I... I fucked up senpai!!
-		DOA_LOG_FATAL("Couldn't compile default scripts.");
-		return false;
-	}
 	for (auto i = 0; i < _scriptFiles.size(); i++) {
 		if (_scriptBuilder.AddSectionFromMemory(_scriptFiles[i].c_str(), _scriptFilesContent[i].c_str()) < 0) {
 			// The builder wasn't able to load the file. Maybe the file
@@ -1129,28 +885,13 @@ bool Angel::Rebuild() {
 		return false;
 	}
 
-	{ //reset everything!
-		_moduleBaseType = _scriptModule->GetTypeInfoByDecl("Module");
-		_defModuleBaseType = _scriptModule->GetTypeInfoByDecl("DefModule");
-		_modules.clear();
+	{ //reset everything
+		_scriptComponentData.clear();
 
-		for (auto& ctor : _moduleCtors) {
+		for (auto& ctor : _scriptComponentCtors) {
 			ctor.second->Release();
 		}
-		_moduleCtors.clear();
-
-		for (auto& update : _moduleUpdates) {
-			update.second->Release();
-		}
-		_moduleUpdates.clear();
-
-		for (auto& pair : _moduleFunctions) {
-			auto& funcVector = pair.second;
-			for (auto& func : funcVector) {
-				func->Release();
-			}
-		}
-		_moduleFunctions.clear();
+		_scriptComponentCtors.clear();
 	}
 
 	{//enumerate and store all components and systems
@@ -1158,62 +899,49 @@ bool Angel::Rebuild() {
 		for (int i = 0; i < classCount; i++) { // for each type
 			asITypeInfo* type = _scriptModule->GetObjectTypeByIndex(i);
 			const char* name = type->GetName();
-			if (strcmp(name, "Module") == 0) continue; // skip the actual base "Module" class
-			if (strcmp(name, "DefModule") == 0) continue; // skip the actual base "DefModule" class
-			if (IsModule(type)) {
-				DOA_LOG_INFO("Module: %s succesfully registered", name); // print its name
-				int fieldCount = type->GetPropertyCount(); // and all of its fields...
-				_modules.insert({ name, std::vector<PropertyData>() });
-				_modules[name].reserve(fieldCount);
-				for (int j = 0; j < fieldCount; j++) {
-					PropertyData d;
-					const char* propName;
-					type->GetProperty(j, &propName, &d.typeId, &d.isPrivate, &d.isProtected, &d.offset, &d.isReference, &d.accessMask, &d.compositeOffset, &d.isCompositeIndirect);
-					d.name = propName;
-					d.prettyName = beautify(d.name);
-					d.typeInfo = type;
 
-					switch (d.typeId) {
-					case asTYPEID_VOID: d.typeName = "void"; break;
-					case asTYPEID_BOOL: d.typeName = "bool"; break;
-					case asTYPEID_INT8: d.typeName = "int8"; break;
-					case asTYPEID_INT16: d.typeName = "int16"; break;
-					case asTYPEID_INT32: d.typeName = "int"; break;
-					case asTYPEID_INT64: d.typeName = "long"; break;
-					case asTYPEID_UINT8: d.typeName = "uint8"; break;
-					case asTYPEID_UINT16: d.typeName = "uint16"; break;
-					case asTYPEID_UINT32: d.typeName = "unsigned int"; break;
-					case asTYPEID_UINT64: d.typeName = "unsigned long"; break;
-					case asTYPEID_FLOAT: d.typeName = "float"; break;
-					case asTYPEID_DOUBLE: d.typeName = "double"; break;
-					case asTYPEID_OBJHANDLE: d.typeName = "ptr"; break;
-					case asTYPEID_HANDLETOCONST: d.typeName = "const ptr"; break;
-					case asTYPEID_MASK_OBJECT: d.typeName = "mask"; break;
-					case asTYPEID_APPOBJECT: d.typeName = "native object"; break;
-					case asTYPEID_SCRIPTOBJECT: d.typeName = "angel object"; break;
-					case asTYPEID_TEMPLATE: d.typeName = "template"; break;
-					case asTYPEID_MASK_SEQNBR: d.typeName = "mask sequence"; break;
-					default: d.typeName = _scriptEngine->GetTypeInfoById(d.typeId)->GetName(); break;
-					}
-					_modules[name].emplace_back(d);
-					printf("\t\t\t\t\t\t  %d --> %s %s\n", j, d.typeName.c_str(), d.name.c_str());
+			DOA_LOG_INFO("Script: %s succesfully registered", name); // print its name
+			int fieldCount = type->GetPropertyCount(); // and all of its fields...
+			_scriptComponentData.insert({ name, std::vector<PropertyData>() });
+			_scriptComponentData[name].reserve(fieldCount);
+			for (int j = 0; j < fieldCount; j++) {
+				PropertyData d;
+				const char* propName;
+				type->GetProperty(j, &propName, &d.typeId, &d.isPrivate, &d.isProtected, &d.offset, &d.isReference, &d.accessMask, &d.compositeOffset, &d.isCompositeIndirect);
+				d.name = propName;
+				d.prettyName = Prettify(d.name);
+				d.typeInfo = type;
+
+				switch (d.typeId) {
+				case asTYPEID_VOID: d.typeName = "void"; break;
+				case asTYPEID_BOOL: d.typeName = "bool"; break;
+				case asTYPEID_INT8: d.typeName = "int8"; break;
+				case asTYPEID_INT16: d.typeName = "int16"; break;
+				case asTYPEID_INT32: d.typeName = "int"; break;
+				case asTYPEID_INT64: d.typeName = "long"; break;
+				case asTYPEID_UINT8: d.typeName = "uint8"; break;
+				case asTYPEID_UINT16: d.typeName = "uint16"; break;
+				case asTYPEID_UINT32: d.typeName = "unsigned int"; break;
+				case asTYPEID_UINT64: d.typeName = "unsigned long"; break;
+				case asTYPEID_FLOAT: d.typeName = "float"; break;
+				case asTYPEID_DOUBLE: d.typeName = "double"; break;
+				case asTYPEID_OBJHANDLE: d.typeName = "ptr"; break;
+				case asTYPEID_HANDLETOCONST: d.typeName = "const ptr"; break;
+				case asTYPEID_MASK_OBJECT: d.typeName = "mask"; break;
+				case asTYPEID_APPOBJECT: d.typeName = "native object"; break;
+				case asTYPEID_SCRIPTOBJECT: d.typeName = "angel object"; break;
+				case asTYPEID_TEMPLATE: d.typeName = "template"; break;
+				case asTYPEID_MASK_SEQNBR: d.typeName = "mask sequence"; break;
+				default: d.typeName = _scriptEngine->GetTypeInfoById(d.typeId)->GetName(); break;
 				}
-				auto ctor = type->GetFactoryByIndex(0);
-				ctor->AddRef();
-				_moduleCtors.insert({ name, ctor });
-
-				auto update = type->GetMethodByDecl("void Execute(float)");
-				update->AddRef();
-				_moduleUpdates.insert({ name, update });
-
-				auto& functions = _moduleFunctions.insert({ name, {} }).first->second;
-				for (int i = 0; i < type->GetMethodCount(); i++) {
-					auto func = type->GetMethodByIndex(i);
-					func->AddRef();
-					functions.push_back(func);
-				}
+				_scriptComponentData[name].emplace_back(d);
+				printf("\t\t\t\t\t\t  %d --> %s %s\n", j, d.typeName.c_str(), d.name.c_str());
 			}
+			auto ctor = type->GetFactoryByIndex(0);
+			ctor->AddRef();
+			_scriptComponentCtors.insert({ name, ctor });
 		}
+
 		int enumCount = _scriptModule->GetEnumCount(); // get the number of all enums
 		for (int i = 0; i < enumCount; i++) { // for each enum
 			asITypeInfo* type = _scriptModule->GetEnumByIndex(i);
@@ -1224,7 +952,7 @@ bool Angel::Rebuild() {
 			for (int j = 0; j < enumValueCount; j++) {
 				int val = -1;
 				const char* enumValueName = type->GetEnumValueByIndex(j, &val);
-				values.push_back({ enumValueName, val, beautify(enumValueName) });
+				values.emplace_back(enumValueName, val, std::move(Prettify(enumValueName)));
 			}
 		}
 	}

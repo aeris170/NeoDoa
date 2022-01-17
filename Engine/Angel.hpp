@@ -13,9 +13,9 @@
 
 #include "PropertyData.hpp"
 #include "EnumValue.hpp"
-#include "Module.hpp"
 
 struct Scene;
+struct ScriptComponent;
 
 struct Angel {
 
@@ -27,12 +27,8 @@ struct Angel {
 	std::vector<std::string> _scriptFiles;
 	std::vector<std::string> _scriptFilesContent;
 
-	asITypeInfo* _moduleBaseType{ nullptr };
-	asITypeInfo* _defModuleBaseType{ nullptr };
-	std::unordered_map<std::string, std::vector<PropertyData>> _modules;
-	std::unordered_map<std::string, asIScriptFunction*> _moduleCtors;
-	std::unordered_map<std::string, asIScriptFunction*> _moduleUpdates;
-	std::unordered_map<std::string, std::vector<asIScriptFunction*>> _moduleFunctions;
+	std::unordered_map<std::string, std::vector<PropertyData>> _scriptComponentData;
+	std::unordered_map<std::string, asIScriptFunction*> _scriptComponentCtors;
 	std::unordered_map<std::string, std::vector<EnumValue>> _enums;
 
 	std::atomic<bool> _scriptLoaderRunning{ true };
@@ -42,12 +38,7 @@ struct Angel {
 	Angel() noexcept;
 	~Angel() noexcept;
 
-	bool IsModule(asITypeInfo* type);
-	bool IsDefModule(asITypeInfo* type);
-
-	Module InstantiateModule(std::string_view moduleType, int ID);
-	void ExecuteModule(asIScriptObject* module, float deltaTime);
-	void* CallModuleFunction(asIScriptObject* module, std::string_view functionName, std::vector<std::string> parameterTypes, std::vector<void*> parameterValues);
+	ScriptComponent InstantiateScriptComponentIncomplete(std::string_view moduleType);
 private:
 	Angel(const Angel&) = delete;
 	Angel(const Angel&&) = delete;
