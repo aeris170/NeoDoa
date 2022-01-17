@@ -6,6 +6,7 @@
 
 #include <entt.hpp>
 
+#include "Entity.hpp"
 #include "TypedefsAndConstants.hpp"
 
 struct Model;
