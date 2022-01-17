@@ -51,8 +51,8 @@ void Texture::Bind(int slot) {
 //-----------------------------------------------------------------
 
 std::weak_ptr<Texture> CreateTexture(std::string_view name, const char* path, bool hasTransparency) {
-	int width, height, nrChannels;
 	stbi_set_flip_vertically_on_load(true);
+	int width, height, nrChannels;
 	unsigned char* pixelData = stbi_load(path, &width, &height, &nrChannels, hasTransparency ? STBI_rgb_alpha : STBI_rgb);
 	if (pixelData == nullptr) {
 		stbi_image_free(pixelData);
@@ -72,6 +72,7 @@ std::weak_ptr<Texture> CreateTexture(std::string_view name, const char* path, bo
 }
 
 std::weak_ptr<Texture> CreateTexture(std::string_view name, const unsigned char* data, int length, bool hasTransparency) {
+	stbi_set_flip_vertically_on_load(true);
 	int width, height, nrChannels;
 	unsigned char* pixelData = stbi_load_from_memory(data, length, &width, &height, &nrChannels, hasTransparency ? STBI_rgb_alpha : STBI_rgb);
 	if (pixelData == nullptr) {
