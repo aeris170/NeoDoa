@@ -10,9 +10,6 @@ constexpr const char* GLSL_VERSION = "#version 430";
 constexpr int OPGL_VERSION_MAJ = 3;
 constexpr int OPGL_VERSION_MIN = 3;
 
-typedef entt::entity EntityID;
-constexpr EntityID NULL_ENTT = entt::null;
-
 typedef GLuint VAO;
 typedef GLuint VBO;
 typedef GLuint EBO;
