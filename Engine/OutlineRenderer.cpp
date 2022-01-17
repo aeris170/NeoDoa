@@ -11,12 +11,7 @@
 #include "PerspectiveCamera.hpp"
 
 #include "Texture.hpp"
-#include "Transform.hpp"
 #include "ModelRenderer.hpp"
-
-OutlineRenderer::OutlineRenderer() noexcept {}
-
-OutlineRenderer::~OutlineRenderer() noexcept {}
 
 //-----------------------------------------------------------------
 
