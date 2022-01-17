@@ -1,20 +1,20 @@
 #include "SceneDeserializer.hpp"
 
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/quaternion.hpp>
+#include <nameof.hpp>
 
-#include <tinyxml2.h>
-
+#include "Scene.hpp"
 #include "Core.hpp"
-#include "Model.hpp"
-#include "Shader.hpp"
+#include "Entity.hpp"
 #include "Angel.hpp"
-#include "ScriptComponent.hpp"
-#include "Tag.hpp"
-#include "Transform.hpp"
 #include "FileNode.hpp"
 #include "PropertyData.hpp"
-#include "FileNode.hpp"
+#include "IDComponent.hpp"
+#include "TransformComponent.hpp"
+#include "ParentComponent.hpp"
+#include "ChildComponent.hpp"
+#include "ScriptStorageComponent.hpp"
+#include "ScriptComponent.hpp"
+#include "ScriptComponentData.hpp"
 
 static tinyxml2::XMLElement* findComponentByNameIn(tinyxml2::XMLElement* parent, std::string_view name) {
 	for (tinyxml2::XMLElement* comp = parent->FirstChildElement(); comp != nullptr; comp = comp->NextSiblingElement()) {
@@ -25,7 +25,13 @@ static tinyxml2::XMLElement* findComponentByNameIn(tinyxml2::XMLElement* parent,
 	return nullptr;
 }
 
-std::shared_ptr<Scene> DeserializeScene(FNode* file) {
+static void loopElement(tinyxml2::XMLElement* element, auto lambda) {
+	for (tinyxml2::XMLElement* l = element; l != nullptr; l = l->NextSiblingElement()) {
+		lambda(l);
+	}
+}
+
+Scene DeserializeScene(FNode* file) {
 	tinyxml2::XMLDocument doc;
 	tinyxml2::XMLError err = doc.LoadFile(file->_path.c_str());
 
@@ -33,148 +39,200 @@ std::shared_ptr<Scene> DeserializeScene(FNode* file) {
 	tinyxml2::XMLElement* configNode = rootNode->FirstChildElement("config");
 	std::string name = configNode->Attribute("name");
 
-	std::weak_ptr<Scene> ptr = FindSceneByName(name);
-	if (!ptr.expired()) {
-		return ptr.lock();
-	}
-
-	ptr = CreateScene(name);
-	std::shared_ptr<Scene> scene = ptr.lock();
+	Scene scene = Scene(file->_name_noext);
 
 	{ // fill config
 		tinyxml2::XMLElement* clearColor = configNode->FirstChildElement("clearColor");
-		scene->ClearColor = { clearColor->FloatAttribute("r"), clearColor->FloatAttribute("g"), clearColor->FloatAttribute("b") };
+		scene.ClearColor = { clearColor->FloatAttribute("r"), clearColor->FloatAttribute("g"), clearColor->FloatAttribute("b") };
 
 		tinyxml2::XMLElement* selectionOutlineColor = configNode->FirstChildElement("selectionOutlineColor");
-		scene->SelectionOutlineColor = { selectionOutlineColor->FloatAttribute("r"), selectionOutlineColor->FloatAttribute("g"), selectionOutlineColor->FloatAttribute("b") };
+		scene.SelectionOutlineColor = { selectionOutlineColor->FloatAttribute("r"), selectionOutlineColor->FloatAttribute("g"), selectionOutlineColor->FloatAttribute("b") };
 
 		tinyxml2::XMLElement* camera = configNode->FirstChildElement("camera");
 		std::string camType = camera->Attribute("type");
 		if (camType == "perspective") {
-			scene->SetPerpectiveCamera(camera->FloatAttribute("fov"), camera->FloatAttribute("aspect"), camera->FloatAttribute("near"), camera->FloatAttribute("far"));
+			scene.SetPerpectiveCamera(camera->FloatAttribute("fov"), camera->FloatAttribute("aspect"), camera->FloatAttribute("near"), camera->FloatAttribute("far"));
 		} else if (camType == "ortho") {
-			scene->SetOrthoCamera(camera->FloatAttribute("left"), camera->FloatAttribute("right"), camera->FloatAttribute("bottom"), camera->FloatAttribute("top"), camera->FloatAttribute("near"), camera->FloatAttribute("far"));
+			scene.SetOrthoCamera(camera->FloatAttribute("left"), camera->FloatAttribute("right"), camera->FloatAttribute("bottom"), camera->FloatAttribute("top"), camera->FloatAttribute("near"), camera->FloatAttribute("far"));
 		}
 		tinyxml2::XMLElement* eye = camera->FirstChildElement("eye");
-		scene->_activeCamera->eye = { eye->FloatAttribute("x"), eye->FloatAttribute("y"), eye->FloatAttribute("z") };
+		scene._activeCamera->eye = { eye->FloatAttribute("x"), eye->FloatAttribute("y"), eye->FloatAttribute("z") };
 
 		tinyxml2::XMLElement* forward = camera->FirstChildElement("forward");
-		scene->_activeCamera->forward = { forward->FloatAttribute("x"), forward->FloatAttribute("y"), forward->FloatAttribute("z") };
+		scene._activeCamera->forward = { forward->FloatAttribute("x"), forward->FloatAttribute("y"), forward->FloatAttribute("z") };
 
 		tinyxml2::XMLElement* up = camera->FirstChildElement("up");
-		scene->_activeCamera->up = { up->FloatAttribute("x"), up->FloatAttribute("y"), up->FloatAttribute("z") };
+		scene._activeCamera->up = { up->FloatAttribute("x"), up->FloatAttribute("y"), up->FloatAttribute("z") };
 
 		tinyxml2::XMLElement* zoom = camera->FirstChildElement("zoom");
-		scene->_activeCamera->zoom = zoom->FloatAttribute("value");
+		scene._activeCamera->zoom = zoom->FloatAttribute("value");
 	}
 	{ // parse entities
 		tinyxml2::XMLElement* entitiesNode = rootNode->FirstChildElement("entities");
 		// all entity elements
 		for (tinyxml2::XMLElement* entity = entitiesNode->FirstChildElement(); entity != nullptr; entity = entity->NextSiblingElement()) {
-			int id = entity->IntAttribute("id");
-			auto* tag = findComponentByNameIn(entity, "Tag");
-			std::string name = tag->FirstChildElement("label")->Attribute("value");
-			EntityID entt = scene->CreateEntity(name.c_str(), id);
-
-			auto* transform = findComponentByNameIn(entity, "Transform");
-			auto& scr = scene->Modules(entt);
-			auto& tr = scr["Transform"].As<Transform>();
-
-			auto* elem = transform->FirstChildElement();
-			tr.Translation() = { elem->FloatAttribute("x"), elem->FloatAttribute("y"), elem->FloatAttribute("z") };
-			elem = elem->NextSiblingElement();
-			tr.Rotation() = { elem->FloatAttribute("w"), elem->FloatAttribute("x"), elem->FloatAttribute("y"), elem->FloatAttribute("z") };
-			elem = elem->NextSiblingElement();
-			tr.Scale() = { elem->FloatAttribute("x"), elem->FloatAttribute("y"), elem->FloatAttribute("z") };
-
-			// Loop all componenets and add missing ones.
-			for (tinyxml2::XMLElement* component = transform->NextSiblingElement(); component != nullptr; component = component->NextSiblingElement()) {
+			for (tinyxml2::XMLElement* component = entity->FirstChildElement(); component != nullptr; component = component->NextSiblingElement()) {
+				std::string type = component->Name();
 				std::string name = component->Attribute("name");
-				auto opt_module = scr.TryGet(name);
-				if (!opt_module.has_value()) {
-					scr.Attach(name);
-				}
-			}
-
-			// Fill the information the components require.
-			for (tinyxml2::XMLElement* component = transform->NextSiblingElement(); component != nullptr; component = component->NextSiblingElement()) {
-				std::string name = component->Attribute("name");
-				auto& module = scr[name];
-				int i = 1; // start i from 1 because 0 is the entity id and should not be modified (from anywhere outside CreateEntity func)
-				auto& core = GetCore();
-				for (tinyxml2::XMLElement* property = component->FirstChildElement(); property != nullptr; property = property->NextSiblingElement(), i++) {
-					std::string typeName = property->Attribute("type");
-					void* address = module.GetAddressOfPropertyAt(i);
-					auto it = core->_angel->_enums.find(typeName);
-					if (it != core->_angel->_enums.end()) {
-						int* ptr = static_cast<int*>(address);
-						*ptr = property->IntAttribute("value");
-					} else if (typeName == "int") {
-						int* ptr = static_cast<int*>(address);
-						*ptr = property->IntAttribute("value");
-					} else if (typeName == "float") {
-						float* ptr = static_cast<float*>(address);
-						*ptr = property->FloatAttribute("value");
-					} else if (typeName == "double") {
-						double* ptr = static_cast<double*>(address);
-						*ptr = property->DoubleAttribute("value");
-					} else if (typeName == "string") {
-						std::string* ptr = static_cast<std::string*>(address);
-						*ptr = property->Attribute("value");
-					} else if (typeName == "vec2") {
-						glm::vec2* ptr = static_cast<glm::vec2*>(address);
-						*ptr = { property->FloatAttribute("x"), property->FloatAttribute("y") };
-					} else if (typeName == "vec3") {
-						glm::vec3* ptr = static_cast<glm::vec3*>(address);
-						*ptr = { property->FloatAttribute("x"), property->FloatAttribute("y"), property->FloatAttribute("z") };
-					} else if (typeName == "vec4") {
-						glm::vec4* ptr = static_cast<glm::vec4*>(address);
-						*ptr = { property->FloatAttribute("x"), property->FloatAttribute("y"), property->FloatAttribute("z"), property->FloatAttribute("w") };
-					} else if (typeName == "quat") {
-						glm::quat* ptr = static_cast<glm::quat*>(address);
-						*ptr = { property->FloatAttribute("w"), property->FloatAttribute("x"), property->FloatAttribute("y"), property->FloatAttribute("z") };
-					} else if (typeName == "Model") {
-						Model** ptr = static_cast<Model**>(address);
-						auto opt_model = FindModel(property->Attribute("value"));
-						if (opt_model.has_value()) {
-							*ptr = opt_model.value().lock().get();
-						} else {
-							*ptr = nullptr;
-						}
-					} else if (typeName == "Shader") {
-						Shader** ptr = static_cast<Shader**>(address);
-						auto shader_ptr = FindShader(property->Attribute("value"));
-						if (!shader_ptr.expired()) {
-							*ptr = shader_ptr.lock().get();
-						} else {
-							*ptr = nullptr;
-						}
-					} else if (typeName == "ptr") {
-						asIScriptObject** ptr = static_cast<asIScriptObject**>(address);
-						std::string componentNeeded = property->Attribute("refersTo");
-						std::string componentOwner = property->Attribute("value");
-						if (componentOwner != "nullptr") {
-							int componentOwnerID = property->IntAttribute("value");
-							*ptr = scene->Modules(static_cast<EntityID>(componentOwnerID))[componentNeeded];
-							(*ptr)->AddRef();
-						} else {
-							*ptr = nullptr;
-						}
-					} else if (typeName == "object") {
-						asIScriptObject* ptr = static_cast<asIScriptObject*>(address);
-						std::string componentOwner = property->Attribute("value");
-						Module m("tmp", ptr);
-						if (componentOwner != "unassigned") {
-							int componentOwnerID = property->IntAttribute("value");
-							m.SetID(static_cast<EntityID>(componentOwnerID));
-						} else {
-							m.SetID(NULL_ENTT);
-						}
+				Entity entt = NULL_ENTT; // the entt we are deserializing for
+				ScriptStorageComponent* scripts{ nullptr };
+				if (type == "cpp-component") {
+					if (name == nameof(IDComponent)) {
+						IDComponent id = DeserializeIDComponent(component);
+						entt = scene.CreateEntity(id.GetTagRef(), static_cast<uint32_t>(id.GetEntity()));
+					} else if (name == nameof(TransformComponent)) {
+						TransformComponent transform = DeserializeTransformComponent(component, entt);
+						scene.AddOrReplaceComponent<TransformComponent>(transform.GetEntity(), std::move(transform));
+					} else if (name == nameof(ParentComponent)) {
+						ParentComponent parent = DeserializeParentComponent(component, entt);
+						scene.AddOrReplaceComponent<ParentComponent>(parent.GetEntity(), std::move(parent));
+					} else if (name == nameof(ChildComponent)) {
+						ChildComponent children = DeserializeChildComponent(component, entt);
+						scene.AddOrReplaceComponent<ChildComponent>(children.GetEntity(), std::move(children));
 					}
+				} else if (type == "script-component") {
+					if (!scene.HasComponent<ScriptStorageComponent>(entt)) {
+						scene.AddComponent<ScriptStorageComponent>(entt, entt);
+						scripts = &scene.GetComponent<ScriptStorageComponent>(entt);
+					}
+					std::string name = component->Attribute("name");
+					ScriptComponentData data = DeserializeScriptComponentData(component, entt);
+					scripts->AttachWithData(name, data);
 				}
 			}
 		}
 	}
 
 	return scene;
+}
+
+Entity DeserializeEntityID(tinyxml2::XMLElement* property, std::string_view identifierOverride) {
+	return static_cast<Entity>(property->UnsignedAttribute(identifierOverride.data(), -1));
+}
+int DeserializeEnum(tinyxml2::XMLElement* property) {
+	return property->IntAttribute("value");
+}
+int DeserializeInt(tinyxml2::XMLElement* property) {
+	return property->IntAttribute("value");
+}
+float DeserializeFloat(tinyxml2::XMLElement* property) {
+	return property->FloatAttribute("value");
+}
+double DeserializeDouble(tinyxml2::XMLElement* property) {
+	return property->DoubleAttribute("value");
+}
+std::string DeserializeString(tinyxml2::XMLElement* property) {
+	return property->Attribute("value");
+}
+glm::vec2 DeserializeVec2(tinyxml2::XMLElement* property) {
+	return {
+		property->FloatAttribute("x", 0),
+		property->FloatAttribute("y", 0)
+	};
+}
+glm::vec3 DeserializeVec3(tinyxml2::XMLElement* property) {
+	return {
+		property->FloatAttribute("x", 0),
+		property->FloatAttribute("y", 0),
+		property->FloatAttribute("z", 0)
+	};
+}
+glm::vec4 DeserializeVec4(tinyxml2::XMLElement* property) {
+	return {
+		property->FloatAttribute("x", 0),
+		property->FloatAttribute("y", 0),
+		property->FloatAttribute("z", 0),
+		property->FloatAttribute("w", 0)
+	};
+}
+glm::quat DeserializeQuat(tinyxml2::XMLElement* property) {
+	return {
+		property->FloatAttribute("w", 0),
+		property->FloatAttribute("x", 0),
+		property->FloatAttribute("y", 0),
+		property->FloatAttribute("z", 0)
+	};
+}
+glm::mat2 DeserializeMat2(tinyxml2::XMLElement* property) {
+	return {
+		property->FloatAttribute("x1", 1), property->FloatAttribute("y1", 0),
+		property->FloatAttribute("x2", 0), property->FloatAttribute("y2", 1)
+	};
+}
+glm::mat3 DeserializeMat3(tinyxml2::XMLElement* property) {
+	return {
+		property->FloatAttribute("x1", 1), property->FloatAttribute("y1", 0), property->FloatAttribute("z1", 0),
+		property->FloatAttribute("x2", 0), property->FloatAttribute("y2", 1), property->FloatAttribute("z2", 0),
+		property->FloatAttribute("x3", 0), property->FloatAttribute("y3", 0), property->FloatAttribute("z3", 1)
+	};
+}
+glm::mat4 DeserializeMat4(tinyxml2::XMLElement* property) {
+	return {
+		property->FloatAttribute("x1", 1), property->FloatAttribute("y1", 0), property->FloatAttribute("z1", 0), property->FloatAttribute("w1", 0),
+		property->FloatAttribute("x2", 0), property->FloatAttribute("y2", 1), property->FloatAttribute("z2", 0), property->FloatAttribute("w2", 0),
+		property->FloatAttribute("x3", 0), property->FloatAttribute("y3", 0), property->FloatAttribute("z3", 1), property->FloatAttribute("w3", 0),
+		property->FloatAttribute("x4", 0), property->FloatAttribute("y4", 0), property->FloatAttribute("z4", 0), property->FloatAttribute("w4", 1)
+	};
+}
+IDComponent DeserializeIDComponent(tinyxml2::XMLElement* component) {
+	auto entity = DeserializeEntityID(component->FirstChildElement(nameof_c(IDComponent::entity)));
+	auto tag = component->FirstChildElement(nameof_c(IDComponent::tag))->Attribute("value");
+	return { entity, tag };
+}
+TransformComponent DeserializeTransformComponent(tinyxml2::XMLElement* component, const Entity entity) {
+	auto matrix = DeserializeMat4(component->FirstChildElement(nameof_c(TransformComponent::localMatrix)));
+
+	return { entity, std::move(matrix) };
+}
+ParentComponent DeserializeParentComponent(tinyxml2::XMLElement* component, const Entity entity) {
+	std::vector<Entity> children;
+	loopElement(component->FirstChildElement(nameof_c(ParentComponent::children)), [&children](tinyxml2::XMLElement* l) {
+		auto child = DeserializeEntityID(l, "value");
+		children.push_back(child);
+	});
+
+	return { entity, std::move(children) };
+}
+ChildComponent DeserializeChildComponent(tinyxml2::XMLElement* component, const Entity entity) {
+	auto parent = DeserializeEntityID(component->FirstChildElement(nameof_c(ChildComponent::parent)));
+
+	return { entity, parent };
+}
+ScriptComponentData DeserializeScriptComponentData(tinyxml2::XMLElement* component, const Entity entity) {
+	ScriptComponentData data;
+	data.name = component->Attribute("name");
+
+	loopElement(component->FirstChildElement(), [&data](tinyxml2::XMLElement* l) {
+		std::any value;
+
+		std::string type = l->Attribute("type");
+		auto it = GetCore()->_angel->_enums.find(type);
+		if (it != GetCore()->_angel->_enums.end())	value = DeserializeEnum(l);
+		else if (type == "Entity")					value = DeserializeEntityID(l);
+		else if (type == "int")						value = DeserializeInt(l);
+		else if (type == "float")					value = DeserializeFloat(l);
+		else if (type == "double")					value = DeserializeDouble(l);
+		else if (type == "string")					value = DeserializeString(l);
+		else if (type == "vec2")					value = DeserializeVec2(l);
+		else if (type == "vec3")					value = DeserializeVec3(l);
+		else if (type == "vec4")					value = DeserializeVec4(l);
+		else if (type == "quat")					value = DeserializeQuat(l);
+		else if (type == "mat2")					value = DeserializeMat2(l);
+		else if (type == "mat3")					value = DeserializeMat3(l);
+		else if (type == "mat4")					value = DeserializeMat4(l);
+		else {
+			//if (prop.isReference) {
+				// TODO
+				DOA_LOG_TRACE("prop.isReference ??");
+			//}
+			//else {
+				// TODO
+				DOA_LOG_TRACE("!prop.isReference ??");
+			//}
+		}
+
+		data.data.emplace_back(value);
+	});
+
+	return data;
 }

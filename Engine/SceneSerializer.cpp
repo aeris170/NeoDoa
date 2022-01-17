@@ -1,81 +1,84 @@
 #include "SceneSerializer.hpp"
 
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/quaternion.hpp>
+#include <entt.hpp>
+using namespace entt::literals;
 
-#include <tinyxml2.h>
+#include <nameof.hpp>
 
+#include "Scene.hpp"
 #include "Core.hpp"
 #include "Angel.hpp"
-#include "ScriptComponent.hpp"
-#include "Tag.hpp"
-#include "Transform.hpp"
 #include "ModelRenderer.hpp"
 #include "PropertyData.hpp"
+#include "IDComponent.hpp"
+#include "TransformComponent.hpp"
+#include "ParentComponent.hpp"
+#include "ChildComponent.hpp"
+#include "ScriptStorageComponent.hpp"
+#include "ScriptComponent.hpp"
 
-std::string SerializeScene(std::weak_ptr<Scene> scene) {
-	if (scene.expired()) {
-		return std::string();
-	}
-	auto ptr = scene.lock();
+std::string SerializeScene(const Scene& scene) {
+	auto& _scene = const_cast<Scene&>(scene);
+
 	tinyxml2::XMLPrinter printer;
+	printer.PushComment("WARNING!! This file is not for editing! Don't!");
 	printer.OpenElement("scene");
 	{
 		printer.OpenElement("config");
 		{
-			printer.PushAttribute("name", ptr->_name.c_str());
+			printer.PushAttribute("name", _scene._name.c_str());
 
 			printer.OpenElement("clearColor");
-			printer.PushAttribute("r", ptr->ClearColor.r);
-			printer.PushAttribute("g", ptr->ClearColor.g);
-			printer.PushAttribute("b", ptr->ClearColor.b);
+			printer.PushAttribute("r", _scene.ClearColor.r);
+			printer.PushAttribute("g", _scene.ClearColor.g);
+			printer.PushAttribute("b", _scene.ClearColor.b);
 			printer.CloseElement();
 
 			printer.OpenElement("selectionOutlineColor");
-			printer.PushAttribute("r", ptr->SelectionOutlineColor.r);
-			printer.PushAttribute("g", ptr->SelectionOutlineColor.g);
-			printer.PushAttribute("b", ptr->SelectionOutlineColor.b);
+			printer.PushAttribute("r", _scene.SelectionOutlineColor.r);
+			printer.PushAttribute("g", _scene.SelectionOutlineColor.g);
+			printer.PushAttribute("b", _scene.SelectionOutlineColor.b);
 			printer.CloseElement();
 
 			printer.OpenElement("camera");
 			{
-				bool isPerspective = ptr->_activeCamera == &ptr->_pc;
+				bool isPerspective = _scene._activeCamera == &_scene._pc;
 				if (isPerspective) {
 					printer.PushAttribute("type", "perspective");
-					printer.PushAttribute("fov", ptr->_pc._fov);
-					printer.PushAttribute("aspect", ptr->_pc._aspect);
-					printer.PushAttribute("near", ptr->_pc._near);
-					printer.PushAttribute("far", ptr->_pc._far);
+					printer.PushAttribute("fov", _scene._pc._fov);
+					printer.PushAttribute("aspect", _scene._pc._aspect);
+					printer.PushAttribute("near", _scene._pc._near);
+					printer.PushAttribute("far", _scene._pc._far);
 				} else {
 					printer.PushAttribute("type", "ortho");
-					printer.PushAttribute("left", ptr->_oc._left);
-					printer.PushAttribute("right", ptr->_oc._right);
-					printer.PushAttribute("bottom", ptr->_oc._bottom);
-					printer.PushAttribute("top", ptr->_oc._top);
-					printer.PushAttribute("near", ptr->_oc._near);
-					printer.PushAttribute("far", ptr->_oc._far);
+					printer.PushAttribute("left", _scene._oc._left);
+					printer.PushAttribute("right", _scene._oc._right);
+					printer.PushAttribute("bottom", _scene._oc._bottom);
+					printer.PushAttribute("top", _scene._oc._top);
+					printer.PushAttribute("near", _scene._oc._near);
+					printer.PushAttribute("far", _scene._oc._far);
 				}
 
 				printer.OpenElement("eye");
-				printer.PushAttribute("x", ptr->_activeCamera->eye.x);
-				printer.PushAttribute("y", ptr->_activeCamera->eye.y);
-				printer.PushAttribute("z", ptr->_activeCamera->eye.z);
+				printer.PushAttribute("x", _scene._activeCamera->eye.x);
+				printer.PushAttribute("y", _scene._activeCamera->eye.y);
+				printer.PushAttribute("z", _scene._activeCamera->eye.z);
 				printer.CloseElement();
 
 				printer.OpenElement("forward");
-				printer.PushAttribute("x", ptr->_activeCamera->forward.x);
-				printer.PushAttribute("y", ptr->_activeCamera->forward.y);
-				printer.PushAttribute("z", ptr->_activeCamera->forward.z);
+				printer.PushAttribute("x", _scene._activeCamera->forward.x);
+				printer.PushAttribute("y", _scene._activeCamera->forward.y);
+				printer.PushAttribute("z", _scene._activeCamera->forward.z);
 				printer.CloseElement();
 
 				printer.OpenElement("up");
-				printer.PushAttribute("x", ptr->_activeCamera->up.x);
-				printer.PushAttribute("y", ptr->_activeCamera->up.y);
-				printer.PushAttribute("z", ptr->_activeCamera->up.z);
+				printer.PushAttribute("x", _scene._activeCamera->up.x);
+				printer.PushAttribute("y", _scene._activeCamera->up.y);
+				printer.PushAttribute("z", _scene._activeCamera->up.z);
 				printer.CloseElement();
 
 				printer.OpenElement("zoom");
-				printer.PushAttribute("value", ptr->_activeCamera->zoom);
+				printer.PushAttribute("value", _scene._activeCamera->zoom);
 				printer.CloseElement();
 
 			}
@@ -87,112 +90,250 @@ std::string SerializeScene(std::weak_ptr<Scene> scene) {
 		printer.OpenElement("entities");
 		{
 			auto& core = GetCore();
-			for (auto& entity : ptr->_entities) {
+			for (auto& entity : _scene._entities) {
 				printer.OpenElement("entity");
 				{
-					printer.PushAttribute("id", static_cast<int>(entity));
-					auto& modules = ptr->Modules(entity);
-					for (auto& module : modules._modules) {
-						auto* type = module._module->GetObjectType();
-						printer.OpenElement("component");
-						{
-							printer.PushAttribute("name", module._name.c_str());
-							if (true) {
-								std::vector<PropertyData>& props = module.Properties();
-								for (int i = 1; i < props.size(); i++) { // starting from 1, the property at 0 is always the "entity" and it's never shown on the editor
-									PropertyData& prop = props[i];
-									if (prop.isPrivate || prop.isProtected) { continue; } // don't serialize private or protected variables as they are never visible in editor!
-									auto it = core->_angel->_enums.find(prop.typeName);
-									printer.OpenElement(prop.name.c_str());
-									{
-										if (it != core->_angel->_enums.end()) {
-											printer.PushAttribute("type", prop.typeName.c_str());
-											printer.PushAttribute("value", module.GetAt<int>(i)); // TODO check bug
-										} else if (prop.typeName == "int") {
-											printer.PushAttribute("type", prop.typeName.c_str());
-											printer.PushAttribute("value", module.GetAt<int>(i));
-										} else if (prop.typeName == "float") {
-											printer.PushAttribute("type", prop.typeName.c_str());
-											printer.PushAttribute("value", module.GetAt<float>(i));
-										} else if (prop.typeName == "double") {
-											printer.PushAttribute("type", prop.typeName.c_str());
-											printer.PushAttribute("value", module.GetAt<double>(i));
-										} else if (prop.typeName == "string") {
-											printer.PushAttribute("type", prop.typeName.c_str());
-											printer.PushAttribute("value", module.GetAt<std::string>(i).c_str());
-										} else if (prop.typeName == "vec2") {
-											printer.PushAttribute("type", prop.typeName.c_str());
-											glm::vec2& vec2 = module.GetAt<glm::vec2>(i);
-											printer.PushAttribute("x", vec2.x);
-											printer.PushAttribute("y", vec2.y);
-										} else if (prop.typeName == "vec3") {
-											printer.PushAttribute("type", prop.typeName.c_str());
-											glm::vec3& vec3 = module.GetAt<glm::vec3>(i);
-											printer.PushAttribute("x", vec3.x);
-											printer.PushAttribute("y", vec3.y);
-											printer.PushAttribute("z", vec3.z);
-										} else if (prop.typeName == "vec4") {
-											printer.PushAttribute("type", prop.typeName.c_str());
-											glm::vec4& vec4 = module.GetAt<glm::vec4>(i);
-											printer.PushAttribute("x", vec4.x);
-											printer.PushAttribute("y", vec4.y);
-											printer.PushAttribute("z", vec4.z);
-											printer.PushAttribute("w", vec4.w);
-										} else if (prop.typeName == "quat") {
-											printer.PushAttribute("type", prop.typeName.c_str());
-											glm::quat& quat = module.GetAt<glm::quat>(i);
-											printer.PushAttribute("w", quat.w);
-											printer.PushAttribute("x", quat.x);
-											printer.PushAttribute("y", quat.y);
-											printer.PushAttribute("z", quat.z);
-										} else if (prop.typeName == "Model") {
-											printer.PushAttribute("type", prop.typeName.c_str());
-											printer.PushAttribute("value", module.GetAt<Model*>(i)->_name.c_str());
-										} else if (prop.typeName == "Shader") {
-											printer.PushAttribute("type", prop.typeName.c_str());
-											printer.PushAttribute("value", module.GetAt<Shader*>(i)->_name.c_str());
-										} else {
-											if (!prop.isReference) {
-												asIScriptObject*& o = module.GetAt<asIScriptObject*>(i);
-												printer.PushAttribute("type", "ptr");
-												printer.PushAttribute("refersTo", prop.typeName.c_str());
-												if (o == nullptr) {
-													printer.PushAttribute("value", "nullptr");
-												} else {
-													Module m("tmp", o);
-													printer.PushAttribute("value", static_cast<int>(m.GetID()));
-												}
-											} else {
-												asIScriptObject& o = module.GetAt<asIScriptObject>(i);
-												Module m("tmp", &o);
-												printer.PushAttribute("type", "object");
-												printer.PushAttribute("refersTo", prop.typeName.c_str());
-												EntityID id = m.GetID();
-												if (id == NULL_ENTT) {
-													printer.PushAttribute("value", "unassigned");
-												} else {
-													printer.PushAttribute("value", static_cast<int>(id));
-												}
-											}
-										}
-									}
-									printer.CloseElement(); // prop.name.c_str() end
 
-								}
-							}
-						}
-						printer.CloseElement(); // component close
-
+					#pragma region IDComponent
+					printer.OpenElement("cpp-component");
+					{
+						printer.PushAttribute("name", nameof_c(IDComponent));
+						IDComponent& id = _scene.GetComponent<IDComponent>(entity);
+						SerializeIDComponent(printer, id);
 					}
+					printer.CloseElement();
+					#pragma endregion
+
+					#pragma region TransformComponent
+					printer.OpenElement("cpp-component");
+					{
+						printer.PushAttribute("name", nameof_c(TransformComponent));
+						TransformComponent& transform = _scene.GetComponent<TransformComponent>(entity);
+						SerializeTransformComponent(printer, transform);
+					}
+					printer.CloseElement();
+					#pragma endregion
+
+					#pragma region ParentComponent
+					if(_scene.HasComponent<ParentComponent>(entity)) {
+						printer.OpenElement("cpp-component");
+						{
+							printer.PushAttribute("name", nameof_c(ParentComponent));
+							ParentComponent& parent = _scene.GetComponent<ParentComponent>(entity);
+							SerializeParentComponent(printer, parent);
+						}
+						printer.CloseElement();
+					}
+					#pragma endregion
+
+					#pragma region ChildComponent
+					if (_scene.HasComponent<ChildComponent>(entity)) {
+						printer.OpenElement("cpp-component");
+						{
+							printer.PushAttribute("name", nameof_c(ChildComponent));
+							ChildComponent& child = _scene.GetComponent<ChildComponent>(entity);
+							SerializeChildComponent(printer, child);
+						}
+						printer.CloseElement();
+					}
+					#pragma endregion
+
+					#pragma region ScriptStorageComponent
+					if (_scene.HasComponent<ScriptStorageComponent>(entity)) {
+						ScriptStorageComponent& scripts = _scene.GetComponent<ScriptStorageComponent>(entity);
+						for (auto& [name, script] : scripts._components) {
+							printer.OpenElement("script-component");
+							{
+								SerializeScriptComponent(printer, script);
+							}
+							printer.CloseElement();
+						}
+					}
+					#pragma endregion
 				}
 				printer.CloseElement(); // entity close
-
 			}
 		}
 		printer.CloseElement(); // entities close
-
 	}
 	printer.CloseElement(); // scene close
 
 	return printer.CStr();
+}
+
+void SerializeEntityID(tinyxml2::XMLPrinter& printer, Entity entity) {
+	printer.PushAttribute("type", "Entity");
+	printer.PushAttribute("id", static_cast<uint32_t>(entity));
+}
+void SerializeEnum(tinyxml2::XMLPrinter& printer, std::string_view name, int value) {
+	printer.PushAttribute("type", name.data());
+	printer.PushAttribute("value", value);
+}
+void SerializeInt(tinyxml2::XMLPrinter& printer, int value) {
+	printer.PushAttribute("type", "int");
+	printer.PushAttribute("value", value);
+}
+void SerializeFloat(tinyxml2::XMLPrinter& printer, float value) {
+	printer.PushAttribute("type", "float");
+	printer.PushAttribute("value", value);
+}
+void SerializeDouble(tinyxml2::XMLPrinter& printer, double value) {
+	printer.PushAttribute("type", "double");
+	printer.PushAttribute("value", value);
+}
+void SerializeString(tinyxml2::XMLPrinter& printer, std::string_view value) {
+	printer.PushAttribute("type", "string");
+	printer.PushAttribute("value", value.data());
+}
+void SerializeVec2(tinyxml2::XMLPrinter& printer,  const glm::vec2& vec) {
+	printer.PushAttribute("type", "vec2");
+	printer.PushAttribute("x", vec.x);
+	printer.PushAttribute("y", vec.y);
+}
+void SerializeVec3(tinyxml2::XMLPrinter& printer,  const glm::vec3& vec) {
+	printer.PushAttribute("type", "vec3");
+	printer.PushAttribute("x", vec.x);
+	printer.PushAttribute("y", vec.y);
+	printer.PushAttribute("z", vec.z);
+}
+void SerializeVec4(tinyxml2::XMLPrinter& printer,  const glm::vec4& vec) {
+	printer.PushAttribute("type", "vec4");
+	printer.PushAttribute("x", vec.x);
+	printer.PushAttribute("y", vec.y);
+	printer.PushAttribute("z", vec.z);
+	printer.PushAttribute("w", vec.w);
+}
+void SerializeQuat(tinyxml2::XMLPrinter& printer,  const glm::quat& quat) {
+	printer.PushAttribute("type", "quat");
+	printer.PushAttribute("w", quat.w);
+	printer.PushAttribute("x", quat.x);
+	printer.PushAttribute("y", quat.y);
+	printer.PushAttribute("z", quat.z);
+}
+void SerializeMat2(tinyxml2::XMLPrinter& printer,  const glm::mat2& mat) {
+	printer.PushAttribute("type", "mat2");
+
+	printer.PushAttribute("x1", mat[0][0]);
+	printer.PushAttribute("y1", mat[0][1]);
+
+	printer.PushAttribute("x2", mat[1][0]);
+	printer.PushAttribute("y2", mat[1][1]);
+}
+void SerializeMat3(tinyxml2::XMLPrinter& printer,  const glm::mat3& mat) {
+	printer.PushAttribute("type", "mat3");
+
+	printer.PushAttribute("x1", mat[0][0]);
+	printer.PushAttribute("y1", mat[0][1]);
+	printer.PushAttribute("z1", mat[0][2]);
+
+	printer.PushAttribute("x2", mat[1][0]);
+	printer.PushAttribute("y2", mat[1][1]);
+	printer.PushAttribute("z2", mat[1][2]);
+
+	printer.PushAttribute("x3", mat[2][0]);
+	printer.PushAttribute("y3", mat[2][1]);
+	printer.PushAttribute("z3", mat[2][2]);
+
+}
+void SerializeMat4(tinyxml2::XMLPrinter& printer,  const glm::mat4& mat) {
+	printer.PushAttribute("type", "mat4");
+
+	printer.PushAttribute("x1", mat[0][0]);
+	printer.PushAttribute("y1", mat[0][1]);
+	printer.PushAttribute("z1", mat[0][2]);
+	printer.PushAttribute("w1", mat[0][3]);
+
+	printer.PushAttribute("x2", mat[1][0]);
+	printer.PushAttribute("y2", mat[1][1]);
+	printer.PushAttribute("z2", mat[1][2]);
+	printer.PushAttribute("w2", mat[1][3]);
+
+	printer.PushAttribute("x3", mat[2][0]);
+	printer.PushAttribute("y3", mat[2][1]);
+	printer.PushAttribute("z3", mat[2][2]);
+	printer.PushAttribute("w3", mat[2][3]);
+
+	printer.PushAttribute("x4", mat[3][0]);
+	printer.PushAttribute("y4", mat[3][1]);
+	printer.PushAttribute("z4", mat[3][2]);
+	printer.PushAttribute("w4", mat[3][3]);
+
+}
+void SerializeIDComponent(tinyxml2::XMLPrinter& printer, const IDComponent& id) {
+	printer.OpenElement(nameof_c(id.entity));
+	SerializeEntityID(printer, id.GetEntity());
+	printer.CloseElement();
+
+	printer.OpenElement(nameof_c(id.tag));
+	printer.PushAttribute("type", "string");
+	printer.PushAttribute("value", id.GetTag().data());
+	printer.CloseElement();
+}
+void SerializeTransformComponent(tinyxml2::XMLPrinter& printer, const TransformComponent& transform) {
+	printer.OpenElement(nameof_c(TransformComponent::localMatrix));
+	SerializeMat4(printer, transform.GetLocalMatrix());
+	printer.CloseElement();
+}
+void SerializeParentComponent(tinyxml2::XMLPrinter& printer, const ParentComponent& parent) {
+	printer.OpenElement(nameof_c(ParentComponent::children));
+	{
+		printer.PushAttribute("type", "vector");
+		printer.OpenElement("values");
+		{
+			const auto& aux = parent.GetChildren();
+			int i = 0;
+			for (auto& item : aux) {
+				printer.OpenElement("item");
+				printer.PushAttribute("index", i);
+				printer.PushAttribute("value", static_cast<uint32_t>(item));
+				printer.CloseElement();
+				i++;
+			}
+		}
+		printer.CloseElement();
+	}
+	printer.CloseElement();
+}
+void SerializeChildComponent(tinyxml2::XMLPrinter& printer, const ChildComponent& child) {
+	printer.OpenElement(nameof_c(ChildComponent::parent));
+	SerializeEntityID(printer, child.GetParent());
+	printer.CloseElement();
+}
+void SerializeScriptComponent(tinyxml2::XMLPrinter& printer, const ScriptComponent& script) {
+	printer.PushAttribute("name", script._name.c_str());
+	auto* type = script._underlyingInstance->GetObjectType();
+
+	const std::vector<PropertyData>& props = script.Properties();
+	for (int i = 0; i < props.size(); i++) {
+		const PropertyData& prop = props[i];
+		if (prop.isPrivate || prop.isProtected) { continue; } // don't serialize private or protected variables as they are never visible in editor!
+		printer.OpenElement(prop.name.c_str());
+		{
+			auto it = GetCore()->_angel->_enums.find(prop.typeName);
+			if (it != GetCore()->_angel->_enums.end()) SerializeEnum(printer, prop.typeName.c_str(), script.GetAt<int>(i));
+			else if (prop.typeName == "Entity")        SerializeEntityID(printer, script.GetAt<Entity>(i));
+			else if (prop.typeName == "int")           SerializeInt(printer, script.GetAt<int>(i));
+			else if (prop.typeName == "float")         SerializeFloat(printer, script.GetAt<float>(i));
+			else if (prop.typeName == "double")        SerializeDouble(printer, script.GetAt<double>(i));
+			else if (prop.typeName == "string")        SerializeString(printer, script.GetAt<std::string>(i).c_str());
+			else if (prop.typeName == "vec2")          SerializeVec2(printer, script.GetAt<glm::vec2>(i));
+			else if (prop.typeName == "vec3")          SerializeVec3(printer, script.GetAt<glm::vec3>(i));
+			else if (prop.typeName == "vec4")          SerializeVec4(printer, script.GetAt<glm::vec4>(i));
+			else if (prop.typeName == "quat")          SerializeQuat(printer, script.GetAt<glm::quat>(i));
+			else if (prop.typeName == "mat2")          SerializeMat2(printer, script.GetAt<glm::mat2>(i));
+			else if (prop.typeName == "mat3")          SerializeMat3(printer, script.GetAt<glm::mat3>(i));
+			else if (prop.typeName == "mat4")          SerializeMat4(printer, script.GetAt<glm::mat4>(i));
+			else {
+				if (prop.isReference) {
+					// TODO
+					DOA_LOG_TRACE("prop.isReference");
+				}
+				else {
+					// TODO
+					DOA_LOG_TRACE("!prop.isReference");
+				}
+			}
+		}
+		printer.CloseElement(); // prop.name.c_str() end
+	}
 }
