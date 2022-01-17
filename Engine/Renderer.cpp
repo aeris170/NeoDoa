@@ -129,7 +129,7 @@ void Renderer::Render(entt::registry& registry, ACamera* cam) {
 			std::vector<glm::mat4> transforms;
 			transforms.reserve(size);
 			for (auto entity : instances) {
-				transforms.emplace_back(CreateModelMatrixFromTransform(registry.get<ScriptComponent>(entity)["Transform"]));
+				//transforms.emplace_back(CreateModelMatrixFromTransform(registry.get<ScriptComponent>(entity)["Transform"]));
 			}
 			glNamedBufferSubData(vbo, 0, transforms.size() * m4s, transforms.data());
 
