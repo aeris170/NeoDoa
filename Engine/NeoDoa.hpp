@@ -96,7 +96,6 @@
 #include "SceneDeserializer.hpp"
 #pragma endregion
 #include "Scene.hpp"
-#include "Camera.hpp"
 #include "OrthoCamera.hpp"
 #include "PerspectiveCamera.hpp"
 #pragma endregion
@@ -118,9 +117,6 @@
 #pragma endregion
 #pragma region Script
 #pragma region Modules
-#include "Module.hpp"
-#include "Tag.hpp"
-#include "Transform.hpp"
 #include "ModelRenderer.hpp"
 #pragma endregion
 #include "Angel.hpp"
