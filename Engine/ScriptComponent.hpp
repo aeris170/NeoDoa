@@ -1,32 +1,30 @@
 #pragma once
 
 #include <string>
-#include <utility>
-#include <optional>
-#include <unordered_map>
 
-#include "Module.hpp"
-#include "TypedefsAndConstants.hpp"
+#include "Angel.hpp"
 
+struct ScriptStorageComponent;
 class asIScriptObject;
 
 struct ScriptComponent {
 
-	int _id;
-	std::vector<Module> _modules;
+	std::string _name;
+	ScriptStorageComponent* _storage;
+	asIScriptObject* _underlyingInstance{ nullptr };
 
-	ScriptComponent(int id) noexcept;
-	~ScriptComponent() noexcept;
-	ScriptComponent(const ScriptComponent&) = delete;
-	ScriptComponent(ScriptComponent&&) noexcept;
-	ScriptComponent& operator=(const ScriptComponent&) = delete;
-	ScriptComponent& operator=(ScriptComponent&&) noexcept;
+	std::vector<PropertyData>& Properties();
+	const std::vector<PropertyData>& Properties() const;
 
-	Module& operator[](int index);
-	Module& operator[](std::string_view componentType);
+	void* GetAddressOfPropertyAt(int index) const;
 
-	int IndexOf(std::string_view componentType);
-	std::optional<std::reference_wrapper<Module>> TryGet(std::string_view componentType);
-	Module& Attach(std::string_view componentType, bool callerIsEngine = true);
-	void Detach(std::string_view componentType, bool callerIsEngine = true);
+	template<typename T>
+	T& As() {
+		return static_cast<T&>(*this);
+	}
+
+	template<typename T>
+	T& GetAt(int index) const {
+		return *static_cast<T*>(GetAddressOfPropertyAt(index));
+	}
 };
