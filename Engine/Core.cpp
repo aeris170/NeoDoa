@@ -14,9 +14,8 @@
 #include "Model.hpp"
 #include "Log.hpp"
 #include "ImGuiRenderer.hpp"
-#include "AssetManager.hpp"
+#include "Assets.hpp"
 #include "ScriptComponent.hpp"
-#include "Transform.hpp"
 #include "ModelRenderer.hpp"
 
 static std::unique_ptr<Core> _core;
@@ -48,11 +47,11 @@ std::unique_ptr<Core>& CreateCore(int width, int height, const char* title, bool
 #pragma endregion
 
 #pragma region Built-in Stuff Initialization
-    std::weak_ptr<Texture> def = CreateTexture("!!default!!", "Images/default_texture.png").value();
-    std::weak_ptr<Texture> defx = CreateTexture("!!default_x!!", "Images/default_texture_x.png").value();
-    std::weak_ptr<Texture> defy = CreateTexture("!!default_y!!", "Images/default_texture_y.png").value();
-    std::weak_ptr<Texture> defz = CreateTexture("!!default_z!!", "Images/default_texture_z.png").value();
-    CreateTexture("!!missing!!", "Images/missing_texture.png").value().lock()->Bind();
+    std::weak_ptr<Texture> def = CreateTexture("!!default!!", "Images/default_texture.png");
+    std::weak_ptr<Texture> defx = CreateTexture("!!default_x!!", "Images/default_texture_x.png");
+    std::weak_ptr<Texture> defy = CreateTexture("!!default_y!!", "Images/default_texture_y.png");
+    std::weak_ptr<Texture> defz = CreateTexture("!!default_z!!", "Images/default_texture_z.png");
+    CreateTexture("!!missing!!", "Images/missing_texture.png").lock()->Bind();
     CreateShader("!!pick!!", "Shaders/mousePickVertexShader.vert", "Shaders/mousePickFragmentShader.frag");
     CreateShader("Simple Instanced Shader", "Shaders/simpleVertexShaderInstanced.vert", "Shaders/simpleFragmentShaderInstanced.frag");
     CreateShader("Simple Shader", "Shaders/simpleVertexShader.vert", "Shaders/simpleFragmentShader.frag");
@@ -147,7 +146,7 @@ std::unique_ptr<Core>& CreateCore(int width, int height, const char* title, bool
 
     meshes.emplace_back(std::move(vertices), std::move(indices), std::move(textures));
 
-    CreateModelFromMesh("Cube", meshes);
+    CreateModelFromMesh("Cube", std::move(meshes));
     vertices.clear();
     indices.clear();
     textures.clear();
@@ -170,7 +169,6 @@ std::unique_ptr<Core>& CreateCore(int width, int height, const char* title, bool
 
     meshes.emplace_back(std::move(vertices), std::move(indices), std::move(textures));
 
-    CreateModelFromMesh("Quad", meshes);
     vertices.clear();
     indices.clear();
     textures.clear();
@@ -253,9 +251,6 @@ std::unique_ptr<Core>& GetCore() {
 }
 
 void DestroyCore() {
-    DeleteAllScenes();
-    //DeleteAll
-
     _core->Stop();
     _core.reset();
 }
