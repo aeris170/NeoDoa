@@ -36,7 +36,7 @@ void Renderer::Register(std::weak_ptr<Shader> shader, std::weak_ptr<Model> model
 	}
 
 	it = _previous.find(ptr);
-	std::vector<EntityID> vec;
+	std::vector<Entity> vec;
 	if (it != _previous.end()) {
 		for (auto& tuple : it->second) {
 			auto& [prevModel, prevInstance, prevSize, prevVbo] = tuple;
@@ -82,7 +82,7 @@ void Renderer::Register(std::weak_ptr<Shader> shader, std::weak_ptr<Model> model
 	_current[ptr].emplace_back(std::make_tuple(model, vec, defaultSize, vbo));
 }
 
-void Renderer::Submit(std::weak_ptr<Shader> shader, std::weak_ptr<Model> model, EntityID instance) {
+void Renderer::Submit(std::weak_ptr<Shader> shader, std::weak_ptr<Model> model, Entity instance) {
 	auto modelPtr = model.lock();
 	auto& vector = _current.at(shader.lock());
 	for (auto& tuple : vector) {
