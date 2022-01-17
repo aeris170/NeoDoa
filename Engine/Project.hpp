@@ -1,18 +1,35 @@
 #pragma once
 
 #include <string>
+#include <optional>
+#include <memory>
 
-#include "AssetManager.hpp"
+#include "Assets.hpp"
 #include "Scene.hpp"
 
+struct FNode;
+
 struct Project {
+
+	inline static const std::string DEFAULT_PATH = std::getenv("USERPROFILE");
+
+	std::string _workspace;
 	std::string _name;
-	AssetManager _assets;
-	std::weak_ptr<Scene> _startupScene;
+	Assets _assets;
+	FNode* _startupScene{ nullptr };
+	std::optional<Scene> _openScene;
 
-	Project(std::string path) noexcept;
-	Project(std::string path, std::string name) noexcept;
+	Project(std::string workspace, std::string name) noexcept;
+	Project(std::string workspace, std::string name, std::string startupLoc) noexcept;
+	~Project() noexcept;
+	Project(const Project& other) = delete;
+	Project(Project&& other) noexcept;
+	Project& operator=(const Project& other) = delete;
+	Project& operator=(Project&& other) noexcept;
 
-	void Serialize(std::string path);
-	void Close();
+	Assets& Assets();
+	void OpenStartupScene();
+	void OpenScene(FNode* sceneFile);
+
+	void SaveToDisk();
 };

@@ -17,6 +17,7 @@
 #include "Assets.hpp"
 #include "ScriptComponent.hpp"
 #include "ModelRenderer.hpp"
+#include "Project.hpp"
 
 static std::unique_ptr<Core> _core;
 
@@ -169,6 +170,7 @@ std::unique_ptr<Core>& CreateCore(int width, int height, const char* title, bool
 
     meshes.emplace_back(std::move(vertices), std::move(indices), std::move(textures));
 
+    CreateModelFromMesh("Quad", std::move(meshes));
     vertices.clear();
     indices.clear();
     textures.clear();
@@ -190,6 +192,14 @@ std::unique_ptr<Core>& CreateCore(int width, int height, const char* title, bool
     return _core;
 }
 
+void Core::LoadProject(const Project& project) {
+    _project = &const_cast<Project&>(project);
+}
+
+void Core::UnloadProject() {
+    _project = nullptr;
+}
+
 void Core::Start() {
     static bool renderingOffscreen = _offscreenBuffer != nullptr;
     float lastTime = glfwGetTime();
@@ -207,29 +217,26 @@ void Core::Start() {
         currentTime = glfwGetTime();
         glViewport(0, 0, _window->_content_width, _window->_content_height);
 
-        auto scenePtr = FindActiveScene();
-        auto scene = scenePtr.lock();
         float delta = currentTime - lastTime;
-        if (_playing) {
-            if (!scenePtr.expired()) {
-                scene->Update(_angel, delta);
+
+        if (_project != nullptr && _project->_openScene) {
+            Scene& scene = _project->_openScene.value();
+            if (_playing) {
+                scene.Update(delta);
             }
-        }
-        if (!scenePtr.expired()) {
             if (renderingOffscreen) {
                 glViewport(0, 0, _offscreenBuffer->_width, _offscreenBuffer->_height);
                 glBindFramebuffer(GL_FRAMEBUFFER, _offscreenBuffer->_fbo);
             }
-            glClearColor(scene->ClearColor.x, scene->ClearColor.y, scene->ClearColor.z, 1.0f);
+            glClearColor(scene.ClearColor.x, scene.ClearColor.y, scene.ClearColor.z, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-            if (!scenePtr.expired()) {
-                scene->Render(_angel);
-            }
+            scene.Render();
             if (renderingOffscreen) {
                 glBindFramebuffer(GL_FRAMEBUFFER, 0);
                 glViewport(0, 0, _window->_content_width, _window->_content_height);
             }
         }
+
         ImGuiRender(delta);
 
         glfwSwapBuffers(_window->_glfwWindow);

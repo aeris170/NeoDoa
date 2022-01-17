@@ -1,37 +1,63 @@
 #include "Project.hpp"
 
-#include "tinyxml2.h"
+#include <tinyxml2.h>
 
 #include "SceneDeserializer.hpp"
+#include "ProjectSerializer.hpp"
 
-Project::Project(std::string path) noexcept :
-	_name(""),
-	_assets(path.substr(0, path.find_last_of('\\'))) {
-	tinyxml2::XMLDocument doc;
-	doc.LoadFile(path.c_str());
-	_name = doc.FirstChildElement("project")->FirstChildElement("name")->FirstChild()->ToText()->Value();
-	std::string startupLoc = doc.FirstChildElement("project")->FirstChildElement("startup")->FirstChild()->ToText()->Value();
-	if (startupLoc != "") {
-		FNode* sceneNode = _assets.Find(startupLoc);
-		_startupScene = DeserializeScene(sceneNode);
+Project::Project(std::string workspace, std::string name) noexcept :
+	_workspace(workspace),
+	_name(name),
+	_assets(this) {}
+
+Project::Project(std::string workspace, std::string name, std::string startupLoc) noexcept :
+	Project(workspace, name) {
+	if (startupLoc != "NULL") {
+		_startupScene = _assets.Find(startupLoc);
+		_openScene = DeserializeScene(_startupScene);
 	}
 }
 
-Project::Project(std::string path, std::string name) noexcept :
-	_name(name),
-	_assets(path) {
+Project::~Project() noexcept {}
+
+Project::Project(Project&& other) noexcept :
+	_workspace(std::move(other._workspace)),
+	_name(std::move(other._name)),
+	_assets(std::move(other._assets)),
+	_startupScene(std::exchange(other._startupScene, nullptr)),
+	_openScene(std::move(other._openScene)) {
+	_assets.project = this;
 }
 
-void Project::Serialize(std::string path) {
+Project& Project::operator=(Project&& other) noexcept {
+	_workspace = std::move(other._workspace);
+	_name = std::move(other._name);
+
+	_assets = std::move(other._assets);
+	_assets.project = this;
+
+	_startupScene = std::exchange(other._startupScene, nullptr);
+
+	_openScene = std::move(other._openScene);
+	return *this;
+}
+
+Assets& Project::Assets() {
+	return _assets;
+}
+
+void Project::OpenStartupScene() {
+	OpenScene(_startupScene);
+}
+
+void Project::OpenScene(FNode* sceneFile) {
+	if (sceneFile == nullptr || !Assets::IsSceneFile(*sceneFile)) { return; }
+
+	_openScene.emplace(DeserializeScene(sceneFile));
+}
+
+void Project::SaveToDisk() {
 	tinyxml2::XMLDocument doc;
-	tinyxml2::XMLElement* root = doc.NewElement("project");
-	root->InsertNewChildElement("name")->SetText(_name.c_str());
-	root->InsertNewChildElement("startup")->SetText("");
-	doc.InsertFirstChild(root);
-	doc.SaveFile((path + "\\" + _name + ".doa").c_str());
-	_assets.ReScan();
-}
-
-void Project::Close() {
-
+	doc.Parse(SerializeProject(*this).c_str());
+	doc.SaveFile((_workspace + "\\" + _name + ".doa").c_str());
 }

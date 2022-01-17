@@ -10,50 +10,47 @@
 #include "Angel.hpp"
 #include "ScriptComponent.hpp"
 
-#include "Tag.hpp"
-#include "Transform.hpp"
 #include "Log.hpp"
 #include "Texture.hpp"
-
-static std::shared_ptr<Scene> ACTIVE_SCENE;
-static std::unordered_map<std::string, std::shared_ptr<Scene>> SCENES;
+#include "TransformComponent.hpp"
+#include "IDComponent.hpp"
+#include "ScriptStorageComponent.hpp"
 
 Scene::Scene(std::string_view name) noexcept :
 	_name(name),
 	_activeCamera(&_oc) {} // default camera is orthographic
 
-Scene::~Scene() {}
-
-EntityID Scene::CreateEntity(const char* name, int desiredID) {
-	EntityID id;
-	if (desiredID == -1) {
-		id = _registry.create();
+Entity Scene::CreateEntity(std::string name, uint32_t desiredID) {
+	Entity entt;
+	if (desiredID != EntityTo<uint32_t>(NULL_ENTT) && desiredID >= 0) {
+		entt = _registry.create(Entity(desiredID));
 	} else {
-		id = _registry.create(static_cast<EntityID>(desiredID));
+		entt = _registry.create();
 	}
-	ScriptComponent& scr = _registry.emplace<ScriptComponent>(id, static_cast<int>(id));
 
-	// attach default modules
-	Tag& tag = scr.Attach("Tag").As<Tag>();
-	tag._isDef = true;
-	tag.Label() = name;
-	Transform& transform = scr.Attach("Transform").As<Transform>();
-	transform._isDef = true;
+	_registry.emplace<IDComponent>(entt, entt, name);
+	_registry.emplace<TransformComponent>(entt, entt, _this);
+	_registry.emplace<ScriptStorageComponent>(entt, entt);
 
-	_entities.push_back(id);
-	return id;
+	_entities.push_back(entt);
+	return entt;
 }
 
-void Scene::DeleteEntity(EntityID id) {
-	_registry.destroy(id);
+void Scene::DeleteEntity(Entity entt) {
+	_registry.destroy(entt);
+	std::erase(_entities, entt);
 }
 
-bool Scene::ContainsEntity(EntityID id) {
-	return _registry.valid(id);
+bool Scene::ContainsEntity(Entity entt) {
+	return _registry.valid(entt);
 }
 
-ScriptComponent& Scene::Modules(EntityID id) {
-	return _registry.get<ScriptComponent>(id);
+size_t Scene::EntityCount() {
+	return _registry.alive();
+}
+
+ScriptStorageComponent& Scene::Scripts(Entity entt) {
+	return _registry.get<ScriptStorageComponent>(entt);
 }
 
 void Scene::SetOrthoCamera(float left, float right, float bottom, float top, float near, float far) {
@@ -66,36 +63,34 @@ void Scene::SetPerpectiveCamera(float fov, float aspect, float near, float far) 
 	_activeCamera = &_pc;
 }
 
-void Scene::Update(const std::unique_ptr<Angel>& angel, float deltaTime) {
+void Scene::Update(float deltaTime) {
 	for (auto& [id, list] : _attachList) {
-		auto& modules = Modules(static_cast<EntityID>(id));
+		auto& scripts = Scripts(id);
 		for (auto& type : list) {
-			modules.Attach(type, false);
+			scripts.Attach(type);
 		}
 	}
 	_attachList.clear();
 	for (auto& [id, list] : _detachList) {
-		auto& modules = Modules(static_cast<EntityID>(id));
+		auto& scripts = Scripts(id);
 		for (auto& type : list) {
-			modules.Detach(type, false);
+			scripts.Detach(type);
 		}
 	}
 	_detachList.clear();
-	// this will need optimization... anti-pattern to ECS!
-	_registry.view<ScriptComponent>().each([this, &angel, deltaTime](EntityID entity, ScriptComponent& script) {
-		for (auto& [name, isActive, module, isDef] : script._modules) {
-			if(isActive) {
-				angel->ExecuteModule(module, deltaTime);
-			}
-		}
-	});
+
+	for (entt::poly<System>& s : _systems) {
+		s->Init(_registry);
+		s->Execute(_registry, deltaTime);
+	}
 }
 
-void Scene::Render(const std::unique_ptr<Angel>& angel) {
+void Scene::Render() {
 	_activeCamera->UpdateView();
 	_activeCamera->UpdateProjection();
 	_activeCamera->UpdateViewProjection();
-	_registry.view<ScriptComponent>().each([this, &angel](EntityID entity, ScriptComponent& script) {
+	/*
+	_registry.view<ScriptComponent>().each([this, &angel](Entity entity, ScriptComponent& script) {
 		for (auto& module : script._modules) {
 			if (module._name == "ModelRenderer" && module._isActive) {
 				auto& modelRenderer = module.As<ModelRenderer>();
@@ -115,11 +110,13 @@ void Scene::Render(const std::unique_ptr<Angel>& angel) {
 		}
 	});
 	_renderer.Render(_registry, _activeCamera);
+	*/
 
 #ifdef EDITOR
+	/*
 	// Find selected objects
 	std::vector<std::tuple<Transform&, ModelRenderer&>> selecteds;
-	_registry.view<ScriptComponent>().each([&](EntityID entity, ScriptComponent& script) {
+	_registry.view<ScriptComponent>().each([&](Entity entity, ScriptComponent& script) {
 		Transform& t = script["Transform"].As<Transform>();
 		if (t.Selected()) {
 			auto opt = script.TryGet("ModelRenderer");
@@ -132,39 +129,6 @@ void Scene::Render(const std::unique_ptr<Angel>& angel) {
 
 	// Outline them
 	_outlineRenderer.Render(selecteds, _activeCamera, SelectionOutlineColor);
+	*/
 #endif
-}
-
-//-----------------------------------------------------------------
-
-std::weak_ptr<Scene> CreateScene(std::string_view name) {
-	auto rv = std::make_shared<Scene>(name);
-	SCENES.insert({ std::string(name), rv });
-	return rv;
-}
-
-void ChangeScene(std::weak_ptr<Scene> scene) {
-	ACTIVE_SCENE = scene.lock();
-	if (scene.expired()) {
-		DOA_LOG_INFO("Changed active scene to NONE.");
-	} else {
-		DOA_LOG_INFO("Changed active scene to %s", ACTIVE_SCENE->_name.c_str());
-	}
-}
-
-std::weak_ptr<Scene> FindSceneByName(std::string_view name) {
-	auto itr = SCENES.find(std::string(name));
-	if (itr != SCENES.end()) {
-		return itr->second;
-	}
-	return std::weak_ptr<Scene>();
-}
-
-std::weak_ptr<Scene> FindActiveScene() {
-	return ACTIVE_SCENE;
-}
-
-void DeleteAllScenes() {
-	ACTIVE_SCENE = nullptr;
-	SCENES.clear();
 }
