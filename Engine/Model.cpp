@@ -85,7 +85,7 @@ static std::vector<Mesh> processNode(aiNode* node, const aiScene* scene) {
     return meshes;
 }
 
-std::weak_ptr<Model> CreateModelFromMesh(std::string_view name, std::vector<Mesh>& meshes) {
+std::weak_ptr<Model> CreateModelFromMesh(std::string_view name, std::vector<Mesh>&& meshes) {
     auto rv = std::make_shared<Model>(name, std::move(meshes));
     MODELS.emplace(name, rv);
     return rv;
