@@ -30,13 +30,13 @@ For example, use "Initialize" instead of "Initialise", and "color" instead of "c
 ### Use uniform initialization if and only if calling "ctor" for aggregate type
 
 ```cpp
-glm::vec3 *vector{ 1, 1, 1 };
+glm::vec3 vector{ 1, 1, 1 };
 ```
 instead of 
 ```cpp
-glm::vec3 *vector = new glm::vec3(1, 1, 1);
+glm::vec3 vector(1, 1, 1);
 //or
-glm::vec3 *vector{ new glm::vec3(1, 1, 1) };
+glm::vec3 vector = glm::vec3(1, 1, 1);
 ```
 
 ### Opening braces should be on the same line as the statement
@@ -64,7 +64,7 @@ Always use braces, this applies to where braces can be omitted:
 
 ```cpp
 // Notice the braces
-if(true) {
+if (true) {
     then();
 }
 ```
@@ -86,19 +86,19 @@ void Foo() {}
 
 ### Use tabs for indentation
 
-This is pretty much self explanatory. We prefer tabs over spaces.
+This is pretty much self explanatory.
 
 ### Remove all trailing white spaces and ending line
 
 ```cpp
-// Replace dots with spaces, WRONG
+// Assume dots are spaces, WRONG
 if (x == 0) {........
     then();.....
 }.....
 ```
 
 ```cpp
-// Replace dots with spaces, CORRECT
+// Assume dots are spaces, CORRECT
 if (x == 0) {
     then();
 }
@@ -146,34 +146,34 @@ void foo() {
     std::string x = "I'm a string";
     cout << x << "\n";
     
-    int x = 3;
-    cout << x << "\n";
+    int y = 3;
+    cout << y << "\n";
 }
 ```
 
 ### Adopt the "early-return" policy
 
-Exit functions early if needed, however, try to make sure no logic takes place before the exits.
+When checking for nullness, or parameter correctness, exit functions early.
 
 ```cpp
 // Don't do this
-int IncrementIfNotZero(int x) {
-    if(x != 0) { ++x; }
-    return x;
-};
-// or this
-void IncrementIfNotZero(int x) {
-    x++; // logic before "early-return" is a NO-NO
-    if(x - 1 == 0) { return 0; }
-    return x;
+void SomeFunc(int* x) {
+    if(x != nullptr) { 
+        /*
+        *  Logic
+        */
+    }
 };
 ```
 
 ```cpp
 // Do this
 void IncrementIfNotZero(int x) {
-    if(x == 0) { return x; }
-    return x + 1;
+    if(x == nullptr) { return; }
+    
+    /*
+    *  Logic
+    */
 };
 ```
 
@@ -236,14 +236,18 @@ class Singleton {
 
 ## Privacy
 
-### DON'T make member variables private, mark them as "read-only"
+### DON'T make member variables private unless you have a good reason to do so, instead mark them as "read-only"
 
-If a member should be private and appropriate getters are to be provided, we say "fuck that" to that and make it public anyways,
-but append an '\_' character in front of the variable's name. Variables that have an '\_' character in front of their names are to be
-considered read-only from outside of the class. "Private" (read-only) variables with setters are oxymoron, and are strictly banned.
+If a member should be private and **trivial** getters and setters are to be provided, we say "fuck that" and make it public (and maybe const).
+Append an '\_' character in front of the member's name if you do this to signify the nature of the member. Members that have an '\_' character in front of their names are to be
+considered read-only from outside of the class. "Private" (read-only) variables with setters are oxymoron, and are to be used with caution.
 ```cpp
 // DON'T
-class Point2D { //now you see why class is also banned :)
+class Point2D { // this is pointless to do and verbose
+    int GetX() const;
+    void SetX(int x);
+    int GetY() const;
+    void SetY(int y);
 private:
     int x;
     int y;
@@ -253,20 +257,24 @@ or
 ```cpp
 // DO
 struct Point2D {
-    int x;
+    int x; 
+    // or int _x; 
+    // or even better, const int x;
     int y;
 };
 ```
 
 ## Namespaces and Classes
 
-Again, namespaces and classes are banned. End of the story :)
+Again, namespaces are banned. End of the story :)
+For classes, there is no strong opinion but they are frowned upon anyways.
 
 ### Don't define member functions in the header, unless you have to
 
 If a member function is to be defined in the header, you better have a good reason to do so.
 
 ```cpp
+// hpp file
 struct Example {
 
     bool foo;
@@ -278,7 +286,7 @@ struct Example {
     }
 	
     template<typename T>
-    void DoEvenMoreStuff() { // good
+    void DoEvenMoreStuff() { // valid reason to define in hpp
         int xxx = 999;
     }
 };
