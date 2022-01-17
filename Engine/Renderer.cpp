@@ -134,7 +134,7 @@ void Renderer::Render(entt::registry& registry, ACamera* cam) {
 			glNamedBufferSubData(vbo, 0, transforms.size() * m4s, transforms.data());
 
 			for (auto& mesh : modelPtr->_meshes) {
-				FindTexture("!!missing!!").value().lock()->Bind(); // override possible overrides to missing texture.
+				FindTexture("!!missing!!").lock()->Bind(); // override possible overrides to missing texture.
 				int i = 1;
 				for (auto& tex : mesh._textures) {
 					if (i == 17) {
