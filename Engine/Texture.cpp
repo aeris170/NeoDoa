@@ -8,9 +8,12 @@
 
 static std::unordered_map<std::string, std::shared_ptr<Texture>> TEXTURES;
 
+bool Texture::FACTORY_FLAG{ false };
+
 Texture::Texture(std::string_view name, int width, int height, unsigned char* pixelData, bool hasTransparency) noexcept :
 	_name(name),
 	_pixelData(pixelData) {
+	assert(FACTORY_FLAG, "don't call ctor directly, use CreateTexture");
 	glCreateTextures(GL_TEXTURE_2D, 1, &_glTextureID);
 
 	glTextureParameteri(_glTextureID, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -29,16 +32,15 @@ Texture::~Texture() noexcept {
 	stbi_image_free(_pixelData);
 }
 
-Texture::Texture(Texture&& other) noexcept {
-	*this = std::move(other);
-}
+Texture::Texture(Texture&& other) noexcept :
+	_name(std::move(other._name)),
+	_pixelData(std::exchange(other._pixelData, nullptr)),
+	_glTextureID(std::exchange(other._glTextureID, 0)) {}
 
 Texture& Texture::operator=(Texture&& other) noexcept {
 	_name = std::move(other._name);
-	_glTextureID = other._glTextureID;
-	other._glTextureID = 0;
-	_pixelData = other._pixelData;
-	other._pixelData = nullptr;
+	_glTextureID = std::exchange(other._glTextureID, 0);
+	_pixelData = std::exchange(other._pixelData, nullptr);
 	return *this;
 }
 
@@ -48,22 +50,49 @@ void Texture::Bind(int slot) {
 
 //-----------------------------------------------------------------
 
-std::optional<std::weak_ptr<Texture>> CreateTexture(std::string_view name, const char* path, bool hasTransparency) {
+std::weak_ptr<Texture> CreateTexture(std::string_view name, const char* path, bool hasTransparency) {
 	int width, height, nrChannels;
 	stbi_set_flip_vertically_on_load(true);
 	unsigned char* pixelData = stbi_load(path, &width, &height, &nrChannels, hasTransparency ? STBI_rgb_alpha : STBI_rgb);
-
 	if (pixelData == nullptr) {
 		stbi_image_free(pixelData);
 		DOA_LOG_WARNING("Couldn't load %s! No such file at %s!", name.data(), path);
 		return {};
 	}
+
+#ifdef _DEBUG
+	Texture::FACTORY_FLAG = true;
 	auto rv = std::make_shared<Texture>(name, width, height, pixelData, hasTransparency);
+	Texture::FACTORY_FLAG = false;
+#elif
+	auto rv = std::make_shared<Texture>(name, width, height, pixelData, hasTransparency);
+#endif
 	TEXTURES.emplace(std::string(name), rv);
 	return rv;
 }
 
-std::optional<std::weak_ptr<Texture>> FindTexture(std::string_view name) {
+std::weak_ptr<Texture> CreateTexture(std::string_view name, const unsigned char* data, int length, bool hasTransparency) {
+	int width, height, nrChannels;
+	unsigned char* pixelData = stbi_load_from_memory(data, length, &width, &height, &nrChannels, hasTransparency ? STBI_rgb_alpha : STBI_rgb);
+	if (pixelData == nullptr) {
+		stbi_image_free(pixelData);
+		DOA_LOG_WARNING("Couldn't load %s!");
+		return {};
+	}
+
+#ifdef _DEBUG
+	Texture::FACTORY_FLAG = true;
+	auto rv = std::make_shared<Texture>(name, width, height, pixelData, hasTransparency);
+	Texture::FACTORY_FLAG = false;
+#elif
+	auto rv = std::make_shared<Texture>(name, width, height, pixelData, hasTransparency);
+#endif
+	TEXTURES.emplace(std::string(name), rv);
+	return rv;
+
+}
+
+std::weak_ptr<Texture> FindTexture(std::string_view name) {
 	auto it = TEXTURES.find(name.data());
 	if (it == TEXTURES.end()) {
 		DOA_LOG_WARNING("FindTexture failed. There is no Texture named %s!", name);

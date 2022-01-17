@@ -1,13 +1,13 @@
 #pragma once
 
-#include <optional>
+#include <memory>
 
 #include "TypedefsAndConstants.hpp"
 
 struct Texture : std::enable_shared_from_this<Texture> {
 	std::string _name;
 	TEX _glTextureID{ 0 };
-	unsigned char* _pixelData;
+	unsigned char* _pixelData{ nullptr };
 
 	void Bind(int slot = 0);
 
@@ -19,7 +19,14 @@ struct Texture : std::enable_shared_from_this<Texture> {
 	Texture& operator=(const Texture&) = delete;
 	Texture& operator=(Texture&&) noexcept;
 
+private:
+
+	static bool FACTORY_FLAG;
+
+	friend std::weak_ptr<Texture> CreateTexture(std::string_view name, const char* path, bool hasTransparency);
+	friend std::weak_ptr<Texture> CreateTexture(std::string_view name, const unsigned char* data, int length, bool hasTransparency);
 };
 
-std::optional<std::weak_ptr<Texture>> CreateTexture(std::string_view name, const char* path, bool hasTransparency = true);
-std::optional<std::weak_ptr<Texture>> FindTexture(std::string_view name);
+std::weak_ptr<Texture> CreateTexture(std::string_view name, const char* path, bool hasTransparency = true);
+std::weak_ptr<Texture> CreateTexture(std::string_view name, const unsigned char* data, int length, bool hasTransparency = true);
+std::weak_ptr<Texture> FindTexture(std::string_view name);
