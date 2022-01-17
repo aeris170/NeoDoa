@@ -29,7 +29,7 @@ NeoDoa is still under development and is not ready for producing games, but it w
 	* Texture loading via [stb_image](https://github.com/nothings/stb)
 * **Scripting system**
 	* Scripting via [AngelScript](https://www.angelcode.com/angelscript/)
-	* Create a script, fill in the "Execute" function, attach it to an Entity!
+	* With true ECS!
 * **Input**
 	* Mouse, Keyboard. 
 	* WIP: Controller
