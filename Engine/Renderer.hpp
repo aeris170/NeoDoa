@@ -14,8 +14,8 @@ struct ACamera;
 
 struct Renderer {
 
-	std::unordered_map<std::shared_ptr<Shader>, std::vector<std::tuple<std::weak_ptr<Model>, std::vector<EntityID>, int, VBO>>> _previous;
-	std::unordered_map<std::shared_ptr<Shader>, std::vector<std::tuple<std::weak_ptr<Model>, std::vector<EntityID>, int, VBO>>> _current;
+	std::unordered_map<std::shared_ptr<Shader>, std::vector<std::tuple<std::weak_ptr<Model>, std::vector<Entity>, int, VBO>>> _previous;
+	std::unordered_map<std::shared_ptr<Shader>, std::vector<std::tuple<std::weak_ptr<Model>, std::vector<Entity>, int, VBO>>> _current;
 
 	int vertices = 0;
 	int indices = 0;
