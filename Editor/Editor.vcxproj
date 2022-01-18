@@ -106,6 +106,7 @@
     <ClCompile Include="Editor.cpp" />
     <ClCompile Include="CodeGenerator.cpp" />
     <ClCompile Include="GUI.cpp" />
+    <ClCompile Include="ImGuiExtensions.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MenuBar.cpp" />
     <ClCompile Include="Observer.cpp" />
@@ -120,6 +121,7 @@
     <ClInclude Include="Editor.hpp" />
     <ClInclude Include="CodeGenerator.hpp" />
     <ClInclude Include="GUI.hpp" />
+    <ClInclude Include="ImGuiExtensions.hpp" />
     <ClInclude Include="MenuBar.hpp" />
     <ClInclude Include="Observer.hpp" />
     <ClInclude Include="resource.h" />

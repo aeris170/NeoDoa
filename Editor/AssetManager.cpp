@@ -7,6 +7,7 @@
 #include <Texture.hpp>
 
 #include "GUI.hpp"
+#include "ImGuiExtensions.hpp"
 
 AssetManager::AssetManager(GUI* gui) noexcept :
 	gui(gui) {}
@@ -31,25 +32,19 @@ void AssetManager::Begin() {
 void AssetManager::Render() {
 	RenderMenuBar();
 
-	bool visible = ImGui::BeginTable(
-		"content",
-		2,
-		ImGuiTableFlags_Resizable | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_ScrollY,
-		{ ImGui::GetContentRegionAvail() }
-	);
-	if (visible) {
-		ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, 200);
-		ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch);
+	selectedFolderContentMinWidth = selectedFolderContentThumbnailSize + 4 * selectedFolderContentItemPadding;
+	selectedFolderContentCurrentWidth = ImGui::GetContentRegionAvail().x - treeViewCurrentWidth;
+	Splitter(true, 8.0f, &treeViewCurrentWidth, &selectedFolderContentCurrentWidth, treeViewMinWidth, selectedFolderContentMinWidth);
 
-		ImGui::TableNextRow();
-		ImGui::TableSetColumnIndex(0);
-		RenderTreeView();
+	ImGui::BeginChild("test", { treeViewCurrentWidth, 0 }, true);
+	RenderTreeView();
+	ImGui::EndChild();
 
-		ImGui::TableSetColumnIndex(1);
-		RenderSelectedFolderContent();
+	ImGui::SameLine();
 
-		ImGui::EndTable();
-	}
+	ImGui::BeginChild("test2", { selectedFolderContentCurrentWidth, 0 }, true);
+	RenderSelectedFolderContent();
+	ImGui::EndChild();
 }
 
 void AssetManager::End() {
@@ -124,7 +119,7 @@ void AssetManager::RenderSelectedFolderContent() {
 
 	if (ImGui::GetIO().KeyCtrl) {
 		selectedFolderContentThumbnailSize += ImGui::GetIO().MouseWheel;
-		selectedFolderContentThumbnailSize = std::clamp(selectedFolderContentThumbnailSize, 48.0f, std::numeric_limits<float>::max());
+		selectedFolderContentThumbnailSize = std::clamp(selectedFolderContentThumbnailSize, 48.0f, 96.0f);
 		selectedFolderContentItemPadding = selectedFolderContentThumbnailSize / 4;
 	}
 
@@ -183,7 +178,7 @@ void AssetManager::RenderSelectedFolderContent() {
 			fileName = shortened;
 		}
 
-		ImGui::PushClipRect(ImGui::GetItemRectMin(), { ImGui::GetItemRectMax().x, ImGui::GetItemRectMax().y + (selectedFolderContentMaxTextLine + 0.5f) * textHeight }, false);
+		ImGui::PushClipRect(ImGui::GetItemRectMin(), { ImGui::GetItemRectMax().x, ImGui::GetItemRectMax().y + (selectedFolderContentMaxTextLine + 0.5f) * textHeight }, true);
 		ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + selectedFolderContentThumbnailSize);
 		ImGui::TextUnformatted(fileName.c_str());
 		ImGui::PopTextWrapPos(); ImGui::RenderTextClipped;

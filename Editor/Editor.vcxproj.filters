@@ -40,6 +40,9 @@
     <Filter Include="UI\GUI\MenuBar">
       <UniqueIdentifier>{f2a21c9f-f215-4d84-aa1a-f3d58f3d7ffb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="UI\Extensions">
+      <UniqueIdentifier>{0eb73bbb-bc54-431e-9181-8ca0f0da9f96}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -78,6 +81,9 @@
     <ClCompile Include="SVGPathway.cpp">
       <Filter>UI</Filter>
     </ClCompile>
+    <ClCompile Include="ImGuiExtensions.cpp">
+      <Filter>UI\Extensions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.hpp">
@@ -115,6 +121,9 @@
     </ClInclude>
     <ClInclude Include="SVGPathway.hpp">
       <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGuiExtensions.hpp">
+      <Filter>UI\Extensions</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
