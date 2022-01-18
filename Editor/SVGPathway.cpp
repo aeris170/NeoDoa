@@ -74,32 +74,27 @@ void SVGPathway::Initialize(Color&& color) {
         bool widthScaled = width != dimension;
         for (int y = 0; y < dimension; y++) {
             for (int x = 0; x < dimension; x++) {
+                unsigned char* currentElement{ nullptr };
                 if (widthScaled) {
                     // pad left-right
                     if (x >= (dimension - width) / 2 && x < (dimension + width) / 2) {
-                        unsigned char* ptr = (unsigned char*)&paddedBuf[x + y * dimension];
-                        ptr[0] = buffer[bufIdx];
-                        ptr[1] = buffer[bufIdx + 1];
-                        ptr[2] = buffer[bufIdx + 2];
-                        ptr[3] = buffer[bufIdx + 3];
-                        bufIdx += elemWidth;
-                        if (bufIdx > width * height * elemWidth) {
-                            bufIdx = 0;
-                        }
+                        currentElement = (unsigned char*)&paddedBuf[x + y * dimension];
                     }
                 } else {
                     // pad top-bottom
                     if (y >= (dimension - height) / 2 && y < (dimension + height) / 2) {
-                        unsigned char* ptr = (unsigned char*)&paddedBuf[x + y * dimension];
-                        ptr[0] = buffer[bufIdx];
-                        ptr[1] = buffer[bufIdx + 1];
-                        ptr[2] = buffer[bufIdx + 2];
-                        ptr[3] = buffer[bufIdx + 3];
-                        bufIdx += elemWidth;
-                        if (bufIdx > width * height * elemWidth) {
-                            bufIdx = 0;
-                        }
+                        currentElement = (unsigned char*)&paddedBuf[x + y * dimension];
                     }
+                }
+                if (currentElement == nullptr) continue;
+
+                currentElement[0] = buffer[bufIdx];
+                currentElement[1] = buffer[bufIdx + 1];
+                currentElement[2] = buffer[bufIdx + 2];
+                currentElement[3] = buffer[bufIdx + 3];
+                bufIdx += elemWidth;
+                if (bufIdx > width * height * elemWidth) {
+                    bufIdx = 0;
                 }
             }
         }
