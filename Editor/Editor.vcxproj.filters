@@ -76,7 +76,7 @@
       <Filter>UI\GUI\AssetManager</Filter>
     </ClCompile>
     <ClCompile Include="SVGPathway.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -114,7 +114,7 @@
       <Filter>UI\GUI\AssetManager</Filter>
     </ClInclude>
     <ClInclude Include="SVGPathway.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
