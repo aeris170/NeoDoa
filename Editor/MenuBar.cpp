@@ -74,17 +74,16 @@ void MenuBar::RenderProjectSubMenu() {
 		}
 	}
 	ImGui::Separator();
-	if (ImGui::MenuItem("Save Project", "Ctrl+S")) {
+	if (ImGui::MenuItem("Save Project", "Ctrl+Shift+S")) {
 		gui->SaveProjectToDisk();
 	}
 	ImGui::Separator();
-	if (ImGui::MenuItem("Exit")) {
 		gui->core->Stop();
 	}
 }
 
 void MenuBar::RenderSceneSubMenu() {
-	if (ImGui::MenuItem("New Scene", nullptr, nullptr, gui->HasOpenProject())) {
+	if (ImGui::MenuItem("New Scene", "Ctrl+N", nullptr, gui->HasOpenProject())) {
 		gui->CreateNewScene("", "New Scene");
 	}
 }
