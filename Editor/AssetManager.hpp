@@ -33,6 +33,8 @@ private:
 
 	float selectedFolderContentItemPadding = 16;
 	float selectedFolderContentThumbnailSize = 64;
+	const float selectedFolderContentThumbnailMinSize = 48.0f;
+	const float selectedFolderContentThumbnailMaxSize = 96.0f;
 	int selectedFolderContentMaxTextLine = 3;
 
 	void RenderMenuBar();

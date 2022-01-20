@@ -138,7 +138,7 @@ void AssetManager::RenderSelectedFolderContent() {
 
 	if (ImGui::GetIO().KeyCtrl) {
 		selectedFolderContentThumbnailSize += ImGui::GetIO().MouseWheel;
-		selectedFolderContentThumbnailSize = std::clamp(selectedFolderContentThumbnailSize, 48.0f, 96.0f);
+		selectedFolderContentThumbnailSize = std::clamp(selectedFolderContentThumbnailSize, selectedFolderContentThumbnailMinSize, selectedFolderContentThumbnailMaxSize);
 		selectedFolderContentItemPadding = selectedFolderContentThumbnailSize / 4;
 	}
 
