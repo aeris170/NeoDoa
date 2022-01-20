@@ -107,12 +107,17 @@ void AssetManager::RenderSelectedFolderContent() {
 	ImGui::Text(SELECTED_FOLDER_CONTENT_TITLE_TEXT);
 	ImVec2 min = ImGui::GetItemRectMin();
 	ImVec2 max = { ImGui::GetItemRectMin().x + ImGui::GetContentRegionAvail().x, ImGui::GetItemRectMax().y };
-	ImGui::GetWindowDrawList()->AddRectFilled({ min.x - 2, min.y - 2 }, { max.x + 2, max.y + 2 }, ImGui::ColorConvertFloat4ToU32({ 0.2f, 0.205f, 0.21f, 1.0f }));
-	ImGui::GetWindowDrawList()->AddRectFilled(min, max, ImGui::ColorConvertFloat4ToU32({ 0.3f, 0.305f, 0.31f, 1.0f }));
+	ImGui::GetWindowDrawList()->AddRectFilled({ min.x - 2, min.y - 2 }, { max.x + 2, max.y + 2 }, ImGui::ColorConvertFloat4ToU32(ImGui::GetStyleColorVec4(ImGuiCol_TitleBg)));
+	ImGui::GetWindowDrawList()->AddRectFilled(min, max, ImGui::ColorConvertFloat4ToU32(ImGui::GetStyleColorVec4(ImGuiCol_Header)));
 
 	ImGui::SetCursorPos({ pos.x - 2, pos.y - 3 });
 	if (!hasContent) ImGui::BeginDisabled();
+	ImGui::PushClipRect(min, max, true);
+	//ImGui::PushStyleColor(ImGuiCol_Button, { 0.38f, 0.38f, 0.38f, 1.0f }); // TODO remove these magic colors
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetStyleColorVec4(ImGuiCol_HeaderHovered));
 	ImGui::Button(ICON_FA_ARROW_LEFT, { ImGui::CalcTextSize(ICON_FA_ARROW_LEFT).x * 2, max.y - min.y + 4 });
+	ImGui::PopStyleColor(1);
+	ImGui::PopClipRect();
 	if (!hasContent) ImGui::EndDisabled();
 	if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
 		selectedFolder = selectedFolder->_parent ? selectedFolder->_parent : root;
