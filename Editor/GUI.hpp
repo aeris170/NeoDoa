@@ -21,8 +21,11 @@ struct GUI {
 	static constexpr const char* const CONSOLE_ID{ "Console" };
 	static constexpr const char* const ASSET_MANAGER_ID{ "Asset Manager" };
 
-	static constexpr const char* const FOLDER_ICON_KEY{ "!!folderIcon!!" };
-	static constexpr const char* const FILE_ICON_KEY{ "!!fileIcon!!" };
+	static constexpr const char* const FOLDER_ICON_KEY{ "folder-open" };
+	static constexpr const char* const PROJECT_ICON_KEY{ "neodoa" };
+	static constexpr const char* const SCENE_ICON_KEY{ "diagram-project" };
+	static constexpr const char* const FILE_ICON_KEY{ "file" };
+	static constexpr const char* const BACK_ARROW_ICON_KEY{ "arrow-left" };
 
 	static constexpr const char* const SCENE_ICON = ICON_FA_PROJECT_DIAGRAM " ";
 	static constexpr const char* const ENTITY_ICON = ICON_FA_CUBE " ";
@@ -36,7 +39,6 @@ struct GUI {
 	std::unique_ptr<Core>& core;
 	std::string defaultWindowName{ "NeoDoa Editor" };
 	bool dockspaceOpen{ true };
-	std::unordered_map<std::string, std::weak_ptr<Texture>> texIcons;
 
 	std::optional<Project> openProject{ std::nullopt };
 
@@ -68,7 +70,10 @@ struct GUI {
 	ImFont* GetFont();
 
 	void* GetFolderIcon();
+	void* GetProjectIcon();
+	void* GetSceneIcon();
 	void* GetFileIcon();
+	void* GetBackArrowIcon();
 
 private:
 	ImGuiIO* io{ nullptr };

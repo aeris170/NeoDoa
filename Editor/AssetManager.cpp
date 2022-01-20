@@ -164,13 +164,16 @@ void AssetManager::RenderSelectedFolderContent() {
 		void* icon;
 		if (child._isDir) {
 			icon = gui->GetFolderIcon();
-		}
-		else {
+		} else if (Assets::IsSceneFile(child)) {
+			icon = gui->GetSceneIcon();
+		} else if(child._ext == ".doa") {
+			icon = gui->GetProjectIcon();
+		} else {
 			icon = gui->GetFileIcon();
 		}
 
 		ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
-		ImGui::ImageButton(gui->GetFolderIcon(), { selectedFolderContentThumbnailSize, selectedFolderContentThumbnailSize }, { 0, 1 }, { 1, 0 });
+		ImGui::ImageButton(icon, { selectedFolderContentThumbnailSize, selectedFolderContentThumbnailSize });
 
 		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
 			OpenFileAtFileNode(child);
