@@ -109,14 +109,23 @@ void AssetManager::RenderSelectedFolderContent() {
 	ImVec2 max = { ImGui::GetItemRectMin().x + ImGui::GetContentRegionAvail().x, ImGui::GetItemRectMax().y };
 	ImGui::GetWindowDrawList()->AddRectFilled({ min.x - 2, min.y - 2 }, { max.x + 2, max.y + 2 }, ImGui::ColorConvertFloat4ToU32({ 0.2f, 0.205f, 0.21f, 1.0f }));
 	ImGui::GetWindowDrawList()->AddRectFilled(min, max, ImGui::ColorConvertFloat4ToU32({ 0.3f, 0.305f, 0.31f, 1.0f }));
-	ImGui::SetCursorPos({ pos.x, pos.y - 1 });
 
+	ImGui::SetCursorPos({ pos.x - 2, pos.y - 3 });
+	if (!hasContent) ImGui::BeginDisabled();
+	ImGui::Button(ICON_FA_ARROW_LEFT, { ImGui::CalcTextSize(ICON_FA_ARROW_LEFT).x * 2, max.y - min.y + 4 });
+	if (!hasContent) ImGui::EndDisabled();
+	if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+		selectedFolder = selectedFolder->_parent ? selectedFolder->_parent : root;
+	}
+
+	ImGui::SameLine();
+
+	ImGui::SetCursorPos({ ImGui::GetCursorPos().x - 1, ImGui::GetCursorPos().y - 1 });
 	std::string title(SELECTED_FOLDER_CONTENT_TITLE_TEXT);
 	if (selectedFolder != nullptr) {
 		title.append(" - ROOT: ");
 		title.append(selectedFolder->_path);
 	}
-	ImGui::Indent(15);
 	ImGui::Text(title.c_str());
 	if (selectedFolder == nullptr) return;
 	if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
