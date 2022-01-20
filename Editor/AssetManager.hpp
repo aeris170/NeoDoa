@@ -25,14 +25,14 @@ private:
 	FNode* root{ nullptr };
 	FNode* selectedFolder{ nullptr };
 
-	float treeViewCurrentWidth = 120;
-	float treeViewMinWidth = 30;
+	float treeViewCurrentWidth = 120.0f;
+	float treeViewMinWidth = 30.0f;
 
-	float selectedFolderContentCurrentWidth = 300;
-	float selectedFolderContentMinWidth = 120;
+	float selectedFolderContentCurrentWidth = 300.0f;
+	float selectedFolderContentMinWidth = 120.0f;
 
-	float selectedFolderContentItemPadding = 16;
-	float selectedFolderContentThumbnailSize = 64;
+	float selectedFolderContentItemPadding = 16.0f;
+	float selectedFolderContentThumbnailSize = 64.0f;
 	const float selectedFolderContentThumbnailMinSize = 48.0f;
 	const float selectedFolderContentThumbnailMaxSize = 96.0f;
 	int selectedFolderContentMaxTextLine = 3;
