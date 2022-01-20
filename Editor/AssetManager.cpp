@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <imgui.h>
 #include <imgui_internal.h>
+#include <detector.hpp>
 
 #include <Texture.hpp>
 
@@ -118,6 +119,21 @@ void AssetManager::RenderSelectedFolderContent() {
 	ImGui::Indent(15);
 	ImGui::Text(title.c_str());
 	if (selectedFolder == nullptr) return;
+	if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+		std::string cmd;
+		if constexpr (detect::is_windows_v) {
+			cmd = "explorer ";
+		} else if constexpr (detect::is_macos_v) {
+			cmd = "open ";
+		} else if constexpr (detect::is_linux_v) {
+			cmd = "nautilus --browser "; // linux not supported
+		} else {
+			throw; // platform not supported
+		}
+		cmd.append(selectedFolder->_path);
+		std::system(cmd.c_str());
+	}
+
 	ImGui::NewLine();
 
 	if (ImGui::GetIO().KeyCtrl) {
