@@ -19,7 +19,7 @@ void AssetManager::Begin() {
 	hasContent = gui->HasOpenProject();
 	if(hasContent) {
 		assets = &gui->openProject->Assets();
-		root = &assets->_root;
+		root = &assets->Root();
 		if (selectedFolder == nullptr) {
 			selectedFolder = root;
 		}

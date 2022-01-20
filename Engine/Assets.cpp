@@ -11,8 +11,64 @@
 #include "Log.hpp"
 #include "SceneSerializer.hpp"
 
-static void ReadRecursive(FNode& root);
-static void FindFilesFor(Assets& assetManager, FNode& root);
+bool Assets::IsSceneFile(const FNode& node) { return node._ext == ".scn"; }
+bool Assets::IsScriptFile(const FNode& node) { return node._ext == ".as"; }
+bool Assets::IsTextureFile(const FNode& node) { return node._ext == ".png" || node._ext == ".jpg" || node._ext == ".jpeg"; }
+bool Assets::IsModelFile(const FNode& node) { return node._ext == ".obj" || node._ext == ".fbx" || node._ext == "3ds"; }
+bool Assets::IsMaterialFile(const FNode& node) { return node._ext == ".mat"; }
+bool Assets::IsShaderFile(const FNode& node) { return node._ext == ".sh"; }
+
+void Assets::ReadRecursive(FNode& root) {
+	auto it = std::filesystem::directory_iterator(root._path);
+	for (const auto& entry : it) {
+		bool isFile = entry.is_regular_file();
+		bool isDir = entry.is_directory();
+		root._children.emplace_back(FNode{
+			entry.path().string(),
+			entry.path().filename().string(),
+			entry.path().filename().string().substr(0, entry.path().filename().string().find_last_of(".")),
+			entry.path().extension().string(),
+			&root,
+			{},
+			isFile,
+			isDir
+		});
+	}
+	// DON'T merge this loop with the above.
+	for (auto& child : root._children) {
+		if (child._isDir) {
+			ReadRecursive(child);
+		}
+	}
+}
+
+void Assets::FindFilesFor(Assets& assetManager, FNode& root) {
+	for (auto& node : root._children) {
+		if (node._isFile) {
+			if (Assets::IsSceneFile(node)) {
+				assetManager._scenes.push_back(&node);
+			}
+			else if (Assets::IsScriptFile(node)) {
+				assetManager._scripts.push_back(&node);
+			}
+			else if (Assets::IsTextureFile(node)) {
+				assetManager._textures.push_back(&node);
+			}
+			else if (Assets::IsModelFile(node)) {
+				assetManager._models.push_back(&node);
+			}
+			else if (Assets::IsMaterialFile(node)) {
+				assetManager._materials.push_back(&node);
+			}
+			else if (Assets::IsShaderFile(node)) {
+				assetManager._shaders.push_back(&node);
+			}
+		}
+		else if (node._isDir) {
+			FindFilesFor(assetManager, node);
+		}
+	}
+}
 
 Assets::Assets(const Project* owner) noexcept :
 	project(owner) {
@@ -73,74 +129,20 @@ FNode* Assets::Find(std::string fullpath) {
 	return cur;
 }
 
-bool Assets::IsSceneFile(const FNode& node) {
-	return node._ext == ".scn";
-}
+FNode& Assets::Root() { return _root; }
+const FNode& Assets::Root() const { return _root; }
 
-bool Assets::IsScriptFile(const FNode& node) {
-	return node._ext == ".as";
-}
+std::vector<FNode*>& Assets::Scenes() { return _scenes; }
+const std::vector<FNode*>& Assets::Scenes() const { return _scenes; }
 
-bool Assets::IsTextureFile(const FNode& node) {
-	return node._ext == ".png" || node._ext == ".jpg" || node._ext == ".jpeg";
-}
+std::vector<FNode*>& Assets::Scripts() { return _scripts; }
+const std::vector<FNode*>& Assets::Scripts() const { return _scripts; }
 
-bool Assets::IsModelFile(const FNode& node) {
-	return node._ext == ".obj" || node._ext == ".fbx" || node._ext == "3ds";
-}
+std::vector<FNode*>& Assets::Textures() { return _textures; }
+const std::vector<FNode*>& Assets::Textures() const { return _textures; }
 
-bool Assets::IsMaterialFile(const FNode& node) {
-	return node._ext == ".mat";
-}
+std::vector<FNode*>& Assets::Materials() { return _materials; }
+const std::vector<FNode*>& Assets::Materials() const { return _materials; }
 
-bool Assets::IsShaderFile(const FNode& node) {
-	return node._ext == ".sh";
-}
-
-//-----------------------------------------------------------------
-
-static void ReadRecursive(FNode& root) {
-	auto it = std::filesystem::directory_iterator(root._path);
-	for (const auto& entry : it) {
-		bool isFile = entry.is_regular_file();
-		bool isDir = entry.is_directory();
-		root._children.emplace_back(FNode{
-			entry.path().string(),
-			entry.path().filename().string(),
-			entry.path().filename().string().substr(0, entry.path().filename().string().find_last_of(".")),
-			entry.path().extension().string(),
-			&root,
-			{},
-			isFile,
-			isDir
-		});
-	}
-	// DON'T merge this loop with the above.
-	for (auto& child : root._children) {
-		if (child._isDir) {
-			ReadRecursive(child);
-		}
-	}
-}
-
-static void FindFilesFor(Assets& assetManager, FNode& root) {
-	for (auto& node : root._children) {
-		if(node._isFile) {
-			if (Assets::IsSceneFile(node)) {
-				assetManager._scenes.push_back(&node);
-			} else if (Assets::IsScriptFile(node)) {
-				assetManager._scripts.push_back(&node);
-			} else if (Assets::IsTextureFile(node)) {
-				assetManager._textures.push_back(&node);
-			} else if (Assets::IsModelFile(node)) {
-				assetManager._models.push_back(&node);
-			} else if (Assets::IsMaterialFile(node)) {
-				assetManager._materials.push_back(&node);
-			} else if (Assets::IsShaderFile(node)) {
-				assetManager._shaders.push_back(&node);
-			}
-		} else if (node._isDir) {
-			FindFilesFor(assetManager, node);
-		}
-	}
-}
+std::vector<FNode*>& Assets::Shaders() { return _shaders; }
+const std::vector<FNode*>& Assets::Shaders() const { return _shaders; }

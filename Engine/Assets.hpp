@@ -23,6 +23,34 @@ struct Assets {
 	inline static std::string SHADER_EXT = ".shdr";
 	static bool IsShaderFile(const FNode& node);
 
+	FNode& Root();
+	const FNode& Root() const;
+
+	std::vector<FNode*>& Scenes();
+	const std::vector<FNode*>& Scenes() const;
+
+	std::vector<FNode*>& Scripts();
+	const std::vector<FNode*>& Scripts() const;
+
+	std::vector<FNode*>& Textures();
+	const std::vector<FNode*>& Textures() const;
+
+	std::vector<FNode*>& Models();
+	const std::vector<FNode*>& Models() const;
+
+	std::vector<FNode*>& Materials();
+	const std::vector<FNode*>& Materials() const;
+
+	std::vector<FNode*>& Shaders();
+	const std::vector<FNode*>& Shaders() const;
+
+	Assets(const Project* owner) noexcept;
+
+	void ReScan();
+	FNode* Find(std::string path);
+	FNode* CreateNewSceneFileNode(std::string_view relativePath, std::string_view name);
+
+private:
 	const Project* project{ nullptr };
 
 	FNode _root;
@@ -34,12 +62,8 @@ struct Assets {
 	std::vector<FNode*> _materials;
 	std::vector<FNode*> _shaders;
 
-	Assets(const Project* owner) noexcept;
+	static void ReadRecursive(FNode& root);
+	static void FindFilesFor(Assets& assetManager, FNode& root);
 
-	void ReScan();
-	FNode* Find(std::string path);
-	FNode* CreateNewSceneFileNode(std::string_view relativePath, std::string_view name);
-
-private:
 	friend struct Project;
 };
