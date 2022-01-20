@@ -14,7 +14,7 @@ AssetManager::AssetManager(GUI* gui) noexcept :
 
 void AssetManager::Begin() {
 	ImGui::PushID(gui->ASSET_MANAGER_ID);
-	ImGui::Begin(gui->ASSET_MANAGER_ID, 0, ImGuiWindowFlags_MenuBar);
+	ImGui::Begin(gui->ASSET_MANAGER_ID, nullptr, ImGuiWindowFlags_MenuBar);
 
 	hasContent = gui->HasOpenProject();
 	if(hasContent) {
