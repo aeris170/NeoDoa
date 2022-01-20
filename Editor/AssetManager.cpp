@@ -85,6 +85,9 @@ void AssetManager::RenderTreeViewRecursive(FNode* current) {
 	}
 
 	std::string title(ICON_FA_FOLDER " ");
+	if (current == root) {
+		title = ICON_FA_FOLDER_TREE " ";
+	}
 	title.append(current->_name);
 	if (ImGui::TreeNodeEx(title.c_str(), flags)) {
 		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
