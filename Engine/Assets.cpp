@@ -139,6 +139,9 @@ const std::vector<FNode*>& Assets::Scripts() const { return _scripts; }
 std::vector<FNode*>& Assets::Textures() { return _textures; }
 const std::vector<FNode*>& Assets::Textures() const { return _textures; }
 
+std::vector<FNode*>& Assets::Models() { return _models; }
+const std::vector<FNode*>& Assets::Models() const { return _models; }
+
 std::vector<FNode*>& Assets::Materials() { return _materials; }
 const std::vector<FNode*>& Assets::Materials() const { return _materials; }
 
