@@ -212,7 +212,11 @@ void AssetManager::RenderSelectedFolderContent() {
 
 void AssetManager::OpenFileAtFileNode(const FNode& file) {
 	FNode* ptr = &const_cast<FNode&>(file);
-	if (Assets::IsSceneFile(file)) {
-		gui->openProject->OpenScene(ptr);
+	if (file._isDir) {
+		selectedFolder = ptr;
+	} else if(file._isFile) {
+		if (Assets::IsSceneFile(file)) {
+			gui->openProject->OpenScene(ptr);
+		}
 	}
 }
