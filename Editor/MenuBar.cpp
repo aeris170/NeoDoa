@@ -78,6 +78,7 @@ void MenuBar::RenderProjectSubMenu() {
 		gui->SaveProjectToDisk();
 	}
 	ImGui::Separator();
+	if (ImGui::MenuItem("Exit", "Alt+F4")) {
 		gui->core->Stop();
 	}
 }
