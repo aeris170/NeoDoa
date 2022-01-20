@@ -116,9 +116,6 @@
     <ClCompile Include="Shader.cpp">
       <Filter>Asset\Shader</Filter>
     </ClCompile>
-    <ClCompile Include="AssetManager.cpp">
-      <Filter>Asset\Manager</Filter>
-    </ClCompile>
     <ClCompile Include="Project.cpp">
       <Filter>Project</Filter>
     </ClCompile>
@@ -169,6 +166,9 @@
     </ClCompile>
     <ClCompile Include="FileNode.cpp">
       <Filter>Asset\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="Assets.cpp">
+      <Filter>Asset</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -235,9 +235,6 @@
     <ClInclude Include="Vertex.hpp">
       <Filter>Asset\Model</Filter>
     </ClInclude>
-    <ClInclude Include="AssetManager.hpp">
-      <Filter>Asset\Manager</Filter>
-    </ClInclude>
     <ClInclude Include="FileNode.hpp">
       <Filter>Asset\Manager</Filter>
     </ClInclude>
@@ -297,6 +294,9 @@
     </ClInclude>
     <ClInclude Include="ProjectDeserializer.hpp">
       <Filter>Project\Serialize</Filter>
+    </ClInclude>
+    <ClInclude Include="Assets.hpp">
+      <Filter>Asset</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
