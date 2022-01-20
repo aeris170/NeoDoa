@@ -32,7 +32,7 @@ void AssetManager::Begin() {
 void AssetManager::Render() {
 	RenderMenuBar();
 
-	selectedFolderContentMinWidth = selectedFolderContentThumbnailSize + 4 * selectedFolderContentItemPadding;
+	selectedFolderContentMinWidth = selectedFolderContentThumbnailSize + 48 + selectedFolderContentItemPadding;
 	selectedFolderContentCurrentWidth = ImGui::GetContentRegionAvail().x - treeViewCurrentWidth;
 	Splitter(true, 8.0f, &treeViewCurrentWidth, &selectedFolderContentCurrentWidth, treeViewMinWidth, selectedFolderContentMinWidth);
 
@@ -73,7 +73,7 @@ void AssetManager::RenderTreeView() {
 void AssetManager::RenderTreeViewRecursive(FNode* current) {
 	if (!current->_isDir) return;
 
-	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth;
+	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_NavLeftJumpsBackHere;
 
 	std::vector<FNode*> children;
 	for (auto& child : current->_children) {
@@ -81,7 +81,7 @@ void AssetManager::RenderTreeViewRecursive(FNode* current) {
 	}
 
 	if (children.size() == 0) {
-		flags |= ImGuiTreeNodeFlags_Leaf;
+		flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet;
 	}
 
 	std::string title(ICON_FA_FOLDER " ");
