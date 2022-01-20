@@ -21,7 +21,7 @@ struct Project {
 
 	Project(std::string workspace, std::string name) noexcept;
 	Project(std::string workspace, std::string name, std::string startupLoc) noexcept;
-	~Project() noexcept;
+	~Project() = default;
 	Project(const Project& other) = delete;
 	Project(Project&& other) noexcept;
 	Project& operator=(const Project& other) = delete;

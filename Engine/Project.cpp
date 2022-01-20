@@ -18,8 +18,6 @@ Project::Project(std::string workspace, std::string name, std::string startupLoc
 	}
 }
 
-Project::~Project() noexcept {}
-
 Project::Project(Project&& other) noexcept :
 	_workspace(std::move(other._workspace)),
 	_name(std::move(other._name)),
