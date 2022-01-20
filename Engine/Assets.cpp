@@ -21,18 +21,16 @@ bool Assets::IsShaderFile(const FNode& node) { return node._ext == ".sh"; }
 void Assets::ReadRecursive(FNode& root) {
 	auto it = std::filesystem::directory_iterator(root._path);
 	for (const auto& entry : it) {
-		bool isFile = entry.is_regular_file();
-		bool isDir = entry.is_directory();
-		root._children.emplace_back(FNode{
+		root._children.emplace_back(
 			entry.path().string(),
 			entry.path().filename().string(),
 			entry.path().filename().string().substr(0, entry.path().filename().string().find_last_of(".")),
 			entry.path().extension().string(),
 			&root,
-			{},
-			isFile,
-			isDir
-		});
+			std::vector<FNode>(),
+			entry.is_regular_file(),
+			entry.is_directory()
+		);
 	}
 	// DON'T merge this loop with the above.
 	for (auto& child : root._children) {
