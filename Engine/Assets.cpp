@@ -97,6 +97,35 @@ FNode* Assets::CreateNewSceneFileNode(std::string_view relativePath, std::string
 	return Find(path);
 }
 
+Assets::Assets(Assets&& other) noexcept :
+	project(other.project),
+	_root(std::move(other._root)),
+	_scenes(std::move(other._scenes)),
+    _scripts(std::move(other._scripts)),
+    _textures(std::move(other._textures)),
+    _models(std::move(other._models)),
+    _materials(std::move(other._materials)),
+    _shaders(std::move(other._shaders)) {
+	for (auto& directChildren : _root._children) {
+		directChildren._parent = &_root;
+	}
+}
+
+Assets& Assets::operator=(Assets&& other) noexcept {
+	project = other.project;
+	_root = std::move(other._root);
+	_scenes = std::move(other._scenes);
+	_scripts = std::move(other._scripts);
+	_textures = std::move(other._textures);
+	_models = std::move(other._models);
+	_materials = std::move(other._materials);
+	_shaders = std::move(other._shaders);
+	for (auto& directChildren : _root._children) {
+		directChildren._parent = &_root;
+	}
+	return *this;
+}
+
 void Assets::ReScan() {
 	_root._children.clear();
 	ReadRecursive(_root);

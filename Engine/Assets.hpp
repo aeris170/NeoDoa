@@ -50,6 +50,12 @@ struct Assets {
 	FNode* Find(std::string path);
 	FNode* CreateNewSceneFileNode(std::string_view relativePath, std::string_view name);
 
+	~Assets() = default;
+	Assets(const Assets& other) = default;
+	Assets(Assets&& other) noexcept;
+	Assets& operator=(const Assets& other) = default;
+	Assets& operator=(Assets&& other) noexcept;
+
 private:
 	const Project* project{ nullptr };
 

@@ -23,22 +23,13 @@ Project::Project(Project&& other) noexcept :
 	_name(std::move(other._name)),
 	_assets(std::move(other._assets)),
 	_startupScene(std::exchange(other._startupScene, nullptr)),
-	_openScene(std::move(other._openScene)) {
-	_assets.project = this;
-	for (auto& directChildren : _assets._root._children) {
-		directChildren._parent = &_assets._root;
-	}
-}
+	_openScene(std::move(other._openScene)) {}
 
 Project& Project::operator=(Project&& other) noexcept {
 	_workspace = std::move(other._workspace);
 	_name = std::move(other._name);
 
 	_assets = std::move(other._assets);
-	_assets.project = this;
-	for (auto& directChildren : _assets._root._children) {
-		directChildren._parent = &_assets._root;
-	}
 
 	_startupScene = std::exchange(other._startupScene, nullptr);
 
