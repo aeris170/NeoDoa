@@ -29,8 +29,8 @@ void Observer::Begin(const std::optional<Scene>& scene) {
 			title.append(scene.value().GetComponent<IDComponent>(gui->sh.selectedEntity).GetTag());
 		}
 	}
-	//title.append("###");
-	//title.append(gui->OBSERVER_ID);
+	title.append("###");
+	title.append(gui->OBSERVER_ID);
 	ImGui::Begin(title.c_str());
 }
 
