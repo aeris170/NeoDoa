@@ -24,7 +24,7 @@ private:
 	static constexpr const char* const PATH{ "SVGs" };
 	static constexpr int WIDTH{ 1024 };
 	static constexpr int HEIGHT{ 1024 };
-	static constexpr int SCALE_FACTOR{ 1 };
+	static constexpr float SCALE_FACTOR{ .25f };
 	static constexpr uint32_t RASTER_BG_COLOR{ 0xffffff00 };
 
 	static bool Initialized;
