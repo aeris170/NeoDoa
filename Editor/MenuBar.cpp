@@ -87,6 +87,15 @@ void MenuBar::RenderSceneSubMenu() {
 	if (ImGui::MenuItem("New Scene", "Ctrl+N", nullptr, gui->HasOpenProject())) {
 		gui->CreateNewScene("", "New Scene");
 	}
+	if (ImGui::BeginMenu("Open Scene...", gui->HasOpenProject())) {
+		auto& scenes = gui->openProject->Assets().Scenes();
+		for (auto sceneFile : scenes) {
+			if (ImGui::MenuItem(sceneFile->_name.c_str(), nullptr, nullptr)) {
+				gui->openProject->OpenScene(sceneFile);
+			}
+		}
+		ImGui::EndMenu();
+	}
 }
 
 void MenuBar::RenderHelpSubMenu() {
