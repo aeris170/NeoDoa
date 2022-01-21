@@ -68,6 +68,7 @@ struct GUI {
 
 	ImGuiIO* IO();
 	ImFont* GetFont();
+	ImFont* GetFontBold();
 
 	void* GetFolderIcon();
 	void* GetProjectIcon();
@@ -78,4 +79,5 @@ struct GUI {
 private:
 	ImGuiIO* io{ nullptr };
 	ImFont* font{ nullptr };
+	ImFont* fontBold{ nullptr };
 };

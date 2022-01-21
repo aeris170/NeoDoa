@@ -56,7 +56,8 @@ void GUI::Prepare() {
 	if (opt_fullscreen) ImGui::PopStyleVar(2);
 
 	io = &ImGui::GetIO();
-	font = io->Fonts->Fonts[1];
+	font = io->Fonts->Fonts[0];
+	fontBold = io->Fonts->Fonts[1];
 
 	ImGuiStyle& style = ImGui::GetStyle();
 	float minWinSizeX = style.WindowMinSize.x;
@@ -177,6 +178,7 @@ bool GUI::HasOpenScene() { return HasOpenProject() && openProject->_openScene.ha
 
 ImGuiIO* GUI::IO() { return io; }
 ImFont* GUI::GetFont() { return font; }
+ImFont* GUI::GetFontBold() { return fontBold; }
 
 void* GUI::GetFolderIcon() { return reinterpret_cast<void*>(SVGPathway::Get(FOLDER_ICON_KEY, TextureStyle::PADDED).lock()->_glTextureID); }
 void* GUI::GetProjectIcon() { return reinterpret_cast<void*>(SVGPathway::Get(PROJECT_ICON_KEY, TextureStyle::PADDED).lock()->_glTextureID); }
