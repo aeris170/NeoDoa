@@ -39,10 +39,10 @@ private:
 		const float thumbnailMinSize = 48.0f;
 		const float thumbnailMaxSize = 96.0f;
 		int maxTextLine = 3;
-		enum class SelectedFolderContentViewMode {
-			Column,
-			Tree
-		} viewMode;
+		enum class ViewMode {
+			Icons,
+			List
+		} viewMode = ViewMode::Icons;
 	} selectedFolderContentSettings;
 
 	void RenderMenuBar();

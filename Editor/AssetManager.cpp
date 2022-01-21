@@ -153,20 +153,26 @@ void AssetManager::RenderSelectedFolderContent() {
 	ImGui::NewLine();
 
 	if (ImGui::GetIO().KeyCtrl) {
-		float mWheelDelta = ImGui::GetIO().MouseWheel;
+		float mWheelDelta = gui->IO()->MouseWheel;
 		if (selectedFolderContentSettings.thumbnailSize == selectedFolderContentSettings.thumbnailMinSize) {
-			if(mWheelDelta < 0) {
-				selectedFolderContentSettings.viewMode = mWheelDelta < 0 ? SelectedFolderContentSettings::SelectedFolderContentViewMode::Tree : SelectedFolderContentSettings::SelectedFolderContentViewMode::Column;
+			if (mWheelDelta < 0) {
+				if (selectedFolderContentSettings.viewMode != SelectedFolderContentSettings::ViewMode::List) {
+					selectedFolderContentSettings.viewMode = SelectedFolderContentSettings::ViewMode::List;
+				}
+		    } else if (mWheelDelta > 0 && selectedFolderContentSettings.viewMode != SelectedFolderContentSettings::ViewMode::Icons) {
+				if (selectedFolderContentSettings.viewMode != SelectedFolderContentSettings::ViewMode::Icons) {
+					selectedFolderContentSettings.viewMode = SelectedFolderContentSettings::ViewMode::Icons;
+					mWheelDelta = 0;
+				}
 			}
-		} else {
-			selectedFolderContentSettings.thumbnailSize += mWheelDelta;
-
-			selectedFolderContentSettings.thumbnailSize = std::clamp(selectedFolderContentSettings.thumbnailSize, selectedFolderContentSettings.thumbnailMinSize, selectedFolderContentSettings.thumbnailMaxSize);
-			selectedFolderContentSettings.itemPadding = selectedFolderContentSettings.thumbnailSize / 4;
 		}
+		selectedFolderContentSettings.thumbnailSize += mWheelDelta;
+
+		selectedFolderContentSettings.thumbnailSize = std::clamp(selectedFolderContentSettings.thumbnailSize, selectedFolderContentSettings.thumbnailMinSize, selectedFolderContentSettings.thumbnailMaxSize);
+		selectedFolderContentSettings.itemPadding = selectedFolderContentSettings.thumbnailSize / 4;
 	}
 
-	if(selectedFolderContentSettings.viewMode == SelectedFolderContentSettings::SelectedFolderContentViewMode::Column) {
+	if (selectedFolderContentSettings.viewMode == SelectedFolderContentSettings::ViewMode::Icons) {
 		float cell = selectedFolderContentSettings.thumbnailSize + selectedFolderContentSettings.itemPadding;
 		float width = ImGui::GetContentRegionAvail().x;
 		selectedFolderContentSettings.minWidth = cell;
@@ -235,6 +241,8 @@ void AssetManager::RenderSelectedFolderContent() {
 		}
 
 		ImGui::EndTable();
+	} else if (selectedFolderContentSettings.viewMode == SelectedFolderContentSettings::ViewMode::List) {
+		// draw as list;
 	}
 }
 
