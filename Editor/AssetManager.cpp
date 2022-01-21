@@ -33,17 +33,17 @@ void AssetManager::Begin() {
 void AssetManager::Render() {
 	RenderMenuBar();
 
-	selectedFolderContentMinWidth = selectedFolderContentThumbnailSize + 48 + selectedFolderContentItemPadding;
-	selectedFolderContentCurrentWidth = ImGui::GetContentRegionAvail().x - treeViewCurrentWidth;
-	Splitter(true, 8.0f, &treeViewCurrentWidth, &selectedFolderContentCurrentWidth, treeViewMinWidth, selectedFolderContentMinWidth);
+	selectedFolderContentSettings.minWidth = selectedFolderContentSettings.thumbnailSize + 48 + selectedFolderContentSettings.itemPadding;
+	selectedFolderContentSettings.currentWidth = ImGui::GetContentRegionAvail().x - treeViewSettings.currentWidth;
+	Splitter(true, 8.0f, &treeViewSettings.currentWidth, &selectedFolderContentSettings.currentWidth, treeViewSettings.minWidth, selectedFolderContentSettings.minWidth);
 
-	ImGui::BeginChild("test", { treeViewCurrentWidth, 0 }, true);
+	ImGui::BeginChild("test", { treeViewSettings.currentWidth, 0 }, true);
 	RenderTreeView();
 	ImGui::EndChild();
 
 	ImGui::SameLine();
 
-	ImGui::BeginChild("test2", { selectedFolderContentCurrentWidth, 0 }, true);
+	ImGui::BeginChild("test2", { selectedFolderContentSettings.currentWidth, 0 }, true);
 	RenderSelectedFolderContent();
 	ImGui::EndChild();
 }
@@ -131,7 +131,9 @@ void AssetManager::RenderSelectedFolderContent() {
 		title.append(" - ROOT: ");
 		title.append(selectedFolder->_path);
 	}
+	ImGui::PushFont(gui->GetFontBold());
 	ImGui::Text(title.c_str());
+	ImGui::PopFont();
 	if (selectedFolder == nullptr) return;
 	if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
 		std::string cmd;
@@ -151,77 +153,89 @@ void AssetManager::RenderSelectedFolderContent() {
 	ImGui::NewLine();
 
 	if (ImGui::GetIO().KeyCtrl) {
-		selectedFolderContentThumbnailSize += ImGui::GetIO().MouseWheel;
-		selectedFolderContentThumbnailSize = std::clamp(selectedFolderContentThumbnailSize, selectedFolderContentThumbnailMinSize, selectedFolderContentThumbnailMaxSize);
-		selectedFolderContentItemPadding = selectedFolderContentThumbnailSize / 4;
-	}
-
-	float cell = selectedFolderContentThumbnailSize + selectedFolderContentItemPadding;
-	float width = ImGui::GetContentRegionAvail().x;
-	selectedFolderContentMinWidth = cell;
-
-	int columns = width / cell;
-	if (columns < 1) return;
-
-	bool visible = ImGui::BeginTable("selectedFolder", columns);
-	if (!visible) return;
-
-	int i = 0;
-	ImGui::TableNextRow();
-	for (auto& child : selectedFolder->_children) {
-		if (i == columns) {
-			i = 0;
-			ImGui::TableNextRow();
-		}
-		ImGui::TableSetColumnIndex(i++);
-
-		void* icon;
-		if (child._isDir) {
-			icon = gui->GetFolderIcon();
-		} else if (Assets::IsSceneFile(child)) {
-			icon = gui->GetSceneIcon();
-		} else if(child._ext == ".doa") {
-			icon = gui->GetProjectIcon();
+		float mWheelDelta = ImGui::GetIO().MouseWheel;
+		if (selectedFolderContentSettings.thumbnailSize == selectedFolderContentSettings.thumbnailMinSize) {
+			if(mWheelDelta < 0) {
+				selectedFolderContentSettings.viewMode = mWheelDelta < 0 ? SelectedFolderContentSettings::SelectedFolderContentViewMode::Tree : SelectedFolderContentSettings::SelectedFolderContentViewMode::Column;
+			}
 		} else {
-			icon = gui->GetFileIcon();
+			selectedFolderContentSettings.thumbnailSize += mWheelDelta;
+
+			selectedFolderContentSettings.thumbnailSize = std::clamp(selectedFolderContentSettings.thumbnailSize, selectedFolderContentSettings.thumbnailMinSize, selectedFolderContentSettings.thumbnailMaxSize);
+			selectedFolderContentSettings.itemPadding = selectedFolderContentSettings.thumbnailSize / 4;
 		}
-
-		ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
-		ImGui::ImageButton(icon, { selectedFolderContentThumbnailSize, selectedFolderContentThumbnailSize });
-
-		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-			OpenFileAtFileNode(child);
-		}
-		ImGui::PopStyleColor();
-
-		std::string fileName = child._name;
-
-		float textHeight = ImGui::GetTextLineHeight();
-		auto textSize = ImGui::CalcTextSize(fileName.c_str(), nullptr, true, selectedFolderContentThumbnailSize);
-		bool shouldShorten = textSize.y / textHeight > selectedFolderContentMaxTextLine;
-		if (shouldShorten) {
-			auto begin = fileName.begin();
-			auto end = --fileName.end();
-			std::string shortened;
-			do {
-				shortened = std::string(begin, end + 1);
-				shortened.append("...");
-				textSize = ImGui::CalcTextSize(shortened.c_str(), nullptr, true, selectedFolderContentThumbnailSize);
-				do {
-					--end;
-				} while (end[0] == ' ');
-			} while (textSize.y / textHeight > selectedFolderContentMaxTextLine);
-			fileName = shortened;
-		}
-
-		ImGui::PushClipRect(ImGui::GetItemRectMin(), { ImGui::GetItemRectMax().x, ImGui::GetItemRectMax().y + (selectedFolderContentMaxTextLine + 0.5f) * textHeight }, true);
-		ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + selectedFolderContentThumbnailSize);
-		ImGui::TextUnformatted(fileName.c_str());
-		ImGui::PopTextWrapPos(); ImGui::RenderTextClipped;
-		ImGui::PopClipRect();
 	}
 
-	ImGui::EndTable();
+	if(selectedFolderContentSettings.viewMode == SelectedFolderContentSettings::SelectedFolderContentViewMode::Column) {
+		float cell = selectedFolderContentSettings.thumbnailSize + selectedFolderContentSettings.itemPadding;
+		float width = ImGui::GetContentRegionAvail().x;
+		selectedFolderContentSettings.minWidth = cell;
+
+		int columns = width / cell;
+		if (columns < 1) return;
+
+		bool visible = ImGui::BeginTable("selectedFolder", columns);
+		if (!visible) return;
+
+		int i = 0;
+		ImGui::TableNextRow();
+		for (auto& child : selectedFolder->_children) {
+			if (i == columns) {
+				i = 0;
+				ImGui::TableNextRow();
+			}
+			ImGui::TableSetColumnIndex(i++);
+
+			void* icon;
+			if (child._isDir) {
+				icon = gui->GetFolderIcon();
+			} else if (Assets::IsSceneFile(child)) {
+				icon = gui->GetSceneIcon();
+			} else if(child._ext == ".doa") {
+				icon = gui->GetProjectIcon();
+			} else {
+				icon = gui->GetFileIcon();
+			}
+
+			ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
+			ImGui::ImageButton(icon, { selectedFolderContentSettings.thumbnailSize, selectedFolderContentSettings.thumbnailSize });
+
+			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+				OpenFileAtFileNode(child);
+			}
+			ImGui::PopStyleColor();
+
+			std::string fileName = child._name;
+
+			float textHeight = ImGui::GetTextLineHeight();
+			auto textSize = ImGui::CalcTextSize(fileName.c_str(), nullptr, true, selectedFolderContentSettings.thumbnailSize);
+			bool shouldShorten = textSize.y / textHeight > selectedFolderContentSettings.maxTextLine;
+			if (shouldShorten) {
+				auto begin = fileName.begin();
+				auto end = --fileName.end();
+				std::string shortened;
+				do {
+					shortened = std::string(begin, end + 1);
+					shortened.append("...");
+					textSize = ImGui::CalcTextSize(shortened.c_str(), nullptr, true, selectedFolderContentSettings.thumbnailSize);
+					do {
+						--end;
+					} while (end[0] == ' ');
+				} while (textSize.y / textHeight > selectedFolderContentSettings.maxTextLine);
+				fileName = shortened;
+			}
+
+			ImGui::PushClipRect(ImGui::GetItemRectMin(), { ImGui::GetItemRectMax().x, ImGui::GetItemRectMax().y + (selectedFolderContentSettings.maxTextLine + 0.5f) * textHeight }, true);
+			ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + selectedFolderContentSettings.thumbnailSize);
+			ImGui::PushFont(gui->GetFontBold());
+			ImGui::TextUnformatted(fileName.c_str());
+			ImGui::PopFont();
+			ImGui::PopTextWrapPos(); ImGui::RenderTextClipped;
+			ImGui::PopClipRect();
+		}
+
+		ImGui::EndTable();
+	}
 }
 
 void AssetManager::OpenFileAtFileNode(const FNode& file) {

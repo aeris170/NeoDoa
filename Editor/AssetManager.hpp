@@ -25,17 +25,25 @@ private:
 	FNode* root{ nullptr };
 	FNode* selectedFolder{ nullptr };
 
-	float treeViewCurrentWidth = 120.0f;
-	float treeViewMinWidth = 30.0f;
+	struct TreeViewSettings {
+		float currentWidth = 120.0f;
+		float minWidth = 30.0f;
+	} treeViewSettings;
 
-	float selectedFolderContentCurrentWidth = 300.0f;
-	float selectedFolderContentMinWidth = 120.0f;
+	struct SelectedFolderContentSettings {
+		float currentWidth = 300.0f;
+		float minWidth = 120.0f;
 
-	float selectedFolderContentItemPadding = 16.0f;
-	float selectedFolderContentThumbnailSize = 64.0f;
-	const float selectedFolderContentThumbnailMinSize = 48.0f;
-	const float selectedFolderContentThumbnailMaxSize = 96.0f;
-	int selectedFolderContentMaxTextLine = 3;
+		float itemPadding = 16.0f;
+		float thumbnailSize = 64.0f;
+		const float thumbnailMinSize = 48.0f;
+		const float thumbnailMaxSize = 96.0f;
+		int maxTextLine = 3;
+		enum class SelectedFolderContentViewMode {
+			Column,
+			Tree
+		} viewMode;
+	} selectedFolderContentSettings;
 
 	void RenderMenuBar();
 	void RenderTreeView();
