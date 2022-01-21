@@ -58,7 +58,9 @@ void Console::RenderFilterButtons() {
 	if (selectedSeverity == LogSeverity::TRACE) {
 		ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0, 0, 0, 0 });
+		ImGui::PushFont(gui->GetFontBold());
 		ImGui::Button(ICON_FA_INFO, buttonSize);
+		ImGui::PopFont();
 		ImGui::PopStyleColor(2);
 	} else if (ImGui::Button(ICON_FA_INFO, buttonSize)) {
 		selectedSeverity = LogSeverity::TRACE;
@@ -78,7 +80,9 @@ void Console::RenderFilterButtons() {
 	if (selectedSeverity == LogSeverity::INFO) {
 		ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0, 0, 0, 0 });
+		ImGui::PushFont(gui->GetFontBold());
 		ImGui::Button(ICON_FA_INFO, buttonSize);
+		ImGui::PopFont();
 		ImGui::PopStyleColor(2);
 	} else if (ImGui::Button(ICON_FA_INFO, buttonSize)) {
 		selectedSeverity = LogSeverity::INFO;
@@ -98,7 +102,9 @@ void Console::RenderFilterButtons() {
 	if (selectedSeverity == LogSeverity::WARNING) {
 		ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0, 0, 0, 0 });
+		ImGui::PushFont(gui->GetFontBold());
 		ImGui::Button(ICON_FA_EXCLAMATION_CIRCLE, buttonSize);
+		ImGui::PopFont();
 		ImGui::PopStyleColor(2);
 	} else if (ImGui::Button(ICON_FA_EXCLAMATION_CIRCLE, buttonSize)) {
 		selectedSeverity = LogSeverity::WARNING;
@@ -118,7 +124,9 @@ void Console::RenderFilterButtons() {
 	if (selectedSeverity == LogSeverity::ERRO) {
 		ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0, 0, 0, 0 });
+		ImGui::PushFont(gui->GetFontBold());
 		ImGui::Button(ICON_FA_EXCLAMATION_TRIANGLE, buttonSize);
+		ImGui::PopFont();
 		ImGui::PopStyleColor(2);
 	} else if (ImGui::Button(ICON_FA_EXCLAMATION_TRIANGLE, buttonSize)) {
 		selectedSeverity = LogSeverity::ERRO;
@@ -138,7 +146,9 @@ void Console::RenderFilterButtons() {
 	if (selectedSeverity == LogSeverity::FATAL) {
 		ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0, 0, 0, 0 });
+		ImGui::PushFont(gui->GetFontBold());
 		ImGui::Button(ICON_FA_EXCLAMATION_TRIANGLE, buttonSize);
+		ImGui::PopFont();
 		ImGui::PopStyleColor(2);
 	} else if (ImGui::Button(ICON_FA_EXCLAMATION_TRIANGLE, buttonSize)) {
 		selectedSeverity = LogSeverity::FATAL;
@@ -156,10 +166,12 @@ void Console::RenderDummyArea() {
 }
 
 void Console::RenderClearButton() {
+	ImGui::PushFont(gui->GetFontBold());
 	if (ImGui::Button(CLEAR_BUTTON_TEXT, { 60, buttonSize.y })) {
 		Log::Clear();
 		oldCount = 0;
 	}
+	ImGui::PopFont();
 	if (ImGui::IsItemHovered()) {
 		ImGui::SetTooltip(CLEAR_BUTTON_TOOLTIP_TEXT);
 	}
@@ -246,7 +258,7 @@ void Console::RenderMessageLog() {
 
 			ImGui::PushStyleColor(ImGuiCol_Text, color);
 
-			ImGui::PushFont(gui->GetFont());
+			ImGui::PushFont(gui->GetFontBold());
 			ImGui::Text(icon);
 			if (ImGui::IsItemHovered()) {
 				ImGui::BeginTooltip();
@@ -257,7 +269,7 @@ void Console::RenderMessageLog() {
 			ImGui::PopFont();
 
 			ImGui::TableSetColumnIndex(1);
-			ImGui::PushFont(gui->GetFont());
+			ImGui::PushFont(gui->GetFontBold());
 			ImGui::Text(message._message.c_str());
 			ImGui::PopFont();
 

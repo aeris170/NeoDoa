@@ -74,7 +74,7 @@ void AssetManager::RenderTreeView() {
 void AssetManager::RenderTreeViewRecursive(FNode* current) {
 	if (!current->_isDir) return;
 
-	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_NavLeftJumpsBackHere;
+	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_NavLeftJumpsBackHere | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 
 	std::vector<FNode*> children;
 	for (auto& child : current->_children) {
