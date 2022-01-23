@@ -190,10 +190,10 @@ void SceneHierarchy::RenderEntityNode(Scene& scene, const Entity entity) {
 
 			if (!badAdopt) {
 				if (!scene.HasComponent<ChildComponent>(dropped)) {
-					scene.AddComponent<ChildComponent>(dropped, dropped);
+					scene.EmplaceComponent<ChildComponent>(dropped);
 				}
 				if (!scene.HasComponent<ParentComponent>(entity)) {
-					scene.AddComponent<ParentComponent>(entity, entity);
+					scene.EmplaceComponent<ParentComponent>(entity);
 				}
 				ChildComponent& child = scene.GetComponent<ChildComponent>(dropped);
 				ParentComponent& parent = scene.GetComponent<ParentComponent>(entity);
@@ -222,7 +222,7 @@ void SceneHierarchy::RenderEntityNode(Scene& scene, const Entity entity) {
 
 			// script components start
 			if (!scene.HasComponent<ScriptStorageComponent>(entity)) {
-				scene.AddComponent<ScriptStorageComponent>(entity, entity);
+				scene.EmplaceComponent<ScriptStorageComponent>(entity);
 			}
 			ScriptStorageComponent& storage = scene.GetComponent<ScriptStorageComponent>(entity);
 			for (auto& [typeName, declData] : GetCore()->_angel->_scriptComponentData) {

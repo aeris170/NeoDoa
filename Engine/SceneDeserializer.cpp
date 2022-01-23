@@ -81,18 +81,18 @@ Scene DeserializeScene(FNode* file) {
 						IDComponent id = DeserializeIDComponent(component);
 						entt = scene.CreateEntity(id.GetTagRef(), static_cast<uint32_t>(id.GetEntity()));
 					} else if (name == nameof(TransformComponent)) {
-						TransformComponent transform = DeserializeTransformComponent(component, entt);
-						scene.AddOrReplaceComponent<TransformComponent>(transform.GetEntity(), std::move(transform));
+						TransformComponent transform = DeserializeTransformComponent(component, entt, scene);
+						scene.ReplaceComponent<TransformComponent>(transform.GetEntity(), std::move(transform));
 					} else if (name == nameof(ParentComponent)) {
 						ParentComponent parent = DeserializeParentComponent(component, entt);
-						scene.AddOrReplaceComponent<ParentComponent>(parent.GetEntity(), std::move(parent));
+						scene.InsertComponent<ParentComponent>(parent.GetEntity(), std::move(parent));
 					} else if (name == nameof(ChildComponent)) {
 						ChildComponent children = DeserializeChildComponent(component, entt);
-						scene.AddOrReplaceComponent<ChildComponent>(children.GetEntity(), std::move(children));
+						scene.InsertComponent<ChildComponent>(children.GetEntity(), std::move(children));
 					}
 				} else if (type == "script-component") {
 					if (!scene.HasComponent<ScriptStorageComponent>(entt)) {
-						scene.AddComponent<ScriptStorageComponent>(entt, entt);
+						scene.EmplaceComponent<ScriptStorageComponent>(entt);
 						scripts = &scene.GetComponent<ScriptStorageComponent>(entt);
 					}
 					std::string name = component->Attribute("name");
