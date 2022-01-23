@@ -84,5 +84,6 @@ struct Scene {
 
 	Scene(std::string_view name = "New Scene") noexcept;
 
+	operator std::weak_ptr<Scene>() const { return _this; }
 	std::weak_ptr<Scene> _this;
 };
