@@ -40,16 +40,19 @@ struct Scene {
 	size_t EntityCount();
 
 	template <typename Component, typename... Args>
+	requires std::constructible_from<Component, Entity, Args...>
 	void EmplaceComponent(Entity entity, Args&&... args) {
 		_registry.emplace<Component>(entity, entity, std::forward<Args>(args)...);
 	}
 
 	template <typename Component>
+	requires std::move_constructible<Component>
 	void InsertComponent(Entity entity, Component&& component) {
 		_registry.emplace<Component>(entity, std::forward<Component>(component));
 	}
 
 	template <typename Component>
+	requires std::move_constructible<Component>
 	void ReplaceComponent(Entity entity, Component&& component) {
 		_registry.replace<Component>(entity, std::forward<Component>(component));
 	}
