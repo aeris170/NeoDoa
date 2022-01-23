@@ -40,13 +40,27 @@ struct Scene {
 	size_t EntityCount();
 
 	template <typename Component, typename... Args>
-	void AddComponent(Entity entity, Args&&... args) {
-		_registry.emplace<Component>(entity, std::forward<Args>(args)...);
+	void EmplaceComponent(Entity entity, Args&&... args) {
+		_registry.emplace<Component>(entity, entity, std::forward<Args>(args)...);
 	}
 
-	template <typename Component, typename... Args>
-	void AddOrReplaceComponent(Entity entity, Args&&... args) {
-		_registry.emplace_or_replace<Component>(entity, std::forward<Args>(args)...);
+	template <typename Component>
+	void InsertComponent(Entity entity, Component&& component) {
+		_registry.emplace<Component>(entity, std::forward<Component>(component));
+	}
+
+	template <typename Component>
+	void ReplaceComponent(Entity entity, Component&& component) {
+		_registry.replace<Component>(entity, std::forward<Component>(component));
+	}
+
+	template <typename Component>
+	void InsertOrReplaceComponent(Entity entity, Component&& component) {
+		if (HasComponent<Component>(entity)) {
+			ReplaceComponent<Component>(entity, std::forward<Component>(component));
+		} else {
+			EmplaceComponent<Component>(entity, std::forward<Component>(component));
+		}
 	}
 
 	template <typename Component>
@@ -56,7 +70,9 @@ struct Scene {
 
 	template <typename Component>
 	void RemoveComponentIfExists(Entity entity) {
-		_registry.remove_if_exists<Component>(entity);
+		if (HasComponent<Component>(entity)) {
+			RemoveComponent<Component>(entity);
+		}
 	}
 
 	template <typename Component>
