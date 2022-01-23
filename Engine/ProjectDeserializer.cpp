@@ -6,7 +6,6 @@
 #include "Project.hpp"
 
 Project DeserializeProject(FNode* file) {
-
 	tinyxml2::XMLDocument doc;
 	tinyxml2::XMLError err = doc.LoadFile(file->_path.c_str());
 
