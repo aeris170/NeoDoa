@@ -28,7 +28,7 @@ Entity Scene::CreateEntity(std::string name, uint32_t desiredID) {
 		entt = _registry.create();
 	}
 
-	_registry.emplace<IDComponent>(entt, entt, name);
+	_registry.emplace<IDComponent>(entt, entt, name.append(" ").append(std::to_string(entt)));
 	_registry.emplace<TransformComponent>(entt, entt, _this);
 	_registry.emplace<ScriptStorageComponent>(entt, entt);
 
