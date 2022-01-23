@@ -27,7 +27,7 @@ private:
 
     std::weak_ptr<Scene> scene;
 
-    TransformComponent(const Entity owner, glm::mat4&& matrix) noexcept;
+    TransformComponent(const Entity owner, std::weak_ptr<Scene> scene, glm::mat4&& matrix) noexcept;
 
 public:
 
@@ -68,6 +68,6 @@ public:
     void SetLocalMatrix(glm::mat4 localMatrix);
 
     friend void SerializeTransformComponent(tinyxml2::XMLPrinter& printer, const TransformComponent& transform);
-    friend TransformComponent DeserializeTransformComponent(tinyxml2::XMLElement* component, const Entity entity);
+    friend TransformComponent DeserializeTransformComponent(tinyxml2::XMLElement* component, const Entity entity, const Scene& scene);
 
 };

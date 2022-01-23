@@ -8,10 +8,10 @@ TransformComponent::TransformComponent(const Entity owner, std::weak_ptr<Scene> 
     entity(owner),
     scene(scene) {}
 
-TransformComponent::TransformComponent(const Entity owner, glm::mat4&& matrix) noexcept :
-    entity(owner),
-    localMatrix(std::move(matrix)) {
-    Decompose(matrix, localTranslation, localRotation, localScale);
+TransformComponent::TransformComponent(const Entity owner, std::weak_ptr<Scene> scene, glm::mat4&& matrix) noexcept :
+    TransformComponent(owner, scene) {
+    localMatrix = std::move(matrix);
+    Decompose(localMatrix, localTranslation, localRotation, localScale);
 }
 
 void TransformComponent::InsertTranslation(glm::mat4& m, const glm::vec3& translation) {

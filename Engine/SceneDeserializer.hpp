@@ -35,7 +35,7 @@ glm::mat2 DeserializeMat2(tinyxml2::XMLElement* property);
 glm::mat3 DeserializeMat3(tinyxml2::XMLElement* property);
 glm::mat4 DeserializeMat4(tinyxml2::XMLElement* property);
 IDComponent DeserializeIDComponent(tinyxml2::XMLElement* component);
-TransformComponent DeserializeTransformComponent(tinyxml2::XMLElement* component, const Entity entity);
+TransformComponent DeserializeTransformComponent(tinyxml2::XMLElement* component, const Entity entity, const Scene& scene);
 ParentComponent DeserializeParentComponent(tinyxml2::XMLElement* component, const Entity entity);
 ChildComponent DeserializeChildComponent(tinyxml2::XMLElement* component, const Entity entity);
 ScriptComponentData DeserializeScriptComponentData(tinyxml2::XMLElement* component, const Entity entity);

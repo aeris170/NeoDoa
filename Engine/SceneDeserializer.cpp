@@ -179,10 +179,10 @@ IDComponent DeserializeIDComponent(tinyxml2::XMLElement* component) {
 	auto tag = component->FirstChildElement(nameof_c(IDComponent::tag))->Attribute("value");
 	return { entity, tag };
 }
-TransformComponent DeserializeTransformComponent(tinyxml2::XMLElement* component, const Entity entity) {
+TransformComponent DeserializeTransformComponent(tinyxml2::XMLElement* component, const Entity entity, const Scene& scene) {
 	auto matrix = DeserializeMat4(component->FirstChildElement(nameof_c(TransformComponent::localMatrix)));
 
-	return { entity, std::move(matrix) };
+	return TransformComponent(entity, scene, std::move(matrix));
 }
 ParentComponent DeserializeParentComponent(tinyxml2::XMLElement* component, const Entity entity) {
 	std::vector<Entity> children;
