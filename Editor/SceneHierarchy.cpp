@@ -46,7 +46,7 @@ void SceneHierarchy::Render(Scene& scene) {
 	std::string title(GUI::SCENE_ICON);
 	title.reserve(64);
 	title.append(scene._name);
-	if (ImGui::CollapsingHeader(title.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
+	if (ImGui::CollapsingHeader(title.c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanAvailWidth)) {
 
 		if (ImGui::BeginDragDropTarget()) {
 			auto* payload = ImGui::AcceptDragDropPayload("SELECTED_ENTT");
@@ -109,10 +109,11 @@ void SceneHierarchy::RenderEntityNode(Scene& scene, const Entity entity) {
 		isLeaf = parent.GetChildren().size() == 0;
 	}
 
+	panel_flags = ImGuiTreeNodeFlags_SpanAvailWidth;
 	if (!isLeaf) {
-		panel_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
+		panel_flags |= ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 	} else {
-		panel_flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+		panel_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 	}
 
 	if (entity == selectedEntity) {

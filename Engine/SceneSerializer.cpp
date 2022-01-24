@@ -260,22 +260,26 @@ void SerializeMat4(tinyxml2::XMLPrinter& printer,  const glm::mat4& mat) {
 
 }
 void SerializeIDComponent(tinyxml2::XMLPrinter& printer, const IDComponent& id) {
-	printer.OpenElement(nameof_c(id.entity));
+	auto name = nameof(IDComponent::entity);
+	printer.OpenElement(name.data());
 	SerializeEntityID(printer, id.GetEntity());
 	printer.CloseElement();
 
-	printer.OpenElement(nameof_c(id.tag));
+	name = nameof(IDComponent::tag);
+	printer.OpenElement(name.data());
 	printer.PushAttribute("type", "string");
 	printer.PushAttribute("value", id.GetTag().data());
 	printer.CloseElement();
 }
 void SerializeTransformComponent(tinyxml2::XMLPrinter& printer, const TransformComponent& transform) {
-	printer.OpenElement(nameof_c(TransformComponent::localMatrix));
+	auto name = nameof(TransformComponent::localMatrix);
+	printer.OpenElement(name.data());
 	SerializeMat4(printer, transform.GetLocalMatrix());
 	printer.CloseElement();
 }
 void SerializeParentComponent(tinyxml2::XMLPrinter& printer, const ParentComponent& parent) {
-	printer.OpenElement(nameof_c(ParentComponent::children));
+	auto name = nameof(ParentComponent::children);
+	printer.OpenElement(name.data());
 	{
 		printer.PushAttribute("type", "vector");
 		printer.OpenElement("values");
@@ -295,7 +299,8 @@ void SerializeParentComponent(tinyxml2::XMLPrinter& printer, const ParentCompone
 	printer.CloseElement();
 }
 void SerializeChildComponent(tinyxml2::XMLPrinter& printer, const ChildComponent& child) {
-	printer.OpenElement(nameof_c(ChildComponent::parent));
+	auto name = nameof(ChildComponent::parent);
+	printer.OpenElement(name.data());
 	SerializeEntityID(printer, child.GetParent());
 	printer.CloseElement();
 }

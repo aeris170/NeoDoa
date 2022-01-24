@@ -17,7 +17,8 @@ struct Project {
 	std::string _name;
 	Assets _assets;
 	FNode* _startupScene{ nullptr };
-	std::optional<Scene> _openScene;
+	std::optional<Scene> _openScene{ std::nullopt };
+	FNode* _openSceneFile{ nullptr };
 
 	Project(std::string workspace, std::string name) noexcept;
 	Project(std::string workspace, std::string name, std::string startupLoc) noexcept;
@@ -32,4 +33,5 @@ struct Project {
 	void OpenScene(FNode* sceneFile);
 
 	void SaveToDisk();
+	void SaveOpenSceneToDisk();
 };

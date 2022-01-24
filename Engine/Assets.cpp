@@ -98,7 +98,7 @@ FNode* Assets::CreateNewSceneFileNode(std::string_view relativePath, std::string
 }
 
 Assets::Assets(Assets&& other) noexcept :
-	project(other.project),
+	project(std::exchange(other.project, nullptr)),
 	_root(std::move(other._root)),
 	_scenes(std::move(other._scenes)),
     _scripts(std::move(other._scripts)),
@@ -112,7 +112,7 @@ Assets::Assets(Assets&& other) noexcept :
 }
 
 Assets& Assets::operator=(Assets&& other) noexcept {
-	project = other.project;
+	project = std::exchange(other.project, nullptr);
 	_root = std::move(other._root);
 	_scenes = std::move(other._scenes);
 	_scripts = std::move(other._scripts);
@@ -128,6 +128,12 @@ Assets& Assets::operator=(Assets&& other) noexcept {
 
 void Assets::ReScan() {
 	_root._children.clear();
+	_scenes.clear();
+	_scripts.clear();
+	_textures.clear();
+	_models.clear();
+	_materials.clear();
+	_shaders.clear();
 	ReadRecursive(_root);
 	FindFilesFor(*this, _root);
 }

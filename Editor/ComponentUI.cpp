@@ -37,7 +37,7 @@ void TransformComponentUI::Render(const TransformComponent& transformComponent) 
 	// translation
 	{
 		glm::vec3 translation = transform.GetLocalTranslation();
-		FancyVectorWidget(UINames[nameof_c(TransformComponent::localTranslation)], translation);
+		FancyVectorWidget(UINames[nameof(TransformComponent::localTranslation)], translation);
 		transform.SetLocalTranslation(translation);
 	}
 	// rotation
@@ -45,14 +45,14 @@ void TransformComponentUI::Render(const TransformComponent& transformComponent) 
 		glm::quat quat = transform.GetLocalRotation();
 		glm::vec3 eulersDeg(glm::degrees(glm::eulerAngles(quat)));
 		glm::vec3 old(eulersDeg);
-		FancyVectorWidget(UINames[nameof_c(TransformComponent::localRotation)], eulersDeg);
+		FancyVectorWidget(UINames[nameof(TransformComponent::localRotation)], eulersDeg);
 		quat = quat * glm::quat(glm::radians(eulersDeg - old));
 		transform.SetLocalRotation(quat);
 	}
 	// scale
 	{
 		glm::vec3 scale = transform.GetLocalScale();
-		FancyVectorWidget(UINames[nameof_c(TransformComponent::localScale)], scale, 1.0f);
+		FancyVectorWidget(UINames[nameof(TransformComponent::localScale)], scale, 1.0f);
 		transform.SetLocalScale(scale);
 	}
 }
@@ -63,7 +63,7 @@ void ParentComponentUI::Render(const ParentComponent& parentComponent) {
 	};
 
 	ParentComponent& parent = const_cast<ParentComponent&>(parentComponent);
-	UneditableArrayWidget<Entity>(UINames[nameof_c(ParentComponent::children)], parent.GetChildren());
+	UneditableArrayWidget<Entity>(UINames[nameof(ParentComponent::children)], parent.GetChildren());
 }
 
 void ChildComponentUI::Render(const ChildComponent& childComponent) {
@@ -72,7 +72,7 @@ void ChildComponentUI::Render(const ChildComponent& childComponent) {
 	};
 
 	ChildComponent& child = const_cast<ChildComponent&>(childComponent);
-	UneditableEntityWidget(UINames[nameof_c(ChildComponent::parent)], childComponent.GetParent());
+	UneditableEntityWidget(UINames[nameof(ChildComponent::parent)], childComponent.GetParent());
 }
 
 bool ComponentUI::Begin(const Observer& observer, std::string_view componentTypeName) {

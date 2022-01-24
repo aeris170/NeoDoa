@@ -71,11 +71,11 @@ Scene DeserializeScene(FNode* file) {
 		tinyxml2::XMLElement* entitiesNode = rootNode->FirstChildElement("entities");
 		// all entity elements
 		for (tinyxml2::XMLElement* entity = entitiesNode->FirstChildElement(); entity != nullptr; entity = entity->NextSiblingElement()) {
+			Entity entt = NULL_ENTT; // the entt we are deserializing for
+			ScriptStorageComponent* scripts{ nullptr };
 			for (tinyxml2::XMLElement* component = entity->FirstChildElement(); component != nullptr; component = component->NextSiblingElement()) {
 				std::string type = component->Name();
 				std::string name = component->Attribute("name");
-				Entity entt = NULL_ENTT; // the entt we are deserializing for
-				ScriptStorageComponent* scripts{ nullptr };
 				if (type == "cpp-component") {
 					if (name == nameof(IDComponent)) {
 						IDComponent id = DeserializeIDComponent(component);
@@ -186,7 +186,7 @@ TransformComponent DeserializeTransformComponent(tinyxml2::XMLElement* component
 }
 ParentComponent DeserializeParentComponent(tinyxml2::XMLElement* component, const Entity entity) {
 	std::vector<Entity> children;
-	loopElement(component->FirstChildElement(nameof_c(ParentComponent::children)), [&children](tinyxml2::XMLElement* l) {
+	loopElement(component->FirstChildElement(nameof_c(ParentComponent::children))->FirstChildElement()->FirstChildElement(), [&children](tinyxml2::XMLElement* l) {
 		auto child = DeserializeEntityID(l, "value");
 		children.push_back(child);
 	});

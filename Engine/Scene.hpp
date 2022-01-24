@@ -34,7 +34,7 @@ struct Scene {
 
 	std::vector<entt::poly<System>> _systems;
 
-	Entity CreateEntity(std::string name = "New Entity", uint32_t desiredID = EntityTo<uint32_t>(NULL_ENTT));
+	Entity CreateEntity(std::string name = "", uint32_t desiredID = EntityTo<uint32_t>(NULL_ENTT));
 	void DeleteEntity(Entity entt);
 	bool ContainsEntity(Entity entt);
 	size_t EntityCount();
