@@ -48,24 +48,42 @@ Scene DeserializeScene(FNode* file) {
 		tinyxml2::XMLElement* selectionOutlineColor = configNode->FirstChildElement("selectionOutlineColor");
 		scene.SelectionOutlineColor = { selectionOutlineColor->FloatAttribute("r"), selectionOutlineColor->FloatAttribute("g"), selectionOutlineColor->FloatAttribute("b") };
 
-		tinyxml2::XMLElement* camera = configNode->FirstChildElement("camera");
-		std::string camType = camera->Attribute("type");
-		if (camType == "perspective") {
-			scene.SetPerpectiveCamera(camera->FloatAttribute("fov"), camera->FloatAttribute("aspect"), camera->FloatAttribute("near"), camera->FloatAttribute("far"));
-		} else if (camType == "ortho") {
-			scene.SetOrthoCamera(camera->FloatAttribute("left"), camera->FloatAttribute("right"), camera->FloatAttribute("bottom"), camera->FloatAttribute("top"), camera->FloatAttribute("near"), camera->FloatAttribute("far"));
+		tinyxml2::XMLElement* camerasNode = configNode->FirstChildElement("cameras");
+		{
+			tinyxml2::XMLElement* activeCameraNode = camerasNode->FirstChildElement("activeCamera");
+			std::string activeCamType = activeCameraNode->Attribute("type");
+
+			if (activeCamType == "ortho") {
+				scene.SwitchToOrtho();
+			} else if (activeCamType == "perspective") {
+				scene.SwitchToPerspective();
+			}
+			ACamera& activeCamera = scene.GetActiveCamera();
+
+			{
+				tinyxml2::XMLElement* eye = activeCameraNode->FirstChildElement("eye");
+				activeCamera.eye = { eye->FloatAttribute("x"), eye->FloatAttribute("y"), eye->FloatAttribute("z") };
+			}{
+				tinyxml2::XMLElement* forward = activeCameraNode->FirstChildElement("forward");
+				activeCamera.forward = { forward->FloatAttribute("x"), forward->FloatAttribute("y"), forward->FloatAttribute("z") };
+			}{
+				tinyxml2::XMLElement* up = activeCameraNode->FirstChildElement("up");
+				activeCamera.up = { up->FloatAttribute("x"), up->FloatAttribute("y"), up->FloatAttribute("z") };
+			}{
+				tinyxml2::XMLElement* zoom = activeCameraNode->FirstChildElement("zoom");
+				activeCamera.zoom = { zoom->FloatAttribute("value") };
+			}
 		}
-		tinyxml2::XMLElement* eye = camera->FirstChildElement("eye");
-		scene.GetActiveCamera().eye = { eye->FloatAttribute("x"), eye->FloatAttribute("y"), eye->FloatAttribute("z") };
-
-		tinyxml2::XMLElement* forward = camera->FirstChildElement("forward");
-		scene.GetActiveCamera().forward = { forward->FloatAttribute("x"), forward->FloatAttribute("y"), forward->FloatAttribute("z") };
-
-		tinyxml2::XMLElement* up = camera->FirstChildElement("up");
-		scene.GetActiveCamera().up = { up->FloatAttribute("x"), up->FloatAttribute("y"), up->FloatAttribute("z") };
-
-		tinyxml2::XMLElement* zoom = camera->FirstChildElement("zoom");
-		scene.GetActiveCamera().zoom = zoom->FloatAttribute("value");
+		{
+			tinyxml2::XMLElement* ortho = camerasNode->FirstChildElement("orthoCamera");
+			scene.SetOrtho(ortho->FloatAttribute("left"), ortho->FloatAttribute("right"),
+				ortho->FloatAttribute("bottom"), ortho->FloatAttribute("top"),
+				ortho->FloatAttribute("near"), ortho->FloatAttribute("far"));
+		} {
+			tinyxml2::XMLElement* perpective = camerasNode->FirstChildElement("perspectiveCamera");
+			scene.SetPerpective(perpective->FloatAttribute("fov"), perpective->FloatAttribute("aspect"),
+				perpective->FloatAttribute("near"), perpective->FloatAttribute("far"));
+		}
 	}
 	{ // parse entities
 		tinyxml2::XMLElement* entitiesNode = rootNode->FirstChildElement("entities");

@@ -28,18 +28,11 @@ bool Scene::IsPerspective() const { return _activeCamera == &_pc; }
 void Scene::SwitchToOrtho() { _activeCamera = &_oc; }
 void Scene::SwitchToPerspective() { _activeCamera = &_pc; }
 
-void Scene::SetOrtho(OrthoCamera&& ortho) { _oc = std::move(ortho); }
-void Scene::SetPerspective(PerspectiveCamera&& perspective) { _pc = std::move(perspective); }
+void Scene::SetOrtho(float left, float right, float bottom, float top, float near, float far) { _oc = OrthoCamera(left, right, bottom, top, near, far); }
+void Scene::SetPerpective(float fov, float aspect, float near, float far) { _pc = PerspectiveCamera(fov, aspect, near, far); }
 
-void Scene::SetOrthoCamera(float left, float right, float bottom, float top, float near, float far) {
-	_oc = OrthoCamera(left, right, bottom, top, near, far);
-	_activeCamera = &_oc;
-}
-
-void Scene::SetPerpectiveCamera(float fov, float aspect, float near, float far) {
-	_pc = PerspectiveCamera(fov, aspect, near, far);
-	_activeCamera = &_pc;
-}
+void Scene::SetOrthoCamera(OrthoCamera&& ortho) { _oc = std::move(ortho); }
+void Scene::SetPerspectiveCamera(PerspectiveCamera&& perspective) { _pc = std::move(perspective); }
 
 OrthoCamera Scene::GetOrtho() const { return _oc; }
 OrthoCamera& Scene::GetOrtho() { return _oc; }

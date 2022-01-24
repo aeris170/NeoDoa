@@ -30,11 +30,11 @@ struct Scene {
 	void SwitchToOrtho();
 	void SwitchToPerspective();
 
-	void SetOrtho(OrthoCamera&& ortho);
-	void SetPerspective(PerspectiveCamera&& perspective);
+	void SetOrtho(float left, float right, float bottom, float top, float near, float far);
+	void SetPerpective(float fov, float aspect, float near, float far);
 
-	void SetOrthoCamera(float left, float right, float bottom, float top, float near, float far);
-	void SetPerpectiveCamera(float fov, float aspect, float near, float far);
+	void SetOrthoCamera(OrthoCamera&& ortho);
+	void SetPerspectiveCamera(PerspectiveCamera&& perspective);
 
 	OrthoCamera GetOrtho() const;
 	OrthoCamera& GetOrtho();

@@ -40,19 +40,46 @@ std::string SerializeScene(const Scene& scene) {
 			printer.PushAttribute("b", _scene.SelectionOutlineColor.b);
 			printer.CloseElement();
 
-			printer.OpenElement("camera");
+			printer.OpenElement("cameras");
 			{
-				bool isPerspective = _scene.IsPerspective();
-				if (isPerspective) {
-					PerspectiveCamera& pc = _scene.GetPerspective();
-					printer.PushAttribute("type", "perspective");
-					printer.PushAttribute("fov", pc._fov);
-					printer.PushAttribute("aspect", pc._aspect);
-					printer.PushAttribute("near", pc._near);
-					printer.PushAttribute("far", pc._far);
-				} else {
+				printer.OpenElement("activeCamera");
+				{
+					if (_scene.IsOrtho()) {
+						printer.PushAttribute("type", "ortho");
+					} else if (_scene.IsPerspective()) {
+						printer.PushAttribute("type", "perspective");
+					} else {
+						assert(false, "no camera?");
+					}
+
+					ACamera& activeCamera = _scene.GetActiveCamera();
+					printer.OpenElement("eye");
+					printer.PushAttribute("x", activeCamera.eye.x);
+					printer.PushAttribute("y", activeCamera.eye.y);
+					printer.PushAttribute("z", activeCamera.eye.z);
+					printer.CloseElement();
+
+					printer.OpenElement("forward");
+					printer.PushAttribute("x", activeCamera.forward.x);
+					printer.PushAttribute("y", activeCamera.forward.y);
+					printer.PushAttribute("z", activeCamera.forward.z);
+					printer.CloseElement();
+
+					printer.OpenElement("up");
+					printer.PushAttribute("x", activeCamera.up.x);
+					printer.PushAttribute("y", activeCamera.up.y);
+					printer.PushAttribute("z", activeCamera.up.z);
+					printer.CloseElement();
+
+					printer.OpenElement("zoom");
+					printer.PushAttribute("value", activeCamera.zoom);
+					printer.CloseElement();
+				}
+				printer.CloseElement();
+
+				printer.OpenElement("orthoCamera");
+				{
 					OrthoCamera& oc = _scene.GetOrtho();
-					printer.PushAttribute("type", "ortho");
 					printer.PushAttribute("left", oc._left);
 					printer.PushAttribute("right", oc._right);
 					printer.PushAttribute("bottom", oc._bottom);
@@ -60,32 +87,19 @@ std::string SerializeScene(const Scene& scene) {
 					printer.PushAttribute("near", oc._near);
 					printer.PushAttribute("far", oc._far);
 				}
-
-				ACamera& activeCamera = _scene.GetActiveCamera();
-				printer.OpenElement("eye");
-				printer.PushAttribute("x", activeCamera.eye.x);
-				printer.PushAttribute("y", activeCamera.eye.y);
-				printer.PushAttribute("z", activeCamera.eye.z);
 				printer.CloseElement();
 
-				printer.OpenElement("forward");
-				printer.PushAttribute("x", activeCamera.forward.x);
-				printer.PushAttribute("y", activeCamera.forward.y);
-				printer.PushAttribute("z", activeCamera.forward.z);
+				printer.OpenElement("perspectiveCamera");
+				{
+					PerspectiveCamera& pc = _scene.GetPerspective();
+					printer.PushAttribute("fov", pc._fov);
+					printer.PushAttribute("aspect", pc._aspect);
+					printer.PushAttribute("near", pc._near);
+					printer.PushAttribute("far", pc._far);
+				}
 				printer.CloseElement();
-
-				printer.OpenElement("up");
-				printer.PushAttribute("x", activeCamera.up.x);
-				printer.PushAttribute("y", activeCamera.up.y);
-				printer.PushAttribute("z", activeCamera.up.z);
-				printer.CloseElement();
-
-				printer.OpenElement("zoom");
-				printer.PushAttribute("value", activeCamera.zoom);
-				printer.CloseElement();
-
 			}
-			printer.CloseElement(); // camera close
+			printer.CloseElement(); // cameras close
 
 		}
 		printer.CloseElement(); // config close
@@ -96,7 +110,6 @@ std::string SerializeScene(const Scene& scene) {
 			for (auto& entity : _scene.GetAllEntites()) {
 				printer.OpenElement("entity");
 				{
-
 					#pragma region IDComponent
 					printer.OpenElement("cpp-component");
 					{
