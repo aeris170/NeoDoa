@@ -45,7 +45,7 @@ void SceneHierarchy::Render(Scene& scene) {
 
 	std::string title(GUI::SCENE_ICON);
 	title.reserve(64);
-	title.append(scene._name);
+	title.append(scene.Name);
 	if (ImGui::CollapsingHeader(title.c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanAvailWidth)) {
 
 		if (ImGui::BeginDragDropTarget()) {
@@ -69,7 +69,7 @@ void SceneHierarchy::Render(Scene& scene) {
 		}
 
 		// render entities with no parent (parent == NULL_ENTT);
-		auto view = scene._registry.view<IDComponent>(entt::exclude<ChildComponent>);
+		auto view = scene.GetRegistry().view<IDComponent>(entt::exclude<ChildComponent>);
 		for (auto& entt : view) {
 			RenderEntityNode(scene, entt);
 		}

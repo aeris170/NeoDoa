@@ -16,44 +16,59 @@ struct ScriptStorageComponent;
 
 struct Scene {
 
-	std::string _name;
+	std::string Name;
 	glm::vec3 ClearColor{ 0.2f, 0.3f, 0.3f };
 	glm::vec3 SelectionOutlineColor{ 0.68f, 0.49f, 0 };
 
-	std::vector<Entity> _entities;
-	Renderer _renderer;
-	OutlineRenderer _outlineRenderer;
+	Scene(std::string_view name = "New Scene") noexcept;
 
-	OrthoCamera _oc{ OrthoCamera(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f) };
-	PerspectiveCamera _pc{ PerspectiveCamera(110.0f, 19.0f/9.0f, 0.001f, 1000.0f) };
-	ACamera* _activeCamera; // address of active cam
+	operator std::weak_ptr<Scene>() const;
 
-	Registry _registry;
-	std::unordered_map<Entity, std::vector<std::string>> _attachList; // scripts that call Attach add to this map
-	std::unordered_map<Entity, std::vector<std::string>> _detachList; // scripts that call Detach add to this map
+	bool IsOrtho() const;
+	bool IsPerspective() const;
 
-	std::vector<entt::poly<System>> _systems;
+	void SwitchToOrtho();
+	void SwitchToPerspective();
 
+	void SetOrtho(OrthoCamera&& ortho);
+	void SetPerspective(PerspectiveCamera&& perspective);
+
+	void SetOrthoCamera(float left, float right, float bottom, float top, float near, float far);
+	void SetPerpectiveCamera(float fov, float aspect, float near, float far);
+
+	OrthoCamera GetOrtho() const;
+	OrthoCamera& GetOrtho();
+
+	PerspectiveCamera GetPerspective() const;
+	PerspectiveCamera& GetPerspective();
+
+	ACamera& GetActiveCamera();
+
+	// E - Entity
 	Entity CreateEntity(std::string name = "", uint32_t desiredID = EntityTo<uint32_t>(NULL_ENTT));
 	void DeleteEntity(Entity entt);
 	bool ContainsEntity(Entity entt);
 	size_t EntityCount();
+	const std::vector<Entity>& GetAllEntites() const;
+
+	// C - Component
+	ScriptStorageComponent& Scripts(Entity entt);
 
 	template <typename Component, typename... Args>
 	requires std::constructible_from<Component, Entity, Args...>
-	void EmplaceComponent(Entity entity, Args&&... args) {
+		void EmplaceComponent(Entity entity, Args&&... args) {
 		_registry.emplace<Component>(entity, entity, std::forward<Args>(args)...);
 	}
 
 	template <typename Component>
 	requires std::move_constructible<Component>
-	void InsertComponent(Entity entity, Component&& component) {
+		void InsertComponent(Entity entity, Component&& component) {
 		_registry.emplace<Component>(entity, std::forward<Component>(component));
 	}
 
 	template <typename Component>
 	requires std::move_constructible<Component>
-	void ReplaceComponent(Entity entity, Component&& component) {
+		void ReplaceComponent(Entity entity, Component&& component) {
 		_registry.replace<Component>(entity, std::forward<Component>(component));
 	}
 
@@ -93,16 +108,29 @@ struct Scene {
 		return _registry.get<Component>(entity);
 	}
 
-	ScriptStorageComponent& Scripts(Entity entt);
+	Registry& GetRegistry();
 
-	void SetOrthoCamera(float left, float right, float bottom, float top, float near, float far);
-	void SetPerpectiveCamera(float fov, float aspect, float near, float far);
+	// S - System
+	// :D ?
+
+private:
+	std::weak_ptr<Scene> _this;
+	Renderer _renderer;
+	OutlineRenderer _outlineRenderer;
+
+	OrthoCamera _oc{ OrthoCamera(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f) };
+	PerspectiveCamera _pc{ PerspectiveCamera(110.0f, 19.0f / 9.0f, 0.001f, 1000.0f) };
+	ACamera* _activeCamera; // address of active cam
+
+	Registry _registry;
+	std::vector<Entity> _entities;
+	std::vector<entt::poly<System>> _systems;
+
+	std::unordered_map<Entity, std::vector<std::string>> _attachList; // scripts that call Attach add to this map
+	std::unordered_map<Entity, std::vector<std::string>> _detachList; // scripts that call Detach add to this map
 
 	void Update(float delta);
 	void Render();
 
-	Scene(std::string_view name = "New Scene") noexcept;
-
-	operator std::weak_ptr<Scene>() const { return _this; }
-	std::weak_ptr<Scene> _this;
+	friend struct Core;
 };

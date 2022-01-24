@@ -17,8 +17,37 @@
 #include "ScriptStorageComponent.hpp"
 
 Scene::Scene(std::string_view name) noexcept :
-	_name(name),
+	Name(name),
 	_activeCamera(&_oc) {} // default camera is orthographic
+
+Scene::operator std::weak_ptr<Scene>() const { return _this; }
+
+bool Scene::IsOrtho() const { return _activeCamera == &_oc; }
+bool Scene::IsPerspective() const { return _activeCamera == &_pc; }
+
+void Scene::SwitchToOrtho() { _activeCamera = &_oc; }
+void Scene::SwitchToPerspective() { _activeCamera = &_pc; }
+
+void Scene::SetOrtho(OrthoCamera&& ortho) { _oc = std::move(ortho); }
+void Scene::SetPerspective(PerspectiveCamera&& perspective) { _pc = std::move(perspective); }
+
+void Scene::SetOrthoCamera(float left, float right, float bottom, float top, float near, float far) {
+	_oc = OrthoCamera(left, right, bottom, top, near, far);
+	_activeCamera = &_oc;
+}
+
+void Scene::SetPerpectiveCamera(float fov, float aspect, float near, float far) {
+	_pc = PerspectiveCamera(fov, aspect, near, far);
+	_activeCamera = &_pc;
+}
+
+OrthoCamera Scene::GetOrtho() const { return _oc; }
+OrthoCamera& Scene::GetOrtho() { return _oc; }
+
+PerspectiveCamera Scene::GetPerspective() const { return _pc; }
+PerspectiveCamera& Scene::GetPerspective() { return _pc; }
+
+ACamera& Scene::GetActiveCamera() { return *_activeCamera; }
 
 Entity Scene::CreateEntity(std::string name, uint32_t desiredID) {
 	Entity entt;
@@ -45,27 +74,13 @@ void Scene::DeleteEntity(Entity entt) {
 	std::erase(_entities, entt);
 }
 
-bool Scene::ContainsEntity(Entity entt) {
-	return _registry.valid(entt);
-}
+bool Scene::ContainsEntity(Entity entt) { return _registry.valid(entt); }
+size_t Scene::EntityCount() { return _registry.alive(); }
+const std::vector<Entity>& Scene::GetAllEntites() const { return _entities; }
 
-size_t Scene::EntityCount() {
-	return _registry.alive();
-}
+ScriptStorageComponent& Scene::Scripts(Entity entt) { return _registry.get<ScriptStorageComponent>(entt); }
 
-ScriptStorageComponent& Scene::Scripts(Entity entt) {
-	return _registry.get<ScriptStorageComponent>(entt);
-}
-
-void Scene::SetOrthoCamera(float left, float right, float bottom, float top, float near, float far) {
-	_oc = OrthoCamera(left, right, bottom, top, near, far);
-	_activeCamera = &_oc;
-}
-
-void Scene::SetPerpectiveCamera(float fov, float aspect, float near, float far) {
-	_pc = PerspectiveCamera(fov, aspect, near, far);
-	_activeCamera = &_pc;
-}
+Registry& Scene::GetRegistry() { return _registry; }
 
 void Scene::Update(float deltaTime) {
 	for (auto& [id, list] : _attachList) {
@@ -88,7 +103,6 @@ void Scene::Update(float deltaTime) {
 		s->Execute(_registry, deltaTime);
 	}
 }
-
 void Scene::Render() {
 	_activeCamera->UpdateView();
 	_activeCamera->UpdateProjection();
