@@ -67,7 +67,7 @@ std::weak_ptr<Texture> CreateTexture(std::string_view name, const char* path, bo
 	Texture::FACTORY_FLAG = true;
 	auto rv = std::make_shared<Texture>(name, width, height, pixelData, hasTransparency);
 	Texture::FACTORY_FLAG = false;
-#elif
+#else
 	auto rv = std::make_shared<Texture>(name, width, height, pixelData, hasTransparency);
 #endif
 	TEXTURES.emplace(std::string(name), rv);
@@ -89,7 +89,7 @@ std::weak_ptr<Texture> CreateTexture(std::string_view name, const unsigned char*
 	Texture::FACTORY_FLAG = true;
 	auto rv = std::make_shared<Texture>(name, width, height, pixelData, hasTransparency);
 	Texture::FACTORY_FLAG = false;
-#elif
+#else
 	auto rv = std::make_shared<Texture>(name, width, height, pixelData, hasTransparency);
 #endif
 	TEXTURES.emplace(std::string(name), rv);
@@ -107,7 +107,7 @@ std::weak_ptr<Texture> CreateTextureRaw(std::string_view name, const unsigned ch
 	Texture::FACTORY_FLAG = true;
 	auto rv = std::make_shared<Texture>(name, width, height, pixelData, hasTransparency);
 	Texture::FACTORY_FLAG = false;
-#elif
+#else
 	auto rv = std::make_shared<Texture>(name, width, height, pixelData, hasTransparency);
 #endif
 	TEXTURES.emplace(std::string(name), rv);
