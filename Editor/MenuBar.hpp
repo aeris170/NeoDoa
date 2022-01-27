@@ -23,12 +23,12 @@ struct MenuBar {
 private:
 	struct AboutSection {
 
-		static constexpr const char* const ABOUT_BUTTON_TEXT{ "About" };
-		static constexpr const char* const ABOUT_POPUP_TITLE_TEXT{ "About" };
-		static constexpr const char* const LIBS_BUTTON_TEXT{ "Libraries and Licences" };
-		static constexpr const char* const LIBS_POPUP_TITLE_TEXT{ "Libraries and Licences" };
-		static constexpr const char* const PRODUCT_NAME{ "NeoDoa Alpha" };
-		static constexpr const char* const PRODUCT_DESCRIPTION{ "A game engine. Build: Windows" };
+		static constexpr auto ABOUT_BUTTON_TEXT{ "About" };
+		static constexpr auto ABOUT_POPUP_TITLE_TEXT{ "About" };
+		static constexpr auto LIBS_BUTTON_TEXT{ "Libraries and Licences" };
+		static constexpr auto LIBS_POPUP_TITLE_TEXT{ "Libraries and Licences" };
+		static constexpr auto PRODUCT_NAME{ "NeoDoa Alpha" };
+		static constexpr auto PRODUCT_DESCRIPTION{ "A game engine. Build: Windows" };
 
 		MenuBar& mb;
 		std::weak_ptr<Texture> neodoaBanner;

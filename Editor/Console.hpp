@@ -18,23 +18,23 @@ struct Console {
 	static const ImVec4 VULKAN_COLOR;
 	static const ImVec4 DIRECTX_COLOR;
 
-	static constexpr const char* const TRACE_TOOLTIP_MESSAGE{ "General purpose hints/clues" };
-	static constexpr const char* const INFO_TOOLTIP_MESSAGE{ "General notices" };
-	static constexpr const char* const WARNING_TOOLTIP_MESSAGE{ "Explanations to potentially unwanted situations" };
-	static constexpr const char* const ERROR_TOOLTIP_MESSAGE{ "Expected(!), but potentially very fragile situations. These will crash your game if you ship it with these :)" };
-	static constexpr const char* const FATAL_TOOLTIP_MESSAGE{ "Unexpected behavior" };
-	static constexpr const char* const OPENGL_TOOLTIP_MESSAGE{ "OpenGL Server message" };
-	static constexpr const char* const VULKAN_TOOLTIP_MESSAGE{ "Vulkan Server message" };
-	static constexpr const char* const DIRECTX_TOOLTIP_MESSAGE{ "Direct-X Server message" };
+	static constexpr auto TRACE_TOOLTIP_MESSAGE{ "General purpose hints/clues" };
+	static constexpr auto INFO_TOOLTIP_MESSAGE{ "General notices" };
+	static constexpr auto WARNING_TOOLTIP_MESSAGE{ "Explanations to potentially unwanted situations" };
+	static constexpr auto ERROR_TOOLTIP_MESSAGE{ "Expected(!), but potentially very fragile situations. These will crash your game if you ship it with these :)" };
+	static constexpr auto FATAL_TOOLTIP_MESSAGE{ "Unexpected behavior" };
+	static constexpr auto OPENGL_TOOLTIP_MESSAGE{ "OpenGL Server message" };
+	static constexpr auto VULKAN_TOOLTIP_MESSAGE{ "Vulkan Server message" };
+	static constexpr auto DIRECTX_TOOLTIP_MESSAGE{ "Direct-X Server message" };
 
-	static constexpr const char* const TRACE_BUTTON_TOOLTIP_MESSAGE{ "Show all messages" };
-	static constexpr const char* const INFO_BUTTON_TOOLTIP_MESSAGE{ "Show only messages with severity INFO or higher" };
-	static constexpr const char* const WARNING_BUTTON_TOOLTIP_MESSAGE{ "Show only messages with severity WARNING or higher" };
-	static constexpr const char* const ERROR_BUTTON_TOOLTIP_MESSAGE{ "Show only ERROR and FATAL messages" };
-	static constexpr const char* const FATAL_BUTTON_TOOLTIP_MESSAGE{ "Show only FATAL messages" };
+	static constexpr auto TRACE_BUTTON_TOOLTIP_MESSAGE{ "Show all messages" };
+	static constexpr auto INFO_BUTTON_TOOLTIP_MESSAGE{ "Show only messages with severity INFO or higher" };
+	static constexpr auto WARNING_BUTTON_TOOLTIP_MESSAGE{ "Show only messages with severity WARNING or higher" };
+	static constexpr auto ERROR_BUTTON_TOOLTIP_MESSAGE{ "Show only ERROR and FATAL messages" };
+	static constexpr auto FATAL_BUTTON_TOOLTIP_MESSAGE{ "Show only FATAL messages" };
 
-	static constexpr const char* const CLEAR_BUTTON_TEXT{ "Clear" };
-	static constexpr const char* const CLEAR_BUTTON_TOOLTIP_TEXT{ "Clear the console" };
+	static constexpr auto CLEAR_BUTTON_TEXT{ "Clear" };
+	static constexpr auto CLEAR_BUTTON_TOOLTIP_TEXT{ "Clear the console" };
 
 	GUI* const gui{ nullptr };
 
