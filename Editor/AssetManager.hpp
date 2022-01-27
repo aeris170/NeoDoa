@@ -8,8 +8,8 @@ struct FNode;
 
 struct AssetManager {
 
-	static constexpr const char* const REFRESH_BUTTON_TEXT{ ICON_FA_SYNC " Refresh" };
-	static constexpr const char* const SELECTED_FOLDER_CONTENT_TITLE_TEXT{ ICON_FA_CUBES " Assets" };
+	static constexpr const char* const REFRESH_BUTTON_TEXT{ "Refresh" };
+	static constexpr const char* const SELECTED_FOLDER_CONTENT_TITLE_TEXT{ "Assets" };
 
 	GUI* const gui;
 

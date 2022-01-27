@@ -121,6 +121,7 @@
     <ClInclude Include="Editor.hpp" />
     <ClInclude Include="CodeGenerator.hpp" />
     <ClInclude Include="GUI.hpp" />
+    <ClInclude Include="Icons.hpp" />
     <ClInclude Include="ImGuiExtensions.hpp" />
     <ClInclude Include="MenuBar.hpp" />
     <ClInclude Include="Observer.hpp" />

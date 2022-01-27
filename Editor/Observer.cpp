@@ -7,14 +7,15 @@
 #include <nameof.hpp>
 #include <prettify.hpp>
 
-#include "GUI.hpp"
-#include "Scene.hpp"
-#include "IDComponent.hpp"
-#include "TransformComponent.hpp"
-#include "ParentComponent.hpp"
-#include "ChildComponent.hpp"
-#include "ScriptStorageComponent.hpp"
+#include <Scene.hpp>
+#include <IDComponent.hpp>
+#include <TransformComponent.hpp>
+#include <ParentComponent.hpp>
+#include <ChildComponent.hpp>
+#include <ScriptStorageComponent.hpp>
 
+#include "GUI.hpp"
+#include "Icons.hpp"
 #include "ComponentUI.hpp"
 
 Observer::Observer(GUI* gui) noexcept :
@@ -22,7 +23,8 @@ Observer::Observer(GUI* gui) noexcept :
 
 void Observer::Begin(const std::optional<Scene>& scene) {
 	ImGui::PushID(gui->OBSERVER_ID);
-	std::string title(gui->OBSERVER_ID);
+	std::string title(WindowIcons::OBSERVER_WINDOW_ICON);
+	title.append(gui->OBSERVER_ID);
 	if(scene) {
 		if (gui->sh.selectedEntity != NULL_ENTT) {
 			title.append(" - ");
@@ -38,7 +40,7 @@ void Observer::Render(Scene& scene) {
 	if (gui->sh.selectedEntity != NULL_ENTT) {
 		RenderComponents(scene, gui->sh.selectedEntity);
 	} else {
-		const char* text = "Select an object from the scene :)";
+		const char* text = "Select an entity from the scene :)";
 		ImVec2 size = ImGui::GetContentRegionAvail();
 		ImVec2 txtSize = ImGui::CalcTextSize(text);
 		for (int i = 0; i < 5; i++) {

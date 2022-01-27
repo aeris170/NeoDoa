@@ -5,13 +5,14 @@
 #include <nameof.hpp>
 #include <prettify.hpp>
 
+#include <Scene.hpp>
 #include <IDComponent.hpp>
 #include <TransformComponent.hpp>
 #include <ParentComponent.hpp>
 #include <ChildComponent.hpp>
 
 #include "GUI.hpp"
-#include "Scene.hpp"
+#include "Icons.hpp"
 #include "Observer.hpp"
 #include "ComponentWidgets.hpp"
 
@@ -78,12 +79,12 @@ void ChildComponentUI::Render(const ChildComponent& childComponent) {
 bool ComponentUI::Begin(const Observer& observer, std::string_view componentTypeName) {
 	std::string title(Prettify(std::string(componentTypeName)));
 	std::string titleWithIcon;
-	auto icon = observer.gui->CUSTOM_SCRIPT_ICONS.find(std::string(componentTypeName));
-	if (icon != observer.gui->CUSTOM_SCRIPT_ICONS.end()) {
+	auto icon = ComponentIcons::DEFINED_COMPONENT_ICONS.find(std::string(componentTypeName));
+	if (icon != ComponentIcons::DEFINED_COMPONENT_ICONS.end()) {
 		titleWithIcon = icon->second + " " + title;
 	}
 	else {
-		titleWithIcon = observer.gui->GENERIC_SCRIPT_ICON + title;
+		titleWithIcon = ComponentIcons::GENERIC_COMPONENT_ICON + title;
 	}
 	ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
 

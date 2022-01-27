@@ -9,15 +9,6 @@
 
 #include "SVGPathway.hpp"
 
-const std::unordered_map<std::string, const std::string> GUI::CUSTOM_SCRIPT_ICONS = {
-	{ "IDComponent", ICON_FA_ADDRESS_CARD " " },
-	{ "TransformComponent", ICON_FA_SEEDLING " " },
-	{ "ParentComponent", ICON_FA_USER_CROWN " " },
-	{ "ChildComponent", ICON_FA_USER " " },
-	{ "Camera", ICON_FA_VIDEO " " },
-	{ "ModelRenderer", ICON_FA_COCKTAIL " " }
-};
-
 GUI::GUI(std::unique_ptr<Core>& core) noexcept :
 	core(core),
 	mb(this),

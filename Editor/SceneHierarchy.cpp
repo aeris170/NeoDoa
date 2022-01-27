@@ -6,6 +6,7 @@
 #include <EZEasing.hpp>
 
 #include "GUI.hpp"
+#include "Icons.hpp"
 
 #include <IDComponent.hpp>
 #include <ParentComponent.hpp>
@@ -19,7 +20,11 @@ SceneHierarchy::SceneHierarchy(GUI* gui) noexcept :
 
 void SceneHierarchy::Begin() {
 	ImGui::PushID(gui->SCENE_HIERARCHY_ID);
-	ImGui::Begin(gui->SCENE_HIERARCHY_ID);
+	std::string title(WindowIcons::SCENE_HIERARCHY_WINDOW_ICON);
+	title.append(gui->SCENE_HIERARCHY_ID);
+	title.append("###");
+	title.append(gui->SCENE_HIERARCHY_ID);
+	ImGui::Begin(title.c_str());
 }
 
 void SceneHierarchy::Render(Scene& scene) {
@@ -43,7 +48,7 @@ void SceneHierarchy::Render(Scene& scene) {
 		}
 	}
 
-	std::string title(GUI::SCENE_ICON);
+	std::string title(SceneHierarchyIcons::SCENE_ICON);
 	title.reserve(64);
 	title.append(scene.Name);
 	if (ImGui::CollapsingHeader(title.c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanAvailWidth)) {
@@ -101,7 +106,7 @@ void SceneHierarchy::RenderEntityNode(Scene& scene, const Entity entity) {
 
 	std::string title;
 	title.reserve(64);
-	title.append(GUI::ENTITY_ICON).append(id.GetTag()).append("###Entity").append(std::to_string(EntityTo<uint32_t>(id.GetEntity())));
+	title.append(SceneHierarchyIcons::ENTITY_ICON).append(id.GetTag()).append("###Entity").append(std::to_string(EntityTo<uint32_t>(id.GetEntity())));
 
 	bool isLeaf = true;
 	if (scene.HasComponent<ParentComponent>(entity)) {
@@ -228,11 +233,11 @@ void SceneHierarchy::RenderEntityNode(Scene& scene, const Entity entity) {
 			ScriptStorageComponent& storage = scene.GetComponent<ScriptStorageComponent>(entity);
 			for (auto& [typeName, declData] : GetCore()->_angel->_scriptComponentData) {
 				std::string name = typeName;
-				auto icon = GUI::CUSTOM_SCRIPT_ICONS.find(name);
-				if (icon != GUI::CUSTOM_SCRIPT_ICONS.end()) {
+				auto icon = ComponentIcons::DEFINED_COMPONENT_ICONS.find(name);
+				if (icon != ComponentIcons::DEFINED_COMPONENT_ICONS.end()) {
 					name.insert(0, icon->second);
 				} else {
-					name.insert(0, GUI::GENERIC_SCRIPT_ICON);
+					name.insert(0, ComponentIcons::GENERIC_COMPONENT_ICON);
 				}
 				if (ImGui::MenuItem(name.c_str())) {
 					storage.Attach(typeName);

@@ -27,11 +27,6 @@ struct GUI {
 	static constexpr const char* const FILE_ICON_KEY{ "file" };
 	static constexpr const char* const BACK_ARROW_ICON_KEY{ "arrow-left" };
 
-	static constexpr const char* const SCENE_ICON = ICON_FA_PROJECT_DIAGRAM " ";
-	static constexpr const char* const ENTITY_ICON = ICON_FA_CUBE " ";
-	static constexpr const char* const GENERIC_SCRIPT_ICON = ICON_FA_FILE_CODE " "; // or ICON_FA_COG
-	static const std::unordered_map<std::string, const std::string> CUSTOM_SCRIPT_ICONS;
-
 	ImGuiWindowFlags window_flags{ ImGuiWindowFlags_None };
 	ImGuiDockNodeFlags dockspace_flags{ ImGuiDockNodeFlags_None };
 	bool opt_fullscreen{ true };

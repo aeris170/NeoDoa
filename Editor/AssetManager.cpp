@@ -8,6 +8,7 @@
 #include <Texture.hpp>
 
 #include "GUI.hpp"
+#include "Icons.hpp"
 #include "ImGuiExtensions.hpp"
 
 AssetManager::AssetManager(GUI* gui) noexcept :
@@ -15,7 +16,11 @@ AssetManager::AssetManager(GUI* gui) noexcept :
 
 void AssetManager::Begin() {
 	ImGui::PushID(gui->ASSET_MANAGER_ID);
-	ImGui::Begin(gui->ASSET_MANAGER_ID, nullptr, ImGuiWindowFlags_MenuBar);
+	std::string title(WindowIcons::ASSET_MANAGER_WINDOW_ICON);
+	title.append(gui->ASSET_MANAGER_ID);
+	title.append("###");
+	title.append(gui->ASSET_MANAGER_ID);
+	ImGui::Begin(title.c_str(), nullptr, ImGuiWindowFlags_MenuBar);
 
 	hasContent = gui->HasOpenProject();
 	if(hasContent) {
@@ -126,7 +131,8 @@ void AssetManager::RenderSelectedFolderContent() {
 	ImGui::SameLine();
 
 	ImGui::SetCursorPos({ ImGui::GetCursorPos().x - 1, ImGui::GetCursorPos().y - 1 });
-	std::string title(SELECTED_FOLDER_CONTENT_TITLE_TEXT);
+	std::string title(AssetManagerIcons::SELECTED_FOLDER_CONTENT_TITLE_ICON);
+	title.append(SELECTED_FOLDER_CONTENT_TITLE_TEXT);
 	if (selectedFolder != nullptr) {
 		title.append(" - ROOT: ");
 		title.append(selectedFolder->_path);

@@ -9,15 +9,6 @@ struct GUI;
 
 struct Console {
 
-	static constexpr const char* const TRACE_ICON{ ICON_FA_INFO };
-	static constexpr const char* const INFO_ICON{ ICON_FA_INFO };
-	static constexpr const char* const WARNING_ICON{ ICON_FA_EXCLAMATION_CIRCLE };
-	static constexpr const char* const ERROR_ICON{ ICON_FA_EXCLAMATION_TRIANGLE };
-	static constexpr const char* const FATAL_ICON{ ICON_FA_EXCLAMATION_TRIANGLE };
-	static constexpr const char* const OPENGL_ICON{ ICON_FA_SERVER };
-	static constexpr const char* const VULKAN_ICON{ ICON_FA_SERVER };
-	static constexpr const char* const DIRECTX_ICON{ ICON_FA_SERVER };
-
 	static const ImVec4 TRACE_COLOR;
 	static const ImVec4 INFO_COLOR;
 	static const ImVec4 WARNING_COLOR;

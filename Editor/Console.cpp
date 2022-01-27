@@ -3,6 +3,7 @@
 #include <IconsFontAwesome5Pro.h>
 
 #include "GUI.hpp"
+#include "Icons.hpp"
 
 const ImVec4 Console::TRACE_COLOR{ 0.7f, 0.7f, 0.7f, 1.0f };
 const ImVec4 Console::INFO_COLOR{ 0.7f, 1.0f, 0.7f, 1.0f };
@@ -18,7 +19,11 @@ Console::Console(GUI* gui) noexcept :
 
 void Console::Begin() {
 	ImGui::PushID(gui->CONSOLE_ID);
-	ImGui::Begin(gui->CONSOLE_ID);
+	std::string title(WindowIcons::CONSOLE_WINDOW_ICON);
+	title.append(gui->CONSOLE_ID);
+	title.append("###");
+	title.append(gui->CONSOLE_ID);
+	ImGui::Begin(title.c_str());
 	ImGui::SetWindowFontScale(0.9);
 }
 
@@ -202,49 +207,49 @@ void Console::RenderMessageLog() {
 			float oldX = ImGui::GetCursorPosX();
 			switch (message._severity) {
 			case LogSeverity::TRACE:
-				icon = TRACE_ICON;
+				icon = ConsoleIcons::TRACE_ICON;
 				color = TRACE_COLOR;
 				tooltipMessage = TRACE_TOOLTIP_MESSAGE;
 				ImGui::SetCursorPosX(oldX + 14);
 				break;
 			case LogSeverity::INFO:
-				icon = INFO_ICON;
+				icon = ConsoleIcons::INFO_ICON;
 				color = INFO_COLOR;
 				tooltipMessage = INFO_TOOLTIP_MESSAGE;
 				ImGui::SetCursorPosX(oldX + 14);
 				break;
 			case LogSeverity::WARNING:
-				icon = WARNING_ICON;
+				icon = ConsoleIcons::WARNING_ICON;
 				color = WARNING_COLOR;
 				tooltipMessage = WARNING_TOOLTIP_MESSAGE;
 				ImGui::SetCursorPosX(oldX + 9);
 				break;
 			case LogSeverity::ERRO:
-				icon = ERROR_ICON;
+				icon = ConsoleIcons::ERROR_ICON;
 				color = ERROR_COLOR;
 				tooltipMessage = ERROR_TOOLTIP_MESSAGE;
 				ImGui::SetCursorPosX(oldX + 8);
 				break;
 			case LogSeverity::FATAL:
-				icon = FATAL_ICON;
+				icon = ConsoleIcons::FATAL_ICON;
 				color = FATAL_COLOR;
 				tooltipMessage = FATAL_TOOLTIP_MESSAGE;
 				ImGui::SetCursorPosX(oldX + 8);
 				break;
 			case LogSeverity::OPENGL:
-				icon = OPENGL_ICON;
+				icon = ConsoleIcons::OPENGL_ICON;
 				color = OPENGL_COLOR;
 				tooltipMessage = OPENGL_TOOLTIP_MESSAGE;
 				ImGui::SetCursorPosX(oldX + 9);
 				break;
 			case LogSeverity::VULKAN:
-				icon = VULKAN_ICON;
+				icon = ConsoleIcons::VULKAN_ICON;
 				color = VULKAN_COLOR;
 				tooltipMessage = VULKAN_TOOLTIP_MESSAGE;
 				ImGui::SetCursorPosX(oldX + 9);
 				break;
 			case LogSeverity::DIRECTX:
-				icon = DIRECTX_ICON;
+				icon = ConsoleIcons::DIRECTX_ICON;
 				color = DIRECTX_COLOR;
 				tooltipMessage = DIRECTX_TOOLTIP_MESSAGE;
 				ImGui::SetCursorPosX(oldX + 9);
