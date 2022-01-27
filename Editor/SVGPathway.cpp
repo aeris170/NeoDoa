@@ -126,6 +126,6 @@ std::weak_ptr<Texture> SVGPathway::Get(const std::string& key, const TextureStyl
     case TextureStyle::SCALED:
         return TexturesScaled.at(key);
     }
-    //return {};
+    assert(false, "no such texture");
 }
 
