@@ -34,6 +34,8 @@ struct GUI {
 	static constexpr auto FILE_ICON_KEY{ "file" };
 	static constexpr auto BACK_ARROW_ICON_KEY{ "arrow-left" };
 
+	static constexpr auto dockSpaceName{ "DockSpace" };
+
 	ImGuiWindowFlags window_flags{ ImGuiWindowFlags_None };
 	ImGuiDockNodeFlags dockspace_flags{ ImGuiDockNodeFlags_None };
 

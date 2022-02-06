@@ -39,7 +39,7 @@ void GUI::Prepare() {
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
 	ImGui::SetNextWindowBgAlpha(0.0f);
-	ImGui::Begin("DockSpace Demo", &dockspaceOpen, window_flags);
+	ImGui::Begin(dockSpaceName, &dockspaceOpen, window_flags);
 	ImGui::PopStyleVar();
 
 	ImGui::PopStyleVar(2);
@@ -57,7 +57,8 @@ void GUI::Prepare() {
 
 		ImGui::DockSpace(dockspace_id, { 0, 0 }, dockspace_flags);
 
-		if (ImGui::DockBuilderGetNode(dockspace_id) == nullptr) {
+		if (ImGui::FindWindowSettings(ImHashStr(dockSpaceName, strlen(dockSpaceName))) == nullptr || ImGui::DockBuilderGetNode(dockspace_id) == nullptr) {
+			ImGui::SaveIniSettingsToDisk(IO()->IniFilename);
 			// Clear out existing layout
 			ImGui::DockBuilderRemoveNode(dockspace_id);
 			// Add empty node
