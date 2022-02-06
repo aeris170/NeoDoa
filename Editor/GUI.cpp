@@ -31,7 +31,6 @@ void GUI::Prepare() {
 	window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
 	window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 
-
 	dockspace_flags = ImGuiDockNodeFlags_NoCloseButton;
 	if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode) {
 		window_flags |= ImGuiWindowFlags_NoBackground;
@@ -55,10 +54,7 @@ void GUI::Prepare() {
 	if (io->ConfigFlags & ImGuiConfigFlags_DockingEnable) {
 		ImGuiID dockspace_id = ImGui::GetID("NeoDoa Dockspace");
 
-		ImGui::DockSpace(dockspace_id, { 0, 0 }, dockspace_flags);
-
-		if (ImGui::FindWindowSettings(ImHashStr(dockSpaceName, strlen(dockSpaceName))) == nullptr || ImGui::DockBuilderGetNode(dockspace_id) == nullptr) {
-			ImGui::SaveIniSettingsToDisk(IO()->IniFilename);
+		if (ImGui::DockBuilderGetNode(dockspace_id) == nullptr) {
 			// Clear out existing layout
 			ImGui::DockBuilderRemoveNode(dockspace_id);
 			// Add empty node
@@ -66,10 +62,11 @@ void GUI::Prepare() {
 			// Main node should cover entire window
 			ImGui::DockBuilderSetNodeSize(dockspace_id, ImGui::GetWindowSize());
 			// Build dock layout
-			ImGuiID top = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Up, 0.2f, nullptr, &dockspace_id);
-			ImGuiID down = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Down, 0.25f, nullptr, &dockspace_id);
-			ImGuiID left = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Left, 0.25f, nullptr, &dockspace_id);
-			ImGuiID right = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Right, 0.25f, nullptr, &dockspace_id);
+			ImGuiID dockspace_id_copy = dockspace_id;
+			ImGuiID top = ImGui::DockBuilderSplitNode(dockspace_id_copy, ImGuiDir_Up, 0.2f, nullptr, &dockspace_id_copy);
+			ImGuiID down = ImGui::DockBuilderSplitNode(dockspace_id_copy, ImGuiDir_Down, 0.25f, nullptr, &dockspace_id_copy);
+			ImGuiID left = ImGui::DockBuilderSplitNode(dockspace_id_copy, ImGuiDir_Left, 0.25f, nullptr, &dockspace_id_copy);
+			ImGuiID right = ImGui::DockBuilderSplitNode(dockspace_id_copy, ImGuiDir_Right, 0.25f, nullptr, &dockspace_id_copy);
 
 			ImGuiID rightDown;
 			ImGuiID rightUp = ImGui::DockBuilderSplitNode(right, ImGuiDir_Up, 0.65f, nullptr, &rightDown);
@@ -80,6 +77,8 @@ void GUI::Prepare() {
 			ImGui::DockBuilderDockWindow(ASSET_MANAGER_ID, rightDown);
 			ImGui::DockBuilderFinish(dockspace_id);
 		}
+
+		ImGui::DockSpace(dockspace_id, { 0, 0 }, dockspace_flags);
 	}
 	style.WindowMinSize.x = minWinSizeX;
 }
