@@ -18,10 +18,9 @@ Console::Console(GUI* gui) noexcept :
 	gui(gui) {}
 
 void Console::Begin() {
-	ImGui::PushID(gui->CONSOLE_ID);
+	ImGui::PushID(gui->CONSOLE_TITLE);
 	std::string title(WindowIcons::CONSOLE_WINDOW_ICON);
-	title.append(gui->CONSOLE_ID);
-	title.append("###");
+	title.append(gui->CONSOLE_TITLE);
 	title.append(gui->CONSOLE_ID);
 	ImGui::Begin(title.c_str());
 	ImGui::SetWindowFontScale(0.9);

@@ -15,10 +15,9 @@ AssetManager::AssetManager(GUI* gui) noexcept :
 	gui(gui) {}
 
 void AssetManager::Begin() {
-	ImGui::PushID(gui->ASSET_MANAGER_ID);
+	ImGui::PushID(gui->ASSET_MANAGER_TITLE);
 	std::string title(WindowIcons::ASSET_MANAGER_WINDOW_ICON);
-	title.append(gui->ASSET_MANAGER_ID);
-	title.append("###");
+	title.append(gui->ASSET_MANAGER_TITLE);
 	title.append(gui->ASSET_MANAGER_ID);
 	ImGui::Begin(title.c_str(), nullptr, ImGuiWindowFlags_MenuBar);
 

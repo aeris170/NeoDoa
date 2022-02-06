@@ -22,16 +22,15 @@ GUI::GUI(std::unique_ptr<Core>& core) noexcept :
 
 void GUI::Prepare() {
 	window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-	if (opt_fullscreen) {
-		ImGuiViewport* viewport = ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(viewport->Pos);
-		ImGui::SetNextWindowSize(viewport->Size);
-		ImGui::SetNextWindowViewport(viewport->ID);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-		window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-	}
+	ImGuiViewport* viewport = ImGui::GetMainViewport();
+	ImGui::SetNextWindowPos(viewport->Pos);
+	ImGui::SetNextWindowSize(viewport->Size);
+	ImGui::SetNextWindowViewport(viewport->ID);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+	window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+	window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
 
 	dockspace_flags = ImGuiDockNodeFlags_NoCloseButton;
 	if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode) {
@@ -39,10 +38,11 @@ void GUI::Prepare() {
 	}
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
+	ImGui::SetNextWindowBgAlpha(0.0f);
 	ImGui::Begin("DockSpace Demo", &dockspaceOpen, window_flags);
 	ImGui::PopStyleVar();
 
-	if (opt_fullscreen) ImGui::PopStyleVar(2);
+	ImGui::PopStyleVar(2);
 
 	io = &ImGui::GetIO();
 	font = io->Fonts->Fonts[0];
@@ -55,6 +55,8 @@ void GUI::Prepare() {
 	if (io->ConfigFlags & ImGuiConfigFlags_DockingEnable) {
 		ImGuiID dockspace_id = ImGui::GetID("NeoDoa Dockspace");
 
+		ImGui::DockSpace(dockspace_id, { 0, 0 }, dockspace_flags);
+
 		if (ImGui::DockBuilderGetNode(dockspace_id) == nullptr) {
 			// Clear out existing layout
 			ImGui::DockBuilderRemoveNode(dockspace_id);
@@ -63,26 +65,20 @@ void GUI::Prepare() {
 			// Main node should cover entire window
 			ImGui::DockBuilderSetNodeSize(dockspace_id, ImGui::GetWindowSize());
 			// Build dock layout
-			ImGuiID left;
-			ImGuiID right = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Right, 0.5f, nullptr, &left);
+			ImGuiID top = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Up, 0.2f, nullptr, &dockspace_id);
+			ImGuiID down = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Down, 0.25f, nullptr, &dockspace_id);
+			ImGuiID left = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Left, 0.25f, nullptr, &dockspace_id);
+			ImGuiID right = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Right, 0.25f, nullptr, &dockspace_id);
 
-			ImGuiID leftLeft;
-			ImGuiID leftRight = ImGui::DockBuilderSplitNode(left, ImGuiDir_Right, 0.5f, nullptr, &leftLeft);
+			ImGuiID rightDown;
+			ImGuiID rightUp = ImGui::DockBuilderSplitNode(right, ImGuiDir_Up, 0.65f, nullptr, &rightDown);
 
-			ImGuiID rightLeft;
-			ImGuiID rightRight = ImGui::DockBuilderSplitNode(right, ImGuiDir_Right, 0.5f, nullptr, &rightLeft);
-
-			ImGuiID rightRightDown;
-			ImGuiID rightRightUp = ImGui::DockBuilderSplitNode(rightRight, ImGuiDir_Up, 0.6f, nullptr, &rightRightDown);
-
-			ImGui::DockBuilderDockWindow(SCENE_HIERARCHY_ID, leftLeft);
-			ImGui::DockBuilderDockWindow(OBSERVER_ID, rightRightUp);
-			ImGui::DockBuilderDockWindow(ASSET_MANAGER_ID, rightRightDown);
-			ImGui::DockBuilderDockWindow(CONSOLE_ID, rightRightDown);
+			ImGui::DockBuilderDockWindow(SCENE_HIERARCHY_ID, left);
+			ImGui::DockBuilderDockWindow(OBSERVER_ID, rightUp);
+			ImGui::DockBuilderDockWindow(CONSOLE_ID, rightDown);
+			ImGui::DockBuilderDockWindow(ASSET_MANAGER_ID, rightDown);
 			ImGui::DockBuilderFinish(dockspace_id);
 		}
-
-		ImGui::DockSpace(dockspace_id, { 0, 0 }, dockspace_flags);
 	}
 	style.WindowMinSize.x = minWinSizeX;
 }

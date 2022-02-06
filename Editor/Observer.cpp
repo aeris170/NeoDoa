@@ -22,16 +22,15 @@ Observer::Observer(GUI* gui) noexcept :
 	gui(gui){}
 
 void Observer::Begin(const std::optional<Scene>& scene) {
-	ImGui::PushID(gui->OBSERVER_ID);
+	ImGui::PushID(gui->OBSERVER_TITLE);
 	std::string title(WindowIcons::OBSERVER_WINDOW_ICON);
-	title.append(gui->OBSERVER_ID);
+	title.append(gui->OBSERVER_TITLE);
 	if(scene) {
 		if (gui->sh.selectedEntity != NULL_ENTT) {
 			title.append(" - ");
 			title.append(scene.value().GetComponent<IDComponent>(gui->sh.selectedEntity).GetTag());
 		}
 	}
-	title.append("###");
 	title.append(gui->OBSERVER_ID);
 	ImGui::Begin(title.c_str());
 }

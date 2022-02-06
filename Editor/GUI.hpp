@@ -18,10 +18,15 @@
 
 struct GUI {
 
-	static constexpr auto SCENE_HIERARCHY_ID{ "Scene Hierarchy" };
-	static constexpr auto OBSERVER_ID{ "Observer" };
-	static constexpr auto CONSOLE_ID{ "Console" };
-	static constexpr auto ASSET_MANAGER_ID{ "Asset Manager" };
+	static constexpr auto SCENE_HIERARCHY_TITLE{ "Scene Hierarchy" };
+	static constexpr auto OBSERVER_TITLE{ "Observer" };
+	static constexpr auto CONSOLE_TITLE{ "Console" };
+	static constexpr auto ASSET_MANAGER_TITLE{ "Asset Manager" };
+
+	static constexpr auto SCENE_HIERARCHY_ID{ "###Scene Hierarchy" };
+	static constexpr auto OBSERVER_ID{ "###Observer" };
+	static constexpr auto CONSOLE_ID{ "###Console" };
+	static constexpr auto ASSET_MANAGER_ID{ "###Asset Manager" };
 
 	static constexpr auto FOLDER_ICON_KEY{ "folder-open" };
 	static constexpr auto PROJECT_ICON_KEY{ "neodoa" };
@@ -31,7 +36,6 @@ struct GUI {
 
 	ImGuiWindowFlags window_flags{ ImGuiWindowFlags_None };
 	ImGuiDockNodeFlags dockspace_flags{ ImGuiDockNodeFlags_None };
-	bool opt_fullscreen{ true };
 
 	std::unique_ptr<Core>& core;
 	std::string defaultWindowName{ "NeoDoa Editor" };
