@@ -8,6 +8,8 @@
 #include <ImGuiRenderCommand.hpp>
 #include <Core.hpp>
 
+#include "SVGPathway.hpp"
+
 #include "MenuBar.hpp"
 #include "SceneHierarchy.hpp"
 #include "Observer.hpp"
@@ -65,11 +67,11 @@ struct GUI {
 	ImFont* GetFont();
 	ImFont* GetFontBold();
 
-	void* GetFolderIcon();
-	void* GetProjectIcon();
-	void* GetSceneIcon();
-	void* GetFileIcon();
-	void* GetBackArrowIcon();
+	void* GetFolderIcon(TextureSize size = TextureSize::MEDIUM);
+	void* GetProjectIcon(TextureSize size = TextureSize::MEDIUM);
+	void* GetSceneIcon(TextureSize size = TextureSize::MEDIUM);
+	void* GetFileIcon(TextureSize size = TextureSize::MEDIUM);
+	void* GetBackArrowIcon(TextureSize size = TextureSize::MEDIUM);
 
 private:
 	ImGuiIO* io{ nullptr };

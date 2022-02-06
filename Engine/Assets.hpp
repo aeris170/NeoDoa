@@ -10,6 +10,8 @@ struct Project;
 
 struct Assets {
 
+	inline static std::string PROJECT_EXT = ".doa";
+	static bool IsProjectFile(const FNode& node);
 	inline static std::string SCENE_EXT = ".scn";
 	static bool IsSceneFile(const FNode& node);
 	inline static std::string SCRIPT_EXT = ".scrpt";

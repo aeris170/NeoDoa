@@ -248,7 +248,30 @@ void AssetManager::RenderSelectedFolderContent() {
 
 		ImGui::EndTable();
 	} else if (selectedFolderContentSettings.viewMode == SelectedFolderContentSettings::ViewMode::List) {
-		// draw as list;
+		for (auto& child : selectedFolder->_children) {
+			void* icon;
+			if (child._isDir) {
+				icon = gui->GetFolderIcon(TextureSize::SMALL);
+			} else if (Assets::IsSceneFile(child)) {
+				icon = gui->GetSceneIcon(TextureSize::SMALL);
+			} else if (child._ext == ".doa") {
+				icon = gui->GetProjectIcon(TextureSize::SMALL);
+			} else {
+				icon = gui->GetFileIcon(TextureSize::SMALL);
+			}
+
+			if (ImGui::TreeNodeEx(child._name.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf)) {
+				if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+					OpenFileAtFileNode(child);
+				}
+				ImGui::TreePop();
+			}
+
+			float textHeight = ImGui::GetTextLineHeight();
+			ImVec2 min = ImGui::GetItemRectMin();
+			ImVec2 max = { min.x + textHeight, min.y + textHeight };
+			ImGui::GetWindowDrawList()->AddImage(icon, min, max);
+		}
 	}
 }
 

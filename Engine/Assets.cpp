@@ -11,12 +11,13 @@
 #include "Log.hpp"
 #include "SceneSerializer.hpp"
 
-bool Assets::IsSceneFile(const FNode& node) { return node._ext == ".scn"; }
-bool Assets::IsScriptFile(const FNode& node) { return node._ext == ".as"; }
-bool Assets::IsTextureFile(const FNode& node) { return node._ext == ".png" || node._ext == ".jpg" || node._ext == ".jpeg"; }
-bool Assets::IsModelFile(const FNode& node) { return node._ext == ".obj" || node._ext == ".fbx" || node._ext == "3ds"; }
-bool Assets::IsMaterialFile(const FNode& node) { return node._ext == ".mat"; }
-bool Assets::IsShaderFile(const FNode& node) { return node._ext == ".sh"; }
+bool Assets::IsProjectFile(const FNode& node) { return node._ext == PROJECT_EXT; }
+bool Assets::IsSceneFile(const FNode& node) { return node._ext == SCENE_EXT; }
+bool Assets::IsScriptFile(const FNode& node) { return node._ext == SCRIPT_EXT; }
+bool Assets::IsTextureFile(const FNode& node) { return node._ext == TEXTURE_EXT || node._ext == ".png" || node._ext == ".jpg" || node._ext == ".jpeg"; }
+bool Assets::IsModelFile(const FNode& node) { return node._ext == MODEL_EXT || node._ext == ".obj" || node._ext == ".fbx" || node._ext == "3ds"; }
+bool Assets::IsMaterialFile(const FNode& node) { return node._ext == MATERIAL_EXT; }
+bool Assets::IsShaderFile(const FNode& node) { return node._ext == SHADER_EXT; }
 
 void Assets::ReadRecursive(FNode& root) {
 	auto it = std::filesystem::directory_iterator(root._path);

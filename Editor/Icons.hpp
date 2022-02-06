@@ -14,8 +14,8 @@ namespace WindowIcons {
 }
 
 namespace SceneHierarchyIcons {
-	inline constexpr auto SCENE_ICON = ICON_FA_PROJECT_DIAGRAM " ";
-	inline constexpr auto ENTITY_ICON = ICON_FA_CUBE " ";
+	inline constexpr auto SCENE_ICON{ ICON_FA_PROJECT_DIAGRAM " " };
+	inline constexpr auto ENTITY_ICON{ ICON_FA_CUBE " " };
 }
 
 namespace ComponentIcons {
@@ -44,4 +44,8 @@ namespace ConsoleIcons {
 namespace AssetManagerIcons {
 	inline constexpr auto REFRESH_BUTTON_ICON{ ICON_FA_SYNC " " };
 	inline constexpr auto SELECTED_FOLDER_CONTENT_TITLE_ICON{ ICON_FA_CUBES " " };
+}
+
+namespace FileIcons {
+	inline constexpr auto DIRECTORY_ICON{ ICON_FA_FOLDER };
 }

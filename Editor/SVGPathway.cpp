@@ -14,9 +14,9 @@
 #include <split.hpp>
 
 bool SVGPathway::Initialized{ false };
-std::unordered_map<std::string, std::weak_ptr<Texture>> SVGPathway::Textures{};
-std::unordered_map<std::string, std::weak_ptr<Texture>> SVGPathway::TexturesPadded{};
-std::unordered_map<std::string, std::weak_ptr<Texture>> SVGPathway::TexturesScaled{};
+std::unordered_map<std::string, SVGPathway::TexturePack> SVGPathway::Textures{};
+std::unordered_map<std::string, SVGPathway::TexturePack> SVGPathway::TexturesPadded{};
+std::unordered_map<std::string, SVGPathway::TexturePack> SVGPathway::TexturesScaled{};
 
 void SVGPathway::Initialize(Color&& color) {
     assert(!Initialized, "No double init for SVGPathway.");
@@ -48,83 +48,104 @@ void SVGPathway::Initialize(Color&& color) {
 
         std::string name = path_noext.filename().string().c_str();
 
-        lunasvg::Bitmap bitmapScaledAspect;
         const char* viewBox;
         rootNode->QueryAttribute("viewBox", &viewBox);
         std::vector<std::string> tokens = std::move(split(viewBox, " "));
         std::vector<int> box{ stoi(tokens[0]), stoi(tokens[1]), stoi(tokens[2]), stoi(tokens[3]) };
 
-        bitmapScaledAspect = lunadoc->renderToBitmap((box[2] - box[0]) * SCALE_FACTOR, (box[3] - box[1]) * SCALE_FACTOR, RASTER_BG_COLOR);
+        { // Fill the "Textures"
+            lunasvg::Bitmap bitmapScaledAspect;
+            bitmapScaledAspect = lunadoc->renderToBitmap((box[2] - box[0]) * SCALE_FACTOR_SMALL, (box[3] - box[1]) * SCALE_FACTOR_SMALL, RASTER_BG_COLOR);
+            auto small = CreateTextureRaw("!!" + name + "_none_small!!", bitmapScaledAspect.data(), bitmapScaledAspect.width(), bitmapScaledAspect.height(), true);
 
-        auto tex = CreateTextureRaw("!!" + name + "_none!!", bitmapScaledAspect.data(), bitmapScaledAspect.width(), bitmapScaledAspect.height(), true);
-        if (!tex.expired()) {
-            Textures.emplace(name, tex);
-        }
+            bitmapScaledAspect = lunadoc->renderToBitmap((box[2] - box[0]) * SCALE_FACTOR_MEDIUM, (box[3] - box[1]) * SCALE_FACTOR_MEDIUM, RASTER_BG_COLOR);
+            auto medium = CreateTextureRaw("!!" + name + "_none_medium!!", bitmapScaledAspect.data(), bitmapScaledAspect.width(), bitmapScaledAspect.height(), true);
 
-        lunasvg::Bitmap bitmapPadded;
-        bitmapPadded = lunadoc->renderToBitmap((box[2] - box[0]) * SCALE_FACTOR, (box[3] - box[1]) * SCALE_FACTOR, RASTER_BG_COLOR);
-        const int width = bitmapPadded.width();
-        const int height = bitmapPadded.height();
-        const int elemWidth = 4;
-        const size_t dimension = size_t(std::max(width, height));
-        uint32_t* paddedBuf = new uint32_t[dimension * dimension](); // zero initialized rgba buffer
-        unsigned char* buffer = bitmapPadded.data();
-        auto bufIdx = 0;
+            bitmapScaledAspect = lunadoc->renderToBitmap((box[2] - box[0]) * SCALE_FACTOR_LARGE, (box[3] - box[1]) * SCALE_FACTOR_LARGE, RASTER_BG_COLOR);
+            auto large = CreateTextureRaw("!!" + name + "_none_large!!", bitmapScaledAspect.data(), bitmapScaledAspect.width(), bitmapScaledAspect.height(), true);
 
-        bool widthScaled = width != dimension;
-        for (int y = 0; y < dimension; y++) {
-            for (int x = 0; x < dimension; x++) {
-                unsigned char* currentElement{ nullptr };
-                if (widthScaled) {
-                    // pad left-right
-                    if (x >= (dimension - width) / 2 && x < (dimension + width) / 2) {
-                        currentElement = (unsigned char*)&paddedBuf[x + y * dimension];
-                    }
-                } else {
-                    // pad top-bottom
-                    if (y >= (dimension - height) / 2 && y < (dimension + height) / 2) {
-                        currentElement = (unsigned char*)&paddedBuf[x + y * dimension];
-                    }
-                }
-                if (currentElement == nullptr) continue;
-
-                currentElement[0] = buffer[bufIdx];
-                currentElement[1] = buffer[bufIdx + 1];
-                currentElement[2] = buffer[bufIdx + 2];
-                currentElement[3] = buffer[bufIdx + 3];
-                bufIdx += elemWidth;
-                if (bufIdx > width * height * elemWidth) {
-                    bufIdx = 0;
-                }
+            if (!small.expired() && !medium.expired() && !large.expired()) {
+                Textures.emplace(name, TexturePack{ small, medium, large });
             }
         }
 
-        tex = CreateTextureRaw("!!" + name + "_padded!!", (unsigned char*)(paddedBuf), dimension, dimension, true);
-        if (!tex.expired()) {
-            TexturesPadded.emplace(name, tex);
+        { // Fill the "TexturesPadded"
+            auto paddingFunction = [](std::unique_ptr<lunasvg::Document>& lunadoc, const std::vector<int>& box, const std::string& name, std::string&& scaleFactorName, float scaleFactor) {
+                lunasvg::Bitmap bitmapPadded;
+                bitmapPadded = lunadoc->renderToBitmap((box[2] - box[0]) * scaleFactor, (box[3] - box[1]) * scaleFactor, RASTER_BG_COLOR);
+                const int width = bitmapPadded.width();
+                const int height = bitmapPadded.height();
+                const int elemWidth = 4;
+                const size_t dimension = size_t(std::max(width, height));
+                uint32_t* paddedBuf = new uint32_t[dimension * dimension](); // zero initialized rgba buffer
+                unsigned char* buffer = bitmapPadded.data();
+                auto bufIdx = 0;
+
+                bool widthScaled = width != dimension;
+                for (int y = 0; y < dimension; y++) {
+                    for (int x = 0; x < dimension; x++) {
+                        unsigned char* currentElement{ nullptr };
+                        if (widthScaled) {
+                            // pad left-right
+                            if (x >= (dimension - width) / 2 && x < (dimension + width) / 2) {
+                                currentElement = (unsigned char*)&paddedBuf[x + y * dimension];
+                            }
+                        }
+                        else {
+                            // pad top-bottom
+                            if (y >= (dimension - height) / 2 && y < (dimension + height) / 2) {
+                                currentElement = (unsigned char*)&paddedBuf[x + y * dimension];
+                            }
+                        }
+                        if (currentElement == nullptr) continue;
+
+                        currentElement[0] = buffer[bufIdx];
+                        currentElement[1] = buffer[bufIdx + 1];
+                        currentElement[2] = buffer[bufIdx + 2];
+                        currentElement[3] = buffer[bufIdx + 3];
+                        bufIdx += elemWidth;
+                        if (bufIdx > width * height * elemWidth) {
+                            bufIdx = 0;
+                        }
+                    }
+                }
+
+                auto tex = CreateTextureRaw("!!" + name + "_padded_" + scaleFactorName + "!!", (unsigned char*)(paddedBuf), dimension, dimension, true);
+                delete[] paddedBuf;
+                return tex;
+            };
+
+            auto small = paddingFunction(lunadoc, box, name, "small", SCALE_FACTOR_SMALL);
+            auto medium = paddingFunction(lunadoc, box, name, "medium", SCALE_FACTOR_MEDIUM);
+            auto large = paddingFunction(lunadoc, box, name, "large", SCALE_FACTOR_LARGE);
+
+            if (!small.expired() && !medium.expired() && !large.expired()) {
+                TexturesPadded.emplace(name, TexturePack{ small, medium, large });
+            }
         }
-        delete[] paddedBuf;
 
         lunasvg::Bitmap bitmapScaled;
-        bitmapScaled = lunadoc->renderToBitmap(WIDTH, HEIGHT, RASTER_BG_COLOR);
-        tex = CreateTextureRaw("!!" + name + "_scaled!!", bitmapScaled.data(), bitmapScaled.width(), bitmapScaled.height(), true);
-        if (!tex.expired()) {
-            TexturesScaled.emplace(name, tex);
+        { // Fill the "TexturesScaled"
+            bitmapScaled = lunadoc->renderToBitmap(WIDTH, HEIGHT, RASTER_BG_COLOR);
+            auto tex = CreateTextureRaw("!!" + name + "_scaled!!", bitmapScaled.data(), bitmapScaled.width(), bitmapScaled.height(), true);
+            if (!tex.expired()) {
+                TexturesScaled.emplace(name, tex);
+            }
         }
     }
 
     Initialized = true;
 }
 
-std::weak_ptr<Texture> SVGPathway::Get(const std::string& key, const TextureStyle style) {
+std::weak_ptr<Texture> SVGPathway::Get(const std::string& key, const TextureStyle style, const TextureSize size) {
     assert(Initialized, "SVGPathway not initialized.");
     switch (style) {
     case TextureStyle::NONE:
-        return Textures.at(key);
+        return Textures.at(key)[static_cast<size_t>(size)];
     case TextureStyle::PADDED:
-        return TexturesPadded.at(key);
+        return TexturesPadded.at(key)[static_cast<size_t>(size)];
     case TextureStyle::SCALED:
-        return TexturesScaled.at(key);
+        return TexturesScaled.at(key)[static_cast<size_t>(size)];
     }
     assert(false, "no such texture");
 }

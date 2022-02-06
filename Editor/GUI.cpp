@@ -7,8 +7,6 @@
 #include <Window.hpp>
 #include <Texture.hpp>
 
-#include "SVGPathway.hpp"
-
 GUI::GUI(std::unique_ptr<Core>& core) noexcept :
 	core(core),
 	mb(this),
@@ -171,8 +169,8 @@ ImGuiIO* GUI::IO() { return io; }
 ImFont* GUI::GetFont() { return font; }
 ImFont* GUI::GetFontBold() { return fontBold; }
 
-void* GUI::GetFolderIcon() { return reinterpret_cast<void*>(SVGPathway::Get(FOLDER_ICON_KEY, TextureStyle::PADDED).lock()->_glTextureID); }
-void* GUI::GetProjectIcon() { return reinterpret_cast<void*>(SVGPathway::Get(PROJECT_ICON_KEY, TextureStyle::PADDED).lock()->_glTextureID); }
-void* GUI::GetSceneIcon() { return reinterpret_cast<void*>(SVGPathway::Get(SCENE_ICON_KEY, TextureStyle::PADDED).lock()->_glTextureID); }
-void* GUI::GetFileIcon() { return reinterpret_cast<void*>(SVGPathway::Get(FILE_ICON_KEY, TextureStyle::PADDED).lock()->_glTextureID); }
-void* GUI::GetBackArrowIcon() { return reinterpret_cast<void*>(SVGPathway::Get(BACK_ARROW_ICON_KEY, TextureStyle::PADDED).lock()->_glTextureID); }
+void* GUI::GetFolderIcon(TextureSize size) { return reinterpret_cast<void*>(SVGPathway::Get(FOLDER_ICON_KEY, TextureStyle::PADDED, size).lock()->_glTextureID); }
+void* GUI::GetProjectIcon(TextureSize size) { return reinterpret_cast<void*>(SVGPathway::Get(PROJECT_ICON_KEY, TextureStyle::PADDED, size).lock()->_glTextureID); }
+void* GUI::GetSceneIcon(TextureSize size) { return reinterpret_cast<void*>(SVGPathway::Get(SCENE_ICON_KEY, TextureStyle::PADDED, size).lock()->_glTextureID); }
+void* GUI::GetFileIcon(TextureSize size) { return reinterpret_cast<void*>(SVGPathway::Get(FILE_ICON_KEY, TextureStyle::PADDED, size).lock()->_glTextureID); }
+void* GUI::GetBackArrowIcon(TextureSize size) { return reinterpret_cast<void*>(SVGPathway::Get(BACK_ARROW_ICON_KEY, TextureStyle::PADDED, size).lock()->_glTextureID); }
