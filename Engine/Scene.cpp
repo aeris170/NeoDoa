@@ -18,15 +18,22 @@
 
 Scene::Scene(std::string_view name) noexcept :
 	Name(name),
-	_activeCamera(&_oc) {} // default camera is orthographic
+	_usingOrthoCamera(true),
+	_usingPerspectiveCamera(false) {} // default camera is orthographic
 
 Scene::operator std::weak_ptr<Scene>() const { return _this; }
 
-bool Scene::IsOrtho() const { return _activeCamera == &_oc; }
-bool Scene::IsPerspective() const { return _activeCamera == &_pc; }
+bool Scene::IsOrtho() const { return _usingOrthoCamera; }
+bool Scene::IsPerspective() const { return _usingPerspectiveCamera; }
 
-void Scene::SwitchToOrtho() { _activeCamera = &_oc; }
-void Scene::SwitchToPerspective() { _activeCamera = &_pc; }
+void Scene::SwitchToOrtho() {
+	_usingOrthoCamera = true;
+	_usingPerspectiveCamera = false;
+}
+void Scene::SwitchToPerspective() {
+	_usingPerspectiveCamera = true;
+	_usingOrthoCamera = false;
+}
 
 void Scene::SetOrtho(float left, float right, float bottom, float top, float near, float far) { _oc = OrthoCamera(left, right, bottom, top, near, far); }
 void Scene::SetPerpective(float fov, float aspect, float near, float far) { _pc = PerspectiveCamera(fov, aspect, near, far); }
@@ -40,7 +47,15 @@ OrthoCamera& Scene::GetOrtho() { return _oc; }
 PerspectiveCamera Scene::GetPerspective() const { return _pc; }
 PerspectiveCamera& Scene::GetPerspective() { return _pc; }
 
-ACamera& Scene::GetActiveCamera() { return *_activeCamera; }
+ACamera& Scene::GetActiveCamera() {
+	if (IsOrtho()) {
+		return _oc;
+	} else if (IsPerspective()) {
+		return _pc;
+	} else {
+		assert("no camera?");
+	}
+}
 
 Entity Scene::CreateEntity(std::string name, uint32_t desiredID) {
 	Entity entt;
@@ -97,9 +112,10 @@ void Scene::Update(float deltaTime) {
 	}
 }
 void Scene::Render() {
-	_activeCamera->UpdateView();
-	_activeCamera->UpdateProjection();
-	_activeCamera->UpdateViewProjection();
+	auto& cam = GetActiveCamera();
+	cam.UpdateView();
+	cam.UpdateProjection();
+	cam.UpdateViewProjection();
 	/*
 	_registry.view<ScriptComponent>().each([this, &angel](Entity entity, ScriptComponent& script) {
 		for (auto& module : script._modules) {

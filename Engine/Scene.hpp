@@ -119,8 +119,9 @@ private:
 	OutlineRenderer _outlineRenderer;
 
 	OrthoCamera _oc{ OrthoCamera(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f) };
+	bool _usingOrthoCamera{ false };
 	PerspectiveCamera _pc{ PerspectiveCamera(110.0f, 19.0f / 9.0f, 0.001f, 1000.0f) };
-	ACamera* _activeCamera; // address of active cam
+	bool _usingPerspectiveCamera{ false };
 
 	Registry _registry;
 	std::vector<Entity> _entities;
