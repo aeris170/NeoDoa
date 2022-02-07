@@ -105,12 +105,14 @@
     <ClCompile Include="Console.cpp" />
     <ClCompile Include="Editor.cpp" />
     <ClCompile Include="CodeGenerator.cpp" />
+    <ClCompile Include="GameViewport.cpp" />
     <ClCompile Include="GUI.cpp" />
     <ClCompile Include="ImGuiExtensions.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MenuBar.cpp" />
     <ClCompile Include="Observer.cpp" />
     <ClCompile Include="SceneHierarchy.cpp" />
+    <ClCompile Include="SceneViewport.cpp" />
     <ClCompile Include="SVGPathway.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -120,6 +122,7 @@
     <ClInclude Include="Console.hpp" />
     <ClInclude Include="Editor.hpp" />
     <ClInclude Include="CodeGenerator.hpp" />
+    <ClInclude Include="GameViewport.hpp" />
     <ClInclude Include="GUI.hpp" />
     <ClInclude Include="Icons.hpp" />
     <ClInclude Include="ImGuiExtensions.hpp" />
@@ -127,6 +130,7 @@
     <ClInclude Include="Observer.hpp" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="SceneHierarchy.hpp" />
+    <ClInclude Include="SceneViewport.hpp" />
     <ClInclude Include="SVGPathway.hpp" />
   </ItemGroup>
   <ItemGroup>

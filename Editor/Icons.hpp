@@ -7,10 +7,12 @@
 #include <nameof.hpp>
 
 namespace WindowIcons {
-	inline constexpr auto SCENE_HIERARCHY_WINDOW_ICON{ ICON_FA_PROJECT_DIAGRAM " "};
-	inline constexpr auto OBSERVER_WINDOW_ICON{ ICON_FA_EYE " "};
-	inline constexpr auto CONSOLE_WINDOW_ICON{ ICON_FA_CODE " "};
-	inline constexpr auto ASSET_MANAGER_WINDOW_ICON{ ICON_FA_CUBES " "};
+	inline constexpr auto SCENE_HIERARCHY_WINDOW_ICON{ ICON_FA_PROJECT_DIAGRAM " " };
+	inline constexpr auto OBSERVER_WINDOW_ICON{ ICON_FA_EYE " " };
+	inline constexpr auto CONSOLE_WINDOW_ICON{ ICON_FA_CODE " " };
+	inline constexpr auto ASSET_MANAGER_WINDOW_ICON{ ICON_FA_CUBES " " };
+	inline constexpr auto SCENE_VIEWPORT_WINDOW_ICON{ ICON_FA_DESKTOP " " }; // TODO CHANGE TO ICON_FA_DISPLAY ONCE 6.0 IS AVAILABLE
+	inline constexpr auto GAME_VIEWPORT_WINDOW_ICON{ ICON_FA_ALIEN_MONSTER " " };
 }
 
 namespace SceneHierarchyIcons {

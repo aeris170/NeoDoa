@@ -14,6 +14,8 @@ GUI::GUI(std::unique_ptr<Core>& core) noexcept :
 	obs(this),
 	con(this),
 	am(this),
+	sv(this),
+	gv(this),
 	delta(0) {
 	ImVec4 txtColor = ImGui::GetStyle().Colors[ImGuiCol_Text];
 	SVGPathway::Initialize({ txtColor.x, txtColor.y, txtColor.z, txtColor.w });
@@ -62,11 +64,9 @@ void GUI::Prepare() {
 			// Main node should cover entire window
 			ImGui::DockBuilderSetNodeSize(dockspace_id, ImGui::GetWindowSize());
 			// Build dock layout
-			ImGuiID dockspace_id_copy = dockspace_id;
-			ImGuiID top = ImGui::DockBuilderSplitNode(dockspace_id_copy, ImGuiDir_Up, 0.2f, nullptr, &dockspace_id_copy);
-			ImGuiID down = ImGui::DockBuilderSplitNode(dockspace_id_copy, ImGuiDir_Down, 0.25f, nullptr, &dockspace_id_copy);
-			ImGuiID left = ImGui::DockBuilderSplitNode(dockspace_id_copy, ImGuiDir_Left, 0.25f, nullptr, &dockspace_id_copy);
-			ImGuiID right = ImGui::DockBuilderSplitNode(dockspace_id_copy, ImGuiDir_Right, 0.25f, nullptr, &dockspace_id_copy);
+			ImGuiID center = dockspace_id;
+			ImGuiID left = ImGui::DockBuilderSplitNode(center, ImGuiDir_Left, 0.25f, nullptr, &center);
+			ImGuiID right = ImGui::DockBuilderSplitNode(center, ImGuiDir_Right, 0.25f, nullptr, &center);
 
 			ImGuiID rightDown;
 			ImGuiID rightUp = ImGui::DockBuilderSplitNode(right, ImGuiDir_Up, 0.65f, nullptr, &rightDown);
@@ -75,6 +75,8 @@ void GUI::Prepare() {
 			ImGui::DockBuilderDockWindow(OBSERVER_ID, rightUp);
 			ImGui::DockBuilderDockWindow(CONSOLE_ID, rightDown);
 			ImGui::DockBuilderDockWindow(ASSET_MANAGER_ID, rightDown);
+			ImGui::DockBuilderDockWindow(SCENE_VIEWPORT_ID, center);
+			ImGui::DockBuilderDockWindow(GAME_VIEWPORT_ID, center);
 			ImGui::DockBuilderFinish(dockspace_id);
 		}
 
@@ -112,6 +114,14 @@ void GUI::operator() (float delta) {
 	am.Begin();
 	am.Render();
 	am.End();
+
+	sv.Begin();
+	sv.Render();
+	sv.End();
+
+	gv.Begin();
+	gv.Render();
+	gv.End();
 
 	End();
 }

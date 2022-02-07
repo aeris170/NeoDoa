@@ -46,6 +46,12 @@
     <Filter Include="UI\Icons">
       <UniqueIdentifier>{58d75d15-6b05-4d1f-babc-48f6e6f9a296}</UniqueIdentifier>
     </Filter>
+    <Filter Include="UI\GUI\SceneViewport">
+      <UniqueIdentifier>{e2f121cc-8dd2-4b8f-841b-c40014d255d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\GUI\GameViewport">
+      <UniqueIdentifier>{63c37ecb-2841-4443-9f71-2ac0ba26d5e2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -86,6 +92,12 @@
     </ClCompile>
     <ClCompile Include="SVGPathway.cpp">
       <Filter>UI\Icons</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneViewport.cpp">
+      <Filter>UI\GUI\SceneViewport</Filter>
+    </ClCompile>
+    <ClCompile Include="GameViewport.cpp">
+      <Filter>UI\GUI\GameViewport</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -130,6 +142,12 @@
     </ClInclude>
     <ClInclude Include="Icons.hpp">
       <Filter>UI\Icons</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneViewport.hpp">
+      <Filter>UI\GUI\SceneViewport</Filter>
+    </ClInclude>
+    <ClInclude Include="GameViewport.hpp">
+      <Filter>UI\GUI\GameViewport</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
