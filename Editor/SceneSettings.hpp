@@ -18,4 +18,8 @@ struct SceneSettings {
 	void Render(Scene& scene);
 	void End();
 
+private:
+
+	void DrawStats(Scene& scene);
+	void DrawSettings(Scene& scene);
 };

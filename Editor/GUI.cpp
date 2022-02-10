@@ -118,8 +118,10 @@ void GUI::operator() (float delta) {
 	am.Render();
 	am.End();
 
-	sv.Begin();
-	sv.Render();
+	sv.Begin(HasOpenProject() ? openProject->_openScene : noScene);
+	if (HasOpenScene()) {
+		sv.Render(openProject->_openScene.value());
+	}
 	sv.End();
 
 	gv.Begin();
