@@ -46,6 +46,7 @@ struct GUI {
 	ImGuiDockNodeFlags dockspace_flags{ ImGuiDockNodeFlags_None };
 
 	std::unique_ptr<Core>& core;
+	std::unique_ptr<Window>& window;
 	std::string defaultWindowName{ "NeoDoa Editor" };
 	bool dockspaceOpen{ true };
 

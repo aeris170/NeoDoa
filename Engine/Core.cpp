@@ -199,6 +199,7 @@ void Core::LoadProject(const Project& project) {
 }
 
 void Core::UnloadProject() {
+    _playing = false;
     _project = nullptr;
 }
 

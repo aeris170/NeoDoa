@@ -9,6 +9,7 @@
 
 GUI::GUI(std::unique_ptr<Core>& core) noexcept :
 	core(core),
+	window(core->_window),
 	mb(this),
 	sh(this),
 	obs(this),
@@ -132,6 +133,7 @@ void GUI::End() {
 
 void GUI::CreateNewProject(std::string_view workspace, std::string_view name) {
 	openProject.emplace(std::string(workspace), std::string(name));
+	core->LoadProject(openProject.value());
 
 	std::string title = defaultWindowName;
 	title.append(" - ");
@@ -149,6 +151,7 @@ void GUI::OpenProjectFromDisk(const std::string& path) {
 	FNode file;
 	file._path = path;
 	openProject.emplace(DeserializeProject(&file));
+	core->LoadProject(openProject.value());
 
 	std::string title = defaultWindowName;
 	title.append(" - ");
@@ -158,6 +161,7 @@ void GUI::OpenProjectFromDisk(const std::string& path) {
 
 void GUI::CloseProject() {
 	openProject.reset();
+	core->UnloadProject();
 }
 
 void GUI::CreateNewScene(std::string_view relativePath, std::string_view name) {

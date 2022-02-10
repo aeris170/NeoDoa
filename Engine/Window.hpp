@@ -38,4 +38,8 @@ struct Window {
 	void SetTitle(const std::string& title);
 	void SetTitle(std::string&& title);
 
+	void DisableCursor();
+	void HideCursor();
+	void EnableCursor();
+
 };

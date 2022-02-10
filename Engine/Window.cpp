@@ -96,6 +96,17 @@ void Window::SetTitle(std::string&& title) {
     glfwSetWindowTitle(_glfwWindow, title.c_str());
 }
 
+void Window::DisableCursor() {
+    glfwSetInputMode(_glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+}
+
+void Window::HideCursor() {
+    glfwSetInputMode(_glfwWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+}
+
+void Window::EnableCursor() {
+    glfwSetInputMode(_glfwWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+}
 //-----------------------------------------------------------------
 
 static void glfwWindowOnResize(GLFWwindow* window, int width, int height) {
