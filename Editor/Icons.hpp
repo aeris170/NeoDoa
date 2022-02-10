@@ -13,6 +13,7 @@ namespace WindowIcons {
 	inline constexpr auto ASSET_MANAGER_WINDOW_ICON{ ICON_FA_CUBES " " };
 	inline constexpr auto SCENE_VIEWPORT_WINDOW_ICON{ ICON_FA_DESKTOP " " }; // TODO CHANGE TO ICON_FA_DISPLAY ONCE 6.0 IS AVAILABLE
 	inline constexpr auto GAME_VIEWPORT_WINDOW_ICON{ ICON_FA_ALIEN_MONSTER " " };
+	inline constexpr auto SCENE_SETTINGS_WINDOW_ICON{ ICON_FA_COG " " };
 }
 
 namespace SceneHierarchyIcons {

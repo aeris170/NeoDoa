@@ -112,6 +112,7 @@
     <ClCompile Include="MenuBar.cpp" />
     <ClCompile Include="Observer.cpp" />
     <ClCompile Include="SceneHierarchy.cpp" />
+    <ClCompile Include="SceneSettings.cpp" />
     <ClCompile Include="SceneViewport.cpp" />
     <ClCompile Include="SVGPathway.cpp" />
   </ItemGroup>
@@ -130,6 +131,7 @@
     <ClInclude Include="Observer.hpp" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="SceneHierarchy.hpp" />
+    <ClInclude Include="SceneSettings.hpp" />
     <ClInclude Include="SceneViewport.hpp" />
     <ClInclude Include="SVGPathway.hpp" />
   </ItemGroup>

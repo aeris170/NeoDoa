@@ -44,6 +44,8 @@ struct Scene {
 
 	ACamera& GetActiveCamera();
 
+	Renderer::Stats GetRendererStats() const;
+
 	// E - Entity
 	Entity CreateEntity(std::string name = "", uint32_t desiredID = EntityTo<uint32_t>(NULL_ENTT));
 	void DeleteEntity(Entity entt);

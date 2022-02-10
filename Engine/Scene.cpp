@@ -57,6 +57,8 @@ ACamera& Scene::GetActiveCamera() {
 	}
 }
 
+Renderer::Stats Scene::GetRendererStats() const { return _renderer.stats; }
+
 Entity Scene::CreateEntity(std::string name, uint32_t desiredID) {
 	Entity entt;
 	if (desiredID != EntityTo<uint32_t>(NULL_ENTT) && desiredID >= 0) {

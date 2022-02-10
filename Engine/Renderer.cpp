@@ -95,9 +95,9 @@ void Renderer::Submit(std::weak_ptr<Shader> shader, std::weak_ptr<Model> model, 
 }
 
 void Renderer::Render(entt::registry& registry, ACamera* cam) {
-	vertices = 0;
-	indices = 0;
-	drawCalls = 0;
+	stats.vertices = 0;
+	stats.indices = 0;
+	stats.drawCalls = 0;
 
 	std::vector<VBO> toBeDeleted;
 	for (auto& pair : _previous) {
@@ -152,9 +152,9 @@ void Renderer::Render(entt::registry& registry, ACamera* cam) {
 				}
 				glBindVertexArray(0);
 
-				vertices += mesh._vertices.size();
-				indices += mesh._indices.size();
-				drawCalls++;
+				stats.vertices += mesh._vertices.size();
+				stats.indices += mesh._indices.size();
+				stats.drawCalls++;
 			}
 		}
 	}

@@ -17,6 +17,7 @@ GUI::GUI(std::unique_ptr<Core>& core) noexcept :
 	am(this),
 	sv(this),
 	gv(this),
+	ss(this),
 	delta(0) {
 	ImVec4 txtColor = ImGui::GetStyle().Colors[ImGuiCol_Text];
 	SVGPathway::Initialize({ txtColor.x, txtColor.y, txtColor.z, txtColor.w });
@@ -78,6 +79,7 @@ void GUI::Prepare() {
 			ImGui::DockBuilderDockWindow(ASSET_MANAGER_ID, rightDown);
 			ImGui::DockBuilderDockWindow(SCENE_VIEWPORT_ID, center);
 			ImGui::DockBuilderDockWindow(GAME_VIEWPORT_ID, center);
+			ImGui::DockBuilderDockWindow(SCENE_SETTINGS_ID, rightUp);
 			ImGui::DockBuilderFinish(dockspace_id);
 		}
 
@@ -123,6 +125,12 @@ void GUI::operator() (float delta) {
 	gv.Begin();
 	gv.Render();
 	gv.End();
+
+	ss.Begin(HasOpenProject() ? openProject->_openScene : noScene);
+	if (HasOpenScene()) {
+		ss.Render(openProject->_openScene.value());
+	}
+	ss.End();
 
 	End();
 }

@@ -52,6 +52,9 @@
     <Filter Include="UI\GUI\GameViewport">
       <UniqueIdentifier>{63c37ecb-2841-4443-9f71-2ac0ba26d5e2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="UI\GUI\SceneSettings">
+      <UniqueIdentifier>{365c057c-5eb3-4528-b074-c5cabf931de0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -98,6 +101,9 @@
     </ClCompile>
     <ClCompile Include="GameViewport.cpp">
       <Filter>UI\GUI\GameViewport</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneSettings.cpp">
+      <Filter>UI\GUI\SceneSettings</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -148,6 +154,9 @@
     </ClInclude>
     <ClInclude Include="GameViewport.hpp">
       <Filter>UI\GUI\GameViewport</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneSettings.hpp">
+      <Filter>UI\GUI\SceneSettings</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
