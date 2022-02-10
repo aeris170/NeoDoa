@@ -212,11 +212,11 @@ void IntWidget(const std::string& label, int& value) {
 	EndWidget();
 }
 
-void FloatWidget(const std::string& label, float& value) {
+void FloatWidget(const std::string& label, float& value, float step, float min, float max) {
 	BeginWidget(label);
 	std::stringstream ss;
 	ss << "##" << label;
-	ImGui::DragFloat(ss.str().c_str(), &value, 0.1f);
+	ImGui::DragFloat(ss.str().c_str(), &value, step, min, max);
 	EndWidget();
 }
 

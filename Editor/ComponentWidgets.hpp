@@ -31,7 +31,7 @@ void UneditableEntityWidget(const std::string& label, const Entity value);
 
 void IntWidget(const std::string& label, int& value);
 
-void FloatWidget(const std::string& label, float& value);
+void FloatWidget(const std::string& label, float& value, float step = 0.1f, float min = 0.0f, float max = 0.0f);
 
 void DoubleWidget(const std::string& label, double& value);
 
