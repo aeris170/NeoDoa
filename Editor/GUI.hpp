@@ -96,4 +96,7 @@ private:
 	ImGuiIO* io{ nullptr };
 	ImFont* font{ nullptr };
 	ImFont* fontBold{ nullptr };
+
+	// TODO REMOVE ME WHEN IMGUI IMPLEMENTS THIS WORKAROUND AS API FUNC.
+	void ExecuteDockBuilderOrderAndFocusWorkAround();
 };

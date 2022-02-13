@@ -74,12 +74,15 @@ void GUI::Prepare() {
 			ImGuiID rightUp = ImGui::DockBuilderSplitNode(right, ImGuiDir_Up, 0.65f, nullptr, &rightDown);
 
 			ImGui::DockBuilderDockWindow(SCENE_HIERARCHY_ID, left);
-			ImGui::DockBuilderDockWindow(OBSERVER_ID, rightUp);
-			ImGui::DockBuilderDockWindow(CONSOLE_ID, rightDown);
-			ImGui::DockBuilderDockWindow(ASSET_MANAGER_ID, rightDown);
+
 			ImGui::DockBuilderDockWindow(SCENE_VIEWPORT_ID, center);
 			ImGui::DockBuilderDockWindow(GAME_VIEWPORT_ID, center);
+
+			ImGui::DockBuilderDockWindow(OBSERVER_ID, rightUp);
 			ImGui::DockBuilderDockWindow(SCENE_SETTINGS_ID, rightUp);
+
+			ImGui::DockBuilderDockWindow(ASSET_MANAGER_ID, rightDown);
+			ImGui::DockBuilderDockWindow(CONSOLE_ID, rightDown);
 			ImGui::DockBuilderFinish(dockspace_id);
 		}
 
@@ -137,8 +140,10 @@ void GUI::operator() (float delta) {
 	End();
 }
 
+#include <iostream>
 void GUI::End() {
 	ImGui::End();
+	ExecuteDockBuilderOrderAndFocusWorkAround();
 }
 
 void GUI::CreateNewProject(std::string_view workspace, std::string_view name) {
@@ -194,3 +199,22 @@ void* GUI::GetProjectIcon(TextureSize size) { return reinterpret_cast<void*>(SVG
 void* GUI::GetSceneIcon(TextureSize size) { return reinterpret_cast<void*>(SVGPathway::Get(SCENE_ICON_KEY, TextureStyle::PADDED, size).lock()->_glTextureID); }
 void* GUI::GetFileIcon(TextureSize size) { return reinterpret_cast<void*>(SVGPathway::Get(FILE_ICON_KEY, TextureStyle::PADDED, size).lock()->_glTextureID); }
 void* GUI::GetBackArrowIcon(TextureSize size) { return reinterpret_cast<void*>(SVGPathway::Get(BACK_ARROW_ICON_KEY, TextureStyle::PADDED, size).lock()->_glTextureID); }
+
+// TODO REMOVE ME WHEN IMGUI IMPLEMENTS THIS WORKAROUND AS API FUNC.
+void GUI::ExecuteDockBuilderOrderAndFocusWorkAround() {
+	static int i = -1;
+	if (i == 0) {
+		auto asset = ImGui::FindWindowByName(ASSET_MANAGER_ID);
+		ImGui::FocusWindow(asset);
+		std::swap(asset->DockNode->TabBar->Tabs[0], asset->DockNode->TabBar->Tabs[1]);
+
+		auto obs = ImGui::FindWindowByName(OBSERVER_ID);
+		ImGui::FocusWindow(obs);
+		std::swap(obs->DockNode->TabBar->Tabs[0], obs->DockNode->TabBar->Tabs[1]);
+
+		auto viewport = ImGui::FindWindowByName(SCENE_VIEWPORT_ID);
+		ImGui::FocusWindow(viewport);
+		std::swap(viewport->DockNode->TabBar->Tabs[0], viewport->DockNode->TabBar->Tabs[1]);
+	}
+	i++;
+}
