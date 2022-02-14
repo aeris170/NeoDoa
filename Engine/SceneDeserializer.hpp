@@ -17,6 +17,8 @@ struct IDComponent;
 struct TransformComponent;
 struct ParentComponent;
 struct ChildComponent;
+struct OrthoCameraComponent;
+struct PerspectiveCameraComponent;
 struct ScriptComponentData;
 
 Scene DeserializeScene(FNode* file);
@@ -38,4 +40,6 @@ IDComponent DeserializeIDComponent(tinyxml2::XMLElement* component);
 TransformComponent DeserializeTransformComponent(tinyxml2::XMLElement* component, const Entity entity, const Scene& scene);
 ParentComponent DeserializeParentComponent(tinyxml2::XMLElement* component, const Entity entity);
 ChildComponent DeserializeChildComponent(tinyxml2::XMLElement* component, const Entity entity);
+OrthoCameraComponent DeserializeOrthoCameraComponent(tinyxml2::XMLElement* component, const Entity entity, const Scene& scene);
+PerspectiveCameraComponent DeserializePerspectiveCameraComponent(tinyxml2::XMLElement* component, const Entity entity, const Scene& scene);
 ScriptComponentData DeserializeScriptComponentData(tinyxml2::XMLElement* component, const Entity entity);

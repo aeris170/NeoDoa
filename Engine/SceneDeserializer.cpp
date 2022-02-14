@@ -12,6 +12,7 @@
 #include "TransformComponent.hpp"
 #include "ParentComponent.hpp"
 #include "ChildComponent.hpp"
+#include "CameraComponent.hpp"
 #include "ScriptStorageComponent.hpp"
 #include "ScriptComponent.hpp"
 #include "ScriptComponentData.hpp"
@@ -215,6 +216,12 @@ ChildComponent DeserializeChildComponent(tinyxml2::XMLElement* component, const 
 	auto parent = DeserializeEntityID(component->FirstChildElement(nameof_c(ChildComponent::parent)));
 
 	return { entity, parent };
+}
+OrthoCameraComponent DeserializeOrthoCameraComponent(tinyxml2::XMLElement* component, const Entity entity, const Scene& scene) {
+	return OrthoCameraComponent((Entity)-1); // TODO implement
+}
+PerspectiveCameraComponent DeserializePerspectiveCameraComponent(tinyxml2::XMLElement* component, const Entity entity, const Scene& scene) {
+	return PerspectiveCameraComponent((Entity)-1); // TODO implement
 }
 ScriptComponentData DeserializeScriptComponentData(tinyxml2::XMLElement* component, const Entity entity) {
 	ScriptComponentData data;

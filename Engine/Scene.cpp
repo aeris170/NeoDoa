@@ -15,6 +15,7 @@
 #include "TransformComponent.hpp"
 #include "IDComponent.hpp"
 #include "ScriptStorageComponent.hpp"
+#include "CameraComponent.hpp"
 
 Scene::Scene(std::string_view name) noexcept :
 	Name(name),
@@ -118,6 +119,29 @@ void Scene::Render() {
 	cam.UpdateView();
 	cam.UpdateProjection();
 	cam.UpdateViewProjection();
+
+	_registry.view<OrthoCameraComponent>().each([](Entity entt, OrthoCameraComponent& camera) {
+		if (!camera.IsActiveAndRendering()) { return; }
+		camera.UpdateMatrices();
+		auto& fbo = camera.GetFrameBuffer();
+		fbo.Bind();
+		fbo.ClearBuffers();
+		DOA_LOG_INFO("%s %d", "ortho camera attached to", EntityTo<int>(camera.GetEntity()));
+		//render stuff here
+		fbo.UnBind();
+	});
+
+	_registry.view<PerspectiveCameraComponent>().each([](Entity entt, PerspectiveCameraComponent& camera) {
+		if (!camera.IsActiveAndRendering()) { return; }
+		camera.UpdateMatrices();
+		auto& fbo = camera.GetFrameBuffer();
+		fbo.Bind();
+		fbo.ClearBuffers();
+		DOA_LOG_INFO("%s %d", "perspective camera attached to", EntityTo<int>(camera.GetEntity()));
+		//render stuff here
+		fbo.UnBind();
+	});
+
 	/*
 	_registry.view<ScriptComponent>().each([this, &angel](Entity entity, ScriptComponent& script) {
 		for (auto& module : script._modules) {

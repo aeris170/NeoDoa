@@ -14,6 +14,7 @@ using namespace entt::literals;
 #include "TransformComponent.hpp"
 #include "ParentComponent.hpp"
 #include "ChildComponent.hpp"
+#include "CameraComponent.hpp"
 #include "ScriptStorageComponent.hpp"
 #include "ScriptComponent.hpp"
 
@@ -319,6 +320,12 @@ void SerializeChildComponent(tinyxml2::XMLPrinter& printer, const ChildComponent
 	printer.OpenElement(name.data());
 	SerializeEntityID(printer, child.GetParent());
 	printer.CloseElement();
+}
+void SerializeOrthoCameraComponent(tinyxml2::XMLPrinter& printer, const OrthoCameraComponent& camera) {
+	// TODO implement
+}
+void SerializePerspectiveCameraComponent(tinyxml2::XMLPrinter& printer, const PerspectiveCameraComponent& camera) {
+	// TODO implement
 }
 void SerializeScriptComponent(tinyxml2::XMLPrinter& printer, const ScriptComponent& script) {
 	printer.PushAttribute("name", script._name.c_str());

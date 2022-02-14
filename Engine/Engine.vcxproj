@@ -114,6 +114,7 @@
     <ClCompile Include="Angel.cpp" />
     <ClCompile Include="Assets.cpp" />
     <ClCompile Include="BehaviourComponent.cpp" />
+    <ClCompile Include="CameraComponent.cpp" />
     <ClCompile Include="ChildComponent.cpp" />
     <ClCompile Include="Color.cpp" />
     <ClCompile Include="Entity.cpp" />
@@ -144,6 +145,7 @@
     <ClInclude Include="Assets.hpp" />
     <ClInclude Include="BehaviourComponent.hpp" />
     <ClInclude Include="ACamera.hpp" />
+    <ClInclude Include="CameraComponent.hpp" />
     <ClInclude Include="ChildComponent.hpp" />
     <ClInclude Include="Color.hpp" />
     <ClInclude Include="Entity.hpp" />

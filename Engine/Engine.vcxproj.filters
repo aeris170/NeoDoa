@@ -173,6 +173,9 @@
     <ClCompile Include="Assets.cpp">
       <Filter>Asset</Filter>
     </ClCompile>
+    <ClCompile Include="CameraComponent.cpp">
+      <Filter>ECS\Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NeoDoa.hpp">
@@ -300,6 +303,9 @@
     </ClInclude>
     <ClInclude Include="Assets.hpp">
       <Filter>Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraComponent.hpp">
+      <Filter>ECS\Components</Filter>
     </ClInclude>
     <ClInclude Include="Resolution.hpp">
       <Filter>Misc</Filter>

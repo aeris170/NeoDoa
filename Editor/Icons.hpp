@@ -28,7 +28,8 @@ namespace ComponentIcons {
 		{ nameof(TransformComponent), ICON_FA_SEEDLING " " },
 		{ nameof(ParentComponent), ICON_FA_USER_CROWN " " },
 		{ nameof(ChildComponent), ICON_FA_USER " " },
-		{ nameof(Camera), ICON_FA_VIDEO " " },
+		{ nameof(OrthoCameraComponent), ICON_FA_VIDEO " " },
+		{ nameof(PerspectiveCameraComponent), ICON_FA_CAMERA_MOVIE " " },
 		{ nameof(ModelRenderer), ICON_FA_COCKTAIL " " }
 	};
 }

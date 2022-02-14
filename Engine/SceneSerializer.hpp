@@ -16,6 +16,8 @@ struct IDComponent;
 struct TransformComponent;
 struct ParentComponent;
 struct ChildComponent;
+struct OrthoCameraComponent;
+struct PerspectiveCameraComponent;
 struct ScriptStorageComponent;
 struct ScriptComponent;
 
@@ -38,4 +40,6 @@ void SerializeIDComponent(tinyxml2::XMLPrinter& printer, const IDComponent& id);
 void SerializeTransformComponent(tinyxml2::XMLPrinter& printer, const TransformComponent& transform);
 void SerializeParentComponent(tinyxml2::XMLPrinter& printer, const ParentComponent& parent);
 void SerializeChildComponent(tinyxml2::XMLPrinter& printer, const ChildComponent& child);
+void SerializeOrthoCameraComponent(tinyxml2::XMLPrinter& printer, const OrthoCameraComponent& camera);
+void SerializePerspectiveCameraComponent(tinyxml2::XMLPrinter& printer, const PerspectiveCameraComponent& camera);
 void SerializeScriptComponent(tinyxml2::XMLPrinter& printer, const ScriptComponent& script);

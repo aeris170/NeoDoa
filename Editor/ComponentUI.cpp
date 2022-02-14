@@ -76,6 +76,14 @@ void ChildComponentUI::Render(const ChildComponent& childComponent) {
 	UneditableEntityWidget(UINames[nameof(ChildComponent::parent)], childComponent.GetParent());
 }
 
+void OrthoCameraComponentUI::Render(const OrthoCameraComponent& orthoCameraComponent) {
+	// TODO implement
+}
+
+void PerspectiveCameraComponentUI::Render(const PerspectiveCameraComponent& perspectiveCameraComponent) {
+	// TODO implement
+}
+
 bool ComponentUI::Begin(const Observer& observer, std::string_view componentTypeName) {
 	std::string title(Prettify(std::string(componentTypeName)));
 	std::string titleWithIcon;
@@ -119,6 +127,20 @@ void ComponentUI::RenderChildComponent(const Observer& observer, Scene& scene, C
 	bool show = ComponentUI::Begin(observer, nameof(ChildComponent));
 	if (show) {
 		ChildComponentUI::Render(childComponent);
+	}
+	ComponentUI::End(show);
+}
+void ComponentUI::RenderOrthoCameraComponent(const Observer& observer, Scene& scene, OrthoCameraComponent& orthoCameraComponent) {
+	bool show = ComponentUI::Begin(observer, nameof(OrthoCameraComponent));
+	if (show) {
+		OrthoCameraComponentUI::Render(orthoCameraComponent);
+	}
+	ComponentUI::End(show);
+}
+void ComponentUI::RenderPerspectiveCameraComponent(const Observer& observer, Scene& scene, PerspectiveCameraComponent& perspectiveCameraComponent) {
+	bool show = ComponentUI::Begin(observer, nameof(PerspectiveCameraComponent));
+	if (show) {
+		PerspectiveCameraComponentUI::Render(perspectiveCameraComponent);
 	}
 	ComponentUI::End(show);
 }
