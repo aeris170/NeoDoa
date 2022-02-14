@@ -8,6 +8,7 @@ struct Angel;
 struct Window;
 struct FrameBuffer;
 struct Project;
+struct Resolution;
 
 struct Core {
 	bool _running{ false };
@@ -33,10 +34,10 @@ private:
 	Core& operator=(const Core&) = delete;
 	Core& operator=(const Core&&) = delete;
 
-	friend std::unique_ptr<Core>& CreateCore(int width, int height, const char* title, bool isFullscreen, const char* windowIcon, bool renderOffscreen);
+	friend std::unique_ptr<Core>& CreateCore(Resolution resolution, const char* title, bool isFullscreen, const char* windowIcon, bool renderOffscreen);
 	friend void DestroyCore();
 };
 
-std::unique_ptr<Core>& CreateCore(int width, int height, const char* title, bool isFullscreen, const char* windowIcon = nullptr, bool renderOffscreen = false);
+std::unique_ptr<Core>& CreateCore(Resolution resolution, const char* title, bool isFullscreen, const char* windowIcon = nullptr, bool renderOffscreen = false);
 std::unique_ptr<Core>& GetCore();
 void DestroyCore();

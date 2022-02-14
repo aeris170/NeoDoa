@@ -186,6 +186,7 @@
     <ClInclude Include="Texture.hpp" />
     <ClInclude Include="TransformComponent.hpp" />
     <ClInclude Include="TypedefsAndConstants.hpp" />
+    <ClInclude Include="Resolution.hpp" />
     <ClInclude Include="Vertex.hpp" />
     <ClInclude Include="Window.hpp" />
   </ItemGroup>

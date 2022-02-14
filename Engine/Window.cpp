@@ -11,9 +11,9 @@ static void glfwWindowOnMouseButtonStateChange(GLFWwindow* window, int button, i
 static void glfwWindowOnMouseMove(GLFWwindow* window, double xpos, double ypos);
 static void glfwWindowOnMouseScroll(GLFWwindow* window, double width, double height);
 
-Window::Window(int width, int height, const char* title, bool isFullscreen, const char* windowIcon) noexcept :
-    _width(width),
-    _height(height),
+Window::Window(Resolution resolution, const char* title, bool isFullscreen, const char* windowIcon) noexcept :
+    _resolution(resolution),
+    _contentResolution(),
     _title(title),
     _isFullscreen(isFullscreen),
     _mouse({}),
@@ -26,8 +26,8 @@ Window::Window(int width, int height, const char* title, bool isFullscreen, cons
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_SAMPLES, 4);
-    _glfwWindow = glfwCreateWindow(width, height, title, isFullscreen ? glfwGetPrimaryMonitor() : nullptr, nullptr);
-    glfwGetWindowSize(_glfwWindow, &_content_width, &_content_height);
+    _glfwWindow = glfwCreateWindow(_resolution.w, _resolution.h, title, isFullscreen ? glfwGetPrimaryMonitor() : nullptr, nullptr);
+    glfwGetWindowSize(_glfwWindow, &_contentResolution.w, &_contentResolution.h);
 
     #pragma region Window Icon Initialization
     GLFWimage img[6];
@@ -79,6 +79,7 @@ Window::Window(int width, int height, const char* title, bool isFullscreen, cons
 
 Window::~Window() noexcept {
     ImGuiClean();
+    glfwDestroyWindow(_glfwWindow);
     glfwTerminate();
 }
 
@@ -112,9 +113,8 @@ void Window::EnableCursor() {
 static void glfwWindowOnResize(GLFWwindow* window, int width, int height) {
     //glViewport(0, 0, width, height);
     Window* w = ((Window*)glfwGetWindowUserPointer(window));
-    w->_width = width;
-    w->_height = height;
-    glfwGetWindowSize(w->_glfwWindow, &w->_content_width, &w->_content_height);
+    w->_resolution = { width, height };
+    glfwGetWindowSize(w->_glfwWindow, &w->_contentResolution.w, &w->_contentResolution.h);
 }
 
 static void glfwWindowOnKeyStateChange(GLFWwindow* window, int key, int scancode, int action, int mods) {

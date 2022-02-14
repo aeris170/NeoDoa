@@ -5,7 +5,7 @@
 #include "GUI.hpp"
 
 int main() {
-	std::unique_ptr<Core>& core = CreateCore(1280, 720, "NeoDoa Editor", false, "Images/neodoalogo", true);
+	std::unique_ptr<Core>& core = CreateCore({ 1280, 720 }, "NeoDoa Editor", false, "Images/neodoalogo", true);
 	ImGui::SetCurrentContext(core->_window->_imGuiContext);
 	/*
 	ImGuiAddRenderCommand(Editor());

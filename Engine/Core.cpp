@@ -18,17 +18,18 @@
 #include "ScriptComponent.hpp"
 #include "ModelRenderer.hpp"
 #include "Project.hpp"
+#include "Resolution.hpp"
 
 static std::unique_ptr<Core> _core;
 
 static void message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, GLchar const* message, void const* user_param);
 
-std::unique_ptr<Core>& CreateCore(int width, int height, const char* title, bool isFullscreen, const char* windowIcon, bool renderOffscreen) {
+std::unique_ptr<Core>& CreateCore(Resolution resolution, const char* title, bool isFullscreen, const char* windowIcon, bool renderOffscreen) {
 #pragma region GLFW and Core/Window Initialization
     glfwInit();
     glfwWindowHint(GLFW_MAXIMIZED, GL_TRUE);
     _core = std::make_unique<Core>();
-    _core->_window = std::make_unique<Window>(width, height, title, isFullscreen, windowIcon);
+    _core->_window = std::make_unique<Window>(resolution, title, isFullscreen, windowIcon);
 #pragma endregion
 
 #pragma region GLEW Initialization
@@ -178,7 +179,7 @@ std::unique_ptr<Core>& CreateCore(int width, int height, const char* title, bool
 #pragma endregion
 
     if (renderOffscreen) {
-        _core->_offscreenBuffer = std::make_unique<FrameBuffer>(1920, 1080);
+        _core->_offscreenBuffer = std::make_unique<FrameBuffer>(resolution);
     }
 #pragma endregion
 
@@ -218,7 +219,7 @@ void Core::Start() {
     _running = true;
     while (_running) {
         currentTime = glfwGetTime();
-        glViewport(0, 0, _window->_content_width, _window->_content_height);
+        glViewport(0, 0, _window->_contentResolution.w, _window->_contentResolution.h);
 
         float delta = currentTime - lastTime;
 
@@ -228,15 +229,13 @@ void Core::Start() {
                 scene.Update(delta);
             }
             if (renderingOffscreen) {
-                glViewport(0, 0, _offscreenBuffer->_width, _offscreenBuffer->_height);
-                glBindFramebuffer(GL_FRAMEBUFFER, _offscreenBuffer->_fbo);
+                _offscreenBuffer->Bind();
             }
-            glClearColor(scene.ClearColor.x, scene.ClearColor.y, scene.ClearColor.z, 1.0f);
+            glClearColor(scene.ClearColor.r, scene.ClearColor.g, scene.ClearColor.b, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
             scene.Render();
             if (renderingOffscreen) {
-                glBindFramebuffer(GL_FRAMEBUFFER, 0);
-                glViewport(0, 0, _window->_content_width, _window->_content_height);
+                _offscreenBuffer->UnBind(_window->_contentResolution);
             }
         }
 

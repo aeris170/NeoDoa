@@ -2,18 +2,33 @@
 
 #include "TypedefsAndConstants.hpp"
 
+#include "Resolution.hpp"
+#include "Color.hpp"
+
 struct FrameBuffer {
-	int _width;
-	int _height;
+	Color ClearColor{ 0.0f, 0.0f, 0.0f, 1.0f };
+
+	Resolution _resolution;
 
 	FBO _fbo{ 0 };
 	TEX _tex{ 0 };
 	RBO _rbo{ 0 };
 
-	FrameBuffer(int width, int height);
+	FrameBuffer(Resolution resolution);
 	~FrameBuffer();
-private:
 	FrameBuffer(const FrameBuffer&) = delete;
+	FrameBuffer(FrameBuffer&&);
 	FrameBuffer& operator=(const FrameBuffer&) = delete;
-	// move semantics are default
+	FrameBuffer& operator=(FrameBuffer&&);
+
+	void DeAlloc();
+
+	void Bind() const;
+	void UnBind() const;
+	void UnBind(Resolution oldViewport) const;
+
+	void ClearBuffers() const;
+	void ClearColorBuffer() const;
+	void ClearDepthBuffer() const;
+	void ClearStencilBuffer() const;
 };

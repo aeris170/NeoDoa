@@ -38,8 +38,8 @@ void SceneSettings::DrawStats(Scene& scene) {
 	ImGui::Text("Vertices: %d", stats.vertices);
 	ImGui::Text("Indices: %d", stats.indices);
 	ImGui::Text("Editor average %.3f ms/frame (%.1f FPS)", 1000.0f / gui->IO()->Framerate, gui->IO()->Framerate);
-	ImGui::ColorEdit3("Clear Color", &scene.ClearColor[0]);
-	ImGui::ColorEdit3("Selection Outline Color", &scene.SelectionOutlineColor[0]);
+	ImGui::ColorEdit3("Clear Color", &scene.ClearColor.r);
+	ImGui::ColorEdit3("Selection Outline Color", &scene.SelectionOutlineColor.r);
 
 	ImGui::EndGroup();
 }

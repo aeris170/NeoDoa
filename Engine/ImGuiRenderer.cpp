@@ -12,72 +12,73 @@ static std::vector<ImGuiFunction> commands;
 static ImGuiContext* context;
 
 ImGuiContext* ImGuiInit(GLFWwindow* window) {
-	if(context == nullptr) {
-		IMGUI_CHECKVERSION();
-		context = ImGui::CreateContext();
+	if (context != nullptr) { return context; }
 
-		ImGuiIO& io{ ImGui::GetIO() };
-		io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
-		io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;
+	IMGUI_CHECKVERSION();
+	context = ImGui::CreateContext();
 
-		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+	ImGuiIO& io{ ImGui::GetIO() };
+	io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
+	io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;
 
-		// merge in icons from Font Awesome
-		static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
-		ImFontConfig icons_config;
-		icons_config.MergeMode = true;
-		icons_config.PixelSnapH = true;
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
-		io.Fonts->AddFontFromFileTTF("Fonts/OpenSans-Regular.ttf", 18.0f);
-		io.Fonts->AddFontFromFileTTF("Fonts/fa-regular-400-pro.ttf", 16.0f, &icons_config, icons_ranges);
-		io.FontDefault = io.Fonts->AddFontFromFileTTF("Fonts/OpenSans-Bold.ttf", 18.0f);
-		io.Fonts->AddFontFromFileTTF("Fonts/fa-solid-900-pro.ttf", 16.0f, &icons_config, icons_ranges);
+	// merge in icons from Font Awesome
+	static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
+	ImFontConfig icons_config;
+	icons_config.MergeMode = true;
+	icons_config.PixelSnapH = true;
 
-		ImGui_ImplGlfw_InitForOpenGL(window, true);
-		ImGui_ImplOpenGL3_Init(GLSL_VERSION);
+	io.Fonts->AddFontFromFileTTF("Fonts/OpenSans-Regular.ttf", 18.0f);
+	io.Fonts->AddFontFromFileTTF("Fonts/fa-regular-400-pro.ttf", 16.0f, &icons_config, icons_ranges);
+	io.FontDefault = io.Fonts->AddFontFromFileTTF("Fonts/OpenSans-Bold.ttf", 18.0f);
+	io.Fonts->AddFontFromFileTTF("Fonts/fa-solid-900-pro.ttf", 16.0f, &icons_config, icons_ranges);
 
-		//Courtesy of Yan Chernikov, aka The Cherno Project.
-		{ // Fancy lookin editor.
-			ImGui::StyleColorsDark();
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init(GLSL_VERSION);
 
-			auto& colors = ImGui::GetStyle().Colors;
-			colors[ImGuiCol_WindowBg] = WINDOW_BG;
+	//Courtesy of Yan Chernikov, aka The Cherno Project.
+	{ // Fancy lookin editor.
+		ImGui::StyleColorsDark();
 
-			// Headers
-			colors[ImGuiCol_Header] = IDLE;
-			colors[ImGuiCol_HeaderHovered] = HOVER;
-			colors[ImGuiCol_HeaderActive] = ACTIVE;
+		auto& colors = ImGui::GetStyle().Colors;
+		colors[ImGuiCol_WindowBg] = WINDOW_BG;
 
-			// Buttons
-			colors[ImGuiCol_Button] = IDLE;
-			colors[ImGuiCol_ButtonHovered] = HOVER;
-			colors[ImGuiCol_ButtonActive] = ACTIVE;
+		// Headers
+		colors[ImGuiCol_Header] = IDLE;
+		colors[ImGuiCol_HeaderHovered] = HOVER;
+		colors[ImGuiCol_HeaderActive] = ACTIVE;
 
-			// Frame BG
-			colors[ImGuiCol_FrameBg] = IDLE;
-			colors[ImGuiCol_FrameBgHovered] = HOVER;
-			colors[ImGuiCol_FrameBgActive] = ACTIVE;
+		// Buttons
+		colors[ImGuiCol_Button] = IDLE;
+		colors[ImGuiCol_ButtonHovered] = HOVER;
+		colors[ImGuiCol_ButtonActive] = ACTIVE;
 
-			// Tabs
-			colors[ImGuiCol_Tab] = TAB_IDLE;
-			colors[ImGuiCol_TabHovered] = TAB_HOVER;
-			colors[ImGuiCol_TabActive] = TAB_ACTIVE;
-			colors[ImGuiCol_TabUnfocused] = TAB_IDLE;
-			colors[ImGuiCol_TabUnfocusedActive] = TAB_ACTIVE_NO_FOCUS;
+		// Frame BG
+		colors[ImGuiCol_FrameBg] = IDLE;
+		colors[ImGuiCol_FrameBgHovered] = HOVER;
+		colors[ImGuiCol_FrameBgActive] = ACTIVE;
 
-			// Title
-			colors[ImGuiCol_TitleBg] = TITLE;
-			colors[ImGuiCol_TitleBgActive] = TITLE;
-			colors[ImGuiCol_TitleBgCollapsed] = TITLE;
+		// Tabs
+		colors[ImGuiCol_Tab] = TAB_IDLE;
+		colors[ImGuiCol_TabHovered] = TAB_HOVER;
+		colors[ImGuiCol_TabActive] = TAB_ACTIVE;
+		colors[ImGuiCol_TabUnfocused] = TAB_IDLE;
+		colors[ImGuiCol_TabUnfocusedActive] = TAB_ACTIVE_NO_FOCUS;
 
-			if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-				ImGuiStyle& style = ImGui::GetStyle();
-				style.WindowRounding = 0.0f;
-				style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-			}
+		// Title
+		colors[ImGuiCol_TitleBg] = TITLE;
+		colors[ImGuiCol_TitleBgActive] = TITLE;
+		colors[ImGuiCol_TitleBgCollapsed] = TITLE;
+
+		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+			ImGuiStyle& style = ImGui::GetStyle();
+			style.WindowRounding = 0.0f;
+			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 		}
 	}
+
 	return context;
 }
 

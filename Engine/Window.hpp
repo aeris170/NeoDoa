@@ -3,15 +3,14 @@
 #include <string>
 
 #include "TypedefsAndConstants.hpp"
+#include "Resolution.hpp"
 
 struct GLFWwindow;
 struct ImGuiContext;
 
 struct Window {
-	int _width;
-	int _height;
-	int _content_width;
-	int _content_height;
+	Resolution _resolution;
+	Resolution _contentResolution;
 	std::string _title;
 	bool _isFullscreen;
 	GLFWwindow* _glfwWindow;
@@ -26,7 +25,7 @@ struct Window {
 	} _keyboard;
 
 	// don't call, this function should only be called by CreateCore
-	Window(int width, int height, const char* title, bool isFullscreen, const char* windowIcon) noexcept;
+	Window(Resolution resolution, const char* title, bool isFullscreen, const char* windowIcon) noexcept;
 	// don't call
 	~Window() noexcept;
 	Window(const Window&) = delete;

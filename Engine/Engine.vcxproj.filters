@@ -69,6 +69,9 @@
     <Filter Include="Project\Serialize">
       <UniqueIdentifier>{9fd92fd9-1af8-4b7f-8190-17c1b0658f9a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Misc">
+      <UniqueIdentifier>{d605cb33-a818-420e-a4a2-e3d54955826c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core.cpp">
@@ -297,6 +300,9 @@
     </ClInclude>
     <ClInclude Include="Assets.hpp">
       <Filter>Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="Resolution.hpp">
+      <Filter>Misc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

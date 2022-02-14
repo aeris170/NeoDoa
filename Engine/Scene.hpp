@@ -11,14 +11,15 @@
 #include "System.hpp"
 #include "Entity.hpp"
 #include "Registry.hpp"
+#include "Color.hpp"
 
 struct ScriptStorageComponent;
 
 struct Scene {
 
 	std::string Name;
-	glm::vec3 ClearColor{ 0.2f, 0.3f, 0.3f };
-	glm::vec3 SelectionOutlineColor{ 0.68f, 0.49f, 0 };
+	Color ClearColor{ 0.2f, 0.3f, 0.3f };
+	Color SelectionOutlineColor{ 0.68f, 0.49f, 0 };
 
 	Scene(std::string_view name = "New Scene") noexcept;
 
