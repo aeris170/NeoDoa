@@ -90,15 +90,14 @@ bool ComponentUI::Begin(const Observer& observer, std::string_view componentType
 	auto icon = ComponentIcons::DEFINED_COMPONENT_ICONS.find(std::string(componentTypeName));
 	if (icon != ComponentIcons::DEFINED_COMPONENT_ICONS.end()) {
 		titleWithIcon = icon->second + " " + title;
-	}
-	else {
+	} else {
 		titleWithIcon = ComponentIcons::GENERIC_COMPONENT_ICON + title;
 	}
-	ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
+	ImGui::PushFont(observer.gui->GetFontBold());
 
 	bool rv = ImGui::CollapsingHeader(titleWithIcon.c_str(), ImGuiTreeNodeFlags_DefaultOpen);
 	if (rv) {
-		ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[0]);
+		ImGui::PushFont(observer.gui->GetFont());
 	}
 	return rv;
 }
