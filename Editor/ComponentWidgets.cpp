@@ -3,20 +3,21 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
-void FancyVectorWidget(const std::string& label, glm::vec2& vec, float reset, int flags) {
-	FancyVectorWidget(label, &vec.x, reset, flags);
+bool FancyVectorWidget(const std::string& label, glm::vec2& vec, float reset, int flags) {
+	return FancyVectorWidget(label, &vec.x, reset, flags);
 }
 
-void FancyVectorWidget(const std::string& label, glm::vec3& vec, float reset, int flags) {
-	FancyVectorWidget(label, &vec.x, reset, flags);
+bool FancyVectorWidget(const std::string& label, glm::vec3& vec, float reset, int flags) {
+	return FancyVectorWidget(label, &vec.x, reset, flags);
 }
 
-void FancyVectorWidget(const std::string& label, glm::vec4& vec, float reset, int flags) {
-	FancyVectorWidget(label, &vec.x, reset, flags);
+bool FancyVectorWidget(const std::string& label, glm::vec4& vec, float reset, int flags) {
+	return FancyVectorWidget(label, &vec.x, reset, flags);
 }
 
 // Courtesy of Yan Chernikov, a.k.a The Cherno Project
-void FancyVectorWidget(const std::string& label, float* values, float reset, int flags) {
+bool FancyVectorWidget(const std::string& label, float* values, float reset, int flags) {
+	bool rv{ false };
 	float divisor = 0;
 	if (flags & X) divisor++;
 	if (flags & Y) divisor++;
@@ -52,6 +53,7 @@ void FancyVectorWidget(const std::string& label, float* values, float reset, int
 		ImVec2 hack = { buttonSize.x - 1, buttonSize.y }; // the color red likes to appear bigger than it is...
 		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 1);
 		if (ImGui::Button("X", hack)) {
+			rv = true;
 			values[0] = reset;
 		}
 		ImGui::SetCursorPosX(ImGui::GetCursorPosX() - 1);
@@ -60,7 +62,7 @@ void FancyVectorWidget(const std::string& label, float* values, float reset, int
 
 		ImGui::SameLine();
 		ImGui::PushItemWidth(compFieldWidth / divisor -  buttonSize.x);
-		ImGui::DragFloat("##X", &values[0], 0.1f, 0.0f, 0.0f, "%.3f");
+		rv = rv || ImGui::DragFloat("##X", &values[0], 0.1f, 0.0f, 0.0f, "%.3f");
 		ImGui::PopItemWidth();
 		if (flags & Y) {
 			ImGui::SameLine();
@@ -73,6 +75,7 @@ void FancyVectorWidget(const std::string& label, float* values, float reset, int
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, { 0.2f, 0.7f, 0.2f, 1.0f });
 		ImGui::PushFont(boldFont);
 		if (ImGui::Button("Y", buttonSize)) {
+			rv = true;
 			values[1] = reset;
 		}
 		ImGui::PopFont();
@@ -80,7 +83,7 @@ void FancyVectorWidget(const std::string& label, float* values, float reset, int
 
 		ImGui::SameLine();
 		ImGui::PushItemWidth(compFieldWidth / divisor - buttonSize.x);
-		ImGui::DragFloat("##Y", &values[1], 0.1f, 0.0f, 0.0f, "%.3f");
+		rv = rv || ImGui::DragFloat("##Y", &values[1], 0.1f, 0.0f, 0.0f, "%.3f");
 		ImGui::PopItemWidth();
 		if (flags & Z) {
 			ImGui::SameLine();
@@ -93,6 +96,7 @@ void FancyVectorWidget(const std::string& label, float* values, float reset, int
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, { 0.1f, 0.25f, 0.8f, 1.0f });
 		ImGui::PushFont(boldFont);
 		if (ImGui::Button("Z", buttonSize)) {
+			rv = true;
 			values[2] = reset;
 		}
 		ImGui::PopFont();
@@ -100,7 +104,7 @@ void FancyVectorWidget(const std::string& label, float* values, float reset, int
 
 		ImGui::SameLine();
 		ImGui::PushItemWidth(compFieldWidth / divisor - buttonSize.x);
-		ImGui::DragFloat("##Z", &values[2], 0.1f, 0.0f, 0.0f, "%.3f");
+		rv = rv || ImGui::DragFloat("##Z", &values[2], 0.1f, 0.0f, 0.0f, "%.3f");
 		ImGui::PopItemWidth();
 		if(flags & W) {
 			ImGui::SameLine();
@@ -113,6 +117,7 @@ void FancyVectorWidget(const std::string& label, float* values, float reset, int
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, { 0.61f, 0.29f, 0.85f, 1.0f });
 		ImGui::PushFont(boldFont);
 		if (ImGui::Button("W", buttonSize)) {
+			rv = true;
 			values[3] = reset;
 		}
 		ImGui::PopFont();
@@ -120,7 +125,7 @@ void FancyVectorWidget(const std::string& label, float* values, float reset, int
 
 		ImGui::SameLine();
 		ImGui::PushItemWidth(compFieldWidth / divisor - buttonSize.x);
-		ImGui::DragFloat("##W", &values[3], 0.1f, 0.0f, 0.0f, "%.3f");
+		rv = rv || ImGui::DragFloat("##W", &values[3], 0.1f, 0.0f, 0.0f, "%.3f");
 		ImGui::PopItemWidth();
 	}
 	ImGui::PopStyleVar(2);
@@ -128,6 +133,8 @@ void FancyVectorWidget(const std::string& label, float* values, float reset, int
 	ImGui::Columns(1);
 
 	ImGui::PopID();
+
+	return rv;
 }
 
 void detail::BeginWidget(const std::string& label) {
@@ -157,7 +164,7 @@ void detail::EndWidget() {
 	ImGui::PopID();
 }
 
-void EnumWidget(const std::string& label, int& value, const std::vector<EnumValue>& values) {
+bool EnumWidget(const std::string& label, int& value, const std::vector<EnumValue>& values) {
 	BeginWidget(label);
 	std::stringstream ss;
 	ss << "##" << label;
@@ -172,10 +179,12 @@ void EnumWidget(const std::string& label, int& value, const std::vector<EnumValu
 		items.push_back(element.prettyName.c_str());
 	}
 
+	bool rv{ false };
 	if(ImGui::BeginCombo(ss.str().c_str(), values[selected].prettyName.c_str())) {
 		for (int i = 0; i < values.size(); i++) {
 			bool is_selected = (value == values[i].value); // You can store your selection however you want, outside or inside your objects
 			if (ImGui::Selectable(values[i].prettyName.c_str(), is_selected)) {
+				rv = true;
 				value = values[i].value;
 			}
 			if (is_selected) {
@@ -185,16 +194,19 @@ void EnumWidget(const std::string& label, int& value, const std::vector<EnumValu
 		ImGui::EndCombo();
 	}
 	EndWidget();
+
+	return rv;
 }
 
-void EntityWidget(const std::string& label, Entity& value) {
+bool EntityWidget(const std::string& label, Entity& value) {
 	BeginWidget(label);
 	std::stringstream ss;
 	ss << "##" << label;
 	int val = EntityTo<int>(value);
-	ImGui::DragInt(ss.str().c_str(), &val);
+	bool rv = ImGui::DragInt(ss.str().c_str(), &val);
 	value = static_cast<Entity>(val);
 	EndWidget();
+	return rv;
 }
 
 void UneditableEntityWidget(const std::string& label, const Entity value) {
@@ -204,48 +216,55 @@ void UneditableEntityWidget(const std::string& label, const Entity value) {
 	EndWidget();
 }
 
-void IntWidget(const std::string& label, int& value) {
+bool IntWidget(const std::string& label, int& value) {
 	BeginWidget(label);
 	std::stringstream ss;
 	ss << "##" << label;
-	ImGui::DragInt(ss.str().c_str(), &value);
+	bool rv = ImGui::DragInt(ss.str().c_str(), &value);
 	EndWidget();
+	return rv;
 }
 
-void FloatWidget(const std::string& label, float& value, float step, float min, float max) {
+bool FloatWidget(const std::string& label, float& value, float step, float min, float max) {
 	BeginWidget(label);
 	std::stringstream ss;
 	ss << "##" << label;
-	ImGui::DragFloat(ss.str().c_str(), &value, step, min, max);
+	bool rv = ImGui::DragFloat(ss.str().c_str(), &value, step, min, max);
 	EndWidget();
+	return rv;
 }
 
-void DoubleWidget(const std::string& label, double& value) {
+bool DoubleWidget(const std::string& label, double& value) {
 	BeginWidget(label);
 	std::stringstream ss;
 	ss << "##" << label;
-	ImGui::DragScalar(ss.str().c_str(), ImGuiDataType_Double, (void*)&value, 0.1f);
+	bool rv = ImGui::DragScalar(ss.str().c_str(), ImGuiDataType_Double, (void*)&value, 0.1f);
 	EndWidget();
+	return rv;
 }
 
-void BoolWidget(const std::string& label, bool& value) {
+bool BoolWidget(const std::string& label, bool& value) {
 	BeginWidget(label);
 	std::stringstream ss;
 	ss << "##" << label;
-	ImGui::Checkbox(ss.str().c_str(), &value);
+	bool rv = ImGui::Checkbox(ss.str().c_str(), &value);
 	EndWidget();
+	return rv;
 }
 
-void StringWidget(const std::string& label, std::string& value) {
+bool StringWidget(const std::string& label, std::string& value) {
 	BeginWidget(label);
 	std::stringstream ss;
 	ss << "##" << label;
 	char buf[128]{ 0 };
 	strcpy_s(buf, value.c_str());
+	bool rv{ false };
 	if (ImGui::InputText(ss.str().c_str(), buf, 128, ImGuiInputTextFlags_EnterReturnsTrue)) {
+		rv = true;
 		value = std::string(buf);
 	};
 	EndWidget();
+	return rv;
 }
 
 void UneditableStringWidget(const std::string& label, const std::string& value) {
@@ -254,10 +273,11 @@ void UneditableStringWidget(const std::string& label, const std::string& value) 
 	EndWidget();
 }
 
-void ColorWidget(const std::string& label, Color& value) {
+bool ColorWidget(const std::string& label, Color& value) {
 	BeginWidget(label);
 	std::stringstream ss;
 	ss << "##" << label;
-	ImGui::ColorEdit4(ss.str().c_str(), value.Data());
+	bool rv = ImGui::ColorEdit4(ss.str().c_str(), value.Data());
 	EndWidget();
+	return rv;
 }
