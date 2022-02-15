@@ -13,7 +13,7 @@ FrameBuffer::FrameBuffer(Resolution resolution) noexcept :
     glCreateTextures(GL_TEXTURE_2D, 1, &_tex);
     glTextureParameteri(_tex, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTextureParameteri(_tex, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTextureStorage2D(_tex, 1, GL_RGB8, _resolution.w, _resolution.w);
+    glTextureStorage2D(_tex, 1, GL_RGB8, _resolution.w, _resolution.h);
 
     glNamedFramebufferTexture(_fbo, GL_COLOR_ATTACHMENT0, _tex, 0);
 
@@ -23,7 +23,7 @@ FrameBuffer::FrameBuffer(Resolution resolution) noexcept :
     glNamedFramebufferRenderbuffer(_fbo, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _rbo);
 
     if (glCheckNamedFramebufferStatus(_fbo, GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        DOA_LOG_FATAL("Offscreen buffer couldn't initialize!");
+        DOA_LOG_FATAL("Offscreen buffer couldn't initialize! Error code: %d", glCheckNamedFramebufferStatus(_fbo, GL_FRAMEBUFFER));
     }
 }
 
