@@ -51,7 +51,7 @@ struct Color {
 	inline constexpr Color(const Color& color) noexcept = default;
 	inline constexpr Color(const Color & color, float a) noexcept : r(color.r), g(color.g), b(color.b), a(a) {}
 	inline constexpr Color(float v) noexcept : r(v), g(v), b(v), a(1.0f) {}
-	inline constexpr Color(float r, float g, float b) noexcept : r(r), g(b), b(b), a(1.0f) {}
+	inline constexpr Color(float r, float g, float b) noexcept : r(r), g(g), b(b), a(1.0f) {}
 	inline constexpr Color(float r, float g, float b, float a) noexcept : r(r), g(g), b(b), a(a) {}
 	inline constexpr Color(const float* data) noexcept : r(data[0]), g(data[1]), b(data[2]), a(data[3]) {}
 	inline constexpr Color(const glm::vec3 & color) noexcept : Color(color.r, color.g, color.b) {}
