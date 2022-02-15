@@ -38,7 +38,7 @@ void TransformComponentUI::Render(const TransformComponent& transformComponent) 
 	// translation
 	{
 		glm::vec3 translation = transform.GetLocalTranslation();
-		FancyVectorWidget(UINames[nameof(TransformComponent::localTranslation)], translation);
+		FancyVector3Widget(UINames[nameof(TransformComponent::localTranslation)], translation);
 		transform.SetLocalTranslation(translation);
 	}
 	// rotation
@@ -46,14 +46,16 @@ void TransformComponentUI::Render(const TransformComponent& transformComponent) 
 		glm::quat quat = transform.GetLocalRotation();
 		glm::vec3 eulersDeg(glm::degrees(glm::eulerAngles(quat)));
 		glm::vec3 old(eulersDeg);
-		FancyVectorWidget(UINames[nameof(TransformComponent::localRotation)], eulersDeg);
+		FancyVector3Widget(UINames[nameof(TransformComponent::localRotation)], eulersDeg);
 		quat = quat * glm::quat(glm::radians(eulersDeg - old));
 		transform.SetLocalRotation(quat);
 	}
 	// scale
 	{
 		glm::vec3 scale = transform.GetLocalScale();
-		FancyVectorWidget(UINames[nameof(TransformComponent::localScale)], scale, 1.0f);
+		FancyVectorWidgetSettings<display::XYZ> settings;
+		settings.resetTo = 1.0f;
+		FancyVector3Widget(UINames[nameof(TransformComponent::localScale)], scale, settings);
 		transform.SetLocalScale(scale);
 	}
 }

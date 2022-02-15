@@ -3,138 +3,20 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
-bool FancyVectorWidget(const std::string& label, glm::vec2& vec, float reset, int flags) {
-	return FancyVectorWidget(label, &vec.x, reset, flags);
+bool FancyVector1Widget(const std::string& label, glm::vec1& vec, FancyVectorWidgetSettings<display::X> settings) {
+	return FancyVectorWidget(label, &vec.x, settings);
 }
 
-bool FancyVectorWidget(const std::string& label, glm::vec3& vec, float reset, int flags) {
-	return FancyVectorWidget(label, &vec.x, reset, flags);
+bool FancyVector2Widget(const std::string& label, glm::vec2& vec, FancyVectorWidgetSettings<display::XY> settings) {
+	return FancyVectorWidget(label, &vec.x, settings);
 }
 
-bool FancyVectorWidget(const std::string& label, glm::vec4& vec, float reset, int flags) {
-	return FancyVectorWidget(label, &vec.x, reset, flags);
+bool FancyVector3Widget(const std::string& label, glm::vec3& vec, FancyVectorWidgetSettings<display::XYZ> settings) {
+	return FancyVectorWidget(label, &vec.x, settings);
 }
 
-// Courtesy of Yan Chernikov, a.k.a The Cherno Project
-bool FancyVectorWidget(const std::string& label, float* values, float reset, int flags) {
-	bool rv{ false };
-	float divisor = 0;
-	if (flags & X) divisor++;
-	if (flags & Y) divisor++;
-	if (flags & Z) divisor++;
-	if (flags & W) divisor++;
-
-	float w = ImGui::GetContentRegionAvail().x;
-
-	ImGui::PushItemWidth(compFieldWidth);
-
-	ImGuiIO& io = ImGui::GetIO();
-	auto boldFont = io.Fonts->Fonts[0];
-
-	ImGui::PushID(label.c_str());
-
-	ImGui::Columns(2);
-	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { ImGui::GetStyle().ItemSpacing.x, 0 });
-	ImGui::SetColumnWidth(0, w - compFieldWidth);
-	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f);
-	ImGui::Text(label.c_str());
-	ImGui::NextColumn();
-	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
-	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f);
-
-	float lineHeight = boldFont->FontSize + ImGui::GetStyle().FramePadding.y * 2.0f;
-	ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
-
-	if(flags & X) {
-		ImGui::PushStyleColor(ImGuiCol_Button, { 0.8f, 0.1f, 0.15f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0.94f, 0.51f, 0.55f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, { 0.8f, 0.1f, 0.15f, 1.0f });
-		ImGui::PushFont(boldFont);
-		ImVec2 hack = { buttonSize.x - 1, buttonSize.y }; // the color red likes to appear bigger than it is...
-		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 1);
-		if (ImGui::Button("X", hack)) {
-			rv = true;
-			values[0] = reset;
-		}
-		ImGui::SetCursorPosX(ImGui::GetCursorPosX() - 1);
-		ImGui::PopFont();
-		ImGui::PopStyleColor(3);
-
-		ImGui::SameLine();
-		ImGui::PushItemWidth(compFieldWidth / divisor -  buttonSize.x);
-		rv = rv || ImGui::DragFloat("##X", &values[0], 0.1f, 0.0f, 0.0f, "%.3f");
-		ImGui::PopItemWidth();
-		if (flags & Y) {
-			ImGui::SameLine();
-		}
-	}
-
-	if(flags & Y) {
-		ImGui::PushStyleColor(ImGuiCol_Button, { 0.2f, 0.7f, 0.2f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0.57f, 0.87f, 0.57f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, { 0.2f, 0.7f, 0.2f, 1.0f });
-		ImGui::PushFont(boldFont);
-		if (ImGui::Button("Y", buttonSize)) {
-			rv = true;
-			values[1] = reset;
-		}
-		ImGui::PopFont();
-		ImGui::PopStyleColor(3);
-
-		ImGui::SameLine();
-		ImGui::PushItemWidth(compFieldWidth / divisor - buttonSize.x);
-		rv = rv || ImGui::DragFloat("##Y", &values[1], 0.1f, 0.0f, 0.0f, "%.3f");
-		ImGui::PopItemWidth();
-		if (flags & Z) {
-			ImGui::SameLine();
-		}
-	}
-
-	if(flags & Z) {
-		ImGui::PushStyleColor(ImGuiCol_Button, { 0.1f, 0.25f, 0.8f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0.51f, 0.6f, 0.94f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, { 0.1f, 0.25f, 0.8f, 1.0f });
-		ImGui::PushFont(boldFont);
-		if (ImGui::Button("Z", buttonSize)) {
-			rv = true;
-			values[2] = reset;
-		}
-		ImGui::PopFont();
-		ImGui::PopStyleColor(3);
-
-		ImGui::SameLine();
-		ImGui::PushItemWidth(compFieldWidth / divisor - buttonSize.x);
-		rv = rv || ImGui::DragFloat("##Z", &values[2], 0.1f, 0.0f, 0.0f, "%.3f");
-		ImGui::PopItemWidth();
-		if(flags & W) {
-			ImGui::SameLine();
-		}
-	}
-
-	if (flags & W) {
-		ImGui::PushStyleColor(ImGuiCol_Button, { 0.61f, 0.29f, 0.85f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0.80f, 0.64f, 0.93f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, { 0.61f, 0.29f, 0.85f, 1.0f });
-		ImGui::PushFont(boldFont);
-		if (ImGui::Button("W", buttonSize)) {
-			rv = true;
-			values[3] = reset;
-		}
-		ImGui::PopFont();
-		ImGui::PopStyleColor(3);
-
-		ImGui::SameLine();
-		ImGui::PushItemWidth(compFieldWidth / divisor - buttonSize.x);
-		rv = rv || ImGui::DragFloat("##W", &values[3], 0.1f, 0.0f, 0.0f, "%.3f");
-		ImGui::PopItemWidth();
-	}
-	ImGui::PopStyleVar(2);
-
-	ImGui::Columns(1);
-
-	ImGui::PopID();
-
-	return rv;
+bool FancyVector4Widget(const std::string& label, glm::vec4& vec, FancyVectorWidgetSettings<display::XYZW> settings) {
+	return FancyVectorWidget(label, &vec.x, settings);
 }
 
 void detail::BeginWidget(const std::string& label) {

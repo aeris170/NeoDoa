@@ -82,9 +82,9 @@ void SceneSettings::DrawSettings(Scene& scene) {
 	ImGui::NewLine();
 
 	auto& active = scene.GetActiveCamera();
-	FancyVectorWidget("Eye", active.eye, 0);
-	FancyVectorWidget("Forward", active.forward, 0);
-	FancyVectorWidget("Up", active.up, 0);
+	FancyVector3Widget("Eye", active.eye);
+	FancyVector3Widget("Forward", active.forward);
+	FancyVector3Widget("Up", active.up);
 	FloatWidget("Zoom", active.zoom);
 
 	ImGui::EndGroup();
