@@ -131,9 +131,6 @@
     <ClCompile Include="OutlineRenderer.cpp">
       <Filter>Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="Color.cpp">
-      <Filter>Asset\Color</Filter>
-    </ClCompile>
     <ClCompile Include="TransformComponent.cpp">
       <Filter>ECS\Components</Filter>
     </ClCompile>

@@ -116,7 +116,6 @@
     <ClCompile Include="BehaviourComponent.cpp" />
     <ClCompile Include="CameraComponent.cpp" />
     <ClCompile Include="ChildComponent.cpp" />
-    <ClCompile Include="Color.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="FileNode.cpp" />
     <ClCompile Include="FrameBuffer.cpp" />
