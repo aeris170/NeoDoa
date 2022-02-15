@@ -14,12 +14,12 @@ struct FrameBuffer {
 	TEX _tex{ 0 };
 	RBO _rbo{ 0 };
 
-	FrameBuffer(Resolution resolution);
-	~FrameBuffer();
+	FrameBuffer(Resolution resolution) noexcept;
+	~FrameBuffer() noexcept;
 	FrameBuffer(const FrameBuffer&) = delete;
-	FrameBuffer(FrameBuffer&&);
+	FrameBuffer(FrameBuffer&&) noexcept;
 	FrameBuffer& operator=(const FrameBuffer&) = delete;
-	FrameBuffer& operator=(FrameBuffer&&);
+	FrameBuffer& operator=(FrameBuffer&&) noexcept;
 
 	void DeAlloc();
 

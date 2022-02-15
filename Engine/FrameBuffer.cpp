@@ -6,7 +6,7 @@
 #include "Core.hpp"
 #include "Window.hpp"
 
-FrameBuffer::FrameBuffer(Resolution resolution) :
+FrameBuffer::FrameBuffer(Resolution resolution) noexcept :
     _resolution(resolution) {
     glCreateFramebuffers(1, &_fbo);
 
@@ -27,17 +27,19 @@ FrameBuffer::FrameBuffer(Resolution resolution) :
     }
 }
 
-FrameBuffer::~FrameBuffer() {
+FrameBuffer::~FrameBuffer() noexcept {
     DeAlloc();
 }
 
-FrameBuffer::FrameBuffer(FrameBuffer&& other) :
+FrameBuffer::FrameBuffer(FrameBuffer&& other) noexcept :
+    _resolution(std::move(other._resolution)),
     _fbo(std::exchange(other._fbo, 0)),
     _tex(std::exchange(other._tex, 0)),
     _rbo(std::exchange(other._rbo, 0)) {}
 
-FrameBuffer& FrameBuffer::operator=(FrameBuffer&& other) {
+FrameBuffer& FrameBuffer::operator=(FrameBuffer&& other) noexcept {
     DeAlloc(); //!!!
+    _resolution = std::move(other._resolution);
     _fbo = std::exchange(other._fbo, 0);
     _tex = std::exchange(other._tex, 0);
     _rbo = std::exchange(other._rbo, 0);
