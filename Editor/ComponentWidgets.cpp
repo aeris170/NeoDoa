@@ -210,10 +210,17 @@ bool OrthoCameraWidget(OrthoCamera& cameraData) {
 	settingsOrthoBottom.displayLabelColorOverride[0] = Color(0.10, 0.53, 0.26 );
 	settingsOrthoBottom.componentFieldWidth /= 2;
 
-	FancyVector1Widget("Top", top, settingsOrthoTop);
-	FancyVector2Widget("Left & Right", leftRight, settingsOrthoLeftRight);
-	FancyVector1Widget("Bottom", bottom, settingsOrthoBottom);
-	return true;
+	bool rv{ false };
+	rv = FancyVector1Widget("Top", top, settingsOrthoTop);
+	rv = rv | FancyVector2Widget("Left & Right", leftRight, settingsOrthoLeftRight); // no double pipe because of short circuit shadowing imgui call
+	rv = rv | FancyVector1Widget("Bottom", bottom, settingsOrthoBottom);
+
+	cameraData._top = top.x;
+	cameraData._left = leftRight.x;
+	cameraData._right = leftRight.y;
+	cameraData._bottom = bottom.x;
+
+	return rv;
 }
 
 void Space() {

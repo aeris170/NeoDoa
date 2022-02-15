@@ -10,6 +10,7 @@
 #include <TransformComponent.hpp>
 #include <ParentComponent.hpp>
 #include <ChildComponent.hpp>
+#include <CameraComponent.hpp>
 
 #include "GUI.hpp"
 #include "Icons.hpp"
@@ -79,7 +80,33 @@ void ChildComponentUI::Render(const ChildComponent& childComponent) {
 }
 
 void OrthoCameraComponentUI::Render(const OrthoCameraComponent& orthoCameraComponent) {
-	// TODO implement
+	static std::unordered_map<::std::string, ::std::string> UINames = {
+		{ nameof(OrthoCameraComponent::isActiveAndRendering), Prettify(nameof(OrthoCameraComponent::isActiveAndRendering)) },
+		{ nameof(OrthoCameraComponent::data), Prettify("orthoCameraProperties") },
+		{ nameof(OrthoCameraComponent::frameBuffer), Prettify("resolution") }
+	};
+
+	OrthoCameraComponent& orthoCamera = const_cast<OrthoCameraComponent&>(orthoCameraComponent);
+	bool active = orthoCamera.IsActiveAndRendering();
+	if (BoolWidget(UINames[nameof(OrthoCameraComponent::isActiveAndRendering)], active)) {
+		if (active) { orthoCamera.TurnOn(); }
+		else { orthoCamera.TurnOff(); }
+	}
+
+	Space();
+	Header(UINames[nameof(OrthoCameraComponent::data)]);
+
+	Resolution r = orthoCamera.GetFrameBuffer()._resolution;
+	if (ResolutionWidget(UINames[nameof(OrthoCameraComponent::frameBuffer)], r)) {
+		orthoCamera.SetUpOffFrameBuffer(r);
+	}
+
+	Space();
+
+	OrthoCamera cam = orthoCamera.GetData();
+	if (OrthoCameraWidget(cam)) {
+		orthoCamera.SetData(std::move(cam));
+	}
 }
 
 void PerspectiveCameraComponentUI::Render(const PerspectiveCameraComponent& perspectiveCameraComponent) {
