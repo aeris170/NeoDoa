@@ -198,6 +198,16 @@ void UneditableStringWidget(const std::string& label, const std::string& value);
 
 bool ColorWidget(const std::string& label, Color& value);
 
+bool ResolutionWidget(const std::string& label, Resolution& resolution);
+
+bool OrthoCameraWidget(OrthoCamera& cameraData);
+
+void Space();
+
+void Header(const std::string& label);
+
+void Separator();
+
 using namespace detail;
 
 template<typename T>

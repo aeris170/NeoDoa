@@ -163,3 +163,78 @@ bool ColorWidget(const std::string& label, Color& value) {
 	EndWidget();
 	return rv;
 }
+
+bool ResolutionWidget(const std::string& label, Resolution& resolution) {
+	glm::vec2 res{ resolution.w, resolution.h };
+	FancyVectorWidgetSettings<display::XY> settingsFBO;
+	settingsFBO.resetEnabled = false;
+	settingsFBO.speed = 1;
+	settingsFBO.min = 128;
+	settingsFBO.max = 16384;
+	settingsFBO.fmt = "%g";
+	settingsFBO.displayLabelOverride[0] = "W";
+	settingsFBO.displayLabelOverride[1] = "H";
+	settingsFBO.displayLabelColorOverride[0] = Color(0.45, 0.63, 0.82);
+	settingsFBO.displayLabelColorOverride[1] = Color(0.66, 0.49, 0.65);
+
+	bool rv = FancyVector2Widget(label, res, settingsFBO);
+	resolution = { static_cast<int>(res.x), static_cast<int>(res.y) };
+
+	return rv;
+}
+
+bool OrthoCameraWidget(OrthoCamera& cameraData) {
+	glm::vec1 top{ cameraData._top };
+	glm::vec2 leftRight{ cameraData._left, cameraData._right };
+	glm::vec1 bottom{ cameraData._bottom };
+
+	FancyVectorWidgetSettings<display::X> settingsOrthoTop;
+	settingsOrthoTop.resetTo = 1;
+	settingsOrthoTop.displayLabelOverride[0] = "T";
+	settingsOrthoTop.displayLabelColorOverride[0] = Color(0.10, 0.53, 0.26);
+	settingsOrthoTop.componentFieldWidth /= 2;
+
+	FancyVectorWidgetSettings<display::XY> settingsOrthoLeftRight;
+	settingsOrthoLeftRight.resetAllToSame = false;
+	settingsOrthoLeftRight.resetTos[0] = -1;
+	settingsOrthoLeftRight.resetTos[1] = 1;
+	settingsOrthoLeftRight.displayLabelOverride[0] = "L";
+	settingsOrthoLeftRight.displayLabelOverride[1] = "R";
+	settingsOrthoLeftRight.displayLabelColorOverride[0] = Color(0.10, 0.53, 0.26);
+	settingsOrthoLeftRight.displayLabelColorOverride[1] = Color(0.10, 0.53, 0.26);
+	settingsOrthoLeftRight.displayLabelHoverColorOverride[1] = settingsOrthoLeftRight.displayLabelHoverColorOverride[0];
+
+	FancyVectorWidgetSettings<display::X> settingsOrthoBottom;
+	settingsOrthoBottom.resetTo = -1;
+	settingsOrthoBottom.displayLabelOverride[0] = "B";
+	settingsOrthoBottom.displayLabelColorOverride[0] = Color(0.10, 0.53, 0.26 );
+	settingsOrthoBottom.componentFieldWidth /= 2;
+
+	FancyVector1Widget("Top", top, settingsOrthoTop);
+	FancyVector2Widget("Left & Right", leftRight, settingsOrthoLeftRight);
+	FancyVector1Widget("Bottom", bottom, settingsOrthoBottom);
+	return true;
+}
+
+void Space() {
+	ImGui::NewLine();
+}
+
+void Header(const std::string& label) {
+	ImGui::PushID(label.c_str());
+
+	ImGuiIO& io = ImGui::GetIO();
+	auto boldFont = io.Fonts->Fonts[1];
+	ImGui::PushFont(boldFont);
+
+	ImGui::Text(label.c_str());
+	ImGui::Separator();
+
+	ImGui::PopFont();
+	ImGui::PopID();
+}
+
+void Separator() {
+	ImGui::NewLine();
+	ImGui::Separator();
+}
