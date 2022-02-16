@@ -170,7 +170,7 @@ bool ResolutionWidget(const std::string& label, Resolution& resolution) {
 	settingsFBO.resetEnabled = false;
 	settingsFBO.speed = 1;
 	settingsFBO.min = 128;
-	settingsFBO.max = 16384;
+	settingsFBO.max = 128*128;
 	settingsFBO.fmt = "%g";
 	settingsFBO.displayLabelOverride[0] = "W";
 	settingsFBO.displayLabelOverride[1] = "H";
@@ -192,6 +192,7 @@ bool OrthoCameraWidget(OrthoCamera& cameraData) {
 	settingsOrthoTop.resetTo = 1;
 	settingsOrthoTop.displayLabelOverride[0] = "T";
 	settingsOrthoTop.displayLabelColorOverride[0] = Color(0.10, 0.53, 0.26);
+	settingsOrthoTop.displayLabelHoverColorOverride[0] = settingsOrthoTop.displayLabelColorOverride[0].Lighten(0.45f);
 	settingsOrthoTop.componentFieldWidth /= 2;
 
 	FancyVectorWidgetSettings<display::XY> settingsOrthoLeftRight;
@@ -202,12 +203,14 @@ bool OrthoCameraWidget(OrthoCamera& cameraData) {
 	settingsOrthoLeftRight.displayLabelOverride[1] = "R";
 	settingsOrthoLeftRight.displayLabelColorOverride[0] = Color(0.10, 0.53, 0.26);
 	settingsOrthoLeftRight.displayLabelColorOverride[1] = Color(0.10, 0.53, 0.26);
-	settingsOrthoLeftRight.displayLabelHoverColorOverride[1] = settingsOrthoLeftRight.displayLabelHoverColorOverride[0];
+	settingsOrthoLeftRight.displayLabelHoverColorOverride[0] = settingsOrthoLeftRight.displayLabelColorOverride[0].Lighten(0.45f);
+	settingsOrthoLeftRight.displayLabelHoverColorOverride[1] = settingsOrthoLeftRight.displayLabelColorOverride[1].Lighten(0.45f);
 
 	FancyVectorWidgetSettings<display::X> settingsOrthoBottom;
 	settingsOrthoBottom.resetTo = -1;
 	settingsOrthoBottom.displayLabelOverride[0] = "B";
 	settingsOrthoBottom.displayLabelColorOverride[0] = Color(0.10, 0.53, 0.26 );
+	settingsOrthoBottom.displayLabelHoverColorOverride[0] = settingsOrthoBottom.displayLabelColorOverride[0].Lighten(0.45f);
 	settingsOrthoBottom.componentFieldWidth /= 2;
 
 	bool rv{ false };
@@ -219,6 +222,33 @@ bool OrthoCameraWidget(OrthoCamera& cameraData) {
 	cameraData._left = leftRight.x;
 	cameraData._right = leftRight.y;
 	cameraData._bottom = bottom.x;
+
+	return rv;
+}
+
+bool PerspectiveCameraWidget(PerspectiveCamera& cameraData) {
+	glm::vec1 fov{ cameraData._fov };
+	glm::vec1 aspect{ cameraData._aspect };
+
+	FancyVectorWidgetSettings<display::X> fovSettings;
+	auto a = fovSettings.displayLabelColorOverride[0].Lighten(0.5);
+	fovSettings.resetTo = 110;
+	fovSettings.min = 30;
+	fovSettings.max = 150;
+	fovSettings.displayLabelOverride[0] = "F";
+	fovSettings.displayLabelColorOverride[0] = Color(0.23, 0.23, 0.13);
+	fovSettings.displayLabelHoverColorOverride[0] = fovSettings.displayLabelColorOverride[0].Lighten(0.35f);
+
+	FancyVectorWidgetSettings<display::X> aspectSettings;
+	aspectSettings.disabled = true;
+	aspectSettings.displayLabelOverride[0] = "A";
+	aspectSettings.displayLabelColorOverride[0] = Color(0.211, 0.121, 0.439);
+
+	bool rv{ false };
+	rv = FancyVector1Widget("Field Of View", fov, fovSettings);
+	rv = rv | FancyVector1Widget("Aspect Ratio", aspect, aspectSettings); // no double pipe because of short circuit shadowing imgui call
+
+	cameraData._fov = fov.x;
 
 	return rv;
 }

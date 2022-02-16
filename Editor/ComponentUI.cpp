@@ -83,6 +83,7 @@ void OrthoCameraComponentUI::Render(const OrthoCameraComponent& orthoCameraCompo
 	static std::unordered_map<::std::string, ::std::string> UINames = {
 		{ nameof(OrthoCameraComponent::isActiveAndRendering), Prettify(nameof(OrthoCameraComponent::isActiveAndRendering)) },
 		{ nameof(OrthoCameraComponent::data), Prettify("orthoCameraProperties") },
+		{ nameof(FrameBuffer::ClearColor), Prettify("clearColor") },
 		{ nameof(OrthoCameraComponent::frameBuffer), Prettify("resolution") }
 	};
 
@@ -96,9 +97,11 @@ void OrthoCameraComponentUI::Render(const OrthoCameraComponent& orthoCameraCompo
 	Space();
 	Header(UINames[nameof(OrthoCameraComponent::data)]);
 
+	ColorWidget(UINames[nameof(FrameBuffer::ClearColor)], orthoCamera.GetFrameBuffer().ClearColor);
+
 	Resolution r = orthoCamera.GetFrameBuffer()._resolution;
 	if (ResolutionWidget(UINames[nameof(OrthoCameraComponent::frameBuffer)], r)) {
-		orthoCamera.SetUpOffFrameBuffer(r);
+		orthoCamera.SetUpFrameBuffer(r);
 	}
 
 	Space();
@@ -110,7 +113,36 @@ void OrthoCameraComponentUI::Render(const OrthoCameraComponent& orthoCameraCompo
 }
 
 void PerspectiveCameraComponentUI::Render(const PerspectiveCameraComponent& perspectiveCameraComponent) {
-	// TODO implement
+	static std::unordered_map<::std::string, ::std::string> UINames = {
+		{ nameof(PerspectiveCameraComponent::isActiveAndRendering), Prettify(nameof(PerspectiveCameraComponent::isActiveAndRendering)) },
+		{ nameof(PerspectiveCameraComponent::data), Prettify("orthoCameraProperties") },
+		{ nameof(FrameBuffer::ClearColor), Prettify("clearColor") },
+		{ nameof(PerspectiveCameraComponent::frameBuffer), Prettify("resolution") }
+	};
+
+	PerspectiveCameraComponent& perspectiveCamera = const_cast<PerspectiveCameraComponent&>(perspectiveCameraComponent);
+	bool active = perspectiveCamera.IsActiveAndRendering();
+	if (BoolWidget(UINames[nameof(PerspectiveCameraComponent::isActiveAndRendering)], active)) {
+		if (active) { perspectiveCamera.TurnOn(); }
+		else { perspectiveCamera.TurnOff(); }
+	}
+
+	Space();
+	Header(UINames[nameof(PerspectiveCameraComponent::data)]);
+
+	ColorWidget(UINames[nameof(PerspectiveCameraComponent::ClearColor)], perspectiveCamera.GetFrameBuffer().ClearColor);
+
+	Resolution r = perspectiveCamera.GetFrameBuffer()._resolution;
+	if (ResolutionWidget(UINames[nameof(PerspectiveCameraComponent::frameBuffer)], r)) {
+		perspectiveCamera.SetUpFrameBuffer(r);
+	}
+
+	Space();
+
+	PerspectiveCamera cam = perspectiveCamera.GetData();
+	if (PerspectiveCameraWidget(cam)) {
+		perspectiveCamera.SetData(std::move(cam));
+	}
 }
 
 bool ComponentUI::Begin(const Observer& observer, std::string_view componentTypeName) {

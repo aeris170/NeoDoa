@@ -202,6 +202,8 @@ bool ResolutionWidget(const std::string& label, Resolution& resolution);
 
 bool OrthoCameraWidget(OrthoCamera& cameraData);
 
+bool PerspectiveCameraWidget(PerspectiveCamera& cameraData);
+
 void Space();
 
 void Header(const std::string& label);

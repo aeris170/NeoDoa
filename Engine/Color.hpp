@@ -234,6 +234,12 @@ struct Color {
 			a * invT + rhs.a * t
 		);
 	}
+	inline Color Lighten(float t) const {
+		return Lerp(WHITE(), t);
+	}
+	inline Color Darken(float t) const {
+		return Lerp(BLACK(), t);
+	}
 
 	inline Color Abs() const { return { std::abs(r), std::abs(g), std::abs(b), std::abs(a) }; }
 

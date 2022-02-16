@@ -12,6 +12,7 @@
 #include <TransformComponent.hpp>
 #include <ParentComponent.hpp>
 #include <ChildComponent.hpp>
+#include <CameraComponent.hpp>
 #include <ScriptStorageComponent.hpp>
 
 #include "GUI.hpp"
@@ -70,6 +71,16 @@ void Observer::RenderComponents(Scene& scene, const Entity entt) {
 	if (scene.HasComponent<ChildComponent>(entt)) {
 		ChildComponent& childComponent = scene.GetComponent<ChildComponent>(entt);
 		ComponentUI::RenderChildComponent(*this, scene, childComponent);
+	}
+
+	if (scene.HasComponent<OrthoCameraComponent>(entt)) {
+		OrthoCameraComponent& orthoCameraComponent = scene.GetComponent<OrthoCameraComponent>(entt);
+		ComponentUI::RenderOrthoCameraComponent(*this, scene, orthoCameraComponent);
+	}
+
+	if (scene.HasComponent<PerspectiveCameraComponent>(entt)) {
+		PerspectiveCameraComponent& perspectiveCameraComponent = scene.GetComponent<PerspectiveCameraComponent>(entt);
+		ComponentUI::RenderPerspectiveCameraComponent(*this, scene, perspectiveCameraComponent);
 	}
 
 	if (scene.HasComponent<ScriptStorageComponent>(entt)) {

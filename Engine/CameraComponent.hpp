@@ -45,8 +45,9 @@ public:
 	void TurnOff();
 	bool IsActiveAndRendering() const;
 
+	FrameBuffer& GetFrameBuffer();
 	const FrameBuffer& GetFrameBuffer() const;
-	void SetUpOffFrameBuffer(Resolution resolution);
+	void SetUpFrameBuffer(Resolution resolution);
 
 	friend void SerializeOrthoCameraComponent(tinyxml2::XMLPrinter& printer, const OrthoCameraComponent& camera);
 	friend OrthoCameraComponent DeserializeOrthoCameraComponent(tinyxml2::XMLElement* component, const Entity entity, const Scene& scene);
@@ -81,8 +82,9 @@ public:
 	void TurnOff();
 	bool IsActiveAndRendering() const;
 
+	FrameBuffer& GetFrameBuffer();
 	const FrameBuffer& GetFrameBuffer() const;
-	void SetUpOffFrameBuffer(Resolution resolution);
+	void SetUpFrameBuffer(Resolution resolution);
 
 	friend void SerializePerspectiveCameraComponent(tinyxml2::XMLPrinter& printer, const PerspectiveCameraComponent& camera);
 	friend PerspectiveCameraComponent DeserializePerspectiveCameraComponent(tinyxml2::XMLElement* component, const Entity entity, const Scene& scene);
