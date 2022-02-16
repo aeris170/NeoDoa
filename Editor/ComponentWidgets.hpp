@@ -7,11 +7,6 @@
 
 #include "NeoDoa.hpp"
 
-inline int X = 0b0001;
-inline int Y = 0b0010;
-inline int Z = 0b0100;
-inline int W = 0b1000;
-
 inline constexpr int compFieldWidth = 300; // must be divisible by both 3 and 4 (and 1 and 2, but you know... MaThS...) (x,y,z,w)
 
 enum class display {
