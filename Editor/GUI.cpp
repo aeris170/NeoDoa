@@ -7,6 +7,9 @@
 #include <Window.hpp>
 #include <Texture.hpp>
 
+// TODO REMOVE ME WHEN IMGUI IMPLEMENTS THIS WORKAROUND AS API FUNC.
+static bool DoWorkAround{ false };
+
 GUI::GUI(std::unique_ptr<Core>& core) noexcept :
 	core(core),
 	window(core->_window),
@@ -84,6 +87,8 @@ void GUI::Prepare() {
 			ImGui::DockBuilderDockWindow(ASSET_MANAGER_ID, rightDown);
 			ImGui::DockBuilderDockWindow(CONSOLE_ID, rightDown);
 			ImGui::DockBuilderFinish(dockspace_id);
+
+			DoWorkAround = true;
 		}
 
 		ImGui::DockSpace(dockspace_id, { 0, 0 }, dockspace_flags);
@@ -140,7 +145,6 @@ void GUI::operator() (float delta) {
 	End();
 }
 
-#include <iostream>
 void GUI::End() {
 	ImGui::End();
 	ExecuteDockBuilderOrderAndFocusWorkAround();
@@ -206,15 +210,23 @@ void GUI::ExecuteDockBuilderOrderAndFocusWorkAround() {
 	if (i == 0) {
 		auto asset = ImGui::FindWindowByName(ASSET_MANAGER_ID);
 		ImGui::FocusWindow(asset);
+
+		if (DoWorkAround)
 		std::swap(asset->DockNode->TabBar->Tabs[0], asset->DockNode->TabBar->Tabs[1]);
 
 		auto obs = ImGui::FindWindowByName(OBSERVER_ID);
 		ImGui::FocusWindow(obs);
+
+		if (DoWorkAround)
 		std::swap(obs->DockNode->TabBar->Tabs[0], obs->DockNode->TabBar->Tabs[1]);
 
 		auto viewport = ImGui::FindWindowByName(SCENE_VIEWPORT_ID);
 		ImGui::FocusWindow(viewport);
+
+		if (DoWorkAround)
 		std::swap(viewport->DockNode->TabBar->Tabs[0], viewport->DockNode->TabBar->Tabs[1]);
+
+		DoWorkAround = false;
 	}
 	i++;
 }
