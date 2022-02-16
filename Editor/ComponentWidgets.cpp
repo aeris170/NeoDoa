@@ -159,7 +159,35 @@ bool ColorWidget(const std::string& label, Color& value) {
 	BeginWidget(label);
 	std::stringstream ss;
 	ss << "##" << label;
-	bool rv = ImGui::ColorEdit4(ss.str().c_str(), value.Data());
+
+	bool rv{ false };
+
+	auto& ctx = *ImGui::GetCurrentContext();
+	if (ImGui::ColorButton(ss.str().c_str(), *reinterpret_cast<ImVec4*>(value.Data()), 0, { compFieldWidth , ImGui::GetFrameHeight() })) {
+		ctx.ColorPickerRef = *reinterpret_cast<ImVec4*>(value.Data());
+		ImGui::OpenPopup("picker");
+		ImVec2 v;
+		v.x = ctx.LastItemData.Rect.GetBL().x - 1;
+		v.y = ctx.LastItemData.Rect.GetBL().y + ImGui::GetStyle().ItemSpacing.y;
+		ImGui::SetNextWindowPos(v);
+	}
+
+	if (ImGui::BeginPopup("picker")) {
+		//picker_active_window = ctx.CurrentWindow;
+		ImGui::TextEx(ss.str().c_str());
+		ImGui::Spacing();
+
+		ImGuiColorEditFlags picker_flags = ImGuiColorEditFlags_DataTypeMask_ |
+			ImGuiColorEditFlags_PickerMask_ | ImGuiColorEditFlags_InputMask_ |
+			ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_NoAlpha |
+			ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_DisplayMask_ |
+			ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf;
+
+		ImGui::SetNextItemWidth(ImGui::GetFrameHeight() * 12.0f);
+		rv |= ImGui::ColorPicker4("##picker", value.Data(), 0, &ctx.ColorPickerRef.x);
+		ImGui::EndPopup();
+	}
+
 	EndWidget();
 	return rv;
 }
