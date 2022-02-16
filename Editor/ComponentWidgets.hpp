@@ -20,6 +20,7 @@ enum class display {
 
 template<display dsp>
 struct FancyVectorWidgetSettings {
+	bool disabled{ false };
 	bool resetEnabled{ true };
 	bool resetAllToSame{ true };
 	float resetTo{ 0.0f };
@@ -30,6 +31,7 @@ struct FancyVectorWidgetSettings {
 	float max{ 0.0f };
 	const char* fmt{ "%.3f" };
 	int componentFieldWidth{ compFieldWidth };
+	bool justifyCenter{ true };
 	std::array<const char*, static_cast<size_t>(dsp)> displayLabelOverride{};
 	std::array<Color, static_cast<size_t>(dsp)> displayLabelColorOverride{};
 	std::array<Color, static_cast<size_t>(dsp)> displayLabelHoverColorOverride{};
@@ -89,6 +91,54 @@ bool FancyVector3Widget(const std::string& label, glm::vec3& vec, FancyVectorWid
 bool FancyVector4Widget(const std::string& label, glm::vec4& vec, FancyVectorWidgetSettings<display::XYZW> settings = defaultFancyVectorSettingsXYZW);
 
 template<display dsp>
+bool FancyVectorPiece(FancyVectorWidgetSettings<dsp>& settings, size_t idx, float* vec, ImFont* buttonFont = nullptr, ImVec2 buttonSize = { 0, 0 }) {
+	bool rv{ false };
+
+	if (buttonFont == nullptr) {
+		buttonFont = ImGui::GetIO().Fonts->Fonts[1];
+	}
+	if (buttonSize.x == 0 && buttonSize.y == 0) {
+		float lineHeight = buttonFont->FontSize + ImGui::GetStyle().FramePadding.y * 2.0f;
+		buttonSize = { lineHeight + 3.0f, lineHeight };
+	}
+
+	Color btnColor = settings.displayLabelColorOverride[idx];
+	Color btnHoverColor = settings.displayLabelHoverColorOverride[idx];
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ btnColor.r, btnColor.g, btnColor.b, btnColor.a });
+	if (!settings.disabled && settings.resetEnabled) {
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ btnHoverColor.r, btnHoverColor.g, btnHoverColor.b, btnHoverColor.a });
+	} else {
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ btnColor.r, btnColor.g, btnColor.b, btnColor.a });
+	}
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ btnColor.r, btnColor.g, btnColor.b, btnColor.a });
+	ImGui::PushFont(buttonFont);
+	ImVec2 textSize = ImGui::CalcTextSize(settings.displayLabelOverride[idx]);
+	if (ImGui::Button(settings.displayLabelOverride[idx], buttonSize)) {
+		if (!settings.disabled) {
+			if (settings.resetEnabled) {
+				rv = true;
+				vec[idx] = settings.resetTo;
+			}
+		}
+	}
+	ImGui::PopFont();
+	ImGui::PopStyleColor(3);
+
+	ImGui::SameLine();
+
+	ImGui::PushItemWidth(settings.componentFieldWidth / static_cast<int>(dsp) - buttonSize.x);
+
+	if (settings.disabled) { ImGui::BeginDisabled(); }
+	if (ImGui::DragFloat(std::string("##").append(settings.displayLabelOverride[idx]).c_str(), &(vec[idx]), settings.speed, settings.min, settings.max, settings.fmt)) {
+		rv = true;
+	}
+	if (settings.disabled) { ImGui::EndDisabled(); }
+	ImGui::PopItemWidth();
+
+	return rv;
+}
+
+template<display dsp>
 bool FancyVectorWidget(const std::string& label, float* vec, FancyVectorWidgetSettings<dsp> settings = defaultFancyVectorSettingsXYZW) {
 	bool rv{ false };
 
@@ -97,7 +147,7 @@ bool FancyVectorWidget(const std::string& label, float* vec, FancyVectorWidgetSe
 	ImGui::PushItemWidth(settings.componentFieldWidth);
 
 	ImGuiIO& io = ImGui::GetIO();
-	auto boldFont = io.Fonts->Fonts[0];
+	auto boldFont = io.Fonts->Fonts[1];
 
 	ImGui::PushID(label.c_str());
 
@@ -109,59 +159,31 @@ bool FancyVectorWidget(const std::string& label, float* vec, FancyVectorWidgetSe
 	ImGui::NextColumn();
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
 	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f);
-	ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (compFieldWidth - settings.componentFieldWidth) / 2);
+	if(settings.justifyCenter) {
+		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (compFieldWidth - settings.componentFieldWidth) / 2);
+	}
 
 	float lineHeight = boldFont->FontSize + ImGui::GetStyle().FramePadding.y * 2.0f;
 	ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
 
-	auto RenderFancyVectorComponentPiece = [&rv, &boldFont, &buttonSize, &vec](FancyVectorWidgetSettings<dsp>& settings, size_t idx) {
-		auto btnColor = settings.displayLabelColorOverride[idx];
-		auto btnHoverColor = settings.displayLabelHoverColorOverride[idx];
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ btnColor.r, btnColor.g, btnColor.b, btnColor.a });
-		if (settings.resetEnabled) {
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ btnHoverColor.r, btnHoverColor.g, btnHoverColor.b, btnHoverColor.a });
-		} else {
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ btnColor.r, btnColor.g, btnColor.b, btnColor.a });
-		}
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ btnColor.r, btnColor.g, btnColor.b, btnColor.a });
-		ImGui::PushFont(boldFont);
-		if (ImGui::Button(settings.displayLabelOverride[idx], buttonSize)) {
-			if (settings.resetEnabled) {
-				rv = true;
-				vec[idx] = settings.resetTo;
-			}
-		}
-		ImGui::PopFont();
-		ImGui::PopStyleColor(3);
-
-		ImGui::SameLine();
-
-		ImGui::PushItemWidth(settings.componentFieldWidth / static_cast<int>(dsp) - buttonSize.x);
-
-		if (ImGui::DragFloat(std::string("##").append(settings.displayLabelOverride[idx]).c_str(), &(vec[idx]), settings.speed, settings.min, settings.max, settings.fmt)) {
-			rv = true;
-		}
-		ImGui::PopItemWidth();
-	};
-
-	RenderFancyVectorComponentPiece(settings, 0);
+	rv |= FancyVectorPiece(settings, 0, vec, boldFont, buttonSize);
 	if constexpr (dsp == display::XY) {
 		ImGui::SameLine();
-		RenderFancyVectorComponentPiece(settings, 1);
+		rv |= FancyVectorPiece(settings, 1, vec, boldFont, buttonSize);
 	}
 	if constexpr (dsp == display::XYZ) {
 		ImGui::SameLine();
-		RenderFancyVectorComponentPiece(settings, 1);
+		rv |= FancyVectorPiece(settings, 1, vec, boldFont, buttonSize);
 		ImGui::SameLine();
-		RenderFancyVectorComponentPiece(settings, 2);
+		rv |= FancyVectorPiece(settings, 2, vec, boldFont, buttonSize);
 	}
 	if constexpr (dsp == display::XYZW) {
 		ImGui::SameLine();
-		RenderFancyVectorComponentPiece(settings, 1);
+		rv |= FancyVectorPiece(settings, 1, vec, boldFont, buttonSize);
 		ImGui::SameLine();
-		RenderFancyVectorComponentPiece(settings, 2);
+		rv |= FancyVectorPiece(settings, 2, vec, boldFont, buttonSize);
 		ImGui::SameLine();
-		RenderFancyVectorComponentPiece(settings, 3);
+		rv |= FancyVectorPiece(settings, 3, vec, boldFont, buttonSize);
 	}
 
 	ImGui::PopStyleVar(2);
