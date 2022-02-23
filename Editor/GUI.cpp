@@ -86,9 +86,8 @@ void GUI::Prepare() {
 
 			ImGui::DockBuilderDockWindow(ASSET_MANAGER_ID, rightDown);
 			ImGui::DockBuilderDockWindow(CONSOLE_ID, rightDown);
-			ImGui::DockBuilderFinish(dockspace_id);
 
-			DoWorkAround = true;
+			ImGui::DockBuilderFinish(dockspace_id);
 		}
 
 		ImGui::DockSpace(dockspace_id, { 0, 0 }, dockspace_flags);
@@ -211,20 +210,11 @@ void GUI::ExecuteDockBuilderOrderAndFocusWorkAround() {
 		auto asset = ImGui::FindWindowByName(ASSET_MANAGER_ID);
 		ImGui::FocusWindow(asset);
 
-		if (DoWorkAround)
-		std::swap(asset->DockNode->TabBar->Tabs[0], asset->DockNode->TabBar->Tabs[1]);
-
 		auto obs = ImGui::FindWindowByName(OBSERVER_ID);
 		ImGui::FocusWindow(obs);
 
-		if (DoWorkAround)
-		std::swap(obs->DockNode->TabBar->Tabs[0], obs->DockNode->TabBar->Tabs[1]);
-
 		auto viewport = ImGui::FindWindowByName(SCENE_VIEWPORT_ID);
 		ImGui::FocusWindow(viewport);
-
-		if (DoWorkAround)
-		std::swap(viewport->DockNode->TabBar->Tabs[0], viewport->DockNode->TabBar->Tabs[1]);
 
 		DoWorkAround = false;
 	}
