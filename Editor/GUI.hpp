@@ -58,8 +58,8 @@ struct GUI {
 	MenuBar mb;
 	SceneHierarchy sh;
 	Observer obs;
-	Console con;
 	AssetManager am;
+	Console con;
 	SceneViewport sv;
 	GameViewport gv;
 	SceneSettings ss;
