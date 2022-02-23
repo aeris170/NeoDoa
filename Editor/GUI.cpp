@@ -118,13 +118,13 @@ void GUI::operator() (float delta) {
 	}
 	obs.End();
 
-	con.Begin();
-	con.Render();
-	con.End();
-
 	am.Begin();
 	am.Render();
 	am.End();
+
+	con.Begin();
+	con.Render();
+	con.End();
 
 	sv.Begin(HasOpenProject() ? openProject->_openScene : noScene);
 	if (HasOpenScene()) {
