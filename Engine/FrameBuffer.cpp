@@ -53,15 +53,15 @@ void FrameBuffer::DeAlloc() {
 }
 
 void FrameBuffer::Bind() const {
-    glViewport(0, 0, _resolution.w, _resolution.h);
+    //glViewport(0, 0, _resolution.w, _resolution.h);
     glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
 }
 
 void FrameBuffer::UnBind() const {
-    static auto& core = GetCore();
-    Resolution rs = core->_window->_contentResolution;
+    static auto& core = Core::GetCore();
+    auto& rs = core->Window()->GetContentResolution();
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glViewport(0, 0, rs.w, rs.h);
+    //glViewport(0, 0, rs.w, rs.h);
 }
 
 void FrameBuffer::UnBind(Resolution oldViewport) const {

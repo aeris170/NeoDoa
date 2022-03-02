@@ -11,6 +11,7 @@
 #include <IDComponent.hpp>
 #include <ParentComponent.hpp>
 #include <ChildComponent.hpp>
+#include <CameraComponent.hpp>
 #include <ScriptStorageComponent.hpp>
 #include <Core.hpp>
 #include <Angel.hpp>
@@ -220,8 +221,11 @@ void SceneHierarchy::RenderEntityNode(Scene& scene, const Entity entity) {
 	if (ImGui::BeginPopupContextItem(0, ImGuiPopupFlags_MouseButtonRight)) {
 		if (ImGui::BeginMenu(ICON_FA_LINK " Attach Module")) {
 			// cpp components start
-			if (ImGui::MenuItem("idk component")) {
-
+			if (ImGui::MenuItem("Ortho")) {
+				scene.EmplaceComponent<OrthoCameraComponent>(entity);
+			}
+			if (ImGui::MenuItem("Perspec")) {
+				scene.EmplaceComponent<PerspectiveCameraComponent>(entity);
 			}
 			// cpp components end
 
@@ -230,7 +234,7 @@ void SceneHierarchy::RenderEntityNode(Scene& scene, const Entity entity) {
 				scene.EmplaceComponent<ScriptStorageComponent>(entity);
 			}
 			ScriptStorageComponent& storage = scene.GetComponent<ScriptStorageComponent>(entity);
-			for (auto& [typeName, declData] : GetCore()->_angel->_scriptComponentData) {
+			for (auto& [typeName, declData] : Core::GetCore()->Angel()->_scriptComponentData) {
 				std::string name = typeName;
 				auto icon = ComponentIcons::DEFINED_COMPONENT_ICONS.find(name);
 				if (icon != ComponentIcons::DEFINED_COMPONENT_ICONS.end()) {

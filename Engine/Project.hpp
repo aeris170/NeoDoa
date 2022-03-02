@@ -31,6 +31,8 @@ struct Project {
 	Assets& Assets();
 	void OpenStartupScene();
 	void OpenScene(FNode* sceneFile);
+	bool HasOpenScene() const;
+	Scene& GetOpenScene();
 
 	void SaveToDisk();
 	void SaveOpenSceneToDisk();

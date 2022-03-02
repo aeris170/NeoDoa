@@ -19,17 +19,17 @@
 #include "ModelRenderer.hpp"
 #include "Project.hpp"
 #include "Resolution.hpp"
-
-static std::unique_ptr<Core> _core;
+#include "Input.hpp"
 
 static void message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, GLchar const* message, void const* user_param);
 
-std::unique_ptr<Core>& CreateCore(Resolution resolution, const char* title, bool isFullscreen, const char* windowIcon, bool renderOffscreen) {
-#pragma region GLFW and Core/Window Initialization
+CorePtr& Core::CreateCore(Resolution resolution, const char* title, bool isFullscreen, const char* windowIcon, bool renderOffscreen) {
+#pragma region GLFW and Core/Window/Input Initialization
     glfwInit();
     glfwWindowHint(GLFW_MAXIMIZED, GL_TRUE);
-    _core = std::make_unique<Core>();
-    _core->_window = std::make_unique<Window>(resolution, title, isFullscreen, windowIcon);
+    _this = CorePtr(new Core, DeleteCore);
+    _this->_window = Window::CreateWindow(resolution, title, isFullscreen, windowIcon);
+    _this->_input = CreateInput();
 #pragma endregion
 
 #pragma region GLEW Initialization
@@ -45,7 +45,7 @@ std::unique_ptr<Core>& CreateCore(Resolution resolution, const char* title, bool
 #pragma endregion
 
 #pragma region Angel Initialization
-    _core->_angel = std::make_unique<Angel>();
+    _this->_angel = std::make_unique<struct Angel>();
 #pragma endregion
 
 #pragma region Built-in Stuff Initialization
@@ -179,7 +179,7 @@ std::unique_ptr<Core>& CreateCore(Resolution resolution, const char* title, bool
 #pragma endregion
 
     if (renderOffscreen) {
-        _core->_offscreenBuffer = std::make_unique<FrameBuffer>(resolution);
+        _this->_offscreenBuffer = std::make_unique<struct FrameBuffer>(resolution);
     }
 #pragma endregion
 
@@ -192,13 +192,26 @@ std::unique_ptr<Core>& CreateCore(Resolution resolution, const char* title, bool
 #endif
 #pragma endregion
 
-    return _core;
+    return _this;
 }
-
-void Core::LoadProject(const Project& project) {
-    _project = &const_cast<Project&>(project);
+CorePtr& Core::GetCore() { return _this; }
+void Core::DestroyCore() {
+    _this->Stop();
+    _this.reset();
 }
+void Core::DeleteCore(Core* core) { delete core; }
 
+bool Core::IsRunning() const { return _running; }
+bool Core::IsPlaying() const { return _playing; }
+void Core::SetPlaying(bool playing) { _playing = playing; }
+
+std::unique_ptr<Angel>& Core::Angel() { return _angel; }
+WindowPtr& Core::Window() { return _window; }
+std::unique_ptr<Input>& Core::Input() { return _input; }
+std::unique_ptr<FrameBuffer>& Core::FrameBuffer() { return _offscreenBuffer; }
+
+void Core::LoadProject(const Project& project) { _project = &const_cast<Project&>(project); }
+Project* Core::GetLoadedProject() const { return _project; }
 void Core::UnloadProject() {
     _playing = false;
     _project = nullptr;
@@ -219,11 +232,14 @@ void Core::Start() {
     _running = true;
     while (_running) {
         currentTime = glfwGetTime();
-        glViewport(0, 0, _window->_contentResolution.w, _window->_contentResolution.h);
+        glViewport(0, 0, _window->GetContentResolution().w, _window->GetContentResolution().h);
 
         float delta = currentTime - lastTime;
 
         if (_project != nullptr && _project->_openScene) {
+            for (auto& [id, attachment] : _attachments) {
+                attachment->BeforeFrame(_project);
+            }
             Scene& scene = _project->_openScene.value();
             if (_playing) {
                 scene.Update(delta);
@@ -235,17 +251,20 @@ void Core::Start() {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
             scene.Render();
             if (renderingOffscreen) {
-                _offscreenBuffer->UnBind(_window->_contentResolution);
+                _offscreenBuffer->UnBind(_window->GetContentResolution());
+            }
+            for (auto& [id, attachment] : _attachments) {
+                attachment->AfterFrame(_project);
             }
         }
 
         ImGuiRender(delta);
 
-        glfwSwapBuffers(_window->_glfwWindow);
+        glfwSwapBuffers(_window->GetPlatformWindow());
         glfwPollEvents();
         lastTime = currentTime;
 
-        if (glfwWindowShouldClose(_window->_glfwWindow)) {
+        if (glfwWindowShouldClose(_window->GetPlatformWindow())) {
             Stop();
         }
     }
@@ -253,15 +272,6 @@ void Core::Start() {
 
 void Core::Stop() {
     _running = false;
-}
-
-std::unique_ptr<Core>& GetCore() {
-    return _core;
-}
-
-void DestroyCore() {
-    _core->Stop();
-    _core.reset();
 }
 
 static void message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, GLchar const* message, void const* user_param) {
@@ -273,6 +283,7 @@ static void message_callback(GLenum source, GLenum type, GLuint id, GLenum sever
         case GL_DEBUG_SOURCE_THIRD_PARTY: return "THIRD PARTY";
         case GL_DEBUG_SOURCE_APPLICATION: return "APPLICATION";
         case GL_DEBUG_SOURCE_OTHER: return "OTHER";
+        default: return "DEFAULT";
         }
     }();
 
@@ -285,6 +296,7 @@ static void message_callback(GLenum source, GLenum type, GLuint id, GLenum sever
         case GL_DEBUG_TYPE_PERFORMANCE: return "PERFORMANCE";
         case GL_DEBUG_TYPE_MARKER: return "MARKER";
         case GL_DEBUG_TYPE_OTHER: return "OTHER";
+        default: return "DEFAULT";
         }
     }();
 
@@ -294,6 +306,7 @@ static void message_callback(GLenum source, GLenum type, GLuint id, GLenum sever
         case GL_DEBUG_SEVERITY_LOW: return "LOW";
         case GL_DEBUG_SEVERITY_MEDIUM: return "MEDIUM";
         case GL_DEBUG_SEVERITY_HIGH: return "HIGH";
+        default: return "DEFAULT";
         }
     }();
 

@@ -1,6 +1,7 @@
 #include "SceneViewport.hpp"
 
 #include <imgui.h>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <Core.hpp>
 #include <Input.hpp>
@@ -11,7 +12,8 @@
 #include "Icons.hpp"
 
 SceneViewport::SceneViewport(GUI* gui) noexcept :
-	gui(gui) {}
+	gui(gui),
+	gizmos(this) {}
 
 void SceneViewport::Begin(const std::optional<Scene>& scene) {
 	ImGui::PushID(gui->SCENE_VIEWPORT_TITLE);
@@ -20,22 +22,27 @@ void SceneViewport::Begin(const std::optional<Scene>& scene) {
 	title.append(gui->SCENE_VIEWPORT_ID);
 	ImGui::Begin(title.c_str());
 
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
-	DrawViewportSettings(scene);
 
-	viewportSize = ImGui::GetContentRegionAvail();
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
+	DrawViewportSettings(scene);
+}
+
+void SceneViewport::Render(Scene& scene) {
+	viewportSize = { static_cast<int>(ImGui::GetContentRegionAvail().x), static_cast<int>(ImGui::GetContentRegionAvail().y) };
 	viewportPosition = {
 		ImGui::GetWindowPos().x + ImGui::GetCursorPos().x,
 		ImGui::GetWindowPos().y + ImGui::GetCursorPos().y
 	};
-}
 
-void SceneViewport::Render(Scene& scene) {
-	ImGui::Image((void*)gui->core->_offscreenBuffer->_tex, { viewportSize.x, viewportSize.y }, { 0, 1 }, { 1, 0 });
+	ImVec2 size { static_cast<float>(viewportSize.w), static_cast<float>(viewportSize.h) };
+	ImGui::Image((void*)gui->core->FrameBuffer()->_tex, size, { 0, 1 }, { 1, 0 });
 
-	if (gizmoSettings.enabled) {
-		DrawGizmos(scene);
-	}
+	ImGui::PushClipRect({ viewportPosition.x, viewportPosition.y }, { viewportPosition.x + size.x, viewportPosition.y + size.y}, false);
+	gizmos.settings.viewportSize = viewportSize;
+	gizmos.settings.viewportPosition = viewportPosition;
+	gizmos.Render(scene);
+	ImGui::PopClipRect();
+
 	DrawCubeControl(scene);
 	HandleMouseControls(scene);
 }
@@ -46,25 +53,22 @@ void SceneViewport::End() {
 	ImGui::PopID();
 }
 
-ImVec2 SceneViewport::GetPosition() const { return viewportPosition; }
-ImVec2 SceneViewport::GetSize() const { return viewportSize; }
-
 void SceneViewport::DrawViewportSettings(const std::optional<Scene>& scene) {
 	ImFont* font = gui->GetFontBold();
 	ImGui::PushFont(font);
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
 	ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1);
 
-	if (gizmoSettings.enabled) {
+	if (gizmos.settings.enabled) {
 		ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0, 0, 0, 0 });
 		if (ImGui::Button(GIZMOS_BUTTON_TEXT)) {
-			gizmoSettings.enabled = false;
+			gizmos.settings.enabled = false;
 		}
 		ImGui::PopStyleColor();
 		ImGui::PopStyleColor();
 	} else if (ImGui::Button(GIZMOS_BUTTON_TEXT)) {
-		gizmoSettings.enabled = true;
+		gizmos.settings.enabled = true;
 	}
 	ImGui::SameLine();
 
@@ -73,46 +77,46 @@ void SceneViewport::DrawViewportSettings(const std::optional<Scene>& scene) {
 
 	ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
 	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0, 0, 0, 0 });
-	if (gizmoSettings.mode == ImGuizmo::MODE::WORLD) {
+	if (gizmos.settings.mode == ImGuizmo::MODE::WORLD) {
 		if (ImGui::Button(ICON_FA_GLOBE " World")) {
-			gizmoSettings.mode = ImGuizmo::MODE::LOCAL;
+			gizmos.settings.mode = ImGuizmo::MODE::LOCAL;
 		}
-	} else if (gizmoSettings.mode == ImGuizmo::MODE::LOCAL) {
+	} else if (gizmos.settings.mode == ImGuizmo::MODE::LOCAL) {
 		if (ImGui::Button(ICON_FA_MALE " Local")) {
-			gizmoSettings.mode = ImGuizmo::MODE::WORLD;
+			gizmos.settings.mode = ImGuizmo::MODE::WORLD;
 		}
 	}
 	ImGui::PopStyleColor(2);
 	ImGui::SameLine();
 
 	{ // Draw Gizmo type buttons group
-		if (gizmoSettings.type == ImGuizmo::OPERATION::TRANSLATE) {
+		if (gizmos.settings.type == ImGuizmo::OPERATION::TRANSLATE) {
 			ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0, 0, 0, 0 });
 			ImGui::Button(ICON_FA_ARROWS_ALT, buttonSize);
 			ImGui::PopStyleColor(2);
 		} else if (ImGui::Button(ICON_FA_ARROWS_ALT, buttonSize)) {
-			gizmoSettings.type = ImGuizmo::OPERATION::TRANSLATE;
+			gizmos.settings.type = ImGuizmo::OPERATION::TRANSLATE;
 		}
 		ImGui::SameLine();
 
-		if (gizmoSettings.type == ImGuizmo::OPERATION::ROTATE) {
+		if (gizmos.settings.type == ImGuizmo::OPERATION::ROTATE) {
 			ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0, 0, 0, 0 });
 			ImGui::Button(ICON_FA_SYNC_ALT, buttonSize);
 			ImGui::PopStyleColor(2);
 		} else if (ImGui::Button(ICON_FA_SYNC_ALT, buttonSize)) {
-			gizmoSettings.type = ImGuizmo::OPERATION::ROTATE;
+			gizmos.settings.type = ImGuizmo::OPERATION::ROTATE;
 		}
 		ImGui::SameLine();
 
-		if (gizmoSettings.type == ImGuizmo::OPERATION::SCALE) {
+		if (gizmos.settings.type == ImGuizmo::OPERATION::SCALE) {
 			ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0, 0, 0, 0 });
 			ImGui::Button(ICON_FA_EXPAND_ALT, buttonSize);
 			ImGui::PopStyleColor(2);
 		} else if (ImGui::Button(ICON_FA_EXPAND_ALT, buttonSize)) {
-			gizmoSettings.type = ImGuizmo::OPERATION::SCALE;
+			gizmos.settings.type = ImGuizmo::OPERATION::SCALE;
 		}
 		ImGui::SameLine();
 	}
@@ -123,12 +127,12 @@ void SceneViewport::DrawViewportSettings(const std::optional<Scene>& scene) {
 	if (!scene) {
 		ImGui::BeginDisabled();
 	}
-	if (gui->core->_playing) {
+	if (gui->core->IsPlaying()) {
 		if (ImGui::Button(ICON_FA_STOP, buttonSize)) {
-			gui->core->_playing = false;
+			gui->core->SetPlaying(false);
 		}
 	} else if (ImGui::Button(ICON_FA_PLAY, buttonSize)) {
-		gui->core->_playing = true;
+		gui->core->SetPlaying(true);
 	}
 	if (!scene) {
 		ImGui::EndDisabled();
@@ -138,12 +142,18 @@ void SceneViewport::DrawViewportSettings(const std::optional<Scene>& scene) {
 	ImGui::PopFont();
 }
 
-void SceneViewport::DrawGizmos(Scene& scene) {
-
-}
-
 void SceneViewport::DrawCubeControl(Scene& scene) {
+	auto& camera = scene.GetActiveCamera();
+	glm::mat4 view = camera._viewMatrix;
+	ImGuizmo::SetDrawlist();
+	ImGuizmo::ViewManipulate(glm::value_ptr(view), 8, { viewportPosition.x + viewportSize.w - 128 , viewportPosition.y }, { 128, 128 }, 0x10101080);
+	camera.forward = glm::normalize(glm::vec3(-view[0].z, -view[1].z, -view[2].z)); // forward is INVERTED!!!
 
+	// don't change up vector, fuck space sims. up being something other than 0, 1, 0 is VERBOTEN!
+	//ptr->_activeCamera->up = glm::normalize(glm::vec3(view[0].y, view[1].y, view[2].y));
+
+	controls.yaw = glm::degrees(atan2(camera.forward.z, camera.forward.x));
+	controls.pitch = glm::degrees(asin(camera.forward.y));
 }
 
 void SceneViewport::HandleMouseControls(Scene& scene) {
@@ -183,16 +193,16 @@ void SceneViewport::HandleMouseControls(Scene& scene) {
 		} else if (scene.IsPerspective()) {
 			glm::vec3 right = glm::normalize(glm::cross(forward, up)) * (controls.cameraSpeed * gui->delta);
 			glm::vec3 fwd = glm::normalize(forward) * (controls.cameraSpeed * gui->delta);
-			if (IsKeyPressed(KEY_W)) {
+			if (gui->core->Input()->IsKeyPressed(KEY_W)) {
 				eye += fwd;
 			}
-			if (IsKeyPressed(KEY_A)) {
+			if (gui->core->Input()->IsKeyPressed(KEY_A)) {
 				eye -= right;
 			}
-			if (IsKeyPressed(KEY_S)) {
+			if (gui->core->Input()->IsKeyPressed(KEY_S)) {
 				eye -= fwd;
 			}
-			if (IsKeyPressed(KEY_D)) {
+			if (gui->core->Input()->IsKeyPressed(KEY_D)) {
 				eye += right;
 			}
 			controls.yaw += delta.x;

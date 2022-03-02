@@ -48,8 +48,8 @@ struct GUI {
 	ImGuiWindowFlags window_flags{ ImGuiWindowFlags_None };
 	ImGuiDockNodeFlags dockspace_flags{ ImGuiDockNodeFlags_None };
 
-	std::unique_ptr<Core>& core;
-	std::unique_ptr<Window>& window;
+	CorePtr& core;
+	WindowPtr& window;
 	std::string defaultWindowName{ "NeoDoa Editor" };
 	bool dockspaceOpen{ true };
 
@@ -66,7 +66,7 @@ struct GUI {
 
 	float delta;
 
-	GUI(std::unique_ptr<Core>& core) noexcept;
+	GUI(CorePtr& core) noexcept;
 
 	void Prepare();
 	void operator() (float delta);
@@ -98,5 +98,5 @@ private:
 	ImFont* fontBold{ nullptr };
 
 	// TODO REMOVE ME WHEN IMGUI IMPLEMENTS THIS WORKAROUND AS API FUNC.
-	void ExecuteDockBuilderOrderAndFocusWorkAround();
+	void ExecuteDockBuilderFocusWorkAround();
 };

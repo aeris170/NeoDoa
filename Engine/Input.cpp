@@ -1,40 +1,18 @@
 #include "Input.hpp"
 
-#include "Core.hpp"
-#include "Window.hpp"
-
-int IsKeyPressed(int key) {
-	return GetCore()->_window->_keyboard._keys[key];
+std::unique_ptr<Input> CreateInput() {
+	return std::make_unique<Input>();
 }
 
-int IsKeyTyped(int key) {
-	return GetCore()->_window->_keyboard._keys[key] == 1;
-}
+int Input::IsKeyPressed(int key) { return Keyboard.Keys[key]; }
+int Input::IsKeyTyped(int key) { return Keyboard.Keys[key] == 1; }
+int Input::IsKeyReleased(int key) { return !Keyboard.Keys[key]; }
 
-int IsKeyReleased(int key) {
-	return compl GetCore()->_window->_keyboard._keys[key];
-}
+int Input::IsMouseButtonPressed(int button) { return Mouse.Buttons[button]; }
+int Input::IsMouseButtonReleased(int button) {	return !Mouse.Buttons[button]; }
 
-int IsMouseButtonPressed(int button) {
-	return GetCore()->_window->_mouse._buttons[button];
-}
+double Input::GetMouseX() { return Mouse.PosX; }
+double Input::GetMouseY() { return Mouse.PosY; }
 
-int IsMouseButtonReleased(int button) {
-	return compl GetCore()->_window->_mouse._buttons[button];
-}
-
-double GetMouseX() {
-	return GetCore()->_window->_mouse._posx;
-}
-
-double GetMouseY() {
-	return GetCore()->_window->_mouse._posy;
-}
-
-double GetMouseScrollX() {
-	return GetCore()->_window->_mouse._scrollx;
-}
-
-double GetMouseScrollY() {
-	return GetCore()->_window->_mouse._scrolly;
-}
+double Input::GetMouseScrollX() { return Mouse.ScrollX; }
+double Input::GetMouseScrollY() { return Mouse.ScrollY; }

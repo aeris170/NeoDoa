@@ -17,13 +17,13 @@ struct ScriptStorageComponent;
 
 struct Scene {
 
+	static Scene& GetLoadedScene();
+
 	std::string Name;
 	Color ClearColor{ 0.2f, 0.3f, 0.3f };
 	Color SelectionOutlineColor{ 0.68f, 0.49f, 0 };
 
 	Scene(std::string_view name = "New Scene") noexcept;
-
-	operator std::weak_ptr<Scene>() const;
 
 	bool IsOrtho() const;
 	bool IsPerspective() const;
@@ -117,7 +117,6 @@ struct Scene {
 	// :D ?
 
 private:
-	std::weak_ptr<Scene> _this;
 	Renderer _renderer;
 	OutlineRenderer _outlineRenderer;
 

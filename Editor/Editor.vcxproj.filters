@@ -55,11 +55,14 @@
     <Filter Include="UI\GUI\SceneSettings">
       <UniqueIdentifier>{365c057c-5eb3-4528-b074-c5cabf931de0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Attachments">
+      <UniqueIdentifier>{f91ff7e7-6f2c-4d96-84a5-ebf77417cdeb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\GUI\SceneViewport\Gizmos">
+      <UniqueIdentifier>{968e200f-ef59-4dbc-bbaa-9b91dc213e0b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Editor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -104,6 +107,13 @@
     </ClCompile>
     <ClCompile Include="SceneSettings.cpp">
       <Filter>UI\GUI\SceneSettings</Filter>
+    </ClCompile>
+    <ClCompile Include="OutlineAttachment.cpp">
+      <Filter>Attachments</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Gizmos.cpp">
+      <Filter>UI\GUI\SceneViewport\Gizmos</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -157,6 +167,12 @@
     </ClInclude>
     <ClInclude Include="SceneSettings.hpp">
       <Filter>UI\GUI\SceneSettings</Filter>
+    </ClInclude>
+    <ClInclude Include="OutlineAttachment.hpp">
+      <Filter>Attachments</Filter>
+    </ClInclude>
+    <ClInclude Include="Gizmos.hpp">
+      <Filter>UI\GUI\SceneViewport\Gizmos</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

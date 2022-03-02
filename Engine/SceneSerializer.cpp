@@ -107,7 +107,7 @@ std::string SerializeScene(const Scene& scene) {
 
 		printer.OpenElement("entities");
 		{
-			auto& core = GetCore();
+			auto& core = Core::GetCore();
 			for (auto& entity : _scene.GetAllEntites()) {
 				printer.OpenElement("entity");
 				{
@@ -337,8 +337,8 @@ void SerializeScriptComponent(tinyxml2::XMLPrinter& printer, const ScriptCompone
 		if (prop.isPrivate || prop.isProtected) { continue; } // don't serialize private or protected variables as they are never visible in editor!
 		printer.OpenElement(prop.name.c_str());
 		{
-			auto it = GetCore()->_angel->_enums.find(prop.typeName);
-			if (it != GetCore()->_angel->_enums.end()) SerializeEnum(printer, prop.typeName.c_str(), script.GetAt<int>(i));
+			auto it = Core::GetCore()->Angel()->_enums.find(prop.typeName);
+			if (it != Core::GetCore()->Angel()->_enums.end()) SerializeEnum(printer, prop.typeName.c_str(), script.GetAt<int>(i));
 			else if (prop.typeName == "Entity")        SerializeEntityID(printer, script.GetAt<Entity>(i));
 			else if (prop.typeName == "int")           SerializeInt(printer, script.GetAt<int>(i));
 			else if (prop.typeName == "float")         SerializeFloat(printer, script.GetAt<float>(i));

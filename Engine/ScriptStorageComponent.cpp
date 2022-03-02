@@ -29,7 +29,7 @@ ScriptComponent& ScriptStorageComponent::Attach(std::string_view componentType) 
 		DOA_LOG_TRACE("Didn't attach. Entity already has %s!", ptr->_name);
 		return *ptr;
 	} else {
-		ScriptComponent c{ GetCore()->_angel->InstantiateScriptComponentIncomplete(componentType) };
+		ScriptComponent c{ Core::GetCore()->Angel()->InstantiateScriptComponentIncomplete(componentType) };
 		c._storage = this;
 		return _components.emplace(std::string(componentType), c).first->second;
 	}
@@ -49,8 +49,8 @@ ScriptComponent& ScriptStorageComponent::AttachWithData(std::string_view compone
 
 	for (auto i = 0; i < props.size(); i++) {
 		const PropertyData& prop = props[i];
-		auto it = GetCore()->_angel->_enums.find(prop.typeName);
-		if (it != GetCore()->_angel->_enums.end()) script.GetAt<int>(i) = std::any_cast<int>(data.data[i]);
+		auto it = Core::GetCore()->Angel()->_enums.find(prop.typeName);
+		if (it != Core::GetCore()->Angel()->_enums.end()) script.GetAt<int>(i) = std::any_cast<int>(data.data[i]);
 		else if (prop.typeName == "Entity")        script.GetAt<Entity>(i) = std::any_cast<Entity>(data.data[i]);
 		else if (prop.typeName == "int")           script.GetAt<int>(i) = std::any_cast<int>(data.data[i]);
 		else if (prop.typeName == "float")         script.GetAt<float>(i) = std::any_cast<float>(data.data[i]);

@@ -100,7 +100,7 @@ Scene DeserializeScene(FNode* file) {
 						IDComponent id = DeserializeIDComponent(component);
 						entt = scene.CreateEntity(id.GetTagRef(), static_cast<uint32_t>(id.GetEntity()));
 					} else if (name == nameof(TransformComponent)) {
-						TransformComponent transform = DeserializeTransformComponent(component, entt, scene);
+						TransformComponent transform = DeserializeTransformComponent(component, entt);
 						scene.ReplaceComponent<TransformComponent>(transform.GetEntity(), std::move(transform));
 					} else if (name == nameof(ParentComponent)) {
 						ParentComponent parent = DeserializeParentComponent(component, entt);
@@ -198,10 +198,10 @@ IDComponent DeserializeIDComponent(tinyxml2::XMLElement* component) {
 	auto tag = component->FirstChildElement(nameof_c(IDComponent::tag))->Attribute("value");
 	return { entity, tag };
 }
-TransformComponent DeserializeTransformComponent(tinyxml2::XMLElement* component, const Entity entity, const Scene& scene) {
+TransformComponent DeserializeTransformComponent(tinyxml2::XMLElement* component, const Entity entity) {
 	auto matrix = DeserializeMat4(component->FirstChildElement(nameof_c(TransformComponent::localMatrix)));
 
-	return TransformComponent(entity, scene, std::move(matrix));
+	return TransformComponent(entity, std::move(matrix));
 }
 ParentComponent DeserializeParentComponent(tinyxml2::XMLElement* component, const Entity entity) {
 	std::vector<Entity> children;
@@ -231,8 +231,8 @@ ScriptComponentData DeserializeScriptComponentData(tinyxml2::XMLElement* compone
 		std::any value;
 
 		std::string type = l->Attribute("type");
-		auto it = GetCore()->_angel->_enums.find(type);
-		if (it != GetCore()->_angel->_enums.end())	value = DeserializeEnum(l);
+		auto it = Core::GetCore()->Angel()->_enums.find(type);
+		if (it != Core::GetCore()->Angel()->_enums.end())	value = DeserializeEnum(l);
 		else if (type == "Entity")					value = DeserializeEntityID(l);
 		else if (type == "int")						value = DeserializeInt(l);
 		else if (type == "float")					value = DeserializeFloat(l);

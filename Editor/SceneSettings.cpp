@@ -77,7 +77,6 @@ void SceneSettings::DrawSettings(Scene& scene) {
 		FloatWidget("FOV", perspective._fov, 1, 45, 135);
 		FloatWidget("Near", perspective._near, 1);
 		FloatWidget("Far", perspective._far, 1);
-		perspective._aspect = gui->sv.GetSize().x / gui->sv.GetSize().y;
 	}
 	ImGui::NewLine();
 

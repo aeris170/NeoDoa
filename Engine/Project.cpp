@@ -44,20 +44,17 @@ Project& Project::operator=(Project&& other) noexcept {
 	return *this;
 }
 
-Assets& Project::Assets() {
-	return _assets;
-}
+Assets& Project::Assets() { return _assets; }
 
-void Project::OpenStartupScene() {
-	OpenScene(_startupScene);
-}
-
+void Project::OpenStartupScene() { OpenScene(_startupScene); }
 void Project::OpenScene(FNode* sceneFile) {
 	if (sceneFile == nullptr || !Assets::IsSceneFile(*sceneFile)) { return; }
 
 	_openScene.emplace(DeserializeScene(sceneFile));
 	_openSceneFile = sceneFile;
 }
+bool Project::HasOpenScene() const { return _openScene.has_value(); }
+Scene& Project::GetOpenScene() { return _openScene.value(); }
 
 void Project::SaveToDisk() {
 	tinyxml2::XMLDocument doc;

@@ -3,13 +3,13 @@
 #include "Scene.hpp"
 #include "ParentComponent.hpp"
 #include "ChildComponent.hpp"
+#include "Core.hpp"
 
-TransformComponent::TransformComponent(const Entity owner, std::weak_ptr<Scene> scene) noexcept :
-    entity(owner),
-    scene(scene) {}
+TransformComponent::TransformComponent(const Entity owner) noexcept :
+    entity(owner) {}
 
-TransformComponent::TransformComponent(const Entity owner, std::weak_ptr<Scene> scene, glm::mat4&& matrix) noexcept :
-    TransformComponent(owner, scene) {
+TransformComponent::TransformComponent(const Entity owner, glm::mat4&& matrix) noexcept :
+    TransformComponent(owner) {
     localMatrix = std::move(matrix);
     Decompose(localMatrix, localTranslation, localRotation, localScale);
 }
@@ -67,8 +67,8 @@ glm::vec3 TransformComponent::ExtractScale(const glm::mat4& m) {
     return scale;
 }
 
-void TransformComponent::Decompose(const glm::mat4& m, glm::vec3& pos, glm::quat& rot, glm::vec3& scale) {
-    pos = ExtractTranslation(m);
+void TransformComponent::Decompose(const glm::mat4& m, glm::vec3& tra, glm::quat& rot, glm::vec3& scale) {
+    tra = ExtractTranslation(m);
     rot = ExtractRotation(m);
     scale = ExtractScale(m);
 }
@@ -77,28 +77,24 @@ Entity TransformComponent::GetEntity() const { return entity; }
 
 glm::vec3 TransformComponent::GetWorldTranslation() const { return ExtractTranslation(GetWorldMatrix()); }
 void TransformComponent::SetWorldTranslation(glm::vec3 worldTranslation) {
-    if (scene.expired()) return;
-
-    std::shared_ptr<Scene> scenePtr = scene.lock();
+    Scene& scene = Scene::GetLoadedScene();
 
     glm::vec3 local = worldTranslation;
-    if (scenePtr->HasComponent<ParentComponent>(entity)) {
-        auto& parent = scenePtr->GetComponent<ParentComponent>(entity);
-        local -= scenePtr->GetComponent<TransformComponent>(parent.GetEntity()).GetWorldTranslation();
+    if (scene.HasComponent<ChildComponent>(entity)) {
+        auto parent = scene.GetComponent<ChildComponent>(entity).GetParent();
+        local -= scene.GetComponent<TransformComponent>(parent).GetWorldTranslation();
     }
     SetLocalTranslation(local);
 }
 
 glm::quat TransformComponent::GetWorldRotation() const { return ExtractRotation(GetWorldMatrix()); }
 void TransformComponent::SetWorldRotation(glm::quat worldRotation) {
-    if (scene.expired()) return;
-
-    std::shared_ptr<Scene> scenePtr = scene.lock();
+    Scene& scene = Scene::GetLoadedScene();
 
     glm::quat local = worldRotation;
-    if (scenePtr->HasComponent<ParentComponent>(entity)) {
-        auto& parent = scenePtr->GetComponent<ParentComponent>(entity);
-        local *= glm::inverse(scenePtr->GetComponent<TransformComponent>(parent.GetEntity()).GetWorldRotation());
+    if (scene.HasComponent<ChildComponent>(entity)) {
+        auto parent = scene.GetComponent<ChildComponent>(entity).GetParent();
+        local *= glm::inverse(scene.GetComponent<TransformComponent>(parent).GetWorldRotation());
     }
     SetLocalRotation(local);
 }
@@ -106,14 +102,12 @@ void TransformComponent::SetWorldRotation(glm::quat worldRotation) {
 glm::vec3 TransformComponent::GetLossyScale() const { return ExtractScale(GetWorldMatrix()); }
 
 glm::mat4 TransformComponent::GetWorldMatrix() const {
-    if (scene.expired()) return glm::mat4();
-
-    std::shared_ptr<Scene> scenePtr = scene.lock();
+    Scene& scene = Scene::GetLoadedScene();
 
     glm::mat4 transform = glm::mat4(1.0f); // identity
-    if (scenePtr->HasComponent<ParentComponent>(entity)) {
-        auto& parent = scenePtr->GetComponent<ParentComponent>(entity);
-        transform = scenePtr->GetComponent<TransformComponent>(parent.GetEntity()).GetLocalMatrix();
+    if (scene.HasComponent<ChildComponent>(entity)) {
+        auto parent = scene.GetComponent<ChildComponent>(entity).GetParent();
+        transform = scene.GetComponent<TransformComponent>(parent).GetLocalMatrix();
     }
     transform = transform * GetLocalMatrix();
     return transform;

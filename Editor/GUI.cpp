@@ -7,12 +7,9 @@
 #include <Window.hpp>
 #include <Texture.hpp>
 
-// TODO REMOVE ME WHEN IMGUI IMPLEMENTS THIS WORKAROUND AS API FUNC.
-static bool DoWorkAround{ false };
-
-GUI::GUI(std::unique_ptr<Core>& core) noexcept :
+GUI::GUI(CorePtr& core) noexcept :
 	core(core),
-	window(core->_window),
+	window(core->Window()),
 	mb(this),
 	sh(this),
 	obs(this),
@@ -24,7 +21,7 @@ GUI::GUI(std::unique_ptr<Core>& core) noexcept :
 	delta(0) {
 	ImVec4 txtColor = ImGui::GetStyle().Colors[ImGuiCol_Text];
 	SVGPathway::Initialize({ txtColor.x, txtColor.y, txtColor.z, txtColor.w });
-	core->_window->SetTitle(defaultWindowName);
+	window->SetTitle(defaultWindowName);
 }
 
 void GUI::Prepare() {
@@ -146,7 +143,7 @@ void GUI::operator() (float delta) {
 
 void GUI::End() {
 	ImGui::End();
-	ExecuteDockBuilderOrderAndFocusWorkAround();
+	ExecuteDockBuilderFocusWorkAround();
 }
 
 void GUI::CreateNewProject(std::string_view workspace, std::string_view name) {
@@ -156,7 +153,7 @@ void GUI::CreateNewProject(std::string_view workspace, std::string_view name) {
 	std::string title = defaultWindowName;
 	title.append(" - ");
 	title.append(openProject->_name);
-	core->_window->SetTitle(title);
+	window->SetTitle(title);
 }
 
 void GUI::SaveProjectToDisk() {
@@ -174,7 +171,7 @@ void GUI::OpenProjectFromDisk(const std::string& path) {
 	std::string title = defaultWindowName;
 	title.append(" - ");
 	title.append(openProject->_name);
-	core->_window->SetTitle(title);
+	window->SetTitle(title);
 }
 
 void GUI::CloseProject() {
@@ -191,7 +188,7 @@ void GUI::CreateNewScene(std::string_view relativePath, std::string_view name) {
 }
 
 bool GUI::HasOpenProject() { return openProject.has_value(); }
-bool GUI::HasOpenScene() { return HasOpenProject() && openProject->_openScene.has_value(); }
+bool GUI::HasOpenScene() { return HasOpenProject() && openProject->HasOpenScene(); }
 
 ImGuiIO* GUI::IO() { return io; }
 ImFont* GUI::GetFont() { return font; }
@@ -204,7 +201,7 @@ void* GUI::GetFileIcon(TextureSize size) { return reinterpret_cast<void*>(SVGPat
 void* GUI::GetBackArrowIcon(TextureSize size) { return reinterpret_cast<void*>(SVGPathway::Get(BACK_ARROW_ICON_KEY, TextureStyle::PADDED, size).lock()->_glTextureID); }
 
 // TODO REMOVE ME WHEN IMGUI IMPLEMENTS THIS WORKAROUND AS API FUNC.
-void GUI::ExecuteDockBuilderOrderAndFocusWorkAround() {
+void GUI::ExecuteDockBuilderFocusWorkAround() {
 	static int i = -1;
 	if (i == 0) {
 		auto asset = ImGui::FindWindowByName(ASSET_MANAGER_ID);
@@ -215,8 +212,6 @@ void GUI::ExecuteDockBuilderOrderAndFocusWorkAround() {
 
 		auto viewport = ImGui::FindWindowByName(SCENE_VIEWPORT_ID);
 		ImGui::FocusWindow(viewport);
-
-		DoWorkAround = false;
 	}
 	i++;
 }

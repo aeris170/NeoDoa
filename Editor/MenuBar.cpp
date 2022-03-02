@@ -64,9 +64,9 @@ void MenuBar::RenderProjectSubMenu() {
 	if (ImGui::MenuItem("Open Project...", "Ctrl+Shift+O")) {
 		if (tinyfd_messageBox("Warning", "You may have unsaved changes. Are you sure you want to open another project?", "yesno", "warning", 0)) {
 			static const char* const types[] = { "*.doa" };
-			gui->core->_angel->_scriptLoaderMutex.lock();
+			gui->core->Angel()->_scriptLoaderMutex.lock();
 			const char* path = tinyfd_openFileDialog("Select Project File", nullptr, 1, types, "NeoDoa Project Files", 0);
-			gui->core->_angel->_scriptLoaderMutex.unlock();
+			gui->core->Angel()->_scriptLoaderMutex.unlock();
 			if (path) {
 				gui->CloseProject();
 				gui->OpenProjectFromDisk(path);
@@ -111,7 +111,6 @@ void MenuBar::RenderHelpSubMenu() {
 }
 
 // Inner struct: About Section
-
 MenuBar::AboutSection::AboutSection(MenuBar& owner) :
 	mb(owner),
 	neodoaBanner(CreateTexture("!!neodoa_banner!!", "Images/social.png")),

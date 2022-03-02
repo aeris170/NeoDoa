@@ -25,13 +25,11 @@ private:
     glm::vec3 localScale{ glm::vec3(1, 1, 1) };
 	glm::mat4 localMatrix{ glm::identity<glm::mat4>() };
 
-    std::weak_ptr<Scene> scene;
-
-    TransformComponent(const Entity owner, std::weak_ptr<Scene> scene, glm::mat4&& matrix) noexcept;
+    TransformComponent(const Entity owner, glm::mat4&& matrix) noexcept;
 
 public:
 
-    TransformComponent(const Entity owner, std::weak_ptr<Scene> scene) noexcept;
+    TransformComponent(const Entity owner) noexcept;
 
     static void InsertTranslation(glm::mat4& m, const glm::vec3& translation);
     static void InsertRotation(glm::mat4& m, const glm::quat& rotation);
@@ -68,6 +66,6 @@ public:
     void SetLocalMatrix(glm::mat4 localMatrix);
 
     friend void SerializeTransformComponent(tinyxml2::XMLPrinter& printer, const TransformComponent& transform);
-    friend TransformComponent DeserializeTransformComponent(tinyxml2::XMLElement* component, const Entity entity, const Scene& scene);
+    friend TransformComponent DeserializeTransformComponent(tinyxml2::XMLElement* component, const Entity entity);
 
 };

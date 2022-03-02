@@ -2,8 +2,13 @@
 
 #include <optional>
 
+#include <glm\glm.hpp>
 #include <imgui.h>
 #include <ImGuizmo.h>
+
+#include <Resolution.hpp>
+
+#include "Gizmos.hpp"
 
 struct GUI;
 struct Scene;
@@ -13,6 +18,7 @@ struct SceneViewport {
 	constexpr static auto GIZMOS_BUTTON_TEXT{ "Gizmos" };
 
 	GUI* const gui;
+	Gizmos gizmos;
 
 	SceneViewport(GUI* gui) noexcept;
 
@@ -20,19 +26,11 @@ struct SceneViewport {
 	void Render(Scene& scene);
 	void End();
 
-	ImVec2 GetPosition() const;
-	ImVec2 GetSize() const;
-
 private:
-	struct ImGuizmoSettings {
-		bool enabled{ true };
-		ImGuizmo::OPERATION type{ ImGuizmo::OPERATION::TRANSLATE };
-		ImGuizmo::MODE mode{ ImGuizmo::MODE::LOCAL };
-	} gizmoSettings;
-	ImVec2 viewportPosition, viewportSize;
+	glm::vec2 viewportPosition{};
+	Resolution viewportSize{};
 
 	void DrawViewportSettings(const std::optional<Scene>& scene);
-	void DrawGizmos(Scene& scene);
 	void DrawCubeControl(Scene& scene);
 
 	struct Controls {
@@ -44,7 +42,7 @@ private:
 
 		float yaw{ 0 };
 		float pitch{ 0 };
-	} controls;
+	} controls{};
 
 	void HandleMouseControls(Scene& scene);
 };

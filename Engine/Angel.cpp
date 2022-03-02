@@ -117,13 +117,13 @@ static Model* modelCtor(const std::string& name, std::vector<Mesh>&& meshes) { r
 static Shader* findShader(const std::string& name) {
 	auto rv = FindShader(name);
 	if (!rv.expired()) return &*(rv.lock());
-	GetCore()->_angel->_scriptCtx->SetException("Shader not found exception");
+	Core::GetCore()->Angel()->_scriptCtx->SetException("Shader not found exception");
 	return nullptr;
 }
 static Model* findModel(const std::string& name) {
 	auto rv = FindModel(name);
 	if (rv.has_value()) return &*(rv.value().lock());
-	GetCore()->_angel->_scriptCtx->SetException("Model not found exception");
+	Core::GetCore()->Angel()->_scriptCtx->SetException("Model not found exception");
 	return nullptr;
 }
 
@@ -154,6 +154,8 @@ Angel::Angel() noexcept :
 	int r;
 	r = _scriptEngine->SetMessageCallback(asFUNCTION(MessageCallback), 0, asCALL_CDECL); assert(r >= 0);
 #pragma region Input...
+	// TODO reexpose input into the scripts
+	/*
 	r = _scriptEngine->RegisterGlobalFunction("bool IsKeyPressed(int)", asFUNCTION(IsKeyPressed), asCALL_CDECL); assert(r >= 0);
 	r = _scriptEngine->RegisterGlobalFunction("bool IsKeyTyped(int)", asFUNCTION(IsKeyTyped), asCALL_CDECL); assert(r >= 0);
 	r = _scriptEngine->RegisterGlobalFunction("bool IsKeyReleased(int)", asFUNCTION(IsKeyReleased), asCALL_CDECL); assert(r >= 0);
@@ -163,7 +165,7 @@ Angel::Angel() noexcept :
 	r = _scriptEngine->RegisterGlobalFunction("double GetMouseY()", asFUNCTION(GetMouseY), asCALL_CDECL); assert(r >= 0);
 	r = _scriptEngine->RegisterGlobalFunction("double GetMouseScrollX()", asFUNCTION(GetMouseScrollX), asCALL_CDECL); assert(r >= 0);
 	r = _scriptEngine->RegisterGlobalFunction("double GetMouseScrollY()", asFUNCTION(GetMouseScrollY), asCALL_CDECL); assert(r >= 0);
-
+	*/
 	r = _scriptEngine->RegisterGlobalProperty("const int KEY_UNKNOWN", &KEY_UNKNOWN); assert(r >= 0);
 	r = _scriptEngine->RegisterGlobalProperty("const int KEY_SPACE", &KEY_SPACE); assert(r >= 0);
 	r = _scriptEngine->RegisterGlobalProperty("const int KEY_APOSTROPHE", &KEY_APOSTROPHE); assert(r >= 0); /* ' */

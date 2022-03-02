@@ -16,13 +16,17 @@
 #include "IDComponent.hpp"
 #include "ScriptStorageComponent.hpp"
 #include "CameraComponent.hpp"
+#include "Project.hpp"
+
+Scene& Scene::GetLoadedScene() {
+	static auto& core = Core::GetCore();
+	return core->GetLoadedProject()->GetOpenScene();
+}
 
 Scene::Scene(std::string_view name) noexcept :
 	Name(name),
 	_usingOrthoCamera(true),
 	_usingPerspectiveCamera(false) {} // default camera is orthographic
-
-Scene::operator std::weak_ptr<Scene>() const { return _this; }
 
 bool Scene::IsOrtho() const { return _usingOrthoCamera; }
 bool Scene::IsPerspective() const { return _usingPerspectiveCamera; }
@@ -73,7 +77,7 @@ Entity Scene::CreateEntity(std::string name, uint32_t desiredID) {
 		name.append(std::to_string(entt));
 	}
 	_registry.emplace<IDComponent>(entt, entt, name);
-	_registry.emplace<TransformComponent>(entt, entt, _this);
+	_registry.emplace<TransformComponent>(entt, entt);
 	_registry.emplace<ScriptStorageComponent>(entt, entt);
 
 	_entities.push_back(entt);

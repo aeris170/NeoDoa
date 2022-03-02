@@ -1,20 +1,19 @@
-#include <Core.hpp>
-#include <Window.hpp>
+#include <Core.hpp>,
 #include <ImGuiRenderer.hpp>
 
 #include "GUI.hpp"
+#include "OutlineAttachment.hpp"
 
 int main() {
-	std::unique_ptr<Core>& core = CreateCore({ 1280, 720 }, "NeoDoa Editor", false, "Images/neodoalogo", true);
-	ImGui::SetCurrentContext(core->_window->_imGuiContext);
-	/*
-	ImGuiAddRenderCommand(Editor());
-	*/
+	CorePtr& core = Core::CreateCore({ 2000, 2000 }, "NeoDoa Editor", false, "Images/neodoalogo", true);
+
+
 	std::shared_ptr<GUI> gui_ptr = std::make_shared<GUI>(core);
 	ImGuiAddRenderCommand([gui = gui_ptr](float delta) { gui->operator()(delta); });
 
-    GetCore()->Start();
-    DestroyCore();
+	core->CreateAttachment<OutlineAttachment>(gui_ptr);
+	core->Start();
+	Core::DestroyCore();
 
 	return 0;
 }
