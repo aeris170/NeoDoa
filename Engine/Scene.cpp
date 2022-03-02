@@ -40,8 +40,8 @@ void Scene::SwitchToPerspective() {
 	_usingOrthoCamera = false;
 }
 
-void Scene::SetOrtho(float left, float right, float bottom, float top, float near, float far) { _oc = OrthoCamera(left, right, bottom, top, near, far); }
-void Scene::SetPerpective(float fov, float aspect, float near, float far) { _pc = PerspectiveCamera(fov, aspect, near, far); }
+void Scene::SetOrtho(float left, float right, float bottom, float top, float near, float far) { _oc.Set(left, right, bottom, top, near, far); }
+void Scene::SetPerpective(float fov, float aspect, float near, float far) { _pc.Set(fov, aspect, near, far); }
 
 void Scene::SetOrthoCamera(OrthoCamera&& ortho) { _oc = std::move(ortho); }
 void Scene::SetPerspectiveCamera(PerspectiveCamera&& perspective) { _pc = std::move(perspective); }

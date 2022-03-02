@@ -12,6 +12,15 @@ OrthoCamera::OrthoCamera(float left, float right, float bottom, float top, float
 	_near(near),
 	_far(far) {}
 
+void OrthoCamera::Set(float left, float right, float bottom, float top, float near, float far) {
+	_left = left;
+	_right = right;
+	_bottom = bottom;
+	_top = top;
+	_near = near;
+	_far = far;
+}
+
 void OrthoCamera::UpdateView() {
 	forward = glm::normalize(forward);
 	up = glm::normalize(up);

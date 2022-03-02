@@ -10,6 +10,7 @@ struct PerspectiveCamera : ACamera {
 
 	PerspectiveCamera(float fov, float aspect, float near, float far);
 
+	void Set(float fov, float aspect, float near, float far);
 	void UpdateView() override;
 	void UpdateProjection() override;
 	void UpdateViewProjection() override;

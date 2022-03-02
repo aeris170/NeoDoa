@@ -144,6 +144,7 @@ void SceneViewport::DrawViewportSettings(const std::optional<Scene>& scene) {
 
 void SceneViewport::DrawCubeControl(Scene& scene) {
 	auto& camera = scene.GetActiveCamera();
+	camera.UpdateView();
 	glm::mat4 view = camera._viewMatrix;
 	ImGuizmo::SetDrawlist();
 	ImGuizmo::ViewManipulate(glm::value_ptr(view), 8, { viewportPosition.x + viewportSize.w - 128 , viewportPosition.y }, { 128, 128 }, 0x10101080);

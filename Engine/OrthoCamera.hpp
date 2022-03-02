@@ -12,6 +12,7 @@ struct OrthoCamera : ACamera {
 
 	OrthoCamera(float left, float right, float bottom, float top, float near, float far);
 
+	void Set(float left, float right, float bottom, float top, float near, float far);
 	void UpdateView() override;
 	void UpdateProjection() override;
 	void UpdateViewProjection() override;

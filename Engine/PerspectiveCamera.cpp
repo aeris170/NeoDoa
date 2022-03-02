@@ -12,6 +12,13 @@ PerspectiveCamera::PerspectiveCamera(float fov, float aspect, float near, float 
     _near(near),
     _far(far) {}
 
+void PerspectiveCamera::Set(float fov, float aspect, float near, float far) {
+    _fov = fov;
+    _aspect = aspect;
+    _near = near;
+    _far = far;
+}
+
 void PerspectiveCamera::UpdateView() {
     forward = glm::normalize(forward);
     up = glm::normalize(up);
