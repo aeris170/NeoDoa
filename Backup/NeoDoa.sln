@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.1.32421.90
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30225.117
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GLFW", "GLFW\GLFW.vcxproj", "{610D3BDC-B016-46EC-BE37-33C01D9E35C1}"
 EndProject
@@ -61,6 +61,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7B5BF7C9-FB96-407A-AB57-737BA52F3065}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		assetmanagement diagram.png = assetmanagement diagram.png
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TinyXML2", "TinyXML2\TinyXML2.vcxproj", "{137530C7-0E83-486F-8E91-02901C7AAF45}"
