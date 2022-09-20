@@ -4,74 +4,111 @@
 #include <filesystem>
 #include <cstdlib>
 
+#include <entt.hpp>
+
+#include "UUID.hpp"
+#include "Asset.hpp"
 #include "FileNode.hpp"
 
 struct Project;
 
+struct AssetHandle {
+
+	AssetHandle() noexcept;
+	AssetHandle(Asset* const asset) noexcept;
+	~AssetHandle() = default;
+	AssetHandle(const AssetHandle& other) = default;
+	AssetHandle(AssetHandle&& other) = default;
+	AssetHandle& operator=(const AssetHandle& other) = default;
+	AssetHandle& operator=(AssetHandle&& other) = default;
+	Asset& operator*() const;
+	Asset* operator->() const;
+	operator Asset*() const;
+	operator bool() const;
+
+	bool HasValue() const;
+	Asset& Value() const;
+	void Reset();
+
+private:
+	Asset* _asset;
+};
+
 struct Assets {
 
-	inline static std::string PROJECT_EXT = ".doa";
-	static bool IsProjectFile(const FNode& node);
-	inline static std::string SCENE_EXT = ".scn";
-	static bool IsSceneFile(const FNode& node);
-	inline static std::string SCRIPT_EXT = ".scrpt";
-	static bool IsScriptFile(const FNode& node);
-	inline static std::string TEXTURE_EXT = ".tex";
-	static bool IsTextureFile(const FNode& node);
-	inline static std::string MODEL_EXT = ".mdl";
-	static bool IsModelFile(const FNode& node);
-	inline static std::string MATERIAL_EXT = ".mat";
-	static bool IsMaterialFile(const FNode& node);
-	inline static std::string SHADER_EXT = ".shdr";
-	static bool IsShaderFile(const FNode& node);
+	inline static std::string SCENE_EXT{ ".scn" };
+	inline static std::string SCRIPT_EXT{ ".scrpt" };
+	inline static std::string TEXTURE_EXT{ ".tex" };
+	inline static std::string MODEL_EXT{ ".mdl" };
+	inline static std::string MATERIAL_EXT{ ".mat" };
+	inline static std::string SHADER_EXT{ ".shdr" };
+
+	static bool IsSceneFile(const FNode* file);
+	static bool IsScriptFile(const FNode* file);
+	static bool IsTextureFile(const FNode* file);
+	static bool IsModelFile(const FNode* file);
+	static bool IsMaterialFile(const FNode* file);
+	static bool IsShaderFile(const FNode* file);
+
+	Assets(const Project* owner) noexcept;
+	~Assets() = default;
+	Assets(const Assets& other) = delete;
+	Assets(Assets&& other) noexcept;
+	Assets& operator=(const Assets& other) = delete;
+	Assets& operator=(Assets&& other) noexcept;
+
+	bool CreateFolder(std::filesystem::path relativePath);
+	bool MoveFolder(std::filesystem::path oldRelativePath, std::filesystem::path newRelativePath);
+	bool DeleteFolder(std::filesystem::path relativePath);
+
+	template<typename T, typename ...Args> requires requires{ &T::Serialize; }
+	AssetHandle CreateAsset(std::filesystem::path relativePath, Args&& ...args) {
+		/*
+		std::filesystem::current_path(project->Workspace());
+		FNode* folder = _root.FindChildAt(relativePath.parent_path());
+		if (folder == null) return std::nullopt;
+		FNode* newAssetFile = folder->CreateChildFileFor(folder,
+			{
+				folder->owner,
+				folder,
+				relativePath.stem(),
+				relativePath.extension(),
+				T(std::forward<Args>(args)...).Serialize()
+			}
+		);
+		ImportFile(database, *newAssetFile);
+		*/
+		return nullptr;
+	}
+	bool MoveAsset(std::filesystem::path oldRelativePath, std::filesystem::path newRelativePath);
+	bool DeleteAsset(std::filesystem::path relativePath);
+
+	AssetHandle FindAsset(UUID uuid);
+	AssetHandle FindAsset(std::filesystem::path relativePath);
 
 	FNode& Root();
 	const FNode& Root() const;
 
-	std::vector<FNode*>& Scenes();
-	const std::vector<FNode*>& Scenes() const;
-
-	std::vector<FNode*>& Scripts();
-	const std::vector<FNode*>& Scripts() const;
-
-	std::vector<FNode*>& Textures();
-	const std::vector<FNode*>& Textures() const;
-
-	std::vector<FNode*>& Models();
-	const std::vector<FNode*>& Models() const;
-
-	std::vector<FNode*>& Materials();
-	const std::vector<FNode*>& Materials() const;
-
-	std::vector<FNode*>& Shaders();
-	const std::vector<FNode*>& Shaders() const;
-
-	Assets(const Project* owner) noexcept;
-
-	void ReScan();
-	FNode* Find(std::string path);
-	FNode* CreateNewSceneFileNode(std::string_view relativePath, std::string_view name);
-
-	~Assets() = default;
-	Assets(const Assets& other) = default;
-	Assets(Assets&& other) noexcept;
-	Assets& operator=(const Assets& other) = default;
-	Assets& operator=(Assets&& other) noexcept;
-
 private:
+
+	using AssetDatabase = entt::dense_hash_map<UUID, Asset>;
+
 	const Project* project{ nullptr };
+	AssetDatabase database{};
 
 	FNode _root;
 
-	std::vector<FNode*> _scenes;
-	std::vector<FNode*> _scripts;
-	std::vector<FNode*> _textures;
-	std::vector<FNode*> _models;
-	std::vector<FNode*> _materials;
-	std::vector<FNode*> _shaders;
+	AssetDatabase sceneAssets{};
+	AssetDatabase scriptAssets{};
+	AssetDatabase textureAssets{};
+	AssetDatabase modelAssets{};
+	AssetDatabase shaderAssets{};
+	AssetDatabase shaderUniformBlockAssets{};
 
-	static void ReadRecursive(FNode& root);
-	static void FindFilesFor(Assets& assetManager, FNode& root);
+	AssetHandle ImportFile(AssetDatabase& database, const FNode& file);
+	void ImportAllFiles(AssetDatabase& database, const FNode& root);
+
+	void BuildFileNodeTree(FNode& root);
 
 	friend struct Project;
 };

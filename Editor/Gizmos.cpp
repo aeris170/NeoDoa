@@ -13,11 +13,12 @@
 #include "SceneViewport.hpp"
 #include "SceneHierarchy.hpp"
 
-Gizmos::Gizmos(SceneViewport* sv) noexcept :
+Gizmos::Gizmos(SceneViewport& sv) noexcept :
 	sv(sv) {}
 
 void Gizmos::Render(Scene& scene) {
-	if (sv->gui->sh.selectedEntity == NULL_ENTT) { return; }
+	GUI& gui = sv.get().gui.get();
+	if (gui.sh.selectedEntity == NULL_ENTT) { return; }
 	if (!settings.enabled) { return; }
 
 	ImGuizmo::SetDrawlist();
@@ -34,10 +35,10 @@ void Gizmos::Render(Scene& scene) {
 	ImGuizmo::SetRect(settings.viewportPosition.x, settings.viewportPosition.y, settings.viewportSize.w, settings.viewportSize.h);
 
 	// Entity transform
-	TransformComponent& transformComponent = scene.GetComponent<TransformComponent>(sv->gui->sh.selectedEntity);
+	TransformComponent& transformComponent = scene.GetComponent<TransformComponent>(gui.sh.selectedEntity);
 	glm::mat4 matrix = transformComponent.GetWorldMatrix();
 
-	bool snap = sv->gui->core->Input()->IsKeyPressed(KEY_LEFT_CONTROL);
+	bool snap = gui.core->Input()->IsKeyPressed(KEY_LEFT_CONTROL);
 	float snapValue = 0.5f;
 	if (settings.type == ImGuizmo::OPERATION::ROTATE) { snapValue = 5.0f; }
 

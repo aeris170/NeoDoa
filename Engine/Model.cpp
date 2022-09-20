@@ -68,7 +68,7 @@ static Mesh processMesh(aiMesh* mesh, const aiScene* scene) {
         ts.insert(ts.end(), specularMaps.begin(), specularMaps.end());
     }
 
-    return Mesh(std::move(vs), std::move(is), std::move(ts));
+    return Mesh(std::move(vs), std::move(is));
 }
 
 static std::vector<Mesh> processNode(aiNode* node, const aiScene* scene) {

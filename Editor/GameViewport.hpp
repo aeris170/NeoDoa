@@ -1,12 +1,14 @@
 #pragma once
 
+#include <functional>
+
 struct GUI;
 
 struct GameViewport {
 
-	GUI* const gui;
+	std::reference_wrapper<GUI> gui;
 
-	GameViewport(GUI* gui) noexcept;
+	GameViewport(GUI& gui) noexcept;
 
 	void Begin();
 	void Render();

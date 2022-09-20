@@ -1,6 +1,7 @@
 #pragma once
 
 #include <optional>
+#include <functional>
 
 #include <imgui.h>
 #include <ImGuizmo.h>
@@ -10,11 +11,11 @@ struct Scene;
 
 struct SceneSettings {
 
-	GUI* const gui;
+	std::reference_wrapper<GUI> gui;
 
-	SceneSettings(GUI* gui) noexcept;
+	SceneSettings(GUI& gui) noexcept;
 
-	void Begin(const std::optional<Scene>& scene);
+	void Begin(Scene* scene);
 	void Render(Scene& scene);
 	void End();
 

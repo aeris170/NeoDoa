@@ -4,7 +4,6 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Model.hpp"
-#include "Shader.hpp"
 #include "Mesh.hpp"
 
 #include "OrthoCamera.hpp"
@@ -12,7 +11,9 @@
 
 #include "Texture.hpp"
 #include "Core.hpp"
+#include "TransformComponent.hpp"
 #include "ScriptComponent.hpp"
+#include "MeshComponent.hpp"
 
 #include "Log.hpp"
 
@@ -58,24 +59,24 @@ void Renderer::Register(std::weak_ptr<Shader> shader, std::weak_ptr<Model> model
 	glNamedBufferData(vbo, defaultSize * m4s, nullptr, GL_DYNAMIC_DRAW);
 
 	for (auto& mesh : model.lock()->_meshes) {
-		glVertexArrayVertexBuffer(mesh._vao, 1, vbo, 0, m4s);
+		glVertexArrayVertexBuffer(mesh.VertexArrayObject(), 1, vbo, 0, m4s);
 
-		glEnableVertexArrayAttrib(mesh._vao, 0);
-		glEnableVertexArrayAttrib(mesh._vao, 1);
-		glEnableVertexArrayAttrib(mesh._vao, 2);
-		glEnableVertexArrayAttrib(mesh._vao, 3);
+		glEnableVertexArrayAttrib(mesh.VertexArrayObject(), 0);
+		glEnableVertexArrayAttrib(mesh.VertexArrayObject(), 1);
+		glEnableVertexArrayAttrib(mesh.VertexArrayObject(), 2);
+		glEnableVertexArrayAttrib(mesh.VertexArrayObject(), 3);
 
-		glVertexArrayAttribBinding(mesh._vao, 0, 1);
-		glVertexArrayAttribBinding(mesh._vao, 1, 1);
-		glVertexArrayAttribBinding(mesh._vao, 2, 1);
-		glVertexArrayAttribBinding(mesh._vao, 3, 1);
+		glVertexArrayAttribBinding(mesh.VertexArrayObject(), 0, 1);
+		glVertexArrayAttribBinding(mesh.VertexArrayObject(), 1, 1);
+		glVertexArrayAttribBinding(mesh.VertexArrayObject(), 2, 1);
+		glVertexArrayAttribBinding(mesh.VertexArrayObject(), 3, 1);
 
-		glVertexArrayAttribFormat(mesh._vao, 0, 4, GL_FLOAT, GL_FALSE, v4s * 0);
-		glVertexArrayAttribFormat(mesh._vao, 1, 4, GL_FLOAT, GL_FALSE, v4s * 1);
-		glVertexArrayAttribFormat(mesh._vao, 2, 4, GL_FLOAT, GL_FALSE, v4s * 2);
-		glVertexArrayAttribFormat(mesh._vao, 3, 4, GL_FLOAT, GL_FALSE, v4s * 3);
+		glVertexArrayAttribFormat(mesh.VertexArrayObject(), 0, 4, GL_FLOAT, GL_FALSE, v4s * 0);
+		glVertexArrayAttribFormat(mesh.VertexArrayObject(), 1, 4, GL_FLOAT, GL_FALSE, v4s * 1);
+		glVertexArrayAttribFormat(mesh.VertexArrayObject(), 2, 4, GL_FLOAT, GL_FALSE, v4s * 2);
+		glVertexArrayAttribFormat(mesh.VertexArrayObject(), 3, 4, GL_FLOAT, GL_FALSE, v4s * 3);
 
-		glVertexArrayBindingDivisor(mesh._vao, 1, 1);
+		glVertexArrayBindingDivisor(mesh.VertexArrayObject(), 1, 1);
 	}
 
 	vec.reserve(defaultSize);
@@ -136,6 +137,7 @@ void Renderer::Render(entt::registry& registry, ACamera* cam) {
 			for (auto& mesh : modelPtr->_meshes) {
 				FindTexture("!!missing!!").lock()->Bind(); // override possible overrides to missing texture.
 				int i = 1;
+				/*
 				for (auto& tex : mesh._textures) {
 					if (i == 17) {
 						DOA_LOG_WARNING("Model %s has too many textures! Rendering may look incorrect.", modelPtr->_name);
@@ -143,17 +145,17 @@ void Renderer::Render(entt::registry& registry, ACamera* cam) {
 					}
 					tex.lock()->Bind(i++);
 				}
-
-				glBindVertexArray(mesh._vao);
-				if (mesh._ebo > 0) {
-					glDrawElementsInstanced(GL_TRIANGLES, mesh._indices.size(), GL_UNSIGNED_INT, 0, instances.size());
+				*/
+				glBindVertexArray(mesh.VertexArrayObject());
+				if (mesh.HasIndexBuffer()) {
+					glDrawElementsInstanced(GL_TRIANGLES, mesh.Indices().size(), GL_UNSIGNED_INT, 0, instances.size());
 				} else {
-					glDrawArraysInstanced(GL_TRIANGLES, 0, mesh._vertices.size(), instances.size());
+					glDrawArraysInstanced(GL_TRIANGLES, 0, mesh.Vertices().size(), instances.size());
 				}
 				glBindVertexArray(0);
 
-				stats.vertices += mesh._vertices.size();
-				stats.indices += mesh._indices.size();
+				stats.vertices += mesh.Vertices().size();
+				stats.indices += mesh.Indices().size();
 				stats.drawCalls++;
 			}
 		}
@@ -161,4 +163,38 @@ void Renderer::Render(entt::registry& registry, ACamera* cam) {
 
 	_previous = std::move(_current);
 	_current.clear(); // _current is in an undefined state, clear() brings it back to a defined one
+}
+
+void Renderer::Submit(const std::weak_ptr<Mesh> mesh, const std::weak_ptr<Shader> shader, const glm::mat4& transform, const glm::mat4& viewProjMatrix, const ShaderUniformTable& uniforms) {
+	//drawCalls[shader].emplace_back(mesh, transform, viewProjMatrix, uniforms);
+}
+
+RendererSystem::RendererSystem(Renderer& renderer) noexcept :
+	renderer(renderer) {}
+
+void RendererSystem::Init(Registry& reg) {}
+
+void RendererSystem::Execute(Registry& reg, float deltaTime) {
+	/*
+	Renderer& r = renderer.get();
+
+	for (auto& [shader, drawDatas] : r.drawCalls) {
+		auto s = shader.lock();
+		s->Use();
+
+		for(auto& drawData : drawDatas) {
+			s->UniformMat4("model", &(drawData.model[0][0]));
+			s->UniformMat4("viewProj", &(drawData.viewProj[0][0]));
+			//s->Apply(drawData.uniforms);
+
+			auto mesh = drawData.meshData.lock();
+			glBindVertexArray(mesh->VertexArrayObject());
+
+			glDrawElements(GL_TRIANGLES, 0, GL_UNSIGNED_SHORT, mesh->Indices().data());
+		}
+	}
+
+
+	r.drawCalls.clear();
+	*/
 }

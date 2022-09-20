@@ -54,10 +54,10 @@ CorePtr& Core::CreateCore(Resolution resolution, const char* title, bool isFulls
     std::weak_ptr<Texture> defy = CreateTexture("!!default_y!!", "Images/default_texture_y.png");
     std::weak_ptr<Texture> defz = CreateTexture("!!default_z!!", "Images/default_texture_z.png");
     CreateTexture("!!missing!!", "Images/missing_texture.png").lock()->Bind();
-    CreateShader("!!pick!!", "Shaders/mousePickVertexShader.vert", "Shaders/mousePickFragmentShader.frag");
-    CreateShader("Simple Instanced Shader", "Shaders/simpleVertexShaderInstanced.vert", "Shaders/simpleFragmentShaderInstanced.frag");
-    CreateShader("Simple Shader", "Shaders/simpleVertexShader.vert", "Shaders/simpleFragmentShader.frag");
-    CreateShader("Solid Color Shader", "Shaders/solidColorVertexShader.vert", "Shaders/solidColorFragmentShader.frag");
+    Shader::CreateFromFile("!!pick!!", "Shaders/mousePickVertexShader.vert", "Shaders/mousePickFragmentShader.frag");
+    Shader::CreateFromFile("Simple Instanced Shader", "Shaders/simpleVertexShaderInstanced.vert", "Shaders/simpleFragmentShaderInstanced.frag");
+    Shader::CreateFromFile("Simple Shader", "Shaders/simpleVertexShader.vert", "Shaders/simpleFragmentShader.frag");
+    Shader::CreateFromFile("Solid Color Shader", "Shaders/solidColorVertexShader.vert", "Shaders/solidColorFragmentShader.frag");
 
     std::vector<Vertex> vertices;
     std::vector<GLuint> indices;
@@ -146,7 +146,7 @@ CorePtr& Core::CreateCore(Resolution resolution, const char* title, bool isFulls
     textures.emplace_back(defy);
     textures.emplace_back(defz);
 
-    meshes.emplace_back(std::move(vertices), std::move(indices), std::move(textures));
+    meshes.emplace_back(std::move(vertices), std::move(indices));
 
     CreateModelFromMesh("Cube", std::move(meshes));
     vertices.clear();
@@ -169,7 +169,7 @@ CorePtr& Core::CreateCore(Resolution resolution, const char* title, bool isFulls
 
     textures.push_back(def);
 
-    meshes.emplace_back(std::move(vertices), std::move(indices), std::move(textures));
+    meshes.emplace_back(std::move(vertices), std::move(indices));
 
     CreateModelFromMesh("Quad", std::move(meshes));
     vertices.clear();
@@ -236,11 +236,11 @@ void Core::Start() {
 
         float delta = currentTime - lastTime;
 
-        if (_project != nullptr && _project->_openScene) {
+        if (_project != nullptr && _project->HasOpenScene()) {
             for (auto& [id, attachment] : _attachments) {
                 attachment->BeforeFrame(_project);
             }
-            Scene& scene = _project->_openScene.value();
+            Scene& scene = _project->GetOpenScene();
             if (_playing) {
                 scene.Update(delta);
             }

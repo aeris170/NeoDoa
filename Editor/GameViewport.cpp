@@ -5,14 +5,15 @@
 #include "GUI.hpp"
 #include "Icons.hpp"
 
-GameViewport::GameViewport(GUI* gui) noexcept :
+GameViewport::GameViewport(GUI& gui) noexcept :
 	gui(gui) {}
 
 void GameViewport::Begin() {
-	ImGui::PushID(gui->GAME_VIEWPORT_TITLE);
+	GUI& gui = this->gui.get();
+	ImGui::PushID(gui.GAME_VIEWPORT_TITLE);
 	std::string title(WindowIcons::GAME_VIEWPORT_WINDOW_ICON);
-	title.append(gui->GAME_VIEWPORT_TITLE);
-	title.append(gui->GAME_VIEWPORT_ID);
+	title.append(gui.GAME_VIEWPORT_TITLE);
+	title.append(gui.GAME_VIEWPORT_ID);
 	ImGui::Begin(title.c_str());
 }
 

@@ -10,14 +10,14 @@
 GUI::GUI(CorePtr& core) noexcept :
 	core(core),
 	window(core->Window()),
-	mb(this),
-	sh(this),
-	obs(this),
-	am(this),
-	con(this),
-	sv(this),
-	gv(this),
-	ss(this),
+	mb(*this),
+	sh(*this),
+	obs(*this),
+	am(*this),
+	con(*this),
+	sv(*this),
+	gv(*this),
+	ss(*this),
 	delta(0) {
 	ImVec4 txtColor = ImGui::GetStyle().Colors[ImGuiCol_Text];
 	SVGPathway::Initialize({ txtColor.x, txtColor.y, txtColor.z, txtColor.w });
@@ -103,14 +103,13 @@ void GUI::operator() (float delta) {
 
 	sh.Begin();
 	if(HasOpenScene()) {
-		sh.Render(openProject->_openScene.value());
+		sh.Render(openProject->GetOpenScene());
 	}
 	sh.End();
 
-	static std::optional<Scene> noScene;
-	obs.Begin(HasOpenProject() ? openProject->_openScene : noScene);
+	obs.Begin(HasOpenProject() ? &openProject->GetOpenScene() : nullptr);
 	if (HasOpenScene()) {
-		obs.Render(openProject->_openScene.value());
+		obs.Render(openProject->GetOpenScene());
 	}
 	obs.End();
 
@@ -122,9 +121,9 @@ void GUI::operator() (float delta) {
 	con.Render();
 	con.End();
 
-	sv.Begin(HasOpenProject() ? openProject->_openScene : noScene);
+	sv.Begin(HasOpenProject() ? &openProject->GetOpenScene() : nullptr);
 	if (HasOpenScene()) {
-		sv.Render(openProject->_openScene.value());
+		sv.Render(openProject->GetOpenScene());
 	}
 	sv.End();
 
@@ -132,9 +131,9 @@ void GUI::operator() (float delta) {
 	gv.Render();
 	gv.End();
 
-	ss.Begin(HasOpenProject() ? openProject->_openScene : noScene);
+	ss.Begin(HasOpenProject() ? &openProject->GetOpenScene() : nullptr);
 	if (HasOpenScene()) {
-		ss.Render(openProject->_openScene.value());
+		ss.Render(openProject->GetOpenScene());
 	}
 	ss.End();
 
@@ -152,7 +151,7 @@ void GUI::CreateNewProject(std::string_view workspace, std::string_view name) {
 
 	std::string title = defaultWindowName;
 	title.append(" - ");
-	title.append(openProject->_name);
+	title.append(openProject->Name());
 	window->SetTitle(title);
 }
 
@@ -163,14 +162,18 @@ void GUI::SaveProjectToDisk() {
 }
 
 void GUI::OpenProjectFromDisk(const std::string& path) {
-	FNode file;
-	file._path = path;
+	// TODO
+	FNode file(FNodeCreationParams{
+		nullptr,
+		nullptr,
+		path
+	});
 	openProject.emplace(DeserializeProject(&file));
 	core->LoadProject(openProject.value());
 
 	std::string title = defaultWindowName;
 	title.append(" - ");
-	title.append(openProject->_name);
+	title.append(openProject->Name());
 	window->SetTitle(title);
 }
 
@@ -180,11 +183,14 @@ void GUI::CloseProject() {
 }
 
 void GUI::CreateNewScene(std::string_view relativePath, std::string_view name) {
+	// TODO
+	/*
 	if (!HasOpenProject()) { return; }
 	FNode* file = openProject->Assets().CreateNewSceneFileNode(relativePath, name);
 	if (!HasOpenScene()) {
 		openProject->OpenScene(file);
 	}
+	*/
 }
 
 bool GUI::HasOpenProject() { return openProject.has_value(); }

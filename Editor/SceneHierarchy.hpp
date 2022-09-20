@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+
 #include <imgui.h>
 
 #include "IconsFontAwesome5Pro.h"
@@ -16,12 +18,12 @@ struct SceneHierarchy {
 	float _highlightTime = 0; // time since the highligh began
 	Entity lastHighlighted = { NULL_ENTT };
 
-	GUI* const gui;
+	std::reference_wrapper<GUI> gui;
 
 	Entity selectedEntity{ NULL_ENTT };
 	Entity highlightedEntity{ NULL_ENTT };
 
-	SceneHierarchy(GUI* gui) noexcept;
+	SceneHierarchy(GUI& gui) noexcept;
 
 	void Begin();
 	void Render(Scene& scene);

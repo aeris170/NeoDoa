@@ -12,11 +12,11 @@ struct Scene;
 
 struct Observer {
 
-	GUI* const gui;
+	std::reference_wrapper<GUI> gui;
 
-	Observer(GUI* gui) noexcept;
+	Observer(GUI& gui) noexcept;
 
-	void Begin(const std::optional<Scene>& scene);
+	void Begin(Scene* scene);
 	void Render(Scene& scene);
 	void End();
 

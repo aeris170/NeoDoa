@@ -4,6 +4,7 @@
 #include <sstream>
 #include <string>
 #include <iostream>
+#include <utility>
 
 #include <stb_image.h>
 
@@ -11,175 +12,202 @@
 #include "Log.hpp"
 #include "SceneSerializer.hpp"
 
-bool Assets::IsProjectFile(const FNode& node) { return node._ext == PROJECT_EXT; }
-bool Assets::IsSceneFile(const FNode& node) { return node._ext == SCENE_EXT; }
-bool Assets::IsScriptFile(const FNode& node) { return node._ext == SCRIPT_EXT; }
-bool Assets::IsTextureFile(const FNode& node) { return node._ext == TEXTURE_EXT || node._ext == ".png" || node._ext == ".jpg" || node._ext == ".jpeg"; }
-bool Assets::IsModelFile(const FNode& node) { return node._ext == MODEL_EXT || node._ext == ".obj" || node._ext == ".fbx" || node._ext == "3ds"; }
-bool Assets::IsMaterialFile(const FNode& node) { return node._ext == MATERIAL_EXT; }
-bool Assets::IsShaderFile(const FNode& node) { return node._ext == SHADER_EXT; }
+AssetHandle::AssetHandle() noexcept :
+	_asset(nullptr) {}
 
-void Assets::ReadRecursive(FNode& root) {
-	auto it = std::filesystem::directory_iterator(root._path);
-	for (const auto& entry : it) {
-		root._children.emplace_back(
-			entry.path().string(),
-			entry.path().filename().string(),
-			entry.path().filename().string().substr(0, entry.path().filename().string().find_last_of(".")),
-			entry.path().extension().string(),
-			&root,
-			std::vector<FNode>(),
-			entry.is_regular_file(),
-			entry.is_directory()
-		);
-	}
-	// DON'T merge this loop with the above.
-	for (auto& child : root._children) {
-		if (child._isDir) {
-			ReadRecursive(child);
-		}
-	}
-}
+AssetHandle::AssetHandle(Asset* const asset) noexcept :
+	_asset(asset) {}
 
-void Assets::FindFilesFor(Assets& assetManager, FNode& root) {
-	for (auto& node : root._children) {
-		if (node._isFile) {
-			if (Assets::IsSceneFile(node)) {
-				assetManager._scenes.push_back(&node);
-			}
-			else if (Assets::IsScriptFile(node)) {
-				assetManager._scripts.push_back(&node);
-			}
-			else if (Assets::IsTextureFile(node)) {
-				assetManager._textures.push_back(&node);
-			}
-			else if (Assets::IsModelFile(node)) {
-				assetManager._models.push_back(&node);
-			}
-			else if (Assets::IsMaterialFile(node)) {
-				assetManager._materials.push_back(&node);
-			}
-			else if (Assets::IsShaderFile(node)) {
-				assetManager._shaders.push_back(&node);
-			}
-		}
-		else if (node._isDir) {
-			FindFilesFor(assetManager, node);
-		}
-	}
-}
+Asset& AssetHandle::operator*() const { return *_asset; }
+Asset* AssetHandle::operator->() const { return _asset; }
+AssetHandle::operator Asset*() const { return _asset; }
+AssetHandle::operator bool() const { return HasValue(); }
+
+bool AssetHandle::HasValue() const { return _asset != nullptr; }
+Asset& AssetHandle::Value() const { return *_asset; }
+void AssetHandle::Reset() { _asset = nullptr; }
+
+bool Assets::IsSceneFile(const FNode* file) { return file->ext == SCENE_EXT; }
+bool Assets::IsScriptFile(const FNode* file) { return file->ext == SCRIPT_EXT; }
+bool Assets::IsTextureFile(const FNode* file) { return file->ext == TEXTURE_EXT; }
+bool Assets::IsModelFile(const FNode* file) { return file->ext == MODEL_EXT; }
+bool Assets::IsMaterialFile(const FNode* file) { return file->ext == MATERIAL_EXT; }
+bool Assets::IsShaderFile(const FNode* file) { return file->ext == SHADER_EXT; }
 
 Assets::Assets(const Project* owner) noexcept :
-	project(owner) {
-	auto path = std::filesystem::path(project->_workspace);
-	_root._path = path.string();
-	_root._name = path.filename().string();
-	_root._name_noext = _root._name.substr(0, _root._name.find_last_of("."));
-	_root._ext = path.extension().string();
-	_root._parent = nullptr;
-	_root._children.clear();
-	_root._isFile = false;
-	_root._isDir = true;
-	ReScan();
-}
-
-FNode* Assets::CreateNewSceneFileNode(std::string_view relativePath, std::string_view name) {
-	tinyxml2::XMLDocument doc;
-	doc.Parse(SerializeScene(Scene(name)).c_str());
-
-	std::string path = project->_workspace;
-	path.append("\\");
-	path.append(relativePath);
-	path.append(name);
-	path.append(SCENE_EXT);
-	doc.SaveFile(path.c_str());
-
-	ReScan();
-	return Find(path);
+	project(owner),
+	_root({}) {
+	std::string mb(MB_CUR_MAX, '\0');
+	const int ret = std::wctomb(&mb[0], std::filesystem::path::preferred_separator);
+	_root = FNode({ owner, nullptr, mb, "", "", true });
+	BuildFileNodeTree(_root);
+	ImportAllFiles(database, _root);
 }
 
 Assets::Assets(Assets&& other) noexcept :
 	project(std::exchange(other.project, nullptr)),
 	_root(std::move(other._root)),
-	_scenes(std::move(other._scenes)),
-    _scripts(std::move(other._scripts)),
-    _textures(std::move(other._textures)),
-    _models(std::move(other._models)),
-    _materials(std::move(other._materials)),
-    _shaders(std::move(other._shaders)) {
-	for (auto& directChildren : _root._children) {
-		directChildren._parent = &_root;
-	}
+	database(std::move(other.database)),
+	sceneAssets(std::move(other.sceneAssets)),
+	scriptAssets(std::move(other.scriptAssets)),
+	textureAssets(std::move(other.textureAssets)),
+	modelAssets(std::move(other.modelAssets)),
+	shaderAssets(std::move(other.shaderAssets)),
+	shaderUniformBlockAssets(std::move(other.shaderUniformBlockAssets)) {
 }
 
 Assets& Assets::operator=(Assets&& other) noexcept {
 	project = std::exchange(other.project, nullptr);
 	_root = std::move(other._root);
-	_scenes = std::move(other._scenes);
-	_scripts = std::move(other._scripts);
-	_textures = std::move(other._textures);
-	_models = std::move(other._models);
-	_materials = std::move(other._materials);
-	_shaders = std::move(other._shaders);
-	for (auto& directChildren : _root._children) {
-		directChildren._parent = &_root;
-	}
+	database = std::move(other.database);
+	sceneAssets = std::move(other.sceneAssets);
+	scriptAssets = std::move(other.scriptAssets);
+	textureAssets = std::move(other.textureAssets);
+	modelAssets = std::move(other.modelAssets);
+	shaderAssets = std::move(other.shaderAssets);
+	shaderUniformBlockAssets = std::move(other.shaderUniformBlockAssets);
 	return *this;
 }
 
-void Assets::ReScan() {
-	_root._children.clear();
-	_scenes.clear();
-	_scripts.clear();
-	_textures.clear();
-	_models.clear();
-	_materials.clear();
-	_shaders.clear();
-	ReadRecursive(_root);
-	FindFilesFor(*this, _root);
+bool Assets::CreateFolder(std::filesystem::path relativePath) {
+	std::filesystem::current_path(project->Workspace());
+	return std::filesystem::create_directories(relativePath);
+}
+bool Assets::MoveFolder(std::filesystem::path oldRelativePath, std::filesystem::path newRelativePath) {
+	std::filesystem::current_path(project->Workspace());
+	std::filesystem::path old(oldRelativePath);
+	std::filesystem::path neww(newRelativePath);
+	std::error_code err;
+	std::filesystem::rename(old, old / neww.filename(), err);
+	return !static_cast<bool>(err);
+}
+bool Assets::DeleteFolder(std::filesystem::path relativePath) {
+	std::filesystem::current_path(project->Workspace());
+	std::error_code err;
+	bool result = std::filesystem::remove_all(relativePath, err);
+	return result && !static_cast<bool>(err);
 }
 
-FNode* Assets::Find(std::string fullpath) {
-	FNode* cur = &_root;
-	do {
-		auto index = fullpath.find_first_of('\\');
-		std::string path;
-		if (index != std::string::npos) {
-			path = fullpath.substr(0, index);
-			fullpath = fullpath.substr(index + 1);
-		} else {
-			path = fullpath;
+bool Assets::MoveAsset(std::filesystem::path oldRelativePath, std::filesystem::path newRelativePath) {
+	std::filesystem::current_path(project->Workspace());
+	if (std::filesystem::is_directory(oldRelativePath) || std::filesystem::is_directory(newRelativePath)) { return false; }
+	if (!std::filesystem::exists(oldRelativePath)) { return false; }
+	if (std::filesystem::exists(newRelativePath)) { return false; }
+	std::error_code err;
+	std::filesystem::rename(oldRelativePath, newRelativePath, err);
+	return !static_cast<bool>(err);
+}
+bool Assets::DeleteAsset(std::filesystem::path relativePath) {
+	std::filesystem::current_path(project->Workspace());
+	std::error_code err;
+	bool result = std::filesystem::remove(relativePath, err);
+	return result && !static_cast<bool>(err);
+}
+
+AssetHandle Assets::FindAsset(UUID uuid) {
+	if (!database.contains(uuid)) { return nullptr; }
+	return { &database[uuid] };
+}
+
+AssetHandle Assets::FindAsset(std::filesystem::path relativePath) {
+	for (auto& pair : database) {
+		Asset& asset = pair.second;
+		if (asset.File()->Path() == relativePath) {
+			return { &asset };
 		}
-		for (auto& node : cur->_children) {
-			if (node._name == path) {
-				cur = &node;
-				break;
-			}
-		}
-	} while (cur->_children.size() != 0);
-	if (!cur || cur->_isDir) {
-		return nullptr;
 	}
-	return cur;
+	return nullptr;
 }
 
 FNode& Assets::Root() { return _root; }
 const FNode& Assets::Root() const { return _root; }
 
-std::vector<FNode*>& Assets::Scenes() { return _scenes; }
-const std::vector<FNode*>& Assets::Scenes() const { return _scenes; }
+AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
+	/* Import a file:
+	    * Step 1: Get the sibling file fileName.fileExtension.id
+	    * Step 2: Check if such file exists
+	    * Step 3: If not exists, create it, generate a UUID and write the UUID
+	    * Step 4: Read the file for the UUID
+	    * Step 5: If there is a collision, resolve it by generating new UUID's until the collision is resolved
+	    * Step 6: Register the file into the database
+	    * Step 7: Call the importer to import the content to the memory
+    */
+	if (file.IsDirectory()) { return nullptr; }
+	// Step 1
+	FNode importData = FNode::HollowCopy(file);
+	importData.ext.append(".id");
 
-std::vector<FNode*>& Assets::Scripts() { return _scripts; }
-const std::vector<FNode*>& Assets::Scripts() const { return _scripts; }
+	tinyxml2::XMLDocument doc;
+	tinyxml2::XMLError err = doc.LoadFile(importData.AbsolutePath().string().c_str());
+	// Step 2
+	if (err == tinyxml2::XMLError::XML_ERROR_FILE_NOT_FOUND) {
+		// Step 3
+		doc.Clear();
 
-std::vector<FNode*>& Assets::Textures() { return _textures; }
-const std::vector<FNode*>& Assets::Textures() const { return _textures; }
+		tinyxml2::XMLPrinter printer;
+		printer.PushComment("WARNING!! This file is not for editing! Don't!");
+		printer.OpenElement("importData");
+		printer.OpenElement("uuid");
+		printer.PushText(UUID());
+		printer.CloseElement();
+		printer.CloseElement();
 
-std::vector<FNode*>& Assets::Models() { return _models; }
-const std::vector<FNode*>& Assets::Models() const { return _models; }
+		doc.Parse(printer.CStr());
+		doc.SaveFile(importData.AbsolutePath().string().c_str());
+		err = tinyxml2::XMLError::XML_SUCCESS; // Notice this line! This is for an unconditional fall to Step 4!
+	}
+	if (err == tinyxml2::XMLError::XML_SUCCESS) {
+		// Step 4
+		UUID uuid(doc.RootElement()->FirstChildElement("uuid")->Unsigned64Text(UUID::Empty()));
+		assert(uuid != UUID::Empty()); // this should never happen, break
 
-std::vector<FNode*>& Assets::Materials() { return _materials; }
-const std::vector<FNode*>& Assets::Materials() const { return _materials; }
+		// Step 5
+		while (database.contains(uuid)) {
+			// collision detected! generate new UUID
+			uuid = UUID();
+			doc.RootElement()->FirstChildElement("uuid")->SetText(uuid);
+			doc.SaveFile(importData.AbsolutePath().string().c_str());
+		}
 
-std::vector<FNode*>& Assets::Shaders() { return _shaders; }
-const std::vector<FNode*>& Assets::Shaders() const { return _shaders; }
+		// Step 6
+		auto result = database.emplace(uuid, Asset{ uuid, &file });
+		Asset& asset = std::get<Asset>(*result.first);
+
+	    // Step 7
+		asset.Deserialize();
+		return &asset;
+	} else {
+		DOA_LOG_ERROR("Failed to import asset at %s do you have write access to the directory?", file.Path());
+		return nullptr;
+	}
+}
+
+void Assets::ImportAllFiles(AssetDatabase& database, const FNode& root) {
+	ImportFile(database, root);
+	for (auto& child : root.Children()) {
+		ImportAllFiles(database, *child);
+	}
+}
+
+#include <iostream>
+void Assets::BuildFileNodeTree(FNode& root) {
+	std::filesystem::current_path(project->Workspace());
+	std::cout << "Current path is " << std::filesystem::current_path() << '\n';
+	auto it = std::filesystem::directory_iterator(project->Workspace());
+	for (const auto& entry : it) {
+		root.children.push_back(new FNode({
+			project,
+			&root,
+			entry.path().filename().replace_extension().string(),
+			entry.path().extension().string(),
+			"",
+			entry.is_directory()
+		}));
+	}
+	// DON'T merge this loop with the above.
+	for (auto& child : root.children) {
+		if (child->IsDirectory()) {
+			BuildFileNodeTree(*child);
+		}
+	}
+}

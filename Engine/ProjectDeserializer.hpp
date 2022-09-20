@@ -3,4 +3,4 @@
 struct FNode;
 struct Project;
 
-Project DeserializeProject(FNode* file);
+Project DeserializeProject(const FNode* file);

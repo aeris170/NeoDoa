@@ -1,6 +1,7 @@
 #pragma once
 
 #include <optional>
+#include <functional>
 
 #include <glm\glm.hpp>
 #include <imgui.h>
@@ -17,12 +18,12 @@ struct SceneViewport {
 
 	constexpr static auto GIZMOS_BUTTON_TEXT{ "Gizmos" };
 
-	GUI* const gui;
+	std::reference_wrapper<GUI> gui;
 	Gizmos gizmos;
 
-	SceneViewport(GUI* gui) noexcept;
+	SceneViewport(GUI& gui) noexcept;
 
-	void Begin(const std::optional<Scene>& scene);
+	void Begin(Scene* scene);
 	void Render(Scene& scene);
 	void End();
 
@@ -30,7 +31,7 @@ private:
 	glm::vec2 viewportPosition{};
 	Resolution viewportSize{};
 
-	void DrawViewportSettings(const std::optional<Scene>& scene);
+	void DrawViewportSettings(Scene* scene);
 	void DrawCubeControl(Scene& scene);
 
 	struct Controls {

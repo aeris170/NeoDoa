@@ -173,6 +173,15 @@
     <ClCompile Include="CameraComponent.cpp">
       <Filter>ECS\Components</Filter>
     </ClCompile>
+    <ClCompile Include="MeshComponent.cpp">
+      <Filter>ECS\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Asset.cpp">
+      <Filter>Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="UUID.cpp">
+      <Filter>Asset</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NeoDoa.hpp">
@@ -306,6 +315,18 @@
     </ClInclude>
     <ClInclude Include="Resolution.hpp">
       <Filter>Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshComponent.hpp">
+      <Filter>ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="TypeSystem.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset.hpp">
+      <Filter>Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="UUID.hpp">
+      <Filter>Asset</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

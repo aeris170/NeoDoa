@@ -17,9 +17,12 @@
 #include "ScriptStorageComponent.hpp"
 #include "CameraComponent.hpp"
 #include "Project.hpp"
+#include "SceneSerializer.hpp"
 
 Scene& Scene::GetLoadedScene() {
 	static auto& core = Core::GetCore();
+	assert(core->GetLoadedProject() != nullptr, "There is no loaded project, hence no loaded scene.");
+	assert(core->GetLoadedProject()->HasOpenScene(), "There is no loaded scene.");
 	return core->GetLoadedProject()->GetOpenScene();
 }
 
@@ -96,6 +99,8 @@ const std::vector<Entity>& Scene::GetAllEntites() const { return _entities; }
 ScriptStorageComponent& Scene::Scripts(Entity entt) { return _registry.get<ScriptStorageComponent>(entt); }
 
 Registry& Scene::GetRegistry() { return _registry; }
+
+std::string Scene::Serialize() const { return SerializeScene(*this); }
 
 void Scene::Update(float deltaTime) {
 	for (auto& [id, list] : _attachList) {

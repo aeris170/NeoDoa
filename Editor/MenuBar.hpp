@@ -12,9 +12,9 @@ struct Texture;
 
 struct MenuBar {
 
-	GUI* const gui;
+	std::reference_wrapper<GUI> gui;
 
-	MenuBar(GUI* owner);
+	MenuBar(GUI& owner);
 
 	void Begin();
 	void Render();
@@ -30,7 +30,7 @@ private:
 		static constexpr auto PRODUCT_NAME{ "NeoDoa Alpha" };
 		static constexpr auto PRODUCT_DESCRIPTION{ "A game engine. Build: Windows" };
 
-		MenuBar& mb;
+		std::reference_wrapper<MenuBar> mb;
 		std::weak_ptr<Texture> neodoaBanner;
 		std::vector<std::tuple<std::string, std::string>> licences;
 

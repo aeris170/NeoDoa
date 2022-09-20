@@ -11,6 +11,7 @@ constexpr int OPGL_VERSION_MAJ = 3;
 constexpr int OPGL_VERSION_MIN = 3;
 
 typedef GLuint VAO;
+typedef GLuint VAOBindSlot;
 typedef GLuint VBO;
 typedef GLuint EBO;
 typedef GLuint FBO;

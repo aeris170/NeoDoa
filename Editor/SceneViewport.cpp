@@ -11,15 +11,16 @@
 #include "GUI.hpp"
 #include "Icons.hpp"
 
-SceneViewport::SceneViewport(GUI* gui) noexcept :
+SceneViewport::SceneViewport(GUI& gui) noexcept :
 	gui(gui),
-	gizmos(this) {}
+	gizmos(*this) {}
 
-void SceneViewport::Begin(const std::optional<Scene>& scene) {
-	ImGui::PushID(gui->SCENE_VIEWPORT_TITLE);
+void SceneViewport::Begin(Scene* scene) {
+	GUI& gui = this->gui.get();
+	ImGui::PushID(gui.SCENE_VIEWPORT_TITLE);
 	std::string title(WindowIcons::SCENE_VIEWPORT_WINDOW_ICON);
-	title.append(gui->SCENE_VIEWPORT_TITLE);
-	title.append(gui->SCENE_VIEWPORT_ID);
+	title.append(gui.SCENE_VIEWPORT_TITLE);
+	title.append(gui.SCENE_VIEWPORT_ID);
 	ImGui::Begin(title.c_str());
 
 
@@ -28,6 +29,7 @@ void SceneViewport::Begin(const std::optional<Scene>& scene) {
 }
 
 void SceneViewport::Render(Scene& scene) {
+	GUI& gui = this->gui.get();
 	viewportSize = { static_cast<int>(ImGui::GetContentRegionAvail().x), static_cast<int>(ImGui::GetContentRegionAvail().y) };
 	viewportPosition = {
 		ImGui::GetWindowPos().x + ImGui::GetCursorPos().x,
@@ -35,7 +37,7 @@ void SceneViewport::Render(Scene& scene) {
 	};
 
 	ImVec2 size { static_cast<float>(viewportSize.w), static_cast<float>(viewportSize.h) };
-	ImGui::Image((void*)gui->core->FrameBuffer()->_tex, size, { 0, 1 }, { 1, 0 });
+	ImGui::Image((void*)gui.core->FrameBuffer()->_tex, size, { 0, 1 }, { 1, 0 });
 
 	ImGui::PushClipRect({ viewportPosition.x, viewportPosition.y }, { viewportPosition.x + size.x, viewportPosition.y + size.y}, false);
 	gizmos.settings.viewportSize = viewportSize;
@@ -53,8 +55,9 @@ void SceneViewport::End() {
 	ImGui::PopID();
 }
 
-void SceneViewport::DrawViewportSettings(const std::optional<Scene>& scene) {
-	ImFont* font = gui->GetFontBold();
+void SceneViewport::DrawViewportSettings(Scene* scene) {
+	GUI& gui = this->gui.get();
+	ImFont* font = gui.GetFontBold();
 	ImGui::PushFont(font);
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
 	ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1);
@@ -127,12 +130,12 @@ void SceneViewport::DrawViewportSettings(const std::optional<Scene>& scene) {
 	if (!scene) {
 		ImGui::BeginDisabled();
 	}
-	if (gui->core->IsPlaying()) {
+	if (gui.core->IsPlaying()) {
 		if (ImGui::Button(ICON_FA_STOP, buttonSize)) {
-			gui->core->SetPlaying(false);
+			gui.core->SetPlaying(false);
 		}
 	} else if (ImGui::Button(ICON_FA_PLAY, buttonSize)) {
-		gui->core->SetPlaying(true);
+		gui.core->SetPlaying(true);
 	}
 	if (!scene) {
 		ImGui::EndDisabled();
@@ -158,6 +161,7 @@ void SceneViewport::DrawCubeControl(Scene& scene) {
 }
 
 void SceneViewport::HandleMouseControls(Scene& scene) {
+	GUI& gui = this->gui.get();
 	auto& camera = scene.GetActiveCamera();
 	glm::vec3& eye = camera.eye;
 	glm::vec3& forward = camera.forward;
@@ -169,7 +173,7 @@ void SceneViewport::HandleMouseControls(Scene& scene) {
 		zoom = std::max(1.f, zoom);
 		if (ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
 			controls.rightClicked = true;
-			gui->window->DisableCursor();
+			gui.window->DisableCursor();
 		} else {
 			controls.rightClicked = false;
 		}
@@ -182,7 +186,7 @@ void SceneViewport::HandleMouseControls(Scene& scene) {
 	if (!ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
 		controls.rightClicked = false;
 		controls.prevDelta = { 0, 0 };
-		gui->window->EnableCursor();
+		gui.window->EnableCursor();
 	}
 
 	if (controls.rightClicked) {
@@ -190,20 +194,20 @@ void SceneViewport::HandleMouseControls(Scene& scene) {
 		ImVec2 delta = { (v.x - controls.prevDelta.x) / 30 * controls.sensitivity, (controls.prevDelta.y - v.y) / 30 * controls.sensitivity };
 		if (scene.IsOrtho()) {
 			eye.x -= delta.x; // want the movement of the camera to be the inverse of mouse. like
-			eye.y -= delta.y; // how your phone's touch screen works. drag right, cam looks left.
+			eye.y -= delta.y; // how your phone's touch screen works. drag right, cam goes left.
 		} else if (scene.IsPerspective()) {
-			glm::vec3 right = glm::normalize(glm::cross(forward, up)) * (controls.cameraSpeed * gui->delta);
-			glm::vec3 fwd = glm::normalize(forward) * (controls.cameraSpeed * gui->delta);
-			if (gui->core->Input()->IsKeyPressed(KEY_W)) {
+			glm::vec3 right = glm::normalize(glm::cross(forward, up)) * (controls.cameraSpeed * gui.delta);
+			glm::vec3 fwd = glm::normalize(forward) * (controls.cameraSpeed * gui.delta);
+			if (gui.core->Input()->IsKeyPressed(KEY_W)) {
 				eye += fwd;
 			}
-			if (gui->core->Input()->IsKeyPressed(KEY_A)) {
+			if (gui.core->Input()->IsKeyPressed(KEY_A)) {
 				eye -= right;
 			}
-			if (gui->core->Input()->IsKeyPressed(KEY_S)) {
+			if (gui.core->Input()->IsKeyPressed(KEY_S)) {
 				eye -= fwd;
 			}
-			if (gui->core->Input()->IsKeyPressed(KEY_D)) {
+			if (gui.core->Input()->IsKeyPressed(KEY_D)) {
 				eye += right;
 			}
 			controls.yaw += delta.x;

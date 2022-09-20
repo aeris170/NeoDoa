@@ -29,5 +29,4 @@ public:
 
 	friend void SerializeIDComponent(tinyxml2::XMLPrinter& printer, const IDComponent& id);
 	friend IDComponent DeserializeIDComponent(tinyxml2::XMLElement* property);
-
 };

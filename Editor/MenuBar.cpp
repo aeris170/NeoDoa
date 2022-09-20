@@ -10,12 +10,11 @@
 
 #include "GUI.hpp"
 
-MenuBar::MenuBar(GUI* owner) :
+MenuBar::MenuBar(GUI& owner) :
 	gui(owner),
 	aboutSection(*this) {}
 
-void MenuBar::Begin() {
-}
+void MenuBar::Begin() {}
 
 void MenuBar::Render() {
 	if (ImGui::BeginMenuBar()) {
@@ -41,6 +40,7 @@ void MenuBar::Render() {
 void MenuBar::End() {}
 
 void MenuBar::RenderProjectSubMenu() {
+	GUI& gui = this->gui.get();
 	if (ImGui::MenuItem("New Project", "Ctrl+Shift+N")) {
 		if (tinyfd_messageBox("Warning", "You may have unsaved changes. Are you sure you want to create a new project?", "yesno", "warning", 0)) {
 			const char* path = tinyfd_selectFolderDialog("Select a folder for New Project", "");
@@ -54,9 +54,9 @@ void MenuBar::RenderProjectSubMenu() {
 						tinyfd_messageBox("Warning", "Projects cannot be unnamed.", "ok", "warning", 1);
 					}
 				}
-				gui->CloseProject();
-				gui->CreateNewProject(path, name);
-				gui->SaveProjectToDisk();
+				gui.CloseProject();
+				gui.CreateNewProject(path, name);
+				gui.SaveProjectToDisk();
 				DOA_LOG_INFO("Succesfully created a new project named %s at %s", name, name);
 			}
 		}
@@ -64,42 +64,46 @@ void MenuBar::RenderProjectSubMenu() {
 	if (ImGui::MenuItem("Open Project...", "Ctrl+Shift+O")) {
 		if (tinyfd_messageBox("Warning", "You may have unsaved changes. Are you sure you want to open another project?", "yesno", "warning", 0)) {
 			static const char* const types[] = { "*.doa" };
-			gui->core->Angel()->_scriptLoaderMutex.lock();
+			gui.core->Angel()->_scriptLoaderMutex.lock();
 			const char* path = tinyfd_openFileDialog("Select Project File", nullptr, 1, types, "NeoDoa Project Files", 0);
-			gui->core->Angel()->_scriptLoaderMutex.unlock();
+			gui.core->Angel()->_scriptLoaderMutex.unlock();
 			if (path) {
-				gui->CloseProject();
-				gui->OpenProjectFromDisk(path);
+				gui.CloseProject();
+				gui.OpenProjectFromDisk(path);
 			}
 		}
 	}
 	ImGui::Separator();
 	if (ImGui::MenuItem("Save Project", "Ctrl+Shift+S")) {
-		gui->SaveProjectToDisk();
+		gui.SaveProjectToDisk();
 	}
 	ImGui::Separator();
 	if (ImGui::MenuItem("Exit", "Alt+F4")) {
-		gui->core->Stop();
+		gui.core->Stop();
 	}
 }
 
 void MenuBar::RenderSceneSubMenu() {
-	if (ImGui::MenuItem("New Scene", "Ctrl+N", nullptr, gui->HasOpenProject())) {
-		gui->CreateNewScene("", "New Scene");
+	GUI& gui = this->gui.get();
+	if (ImGui::MenuItem("New Scene", "Ctrl+N", nullptr, gui.HasOpenProject())) {
+		gui.CreateNewScene("", "New Scene");
 	}
-	if (ImGui::BeginMenu("Open Scene...", gui->HasOpenProject())) {
-		auto& scenes = gui->openProject->Assets().Scenes();
+	if (ImGui::BeginMenu("Open Scene...", gui.HasOpenProject())) {
+		// TODO
+		/*
+		auto& scenes = gui.openProject->Assets().Scenes();
 		for (auto sceneFile : scenes) {
 			if (ImGui::MenuItem(sceneFile->_name.c_str(), nullptr, nullptr)) {
-				gui->openProject->OpenScene(sceneFile);
+				gui.openProject->OpenScene(sceneFile);
 			}
 		}
+		*/
 		ImGui::EndMenu();
 	}
 	ImGui::Separator();
 	if (ImGui::MenuItem("Save Scene", "Ctrl+S")) {
-		if(gui->HasOpenScene()) {
-			gui->openProject->SaveOpenSceneToDisk();
+		if(gui.HasOpenScene()) {
+			gui.openProject->SaveOpenSceneToDisk();
 		}
 	}
 }
@@ -536,6 +540,7 @@ MenuBar::AboutSection::AboutSection(MenuBar& owner) :
 	}) {}
 
 void MenuBar::AboutSection::RenderAboutPopup() {
+	GUI& gui = mb.get().gui.get();
 	if (ab) {
 		ImGui::OpenPopup(ABOUT_POPUP_TITLE_TEXT);
 		ab_open = true;
@@ -547,7 +552,7 @@ void MenuBar::AboutSection::RenderAboutPopup() {
 	ImGui::SetNextWindowPos({ center.x - size.x / 2, center.y - size.y / 2 });
 
 	if (ImGui::BeginPopupModal(ABOUT_POPUP_TITLE_TEXT, &ab_open, ImGuiWindowFlags_NoResize)) {
-		ImGui::PushFont(mb.gui->GetFont());
+		ImGui::PushFont(gui.GetFont());
 		ImGui::TextColored({ 0.7, 0.7, 0.7, 1 }, PRODUCT_NAME);
 		ImGui::PopFont();
 		ImGui::Image((void*)neodoaBanner.lock()->_glTextureID, { ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().x / 2 }, { 0, 1 }, { 1, 0 });
@@ -572,8 +577,9 @@ void MenuBar::AboutSection::RenderAboutPopup() {
 }
 
 void MenuBar::AboutSection::RenderLicenceNotices() {
+	GUI& gui = mb.get().gui.get();
 	for (auto& [name, licence] : licences) {
-		ImGui::PushFont(mb.gui->GetFont());
+		ImGui::PushFont(gui.GetFont());
 		ImGui::TextColored({ 0.7, 0.7, 0.7, 1 }, name.c_str());
 		ImGui::PopFont();
 		auto title = (std::string("License###") + name);

@@ -19,26 +19,28 @@
 #include "Icons.hpp"
 #include "ComponentUI.hpp"
 
-Observer::Observer(GUI* gui) noexcept :
+Observer::Observer(GUI& gui) noexcept :
 	gui(gui){}
 
-void Observer::Begin(const std::optional<Scene>& scene) {
-	ImGui::PushID(gui->OBSERVER_TITLE);
+void Observer::Begin(Scene* scene) {
+	GUI& gui = this->gui.get();
+	ImGui::PushID(gui.OBSERVER_TITLE);
 	std::string title(WindowIcons::OBSERVER_WINDOW_ICON);
-	title.append(gui->OBSERVER_TITLE);
+	title.append(gui.OBSERVER_TITLE);
 	if(scene) {
-		if (gui->sh.selectedEntity != NULL_ENTT) {
+		if (gui.sh.selectedEntity != NULL_ENTT) {
 			title.append(" - ");
-			title.append(scene.value().GetComponent<IDComponent>(gui->sh.selectedEntity).GetTag());
+			title.append(scene->GetComponent<IDComponent>(gui.sh.selectedEntity).GetTag());
 		}
 	}
-	title.append(gui->OBSERVER_ID);
+	title.append(gui.OBSERVER_ID);
 	ImGui::Begin(title.c_str());
 }
 
 void Observer::Render(Scene& scene) {
-	if (gui->sh.selectedEntity != NULL_ENTT) {
-		RenderComponents(scene, gui->sh.selectedEntity);
+	GUI& gui = this->gui.get();
+	if (gui.sh.selectedEntity != NULL_ENTT) {
+		RenderComponents(scene, gui.sh.selectedEntity);
 	} else {
 		const char* text = "Select an entity from the scene :)";
 		ImVec2 size = ImGui::GetContentRegionAvail();

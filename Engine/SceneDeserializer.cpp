@@ -32,15 +32,15 @@ static void loopElement(tinyxml2::XMLElement* element, auto lambda) {
 	}
 }
 
-Scene DeserializeScene(FNode* file) {
+Scene DeserializeScene(const FNode* file) {
 	tinyxml2::XMLDocument doc;
-	tinyxml2::XMLError err = doc.LoadFile(file->_path.c_str());
+	tinyxml2::XMLError err = doc.LoadFile(file->Path().string().c_str());
 
 	tinyxml2::XMLElement* rootNode = doc.RootElement();
 	tinyxml2::XMLElement* configNode = rootNode->FirstChildElement("config");
 	std::string name = configNode->Attribute("name");
 
-	Scene scene = Scene(file->_name_noext);
+	Scene scene = Scene(file->Name());
 
 	{ // fill config
 		tinyxml2::XMLElement* clearColor = configNode->FirstChildElement("clearColor");

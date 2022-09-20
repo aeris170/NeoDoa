@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <imgui.h>
 #include <IconsFontAwesome5Pro.h>
 
@@ -36,9 +37,9 @@ struct Console {
 	static constexpr auto CLEAR_BUTTON_TEXT{ "Clear" };
 	static constexpr auto CLEAR_BUTTON_TOOLTIP_TEXT{ "Clear the console" };
 
-	GUI* const gui{ nullptr };
+	std::reference_wrapper<GUI> gui;
 
-	Console(GUI* gui) noexcept;
+	Console(GUI& gui) noexcept;
 
 	void Begin();
 	void Render();

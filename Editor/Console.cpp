@@ -14,14 +14,15 @@ const ImVec4 Console::OPENGL_COLOR{ 0.32f, 0.51f, 0.62f, 1.0f };
 const ImVec4 Console::VULKAN_COLOR{ 0.62f, 0.11f, 0.13f, 1.0f };
 const ImVec4 Console::DIRECTX_COLOR{ 0.48f, 0.71f, 0.0f, 1.0f };
 
-Console::Console(GUI* gui) noexcept :
+Console::Console(GUI& gui) noexcept :
 	gui(gui) {}
 
 void Console::Begin() {
-	ImGui::PushID(gui->CONSOLE_TITLE);
+	GUI& gui = this->gui.get();
+	ImGui::PushID(gui.CONSOLE_TITLE);
 	std::string title(WindowIcons::CONSOLE_WINDOW_ICON);
-	title.append(gui->CONSOLE_TITLE);
-	title.append(gui->CONSOLE_ID);
+	title.append(gui.CONSOLE_TITLE);
+	title.append(gui.CONSOLE_ID);
 	ImGui::Begin(title.c_str());
 	ImGui::SetWindowFontScale(0.9);
 }
@@ -38,13 +39,14 @@ void Console::End() {
 }
 
 void Console::RenderTopPanel() {
+	GUI& gui = this->gui.get();
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
 	ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1);
 
-	lineHeight = gui->GetFont()->FontSize * 0.9 + ImGui::GetStyle().FramePadding.y * 2.0f;
+	lineHeight = gui.GetFont()->FontSize * 0.9 + ImGui::GetStyle().FramePadding.y * 2.0f;
 	buttonSize = { lineHeight + 6.0f, lineHeight };
 
-	ImGui::PushFont(gui->GetFont());
+	ImGui::PushFont(gui.GetFont());
 	RenderFilterButtons();
 	ImGui::PopFont();
 	ImGui::SameLine();
@@ -56,13 +58,14 @@ void Console::RenderTopPanel() {
 }
 
 void Console::RenderFilterButtons() {
+	GUI& gui = this->gui.get();
 #pragma region Trace
 	ImGui::PushID("TRACE");
 	ImGui::PushStyleColor(ImGuiCol_Text, TRACE_COLOR);
 	if (selectedSeverity == LogSeverity::TRACE) {
 		ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0, 0, 0, 0 });
-		ImGui::PushFont(gui->GetFontBold());
+		ImGui::PushFont(gui.GetFontBold());
 		ImGui::Button(ICON_FA_INFO, buttonSize);
 		ImGui::PopFont();
 		ImGui::PopStyleColor(2);
@@ -84,7 +87,7 @@ void Console::RenderFilterButtons() {
 	if (selectedSeverity == LogSeverity::INFO) {
 		ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0, 0, 0, 0 });
-		ImGui::PushFont(gui->GetFontBold());
+		ImGui::PushFont(gui.GetFontBold());
 		ImGui::Button(ICON_FA_INFO, buttonSize);
 		ImGui::PopFont();
 		ImGui::PopStyleColor(2);
@@ -106,7 +109,7 @@ void Console::RenderFilterButtons() {
 	if (selectedSeverity == LogSeverity::WARNING) {
 		ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0, 0, 0, 0 });
-		ImGui::PushFont(gui->GetFontBold());
+		ImGui::PushFont(gui.GetFontBold());
 		ImGui::Button(ICON_FA_EXCLAMATION_CIRCLE, buttonSize);
 		ImGui::PopFont();
 		ImGui::PopStyleColor(2);
@@ -128,7 +131,7 @@ void Console::RenderFilterButtons() {
 	if (selectedSeverity == LogSeverity::ERRO) {
 		ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0, 0, 0, 0 });
-		ImGui::PushFont(gui->GetFontBold());
+		ImGui::PushFont(gui.GetFontBold());
 		ImGui::Button(ICON_FA_EXCLAMATION_TRIANGLE, buttonSize);
 		ImGui::PopFont();
 		ImGui::PopStyleColor(2);
@@ -150,7 +153,7 @@ void Console::RenderFilterButtons() {
 	if (selectedSeverity == LogSeverity::FATAL) {
 		ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0, 0, 0, 0 });
-		ImGui::PushFont(gui->GetFontBold());
+		ImGui::PushFont(gui.GetFontBold());
 		ImGui::Button(ICON_FA_EXCLAMATION_TRIANGLE, buttonSize);
 		ImGui::PopFont();
 		ImGui::PopStyleColor(2);
@@ -170,7 +173,8 @@ void Console::RenderDummyArea() {
 }
 
 void Console::RenderClearButton() {
-	ImGui::PushFont(gui->GetFontBold());
+	GUI& gui = this->gui.get();
+	ImGui::PushFont(gui.GetFontBold());
 	if (ImGui::Button(CLEAR_BUTTON_TEXT, { 60, buttonSize.y })) {
 		Log::Clear();
 		oldCount = 0;
@@ -182,6 +186,7 @@ void Console::RenderClearButton() {
 }
 
 void Console::RenderMessageLog() {
+	GUI& gui = this->gui.get();
 	bool visible = ImGui::BeginTable(
 		"log",
 		2,
@@ -262,7 +267,7 @@ void Console::RenderMessageLog() {
 
 			ImGui::PushStyleColor(ImGuiCol_Text, color);
 
-			ImGui::PushFont(gui->GetFontBold());
+			ImGui::PushFont(gui.GetFontBold());
 			ImGui::Text(icon);
 			if (ImGui::IsItemHovered()) {
 				ImGui::BeginTooltip();
@@ -273,7 +278,7 @@ void Console::RenderMessageLog() {
 			ImGui::PopFont();
 
 			ImGui::TableSetColumnIndex(1);
-			ImGui::PushFont(gui->GetFontBold());
+			ImGui::PushFont(gui.GetFontBold());
 			ImGui::Text(message._message.c_str());
 			ImGui::PopFont();
 

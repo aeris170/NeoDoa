@@ -2,6 +2,7 @@
 
 #include <tinyxml2.h>
 
+#include "Asset.hpp"
 #include "Project.hpp"
 #include "Scene.hpp"
 
@@ -13,13 +14,14 @@ std::string SerializeProject(const Project& project) {
 	{
 		printer.OpenElement("name");
 		{
-			printer.PushText(project._name.c_str());
+			printer.PushText(project.Name().c_str());
 		}
 		printer.CloseElement(); // name close
 		printer.OpenElement("startup");
 		{
-			if (project._startupScene) {
-				printer.PushText(project._startupScene->_path.c_str());
+			AssetHandle startup = project.GetStartupScene();
+			if (startup.HasValue()) {
+				printer.PushText(startup->File()->Path().string().c_str());
 			} else {
 				printer.PushText("NULL");
 			}

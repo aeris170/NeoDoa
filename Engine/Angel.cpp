@@ -109,13 +109,13 @@ static void colorCtorRGBA(void* memory, float r, float g, float b, float a) { ne
 static void colorCtorVec3(void* memory, const glm::vec3& color) { new(memory) Color(color); }
 static void colorCtorVec4(void* memory, const glm::vec4& color) { new(memory) Color(color); }
 
-static void meshCtor(void* memory) { new(memory) Mesh(std::vector<Vertex>(), std::vector<GLuint>(), std::vector<std::weak_ptr<Texture>>()); }
+static void meshCtor(void* memory) { new(memory) Mesh(std::vector<Vertex>(), std::vector<GLuint>()); }
 static void meshDtor(void* memory) { ((Mesh*)memory)->~Mesh(); }
 
 static Model* modelCtor(const std::string& name, std::vector<Mesh>&& meshes) { return &*(CreateModelFromMesh(name, std::move(meshes)).lock()); }
 
 static Shader* findShader(const std::string& name) {
-	auto rv = FindShader(name);
+	auto rv = Shader::Find(name);
 	if (!rv.expired()) return &*(rv.lock());
 	Core::GetCore()->Angel()->_scriptCtx->SetException("Shader not found exception");
 	return nullptr;
@@ -393,7 +393,7 @@ Angel::Angel() noexcept :
 	r = _scriptEngine->RegisterObjectProperty("Model", "string name", asOFFSET(Model, _name)); assert(r >= 0);
 
 	r = _scriptEngine->RegisterObjectType("Shader", 0, asOBJ_REF | asOBJ_NOCOUNT); assert(r >= 0);
-	r = _scriptEngine->RegisterObjectProperty("Shader", "string name", asOFFSET(Shader, _name)); assert(r >= 0);
+	//r = _scriptEngine->RegisterObjectProperty("Shader", "string name", asOFFSET(Shader, _name)); assert(r >= 0);
 
 	r = _scriptEngine->RegisterObjectType("Color", sizeof(Color), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<Color>()); assert(r >= 0);
 	r = _scriptEngine->RegisterObjectBehaviour("Color", asBEHAVE_CONSTRUCT, "void f()", asFUNCTION(colorCtor), asCALL_CDECL_OBJFIRST); assert(r >= 0);
@@ -406,8 +406,6 @@ Angel::Angel() noexcept :
 	r = _scriptEngine->RegisterObjectProperty("Color", "float g", asOFFSET(Color, g)); assert(r >= 0);
 	r = _scriptEngine->RegisterObjectProperty("Color", "float b", asOFFSET(Color, b)); assert(r >= 0);
 	r = _scriptEngine->RegisterObjectProperty("Color", "float a", asOFFSET(Color, a)); assert(r >= 0);
-
-	r = _scriptEngine->RegisterInterface("__module"); assert(r >= 0);
 #pragma endregion
 #pragma region Core Functions
 	r = _scriptEngine->RegisterGlobalFunction("Shader@ FindShader(const string &in)", asFUNCTION(findShader), asCALL_CDECL); assert(r >= 0);

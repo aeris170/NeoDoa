@@ -116,6 +116,8 @@ struct Scene {
 	// S - System
 	// :D ?
 
+	std::string Serialize() const;
+
 private:
 	Renderer _renderer;
 	OutlineRenderer _outlineRenderer;

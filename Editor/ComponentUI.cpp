@@ -154,11 +154,11 @@ bool ComponentUI::Begin(const Observer& observer, std::string_view componentType
 	} else {
 		titleWithIcon = ComponentIcons::GENERIC_COMPONENT_ICON + title;
 	}
-	ImGui::PushFont(observer.gui->GetFontBold());
+	ImGui::PushFont(observer.gui.get().GetFontBold());
 
 	bool rv = ImGui::CollapsingHeader(titleWithIcon.c_str(), ImGuiTreeNodeFlags_DefaultOpen);
 	if (rv) {
-		ImGui::PushFont(observer.gui->GetFont());
+		ImGui::PushFont(observer.gui.get().GetFont());
 	}
 	return rv;
 }

@@ -16,18 +16,20 @@
 #include <Core.hpp>
 #include <Angel.hpp>
 
-SceneHierarchy::SceneHierarchy(GUI* gui) noexcept :
+SceneHierarchy::SceneHierarchy(GUI& gui) noexcept :
 	gui(gui) {}
 
 void SceneHierarchy::Begin() {
-	ImGui::PushID(gui->SCENE_HIERARCHY_TITLE);
+	GUI& gui = this->gui.get();
+	ImGui::PushID(gui.SCENE_HIERARCHY_TITLE);
 	std::string title(WindowIcons::SCENE_HIERARCHY_WINDOW_ICON);
-	title.append(gui->SCENE_HIERARCHY_TITLE);
-	title.append(gui->SCENE_HIERARCHY_ID);
+	title.append(gui.SCENE_HIERARCHY_TITLE);
+	title.append(gui.SCENE_HIERARCHY_ID);
 	ImGui::Begin(title.c_str());
 }
 
 void SceneHierarchy::Render(Scene& scene) {
+	GUI& gui = this->gui.get();
 	if (ImGui::BeginDragDropTarget()) {
 		auto* payload = ImGui::AcceptDragDropPayload("SELECTED_ENTT");
 		if (payload != nullptr) {
@@ -90,7 +92,7 @@ void SceneHierarchy::Render(Scene& scene) {
 		}
 		ImGui::Separator();
 		if (ImGui::MenuItem(ICON_FA_WINDOW_CLOSE " Close Scene")) {
-			gui->openProject.value()._openScene.reset();
+			gui.openProject.value().CloseScene();
 		}
 		ImGui::EndPopup();
 	}
@@ -102,6 +104,7 @@ void SceneHierarchy::End() {
 }
 
 void SceneHierarchy::RenderEntityNode(Scene& scene, const Entity entity) {
+	GUI& gui = this->gui.get();
 	IDComponent& id = scene.GetComponent<IDComponent>(entity);
 
 	std::string title;
@@ -142,7 +145,7 @@ void SceneHierarchy::RenderEntityNode(Scene& scene, const Entity entity) {
 			eze::easeInSine(0.0f, origTextColor.z, factor),
 			1
 		});
-		_highlightTime += gui->delta;
+		_highlightTime += gui.delta;
 
 		// if highlighted entity changed during the highlight anim., restart the anim
 		if (lastHighlighted != highlightedEntity) {

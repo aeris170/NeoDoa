@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+
 #include <imgui.h>
 #include <ImGuizmo.h>
 
@@ -20,11 +22,11 @@ struct Gizmos {
 		Resolution viewportSize;
 	} settings;
 
-	Gizmos(SceneViewport* sv) noexcept;
+	Gizmos(SceneViewport& sv) noexcept;
 
 	void Render(Scene& scene);
 
 private:
-	SceneViewport* sv;
+	std::reference_wrapper<SceneViewport> sv;
 };
 

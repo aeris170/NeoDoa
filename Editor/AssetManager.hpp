@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <IconsFontAwesome5Pro.h>
 
 struct GUI;
@@ -11,9 +12,9 @@ struct AssetManager {
 	static constexpr auto REFRESH_BUTTON_TEXT{ "Refresh" };
 	static constexpr auto SELECTED_FOLDER_CONTENT_TITLE_TEXT{ "Assets" };
 
-	GUI* const gui;
+	std::reference_wrapper<GUI> gui;
 
-	AssetManager(GUI* gui) noexcept;
+	AssetManager(GUI& gui) noexcept;
 
 	void Begin();
 	void Render();
@@ -50,6 +51,6 @@ private:
 	void RenderTreeViewRecursive(FNode* current);
 
 	void RenderSelectedFolderContent();
-	void OpenFileAtFileNode(const FNode& file);
+	void OpenFileAtFileNode(FNode* file);
 };
 

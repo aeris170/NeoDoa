@@ -8,7 +8,7 @@
 #include "Mesh.hpp"
 
 struct Model : std::enable_shared_from_this<Model> {
-	std::string _name;
+	const std::string _name;
 	std::vector<Mesh> _meshes;
 
 	Model(std::string_view name, std::vector<Mesh>&& meshes) noexcept;

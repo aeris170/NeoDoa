@@ -63,7 +63,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <CompileAs>Default</CompileAs>
-      <AdditionalIncludeDirectories>$(SolutionDir)GLFW\include\;$(SolutionDir)GLEW\include\;$(SolutionDir)GLM\;$(SolutionDir)ImGui\;$(SolutionDir)STB\;$(SolutionDir)Assimp\include\;$(SolutionDir)EnTT\;$(SolutionDir)AngelScript\include\;$(SolutionDir)AngelScript\add_on\;$(SolutionDir)IconFontCppHeaders\;$(SolutionDir)TinyXML2\;$(SolutionDir)Utility\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)GLFW\include\;$(SolutionDir)GLEW\include\;$(SolutionDir)GLM\;$(SolutionDir)ImGui\;$(SolutionDir)STB\;$(SolutionDir)Assimp\include\;$(SolutionDir)EnTT\;$(SolutionDir)AngelScript\include\;$(SolutionDir)AngelScript\add_on\;$(SolutionDir)IconFontCppHeaders\;$(SolutionDir)TinyXML2\;$(SolutionDir)stduuid\;$(SolutionDir)Utility\</AdditionalIncludeDirectories>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <AdditionalOptions>-D_CRT_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
@@ -112,6 +112,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Angel.cpp" />
+    <ClCompile Include="Asset.cpp" />
     <ClCompile Include="Assets.cpp" />
     <ClCompile Include="BehaviourComponent.cpp" />
     <ClCompile Include="CameraComponent.cpp" />
@@ -121,6 +122,7 @@
     <ClCompile Include="FrameBuffer.cpp" />
     <ClCompile Include="IDComponent.cpp" />
     <ClCompile Include="Log.cpp" />
+    <ClCompile Include="MeshComponent.cpp" />
     <ClCompile Include="OrthoCamera.cpp" />
     <ClCompile Include="ImGuiRenderer.cpp" />
     <ClCompile Include="OutlineRenderer.cpp" />
@@ -141,6 +143,7 @@
     <ClCompile Include="ScriptStorageComponent.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClInclude Include="Angel.hpp" />
+    <ClInclude Include="Asset.hpp" />
     <ClInclude Include="Assets.hpp" />
     <ClInclude Include="BehaviourComponent.hpp" />
     <ClInclude Include="ACamera.hpp" />
@@ -153,6 +156,7 @@
     <ClInclude Include="FrameBuffer.hpp" />
     <ClInclude Include="IDComponent.hpp" />
     <ClInclude Include="Log.hpp" />
+    <ClInclude Include="MeshComponent.hpp" />
     <ClInclude Include="OrthoCamera.hpp" />
     <ClInclude Include="ImGuiRenderCommand.hpp" />
     <ClInclude Include="ImGuiRenderer.hpp" />
@@ -178,6 +182,7 @@
     <ClCompile Include="System.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="TransformComponent.cpp" />
+    <ClCompile Include="UUID.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -188,6 +193,8 @@
     <ClInclude Include="TransformComponent.hpp" />
     <ClInclude Include="TypedefsAndConstants.hpp" />
     <ClInclude Include="Resolution.hpp" />
+    <ClInclude Include="TypeSystem.hpp" />
+    <ClInclude Include="UUID.hpp" />
     <ClInclude Include="Vertex.hpp" />
     <ClInclude Include="Window.hpp" />
   </ItemGroup>

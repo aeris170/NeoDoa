@@ -6,16 +6,17 @@
 
 #include <Scene.hpp>
 
-SceneSettings::SceneSettings(GUI* gui) noexcept :
+SceneSettings::SceneSettings(GUI& gui) noexcept :
 	gui(gui) {}
 
-void SceneSettings::Begin(const std::optional<Scene>& scene) {
-	ImGui::PushID(gui->SCENE_SETTINGS_TITLE);
+void SceneSettings::Begin(Scene* scene) {
+	GUI& gui = this->gui.get();
+	ImGui::PushID(gui.SCENE_SETTINGS_TITLE);
 	std::string title(WindowIcons::SCENE_SETTINGS_WINDOW_ICON);
-	title.append(gui->SCENE_SETTINGS_TITLE);
-	title.append(gui->SCENE_SETTINGS_ID);
+	title.append(gui.SCENE_SETTINGS_TITLE);
+	title.append(gui.SCENE_SETTINGS_ID);
 	ImGui::Begin(title.c_str());
-	ImGui::PushFont(gui->GetFont());
+	ImGui::PushFont(gui.GetFont());
 }
 
 void SceneSettings::Render(Scene& scene) {
@@ -31,13 +32,14 @@ void SceneSettings::End() {
 }
 
 void SceneSettings::DrawStats(Scene& scene) {
+	GUI& gui = this->gui.get();
 	ImGui::BeginGroup();
 
 	auto stats = scene.GetRendererStats();
 	ImGui::Text("Draw Calls: %d", stats.drawCalls);
 	ImGui::Text("Vertices: %d", stats.vertices);
 	ImGui::Text("Indices: %d", stats.indices);
-	ImGui::Text("Editor average %.3f ms/frame (%.1f FPS)", 1000.0f / gui->IO()->Framerate, gui->IO()->Framerate);
+	ImGui::Text("Editor average %.3f ms/frame (%.1f FPS)", 1000.0f / gui.IO()->Framerate, gui.IO()->Framerate);
 	ImGui::ColorEdit3("Clear Color", &scene.ClearColor.r);
 	ImGui::ColorEdit3("Selection Outline Color", &scene.SelectionOutlineColor.r);
 
@@ -45,10 +47,11 @@ void SceneSettings::DrawStats(Scene& scene) {
 }
 
 void SceneSettings::DrawSettings(Scene& scene) {
+	GUI& gui = this->gui.get();
 	ImGui::BeginGroup();
 
 	ImGui::NewLine();
-	ImGui::PushFont(gui->GetFontBold());
+	ImGui::PushFont(gui.GetFontBold());
 	ImGui::Text("Viewport Camera:");
 	ImGui::PopFont();
 	static int camSelection = scene.IsOrtho() ? 0 : scene.IsPerspective() ? 1 : -1;
