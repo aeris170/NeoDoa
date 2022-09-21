@@ -836,6 +836,7 @@ ScriptComponent Angel::InstantiateScriptComponentIncomplete(std::string_view com
 }
 
 void Angel::FindAndBuildScripts() {
+	/*
 	std::string path = "Scripts"; // TODO change this!
 	std::vector<std::string> files;
 	std::vector<std::string> filesContent;
@@ -858,6 +859,7 @@ void Angel::FindAndBuildScripts() {
 			DOA_LOG_TRACE("Script Database Succesfully Built!");
 		}
 	}
+	*/
 }
 
 bool Angel::Rebuild() {
