@@ -36,10 +36,7 @@ bool Assets::IsShaderFile(const FNode* file) { return file->ext == SHADER_EXT; }
 
 Assets::Assets(const Project* owner) noexcept :
 	project(owner),
-	_root({}) {
-	std::string mb(MB_CUR_MAX, '\0');
-	const int ret = std::wctomb(&mb[0], std::filesystem::path::preferred_separator);
-	_root = FNode({ owner, nullptr, mb, "", "", true });
+	_root({ owner, nullptr, "", "", "", true }) {
 	BuildFileNodeTree(_root);
 	ImportAllFiles(database, _root);
 }
@@ -136,6 +133,7 @@ AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
 	// Step 1
 	FNode importData = FNode::HollowCopy(file);
 	importData.ext.append(".id");
+	importData.fullName.append(".id");
 
 	tinyxml2::XMLDocument doc;
 	tinyxml2::XMLError err = doc.LoadFile(importData.AbsolutePath().string().c_str());
@@ -192,8 +190,8 @@ void Assets::ImportAllFiles(AssetDatabase& database, const FNode& root) {
 #include <iostream>
 void Assets::BuildFileNodeTree(FNode& root) {
 	std::filesystem::current_path(project->Workspace());
-	std::cout << "Current path is " << std::filesystem::current_path() << '\n';
-	auto it = std::filesystem::directory_iterator(project->Workspace());
+	std::cout << "Current path is " << project->Workspace() / root.Path() << '\n';
+	auto it = std::filesystem::directory_iterator(project->Workspace() / root.Path());
 	for (const auto& entry : it) {
 		root.children.push_back(new FNode({
 			project,
