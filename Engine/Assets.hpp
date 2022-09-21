@@ -36,12 +36,16 @@ private:
 
 struct Assets {
 
+	using AssetDatabaseCategory = entt::dense_hash_map<UUID, Asset*>;
+	using AssetFileDatabase = entt::dense_hash_map<const FNode*, Asset*>;
+
 	inline static std::string SCENE_EXT{ ".scn" };
 	inline static std::string SCRIPT_EXT{ ".scrpt" };
 	inline static std::string TEXTURE_EXT{ ".tex" };
 	inline static std::string MODEL_EXT{ ".mdl" };
 	inline static std::string MATERIAL_EXT{ ".mat" };
 	inline static std::string SHADER_EXT{ ".shdr" };
+	inline static std::string ID_EXT{ ".id" };
 
 	static bool IsSceneFile(const FNode* file);
 	static bool IsScriptFile(const FNode* file);
@@ -86,8 +90,17 @@ struct Assets {
 	AssetHandle FindAsset(UUID uuid);
 	AssetHandle FindAsset(std::filesystem::path relativePath);
 
+	bool IsAsset(FNode* file) const;
+
 	FNode& Root();
 	const FNode& Root() const;
+
+	const AssetDatabaseCategory& SceneAssets() const;
+	const AssetDatabaseCategory& ScriptAssets() const;
+	const AssetDatabaseCategory& TextureAssets() const;
+	const AssetDatabaseCategory& ModelAssets() const;
+	const AssetDatabaseCategory& ShaderAssets() const;
+	const AssetDatabaseCategory& ShaderUniformBlockAssets() const;
 
 private:
 
@@ -95,15 +108,16 @@ private:
 
 	const Project* project{ nullptr };
 	AssetDatabase database{};
+	AssetFileDatabase files{};
 
 	FNode _root;
 
-	AssetDatabase sceneAssets{};
-	AssetDatabase scriptAssets{};
-	AssetDatabase textureAssets{};
-	AssetDatabase modelAssets{};
-	AssetDatabase shaderAssets{};
-	AssetDatabase shaderUniformBlockAssets{};
+	AssetDatabaseCategory sceneAssets{};
+	AssetDatabaseCategory scriptAssets{};
+	AssetDatabaseCategory textureAssets{};
+	AssetDatabaseCategory modelAssets{};
+	AssetDatabaseCategory shaderAssets{};
+	AssetDatabaseCategory shaderUniformBlockAssets{};
 
 	AssetHandle ImportFile(AssetDatabase& database, const FNode& file);
 	void ImportAllFiles(AssetDatabase& database, const FNode& root);
@@ -111,4 +125,9 @@ private:
 	void BuildFileNodeTree(FNode& root);
 
 	friend struct Project;
+
+	inline void __pointersInvalidated(Project* newOwner) {
+		project = newOwner;
+		_root.__pointersInvalidated(newOwner);
+	}
 };

@@ -31,7 +31,7 @@ Project::Project(Project&& other) noexcept :
 	_startupScene(std::exchange(other._startupScene, nullptr)),
 	_openScene(std::exchange(other._openScene, nullptr)),
 	_openSceneAsset(std::exchange(other._openSceneAsset, nullptr)) {
-	_assets.project = this;
+	_assets.__pointersInvalidated(this);
 }
 
 Project& Project::operator=(Project&& other) noexcept {
@@ -39,7 +39,7 @@ Project& Project::operator=(Project&& other) noexcept {
 	_name = std::move(other._name);
 
 	_assets = std::move(other._assets);
-	_assets.project = this;
+	_assets.__pointersInvalidated(this);
 
 	_startupScene = std::exchange(other._startupScene, nullptr);
 

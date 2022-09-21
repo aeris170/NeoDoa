@@ -194,6 +194,8 @@ void AssetManager::RenderSelectedFolderContent() {
 		int i = 0;
 		ImGui::TableNextRow();
 		for (auto child : selectedFolder->Children()) {
+			if (!assets->IsAsset(child)) { continue; }
+
 			if (i == columns) {
 				i = 0;
 				ImGui::TableNextRow();

@@ -84,4 +84,11 @@ private:
 
 	friend struct Asset;
 	friend struct Assets;
+
+	inline void __pointersInvalidated(Project* newOwner) {
+		owner = newOwner;
+		for (auto child : children) {
+			child->__pointersInvalidated(newOwner);
+		}
+	}
 };

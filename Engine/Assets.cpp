@@ -45,6 +45,7 @@ Assets::Assets(Assets&& other) noexcept :
 	project(std::exchange(other.project, nullptr)),
 	_root(std::move(other._root)),
 	database(std::move(other.database)),
+	files(std::move(other.files)),
 	sceneAssets(std::move(other.sceneAssets)),
 	scriptAssets(std::move(other.scriptAssets)),
 	textureAssets(std::move(other.textureAssets)),
@@ -57,6 +58,7 @@ Assets& Assets::operator=(Assets&& other) noexcept {
 	project = std::exchange(other.project, nullptr);
 	_root = std::move(other._root);
 	database = std::move(other.database);
+	files = std::move(other.files);
 	sceneAssets = std::move(other.sceneAssets);
 	scriptAssets = std::move(other.scriptAssets);
 	textureAssets = std::move(other.textureAssets);
@@ -107,8 +109,7 @@ AssetHandle Assets::FindAsset(UUID uuid) {
 }
 
 AssetHandle Assets::FindAsset(std::filesystem::path relativePath) {
-	for (auto& pair : database) {
-		Asset& asset = pair.second;
+	for (auto& [uuid, asset] : database) {
 		if (asset.File()->Path() == relativePath) {
 			return { &asset };
 		}
@@ -116,8 +117,17 @@ AssetHandle Assets::FindAsset(std::filesystem::path relativePath) {
 	return nullptr;
 }
 
+bool Assets::IsAsset(FNode* file) const { return files.find(file) != files.end(); }
+
 FNode& Assets::Root() { return _root; }
 const FNode& Assets::Root() const { return _root; }
+
+const Assets::AssetDatabaseCategory& Assets::SceneAssets() const { return sceneAssets; }
+const Assets::AssetDatabaseCategory& Assets::ScriptAssets() const { return scriptAssets; }
+const Assets::AssetDatabaseCategory& Assets::TextureAssets() const { return textureAssets; }
+const Assets::AssetDatabaseCategory& Assets::ModelAssets() const { return modelAssets; }
+const Assets::AssetDatabaseCategory& Assets::ShaderAssets() const { return shaderAssets; }
+const Assets::AssetDatabaseCategory& Assets::ShaderUniformBlockAssets() const { return shaderUniformBlockAssets; }
 
 AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
 	/* Import a file:
@@ -128,12 +138,14 @@ AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
 	    * Step 5: If there is a collision, resolve it by generating new UUID's until the collision is resolved
 	    * Step 6: Register the file into the database
 	    * Step 7: Call the importer to import the content to the memory
+		* Step 8: Separate imported asset to its own subcategory
     */
 	if (file.IsDirectory()) { return nullptr; }
+	if (file.ext == ID_EXT) { return nullptr; }
 	// Step 1
 	FNode importData = FNode::HollowCopy(file);
-	importData.ext.append(".id");
-	importData.fullName.append(".id");
+	importData.ext.append(ID_EXT);
+	importData.fullName.append(ID_EXT);
 
 	tinyxml2::XMLDocument doc;
 	tinyxml2::XMLError err = doc.LoadFile(importData.AbsolutePath().string().c_str());
@@ -170,9 +182,16 @@ AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
 		// Step 6
 		auto result = database.emplace(uuid, Asset{ uuid, &file });
 		Asset& asset = std::get<Asset>(*result.first);
+		files.emplace(&file, &asset);
 
 	    // Step 7
 		asset.Deserialize();
+
+		// Step 8
+		if (asset.IsScene()) {
+			sceneAssets[asset.ID()] = &asset;
+		}
+
 		return &asset;
 	} else {
 		DOA_LOG_ERROR("Failed to import asset at %s do you have write access to the directory?", file.Path());
