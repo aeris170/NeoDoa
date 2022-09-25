@@ -96,6 +96,14 @@ void SceneHierarchy::Render(Scene& scene) {
 		}
 		ImGui::EndPopup();
 	}
+
+	if (deletedEntity != NULL_ENTT) {
+		scene.DeleteEntity(deletedEntity);
+		if (selectedEntity == deletedEntity) {
+			selectedEntity = NULL_ENTT;
+		}
+		deletedEntity = NULL_ENTT;
+	}
 }
 
 void SceneHierarchy::End() {
@@ -251,6 +259,9 @@ void SceneHierarchy::RenderEntityNode(Scene& scene, const Entity entity) {
 			}
 			//script components end
 			ImGui::EndMenu();
+		}
+		if (ImGui::MenuItem(ICON_FA_TRASH " Delete Entity")) {
+			deletedEntity = entity;
 		}
 		ImGui::EndPopup();
 	}

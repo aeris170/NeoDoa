@@ -22,6 +22,7 @@ struct SceneHierarchy {
 
 	Entity selectedEntity{ NULL_ENTT };
 	Entity highlightedEntity{ NULL_ENTT };
+	Entity deletedEntity{ NULL_ENTT };
 
 	SceneHierarchy(GUI& gui) noexcept;
 

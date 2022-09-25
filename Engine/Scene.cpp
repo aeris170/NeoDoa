@@ -14,6 +14,7 @@
 #include "Texture.hpp"
 #include "TransformComponent.hpp"
 #include "IDComponent.hpp"
+#include "ParentComponent.hpp"
 #include "ScriptStorageComponent.hpp"
 #include "CameraComponent.hpp"
 #include "Project.hpp"
@@ -89,6 +90,13 @@ Entity Scene::CreateEntity(std::string name, uint32_t desiredID) {
 }
 
 void Scene::DeleteEntity(Entity entt) {
+	if (HasComponent<ParentComponent>(entt)) {
+		auto& parent = GetComponent<ParentComponent>(entt);
+		for (auto& child : parent.GetChildren()) {
+			DeleteEntity(child);
+		}
+	}
+
 	_registry.destroy(entt);
 	std::erase(_entities, entt);
 }
