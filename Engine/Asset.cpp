@@ -50,7 +50,7 @@ void Asset::Deserialize() {
 	file->ReadContent();
 
 	if (IsScene()) {
-		data = DeserializeScene(file);
+		data = DeserializeScene(file->content);
 	}
 	/*
 	* TODO others

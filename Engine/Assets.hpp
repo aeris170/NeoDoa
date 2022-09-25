@@ -65,7 +65,7 @@ struct Assets {
 	bool MoveFolder(std::filesystem::path oldRelativePath, std::filesystem::path newRelativePath);
 	bool DeleteFolder(std::filesystem::path relativePath);
 
-	template<typename T, typename ...Args> requires requires{ &T::Serialize; }
+	template<detail::AssetType T, typename ...Args>
 	AssetHandle CreateAsset(std::filesystem::path relativePath, Args&& ...args) {
 		/*
 		std::filesystem::current_path(project->Workspace());

@@ -253,6 +253,8 @@ void AssetManager::RenderSelectedFolderContent() {
 		ImGui::EndTable();
 	} else if (selectedFolderContentSettings.viewMode == SelectedFolderContentSettings::ViewMode::List) {
 		for (auto child : selectedFolder->Children()) {
+			if (!assets->IsAsset(child)) { continue; }
+
 			void* icon;
 			if (child->IsDirectory()) {
 				icon = gui.GetFolderIcon(TextureSize::SMALL);
@@ -285,8 +287,7 @@ void AssetManager::OpenFileAtFileNode(FNode* file) {
 		selectedFolder = file;
 	} else if(file->IsFile()) {
 		if (Assets::IsSceneFile(file)) {
-			// TODO
-			//gui.openProject->OpenScene(ptr);
+			gui.openProject->OpenScene(assets->FindAsset(file->Path()));
 		}
 	}
 }

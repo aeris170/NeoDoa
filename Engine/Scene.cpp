@@ -18,6 +18,7 @@
 #include "CameraComponent.hpp"
 #include "Project.hpp"
 #include "SceneSerializer.hpp"
+#include "SceneDeserializer.hpp"
 
 Scene& Scene::GetLoadedScene() {
 	static auto& core = Core::GetCore();
@@ -101,6 +102,9 @@ ScriptStorageComponent& Scene::Scripts(Entity entt) { return _registry.get<Scrip
 Registry& Scene::GetRegistry() { return _registry; }
 
 std::string Scene::Serialize() const { return SerializeScene(*this); }
+Scene Scene::Deserialize(const std::string& data) { return DeserializeScene(data); }
+
+Scene Scene::Copy(const Scene& scene) { return scene.Deserialize(scene.Serialize()); }
 
 void Scene::Update(float deltaTime) {
 	for (auto& [id, list] : _attachList) {

@@ -117,6 +117,9 @@ struct Scene {
 	// :D ?
 
 	std::string Serialize() const;
+	static Scene Deserialize(const std::string& data);
+
+	static Scene Copy(const Scene& scene);
 
 private:
 	Renderer _renderer;

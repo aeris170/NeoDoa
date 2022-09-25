@@ -21,7 +21,7 @@ struct OrthoCameraComponent;
 struct PerspectiveCameraComponent;
 struct ScriptComponentData;
 
-Scene DeserializeScene(const FNode* file);
+Scene DeserializeScene(const std::string& data);
 
 Entity DeserializeEntityID(tinyxml2::XMLElement* property, std::string_view identifierOverride = "id");
 int DeserializeEnum(tinyxml2::XMLElement* property);
