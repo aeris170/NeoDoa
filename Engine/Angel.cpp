@@ -816,7 +816,7 @@ Angel::~Angel() noexcept {
 	}
 
 	_scriptLoaderDeamon.join();
-	_scriptModule->Discard();
+	//_scriptModule->Discard();
 	_scriptCtx->Release();
 	_scriptEngine->ShutDownAndRelease();
 }
