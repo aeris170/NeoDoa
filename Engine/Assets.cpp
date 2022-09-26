@@ -182,14 +182,14 @@ AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
 		// Step 6
 		auto result = database.emplace(uuid, Asset{ uuid, &file });
 		Asset& asset = std::get<Asset>(*result.first);
-		files.emplace(&file, &asset);
+		files.emplace(&file, asset.ID());
 
 	    // Step 7
 		asset.Deserialize();
 
 		// Step 8
 		if (asset.IsScene()) {
-			sceneAssets[asset.ID()] = &asset;
+			sceneAssets.push_back(asset.ID());
 		}
 
 		return &asset;

@@ -36,8 +36,8 @@ private:
 
 struct Assets {
 
-	using AssetDatabaseCategory = entt::dense_hash_map<UUID, Asset*>;
-	using AssetFileDatabase = entt::dense_hash_map<const FNode*, Asset*>;
+	using AssetDatabaseCategory = std::vector<UUID>;
+	using AssetFileDatabase = entt::dense_hash_map<const FNode*, UUID>;
 
 	inline static std::string SCENE_EXT{ ".scn" };
 	inline static std::string SCRIPT_EXT{ ".scrpt" };

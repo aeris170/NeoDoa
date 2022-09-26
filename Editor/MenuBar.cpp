@@ -89,15 +89,13 @@ void MenuBar::RenderSceneSubMenu() {
 		gui.CreateNewScene("", "New Scene");
 	}
 	if (ImGui::BeginMenu("Open Scene...", gui.HasOpenProject())) {
-		// TODO
-		/*
-		auto& scenes = gui.openProject->Assets().Scenes();
-		for (auto sceneFile : scenes) {
-			if (ImGui::MenuItem(sceneFile->_name.c_str(), nullptr, nullptr)) {
-				gui.openProject->OpenScene(sceneFile);
+		Assets& assets = gui.openProject->Assets();
+		for (auto& uuid : assets.SceneAssets()) {
+			AssetHandle sceneAsset = assets.FindAsset(uuid);
+			if (ImGui::MenuItem(sceneAsset.Value().File()->Name().c_str(), nullptr, nullptr)) {
+				gui.openProject->OpenScene(sceneAsset);
 			}
 		}
-		*/
 		ImGui::EndMenu();
 	}
 	ImGui::Separator();
