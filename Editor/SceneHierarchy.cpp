@@ -20,7 +20,7 @@ SceneHierarchy::SceneHierarchy(GUI& gui) noexcept :
 	gui(gui) {}
 
 void SceneHierarchy::Begin() {
-	GUI& gui = this->gui.get();
+	GUI& gui = this->gui;
 	ImGui::PushID(gui.SCENE_HIERARCHY_TITLE);
 	std::string title(WindowIcons::SCENE_HIERARCHY_WINDOW_ICON);
 	title.append(gui.SCENE_HIERARCHY_TITLE);
@@ -29,7 +29,7 @@ void SceneHierarchy::Begin() {
 }
 
 void SceneHierarchy::Render(Scene& scene) {
-	GUI& gui = this->gui.get();
+	GUI& gui = this->gui;
 	if (ImGui::BeginDragDropTarget()) {
 		auto* payload = ImGui::AcceptDragDropPayload("SELECTED_ENTT");
 		if (payload != nullptr) {
@@ -112,7 +112,7 @@ void SceneHierarchy::End() {
 }
 
 void SceneHierarchy::RenderEntityNode(Scene& scene, const Entity entity) {
-	GUI& gui = this->gui.get();
+	GUI& gui = this->gui;
 	IDComponent& id = scene.GetComponent<IDComponent>(entity);
 
 	std::string title;

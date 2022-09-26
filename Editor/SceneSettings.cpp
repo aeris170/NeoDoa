@@ -10,7 +10,7 @@ SceneSettings::SceneSettings(GUI& gui) noexcept :
 	gui(gui) {}
 
 void SceneSettings::Begin(Scene* scene) {
-	GUI& gui = this->gui.get();
+	GUI& gui = this->gui;
 	ImGui::PushID(gui.SCENE_SETTINGS_TITLE);
 	std::string title(WindowIcons::SCENE_SETTINGS_WINDOW_ICON);
 	title.append(gui.SCENE_SETTINGS_TITLE);
@@ -32,7 +32,7 @@ void SceneSettings::End() {
 }
 
 void SceneSettings::DrawStats(Scene& scene) {
-	GUI& gui = this->gui.get();
+	GUI& gui = this->gui;
 	ImGui::BeginGroup();
 
 	auto stats = scene.GetRendererStats();
@@ -47,7 +47,7 @@ void SceneSettings::DrawStats(Scene& scene) {
 }
 
 void SceneSettings::DrawSettings(Scene& scene) {
-	GUI& gui = this->gui.get();
+	GUI& gui = this->gui;
 	ImGui::BeginGroup();
 
 	ImGui::NewLine();
@@ -56,6 +56,7 @@ void SceneSettings::DrawSettings(Scene& scene) {
 	ImGui::PopFont();
 	static int camSelection = scene.IsOrtho() ? 0 : scene.IsPerspective() ? 1 : -1;
 
+	/* | is intentional, || leads to invisible Perspective radio button */
 	if (ImGui::RadioButton("Ortho", &camSelection, 0) | ImGui::RadioButton("Perspective", &camSelection, 1)) {
 		if (camSelection == 0) {
 			scene.SwitchToOrtho();

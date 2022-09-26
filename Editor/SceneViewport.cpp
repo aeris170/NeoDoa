@@ -16,7 +16,7 @@ SceneViewport::SceneViewport(GUI& gui) noexcept :
 	gizmos(*this) {}
 
 void SceneViewport::Begin(Scene* scene) {
-	GUI& gui = this->gui.get();
+	GUI& gui = this->gui;
 	ImGui::PushID(gui.SCENE_VIEWPORT_TITLE);
 	std::string title(WindowIcons::SCENE_VIEWPORT_WINDOW_ICON);
 	title.append(gui.SCENE_VIEWPORT_TITLE);
@@ -29,7 +29,7 @@ void SceneViewport::Begin(Scene* scene) {
 }
 
 void SceneViewport::Render(Scene& scene) {
-	GUI& gui = this->gui.get();
+	GUI& gui = this->gui;
 	viewportSize = { static_cast<int>(ImGui::GetContentRegionAvail().x), static_cast<int>(ImGui::GetContentRegionAvail().y) };
 	viewportPosition = {
 		ImGui::GetWindowPos().x + ImGui::GetCursorPos().x,
@@ -56,7 +56,7 @@ void SceneViewport::End() {
 }
 
 void SceneViewport::DrawViewportSettings(Scene* scene) {
-	GUI& gui = this->gui.get();
+	GUI& gui = this->gui;
 	ImFont* font = gui.GetFontBold();
 	ImGui::PushFont(font);
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
@@ -161,7 +161,7 @@ void SceneViewport::DrawCubeControl(Scene& scene) {
 }
 
 void SceneViewport::HandleMouseControls(Scene& scene) {
-	GUI& gui = this->gui.get();
+	GUI& gui = this->gui;
 	auto& camera = scene.GetActiveCamera();
 	glm::vec3& eye = camera.eye;
 	glm::vec3& forward = camera.forward;

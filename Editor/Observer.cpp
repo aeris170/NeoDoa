@@ -23,7 +23,7 @@ Observer::Observer(GUI& gui) noexcept :
 	gui(gui){}
 
 void Observer::Begin(Scene* scene) {
-	GUI& gui = this->gui.get();
+	GUI& gui = this->gui;
 	ImGui::PushID(gui.OBSERVER_TITLE);
 	std::string title(WindowIcons::OBSERVER_WINDOW_ICON);
 	title.append(gui.OBSERVER_TITLE);
@@ -38,7 +38,7 @@ void Observer::Begin(Scene* scene) {
 }
 
 void Observer::Render(Scene& scene) {
-	GUI& gui = this->gui.get();
+	GUI& gui = this->gui;
 	if (gui.sh.selectedEntity != NULL_ENTT) {
 		RenderComponents(scene, gui.sh.selectedEntity);
 	} else {

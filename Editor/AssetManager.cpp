@@ -15,7 +15,7 @@ AssetManager::AssetManager(GUI& gui) noexcept :
 	gui(gui) {}
 
 void AssetManager::Begin() {
-	GUI& gui = this->gui.get();
+	GUI& gui = this->gui;
 	ImGui::PushID(gui.ASSET_MANAGER_TITLE);
 	std::string title(WindowIcons::ASSET_MANAGER_WINDOW_ICON);
 	title.append(gui.ASSET_MANAGER_TITLE);
@@ -109,7 +109,7 @@ void AssetManager::RenderTreeViewRecursive(FNode* current) {
 }
 
 void AssetManager::RenderSelectedFolderContent() {
-	GUI& gui = this->gui.get();
+	GUI& gui = this->gui;
 	auto pos = ImGui::GetCursorPos();
 	ImGui::Text(SELECTED_FOLDER_CONTENT_TITLE_TEXT);
 	ImVec2 min = ImGui::GetItemRectMin();
@@ -282,7 +282,7 @@ void AssetManager::RenderSelectedFolderContent() {
 }
 
 void AssetManager::OpenFileAtFileNode(FNode* file) {
-	GUI& gui = this->gui.get();
+	GUI& gui = this->gui;
 	if (file->IsDirectory()) {
 		selectedFolder = file;
 	} else if(file->IsFile()) {

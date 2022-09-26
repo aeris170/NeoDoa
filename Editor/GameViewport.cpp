@@ -9,7 +9,7 @@ GameViewport::GameViewport(GUI& gui) noexcept :
 	gui(gui) {}
 
 void GameViewport::Begin() {
-	GUI& gui = this->gui.get();
+	GUI& gui = this->gui;
 	ImGui::PushID(gui.GAME_VIEWPORT_TITLE);
 	std::string title(WindowIcons::GAME_VIEWPORT_WINDOW_ICON);
 	title.append(gui.GAME_VIEWPORT_TITLE);

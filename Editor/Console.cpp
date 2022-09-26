@@ -18,7 +18,7 @@ Console::Console(GUI& gui) noexcept :
 	gui(gui) {}
 
 void Console::Begin() {
-	GUI& gui = this->gui.get();
+	GUI& gui = this->gui;
 	ImGui::PushID(gui.CONSOLE_TITLE);
 	std::string title(WindowIcons::CONSOLE_WINDOW_ICON);
 	title.append(gui.CONSOLE_TITLE);
@@ -39,7 +39,7 @@ void Console::End() {
 }
 
 void Console::RenderTopPanel() {
-	GUI& gui = this->gui.get();
+	GUI& gui = this->gui;
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
 	ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1);
 
@@ -58,7 +58,7 @@ void Console::RenderTopPanel() {
 }
 
 void Console::RenderFilterButtons() {
-	GUI& gui = this->gui.get();
+	GUI& gui = this->gui;
 #pragma region Trace
 	ImGui::PushID("TRACE");
 	ImGui::PushStyleColor(ImGuiCol_Text, TRACE_COLOR);
@@ -173,7 +173,7 @@ void Console::RenderDummyArea() {
 }
 
 void Console::RenderClearButton() {
-	GUI& gui = this->gui.get();
+	GUI& gui = this->gui;
 	ImGui::PushFont(gui.GetFontBold());
 	if (ImGui::Button(CLEAR_BUTTON_TEXT, { 60, buttonSize.y })) {
 		Log::Clear();
@@ -186,7 +186,7 @@ void Console::RenderClearButton() {
 }
 
 void Console::RenderMessageLog() {
-	GUI& gui = this->gui.get();
+	GUI& gui = this->gui;
 	bool visible = ImGui::BeginTable(
 		"log",
 		2,

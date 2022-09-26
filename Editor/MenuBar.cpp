@@ -40,7 +40,7 @@ void MenuBar::Render() {
 void MenuBar::End() {}
 
 void MenuBar::RenderProjectSubMenu() {
-	GUI& gui = this->gui.get();
+	GUI& gui = this->gui;
 	if (ImGui::MenuItem("New Project", "Ctrl+Shift+N")) {
 		if (tinyfd_messageBox("Warning", "You may have unsaved changes. Are you sure you want to create a new project?", "yesno", "warning", 0)) {
 			const char* path = tinyfd_selectFolderDialog("Select a folder for New Project", "");
@@ -84,7 +84,7 @@ void MenuBar::RenderProjectSubMenu() {
 }
 
 void MenuBar::RenderSceneSubMenu() {
-	GUI& gui = this->gui.get();
+	GUI& gui = this->gui;
 	if (ImGui::MenuItem("New Scene", "Ctrl+N", nullptr, gui.HasOpenProject())) {
 		gui.CreateNewScene("", "New Scene");
 	}
@@ -538,7 +538,7 @@ MenuBar::AboutSection::AboutSection(MenuBar& owner) :
 	}) {}
 
 void MenuBar::AboutSection::RenderAboutPopup() {
-	GUI& gui = mb.get().gui.get();
+	GUI& gui = mb.get().gui;
 	if (ab) {
 		ImGui::OpenPopup(ABOUT_POPUP_TITLE_TEXT);
 		ab_open = true;
@@ -575,7 +575,7 @@ void MenuBar::AboutSection::RenderAboutPopup() {
 }
 
 void MenuBar::AboutSection::RenderLicenceNotices() {
-	GUI& gui = mb.get().gui.get();
+	GUI& gui = mb.get().gui;
 	for (auto& [name, licence] : licences) {
 		ImGui::PushFont(gui.GetFont());
 		ImGui::TextColored({ 0.7, 0.7, 0.7, 1 }, name.c_str());

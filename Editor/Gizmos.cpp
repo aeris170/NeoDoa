@@ -17,7 +17,7 @@ Gizmos::Gizmos(SceneViewport& sv) noexcept :
 	sv(sv) {}
 
 void Gizmos::Render(Scene& scene) {
-	GUI& gui = sv.get().gui.get();
+	GUI& gui = sv.get().gui;
 	if (gui.sh.selectedEntity == NULL_ENTT) { return; }
 	if (!settings.enabled) { return; }
 
