@@ -93,7 +93,7 @@ void AssetManager::RenderTreeViewRecursive(FNode* current) {
 
 	std::string title(ICON_FA_FOLDER " ");
 	if (current == root) {
-		title = ICON_FA_FOLDER_TREE " ";
+		title = ICON_FA_FOLDER_TREE " ROOT";
 	}
 	title.append(current->Name());
 	if (ImGui::TreeNodeEx(title.c_str(), flags)) {
