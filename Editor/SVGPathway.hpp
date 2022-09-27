@@ -18,7 +18,7 @@ enum class TextureSize {
 	SMALL,
 	MEDIUM,
 	LARGE,
-	SIZE_COUNT
+	SIZE_COUNT /* = 3 */
 };
 
 struct SVGPathway {
