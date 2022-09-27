@@ -120,6 +120,12 @@ const std::string& FNode::Extension() const { return ext; }
 void FNode::ChangeExtension(std::string_view extension) { ChangeExtension(std::string(extension)); }
 void FNode::ChangeExtension(const std::string& extension) { ChangeExtension(std::string(extension)); }
 void FNode::ChangeExtension(std::string&& extension) {
+	if (isDirectory) {
+		DOA_LOG_ERROR("FNode::ChangeExtension cannot change extension of a folder!");
+		DOA_LOG_ERROR("\tnode must be a file!");
+		return;
+	}
+
 	std::string oldFullName = fullName;
 	ext = std::move(extension);
 	fullName = name + ext;
@@ -136,6 +142,11 @@ bool FNode::ReadContent() const {
 		DOA_LOG_ERROR("FNode::ReadContent cannot read contents of a non-owned file node!");
 		DOA_LOG_ERROR("\tnode must have a valid owning project!");
 		return false;
+	}
+	if (isDirectory) {
+		DOA_LOG_ERROR("FNode::ReadContent read contents of a folder!");
+		DOA_LOG_ERROR("\tnode must be a file!");
+		return;
 	}
 
 	std::filesystem::current_path(owner->Workspace());
@@ -154,6 +165,11 @@ void FNode::ModifyContent(std::string&& content) {
 	if (!owner) {
 		DOA_LOG_ERROR("FNode::ModifyContent cannot modify contents of a non-owned file node!");
 		DOA_LOG_ERROR("\tnode must have a valid owning project!");
+		return;
+	}
+	if (isDirectory) {
+		DOA_LOG_ERROR("FNode::ModifyContent cannot modify contents of a folder!");
+		DOA_LOG_ERROR("\tnode must be a file!");
 		return;
 	}
 
