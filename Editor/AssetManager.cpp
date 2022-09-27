@@ -194,7 +194,7 @@ void AssetManager::RenderSelectedFolderContent() {
 		int i = 0;
 		ImGui::TableNextRow();
 		for (auto child : selectedFolder->Children()) {
-			if (!assets->IsAsset(child)) { continue; }
+			if (!child->IsDirectory() && !assets->IsAsset(child)) { continue; }
 
 			if (i == columns) {
 				i = 0;
@@ -253,7 +253,7 @@ void AssetManager::RenderSelectedFolderContent() {
 		ImGui::EndTable();
 	} else if (selectedFolderContentSettings.viewMode == SelectedFolderContentSettings::ViewMode::List) {
 		for (auto child : selectedFolder->Children()) {
-			if (!assets->IsAsset(child)) { continue; }
+			if (!child->IsDirectory() && !assets->IsAsset(child)) { continue; }
 
 			void* icon;
 			if (child->IsDirectory()) {
