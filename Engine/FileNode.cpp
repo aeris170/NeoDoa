@@ -45,6 +45,7 @@ FNode::FNode(FNode&& other) noexcept :
 	ext(std::move(other.ext)),
 	fullName(std::move(other.fullName)),
 	content(std::move(other.content)),
+	isDirectory(std::exchange(other.isDirectory, false)),
 	children(std::move(other.children)) {
 	FixPointers(*this);
 }
@@ -55,6 +56,7 @@ FNode& FNode::operator=(FNode&& other) noexcept {
 	ext = std::move(other.ext);
 	fullName = std::move(other.fullName);
 	content = std::move(other.content);
+	isDirectory = std::exchange(other.isDirectory, false);
 	children = std::move(other.children);
 	FixPointers(*this);
 	return *this;
