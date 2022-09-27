@@ -62,7 +62,7 @@ bool EnumWidget(const std::string& label, int& value, const std::vector<EnumValu
 	}
 
 	bool rv{ false };
-	if(ImGui::BeginCombo(ss.str().c_str(), values[selected].prettyName.c_str())) {
+	if (ImGui::BeginCombo(ss.str().c_str(), values[selected].prettyName.c_str())) {
 		for (int i = 0; i < values.size(); i++) {
 			bool is_selected = (value == values[i].value); // You can store your selection however you want, outside or inside your objects
 			if (ImGui::Selectable(values[i].prettyName.c_str(), is_selected)) {
@@ -344,8 +344,9 @@ bool ImGui::NeoDoaColorPickerPopup(const char* label, float col[4], ImGuiColorEd
 
     ImGuiContext& g = *GImGui;
     ImGuiWindow* window = GetCurrentWindow();
-    if (window->SkipItems)
+    if (window->SkipItems) {
         return false;
+    }
 
     ImDrawList* draw_list = window->DrawList;
     ImGuiStyle& style = g.Style;
