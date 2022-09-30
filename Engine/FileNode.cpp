@@ -134,7 +134,7 @@ bool FNode::ReadContent() const {
 	if (isDirectory) {
 		DOA_LOG_ERROR("FNode::ReadContent read contents of a folder!");
 		DOA_LOG_ERROR("\tnode must be a file!");
-		return;
+		return false;
 	}
 
 	std::filesystem::current_path(owner->Workspace());
