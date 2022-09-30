@@ -62,8 +62,7 @@ void AssetManager::RenderMenuBar() {
 	if (ImGui::BeginMenuBar()) {
 		if (ImGui::MenuItem(REFRESH_BUTTON_TEXT)) {
 			if (hasContent) {
-				// TODO
-				//assets->ReScan();
+				assets->ReimportAll();
 			} else {
 				DOA_LOG_WARNING("Didn't refresh! No open project.");
 			}
