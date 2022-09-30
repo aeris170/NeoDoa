@@ -220,6 +220,29 @@ FNode* FNode::CreateChildFileFor(FNode& node, FNodeCreationParams&& params) {
 	params.isDirectory = false;
 
 	std::filesystem::current_path(node.owner->Workspace());
+	{ /* check for duplicate file names and act accordingly */
+		bool found = false;
+		int appendCount = 0;
+		do {
+			found = false;
+			for (auto child : node.children) {
+				if (child->IsFile() && child->name == params.name) {
+					found = true;
+					break;
+				}
+			}
+			if (found) {
+				appendCount++;
+				if (appendCount == 1) {
+					params.name.append(".1");
+				} else {
+					auto pos = params.name.find_last_of(".");
+					params.name = params.name.substr(0, pos + 1).append(std::to_string(appendCount));
+				}
+			}
+		} while (found);
+	}
+
 	std::string fullName = (params.name + params.ext);
 	std::filesystem::path pathToFile(params.parent ? params.parent->Path() / fullName : fullName);
 
@@ -248,6 +271,29 @@ FNode* FNode::CreateChildFolderFor(FNode& node, FNodeCreationParams&& params) {
 	params.ext.clear();
 	params.content.clear();
 	params.isDirectory = true;
+
+	{ /* check for duplicate file names and act accordingly */
+		bool found = false;
+		int appendCount = 0;
+		do {
+			found = false;
+			for (auto child : node.children) {
+				if (child->IsDirectory() && child->name == params.name) {
+					found = true;
+					break;
+				}
+			}
+			if (found) {
+				appendCount++;
+				if (appendCount == 1) {
+					params.name.append(".1");
+				} else {
+					auto pos = params.name.find_last_of(".");
+					params.name = params.name.substr(0, pos + 1).append(std::to_string(appendCount));
+				}
+			}
+		} while (found);
+	}
 
 	std::filesystem::current_path(node.owner->Workspace());
 	std::filesystem::create_directory(params.name);
