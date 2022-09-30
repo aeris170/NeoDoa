@@ -102,6 +102,8 @@ struct Assets {
 	const AssetDatabaseCategory& ShaderAssets() const;
 	const AssetDatabaseCategory& ShaderUniformBlockAssets() const;
 
+	void ReimportAll();
+
 private:
 
 	using AssetDatabase = entt::dense_hash_map<UUID, Asset>;

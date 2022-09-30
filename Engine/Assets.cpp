@@ -129,6 +129,12 @@ const Assets::AssetDatabaseCategory& Assets::ModelAssets() const { return modelA
 const Assets::AssetDatabaseCategory& Assets::ShaderAssets() const { return shaderAssets; }
 const Assets::AssetDatabaseCategory& Assets::ShaderUniformBlockAssets() const { return shaderUniformBlockAssets; }
 
+void Assets::ReimportAll() {
+	_root = FNode(FNodeCreationParams{ project, nullptr, "", "", "", true });
+	BuildFileNodeTree(_root);
+	ImportAllFiles(database, _root);
+}
+
 AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
 	/* Import a file:
 	    * Step 1: Get the sibling file fileName.fileExtension.id
