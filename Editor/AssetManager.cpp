@@ -52,6 +52,7 @@ void AssetManager::Render() {
 	RenderContextMenu();
 	RenderSelectedFolderContent();
 	ImGui::EndChild();
+	}
 }
 
 void AssetManager::End() {
@@ -200,7 +201,7 @@ void AssetManager::RenderSelectedFolderContent() {
 				i = 0;
 				ImGui::TableNextRow();
 			}
-			ImGui::TableSetColumnIndex(i++);
+			ImGui::TableSetColumnIndex(i++ % columns);
 
 			void* icon;
 			if (child->IsDirectory()) {
@@ -215,6 +216,8 @@ void AssetManager::RenderSelectedFolderContent() {
 
 			ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
 			ImGui::ImageButton(icon, { selectedFolderContentSettings.thumbnailSize, selectedFolderContentSettings.thumbnailSize });
+				ImGui::EndPopup();
+			}
 
 			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
 				OpenFileAtFileNode(child);

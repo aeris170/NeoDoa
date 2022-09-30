@@ -25,6 +25,7 @@ private:
 	Assets* assets{ nullptr };
 	FNode* root{ nullptr };
 	FNode* selectedFolder{ nullptr };
+	FNode* deletedNode{ nullptr };
 
 	struct TreeViewSettings {
 		float currentWidth = 120.0f;
