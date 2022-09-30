@@ -52,6 +52,13 @@ void AssetManager::Render() {
 	RenderContextMenu();
 	RenderSelectedFolderContent();
 	ImGui::EndChild();
+
+	if (deletedNode != nullptr) {
+		deletedNode->ParentNode()->DeleteChildNode(deletedNode);
+		if (selectedFolder == deletedNode) {
+			selectedFolder = root;
+		}
+		deletedNode = nullptr;
 	}
 }
 
@@ -65,6 +72,7 @@ void AssetManager::RenderMenuBar() {
 		if (ImGui::MenuItem(REFRESH_BUTTON_TEXT)) {
 			if (hasContent) {
 				assets->ReimportAll();
+				selectedFolder = root;
 			} else {
 				DOA_LOG_WARNING("Didn't refresh! No open project.");
 			}
@@ -197,8 +205,9 @@ void AssetManager::RenderSelectedFolderContent() {
 		for (auto child : selectedFolder->Children()) {
 			if (!child->IsDirectory() && !assets->IsAsset(child)) { continue; }
 
-			if (i == columns) {
-				i = 0;
+			ImGui::PushID(i);
+
+			if (i % columns == 0) {
 				ImGui::TableNextRow();
 			}
 			ImGui::TableSetColumnIndex(i++ % columns);
@@ -216,6 +225,13 @@ void AssetManager::RenderSelectedFolderContent() {
 
 			ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
 			ImGui::ImageButton(icon, { selectedFolderContentSettings.thumbnailSize, selectedFolderContentSettings.thumbnailSize });
+			if (ImGui::BeginPopupContextItem()) {
+
+				if (ImGui::MenuItem("Delete")) {
+					deletedNode = child;
+					ImGui::Separator();
+				}
+
 				ImGui::EndPopup();
 			}
 
@@ -251,6 +267,8 @@ void AssetManager::RenderSelectedFolderContent() {
 			ImGui::PopFont();
 			ImGui::PopTextWrapPos(); ImGui::RenderTextClipped;
 			ImGui::PopClipRect();
+
+			ImGui::PopID();
 		}
 
 		ImGui::EndTable();
@@ -285,10 +303,12 @@ void AssetManager::RenderSelectedFolderContent() {
 }
 
 void AssetManager::RenderContextMenu() {
+	bool isDisabled = !hasContent;
+	if (isDisabled) { ImGui::BeginDisabled(); }
 	if (ImGui::BeginPopupContextWindow()) {
 		if (ImGui::BeginMenu("Create")) {
 			if (ImGui::MenuItem("Folder")) {
-				FNode::CreateChildFolderFor(*selectedFolder, FNodeCreationParams{
+				selectedFolder->CreateChildFolder(FNodeCreationParams{
 					selectedFolder->OwningProject(),
 					selectedFolder,
 					"New Folder",
@@ -304,6 +324,7 @@ void AssetManager::RenderContextMenu() {
 
 		ImGui::EndPopup();
 	}
+	if (isDisabled) { ImGui::EndDisabled(); }
 }
 
 void AssetManager::OpenFileAtFileNode(FNode* file) {
