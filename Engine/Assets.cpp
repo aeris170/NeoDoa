@@ -206,10 +206,8 @@ void Assets::ImportAllFiles(AssetDatabase& database, const FNode& root) {
 	}
 }
 
-#include <iostream>
 void Assets::BuildFileNodeTree(FNode& root) {
 	std::filesystem::current_path(project->Workspace());
-	std::cout << "Current path is " << project->Workspace() / root.Path() << '\n';
 	auto it = std::filesystem::directory_iterator(project->Workspace() / root.Path());
 	for (const auto& entry : it) {
 		root.children.push_back(new FNode({
