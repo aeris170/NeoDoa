@@ -195,6 +195,9 @@ void FNode::MoveUnder(FNode& directory) {
 		std::filesystem::rename(Path(), directory.Path() / fullName);
 	}
 }
+void FNode::Delete() {
+	FNode::DeleteChildNode(this);
+}
 
 std::vector<FNode*> FNode::Children() { return children; }
 const std::vector<FNode*>& FNode::Children() const { return children; }
@@ -205,8 +208,8 @@ FNode FNode::HollowCopy(const FNode& other) {
 	return {{ other.OwningProject(), other.ParentNode(), other.Name(), other.Extension(), "", other.IsDirectory() }};
 }
 
-FNode* FNode::CreateChildFileFor(FNode& node, FNodeCreationParams&& params) {
-	if (!node.owner) {
+FNode* FNode::CreateChildFile(FNodeCreationParams&& params) {
+	if (!owner) {
 		DOA_LOG_ERROR("FNode::CreateChildFileFor not supported for non-owned nodes, node must have a valid owning project!");
 		return nullptr;
 	}
@@ -215,17 +218,17 @@ FNode* FNode::CreateChildFileFor(FNode& node, FNodeCreationParams&& params) {
 		return nullptr;
 	}
 
-	params.owner = node.owner;
-	params.parent = &node;
+	params.owner = owner;
+	params.parent = this;
 	params.isDirectory = false;
 
-	std::filesystem::current_path(node.owner->Workspace());
+	std::filesystem::current_path(owner->Workspace());
 	{ /* check for duplicate file names and act accordingly */
 		bool found = false;
 		int appendCount = 0;
 		do {
 			found = false;
-			for (auto child : node.children) {
+			for (auto child : children) {
 				if (child->IsFile() && child->name == params.name) {
 					found = true;
 					break;
@@ -243,21 +246,18 @@ FNode* FNode::CreateChildFileFor(FNode& node, FNodeCreationParams&& params) {
 		} while (found);
 	}
 
-	std::string fullName = (params.name + params.ext);
-	std::filesystem::path pathToFile(params.parent ? params.parent->Path() / fullName : fullName);
-
-	std::ofstream file(pathToFile, std::ofstream::trunc | std::ofstream::binary);
+	std::ofstream file(params.parent->Path() / params.name, std::ofstream::trunc | std::ofstream::binary);
 	assert(file.is_open(), "file should be open by default");
 	file << params.content;
 	file.flush();
 	file.close();
 
 	FNode* ptr = new FNode(std::move(params));
-	node.children.push_back(ptr);
+	children.push_back(ptr);
 	return ptr;
 }
-FNode* FNode::CreateChildFolderFor(FNode& node, FNodeCreationParams&& params) {
-	if (!node.owner) {
+FNode* FNode::CreateChildFolder(FNodeCreationParams&& params) {
+	if (!owner) {
 		DOA_LOG_ERROR("FNode::CreateChildFolderFor not supported for non-owned nodes, node must have a valid owning project!");
 		return nullptr;
 	}
@@ -266,8 +266,8 @@ FNode* FNode::CreateChildFolderFor(FNode& node, FNodeCreationParams&& params) {
 		return nullptr;
 	}
 
-	params.owner = node.owner;
-	params.parent = &node;
+	params.owner = owner;
+	params.parent = this;
 	params.ext.clear();
 	params.content.clear();
 	params.isDirectory = true;
@@ -277,7 +277,7 @@ FNode* FNode::CreateChildFolderFor(FNode& node, FNodeCreationParams&& params) {
 		int appendCount = 0;
 		do {
 			found = false;
-			for (auto child : node.children) {
+			for (auto child : children) {
 				if (child->IsDirectory() && child->name == params.name) {
 					found = true;
 					break;
@@ -295,12 +295,34 @@ FNode* FNode::CreateChildFolderFor(FNode& node, FNodeCreationParams&& params) {
 		} while (found);
 	}
 
-	std::filesystem::current_path(node.owner->Workspace());
-	std::filesystem::create_directory(params.name);
+	std::filesystem::current_path(owner->Workspace());
+	std::filesystem::create_directory(params.parent->Path() / params.name);
 
 	FNode* ptr = new FNode(std::move(params));
-	node.children.push_back(ptr);
+	children.push_back(ptr);
 	return ptr;
+}
+bool FNode::DeleteChildNode(FNode* child) {
+	if (!owner) {
+		DOA_LOG_ERROR("FNode::DeleteChildNode not supported for non-owned nodes, node must have a valid owning project!");
+		return false;
+	}
+	if (child == nullptr) {
+		DOA_LOG_ERROR("FNode::DeleteChildNode child must not be nullptr!");
+		return false;
+	}
+
+	if (this != child->parent) {
+		return false;
+	}
+	auto pos = std::find(children.begin(), children.end(), child);
+	assert(pos != children.end(), "Something is wrong, child has this as parent but this does not have child as a child!");
+	children.erase(pos);
+
+	std::filesystem::current_path(owner->Workspace());
+	std::filesystem::remove_all(child->Path());
+
+	return true;
 }
 
 void FNode::FixPointers(FNode& node) {

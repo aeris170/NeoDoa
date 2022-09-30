@@ -56,6 +56,7 @@ struct FNode {
 	FNode* RootNode() const;
 	FNode* ParentNode() const;
 	void MoveUnder(FNode& directory);
+	void Delete();
 
 	std::vector<FNode*> Children();
 	const std::vector<FNode*>& Children() const;
@@ -64,8 +65,9 @@ struct FNode {
 
 	static FNode HollowCopy(const FNode& other);
 
-	static FNode* CreateChildFileFor(FNode& node, FNodeCreationParams&& params);
-	static FNode* CreateChildFolderFor(FNode& node, FNodeCreationParams&& params);
+	FNode* CreateChildFile(FNodeCreationParams&& params);
+	FNode* CreateChildFolder(FNodeCreationParams&& params);
+	bool DeleteChildNode(FNode* child);
 
 private:
 	const Project* owner{ nullptr };
