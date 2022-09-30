@@ -200,6 +200,7 @@ AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
 }
 
 void Assets::ImportAllFiles(AssetDatabase& database, const FNode& root) {
+	database.clear();
 	ImportFile(database, root);
 	for (auto& child : root.Children()) {
 		ImportAllFiles(database, *child);
