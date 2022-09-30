@@ -49,6 +49,7 @@ void AssetManager::Render() {
 	ImGui::SameLine();
 
 	ImGui::BeginChild("test2", { selectedFolderContentSettings.currentWidth, 0 }, true);
+	RenderContextMenu();
 	RenderSelectedFolderContent();
 	ImGui::EndChild();
 }
@@ -277,6 +278,28 @@ void AssetManager::RenderSelectedFolderContent() {
 			ImVec2 max = { min.x + textHeight, min.y + textHeight };
 			ImGui::GetWindowDrawList()->AddImage(icon, min, max);
 		}
+	}
+}
+
+void AssetManager::RenderContextMenu() {
+	if (ImGui::BeginPopupContextWindow()) {
+		if (ImGui::BeginMenu("Create")) {
+			if (ImGui::MenuItem("Folder")) {
+				FNode::CreateChildFolderFor(*selectedFolder, FNodeCreationParams{
+					selectedFolder->OwningProject(),
+					selectedFolder,
+					"New Folder",
+					"",
+					"",
+					true
+				});
+			}
+			ImGui::Separator();
+
+			ImGui::EndMenu();
+		}
+
+		ImGui::EndPopup();
 	}
 }
 

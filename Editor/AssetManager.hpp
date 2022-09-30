@@ -51,6 +51,7 @@ private:
 	void RenderTreeViewRecursive(FNode* current);
 
 	void RenderSelectedFolderContent();
+	void RenderContextMenu();
 	void OpenFileAtFileNode(FNode* file);
 };
 
