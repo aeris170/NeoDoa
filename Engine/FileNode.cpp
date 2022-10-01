@@ -296,11 +296,15 @@ FNode* FNode::CreateChildFolder(FNodeCreationParams&& params) {
 	}
 
 	std::filesystem::current_path(owner->Workspace());
-	std::filesystem::create_directory(params.parent->Path() / params.name);
+	bool success = std::filesystem::create_directory(params.parent->Path() / params.name);
+	if (success) {
+		FNode* ptr = new FNode(std::move(params));
+		children.push_back(ptr);
+		return ptr;
+	} else {
+		return nullptr;
+	}
 
-	FNode* ptr = new FNode(std::move(params));
-	children.push_back(ptr);
-	return ptr;
 }
 bool FNode::DeleteChildNode(FNode* child) {
 	if (!owner) {
