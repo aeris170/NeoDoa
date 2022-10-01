@@ -90,7 +90,7 @@ void MenuBar::RenderSceneSubMenu() {
 	}
 	if (ImGui::BeginMenu("Open Scene...", gui.HasOpenProject())) {
 		Assets& assets = gui.openProject->Assets();
-		for (auto& uuid : assets.SceneAssets()) {
+		for (auto& uuid : assets.SceneAssetIDs()) {
 			AssetHandle sceneAsset = assets.FindAsset(uuid);
 			if (ImGui::MenuItem(sceneAsset.Value().File()->Name().c_str(), nullptr, nullptr)) {
 				gui.openProject->OpenScene(sceneAsset);

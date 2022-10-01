@@ -68,56 +68,61 @@ Assets& Assets::operator=(Assets&& other) noexcept {
 	return *this;
 }
 
-bool Assets::CreateFolder(std::filesystem::path relativePath) {
-	std::filesystem::current_path(project->Workspace());
-	return std::filesystem::create_directories(relativePath);
+FNode& Assets::CreateFolder(FNode& parentFolder, const std::string_view folderName) {
+	FNode& rv = *parentFolder.CreateChildFolder({ parentFolder.owner, &parentFolder, std::string(folderName) });
+	ReimportAll();
+	return rv;
 }
-bool Assets::MoveFolder(std::filesystem::path oldRelativePath, std::filesystem::path newRelativePath) {
-	std::filesystem::current_path(project->Workspace());
-	std::filesystem::path old(oldRelativePath);
-	std::filesystem::path neww(newRelativePath);
-	std::error_code err;
-	std::filesystem::rename(old, old / neww.filename(), err);
-	return !static_cast<bool>(err);
+void Assets::MoveFolder(FNode& folder, FNode& targetParentFolder) {
+	folder.MoveUnder(targetParentFolder);
+	ReimportAll();
 }
-bool Assets::DeleteFolder(std::filesystem::path relativePath) {
-	std::filesystem::current_path(project->Workspace());
-	std::error_code err;
-	bool result = std::filesystem::remove_all(relativePath, err);
-	return result && !static_cast<bool>(err);
+void Assets::DeleteFolder(FNode& folder) {
+	folder.Delete();
+	ReimportAll();
 }
 
-bool Assets::MoveAsset(std::filesystem::path oldRelativePath, std::filesystem::path newRelativePath) {
-	std::filesystem::current_path(project->Workspace());
-	if (std::filesystem::is_directory(oldRelativePath) || std::filesystem::is_directory(newRelativePath)) { return false; }
-	if (!std::filesystem::exists(oldRelativePath)) { return false; }
-	if (std::filesystem::exists(newRelativePath)) { return false; }
-	std::error_code err;
-	std::filesystem::rename(oldRelativePath, newRelativePath, err);
-	return !static_cast<bool>(err);
+void Assets::MoveAsset(const AssetHandle asset, FNode& targetParentFolder) {
+	if (!asset.HasValue()) { return; }
+	asset->File()->MoveUnder(targetParentFolder);
+	ReimportAll();
 }
-bool Assets::DeleteAsset(std::filesystem::path relativePath) {
-	std::filesystem::current_path(project->Workspace());
-	std::error_code err;
-	bool result = std::filesystem::remove(relativePath, err);
-	return result && !static_cast<bool>(err);
+void Assets::DeleteAsset(const AssetHandle asset) {
+	if (!asset.HasValue()) { return; }
+
+	UUID id = asset->ID();
+
+	database.erase(id);
+	std::erase(sceneAssets, id);
+	std::erase(scriptAssets, id);
+	std::erase(textureAssets, id);
+	std::erase(modelAssets, id);
+	std::erase(shaderAssets, id);
+	std::erase(shaderUniformBlockAssets, id);
+
+	asset->File()->Delete();
+
+	ReimportAll();
 }
 
 AssetHandle Assets::FindAsset(UUID uuid) {
 	if (!database.contains(uuid)) { return nullptr; }
 	return { &database[uuid] };
 }
-
-AssetHandle Assets::FindAsset(std::filesystem::path relativePath) {
+AssetHandle Assets::FindAssetAt(const FNode& file) const {
 	for (auto& [uuid, asset] : database) {
-		if (asset.File()->Path() == relativePath) {
-			return { &asset };
+		if (asset.File() == &file) {
+			/*
+			* casting away const is safe here
+			* because database does not contain "const Asset*"
+			* in the first place, it contains "Asset*"
+			*/
+			return { const_cast<Asset*>(&asset) };
 		}
 	}
 	return nullptr;
 }
-
-bool Assets::IsAsset(FNode* file) const { return files.find(file) != files.end(); }
+bool Assets::IsAssetExistsAt(const FNode& file) const { return files.contains(&file); }
 
 FNode& Assets::Root() { return _root; }
 const FNode& Assets::Root() const { return _root; }
@@ -186,7 +191,7 @@ AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
 		}
 
 		// Step 6
-		auto result = database.emplace(uuid, Asset{ uuid, &file });
+		auto result = database.emplace(uuid, Asset{ uuid, const_cast<FNode*>(&file) });
 		Asset& asset = std::get<Asset>(*result.first);
 		files.emplace(&file, asset.ID());
 

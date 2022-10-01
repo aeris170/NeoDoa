@@ -61,12 +61,12 @@ struct Assets {
 	Assets& operator=(const Assets& other) = delete;
 	Assets& operator=(Assets&& other) noexcept;
 
-	bool CreateFolder(std::filesystem::path relativePath);
-	bool MoveFolder(std::filesystem::path oldRelativePath, std::filesystem::path newRelativePath);
-	bool DeleteFolder(std::filesystem::path relativePath);
+	FNode& CreateFolder(FNode& parentFolder, const std::string_view folderName);
+	void MoveFolder(FNode& folder, FNode& targetParentFolder);
+	void DeleteFolder(FNode& folder);
 
 	template<detail::AssetType T, typename ...Args>
-	AssetHandle CreateAsset(std::filesystem::path relativePath, Args&& ...args) {
+	AssetHandle CreateAssetAt(FNode& folderPath, const std::string_view fileName, Args&& ...args) {
 		/*
 		std::filesystem::current_path(project->Workspace());
 		FNode* folder = _root.FindChildAt(relativePath.parent_path());
@@ -84,13 +84,12 @@ struct Assets {
 		*/
 		return nullptr;
 	}
-	bool MoveAsset(std::filesystem::path oldRelativePath, std::filesystem::path newRelativePath);
-	bool DeleteAsset(std::filesystem::path relativePath);
+	void MoveAsset(const AssetHandle asset, FNode& targetParentFolder);
+	void DeleteAsset(const AssetHandle asset);
 
 	AssetHandle FindAsset(UUID uuid);
-	AssetHandle FindAsset(std::filesystem::path relativePath);
-
-	bool IsAsset(FNode* file) const;
+	AssetHandle FindAssetAt(const FNode& file) const;
+	bool IsAssetExistsAt(const FNode& file) const;
 
 	FNode& Root();
 	const FNode& Root() const;

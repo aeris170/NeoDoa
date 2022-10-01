@@ -203,7 +203,7 @@ void AssetManager::RenderSelectedFolderContent() {
 		int i = 0;
 		ImGui::TableNextRow();
 		for (auto child : selectedFolder->Children()) {
-			if (!child->IsDirectory() && !assets->IsAsset(child)) { continue; }
+			if (!child->IsDirectory() && !assets->IsAssetExistsAt(*child)) { continue; }
 
 			ImGui::PushID(i);
 
@@ -274,7 +274,7 @@ void AssetManager::RenderSelectedFolderContent() {
 		ImGui::EndTable();
 	} else if (selectedFolderContentSettings.viewMode == SelectedFolderContentSettings::ViewMode::List) {
 		for (auto child : selectedFolder->Children()) {
-			if (!child->IsDirectory() && !assets->IsAsset(child)) { continue; }
+			if (!child->IsDirectory() && !assets->IsAssetExistsAt(*child)) { continue; }
 
 			void* icon;
 			if (child->IsDirectory()) {
@@ -333,7 +333,7 @@ void AssetManager::OpenFileAtFileNode(FNode* file) {
 		selectedFolder = file;
 	} else if(file->IsFile()) {
 		if (Assets::IsSceneFile(file)) {
-			gui.openProject->OpenScene(assets->FindAsset(file->Path()));
+			gui.openProject->OpenScene(assets->FindAssetAt(*file));
 		}
 	}
 }

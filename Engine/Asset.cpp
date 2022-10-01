@@ -8,7 +8,7 @@
 Asset::Asset() noexcept :
 	Asset(UUID::Empty(), nullptr) {}
 
-Asset::Asset(const UUID id, const FNode* file) noexcept :
+Asset::Asset(const UUID id, FNode* file) noexcept :
 	id(id),
 	file(file) {}
 
@@ -26,7 +26,7 @@ Asset& Asset::operator=(Asset&& other) noexcept {
 }
 
 UUID Asset::ID() const { return id; }
-const FNode* Asset::File() const { return file; }
+FNode* Asset::File() const { return file; }
 const AssetData& Asset::Data() const { return data; }
 
 void Asset::Serialize() {

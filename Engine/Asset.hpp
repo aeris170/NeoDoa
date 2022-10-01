@@ -41,7 +41,7 @@ using AssetData = std::variant<std::monostate, ASSET_TYPE>;
 struct Asset {
 
 	Asset() noexcept;
-	Asset(const UUID id, const FNode* file) noexcept;
+	Asset(const UUID id, FNode* file) noexcept;
 	~Asset() = default;
 	Asset(const Asset& other) = default;
 	Asset(Asset&& other) noexcept;
@@ -49,7 +49,7 @@ struct Asset {
 	Asset& operator=(Asset&& other) noexcept;
 
 	UUID ID() const;
-	const FNode* File() const;
+	FNode* File() const;
 	const AssetData& Data() const;
 	template<detail::AssetType T>
 	T& DataAs() {
@@ -77,6 +77,6 @@ struct Asset {
 
 private:
 	UUID id;
-	const FNode* file;
+	FNode* file;
 	AssetData data{ std::monostate{} };
 };
