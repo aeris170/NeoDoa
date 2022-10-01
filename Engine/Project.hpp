@@ -15,7 +15,7 @@ struct Project {
 	inline static const std::string DEFAULT_PATH = std::getenv("USERPROFILE");
 
 	Project(std::filesystem::path workspace, std::string name) noexcept;
-	Project(std::filesystem::path workspace, std::string name, std::filesystem::path  startupLoc) noexcept;
+	Project(std::filesystem::path workspace, std::string name, UUID startupSceneUUID) noexcept;
 	~Project() = default;
 	Project(const Project& other) = delete;
 	Project(Project&& other) noexcept;

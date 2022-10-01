@@ -21,9 +21,9 @@ std::string SerializeProject(const Project& project) {
 		{
 			AssetHandle startup = project.GetStartupScene();
 			if (startup.HasValue()) {
-				printer.PushText(startup->File()->Path().string().c_str());
+				printer.PushText(startup->ID());
 			} else {
-				printer.PushText("NULL");
+				printer.PushText(UUID::Empty());
 			}
 		}
 		printer.CloseElement(); // name close

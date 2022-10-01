@@ -12,10 +12,10 @@ Project::Project(std::filesystem::path workspace, std::string name) noexcept :
 	_name(name),
 	_assets(this) {}
 
-Project::Project(std::filesystem::path workspace, std::string name, std::filesystem::path startupLoc) noexcept :
+Project::Project(std::filesystem::path workspace, std::string name, UUID startupSceneUUID) noexcept :
 	Project(workspace, name) {
-	if (startupLoc != "NULL") {
-		_startupScene = _assets.FindAsset(startupLoc);
+	if (startupSceneUUID != UUID::Empty()) {
+		_startupScene = _assets.FindAsset(startupSceneUUID);
 		if (_startupScene.HasValue()) {
 			_startupScene->ForceDeserialize();
 			_openScene = &_startupScene->DataAs<Scene>();

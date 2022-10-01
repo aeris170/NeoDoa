@@ -12,8 +12,8 @@ Project DeserializeProject(const FNode* file) {
 	tinyxml2::XMLElement* rootNode = doc.RootElement();
 
 	std::string name = rootNode->FirstChildElement("name")->GetText();
-	std::string startupLoc = rootNode->FirstChildElement("startup")->GetText();
+	UUID startupID = rootNode->FirstChildElement("startup")->Unsigned64Text(UUID::Empty());
 
 	// TODO
-	return { file->FolderPath(), name, startupLoc};
+	return { file->FolderPath(), name, startupID };
 }
