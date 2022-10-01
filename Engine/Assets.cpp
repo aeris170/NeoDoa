@@ -122,12 +122,12 @@ bool Assets::IsAsset(FNode* file) const { return files.find(file) != files.end()
 FNode& Assets::Root() { return _root; }
 const FNode& Assets::Root() const { return _root; }
 
-const Assets::AssetDatabaseCategory& Assets::SceneAssets() const { return sceneAssets; }
-const Assets::AssetDatabaseCategory& Assets::ScriptAssets() const { return scriptAssets; }
-const Assets::AssetDatabaseCategory& Assets::TextureAssets() const { return textureAssets; }
-const Assets::AssetDatabaseCategory& Assets::ModelAssets() const { return modelAssets; }
-const Assets::AssetDatabaseCategory& Assets::ShaderAssets() const { return shaderAssets; }
-const Assets::AssetDatabaseCategory& Assets::ShaderUniformBlockAssets() const { return shaderUniformBlockAssets; }
+const Assets::UUIDCollection& Assets::SceneAssetIDs() const { return sceneAssets; }
+const Assets::UUIDCollection& Assets::ScriptAssetIDs() const { return scriptAssets; }
+const Assets::UUIDCollection& Assets::TextureAssetIDs() const { return textureAssets; }
+const Assets::UUIDCollection& Assets::ModelAssetIDs() const { return modelAssets; }
+const Assets::UUIDCollection& Assets::ShaderAssetIDs() const { return shaderAssets; }
+const Assets::UUIDCollection& Assets::ShaderUniformBlockAssetIDs() const { return shaderUniformBlockAssets; }
 
 void Assets::ReimportAll() {
 	_root = FNode(FNodeCreationParams{ project, nullptr, "", "", "", true });

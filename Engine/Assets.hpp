@@ -36,7 +36,7 @@ private:
 
 struct Assets {
 
-	using AssetDatabaseCategory = std::vector<UUID>;
+	using UUIDCollection = std::vector<UUID>;
 	using AssetFileDatabase = entt::dense_hash_map<const FNode*, UUID>;
 
 	inline static std::string SCENE_EXT{ ".scn" };
@@ -95,12 +95,12 @@ struct Assets {
 	FNode& Root();
 	const FNode& Root() const;
 
-	const AssetDatabaseCategory& SceneAssets() const;
-	const AssetDatabaseCategory& ScriptAssets() const;
-	const AssetDatabaseCategory& TextureAssets() const;
-	const AssetDatabaseCategory& ModelAssets() const;
-	const AssetDatabaseCategory& ShaderAssets() const;
-	const AssetDatabaseCategory& ShaderUniformBlockAssets() const;
+	const UUIDCollection& SceneAssetIDs() const;
+	const UUIDCollection& ScriptAssetIDs() const;
+	const UUIDCollection& TextureAssetIDs() const;
+	const UUIDCollection& ModelAssetIDs() const;
+	const UUIDCollection& ShaderAssetIDs() const;
+	const UUIDCollection& ShaderUniformBlockAssetIDs() const;
 
 	void ReimportAll();
 
@@ -114,12 +114,12 @@ private:
 
 	FNode _root;
 
-	AssetDatabaseCategory sceneAssets{};
-	AssetDatabaseCategory scriptAssets{};
-	AssetDatabaseCategory textureAssets{};
-	AssetDatabaseCategory modelAssets{};
-	AssetDatabaseCategory shaderAssets{};
-	AssetDatabaseCategory shaderUniformBlockAssets{};
+	UUIDCollection sceneAssets{};
+	UUIDCollection scriptAssets{};
+	UUIDCollection textureAssets{};
+	UUIDCollection modelAssets{};
+	UUIDCollection shaderAssets{};
+	UUIDCollection shaderUniformBlockAssets{};
 
 	AssetHandle ImportFile(AssetDatabase& database, const FNode& file);
 	void ImportAllFiles(AssetDatabase& database, const FNode& root);
