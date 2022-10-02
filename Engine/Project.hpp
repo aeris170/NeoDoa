@@ -23,7 +23,7 @@ struct Project {
 	Project& operator=(Project&& other) noexcept;
 
 	std::filesystem::path Workspace() const;
-	const std::string& WorkspaceName() const;
+	std::string WorkspaceName() const;
 	const std::string& Name() const;
 
 	Assets& Assets();

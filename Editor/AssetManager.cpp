@@ -194,7 +194,7 @@ void AssetManager::RenderSelectedFolderContent() {
 		float width = ImGui::GetContentRegionAvail().x;
 		selectedFolderContentSettings.minWidth = cell;
 
-		int columns = width / cell;
+		int columns = static_cast<int>(width / cell);
 		if (columns < 1) return;
 
 		bool visible = ImGui::BeginTable("selectedFolder", columns);
@@ -265,7 +265,7 @@ void AssetManager::RenderSelectedFolderContent() {
 			ImGui::PushFont(gui.GetFontBold());
 			ImGui::TextUnformatted(fileName.c_str());
 			ImGui::PopFont();
-			ImGui::PopTextWrapPos(); ImGui::RenderTextClipped;
+			ImGui::PopTextWrapPos();
 			ImGui::PopClipRect();
 
 			ImGui::PopID();

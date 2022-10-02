@@ -1,4 +1,4 @@
-#include <Core.hpp>,
+#include <Core.hpp>
 #include <ImGuiRenderer.hpp>
 
 #include "GUI.hpp"

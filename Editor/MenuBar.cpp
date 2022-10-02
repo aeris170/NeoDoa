@@ -551,9 +551,9 @@ void MenuBar::AboutSection::RenderAboutPopup() {
 
 	if (ImGui::BeginPopupModal(ABOUT_POPUP_TITLE_TEXT, &ab_open, ImGuiWindowFlags_NoResize)) {
 		ImGui::PushFont(gui.GetFont());
-		ImGui::TextColored({ 0.7, 0.7, 0.7, 1 }, PRODUCT_NAME);
+		ImGui::TextColored({ 0.7f, 0.7f, 0.7f, 1.0f }, PRODUCT_NAME);
 		ImGui::PopFont();
-		ImGui::Image((void*)neodoaBanner.lock()->_glTextureID, { ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().x / 2 }, { 0, 1 }, { 1, 0 });
+		ImGui::Image(reinterpret_cast<void*>(neodoaBanner.lock()->_glTextureID), { ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().x / 2 }, { 0, 1 }, { 1, 0 });
 		ImGui::Text(PRODUCT_DESCRIPTION);
 		ImGui::Dummy({ 0, 20 });
 		if (ImGui::Button(LIBS_BUTTON_TEXT, { ImGui::GetContentRegionAvail().x, 30 })) {
@@ -578,7 +578,7 @@ void MenuBar::AboutSection::RenderLicenceNotices() {
 	GUI& gui = mb.get().gui;
 	for (auto& [name, licence] : licences) {
 		ImGui::PushFont(gui.GetFont());
-		ImGui::TextColored({ 0.7, 0.7, 0.7, 1 }, name.c_str());
+		ImGui::TextColored({ 0.7f, 0.7f, 0.7f, 1.0f }, name.c_str());
 		ImGui::PopFont();
 		auto title = (std::string("License###") + name);
 		if (ImGui::CollapsingHeader(title.c_str(), ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick)) {

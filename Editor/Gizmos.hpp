@@ -18,8 +18,8 @@ struct Gizmos {
 		bool enabled{ true };
 		ImGuizmo::OPERATION type{ ImGuizmo::OPERATION::TRANSLATE };
 		ImGuizmo::MODE mode{ ImGuizmo::MODE::LOCAL };
-		glm::vec2 viewportPosition;
-		Resolution viewportSize;
+		glm::vec2 viewportPosition{};
+		Resolution viewportSize{};
 	} settings;
 
 	Gizmos(SceneViewport& sv) noexcept;

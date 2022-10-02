@@ -196,12 +196,12 @@ bool ResolutionWidget(const std::string& label, Resolution& resolution) {
 	settingsFBO.resetEnabled = false;
 	settingsFBO.speed = 1;
 	settingsFBO.min = 128;
-	settingsFBO.max = 128*128;
+	settingsFBO.max = 128 * 128;
 	settingsFBO.fmt = "%g";
 	settingsFBO.displayLabelOverride[0] = "W";
 	settingsFBO.displayLabelOverride[1] = "H";
-	settingsFBO.displayLabelColorOverride[0] = Color(0.45, 0.63, 0.82);
-	settingsFBO.displayLabelColorOverride[1] = Color(0.66, 0.49, 0.65);
+	settingsFBO.displayLabelColorOverride[0] = Color(0.45f, 0.63f, 0.82f);
+	settingsFBO.displayLabelColorOverride[1] = Color(0.66f, 0.49f, 0.65f);
 
 	bool rv = FancyVector2Widget(label, res, settingsFBO);
 	resolution = { static_cast<int>(res.x), static_cast<int>(res.y) };
@@ -217,7 +217,7 @@ bool OrthoCameraWidget(OrthoCamera& cameraData) {
 	FancyVectorWidgetSettings<display::X> settingsOrthoTop;
 	settingsOrthoTop.resetTo = 1;
 	settingsOrthoTop.displayLabelOverride[0] = "T";
-	settingsOrthoTop.displayLabelColorOverride[0] = Color(0.10, 0.53, 0.26);
+	settingsOrthoTop.displayLabelColorOverride[0] = Color(0.10f, 0.53f, 0.26f);
 	settingsOrthoTop.displayLabelHoverColorOverride[0] = settingsOrthoTop.displayLabelColorOverride[0].Lighten(0.45f);
 	settingsOrthoTop.componentFieldWidth /= 2;
 
@@ -227,15 +227,15 @@ bool OrthoCameraWidget(OrthoCamera& cameraData) {
 	settingsOrthoLeftRight.resetTos[1] = 1;
 	settingsOrthoLeftRight.displayLabelOverride[0] = "L";
 	settingsOrthoLeftRight.displayLabelOverride[1] = "R";
-	settingsOrthoLeftRight.displayLabelColorOverride[0] = Color(0.10, 0.53, 0.26);
-	settingsOrthoLeftRight.displayLabelColorOverride[1] = Color(0.10, 0.53, 0.26);
+	settingsOrthoLeftRight.displayLabelColorOverride[0] = Color(0.10f, 0.53f, 0.26f);
+	settingsOrthoLeftRight.displayLabelColorOverride[1] = Color(0.10f, 0.53f, 0.26f);
 	settingsOrthoLeftRight.displayLabelHoverColorOverride[0] = settingsOrthoLeftRight.displayLabelColorOverride[0].Lighten(0.45f);
 	settingsOrthoLeftRight.displayLabelHoverColorOverride[1] = settingsOrthoLeftRight.displayLabelColorOverride[1].Lighten(0.45f);
 
 	FancyVectorWidgetSettings<display::X> settingsOrthoBottom;
 	settingsOrthoBottom.resetTo = -1;
 	settingsOrthoBottom.displayLabelOverride[0] = "B";
-	settingsOrthoBottom.displayLabelColorOverride[0] = Color(0.10, 0.53, 0.26 );
+	settingsOrthoBottom.displayLabelColorOverride[0] = Color(0.10f, 0.53f, 0.26f);
 	settingsOrthoBottom.displayLabelHoverColorOverride[0] = settingsOrthoBottom.displayLabelColorOverride[0].Lighten(0.45f);
 	settingsOrthoBottom.componentFieldWidth /= 2;
 
@@ -262,13 +262,13 @@ bool PerspectiveCameraWidget(PerspectiveCamera& cameraData) {
 	fovSettings.min = 30;
 	fovSettings.max = 150;
 	fovSettings.displayLabelOverride[0] = "F";
-	fovSettings.displayLabelColorOverride[0] = Color(0.23, 0.23, 0.13);
+	fovSettings.displayLabelColorOverride[0] = Color(0.23f, 0.23f, 0.13f);
 	fovSettings.displayLabelHoverColorOverride[0] = fovSettings.displayLabelColorOverride[0].Lighten(0.35f);
 
 	FancyVectorWidgetSettings<display::X> aspectSettings;
 	aspectSettings.disabled = true;
 	aspectSettings.displayLabelOverride[0] = "A";
-	aspectSettings.displayLabelColorOverride[0] = Color(0.211, 0.121, 0.439);
+	aspectSettings.displayLabelColorOverride[0] = Color(0.211f, 0.121f, 0.439f);
 
 	bool rv{ false };
 	rv = FancyVector1Widget("Field Of View", fov, fovSettings);
@@ -550,7 +550,7 @@ bool ImGui::NeoDoaColorPickerPopup(const char* label, float col[4], ImGuiColorEd
             settings.speed = 1.0f;
             settings.min = 0.0f;
             settings.max = 255.0f;
-            settings.componentFieldWidth = CalcItemWidth();
+            settings.componentFieldWidth = static_cast<int>(CalcItemWidth());
             settings.displayLabelOverride[0] = "R";
             settings.displayLabelOverride[1] = "G";
             settings.displayLabelOverride[2] = "B";
@@ -562,10 +562,10 @@ bool ImGui::NeoDoaColorPickerPopup(const char* label, float col[4], ImGuiColorEd
             settings.scaleY[3] = 2;
 
             float denorm[4] = {
-                IM_F32_TO_INT8_UNBOUND(col[0]),
-                IM_F32_TO_INT8_UNBOUND(col[1]),
-                IM_F32_TO_INT8_UNBOUND(col[2]),
-                IM_F32_TO_INT8_UNBOUND(col[3])
+                static_cast<float>(IM_F32_TO_INT8_UNBOUND(col[0])),
+                static_cast<float>(IM_F32_TO_INT8_UNBOUND(col[1])),
+                static_cast<float>(IM_F32_TO_INT8_UNBOUND(col[2])),
+                static_cast<float>(IM_F32_TO_INT8_UNBOUND(col[3]))
             };
 
             value_changed |= FancyVectorPiece<display::XYZW>(settings, 0, denorm);
@@ -593,7 +593,7 @@ bool ImGui::NeoDoaColorPickerPopup(const char* label, float col[4], ImGuiColorEd
             settings.speed = 1.0f;
             settings.min = 0.0f;
             settings.max = 255.0f;
-            settings.componentFieldWidth = CalcItemWidth();
+            settings.componentFieldWidth = static_cast<int>(CalcItemWidth());
             settings.displayLabelOverride[0] = "H";
             settings.displayLabelOverride[1] = "S";
             settings.displayLabelOverride[2] = "V";
@@ -602,19 +602,19 @@ bool ImGui::NeoDoaColorPickerPopup(const char* label, float col[4], ImGuiColorEd
             settings.displayLabelID[1] = "###HSVG";
             settings.displayLabelID[2] = "###HSVB";
             settings.displayLabelID[3] = "###HSVA";
-            settings.displayLabelColorOverride[0] = Color(0.78, 0.60, 0.12);
-            settings.displayLabelColorOverride[1] = Color(0.42, 0.42, 0.42);
-            settings.displayLabelColorOverride[2] = Color(0.11, 0.11, 0.11);
+            settings.displayLabelColorOverride[0] = Color(0.78f, 0.60f, 0.12f);
+            settings.displayLabelColorOverride[1] = Color(0.42f, 0.42f, 0.42f);
+            settings.displayLabelColorOverride[2] = Color(0.11f, 0.11f, 0.11f);
 
             float f[4] = { col[0], col[1], col[2], col[3] };
             ColorConvertRGBtoHSV(f[0], f[1], f[2], f[0], f[1], f[2]);
             ColorEditRestoreHS(col, &f[0], &f[1], &f[2]);
 
             float denorm[4] = {
-                IM_F32_TO_INT8_UNBOUND(f[0]),
-                IM_F32_TO_INT8_UNBOUND(f[1]),
-                IM_F32_TO_INT8_UNBOUND(f[2]),
-                IM_F32_TO_INT8_UNBOUND(f[3])
+                static_cast<float>(IM_F32_TO_INT8_UNBOUND(f[0])),
+                static_cast<float>(IM_F32_TO_INT8_UNBOUND(f[1])),
+                static_cast<float>(IM_F32_TO_INT8_UNBOUND(f[2])),
+                static_cast<float>(IM_F32_TO_INT8_UNBOUND(f[3]))
             };
 
             value_changed |= FancyVectorPiece(settings, 0, denorm);

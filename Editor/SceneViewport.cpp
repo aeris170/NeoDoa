@@ -37,7 +37,7 @@ void SceneViewport::Render(Scene& scene) {
 	};
 
 	ImVec2 size { static_cast<float>(viewportSize.w), static_cast<float>(viewportSize.h) };
-	ImGui::Image((void*)gui.core->FrameBuffer()->_tex, size, { 0, 1 }, { 1, 0 });
+	ImGui::Image(reinterpret_cast<void*>(gui.core->FrameBuffer()->_tex), size, { 0, 1 }, { 1, 0 });
 
 	ImGui::PushClipRect({ viewportPosition.x, viewportPosition.y }, { viewportPosition.x + size.x, viewportPosition.y + size.y}, false);
 	gizmos.settings.viewportSize = viewportSize;

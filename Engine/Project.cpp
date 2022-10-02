@@ -49,7 +49,7 @@ Project& Project::operator=(Project&& other) noexcept {
 }
 
 std::filesystem::path Project::Workspace() const { return _workspace; }
-const std::string& Project::WorkspaceName() const { return _workspace.string(); }
+std::string Project::WorkspaceName() const { return _workspace.string(); }
 const std::string& Project::Name() const { return _name; }
 
 Assets& Project::Assets() { return _assets; }

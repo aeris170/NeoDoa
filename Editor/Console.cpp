@@ -24,7 +24,7 @@ void Console::Begin() {
 	title.append(gui.CONSOLE_TITLE);
 	title.append(gui.CONSOLE_ID);
 	ImGui::Begin(title.c_str());
-	ImGui::SetWindowFontScale(0.9);
+	ImGui::SetWindowFontScale(0.9f);
 }
 
 void Console::Render() {
@@ -43,7 +43,7 @@ void Console::RenderTopPanel() {
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
 	ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1);
 
-	lineHeight = gui.GetFont()->FontSize * 0.9 + ImGui::GetStyle().FramePadding.y * 2.0f;
+	lineHeight = gui.GetFont()->FontSize * 0.9f + ImGui::GetStyle().FramePadding.y * 2.0f;
 	buttonSize = { lineHeight + 6.0f, lineHeight };
 
 	ImGui::PushFont(gui.GetFont());
@@ -289,7 +289,7 @@ void Console::RenderMessageLog() {
 
 	if (oldCount < messages.size()) {
 		ImGui::SetScrollY(ImGui::GetScrollMaxY() + 100);
-		oldCount = messages.size();
+		oldCount = static_cast<int>(messages.size());
 	}
 	ImGui::EndTable();
 }

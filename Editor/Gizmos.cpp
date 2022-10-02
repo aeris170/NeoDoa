@@ -32,7 +32,12 @@ void Gizmos::Render(Scene& scene) {
 	glm::mat4 proj = camera._projectionMatrix;
 	glm::mat4 view = camera._viewMatrix;
 
-	ImGuizmo::SetRect(settings.viewportPosition.x, settings.viewportPosition.y, settings.viewportSize.w, settings.viewportSize.h);
+	ImGuizmo::SetRect(
+		settings.viewportPosition.x,
+		settings.viewportPosition.y,
+		static_cast<float>(settings.viewportSize.w),
+		static_cast<float>(settings.viewportSize.h)
+	);
 
 	// Entity transform
 	TransformComponent& transformComponent = scene.GetComponent<TransformComponent>(gui.sh.selectedEntity);

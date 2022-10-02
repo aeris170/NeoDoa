@@ -159,7 +159,7 @@ bool FancyVectorWidget(const std::string& label, float* vec, FancyVectorWidgetSe
 
 	float w = ImGui::GetContentRegionAvail().x;
 
-	ImGui::PushItemWidth(settings.componentFieldWidth);
+	ImGui::PushItemWidth(static_cast<float>(settings.componentFieldWidth));
 
 	ImGuiIO& io = ImGui::GetIO();
 	auto boldFont = io.Fonts->Fonts[1];

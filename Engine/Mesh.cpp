@@ -67,7 +67,7 @@ void Mesh::UpdateVRAM() {
 	//glNamedBufferData(_vbo, totalSize, _vertices.data(), GL_STATIC_DRAW); // if crash, driver bug
 	glNamedBufferStorage(_vbo, totalSize, _vertices.data(), 0); // TODO investigate this shit
 
-	glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, vertexSize);
+	glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, static_cast<GLsizei>(vertexSize));
 
 	glEnableVertexArrayAttrib(_vao, 0);
 	glEnableVertexArrayAttrib(_vao, 1);

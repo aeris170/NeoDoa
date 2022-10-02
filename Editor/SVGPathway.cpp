@@ -55,13 +55,25 @@ void SVGPathway::Initialize(Color&& color) {
 
         { // Fill the "Textures"
             lunasvg::Bitmap bitmapScaledAspect;
-            bitmapScaledAspect = lunadoc->renderToBitmap((box[2] - box[0]) * SCALE_FACTOR_SMALL, (box[3] - box[1]) * SCALE_FACTOR_SMALL, RASTER_BG_COLOR);
+            bitmapScaledAspect = lunadoc->renderToBitmap(
+                static_cast<uint32_t>((box[2] - box[0]) * SCALE_FACTOR_SMALL),
+                static_cast<uint32_t>((box[3] - box[1]) * SCALE_FACTOR_SMALL),
+                RASTER_BG_COLOR
+            );
             auto small = CreateTextureRaw("!!" + name + "_none_small!!", bitmapScaledAspect.data(), bitmapScaledAspect.width(), bitmapScaledAspect.height(), true);
 
-            bitmapScaledAspect = lunadoc->renderToBitmap((box[2] - box[0]) * SCALE_FACTOR_MEDIUM, (box[3] - box[1]) * SCALE_FACTOR_MEDIUM, RASTER_BG_COLOR);
+            bitmapScaledAspect = lunadoc->renderToBitmap(
+                static_cast<uint32_t>((box[2] - box[0]) * SCALE_FACTOR_MEDIUM),
+                static_cast<uint32_t>((box[3] - box[1]) * SCALE_FACTOR_MEDIUM),
+                RASTER_BG_COLOR
+            );
             auto medium = CreateTextureRaw("!!" + name + "_none_medium!!", bitmapScaledAspect.data(), bitmapScaledAspect.width(), bitmapScaledAspect.height(), true);
 
-            bitmapScaledAspect = lunadoc->renderToBitmap((box[2] - box[0]) * SCALE_FACTOR_LARGE, (box[3] - box[1]) * SCALE_FACTOR_LARGE, RASTER_BG_COLOR);
+            bitmapScaledAspect = lunadoc->renderToBitmap(
+                static_cast<uint32_t>((box[2] - box[0]) * SCALE_FACTOR_LARGE),
+                static_cast<uint32_t>((box[3] - box[1]) * SCALE_FACTOR_LARGE),
+                RASTER_BG_COLOR
+            );
             auto large = CreateTextureRaw("!!" + name + "_none_large!!", bitmapScaledAspect.data(), bitmapScaledAspect.width(), bitmapScaledAspect.height(), true);
 
             if (!small.expired() && !medium.expired() && !large.expired()) {

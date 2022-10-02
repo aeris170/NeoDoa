@@ -219,7 +219,7 @@ void Core::UnloadProject() {
 
 void Core::Start() {
     static bool renderingOffscreen = _offscreenBuffer != nullptr;
-    float lastTime = glfwGetTime();
+    float lastTime = static_cast<float>(glfwGetTime());
     float currentTime;
 
     glEnable(GL_DEPTH_TEST);
@@ -231,7 +231,7 @@ void Core::Start() {
 
     _running = true;
     while (_running) {
-        currentTime = glfwGetTime();
+        currentTime = static_cast<float>(glfwGetTime());
         glViewport(0, 0, _window->GetContentResolution().w, _window->GetContentResolution().h);
 
         float delta = currentTime - lastTime;
