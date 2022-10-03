@@ -24,7 +24,7 @@ private:
 	bool hasContent{ false };
 	Assets* assets{ nullptr };
 	FNode* root{ nullptr };
-	FNode* selectedFolder{ nullptr };
+	FNode* currentFolder{ nullptr };
 	FNode* deletedNode{ nullptr };
 
 	struct TreeViewSettings {
@@ -32,7 +32,7 @@ private:
 		float minWidth = 30.0f;
 	} treeViewSettings;
 
-	struct SelectedFolderContentSettings {
+	struct CurrentFolderContentSettings {
 		float currentWidth = 300.0f;
 		float minWidth = 120.0f;
 
@@ -45,7 +45,7 @@ private:
 			Icons,
 			List
 		} viewMode = ViewMode::Icons;
-	} selectedFolderContentSettings;
+	} currentFolderContentSettings;
 
 	void RenderMenuBar();
 	void RenderTreeView();

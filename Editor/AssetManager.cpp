@@ -26,8 +26,8 @@ void AssetManager::Begin() {
 	if(hasContent) {
 		assets = &gui.openProject->Assets();
 		root = &assets->Root();
-		if (selectedFolder == nullptr) {
-			selectedFolder = root;
+		if (currentFolder == nullptr) {
+			currentFolder = root;
 		}
 	} else {
 		assets = nullptr;
@@ -38,9 +38,9 @@ void AssetManager::Begin() {
 void AssetManager::Render() {
 	RenderMenuBar();
 
-	selectedFolderContentSettings.minWidth = selectedFolderContentSettings.thumbnailSize + 48 + selectedFolderContentSettings.itemPadding;
-	selectedFolderContentSettings.currentWidth = ImGui::GetContentRegionAvail().x - treeViewSettings.currentWidth;
-	Splitter(true, 8.0f, &treeViewSettings.currentWidth, &selectedFolderContentSettings.currentWidth, treeViewSettings.minWidth, selectedFolderContentSettings.minWidth);
+	currentFolderContentSettings.minWidth = currentFolderContentSettings.thumbnailSize + 48 + currentFolderContentSettings.itemPadding;
+	currentFolderContentSettings.currentWidth = ImGui::GetContentRegionAvail().x - treeViewSettings.currentWidth;
+	Splitter(true, 8.0f, &treeViewSettings.currentWidth, &currentFolderContentSettings.currentWidth, treeViewSettings.minWidth, currentFolderContentSettings.minWidth);
 
 	ImGui::BeginChild("test", { treeViewSettings.currentWidth, 0 }, true);
 	RenderTreeView();
@@ -48,15 +48,15 @@ void AssetManager::Render() {
 
 	ImGui::SameLine();
 
-	ImGui::BeginChild("test2", { selectedFolderContentSettings.currentWidth, 0 }, true);
+	ImGui::BeginChild("test2", { currentFolderContentSettings.currentWidth, 0 }, true);
 	RenderContextMenu();
 	RenderSelectedFolderContent();
 	ImGui::EndChild();
 
 	if (deletedNode != nullptr) {
 		deletedNode->ParentNode()->DeleteChildNode(deletedNode);
-		if (selectedFolder == deletedNode) {
-			selectedFolder = root;
+		if (currentFolder == deletedNode) {
+			currentFolder = root;
 		}
 		deletedNode = nullptr;
 	}
@@ -72,7 +72,7 @@ void AssetManager::RenderMenuBar() {
 		if (ImGui::MenuItem(REFRESH_BUTTON_TEXT)) {
 			if (hasContent) {
 				assets->ReimportAll();
-				selectedFolder = root;
+				currentFolder = root;
 			} else {
 				DOA_LOG_WARNING("Didn't refresh! No open project.");
 			}
@@ -107,7 +107,7 @@ void AssetManager::RenderTreeViewRecursive(FNode* current) {
 	title.append(current->Name());
 	if (ImGui::TreeNodeEx(title.c_str(), flags)) {
 		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-			selectedFolder = current;
+			currentFolder = current;
 		}
 
 		for (auto& child : children) {
@@ -136,7 +136,7 @@ void AssetManager::RenderSelectedFolderContent() {
 	ImGui::PopClipRect();
 	if (!hasContent) ImGui::EndDisabled();
 	if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-		selectedFolder = selectedFolder->ParentNode() ? selectedFolder->ParentNode() : root;
+		currentFolder = currentFolder->ParentNode() ? currentFolder->ParentNode() : root;
 	}
 
 	ImGui::SameLine();
@@ -144,14 +144,14 @@ void AssetManager::RenderSelectedFolderContent() {
 	ImGui::SetCursorPos({ ImGui::GetCursorPos().x - 1, ImGui::GetCursorPos().y - 1 });
 	std::string title(AssetManagerIcons::SELECTED_FOLDER_CONTENT_TITLE_ICON);
 	title.append(SELECTED_FOLDER_CONTENT_TITLE_TEXT);
-	if (selectedFolder != nullptr) {
+	if (currentFolder != nullptr) {
 		title.append(" - ROOT: ");
-		title.append(selectedFolder->Path().string());
+		title.append(currentFolder->Path().string());
 	}
 	ImGui::PushFont(gui.GetFontBold());
 	ImGui::Text(title.c_str());
 	ImGui::PopFont();
-	if (selectedFolder == nullptr) return;
+	if (currentFolder == nullptr) return;
 	if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
 		std::string cmd;
 		if constexpr (detect::is_windows_v) {
@@ -163,7 +163,7 @@ void AssetManager::RenderSelectedFolderContent() {
 		} else {
 			throw; // platform not supported
 		}
-		cmd.append(selectedFolder->Path().string());
+		cmd.append(currentFolder->Path().string());
 		std::system(cmd.c_str());
 	}
 
@@ -171,38 +171,38 @@ void AssetManager::RenderSelectedFolderContent() {
 
 	if (ImGui::GetIO().KeyCtrl) {
 		float mWheelDelta = gui.IO()->MouseWheel;
-		if (selectedFolderContentSettings.thumbnailSize == selectedFolderContentSettings.thumbnailMinSize) {
+		if (currentFolderContentSettings.thumbnailSize == currentFolderContentSettings.thumbnailMinSize) {
 			if (mWheelDelta < 0) {
-				if (selectedFolderContentSettings.viewMode != SelectedFolderContentSettings::ViewMode::List) {
-					selectedFolderContentSettings.viewMode = SelectedFolderContentSettings::ViewMode::List;
+				if (currentFolderContentSettings.viewMode != CurrentFolderContentSettings::ViewMode::List) {
+					currentFolderContentSettings.viewMode = CurrentFolderContentSettings::ViewMode::List;
 				}
-		    } else if (mWheelDelta > 0 && selectedFolderContentSettings.viewMode != SelectedFolderContentSettings::ViewMode::Icons) {
-				if (selectedFolderContentSettings.viewMode != SelectedFolderContentSettings::ViewMode::Icons) {
-					selectedFolderContentSettings.viewMode = SelectedFolderContentSettings::ViewMode::Icons;
+		    } else if (mWheelDelta > 0 && currentFolderContentSettings.viewMode != CurrentFolderContentSettings::ViewMode::Icons) {
+				if (currentFolderContentSettings.viewMode != CurrentFolderContentSettings::ViewMode::Icons) {
+					currentFolderContentSettings.viewMode = CurrentFolderContentSettings::ViewMode::Icons;
 					mWheelDelta = 0;
 				}
 			}
 		}
-		selectedFolderContentSettings.thumbnailSize += mWheelDelta;
+		currentFolderContentSettings.thumbnailSize += mWheelDelta;
 
-		selectedFolderContentSettings.thumbnailSize = std::clamp(selectedFolderContentSettings.thumbnailSize, selectedFolderContentSettings.thumbnailMinSize, selectedFolderContentSettings.thumbnailMaxSize);
-		selectedFolderContentSettings.itemPadding = selectedFolderContentSettings.thumbnailSize / 4;
+		currentFolderContentSettings.thumbnailSize = std::clamp(currentFolderContentSettings.thumbnailSize, currentFolderContentSettings.thumbnailMinSize, currentFolderContentSettings.thumbnailMaxSize);
+		currentFolderContentSettings.itemPadding = currentFolderContentSettings.thumbnailSize / 4;
 	}
 
-	if (selectedFolderContentSettings.viewMode == SelectedFolderContentSettings::ViewMode::Icons) {
-		float cell = selectedFolderContentSettings.thumbnailSize + selectedFolderContentSettings.itemPadding;
+	if (currentFolderContentSettings.viewMode == CurrentFolderContentSettings::ViewMode::Icons) {
+		float cell = currentFolderContentSettings.thumbnailSize + currentFolderContentSettings.itemPadding;
 		float width = ImGui::GetContentRegionAvail().x;
-		selectedFolderContentSettings.minWidth = cell;
+		currentFolderContentSettings.minWidth = cell;
 
 		int columns = static_cast<int>(width / cell);
 		if (columns < 1) return;
 
-		bool visible = ImGui::BeginTable("selectedFolder", columns);
+		bool visible = ImGui::BeginTable("currentFolder", columns);
 		if (!visible) return;
 
 		int i = 0;
 		ImGui::TableNextRow();
-		for (auto child : selectedFolder->Children()) {
+		for (auto child : currentFolder->Children()) {
 			if (!child->IsDirectory() && !assets->IsAssetExistsAt(*child)) { continue; }
 
 			ImGui::PushID(i);
@@ -224,7 +224,7 @@ void AssetManager::RenderSelectedFolderContent() {
 			}
 
 			ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
-			ImGui::ImageButton(icon, { selectedFolderContentSettings.thumbnailSize, selectedFolderContentSettings.thumbnailSize });
+			ImGui::ImageButton(icon, { currentFolderContentSettings.thumbnailSize, currentFolderContentSettings.thumbnailSize });
 			if (ImGui::BeginPopupContextItem()) {
 
 				if (ImGui::MenuItem("Delete")) {
@@ -243,8 +243,8 @@ void AssetManager::RenderSelectedFolderContent() {
 			std::string fileName = child->Name();
 
 			float textHeight = ImGui::GetTextLineHeight();
-			auto textSize = ImGui::CalcTextSize(fileName.c_str(), nullptr, true, selectedFolderContentSettings.thumbnailSize);
-			bool shouldShorten = textSize.y / textHeight > selectedFolderContentSettings.maxTextLine;
+			auto textSize = ImGui::CalcTextSize(fileName.c_str(), nullptr, true, currentFolderContentSettings.thumbnailSize);
+			bool shouldShorten = textSize.y / textHeight > currentFolderContentSettings.maxTextLine;
 			if (shouldShorten) {
 				auto begin = fileName.begin();
 				auto end = --fileName.end();
@@ -252,16 +252,16 @@ void AssetManager::RenderSelectedFolderContent() {
 				do {
 					shortened = std::string(begin, end + 1);
 					shortened.append("...");
-					textSize = ImGui::CalcTextSize(shortened.c_str(), nullptr, true, selectedFolderContentSettings.thumbnailSize);
+					textSize = ImGui::CalcTextSize(shortened.c_str(), nullptr, true, currentFolderContentSettings.thumbnailSize);
 					do {
 						--end;
 					} while (end[0] == ' ');
-				} while (textSize.y / textHeight > selectedFolderContentSettings.maxTextLine);
+				} while (textSize.y / textHeight > currentFolderContentSettings.maxTextLine);
 				fileName = shortened;
 			}
 
-			ImGui::PushClipRect(ImGui::GetItemRectMin(), { ImGui::GetItemRectMax().x, ImGui::GetItemRectMax().y + (selectedFolderContentSettings.maxTextLine + 0.5f) * textHeight }, true);
-			ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + selectedFolderContentSettings.thumbnailSize);
+			ImGui::PushClipRect(ImGui::GetItemRectMin(), { ImGui::GetItemRectMax().x, ImGui::GetItemRectMax().y + (currentFolderContentSettings.maxTextLine + 0.5f) * textHeight }, true);
+			ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + currentFolderContentSettings.thumbnailSize);
 			ImGui::PushFont(gui.GetFontBold());
 			ImGui::TextUnformatted(fileName.c_str());
 			ImGui::PopFont();
@@ -272,8 +272,8 @@ void AssetManager::RenderSelectedFolderContent() {
 		}
 
 		ImGui::EndTable();
-	} else if (selectedFolderContentSettings.viewMode == SelectedFolderContentSettings::ViewMode::List) {
-		for (auto child : selectedFolder->Children()) {
+	} else if (currentFolderContentSettings.viewMode == CurrentFolderContentSettings::ViewMode::List) {
+		for (auto child : currentFolder->Children()) {
 			if (!child->IsDirectory() && !assets->IsAssetExistsAt(*child)) { continue; }
 
 			void* icon;
@@ -308,9 +308,9 @@ void AssetManager::RenderContextMenu() {
 	if (ImGui::BeginPopupContextWindow()) {
 		if (ImGui::BeginMenu("Create")) {
 			if (ImGui::MenuItem("Folder")) {
-				selectedFolder->CreateChildFolder(FNodeCreationParams{
-					selectedFolder->OwningProject(),
-					selectedFolder,
+				currentFolder->CreateChildFolder(FNodeCreationParams{
+					currentFolder->OwningProject(),
+					currentFolder,
 					"New Folder",
 					"",
 					"",
@@ -330,7 +330,7 @@ void AssetManager::RenderContextMenu() {
 void AssetManager::OpenFileAtFileNode(FNode* file) {
 	GUI& gui = this->gui;
 	if (file->IsDirectory()) {
-		selectedFolder = file;
+		currentFolder = file;
 	} else if(file->IsFile()) {
 		if (Assets::IsSceneFile(file)) {
 			gui.openProject->OpenScene(assets->FindAssetAt(*file));
