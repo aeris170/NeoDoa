@@ -4,11 +4,21 @@
 #include <unordered_map>
 #include <functional>
 #include <optional>
+#include <variant>
 
 #include "Entity.hpp"
 
+#include "TemplateUtilities.hpp"
+
 struct GUI;
 struct Scene;
+struct FNode;
+
+#define DISPLAYABLE Entity, FNode*
+template<typename T>
+concept Displayable = concepts::IsAnyOf<T, DISPLAYABLE>;
+using DisplayTarget = std::variant<std::monostate, DISPLAYABLE>;
+#undef DISPLAYABLE
 
 struct Observer {
 
@@ -22,4 +32,9 @@ struct Observer {
 
 	void RenderComponents(Scene& scene, const Entity entt);
 
+	template<Displayable T>
+	void SetDisplayTarget(T target) { displayTarget == target; }
+
+private:
+	DisplayTarget displayTarget;
 };
