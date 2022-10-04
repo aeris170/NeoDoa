@@ -218,16 +218,7 @@ void AssetManager::RenderSelectedFolderContent() {
 			}
 			ImGui::TableSetColumnIndex(i++ % columns);
 
-			void* icon;
-			if (child->IsDirectory()) {
-				icon = gui.GetFolderIcon();
-			} else if (Assets::IsSceneFile(child)) {
-				icon = gui.GetSceneIcon();
-			} else if(child->Extension() == ".doa") {
-				icon = gui.GetProjectIcon();
-			} else {
-				icon = gui.GetFileIcon();
-			}
+			void* icon = gui.FindIconForFileType(*child);
 
 			ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
 			ImGui::ImageButton(icon, { currentFolderContentSettings.thumbnailSize, currentFolderContentSettings.thumbnailSize });
@@ -286,16 +277,7 @@ void AssetManager::RenderSelectedFolderContent() {
 		for (auto child : currentFolder->Children()) {
 			if (!child->IsDirectory() && !assets->IsAssetExistsAt(*child)) { continue; }
 
-			void* icon;
-			if (child->IsDirectory()) {
-				icon = gui.GetFolderIcon(TextureSize::SMALL);
-			} else if (Assets::IsSceneFile(child)) {
-				icon = gui.GetSceneIcon(TextureSize::SMALL);
-			} else if (child->Extension() == ".doa") {
-				icon = gui.GetProjectIcon(TextureSize::SMALL);
-			} else {
-				icon = gui.GetFileIcon(TextureSize::SMALL);
-			}
+			void* icon = gui.FindIconForFileType(*child);
 
 			if (ImGui::TreeNodeEx(child->Name().c_str(), ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf)) {
 				if (ImGui::IsItemHovered()) {
