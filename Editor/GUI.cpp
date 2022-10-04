@@ -162,6 +162,8 @@ void GUI::SaveProjectToDisk() {
 }
 
 void GUI::OpenProjectFromDisk(const std::string& path) {
+	CloseProject();
+
 	// TODO
 	FNode file(FNodeCreationParams{
 		nullptr,
@@ -178,6 +180,7 @@ void GUI::OpenProjectFromDisk(const std::string& path) {
 }
 
 void GUI::CloseProject() {
+	obs.ResetDisplayTarget();
 	openProject.reset();
 	core->UnloadProject();
 }
