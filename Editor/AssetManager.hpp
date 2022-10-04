@@ -24,6 +24,7 @@ private:
 	bool hasContent{ false };
 	Assets* assets{ nullptr };
 	FNode* root{ nullptr };
+	FNode* selectedNode{ nullptr };
 	FNode* currentFolder{ nullptr };
 	FNode* deletedNode{ nullptr };
 
