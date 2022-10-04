@@ -55,5 +55,8 @@ private:
 	void RenderSelectedFolderContent();
 	void RenderContextMenu();
 	void OpenFileAtFileNode(FNode* file);
+
+	void SetSelectedNode(FNode* node);
+	void SetCurrentFolder(FNode* folder);
 };
 

@@ -27,15 +27,18 @@ void AssetManager::Begin() {
 		assets = &gui.openProject->Assets();
 		root = &assets->Root();
 		if (currentFolder == nullptr) {
-			currentFolder = root;
+			SetCurrentFolder(root);
 		}
 	} else {
 		assets = nullptr;
 		root = nullptr;
+		SetCurrentFolder(root);
 	}
 }
 
 void AssetManager::Render() {
+	GUI& gui = this->gui;
+
 	RenderMenuBar();
 
 	currentFolderContentSettings.minWidth = currentFolderContentSettings.thumbnailSize + 48 + currentFolderContentSettings.itemPadding;
@@ -56,7 +59,7 @@ void AssetManager::Render() {
 	if (deletedNode != nullptr) {
 		deletedNode->ParentNode()->DeleteChildNode(deletedNode);
 		if (currentFolder == deletedNode) {
-			currentFolder = root;
+			SetCurrentFolder(root);
 		}
 		deletedNode = nullptr;
 	}
@@ -68,11 +71,13 @@ void AssetManager::End() {
 }
 
 void AssetManager::RenderMenuBar() {
+	GUI& gui = this->gui;
+
 	if (ImGui::BeginMenuBar()) {
 		if (ImGui::MenuItem(REFRESH_BUTTON_TEXT)) {
 			if (hasContent) {
 				assets->ReimportAll();
-				currentFolder = root;
+				SetCurrentFolder(root);
 			} else {
 				DOA_LOG_WARNING("Didn't refresh! No open project.");
 			}
@@ -88,6 +93,7 @@ void AssetManager::RenderTreeView() {
 
 void AssetManager::RenderTreeViewRecursive(FNode* current) {
 	if (!current->IsDirectory()) return;
+	GUI& gui = this->gui;
 
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_NavLeftJumpsBackHere | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 
@@ -107,7 +113,7 @@ void AssetManager::RenderTreeViewRecursive(FNode* current) {
 	title.append(current->Name());
 	if (ImGui::TreeNodeEx(title.c_str(), flags)) {
 		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-			currentFolder = current;
+			SetCurrentFolder(current);
 		}
 
 		for (auto& child : children) {
@@ -136,7 +142,7 @@ void AssetManager::RenderSelectedFolderContent() {
 	ImGui::PopClipRect();
 	if (!hasContent) ImGui::EndDisabled();
 	if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-		currentFolder = currentFolder->ParentNode() ? currentFolder->ParentNode() : root;
+		SetCurrentFolder(currentFolder->ParentNode() ? currentFolder->ParentNode() : root);
 	}
 
 	ImGui::SameLine();
@@ -235,8 +241,12 @@ void AssetManager::RenderSelectedFolderContent() {
 				ImGui::EndPopup();
 			}
 
-			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-				OpenFileAtFileNode(child);
+			if (ImGui::IsItemHovered()) {
+				if(ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+					OpenFileAtFileNode(child);
+				} else if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+					SetSelectedNode(child);
+				}
 			}
 			ImGui::PopStyleColor();
 
@@ -288,9 +298,14 @@ void AssetManager::RenderSelectedFolderContent() {
 			}
 
 			if (ImGui::TreeNodeEx(child->Name().c_str(), ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf)) {
-				if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-					OpenFileAtFileNode(child);
+				if (ImGui::IsItemHovered()) {
+					if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+						OpenFileAtFileNode(child);
+					} else if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+						SetSelectedNode(child);
+					}
 				}
+
 				ImGui::TreePop();
 			}
 
@@ -331,9 +346,38 @@ void AssetManager::OpenFileAtFileNode(FNode* file) {
 	GUI& gui = this->gui;
 	if (file->IsDirectory()) {
 		currentFolder = file;
+		SetSelectedNode(nullptr);
 	} else if(file->IsFile()) {
 		if (Assets::IsSceneFile(file)) {
 			gui.openProject->OpenScene(assets->FindAssetAt(*file));
 		}
 	}
+}
+
+void AssetManager::SetSelectedNode(FNode* node) {
+	GUI& gui = this->gui;
+
+	selectedNode = node;
+	if (node == nullptr) {
+		gui.obs.ResetDisplayTarget();
+	} else {
+		gui.obs.SetDisplayTarget(selectedNode);
+	}
+}
+void AssetManager::SetCurrentFolder(FNode* folder) {
+	if (folder == nullptr) {
+		currentFolder = nullptr;
+		SetSelectedNode(nullptr);
+		return;
+	}
+
+	if (!folder->IsDirectory()) { return; }
+	GUI& gui = this->gui;
+
+	if (folder == root || folder == currentFolder->ParentNode()) {
+		SetSelectedNode(nullptr);
+	} else {
+		SetSelectedNode(folder);
+	}
+	currentFolder = folder;
 }
