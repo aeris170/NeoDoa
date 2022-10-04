@@ -135,6 +135,7 @@ const Assets::UUIDCollection& Assets::ShaderAssetIDs() const { return shaderAsse
 const Assets::UUIDCollection& Assets::ShaderUniformBlockAssetIDs() const { return shaderUniformBlockAssets; }
 
 void Assets::ReimportAll() {
+	database.clear();
 	_root = FNode(FNodeCreationParams{ project, nullptr, "", "", "", true });
 	BuildFileNodeTree(_root);
 	ImportAllFiles(database, _root);
@@ -211,7 +212,6 @@ AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
 }
 
 void Assets::ImportAllFiles(AssetDatabase& database, const FNode& root) {
-	database.clear();
 	ImportFile(database, root);
 	for (auto& child : root.Children()) {
 		ImportAllFiles(database, *child);
