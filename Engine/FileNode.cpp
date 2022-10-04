@@ -177,6 +177,8 @@ std::string FNode::DisposeContent() const {
 	return data; // move or possibly NRVO
 }
 
+uintmax_t FNode::Size() const { return std::filesystem::file_size(AbsolutePath()); }
+
 bool FNode::IsFile() const { return !IsDirectory(); }
 bool FNode::IsDirectory() const { return isDirectory; }
 

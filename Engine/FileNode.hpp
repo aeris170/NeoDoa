@@ -52,6 +52,8 @@ struct FNode {
 	void ModifyContent(std::string&& content);
 	std::string DisposeContent() const;
 
+	size_t Size() const;
+
 	bool IsFile() const;
 	bool IsDirectory() const;
 
