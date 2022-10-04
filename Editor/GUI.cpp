@@ -209,6 +209,25 @@ void* GUI::GetSceneIcon(TextureSize size) { return reinterpret_cast<void*>(SVGPa
 void* GUI::GetFileIcon(TextureSize size) { return reinterpret_cast<void*>(SVGPathway::Get(FILE_ICON_KEY, TextureStyle::PADDED, size).lock()->_glTextureID); }
 void* GUI::GetBackArrowIcon(TextureSize size) { return reinterpret_cast<void*>(SVGPathway::Get(BACK_ARROW_ICON_KEY, TextureStyle::PADDED, size).lock()->_glTextureID); }
 
+void* GUI::FindIconForFileType(const FNode& file, TextureSize size) {
+	assert(HasOpenProject());
+
+	if (file.IsDirectory()) { return GetFolderIcon(size); }
+	if (file.Extension() == ".doa") { return GetProjectIcon(size); } /* TODO FIX THIS SHITTY EXTENSION CHECK */
+
+	Project& project = openProject.value();
+	assert(project.Assets().IsAssetExistsAt(file));
+	AssetHandle asset = project.Assets().FindAssetAt(file);
+
+	if (asset->IsScene()) { return GetSceneIcon(size); }
+	if (asset->IsScript()) { return GetSceneIcon(size); }
+	if (asset->IsTexture()) { return GetSceneIcon(size); }
+	if (asset->IsModel()) { return GetSceneIcon(size); }
+	if (asset->IsMaterial()) { return GetSceneIcon(size); }
+	if (asset->IsShader()) { return GetSceneIcon(size); }
+	return GetFileIcon(size);
+}
+
 // TODO REMOVE ME WHEN IMGUI IMPLEMENTS THIS WORKAROUND AS API FUNC.
 void GUI::ExecuteDockBuilderFocusWorkAround() {
 	static int i = -1;

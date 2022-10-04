@@ -92,6 +92,8 @@ struct GUI {
 	void* GetFileIcon(TextureSize size = TextureSize::MEDIUM);
 	void* GetBackArrowIcon(TextureSize size = TextureSize::MEDIUM);
 
+	void* FindIconForFileType(const FNode& file, TextureSize = TextureSize::MEDIUM);
+
 private:
 	ImGuiIO* io{ nullptr };
 	ImFont* font{ nullptr };
