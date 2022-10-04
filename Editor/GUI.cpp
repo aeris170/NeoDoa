@@ -101,6 +101,10 @@ void GUI::operator() (float delta) {
 	mb.Render();
 	mb.End();
 
+	am.Begin();
+	am.Render();
+	am.End();
+
 	sh.Begin();
 	if(HasOpenScene()) {
 		sh.Render(openProject->GetOpenScene());
@@ -112,10 +116,6 @@ void GUI::operator() (float delta) {
 		obs.Render(openProject->GetOpenScene());
 	}
 	obs.End();
-
-	am.Begin();
-	am.Render();
-	am.End();
 
 	con.Begin();
 	con.Render();

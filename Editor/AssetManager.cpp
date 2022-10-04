@@ -23,7 +23,7 @@ void AssetManager::Begin() {
 	ImGui::Begin(title.c_str(), nullptr, ImGuiWindowFlags_MenuBar);
 
 	hasContent = gui.HasOpenProject();
-	if(hasContent) {
+	if (hasContent) {
 		assets = &gui.openProject->Assets();
 		root = &assets->Root();
 		if (currentFolder == nullptr) {
