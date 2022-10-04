@@ -43,6 +43,9 @@ struct FNode {
 	void ChangeExtension(const std::string& extension);
 	void ChangeExtension(std::string&& extension);
 
+	std::string FullName();
+	const std::string& FullName() const;
+
 	bool ReadContent() const;
 	void ModifyContent(std::string_view content);
 	void ModifyContent(const std::string& content);
