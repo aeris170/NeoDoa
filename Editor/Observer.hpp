@@ -33,7 +33,8 @@ struct Observer {
 	void RenderComponents(Scene& scene, const Entity entt);
 
 	template<Displayable T>
-	void SetDisplayTarget(T target) { displayTarget == target; }
+	void SetDisplayTarget(T target) { displayTarget = target; }
+	void ResetDisplayTarget();
 
 private:
 	DisplayTarget displayTarget;

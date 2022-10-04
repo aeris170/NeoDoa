@@ -39,18 +39,26 @@ void Observer::Begin(Scene* scene) {
 
 void Observer::Render(Scene& scene) {
 	GUI& gui = this->gui;
-	if (gui.sh.selectedEntity != NULL_ENTT) {
-		RenderComponents(scene, gui.sh.selectedEntity);
-	} else {
-		const char* text = "Select an entity from the scene :)";
-		ImVec2 size = ImGui::GetContentRegionAvail();
-		ImVec2 txtSize = ImGui::CalcTextSize(text);
-		for (int i = 0; i < 5; i++) {
-			ImGui::SameLine((size.x - txtSize.x) / 2, 0);
-			ImGui::Text(text);
-			ImGui::NewLine();
+	std::visit(overloads::overloaded {
+		[](std::monostate arg) {
+			const char* text = "Nothing to display here :)";
+			ImVec2 size = ImGui::GetContentRegionAvail();
+			ImVec2 txtSize = ImGui::CalcTextSize(text);
+			for (int i = 0; i < 5; i++) {
+				ImGui::SameLine((size.x - txtSize.x) / 2, 0);
+				ImGui::Text(text);
+				ImGui::NewLine();
+			}
+		},
+		[&](Entity entt) { RenderComponents(scene, gui.sh.selectedEntity); },
+		[&](FNode* file) {
+			if (file->IsDirectory()) {
+
+			} else {
+				AssetHandle h = gui.openProject->Assets().FindAssetAt(*file);
+			}
 		}
-	}
+	}, displayTarget);
 }
 
 void Observer::End() {
@@ -90,3 +98,5 @@ void Observer::RenderComponents(Scene& scene, const Entity entt) {
 		ComponentUI::RenderScriptStorageComponent(*this, scene, scriptStorageComponent);
 	}
 }
+
+void Observer::ResetDisplayTarget() { displayTarget = std::monostate{}; }
