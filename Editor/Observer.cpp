@@ -53,11 +53,11 @@ void Observer::Render(Scene& scene) {
 		[&](Entity entt) { RenderComponents(scene, gui.sh.selectedEntity); },
 		[&](FNode* file) {
 			static const ImVec2 iconSize{ 64.0f, 64.0f };
-			ImGui::Columns(2, nullptr, 0);
+			ImGui::Columns(2);
 			ImGui::SetColumnWidth(0, iconSize.x * 1.25f);
 			ImGui::PushFont(gui.GetFontBold());
 
-			ImGui::Image(gui.GetFolderIcon(), iconSize);
+			ImGui::Image(gui.FindIconForFileType(*file), iconSize);
 
 			ImGui::SameLine();
 			ImGui::NextColumn();
@@ -74,6 +74,9 @@ void Observer::Render(Scene& scene) {
 			ImGui::Text(std::string("Absolute Path: ").append(absolutePath).c_str());
 
 			ImGui::PopFont();
+
+			ImGui::Columns(1);
+			ImGui::Separator();
 
 			if (file->IsDirectory()) {
 				RenderFolderView(file);
@@ -121,9 +124,37 @@ void Observer::RenderComponents(Scene& scene, const Entity entt) {
 		ComponentUI::RenderScriptStorageComponent(*this, scene, scriptStorageComponent);
 	}
 }
-void RenderFolderView(FNode* folder) {
+void Observer::RenderFolderView(FNode* folder) {
 	assert(folder->IsDirectory());
+	GUI& gui = this->gui;
 
+	ImGuiTableFlags flags = ImGuiTableFlags_RowBg |
+							ImGuiTableFlags_Borders |
+							ImGuiTableFlags_Resizable |
+							ImGuiTableFlags_SizingFixedFit |
+							ImGuiTableFlags_NoBordersInBodyUntilResize;
+
+	if (ImGui::BeginTable("folderview", 3, flags)) {
+
+		ImGui::TableSetupColumn("", ImGuiTableColumnFlags_NoResize);
+		ImGui::TableSetupColumn("Files", ImGuiTableColumnFlags_WidthStretch, 0.6f);
+		ImGui::TableSetupColumn("Size (bytes)", ImGuiTableColumnFlags_WidthStretch, 0.3f);
+		ImGui::TableHeadersRow();
+
+		for (auto child : folder->Children()) {
+			if (!child->IsDirectory() && !gui.openProject->Assets().IsAssetExistsAt(*child)) { continue; }
+
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			ImGui::Image(gui.FindIconForFileType(*child, TextureSize::SMALL), { 16.0f, 16.0f });
+			ImGui::TableSetColumnIndex(1);
+			ImGui::Text(child->FullName().c_str());
+			ImGui::TableSetColumnIndex(2);
+			std::string size = std::to_string(child->Size());
+			ImGui::Text(size.c_str());
+		}
+		ImGui::EndTable();
+	}
 }
 
 void Observer::ResetDisplayTarget() { displayTarget = std::monostate{}; }
