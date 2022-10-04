@@ -53,31 +53,30 @@ void Observer::Render(Scene& scene) {
 		[&](Entity entt) { RenderComponents(scene, gui.sh.selectedEntity); },
 		[&](FNode* file) {
 			static const ImVec2 iconSize{ 64.0f, 64.0f };
+			ImGui::Columns(2, nullptr, 0);
+			ImGui::SetColumnWidth(0, iconSize.x * 1.25f);
+			ImGui::PushFont(gui.GetFontBold());
+
+			ImGui::Image(gui.GetFolderIcon(), iconSize);
+
+			ImGui::SameLine();
+			ImGui::NextColumn();
+
+			auto name = static_cast<const FNode*>(file)->Name().c_str();
+			ImGui::Text(name);
+
+			ImGui::PopFont();
+			ImGui::PushFont(gui.GetFont());
+
+			std::string path = file->Path().string();
+			ImGui::Text(std::string("Path: ROOT").append(sizeof(char), static_cast<char>(std::filesystem::path::preferred_separator)).append(path).c_str());
+			std::string absolutePath = file->AbsolutePath().string();
+			ImGui::Text(std::string("Absolute Path: ").append(absolutePath).c_str());
+
+			ImGui::PopFont();
 
 			if (file->IsDirectory()) {
-				ImGui::Columns(2, nullptr, 0);
-				ImGui::SetColumnWidth(0, iconSize.x * 1.25f);
-
-				ImGui::PushFont(gui.GetFontBold());
-
-				ImGui::Image(gui.GetFolderIcon(), iconSize);
-				ImGui::SameLine();
-				auto name = static_cast<const FNode*>(file)->Name().c_str();
-
-				ImGui::NextColumn();
-
-				ImGui::Text(name);
-
-				ImGui::PopFont();
-
-				ImGui::PushFont(gui.GetFont());
-				std::string path = file->Path().string();
-				ImGui::Text(std::string("Path: ROOT").append(sizeof(char), static_cast<char>(std::filesystem::path::preferred_separator)).append(path).c_str());
-
-				std::string absolutePath = file->AbsolutePath().string();
-				ImGui::Text(std::string("Absolute Path: ").append(absolutePath).c_str());
-				ImGui::PopFont();
-
+				RenderFolderView(file);
 			} else {
 				AssetHandle h = gui.openProject->Assets().FindAssetAt(*file);
 			}
