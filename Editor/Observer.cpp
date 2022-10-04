@@ -39,7 +39,7 @@ void Observer::Begin(Scene* scene) {
 
 void Observer::Render(Scene& scene) {
 	GUI& gui = this->gui;
-	std::visit(overloads::overloaded {
+	std::visit(overloaded::lambda {
 		[](std::monostate arg) {
 			const char* text = "Nothing to display here :)";
 			ImVec2 size = ImGui::GetContentRegionAvail();

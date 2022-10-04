@@ -19,7 +19,7 @@ namespace concepts {
 	};
 }
 
-namespace overloads {
-	template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
-	template<class... Ts> overloaded(Ts...)->overloaded<Ts...>;
+namespace overloaded {
+	template<class... Ts> struct lambda : Ts... { using Ts::operator()...; };
+	template<class... Ts> lambda(Ts...)->lambda<Ts...>;
 }
