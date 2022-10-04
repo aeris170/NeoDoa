@@ -32,4 +32,7 @@ struct SceneHierarchy {
 
 private:
 	void RenderEntityNode(Scene& scene, const Entity entity);
+
+	void SetSelectedEntity(Entity entt);
+	void ResetSelectedEntity();
 };

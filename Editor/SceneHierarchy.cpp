@@ -83,7 +83,7 @@ void SceneHierarchy::Render(Scene& scene) {
 	}
 
 	if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered()) {
-		selectedEntity = NULL_ENTT;
+		ResetSelectedEntity();
 	}
 
 	if (ImGui::BeginPopupContextWindow(0, ImGuiMouseButton_Right, false)) {
@@ -100,7 +100,7 @@ void SceneHierarchy::Render(Scene& scene) {
 	if (deletedEntity != NULL_ENTT) {
 		scene.DeleteEntity(deletedEntity);
 		if (selectedEntity == deletedEntity) {
-			selectedEntity = NULL_ENTT;
+			ResetSelectedEntity();
 		}
 		deletedEntity = NULL_ENTT;
 	}
@@ -226,7 +226,7 @@ void SceneHierarchy::RenderEntityNode(Scene& scene, const Entity entity) {
 	}
 
 	if (ImGui::IsItemHovered(ImGuiHoveredFlags_None) && ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
-		selectedEntity = entity;
+		SetSelectedEntity(entity);
 	}
 
 	if (ImGui::BeginPopupContextItem(0, ImGuiPopupFlags_MouseButtonRight)) {
@@ -280,4 +280,15 @@ void SceneHierarchy::RenderEntityNode(Scene& scene, const Entity entity) {
 			ImGui::TreePop();
 		}
 	}
+}
+
+void SceneHierarchy::SetSelectedEntity(Entity entt) {
+	GUI& gui = this->gui;
+	selectedEntity = entt;
+	gui.obs.SetDisplayTarget(selectedEntity);
+}
+void SceneHierarchy::ResetSelectedEntity() {
+	GUI& gui = this->gui;
+	selectedEntity = NULL_ENTT;
+	gui.obs.ResetDisplayTarget();
 }
