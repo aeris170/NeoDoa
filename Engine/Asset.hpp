@@ -10,31 +10,13 @@
 //#include "Material.hpp"
 #include "Shader.hpp"
 
+#include "TemplateUtilities.hpp"
+
 #include <variant>
-#include <concepts>
 
-
-namespace detail {
 #define ASSET_TYPE Scene, Texture, Model, Shader
-
-	template<typename T, typename ...U>
-	concept IsAnyOf = (std::same_as<T, U> || ...);
-
-	template<typename T>
-	concept Copyable = requires(const T& t) {
-		{ T::Copy(t) } -> std::same_as<T>;
-	};
-
-	template<typename T>
-	concept Serializable = requires {
-		&T::Serialize;
-		&T::Deserialize;
-	};
-
-	template<typename T>
-	concept AssetType = IsAnyOf<T, ASSET_TYPE> && Copyable<T> && Serializable<T> && std::movable<T>;
-}
-
+template<typename T>
+concept AssetType = concepts::IsAnyOf<T, ASSET_TYPE> && concepts::Copyable<T> && concepts::Serializable<T> && std::movable<T>;
 using AssetData = std::variant<std::monostate, ASSET_TYPE>;
 #undef ASSET_TYPE
 
@@ -51,7 +33,7 @@ struct Asset {
 	UUID ID() const;
 	FNode* File() const;
 	const AssetData& Data() const;
-	template<detail::AssetType T>
+	template<AssetType T>
 	T& DataAs() {
 		return std::get<T>(data);
 	}
@@ -63,7 +45,7 @@ struct Asset {
 
 	UUID Instantiate() const;
 
-	template<detail::AssetType T>
+	template<AssetType T>
 	void UpdateData(T&& newData) {
 		data = std::move(newData);
 	}

@@ -65,7 +65,7 @@ struct Assets {
 	void MoveFolder(FNode& folder, FNode& targetParentFolder);
 	void DeleteFolder(FNode& folder);
 
-	template<detail::AssetType T, typename ...Args>
+	template<AssetType T, typename ...Args>
 	AssetHandle CreateAssetAt(FNode& folderPath, const std::string_view fileName, Args&& ...args) {
 		/*
 		std::filesystem::current_path(project->Workspace());

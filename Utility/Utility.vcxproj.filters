@@ -27,5 +27,8 @@
     <ClInclude Include="split.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TemplateUtilities.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
