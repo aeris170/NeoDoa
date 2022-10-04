@@ -87,6 +87,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="FormatBytes.hpp" />
     <ClInclude Include="nameof.hpp" />
     <ClInclude Include="prettify.hpp" />
     <ClInclude Include="split.hpp" />

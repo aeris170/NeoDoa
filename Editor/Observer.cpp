@@ -4,8 +4,10 @@
 #include <sstream>
 
 #include <imgui.h>
+
 #include <nameof.hpp>
 #include <prettify.hpp>
+#include <FormatBytes.hpp>
 
 #include <Scene.hpp>
 #include <IDComponent.hpp>
@@ -138,7 +140,7 @@ void Observer::RenderFolderView(FNode* folder) {
 
 		ImGui::TableSetupColumn("", ImGuiTableColumnFlags_NoResize);
 		ImGui::TableSetupColumn("Files", ImGuiTableColumnFlags_WidthStretch, 0.6f);
-		ImGui::TableSetupColumn("Size (bytes)", ImGuiTableColumnFlags_WidthStretch, 0.3f);
+		ImGui::TableSetupColumn("Size", ImGuiTableColumnFlags_WidthStretch, 0.3f);
 		ImGui::TableHeadersRow();
 
 		for (auto child : folder->Children()) {
@@ -150,7 +152,7 @@ void Observer::RenderFolderView(FNode* folder) {
 			ImGui::TableSetColumnIndex(1);
 			ImGui::Text(child->FullName().c_str());
 			ImGui::TableSetColumnIndex(2);
-			std::string size = std::to_string(child->Size());
+			std::string size = FormatBytes(child->Size());
 			ImGui::Text(size.c_str());
 		}
 		ImGui::EndTable();
