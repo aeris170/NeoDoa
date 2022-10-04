@@ -121,5 +121,9 @@ void Observer::RenderComponents(Scene& scene, const Entity entt) {
 		ComponentUI::RenderScriptStorageComponent(*this, scene, scriptStorageComponent);
 	}
 }
+void RenderFolderView(FNode* folder) {
+	assert(folder->IsDirectory());
+
+}
 
 void Observer::ResetDisplayTarget() { displayTarget = std::monostate{}; }
