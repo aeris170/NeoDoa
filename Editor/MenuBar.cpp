@@ -77,6 +77,9 @@ void MenuBar::RenderProjectSubMenu() {
 	if (ImGui::MenuItem("Save Project", "Ctrl+Shift+S")) {
 		gui.SaveProjectToDisk();
 	}
+	if (ImGui::MenuItem("Close Project", "Ctrl+Shift+S")) {
+		gui.CloseProject();
+	}
 	ImGui::Separator();
 	if (ImGui::MenuItem("Exit", "Alt+F4")) {
 		gui.core->Stop();
