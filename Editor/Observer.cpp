@@ -16,6 +16,7 @@
 #include <ChildComponent.hpp>
 #include <CameraComponent.hpp>
 #include <ScriptStorageComponent.hpp>
+#include <Assets.hpp>
 
 #include "GUI.hpp"
 #include "Icons.hpp"
@@ -84,6 +85,9 @@ void Observer::Render(Scene& scene) {
 				RenderFolderView(file);
 			} else {
 				AssetHandle h = gui.openProject->Assets().FindAssetAt(*file);
+				if (h->IsScene()) {
+					RenderSceneView(h);
+				}
 			}
 		}
 	}, displayTarget);
@@ -155,6 +159,55 @@ void Observer::RenderFolderView(FNode* folder) {
 			std::string size = FormatBytes(child->Size());
 			ImGui::Text(size.c_str());
 		}
+		ImGui::EndTable();
+	}
+}
+void Observer::RenderSceneView(AssetHandle sceneAsset) {
+	assert(sceneAsset->IsScene());
+
+	Scene& scene = sceneAsset->DataAs<Scene>();
+
+	ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders;
+	if (ImGui::BeginTable("entities", 1, flags)) {
+		ImGui::TableSetupColumn("Entities", ImGuiTableColumnFlags_WidthStretch);
+		ImGui::TableHeadersRow();
+
+		for (Entity entt : scene.GetAllEntites()) {
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			std::string label = std::to_string(entt).append("\t\t(").append(scene.GetComponent<IDComponent>(entt).GetTagRef()).append(")");
+			if (ImGui::CollapsingHeader(label.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth)) {
+				ImGui::Text(nameof_c(IDComponent));
+				ImGui::Text(nameof_c(TransformComponent));
+				if (scene.HasComponent<ParentComponent>(entt)) {
+					ImGui::Text(nameof_c(ParentComponent));
+				}
+				if (scene.HasComponent<ChildComponent>(entt)) {
+					ImGui::Text(nameof_c(ChildComponent));
+				}
+				if (scene.HasComponent<OrthoCameraComponent>(entt)) {
+					ImGui::Text(nameof_c(OrthoCameraComponent));
+				}
+				if (scene.HasComponent<PerspectiveCameraComponent>(entt)) {
+					ImGui::Text(nameof_c(PerspectiveCameraComponent));
+				}
+				if (scene.HasComponent<ScriptStorageComponent>(entt)) {
+					ImGui::Text(nameof_c(ScriptStorageComponent));
+				}
+			}
+		}
+		ImGui::EndTable();
+	}
+
+	flags = ImGuiTableFlags_RowBg |
+		ImGuiTableFlags_Borders |
+		ImGuiTableFlags_SizingFixedFit |
+		ImGuiTableFlags_NoBordersInBodyUntilResize;
+	if (ImGui::BeginTable("systems", 2, flags)) {
+		ImGui::TableSetupColumn("Systems", ImGuiTableColumnFlags_WidthStretch);
+		ImGui::TableSetupColumn("", ImGuiTableColumnFlags_NoResize);
+		ImGui::TableHeadersRow();
+
 		ImGui::EndTable();
 	}
 }

@@ -13,6 +13,7 @@
 struct GUI;
 struct Scene;
 struct FNode;
+struct AssetHandle;
 
 #define DISPLAYABLE Entity, FNode*
 template<typename T>
@@ -32,6 +33,7 @@ struct Observer {
 
 	void RenderComponents(Scene& scene, const Entity entt);
 	void RenderFolderView(FNode* folder);
+	void RenderSceneView(AssetHandle sceneAsset);
 
 	template<Displayable T>
 	void SetDisplayTarget(T target) { displayTarget = target; }
