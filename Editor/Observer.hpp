@@ -17,7 +17,7 @@ struct AssetHandle;
 
 #define DISPLAYABLE Entity, FNode*
 template<typename T>
-concept Displayable = concepts::IsAnyOf<T, DISPLAYABLE>;
+concept DisplayableInObserver = concepts::IsAnyOf<T, DISPLAYABLE>;
 using DisplayTarget = std::variant<std::monostate, DISPLAYABLE>;
 #undef DISPLAYABLE
 
@@ -35,7 +35,7 @@ struct Observer {
     void RenderFolderView(FNode* folder);
     void RenderSceneView(AssetHandle sceneAsset);
 
-    template<Displayable T>
+    template<DisplayableInObserver T>
     void SetDisplayTarget(T target) { displayTarget = target; }
     void ResetDisplayTarget();
 
