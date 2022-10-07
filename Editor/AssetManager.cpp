@@ -312,7 +312,7 @@ void AssetManager::RenderContextMenu() {
                     "",
                     "",
                     true
-                                                 });
+                });
             }
             ImGui::Separator();
 
