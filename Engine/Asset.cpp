@@ -6,23 +6,23 @@
 #include "SceneSerializer.hpp"
 
 Asset::Asset() noexcept :
-	Asset(UUID::Empty(), nullptr) {}
+    Asset(UUID::Empty(), nullptr) {}
 
 Asset::Asset(const UUID id, FNode* file) noexcept :
-	id(id),
-	file(file) {}
+    id(id),
+    file(file) {}
 
 Asset::Asset(Asset&& other) noexcept :
-	id(std::move(other.id)),
-	file(std::exchange(other.file, nullptr)) {
-	DeleteDeserializedData();
+    id(std::move(other.id)),
+    file(std::exchange(other.file, nullptr)) {
+    DeleteDeserializedData();
 }
 
 Asset& Asset::operator=(Asset&& other) noexcept {
-	id = std::move(other.id);
-	file = std::exchange(other.file, nullptr);
-	DeleteDeserializedData();
-	return *this;
+    id = std::move(other.id);
+    file = std::exchange(other.file, nullptr);
+    DeleteDeserializedData();
+    return *this;
 }
 
 UUID Asset::ID() const { return id; }
@@ -30,42 +30,42 @@ FNode* Asset::File() const { return file; }
 const AssetData& Asset::Data() const { return data; }
 
 void Asset::Serialize() {
-	std::string serializedData;
+    std::string serializedData;
 
-	if (IsScene()) {
-		serializedData = SerializeScene(DataAs<Scene>());
-	}
-	/*
-	* TODO others
-	*/
+    if (IsScene()) {
+        serializedData = SerializeScene(DataAs<Scene>());
+    }
+    /*
+    * TODO others
+    */
 
-	tinyxml2::XMLDocument doc;
-	doc.Parse(serializedData.c_str());
-	doc.SaveFile(file->AbsolutePath().string().c_str());
+    tinyxml2::XMLDocument doc;
+    doc.Parse(serializedData.c_str());
+    doc.SaveFile(file->AbsolutePath().string().c_str());
 }
 
 void Asset::Deserialize() {
-	if (!std::get_if<std::monostate>(&data)) { return; } // already deserialized
+    if (!std::get_if<std::monostate>(&data)) { return; } // already deserialized
 
-	file->ReadContent();
+    file->ReadContent();
 
-	if (IsScene()) {
-		data = DeserializeScene(file->content);
-	}
-	/*
-	* TODO others
-	*/
+    if (IsScene()) {
+        data = DeserializeScene(file->content);
+    }
+    /*
+    * TODO others
+    */
 
-	file->DisposeContent();
+    file->DisposeContent();
 }
 void Asset::ForceDeserialize() {
-	DeleteDeserializedData();
-	Deserialize();
+    DeleteDeserializedData();
+    Deserialize();
 }
 void Asset::DeleteDeserializedData() { data = std::monostate{}; }
 
 UUID Asset::Instantiate() const {
-	return UUID();
+    return UUID();
 }
 
 bool Asset::IsScene() const { return Assets::IsSceneFile(file); }

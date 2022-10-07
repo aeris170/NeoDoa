@@ -6,6 +6,6 @@
 
 struct ScriptComponentData {
 
-	std::string name;
-	std::vector<std::any> data;
+    std::string name;
+    std::vector<std::any> data;
 };

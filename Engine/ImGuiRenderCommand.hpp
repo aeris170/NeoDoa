@@ -2,5 +2,5 @@
 
 class ImGuiRenderCommand {
 public:
-	virtual void operator() (float delta) = 0;
+    virtual void operator() (float delta) = 0;
 };

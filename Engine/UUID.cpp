@@ -1,7 +1,7 @@
 #include "UUID.hpp"
 
 UUID::UUID(const std::string& hashee) noexcept :
-	uuid(std::hash<std::string>{}(hashee)) {}
+    uuid(std::hash<std::string>{}(hashee)) {}
 
 std::string UUID::AsString() const { return std::to_string(uuid); }
 

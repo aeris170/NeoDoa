@@ -3,11 +3,11 @@
 #include "Mesh.hpp"
 
 MeshComponent::MeshComponent(Entity entity) noexcept :
-	MeshComponent(entity, {}) {}
+    MeshComponent(entity, {}) {}
 
 MeshComponent::MeshComponent(Entity entity, std::weak_ptr<Mesh> mesh) noexcept :
-	entity(entity),
-	mesh(mesh) {}
+    entity(entity),
+    mesh(mesh) {}
 
 Entity MeshComponent::GetEntity() const { return entity; }
 

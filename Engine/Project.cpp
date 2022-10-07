@@ -8,44 +8,44 @@
 #include "ProjectSerializer.hpp"
 
 Project::Project(std::filesystem::path workspace, std::string name) noexcept :
-	_workspace(workspace),
-	_name(name),
-	_assets(this) {}
+    _workspace(workspace),
+    _name(name),
+    _assets(this) {}
 
 Project::Project(std::filesystem::path workspace, std::string name, UUID startupSceneUUID) noexcept :
-	Project(workspace, name) {
-	if (startupSceneUUID != UUID::Empty()) {
-		_startupScene = _assets.FindAsset(startupSceneUUID);
-		if (_startupScene.HasValue()) {
-			_startupScene->ForceDeserialize();
-			_openScene = &_startupScene->DataAs<Scene>();
-			_openSceneAsset = _startupScene;
-		}
-	}
+    Project(workspace, name) {
+    if (startupSceneUUID != UUID::Empty()) {
+        _startupScene = _assets.FindAsset(startupSceneUUID);
+        if (_startupScene.HasValue()) {
+            _startupScene->ForceDeserialize();
+            _openScene = &_startupScene->DataAs<Scene>();
+            _openSceneAsset = _startupScene;
+        }
+    }
 }
 
 Project::Project(Project&& other) noexcept :
-	_workspace(std::move(other._workspace)),
-	_name(std::move(other._name)),
-	_assets(std::move(other._assets)),
-	_startupScene(std::exchange(other._startupScene, nullptr)),
-	_openScene(std::exchange(other._openScene, nullptr)),
-	_openSceneAsset(std::exchange(other._openSceneAsset, nullptr)) {
-	_assets.__pointersInvalidated(this);
+    _workspace(std::move(other._workspace)),
+    _name(std::move(other._name)),
+    _assets(std::move(other._assets)),
+    _startupScene(std::exchange(other._startupScene, nullptr)),
+    _openScene(std::exchange(other._openScene, nullptr)),
+    _openSceneAsset(std::exchange(other._openSceneAsset, nullptr)) {
+    _assets.__pointersInvalidated(this);
 }
 
 Project& Project::operator=(Project&& other) noexcept {
-	_workspace = std::move(other._workspace);
-	_name = std::move(other._name);
+    _workspace = std::move(other._workspace);
+    _name = std::move(other._name);
 
-	_assets = std::move(other._assets);
-	_assets.__pointersInvalidated(this);
+    _assets = std::move(other._assets);
+    _assets.__pointersInvalidated(this);
 
-	_startupScene = std::exchange(other._startupScene, nullptr);
+    _startupScene = std::exchange(other._startupScene, nullptr);
 
-	_openScene = std::exchange(other._openScene, nullptr);
-	_openSceneAsset = std::exchange(other._openSceneAsset, nullptr);
-	return *this;
+    _openScene = std::exchange(other._openScene, nullptr);
+    _openSceneAsset = std::exchange(other._openSceneAsset, nullptr);
+    return *this;
 }
 
 std::filesystem::path Project::Workspace() const { return _workspace; }
@@ -59,29 +59,29 @@ AssetHandle Project::GetStartupScene() const { return _startupScene; }
 void Project::SetStartupScene(AssetHandle sceneFile) { _startupScene = sceneFile; }
 
 void Project::OpenScene(AssetHandle sceneAsset) {
-	if (!sceneAsset.HasValue() || !sceneAsset.Value().IsScene()) { return; }
+    if (!sceneAsset.HasValue() || !sceneAsset.Value().IsScene()) { return; }
 
-	sceneAsset->ForceDeserialize();
-	_openScene = &sceneAsset->DataAs<Scene>();
-	_openSceneAsset = sceneAsset;
+    sceneAsset->ForceDeserialize();
+    _openScene = &sceneAsset->DataAs<Scene>();
+    _openSceneAsset = sceneAsset;
 }
 void Project::CloseScene() {
-	_openScene = nullptr;
-	_openSceneAsset->DeleteDeserializedData();
-	_openSceneAsset.Reset();
+    _openScene = nullptr;
+    _openSceneAsset->DeleteDeserializedData();
+    _openSceneAsset.Reset();
 }
 bool Project::HasOpenScene() const { return _openScene != nullptr; }
 Scene& Project::GetOpenScene() { return *_openScene; }
 AssetHandle Project::GetOpenSceneAsset() const { return _openSceneAsset; }
 
 void Project::SaveToDisk() {
-	tinyxml2::XMLDocument doc;
-	doc.Parse(SerializeProject(*this).c_str());
-	doc.SaveFile((_workspace / (_name + ".doa")).string().c_str());
+    tinyxml2::XMLDocument doc;
+    doc.Parse(SerializeProject(*this).c_str());
+    doc.SaveFile((_workspace / (_name + ".doa")).string().c_str());
 }
 
 void Project::SaveOpenSceneToDisk() {
-	if (!_openScene) return;
+    if (!_openScene) return;
 
-	_openSceneAsset->Serialize();
+    _openSceneAsset->Serialize();
 }

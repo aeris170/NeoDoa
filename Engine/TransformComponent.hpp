@@ -23,7 +23,7 @@ private:
     glm::vec3 localTranslation{ glm::vec3(0, 0, 0) };
     glm::quat localRotation{ glm::quat_identity<float, glm::packed_highp>() };
     glm::vec3 localScale{ glm::vec3(1, 1, 1) };
-	glm::mat4 localMatrix{ glm::identity<glm::mat4>() };
+    glm::mat4 localMatrix{ glm::identity<glm::mat4>() };
 
     TransformComponent(const Entity owner, glm::mat4&& matrix) noexcept;
 
