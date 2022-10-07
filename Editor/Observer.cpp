@@ -90,7 +90,7 @@ void Observer::Render(Scene& scene) {
                 }
             }
         }
-               }, displayTarget);
+    }, displayTarget);
 }
 
 void Observer::End() {
