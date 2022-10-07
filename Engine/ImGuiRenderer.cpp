@@ -31,9 +31,9 @@ ImGuiContext* ImGuiInit(GLFWwindow* window) {
     icons_config.MergeMode = true;
     icons_config.PixelSnapH = true;
 
-    io.Fonts->AddFontFromFileTTF("Fonts/OpenSans-Regular.ttf", 18.0f);
+    io.Fonts->AddFontFromFileTTF("Fonts/OpenSans-Regular.ttf", 18.0f, nullptr, ICONS_RANGES_TURKISH);
     io.Fonts->AddFontFromFileTTF("Fonts/fa-regular-400-pro.ttf", 16.0f, &icons_config, icons_ranges);
-    io.FontDefault = io.Fonts->AddFontFromFileTTF("Fonts/OpenSans-Bold.ttf", 18.0f);
+    io.FontDefault = io.Fonts->AddFontFromFileTTF("Fonts/OpenSans-Bold.ttf", 18.0f, nullptr, ICONS_RANGES_TURKISH);
     io.Fonts->AddFontFromFileTTF("Fonts/fa-solid-900-pro.ttf", 16.0f, &icons_config, icons_ranges);
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
