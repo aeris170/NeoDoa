@@ -1,7 +1,3 @@
-#define _USE_MATH_DEFINES
-#include <math.h>
-#include <cmath>
-
 namespace eze {
 
     // ratio is in range [0-1]
