@@ -103,7 +103,7 @@ void MenuBar::RenderSceneSubMenu() {
 	}
 	ImGui::Separator();
 	if (ImGui::MenuItem("Save Scene", "Ctrl+S")) {
-		if(gui.HasOpenScene()) {
+		if (gui.HasOpenScene()) {
 			gui.openProject->SaveOpenSceneToDisk();
 		}
 	}

@@ -106,7 +106,7 @@ void GUI::operator() (float delta) {
 	am.End();
 
 	sh.Begin();
-	if(HasOpenScene()) {
+	if (HasOpenScene()) {
 		sh.Render(openProject->GetOpenScene());
 	}
 	sh.End();

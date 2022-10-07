@@ -233,7 +233,7 @@ void AssetManager::RenderSelectedFolderContent() {
 			}
 
 			if (ImGui::IsItemHovered()) {
-				if(ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+				if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
 					OpenFileAtFileNode(child);
 				} else if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
 					SetSelectedNode(child);
@@ -329,7 +329,7 @@ void AssetManager::OpenFileAtFileNode(FNode* file) {
 	if (file->IsDirectory()) {
 		currentFolder = file;
 		SetSelectedNode(nullptr);
-	} else if(file->IsFile()) {
+	} else if (file->IsFile()) {
 		if (Assets::IsSceneFile(file)) {
 			gui.openProject->OpenScene(assets->FindAssetAt(*file));
 		}

@@ -23,7 +23,7 @@ namespace SceneHierarchyIcons {
 
 namespace ComponentIcons {
 	inline constexpr auto GENERIC_COMPONENT_ICON = ICON_FA_FILE_CODE " "; // or ICON_FA_COG
-	inline const std::unordered_map<std::string, const std::string> DEFINED_COMPONENT_ICONS {
+	inline const std::unordered_map<std::string, const std::string> DEFINED_COMPONENT_ICONS{
 		{ nameof(IDComponent), ICON_FA_ADDRESS_CARD " " },
 		{ nameof(TransformComponent), ICON_FA_SEEDLING " " },
 		{ nameof(ParentComponent), ICON_FA_USER_CROWN " " },

@@ -23,14 +23,14 @@
 #include "ComponentUI.hpp"
 
 Observer::Observer(GUI& gui) noexcept :
-	gui(gui){}
+	gui(gui) {}
 
 void Observer::Begin(Scene* scene) {
 	GUI& gui = this->gui;
 	ImGui::PushID(gui.OBSERVER_TITLE);
 	std::string title(WindowIcons::OBSERVER_WINDOW_ICON);
 	title.append(gui.OBSERVER_TITLE);
-	if(scene) {
+	if (scene) {
 		if (gui.sh.selectedEntity != NULL_ENTT) {
 			title.append(" - ");
 			title.append(scene->GetComponent<IDComponent>(gui.sh.selectedEntity).GetTag());
@@ -42,7 +42,7 @@ void Observer::Begin(Scene* scene) {
 
 void Observer::Render(Scene& scene) {
 	GUI& gui = this->gui;
-	std::visit(overloaded::lambda {
+	std::visit(overloaded::lambda{
 		[](std::monostate arg) {
 			const char* text = "Nothing to display here :)";
 			ImVec2 size = ImGui::GetContentRegionAvail();
@@ -105,7 +105,7 @@ void Observer::RenderComponents(Scene& scene, const Entity entt) {
 	TransformComponent& transformComponent = scene.GetComponent<TransformComponent>(entt);
 	ComponentUI::RenderTransformComponent(*this, scene, transformComponent);
 
-	if(scene.HasComponent<ParentComponent>(entt)) {
+	if (scene.HasComponent<ParentComponent>(entt)) {
 		ParentComponent& parentComponent = scene.GetComponent<ParentComponent>(entt);
 		ComponentUI::RenderParentComponent(*this, scene, parentComponent);
 	}

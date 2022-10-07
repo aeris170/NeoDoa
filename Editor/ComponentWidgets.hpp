@@ -174,7 +174,7 @@ bool FancyVectorWidget(const std::string& label, float* vec, FancyVectorWidgetSe
 	ImGui::NextColumn();
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
 	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f);
-	if(settings.justifyCenter) {
+	if (settings.justifyCenter) {
 		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (compFieldWidth - settings.componentFieldWidth) / 2);
 	}
 

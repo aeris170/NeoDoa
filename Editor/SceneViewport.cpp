@@ -36,10 +36,10 @@ void SceneViewport::Render(Scene& scene) {
 		ImGui::GetWindowPos().y + ImGui::GetCursorPos().y
 	};
 
-	ImVec2 size { static_cast<float>(viewportSize.w), static_cast<float>(viewportSize.h) };
+	ImVec2 size{ static_cast<float>(viewportSize.w), static_cast<float>(viewportSize.h) };
 	ImGui::Image(reinterpret_cast<void*>(gui.core->FrameBuffer()->_tex), size, { 0, 1 }, { 1, 0 });
 
-	ImGui::PushClipRect({ viewportPosition.x, viewportPosition.y }, { viewportPosition.x + size.x, viewportPosition.y + size.y}, false);
+	ImGui::PushClipRect({ viewportPosition.x, viewportPosition.y }, { viewportPosition.x + size.x, viewportPosition.y + size.y }, false);
 	gizmos.settings.viewportSize = viewportSize;
 	gizmos.settings.viewportPosition = viewportPosition;
 	gizmos.Render(scene);
