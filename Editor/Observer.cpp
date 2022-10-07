@@ -87,6 +87,8 @@ void Observer::Render(Scene& scene) {
                 AssetHandle h = gui.openProject->Assets().FindAssetAt(*file);
                 if (h->IsScene()) {
                     RenderSceneView(h);
+                } else {
+                    RenderTextView(h);
                 }
             }
         }
@@ -210,6 +212,25 @@ void Observer::RenderSceneView(AssetHandle sceneAsset) {
 
         ImGui::EndTable();
     }
+}
+void Observer::RenderTextView(AssetHandle textAsset) {
+    textAsset->File()->ReadContent();
+    std::string content = textAsset->File()->DisposeContent();
+
+    ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders;
+    if (ImGui::BeginTable("content", 1, flags)) {
+        ImGui::TableSetupColumn("File Content", ImGuiTableColumnFlags_WidthStretch);
+        ImGui::TableHeadersRow();
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+
+        ImGuiInputTextFlags flags = ImGuiInputTextFlags_ReadOnly;
+        ImGui::InputTextMultiline("", content.data(), content.size(), ImGui::GetContentRegionAvail(), flags);
+
+        ImGui::EndTable();
+    }
+
 }
 
 void Observer::ResetDisplayTarget() { displayTarget = std::monostate{}; }

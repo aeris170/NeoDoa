@@ -34,6 +34,7 @@ struct Observer {
     void RenderComponents(Scene& scene, const Entity entt);
     void RenderFolderView(FNode* folder);
     void RenderSceneView(AssetHandle sceneAsset);
+    void RenderTextView(AssetHandle textAsset);
 
     template<DisplayableInObserver T>
     void SetDisplayTarget(T target) { displayTarget = target; }
