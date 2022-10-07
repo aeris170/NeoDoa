@@ -103,7 +103,6 @@
     <ClCompile Include="ComponentUI.cpp" />
     <ClCompile Include="ComponentWidgets.cpp" />
     <ClCompile Include="Console.cpp" />
-    <ClCompile Include="Editor.cpp" />
     <ClCompile Include="CodeGenerator.cpp" />
     <ClCompile Include="GameViewport.cpp" />
     <ClCompile Include="Gizmos.cpp" />
@@ -123,7 +122,6 @@
     <ClInclude Include="ComponentUI.hpp" />
     <ClInclude Include="ComponentWidgets.hpp" />
     <ClInclude Include="Console.hpp" />
-    <ClInclude Include="Editor.hpp" />
     <ClInclude Include="CodeGenerator.hpp" />
     <ClInclude Include="GameViewport.hpp" />
     <ClInclude Include="Gizmos.hpp" />
