@@ -4,302 +4,302 @@
 #include <imgui_internal.h>
 
 bool FancyVector1Widget(const std::string& label, glm::vec1& vec, FancyVectorWidgetSettings<display::X> settings) {
-	return FancyVectorWidget(label, &vec.x, settings);
+    return FancyVectorWidget(label, &vec.x, settings);
 }
 
 bool FancyVector2Widget(const std::string& label, glm::vec2& vec, FancyVectorWidgetSettings<display::XY> settings) {
-	return FancyVectorWidget(label, &vec.x, settings);
+    return FancyVectorWidget(label, &vec.x, settings);
 }
 
 bool FancyVector3Widget(const std::string& label, glm::vec3& vec, FancyVectorWidgetSettings<display::XYZ> settings) {
-	return FancyVectorWidget(label, &vec.x, settings);
+    return FancyVectorWidget(label, &vec.x, settings);
 }
 
 bool FancyVector4Widget(const std::string& label, glm::vec4& vec, FancyVectorWidgetSettings<display::XYZW> settings) {
-	return FancyVectorWidget(label, &vec.x, settings);
+    return FancyVectorWidget(label, &vec.x, settings);
 }
 
 void detail::BeginWidget(const std::string& label) {
-	float w = ImGui::GetContentRegionAvail().x;
+    float w = ImGui::GetContentRegionAvail().x;
 
-	ImGui::PushID(label.c_str());
-	ImGui::Columns(2);
-	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { ImGui::GetStyle().ItemSpacing.x, 0 });
-	ImGui::SetColumnWidth(0, w - compFieldWidth);
-	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f + 3);
-	ImGui::Text(label.c_str());
-	ImGui::NextColumn();
-	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
-	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f);
+    ImGui::PushID(label.c_str());
+    ImGui::Columns(2);
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { ImGui::GetStyle().ItemSpacing.x, 0 });
+    ImGui::SetColumnWidth(0, w - compFieldWidth);
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f + 3);
+    ImGui::Text(label.c_str());
+    ImGui::NextColumn();
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f);
 
-	ImGui::PushItemWidth(compFieldWidth);
-	ImGuiIO& io = ImGui::GetIO();
-	auto boldFont = io.Fonts->Fonts[0];
-	ImGui::PushFont(boldFont);
+    ImGui::PushItemWidth(compFieldWidth);
+    ImGuiIO& io = ImGui::GetIO();
+    auto boldFont = io.Fonts->Fonts[0];
+    ImGui::PushFont(boldFont);
 }
 
 void detail::EndWidget() {
-	ImGui::PopFont();
-	ImGui::PopStyleVar(2);
-	ImGui::Columns(1);
-	ImGui::PopItemWidth();
-	ImGui::PopID();
+    ImGui::PopFont();
+    ImGui::PopStyleVar(2);
+    ImGui::Columns(1);
+    ImGui::PopItemWidth();
+    ImGui::PopID();
 }
 
 bool EnumWidget(const std::string& label, int& value, const std::vector<EnumValue>& values) {
-	BeginWidget(label);
-	std::stringstream ss;
-	ss << "##" << label;
+    BeginWidget(label);
+    std::stringstream ss;
+    ss << "##" << label;
 
-	int selected = -1;
-	std::vector<const char*> items;
-	for (int i = 0; i < values.size(); i++) {
-		auto& element = values[i];
-		if (element.value == value) {
-			selected = i;
-		}
-		items.push_back(element.prettyName.c_str());
-	}
+    int selected = -1;
+    std::vector<const char*> items;
+    for (int i = 0; i < values.size(); i++) {
+        auto& element = values[i];
+        if (element.value == value) {
+            selected = i;
+        }
+        items.push_back(element.prettyName.c_str());
+    }
 
-	bool rv{ false };
-	if (ImGui::BeginCombo(ss.str().c_str(), values[selected].prettyName.c_str())) {
-		for (int i = 0; i < values.size(); i++) {
-			bool is_selected = (value == values[i].value); // You can store your selection however you want, outside or inside your objects
-			if (ImGui::Selectable(values[i].prettyName.c_str(), is_selected)) {
-				rv = true;
-				value = values[i].value;
-			}
-			if (is_selected) {
-				ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
-			}
-		}
-		ImGui::EndCombo();
-	}
-	EndWidget();
+    bool rv{ false };
+    if (ImGui::BeginCombo(ss.str().c_str(), values[selected].prettyName.c_str())) {
+        for (int i = 0; i < values.size(); i++) {
+            bool is_selected = (value == values[i].value); // You can store your selection however you want, outside or inside your objects
+            if (ImGui::Selectable(values[i].prettyName.c_str(), is_selected)) {
+                rv = true;
+                value = values[i].value;
+            }
+            if (is_selected) {
+                ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+            }
+        }
+        ImGui::EndCombo();
+    }
+    EndWidget();
 
-	return rv;
+    return rv;
 }
 
 bool EntityWidget(const std::string& label, Entity& value) {
-	BeginWidget(label);
-	std::stringstream ss;
-	ss << "##" << label;
-	int val = EntityTo<int>(value);
-	bool rv = ImGui::DragInt(ss.str().c_str(), &val);
-	value = static_cast<Entity>(val);
-	EndWidget();
-	return rv;
+    BeginWidget(label);
+    std::stringstream ss;
+    ss << "##" << label;
+    int val = EntityTo<int>(value);
+    bool rv = ImGui::DragInt(ss.str().c_str(), &val);
+    value = static_cast<Entity>(val);
+    EndWidget();
+    return rv;
 }
 
 void UneditableEntityWidget(const std::string& label, const Entity value) {
-	BeginWidget(label);
-	int val = EntityTo<int>(value);
-	ImGui::Text(std::to_string(val).c_str());
-	EndWidget();
+    BeginWidget(label);
+    int val = EntityTo<int>(value);
+    ImGui::Text(std::to_string(val).c_str());
+    EndWidget();
 }
 
 bool IntWidget(const std::string& label, int& value) {
-	BeginWidget(label);
-	std::stringstream ss;
-	ss << "##" << label;
-	bool rv = ImGui::DragInt(ss.str().c_str(), &value);
-	EndWidget();
-	return rv;
+    BeginWidget(label);
+    std::stringstream ss;
+    ss << "##" << label;
+    bool rv = ImGui::DragInt(ss.str().c_str(), &value);
+    EndWidget();
+    return rv;
 }
 
 bool FloatWidget(const std::string& label, float& value, float step, float min, float max) {
-	BeginWidget(label);
-	std::stringstream ss;
-	ss << "##" << label;
-	bool rv = ImGui::DragFloat(ss.str().c_str(), &value, step, min, max);
-	EndWidget();
-	return rv;
+    BeginWidget(label);
+    std::stringstream ss;
+    ss << "##" << label;
+    bool rv = ImGui::DragFloat(ss.str().c_str(), &value, step, min, max);
+    EndWidget();
+    return rv;
 }
 
 bool DoubleWidget(const std::string& label, double& value) {
-	BeginWidget(label);
-	std::stringstream ss;
-	ss << "##" << label;
-	bool rv = ImGui::DragScalar(ss.str().c_str(), ImGuiDataType_Double, (void*)&value, 0.1f);
-	EndWidget();
-	return rv;
+    BeginWidget(label);
+    std::stringstream ss;
+    ss << "##" << label;
+    bool rv = ImGui::DragScalar(ss.str().c_str(), ImGuiDataType_Double, (void*) &value, 0.1f);
+    EndWidget();
+    return rv;
 }
 
 bool BoolWidget(const std::string& label, bool& value) {
-	BeginWidget(label);
-	std::stringstream ss;
-	ss << "##" << label;
-	bool rv = ImGui::Checkbox(ss.str().c_str(), &value);
-	EndWidget();
-	return rv;
+    BeginWidget(label);
+    std::stringstream ss;
+    ss << "##" << label;
+    bool rv = ImGui::Checkbox(ss.str().c_str(), &value);
+    EndWidget();
+    return rv;
 }
 
 bool StringWidget(const std::string& label, std::string& value) {
-	BeginWidget(label);
-	std::stringstream ss;
-	ss << "##" << label;
-	char buf[128]{ 0 };
-	strcpy_s(buf, value.c_str());
-	bool rv{ false };
-	if (ImGui::InputText(ss.str().c_str(), buf, 128, ImGuiInputTextFlags_EnterReturnsTrue)) {
-		rv = true;
-		value = std::string(buf);
-	};
-	EndWidget();
-	return rv;
+    BeginWidget(label);
+    std::stringstream ss;
+    ss << "##" << label;
+    char buf[128]{ 0 };
+    strcpy_s(buf, value.c_str());
+    bool rv{ false };
+    if (ImGui::InputText(ss.str().c_str(), buf, 128, ImGuiInputTextFlags_EnterReturnsTrue)) {
+        rv = true;
+        value = std::string(buf);
+    };
+    EndWidget();
+    return rv;
 }
 
 void UneditableStringWidget(const std::string& label, const std::string& value) {
-	BeginWidget(label);
-	ImGui::Text(value.c_str());
-	EndWidget();
+    BeginWidget(label);
+    ImGui::Text(value.c_str());
+    EndWidget();
 }
 
 bool ColorWidget(const std::string& label, Color& value) {
-	BeginWidget(label);
-	std::stringstream ss;
-	ss << "##" << label;
+    BeginWidget(label);
+    std::stringstream ss;
+    ss << "##" << label;
 
-	bool rv{ false };
+    bool rv{ false };
 
-	auto& ctx = *ImGui::GetCurrentContext();
-	if (ImGui::ColorButton(ss.str().c_str(), *reinterpret_cast<ImVec4*>(value.Data()), 0, { compFieldWidth , ImGui::GetFrameHeight() })) {
-		ctx.ColorPickerRef = *reinterpret_cast<ImVec4*>(value.Data());
-		ImGui::OpenPopup("picker");
-		ImVec2 v;
-		v.x = ctx.LastItemData.Rect.GetBL().x - 1;
-		v.y = ctx.LastItemData.Rect.GetBL().y + ImGui::GetStyle().ItemSpacing.y;
-		ImGui::SetNextWindowPos(v);
-	}
+    auto& ctx = *ImGui::GetCurrentContext();
+    if (ImGui::ColorButton(ss.str().c_str(), *reinterpret_cast<ImVec4*>(value.Data()), 0, { compFieldWidth , ImGui::GetFrameHeight() })) {
+        ctx.ColorPickerRef = *reinterpret_cast<ImVec4*>(value.Data());
+        ImGui::OpenPopup("picker");
+        ImVec2 v;
+        v.x = ctx.LastItemData.Rect.GetBL().x - 1;
+        v.y = ctx.LastItemData.Rect.GetBL().y + ImGui::GetStyle().ItemSpacing.y;
+        ImGui::SetNextWindowPos(v);
+    }
 
-	if (ImGui::BeginPopup("picker")) {
-		ImGui::TextEx(ss.str().c_str());
-		ImGui::Spacing();
+    if (ImGui::BeginPopup("picker")) {
+        ImGui::TextEx(ss.str().c_str());
+        ImGui::Spacing();
 
-		ImGuiColorEditFlags picker_flags = ImGuiColorEditFlags_HDR |
+        ImGuiColorEditFlags picker_flags = ImGuiColorEditFlags_HDR |
             ImGuiColorEditFlags_AlphaBar |
             ImGuiColorEditFlags_NoLabel |
             ImGuiColorEditFlags_AlphaPreviewHalf;
 
-		ImGui::SetNextItemWidth(ImGui::GetFrameHeight() * 12.0f);
-		rv |= ImGui::NeoDoaColorPickerPopup("##picker", value.Data(), picker_flags, &ctx.ColorPickerRef.x);
-		ImGui::EndPopup();
-	}
+        ImGui::SetNextItemWidth(ImGui::GetFrameHeight() * 12.0f);
+        rv |= ImGui::NeoDoaColorPickerPopup("##picker", value.Data(), picker_flags, &ctx.ColorPickerRef.x);
+        ImGui::EndPopup();
+    }
 
-	EndWidget();
-	return rv;
+    EndWidget();
+    return rv;
 }
 
 bool ResolutionWidget(const std::string& label, Resolution& resolution) {
-	glm::vec2 res{ resolution.w, resolution.h };
-	FancyVectorWidgetSettings<display::XY> settingsFBO;
-	settingsFBO.resetEnabled = false;
-	settingsFBO.speed = 1;
-	settingsFBO.min = 128;
-	settingsFBO.max = 128 * 128;
-	settingsFBO.fmt = "%g";
-	settingsFBO.displayLabelOverride[0] = "W";
-	settingsFBO.displayLabelOverride[1] = "H";
-	settingsFBO.displayLabelColorOverride[0] = Color(0.45f, 0.63f, 0.82f);
-	settingsFBO.displayLabelColorOverride[1] = Color(0.66f, 0.49f, 0.65f);
+    glm::vec2 res{ resolution.w, resolution.h };
+    FancyVectorWidgetSettings<display::XY> settingsFBO;
+    settingsFBO.resetEnabled = false;
+    settingsFBO.speed = 1;
+    settingsFBO.min = 128;
+    settingsFBO.max = 128 * 128;
+    settingsFBO.fmt = "%g";
+    settingsFBO.displayLabelOverride[0] = "W";
+    settingsFBO.displayLabelOverride[1] = "H";
+    settingsFBO.displayLabelColorOverride[0] = Color(0.45f, 0.63f, 0.82f);
+    settingsFBO.displayLabelColorOverride[1] = Color(0.66f, 0.49f, 0.65f);
 
-	bool rv = FancyVector2Widget(label, res, settingsFBO);
-	resolution = { static_cast<int>(res.x), static_cast<int>(res.y) };
+    bool rv = FancyVector2Widget(label, res, settingsFBO);
+    resolution = { static_cast<int>(res.x), static_cast<int>(res.y) };
 
-	return rv;
+    return rv;
 }
 
 bool OrthoCameraWidget(OrthoCamera& cameraData) {
-	glm::vec1 top{ cameraData._top };
-	glm::vec2 leftRight{ cameraData._left, cameraData._right };
-	glm::vec1 bottom{ cameraData._bottom };
+    glm::vec1 top{ cameraData._top };
+    glm::vec2 leftRight{ cameraData._left, cameraData._right };
+    glm::vec1 bottom{ cameraData._bottom };
 
-	FancyVectorWidgetSettings<display::X> settingsOrthoTop;
-	settingsOrthoTop.resetTo = 1;
-	settingsOrthoTop.displayLabelOverride[0] = "T";
-	settingsOrthoTop.displayLabelColorOverride[0] = Color(0.10f, 0.53f, 0.26f);
-	settingsOrthoTop.displayLabelHoverColorOverride[0] = settingsOrthoTop.displayLabelColorOverride[0].Lighten(0.45f);
-	settingsOrthoTop.componentFieldWidth /= 2;
+    FancyVectorWidgetSettings<display::X> settingsOrthoTop;
+    settingsOrthoTop.resetTo = 1;
+    settingsOrthoTop.displayLabelOverride[0] = "T";
+    settingsOrthoTop.displayLabelColorOverride[0] = Color(0.10f, 0.53f, 0.26f);
+    settingsOrthoTop.displayLabelHoverColorOverride[0] = settingsOrthoTop.displayLabelColorOverride[0].Lighten(0.45f);
+    settingsOrthoTop.componentFieldWidth /= 2;
 
-	FancyVectorWidgetSettings<display::XY> settingsOrthoLeftRight;
-	settingsOrthoLeftRight.resetAllToSame = false;
-	settingsOrthoLeftRight.resetTos[0] = -1;
-	settingsOrthoLeftRight.resetTos[1] = 1;
-	settingsOrthoLeftRight.displayLabelOverride[0] = "L";
-	settingsOrthoLeftRight.displayLabelOverride[1] = "R";
-	settingsOrthoLeftRight.displayLabelColorOverride[0] = Color(0.10f, 0.53f, 0.26f);
-	settingsOrthoLeftRight.displayLabelColorOverride[1] = Color(0.10f, 0.53f, 0.26f);
-	settingsOrthoLeftRight.displayLabelHoverColorOverride[0] = settingsOrthoLeftRight.displayLabelColorOverride[0].Lighten(0.45f);
-	settingsOrthoLeftRight.displayLabelHoverColorOverride[1] = settingsOrthoLeftRight.displayLabelColorOverride[1].Lighten(0.45f);
+    FancyVectorWidgetSettings<display::XY> settingsOrthoLeftRight;
+    settingsOrthoLeftRight.resetAllToSame = false;
+    settingsOrthoLeftRight.resetTos[0] = -1;
+    settingsOrthoLeftRight.resetTos[1] = 1;
+    settingsOrthoLeftRight.displayLabelOverride[0] = "L";
+    settingsOrthoLeftRight.displayLabelOverride[1] = "R";
+    settingsOrthoLeftRight.displayLabelColorOverride[0] = Color(0.10f, 0.53f, 0.26f);
+    settingsOrthoLeftRight.displayLabelColorOverride[1] = Color(0.10f, 0.53f, 0.26f);
+    settingsOrthoLeftRight.displayLabelHoverColorOverride[0] = settingsOrthoLeftRight.displayLabelColorOverride[0].Lighten(0.45f);
+    settingsOrthoLeftRight.displayLabelHoverColorOverride[1] = settingsOrthoLeftRight.displayLabelColorOverride[1].Lighten(0.45f);
 
-	FancyVectorWidgetSettings<display::X> settingsOrthoBottom;
-	settingsOrthoBottom.resetTo = -1;
-	settingsOrthoBottom.displayLabelOverride[0] = "B";
-	settingsOrthoBottom.displayLabelColorOverride[0] = Color(0.10f, 0.53f, 0.26f);
-	settingsOrthoBottom.displayLabelHoverColorOverride[0] = settingsOrthoBottom.displayLabelColorOverride[0].Lighten(0.45f);
-	settingsOrthoBottom.componentFieldWidth /= 2;
+    FancyVectorWidgetSettings<display::X> settingsOrthoBottom;
+    settingsOrthoBottom.resetTo = -1;
+    settingsOrthoBottom.displayLabelOverride[0] = "B";
+    settingsOrthoBottom.displayLabelColorOverride[0] = Color(0.10f, 0.53f, 0.26f);
+    settingsOrthoBottom.displayLabelHoverColorOverride[0] = settingsOrthoBottom.displayLabelColorOverride[0].Lighten(0.45f);
+    settingsOrthoBottom.componentFieldWidth /= 2;
 
-	bool rv{ false };
-	rv = FancyVector1Widget("Top", top, settingsOrthoTop);
-	rv = rv | FancyVector2Widget("Left & Right", leftRight, settingsOrthoLeftRight); // no double pipe because of short circuit shadowing imgui call
-	rv = rv | FancyVector1Widget("Bottom", bottom, settingsOrthoBottom);
+    bool rv{ false };
+    rv = FancyVector1Widget("Top", top, settingsOrthoTop);
+    rv = rv | FancyVector2Widget("Left & Right", leftRight, settingsOrthoLeftRight); // no double pipe because of short circuit shadowing imgui call
+    rv = rv | FancyVector1Widget("Bottom", bottom, settingsOrthoBottom);
 
-	cameraData._top = top.x;
-	cameraData._left = leftRight.x;
-	cameraData._right = leftRight.y;
-	cameraData._bottom = bottom.x;
+    cameraData._top = top.x;
+    cameraData._left = leftRight.x;
+    cameraData._right = leftRight.y;
+    cameraData._bottom = bottom.x;
 
-	return rv;
+    return rv;
 }
 
 bool PerspectiveCameraWidget(PerspectiveCamera& cameraData) {
-	glm::vec1 fov{ cameraData._fov };
-	glm::vec1 aspect{ cameraData._aspect };
+    glm::vec1 fov{ cameraData._fov };
+    glm::vec1 aspect{ cameraData._aspect };
 
-	FancyVectorWidgetSettings<display::X> fovSettings;
-	auto a = fovSettings.displayLabelColorOverride[0].Lighten(0.5);
-	fovSettings.resetTo = 110;
-	fovSettings.min = 30;
-	fovSettings.max = 150;
-	fovSettings.displayLabelOverride[0] = "F";
-	fovSettings.displayLabelColorOverride[0] = Color(0.23f, 0.23f, 0.13f);
-	fovSettings.displayLabelHoverColorOverride[0] = fovSettings.displayLabelColorOverride[0].Lighten(0.35f);
+    FancyVectorWidgetSettings<display::X> fovSettings;
+    auto a = fovSettings.displayLabelColorOverride[0].Lighten(0.5);
+    fovSettings.resetTo = 110;
+    fovSettings.min = 30;
+    fovSettings.max = 150;
+    fovSettings.displayLabelOverride[0] = "F";
+    fovSettings.displayLabelColorOverride[0] = Color(0.23f, 0.23f, 0.13f);
+    fovSettings.displayLabelHoverColorOverride[0] = fovSettings.displayLabelColorOverride[0].Lighten(0.35f);
 
-	FancyVectorWidgetSettings<display::X> aspectSettings;
-	aspectSettings.disabled = true;
-	aspectSettings.displayLabelOverride[0] = "A";
-	aspectSettings.displayLabelColorOverride[0] = Color(0.211f, 0.121f, 0.439f);
+    FancyVectorWidgetSettings<display::X> aspectSettings;
+    aspectSettings.disabled = true;
+    aspectSettings.displayLabelOverride[0] = "A";
+    aspectSettings.displayLabelColorOverride[0] = Color(0.211f, 0.121f, 0.439f);
 
-	bool rv{ false };
-	rv = FancyVector1Widget("Field Of View", fov, fovSettings);
-	rv = rv | FancyVector1Widget("Aspect Ratio", aspect, aspectSettings); // no double pipe because of short circuit shadowing imgui call
+    bool rv{ false };
+    rv = FancyVector1Widget("Field Of View", fov, fovSettings);
+    rv = rv | FancyVector1Widget("Aspect Ratio", aspect, aspectSettings); // no double pipe because of short circuit shadowing imgui call
 
-	cameraData._fov = fov.x;
+    cameraData._fov = fov.x;
 
-	return rv;
+    return rv;
 }
 
 void Space() {
-	ImGui::NewLine();
+    ImGui::NewLine();
 }
 
 void Header(const std::string& label) {
-	ImGui::PushID(label.c_str());
+    ImGui::PushID(label.c_str());
 
-	ImGuiIO& io = ImGui::GetIO();
-	auto boldFont = io.Fonts->Fonts[1];
-	ImGui::PushFont(boldFont);
+    ImGuiIO& io = ImGui::GetIO();
+    auto boldFont = io.Fonts->Fonts[1];
+    ImGui::PushFont(boldFont);
 
-	ImGui::Text(label.c_str());
-	ImGui::Separator();
+    ImGui::Text(label.c_str());
+    ImGui::Separator();
 
-	ImGui::PopFont();
-	ImGui::PopID();
+    ImGui::PopFont();
+    ImGui::PopID();
 }
 
 void Separator() {
-	ImGui::NewLine();
-	ImGui::Separator();
+    ImGui::NewLine();
+    ImGui::Separator();
 }
 
 // Modified ColorPicker4()
@@ -400,7 +400,7 @@ bool ImGui::NeoDoaColorPickerPopup(const char* label, float col[4], ImGuiColorEd
     ImVec2 wheel_center(picker_pos.x + (sv_picker_size + bars_width) * 0.5f, picker_pos.y + sv_picker_size * 0.5f);
 
     // Note: the triangle is displayed rotated with triangle_pa pointing to Hue, but most coordinates stays unrotated for logic.
-    float triangle_r = wheel_r_inner - (int)(sv_picker_size * 0.027f);
+    float triangle_r = wheel_r_inner - (int) (sv_picker_size * 0.027f);
     ImVec2 triangle_pa = ImVec2(triangle_r, 0.0f); // Hue point.
     ImVec2 triangle_pb = ImVec2(triangle_r * -0.5f, triangle_r * -0.866025f); // Black point.
     ImVec2 triangle_pc = ImVec2(triangle_r * -0.5f, triangle_r * +0.866025f); // White point.
@@ -658,7 +658,7 @@ bool ImGui::NeoDoaColorPickerPopup(const char* label, float col[4], ImGuiColorEd
                     p++;
                 denorm[0] = denorm[1] = denorm[2] = 0;
                 denorm[3] = 0xFF; // alpha default to 255 is not parsed by scanf (e.g. inputting #FFFFFF omitting alpha)
-                sscanf(p, "%02X%02X%02X%02X", (unsigned int*)&denorm[0], (unsigned int*)&denorm[1], (unsigned int*)&denorm[2], (unsigned int*)&denorm[3]);
+                sscanf(p, "%02X%02X%02X%02X", (unsigned int*) &denorm[0], (unsigned int*) &denorm[1], (unsigned int*) &denorm[2], (unsigned int*) &denorm[3]);
                 col[0] = denorm[0] / 255.0f;
                 col[1] = denorm[1] / 255.0f;
                 col[2] = denorm[2] / 255.0f;
@@ -674,7 +674,7 @@ bool ImGui::NeoDoaColorPickerPopup(const char* label, float col[4], ImGuiColorEd
     if (value_changed_fix_hue_wrap && (flags & ImGuiColorEditFlags_InputRGB)) {
         float new_H, new_S, new_V;
         ColorConvertRGBtoHSV(col[0], col[1], col[2], new_H, new_S, new_V);
-        if (new_H <= 0 && H > 0)        {
+        if (new_H <= 0 && H > 0) {
             if (new_V <= 0 && V != new_V) {
                 ColorConvertHSVtoRGB(H, S, new_V <= 0 ? V * 0.5f : new_V, col[0], col[1], col[2]);
             } else if (new_S <= 0) {
@@ -713,7 +713,7 @@ bool ImGui::NeoDoaColorPickerPopup(const char* label, float col[4], ImGuiColorEd
     if (flags & ImGuiColorEditFlags_PickerHueWheel) {
         // Render Hue Wheel
         const float aeps = 0.5f / wheel_r_outer; // Half a pixel arc length in radians (2pi cancels out).
-        const int segment_per_arc = ImMax(4, (int)wheel_r_outer / 12);
+        const int segment_per_arc = ImMax(4, (int) wheel_r_outer / 12);
         for (int n = 0; n < 6; n++) {
             const float a0 = (n) / 6.0f * 2.0f * IM_PI - aeps;
             const float a1 = (n + 1.0f) / 6.0f * 2.0f * IM_PI + aeps;
@@ -733,7 +733,7 @@ bool ImGui::NeoDoaColorPickerPopup(const char* label, float col[4], ImGuiColorEd
         float sin_hue_angle = ImSin(H * 2.0f * IM_PI);
         ImVec2 hue_cursor_pos(wheel_center.x + cos_hue_angle * (wheel_r_inner + wheel_r_outer) * 0.5f, wheel_center.y + sin_hue_angle * (wheel_r_inner + wheel_r_outer) * 0.5f);
         float hue_cursor_rad = value_changed_h ? wheel_thickness * 0.65f : wheel_thickness * 0.55f;
-        int hue_cursor_segments = ImClamp((int)(hue_cursor_rad / 1.4f), 9, 32);
+        int hue_cursor_segments = ImClamp((int) (hue_cursor_rad / 1.4f), 9, 32);
         draw_list->AddCircleFilled(hue_cursor_pos, hue_cursor_rad, hue_color32, hue_cursor_segments);
         draw_list->AddCircle(hue_cursor_pos, hue_cursor_rad + 1, col_midgrey, hue_cursor_segments);
         draw_list->AddCircle(hue_cursor_pos, hue_cursor_rad, col_white, hue_cursor_segments);

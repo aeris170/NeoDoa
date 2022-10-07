@@ -6,12 +6,12 @@ struct GUI;
 
 struct GameViewport {
 
-	std::reference_wrapper<GUI> gui;
+    std::reference_wrapper<GUI> gui;
 
-	GameViewport(GUI& gui) noexcept;
+    GameViewport(GUI& gui) noexcept;
 
-	void Begin();
-	void Render();
-	void End();
+    void Begin();
+    void Render();
+    void End();
 
 };

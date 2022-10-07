@@ -23,193 +23,193 @@
 #include "ComponentUI.hpp"
 
 Observer::Observer(GUI& gui) noexcept :
-	gui(gui) {}
+    gui(gui) {}
 
 void Observer::Begin(Scene* scene) {
-	GUI& gui = this->gui;
-	ImGui::PushID(gui.OBSERVER_TITLE);
-	std::string title(WindowIcons::OBSERVER_WINDOW_ICON);
-	title.append(gui.OBSERVER_TITLE);
-	if (scene) {
-		if (gui.sh.selectedEntity != NULL_ENTT) {
-			title.append(" - ");
-			title.append(scene->GetComponent<IDComponent>(gui.sh.selectedEntity).GetTag());
-		}
-	}
-	title.append(gui.OBSERVER_ID);
-	ImGui::Begin(title.c_str());
+    GUI& gui = this->gui;
+    ImGui::PushID(gui.OBSERVER_TITLE);
+    std::string title(WindowIcons::OBSERVER_WINDOW_ICON);
+    title.append(gui.OBSERVER_TITLE);
+    if (scene) {
+        if (gui.sh.selectedEntity != NULL_ENTT) {
+            title.append(" - ");
+            title.append(scene->GetComponent<IDComponent>(gui.sh.selectedEntity).GetTag());
+        }
+    }
+    title.append(gui.OBSERVER_ID);
+    ImGui::Begin(title.c_str());
 }
 
 void Observer::Render(Scene& scene) {
-	GUI& gui = this->gui;
-	std::visit(overloaded::lambda{
-		[](std::monostate arg) {
-			const char* text = "Nothing to display here :)";
-			ImVec2 size = ImGui::GetContentRegionAvail();
-			ImVec2 txtSize = ImGui::CalcTextSize(text);
-			for (int i = 0; i < 5; i++) {
-				ImGui::SameLine((size.x - txtSize.x) / 2, 0);
-				ImGui::Text(text);
-				ImGui::NewLine();
-			}
-		},
-		[&](Entity entt) { RenderComponents(scene, gui.sh.selectedEntity); },
-		[&](FNode* file) {
-			static const ImVec2 iconSize{ 64.0f, 64.0f };
-			ImGui::Columns(2);
-			ImGui::SetColumnWidth(0, iconSize.x * 1.25f);
-			ImGui::PushFont(gui.GetFontBold());
+    GUI& gui = this->gui;
+    std::visit(overloaded::lambda{
+        [](std::monostate arg) {
+            const char* text = "Nothing to display here :)";
+            ImVec2 size = ImGui::GetContentRegionAvail();
+            ImVec2 txtSize = ImGui::CalcTextSize(text);
+            for (int i = 0; i < 5; i++) {
+                ImGui::SameLine((size.x - txtSize.x) / 2, 0);
+                ImGui::Text(text);
+                ImGui::NewLine();
+            }
+        },
+        [&](Entity entt) { RenderComponents(scene, gui.sh.selectedEntity); },
+        [&](FNode* file) {
+            static const ImVec2 iconSize{ 64.0f, 64.0f };
+            ImGui::Columns(2);
+            ImGui::SetColumnWidth(0, iconSize.x * 1.25f);
+            ImGui::PushFont(gui.GetFontBold());
 
-			ImGui::Image(gui.FindIconForFileType(*file), iconSize);
+            ImGui::Image(gui.FindIconForFileType(*file), iconSize);
 
-			ImGui::SameLine();
-			ImGui::NextColumn();
+            ImGui::SameLine();
+            ImGui::NextColumn();
 
-			auto name = static_cast<const FNode*>(file)->Name().c_str();
-			ImGui::Text(name);
+            auto name = static_cast<const FNode*>(file)->Name().c_str();
+            ImGui::Text(name);
 
-			ImGui::PopFont();
-			ImGui::PushFont(gui.GetFont());
+            ImGui::PopFont();
+            ImGui::PushFont(gui.GetFont());
 
-			std::string path = file->Path().string();
-			ImGui::Text(std::string("Path: ROOT").append(sizeof(char), static_cast<char>(std::filesystem::path::preferred_separator)).append(path).c_str());
-			std::string absolutePath = file->AbsolutePath().string();
-			ImGui::Text(std::string("Absolute Path: ").append(absolutePath).c_str());
+            std::string path = file->Path().string();
+            ImGui::Text(std::string("Path: ROOT").append(sizeof(char), static_cast<char>(std::filesystem::path::preferred_separator)).append(path).c_str());
+            std::string absolutePath = file->AbsolutePath().string();
+            ImGui::Text(std::string("Absolute Path: ").append(absolutePath).c_str());
 
-			ImGui::PopFont();
+            ImGui::PopFont();
 
-			ImGui::Columns(1);
-			ImGui::Separator();
+            ImGui::Columns(1);
+            ImGui::Separator();
 
-			if (file->IsDirectory()) {
-				RenderFolderView(file);
-			} else {
-				AssetHandle h = gui.openProject->Assets().FindAssetAt(*file);
-				if (h->IsScene()) {
-					RenderSceneView(h);
-				}
-			}
-		}
-	}, displayTarget);
+            if (file->IsDirectory()) {
+                RenderFolderView(file);
+            } else {
+                AssetHandle h = gui.openProject->Assets().FindAssetAt(*file);
+                if (h->IsScene()) {
+                    RenderSceneView(h);
+                }
+            }
+        }
+               }, displayTarget);
 }
 
 void Observer::End() {
-	ImGui::End();
-	ImGui::PopID();
+    ImGui::End();
+    ImGui::PopID();
 }
 
 void Observer::RenderComponents(Scene& scene, const Entity entt) {
-	IDComponent& idComponent = scene.GetComponent<IDComponent>(entt);
-	ComponentUI::RenderIDComponent(*this, scene, idComponent);
+    IDComponent& idComponent = scene.GetComponent<IDComponent>(entt);
+    ComponentUI::RenderIDComponent(*this, scene, idComponent);
 
-	TransformComponent& transformComponent = scene.GetComponent<TransformComponent>(entt);
-	ComponentUI::RenderTransformComponent(*this, scene, transformComponent);
+    TransformComponent& transformComponent = scene.GetComponent<TransformComponent>(entt);
+    ComponentUI::RenderTransformComponent(*this, scene, transformComponent);
 
-	if (scene.HasComponent<ParentComponent>(entt)) {
-		ParentComponent& parentComponent = scene.GetComponent<ParentComponent>(entt);
-		ComponentUI::RenderParentComponent(*this, scene, parentComponent);
-	}
+    if (scene.HasComponent<ParentComponent>(entt)) {
+        ParentComponent& parentComponent = scene.GetComponent<ParentComponent>(entt);
+        ComponentUI::RenderParentComponent(*this, scene, parentComponent);
+    }
 
-	if (scene.HasComponent<ChildComponent>(entt)) {
-		ChildComponent& childComponent = scene.GetComponent<ChildComponent>(entt);
-		ComponentUI::RenderChildComponent(*this, scene, childComponent);
-	}
+    if (scene.HasComponent<ChildComponent>(entt)) {
+        ChildComponent& childComponent = scene.GetComponent<ChildComponent>(entt);
+        ComponentUI::RenderChildComponent(*this, scene, childComponent);
+    }
 
-	if (scene.HasComponent<OrthoCameraComponent>(entt)) {
-		OrthoCameraComponent& orthoCameraComponent = scene.GetComponent<OrthoCameraComponent>(entt);
-		ComponentUI::RenderOrthoCameraComponent(*this, scene, orthoCameraComponent);
-	}
+    if (scene.HasComponent<OrthoCameraComponent>(entt)) {
+        OrthoCameraComponent& orthoCameraComponent = scene.GetComponent<OrthoCameraComponent>(entt);
+        ComponentUI::RenderOrthoCameraComponent(*this, scene, orthoCameraComponent);
+    }
 
-	if (scene.HasComponent<PerspectiveCameraComponent>(entt)) {
-		PerspectiveCameraComponent& perspectiveCameraComponent = scene.GetComponent<PerspectiveCameraComponent>(entt);
-		ComponentUI::RenderPerspectiveCameraComponent(*this, scene, perspectiveCameraComponent);
-	}
+    if (scene.HasComponent<PerspectiveCameraComponent>(entt)) {
+        PerspectiveCameraComponent& perspectiveCameraComponent = scene.GetComponent<PerspectiveCameraComponent>(entt);
+        ComponentUI::RenderPerspectiveCameraComponent(*this, scene, perspectiveCameraComponent);
+    }
 
-	if (scene.HasComponent<ScriptStorageComponent>(entt)) {
-		ScriptStorageComponent& scriptStorageComponent = scene.GetComponent<ScriptStorageComponent>(entt);
-		ComponentUI::RenderScriptStorageComponent(*this, scene, scriptStorageComponent);
-	}
+    if (scene.HasComponent<ScriptStorageComponent>(entt)) {
+        ScriptStorageComponent& scriptStorageComponent = scene.GetComponent<ScriptStorageComponent>(entt);
+        ComponentUI::RenderScriptStorageComponent(*this, scene, scriptStorageComponent);
+    }
 }
 void Observer::RenderFolderView(FNode* folder) {
-	assert(folder->IsDirectory());
-	GUI& gui = this->gui;
+    assert(folder->IsDirectory());
+    GUI& gui = this->gui;
 
-	ImGuiTableFlags flags = ImGuiTableFlags_RowBg |
-							ImGuiTableFlags_Borders |
-							ImGuiTableFlags_Resizable |
-							ImGuiTableFlags_SizingFixedFit |
-							ImGuiTableFlags_NoBordersInBodyUntilResize;
+    ImGuiTableFlags flags = ImGuiTableFlags_RowBg |
+        ImGuiTableFlags_Borders |
+        ImGuiTableFlags_Resizable |
+        ImGuiTableFlags_SizingFixedFit |
+        ImGuiTableFlags_NoBordersInBodyUntilResize;
 
-	if (ImGui::BeginTable("folderview", 3, flags)) {
+    if (ImGui::BeginTable("folderview", 3, flags)) {
 
-		ImGui::TableSetupColumn("", ImGuiTableColumnFlags_NoResize);
-		ImGui::TableSetupColumn("Files", ImGuiTableColumnFlags_WidthStretch, 0.6f);
-		ImGui::TableSetupColumn("Size", ImGuiTableColumnFlags_WidthStretch, 0.3f);
-		ImGui::TableHeadersRow();
+        ImGui::TableSetupColumn("", ImGuiTableColumnFlags_NoResize);
+        ImGui::TableSetupColumn("Files", ImGuiTableColumnFlags_WidthStretch, 0.6f);
+        ImGui::TableSetupColumn("Size", ImGuiTableColumnFlags_WidthStretch, 0.3f);
+        ImGui::TableHeadersRow();
 
-		for (auto child : folder->Children()) {
-			if (!child->IsDirectory() && !gui.openProject->Assets().IsAssetExistsAt(*child)) { continue; }
+        for (auto child : folder->Children()) {
+            if (!child->IsDirectory() && !gui.openProject->Assets().IsAssetExistsAt(*child)) { continue; }
 
-			ImGui::TableNextRow();
-			ImGui::TableSetColumnIndex(0);
-			ImGui::Image(gui.FindIconForFileType(*child, TextureSize::SMALL), { 16.0f, 16.0f });
-			ImGui::TableSetColumnIndex(1);
-			ImGui::Text(child->FullName().c_str());
-			ImGui::TableSetColumnIndex(2);
-			std::string size = FormatBytes(child->Size());
-			ImGui::Text(size.c_str());
-		}
-		ImGui::EndTable();
-	}
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+            ImGui::Image(gui.FindIconForFileType(*child, TextureSize::SMALL), { 16.0f, 16.0f });
+            ImGui::TableSetColumnIndex(1);
+            ImGui::Text(child->FullName().c_str());
+            ImGui::TableSetColumnIndex(2);
+            std::string size = FormatBytes(child->Size());
+            ImGui::Text(size.c_str());
+        }
+        ImGui::EndTable();
+    }
 }
 void Observer::RenderSceneView(AssetHandle sceneAsset) {
-	assert(sceneAsset->IsScene());
+    assert(sceneAsset->IsScene());
 
-	Scene& scene = sceneAsset->DataAs<Scene>();
+    Scene& scene = sceneAsset->DataAs<Scene>();
 
-	ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders;
-	if (ImGui::BeginTable("entities", 1, flags)) {
-		ImGui::TableSetupColumn("Entities", ImGuiTableColumnFlags_WidthStretch);
-		ImGui::TableHeadersRow();
+    ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders;
+    if (ImGui::BeginTable("entities", 1, flags)) {
+        ImGui::TableSetupColumn("Entities", ImGuiTableColumnFlags_WidthStretch);
+        ImGui::TableHeadersRow();
 
-		for (Entity entt : scene.GetAllEntites()) {
-			ImGui::TableNextRow();
-			ImGui::TableSetColumnIndex(0);
-			std::string label = std::to_string(entt).append("\t\t(").append(scene.GetComponent<IDComponent>(entt).GetTagRef()).append(")");
-			if (ImGui::CollapsingHeader(label.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth)) {
-				ImGui::Text(nameof_c(IDComponent));
-				ImGui::Text(nameof_c(TransformComponent));
-				if (scene.HasComponent<ParentComponent>(entt)) {
-					ImGui::Text(nameof_c(ParentComponent));
-				}
-				if (scene.HasComponent<ChildComponent>(entt)) {
-					ImGui::Text(nameof_c(ChildComponent));
-				}
-				if (scene.HasComponent<OrthoCameraComponent>(entt)) {
-					ImGui::Text(nameof_c(OrthoCameraComponent));
-				}
-				if (scene.HasComponent<PerspectiveCameraComponent>(entt)) {
-					ImGui::Text(nameof_c(PerspectiveCameraComponent));
-				}
-				if (scene.HasComponent<ScriptStorageComponent>(entt)) {
-					ImGui::Text(nameof_c(ScriptStorageComponent));
-				}
-			}
-		}
-		ImGui::EndTable();
-	}
+        for (Entity entt : scene.GetAllEntites()) {
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+            std::string label = std::to_string(entt).append("\t\t(").append(scene.GetComponent<IDComponent>(entt).GetTagRef()).append(")");
+            if (ImGui::CollapsingHeader(label.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth)) {
+                ImGui::Text(nameof_c(IDComponent));
+                ImGui::Text(nameof_c(TransformComponent));
+                if (scene.HasComponent<ParentComponent>(entt)) {
+                    ImGui::Text(nameof_c(ParentComponent));
+                }
+                if (scene.HasComponent<ChildComponent>(entt)) {
+                    ImGui::Text(nameof_c(ChildComponent));
+                }
+                if (scene.HasComponent<OrthoCameraComponent>(entt)) {
+                    ImGui::Text(nameof_c(OrthoCameraComponent));
+                }
+                if (scene.HasComponent<PerspectiveCameraComponent>(entt)) {
+                    ImGui::Text(nameof_c(PerspectiveCameraComponent));
+                }
+                if (scene.HasComponent<ScriptStorageComponent>(entt)) {
+                    ImGui::Text(nameof_c(ScriptStorageComponent));
+                }
+            }
+        }
+        ImGui::EndTable();
+    }
 
-	flags = ImGuiTableFlags_RowBg |
-		ImGuiTableFlags_Borders |
-		ImGuiTableFlags_SizingFixedFit |
-		ImGuiTableFlags_NoBordersInBodyUntilResize;
-	if (ImGui::BeginTable("systems", 2, flags)) {
-		ImGui::TableSetupColumn("Systems", ImGuiTableColumnFlags_WidthStretch);
-		ImGui::TableSetupColumn("", ImGuiTableColumnFlags_NoResize);
-		ImGui::TableHeadersRow();
+    flags = ImGuiTableFlags_RowBg |
+        ImGuiTableFlags_Borders |
+        ImGuiTableFlags_SizingFixedFit |
+        ImGuiTableFlags_NoBordersInBodyUntilResize;
+    if (ImGui::BeginTable("systems", 2, flags)) {
+        ImGui::TableSetupColumn("Systems", ImGuiTableColumnFlags_WidthStretch);
+        ImGui::TableSetupColumn("", ImGuiTableColumnFlags_NoResize);
+        ImGui::TableHeadersRow();
 
-		ImGui::EndTable();
-	}
+        ImGui::EndTable();
+    }
 }
 
 void Observer::ResetDisplayTarget() { displayTarget = std::monostate{}; }

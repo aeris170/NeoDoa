@@ -11,16 +11,16 @@ struct Scene;
 
 struct SceneSettings {
 
-	std::reference_wrapper<GUI> gui;
+    std::reference_wrapper<GUI> gui;
 
-	SceneSettings(GUI& gui) noexcept;
+    SceneSettings(GUI& gui) noexcept;
 
-	void Begin(Scene* scene);
-	void Render(Scene& scene);
-	void End();
+    void Begin(Scene* scene);
+    void Render(Scene& scene);
+    void End();
 
 private:
 
-	void DrawStats(Scene& scene);
-	void DrawSettings(Scene& scene);
+    void DrawStats(Scene& scene);
+    void DrawSettings(Scene& scene);
 };

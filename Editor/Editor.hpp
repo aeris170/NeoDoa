@@ -7,12 +7,12 @@ struct Texture;
 
 class Editor : public ImGuiRenderCommand {
 private:
-	std::weak_ptr<Texture> neodoaBanner;
+    std::weak_ptr<Texture> neodoaBanner;
 
 public:
-	std::shared_ptr<Project> _openProject;
+    std::shared_ptr<Project> _openProject;
 
-	Editor() noexcept;
+    Editor() noexcept;
 
-	void operator() (float delta) override;
+    void operator() (float delta) override;
 };

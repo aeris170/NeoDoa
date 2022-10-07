@@ -6,15 +6,15 @@
 #include "Icons.hpp"
 
 GameViewport::GameViewport(GUI& gui) noexcept :
-	gui(gui) {}
+    gui(gui) {}
 
 void GameViewport::Begin() {
-	GUI& gui = this->gui;
-	ImGui::PushID(gui.GAME_VIEWPORT_TITLE);
-	std::string title(WindowIcons::GAME_VIEWPORT_WINDOW_ICON);
-	title.append(gui.GAME_VIEWPORT_TITLE);
-	title.append(gui.GAME_VIEWPORT_ID);
-	ImGui::Begin(title.c_str());
+    GUI& gui = this->gui;
+    ImGui::PushID(gui.GAME_VIEWPORT_TITLE);
+    std::string title(WindowIcons::GAME_VIEWPORT_WINDOW_ICON);
+    title.append(gui.GAME_VIEWPORT_TITLE);
+    title.append(gui.GAME_VIEWPORT_ID);
+    ImGui::Begin(title.c_str());
 }
 
 void GameViewport::Render() {
@@ -22,6 +22,6 @@ void GameViewport::Render() {
 }
 
 void GameViewport::End() {
-	ImGui::End();
-	ImGui::PopID();
+    ImGui::End();
+    ImGui::PopID();
 }

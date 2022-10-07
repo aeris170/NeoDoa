@@ -100,13 +100,12 @@ void SVGPathway::Initialize(Color&& color) {
                         if (widthScaled) {
                             // pad left-right
                             if (x >= (dimension - width) / 2 && x < (dimension + width) / 2) {
-                                currentElement = (unsigned char*)&paddedBuf[x + y * dimension];
+                                currentElement = (unsigned char*) &paddedBuf[x + y * dimension];
                             }
-                        }
-                        else {
+                        } else {
                             // pad top-bottom
                             if (y >= (dimension - height) / 2 && y < (dimension + height) / 2) {
-                                currentElement = (unsigned char*)&paddedBuf[x + y * dimension];
+                                currentElement = (unsigned char*) &paddedBuf[x + y * dimension];
                             }
                         }
                         if (currentElement == nullptr) continue;
@@ -122,7 +121,7 @@ void SVGPathway::Initialize(Color&& color) {
                     }
                 }
 
-                auto tex = CreateTextureRaw("!!" + name + "_padded_" + scaleFactorName + "!!", (unsigned char*)(paddedBuf), dimension, dimension, true);
+                auto tex = CreateTextureRaw("!!" + name + "_padded_" + scaleFactorName + "!!", (unsigned char*) (paddedBuf), dimension, dimension, true);
                 delete[] paddedBuf;
                 return tex;
             };

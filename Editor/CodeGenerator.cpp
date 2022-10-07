@@ -7,11 +7,11 @@ struct )"; s.append(componentName); s.append(R"( {
 
 };
 )");
-	return s;
+    return s;
 }
 
 std::string CodeGenerator::GenerateSystemDeclaration(std::string_view systemName) {
-	std::string s = R"(#pragma once
+    std::string s = R"(#pragma once
 
 #include "System.hpp"
 
@@ -24,11 +24,11 @@ struct )"; s.append(systemName); s.append(R"( {
     void Execute(entt::registry& reg, float deltaTime) {}
 };
 )");
-	return s;
+    return s;
 }
 
 std::string CodeGenerator::GenerateBehaviorDeclaration(std::string_view behaviorName) {
-	std::string s = R"(#pragma once
+    std::string s = R"(#pragma once
 
 #include "BehaviorComponent.hpp"
 
@@ -41,9 +41,9 @@ struct )"; s.append(behaviorName); s.append(R"( : public BehaviorComponent {
     virtual void Execute(float deltaTime) override ;
 };
 )");
-	return s;
+    return s;
 }
 
 std::string CodeGenerator::GenerateRuntimeMain() {
-	return "";
+    return "";
 }

@@ -14,19 +14,19 @@ struct SceneViewport;
 
 struct Gizmos {
 
-	struct GizmoSettings {
-		bool enabled{ true };
-		ImGuizmo::OPERATION type{ ImGuizmo::OPERATION::TRANSLATE };
-		ImGuizmo::MODE mode{ ImGuizmo::MODE::LOCAL };
-		glm::vec2 viewportPosition{};
-		Resolution viewportSize{};
-	} settings;
+    struct GizmoSettings {
+        bool enabled{ true };
+        ImGuizmo::OPERATION type{ ImGuizmo::OPERATION::TRANSLATE };
+        ImGuizmo::MODE mode{ ImGuizmo::MODE::LOCAL };
+        glm::vec2 viewportPosition{};
+        Resolution viewportSize{};
+    } settings;
 
-	Gizmos(SceneViewport& sv) noexcept;
+    Gizmos(SceneViewport& sv) noexcept;
 
-	void Render(Scene& scene);
+    void Render(Scene& scene);
 
 private:
-	std::reference_wrapper<SceneViewport> sv;
+    std::reference_wrapper<SceneViewport> sv;
 };
 

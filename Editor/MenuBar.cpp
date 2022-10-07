@@ -11,116 +11,116 @@
 #include "GUI.hpp"
 
 MenuBar::MenuBar(GUI& owner) :
-	gui(owner),
-	aboutSection(*this) {}
+    gui(owner),
+    aboutSection(*this) {}
 
 void MenuBar::Begin() {}
 
 void MenuBar::Render() {
-	if (ImGui::BeginMenuBar()) {
-		if (ImGui::BeginMenu("Project")) {
-			RenderProjectSubMenu();
-			ImGui::EndMenu();
-		}
-		if (ImGui::BeginMenu("Scene")) {
-			RenderSceneSubMenu();
-			ImGui::EndMenu();
-		}
-		if (ImGui::BeginMenu("Help")) {
-			RenderHelpSubMenu();
-			ImGui::EndMenu();
-		}
-		ImGui::EndMenuBar();
-	}
+    if (ImGui::BeginMenuBar()) {
+        if (ImGui::BeginMenu("Project")) {
+            RenderProjectSubMenu();
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Scene")) {
+            RenderSceneSubMenu();
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Help")) {
+            RenderHelpSubMenu();
+            ImGui::EndMenu();
+        }
+        ImGui::EndMenuBar();
+    }
 
-	// due to how imgui works, this must be outside the begin/end menubar :(
-	aboutSection.RenderAboutPopup();
+    // due to how imgui works, this must be outside the begin/end menubar :(
+    aboutSection.RenderAboutPopup();
 }
 
 void MenuBar::End() {}
 
 void MenuBar::RenderProjectSubMenu() {
-	GUI& gui = this->gui;
-	if (ImGui::MenuItem("New Project", "Ctrl+Shift+N")) {
-		if (tinyfd_messageBox("Warning", "You may have unsaved changes. Are you sure you want to create a new project?", "yesno", "warning", 0)) {
-			const char* path = tinyfd_selectFolderDialog("Select a folder for New Project", "");
-			if (path) {
-				const char* name = nullptr;
-				bool badName = true;
-				while (badName) {
-					name = tinyfd_inputBox("Enter a name for the New Project", "Enter a name for the New Project", "New Project");
-					badName = name == nullptr || std::string(name) == "";
-					if (badName) {
-						tinyfd_messageBox("Warning", "Projects cannot be unnamed.", "ok", "warning", 1);
-					}
-				}
-				gui.CloseProject();
-				gui.CreateNewProject(path, name);
-				gui.SaveProjectToDisk();
-				DOA_LOG_INFO("Succesfully created a new project named %s at %s", name, name);
-			}
-		}
-	}
-	if (ImGui::MenuItem("Open Project...", "Ctrl+Shift+O")) {
-		if (tinyfd_messageBox("Warning", "You may have unsaved changes. Are you sure you want to open another project?", "yesno", "warning", 0)) {
-			static const char* const types[] = { "*.doa" };
-			gui.core->Angel()->_scriptLoaderMutex.lock();
-			const char* path = tinyfd_openFileDialog("Select Project File", nullptr, 1, types, "NeoDoa Project Files", 0);
-			gui.core->Angel()->_scriptLoaderMutex.unlock();
-			if (path) {
-				gui.CloseProject();
-				gui.OpenProjectFromDisk(path);
-			}
-		}
-	}
-	ImGui::Separator();
-	if (ImGui::MenuItem("Save Project", "Ctrl+Shift+S")) {
-		gui.SaveProjectToDisk();
-	}
-	if (ImGui::MenuItem("Close Project", "Ctrl+Shift+S")) {
-		gui.CloseProject();
-	}
-	ImGui::Separator();
-	if (ImGui::MenuItem("Exit", "Alt+F4")) {
-		gui.core->Stop();
-	}
+    GUI& gui = this->gui;
+    if (ImGui::MenuItem("New Project", "Ctrl+Shift+N")) {
+        if (tinyfd_messageBox("Warning", "You may have unsaved changes. Are you sure you want to create a new project?", "yesno", "warning", 0)) {
+            const char* path = tinyfd_selectFolderDialog("Select a folder for New Project", "");
+            if (path) {
+                const char* name = nullptr;
+                bool badName = true;
+                while (badName) {
+                    name = tinyfd_inputBox("Enter a name for the New Project", "Enter a name for the New Project", "New Project");
+                    badName = name == nullptr || std::string(name) == "";
+                    if (badName) {
+                        tinyfd_messageBox("Warning", "Projects cannot be unnamed.", "ok", "warning", 1);
+                    }
+                }
+                gui.CloseProject();
+                gui.CreateNewProject(path, name);
+                gui.SaveProjectToDisk();
+                DOA_LOG_INFO("Succesfully created a new project named %s at %s", name, name);
+            }
+        }
+    }
+    if (ImGui::MenuItem("Open Project...", "Ctrl+Shift+O")) {
+        if (tinyfd_messageBox("Warning", "You may have unsaved changes. Are you sure you want to open another project?", "yesno", "warning", 0)) {
+            static const char* const types[] = { "*.doa" };
+            gui.core->Angel()->_scriptLoaderMutex.lock();
+            const char* path = tinyfd_openFileDialog("Select Project File", nullptr, 1, types, "NeoDoa Project Files", 0);
+            gui.core->Angel()->_scriptLoaderMutex.unlock();
+            if (path) {
+                gui.CloseProject();
+                gui.OpenProjectFromDisk(path);
+            }
+        }
+    }
+    ImGui::Separator();
+    if (ImGui::MenuItem("Save Project", "Ctrl+Shift+S")) {
+        gui.SaveProjectToDisk();
+    }
+    if (ImGui::MenuItem("Close Project", "Ctrl+Shift+S")) {
+        gui.CloseProject();
+    }
+    ImGui::Separator();
+    if (ImGui::MenuItem("Exit", "Alt+F4")) {
+        gui.core->Stop();
+    }
 }
 
 void MenuBar::RenderSceneSubMenu() {
-	GUI& gui = this->gui;
-	if (ImGui::MenuItem("New Scene", "Ctrl+N", nullptr, gui.HasOpenProject())) {
-		gui.CreateNewScene("", "New Scene");
-	}
-	if (ImGui::BeginMenu("Open Scene...", gui.HasOpenProject())) {
-		Assets& assets = gui.openProject->Assets();
-		for (auto& uuid : assets.SceneAssetIDs()) {
-			AssetHandle sceneAsset = assets.FindAsset(uuid);
-			if (ImGui::MenuItem(sceneAsset.Value().File()->Name().c_str(), nullptr, nullptr)) {
-				gui.openProject->OpenScene(sceneAsset);
-			}
-		}
-		ImGui::EndMenu();
-	}
-	ImGui::Separator();
-	if (ImGui::MenuItem("Save Scene", "Ctrl+S")) {
-		if (gui.HasOpenScene()) {
-			gui.openProject->SaveOpenSceneToDisk();
-		}
-	}
+    GUI& gui = this->gui;
+    if (ImGui::MenuItem("New Scene", "Ctrl+N", nullptr, gui.HasOpenProject())) {
+        gui.CreateNewScene("", "New Scene");
+    }
+    if (ImGui::BeginMenu("Open Scene...", gui.HasOpenProject())) {
+        Assets& assets = gui.openProject->Assets();
+        for (auto& uuid : assets.SceneAssetIDs()) {
+            AssetHandle sceneAsset = assets.FindAsset(uuid);
+            if (ImGui::MenuItem(sceneAsset.Value().File()->Name().c_str(), nullptr, nullptr)) {
+                gui.openProject->OpenScene(sceneAsset);
+            }
+        }
+        ImGui::EndMenu();
+    }
+    ImGui::Separator();
+    if (ImGui::MenuItem("Save Scene", "Ctrl+S")) {
+        if (gui.HasOpenScene()) {
+            gui.openProject->SaveOpenSceneToDisk();
+        }
+    }
 }
 
 void MenuBar::RenderHelpSubMenu() {
-	if (ImGui::MenuItem(AboutSection::ABOUT_BUTTON_TEXT)) {
-		aboutSection.ab = true;
-	}
+    if (ImGui::MenuItem(AboutSection::ABOUT_BUTTON_TEXT)) {
+        aboutSection.ab = true;
+    }
 }
 
 // Inner struct: About Section
 MenuBar::AboutSection::AboutSection(MenuBar& owner) :
-	mb(owner),
-	neodoaBanner(CreateTexture("!!neodoa_banner!!", "Images/social.png")),
-	licences({
-		{ "NeoDoa", R"(NeoDoa Public Licence
+    mb(owner),
+    neodoaBanner(CreateTexture("!!neodoa_banner!!", "Images/social.png")),
+    licences({
+        { "NeoDoa", R"(NeoDoa Public Licence
 
 	> Copyright(C)[2022][Doga Oruc]
 
@@ -142,7 +142,7 @@ MenuBar::AboutSection::AboutSection(MenuBar& owner) :
 	3. Software is provided with no warranty. Asking for help won't make you a dick, but asking someone to
 	write your code for you makes you a DONKEY dick. If you happen to solve your problem before any help arrives,
 	you would submit the fix back to regain your status of non-dick.)"},
-		{ "AngelScript", R"(AngelCode Scripting Library
+        { "AngelScript", R"(AngelCode Scripting Library
 	Copyright © 2003 - 2020 Andreas Jönsson
 
 	This software is provided 'as-is', without any express or implied warranty.In no event will the authors be
@@ -157,7 +157,7 @@ MenuBar::AboutSection::AboutSection(MenuBar& owner) :
 	Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
 
 	This notice may not be removed or altered from any source distribution.)"},
-		{ "Assimp", R"(Open Asset Import Library (assimp)
+        { "Assimp", R"(Open Asset Import Library (assimp)
 
 	Copyright (c) 2006-2016, assimp team
 	All rights reserved.
@@ -235,7 +235,7 @@ MenuBar::AboutSection::AboutSection(MenuBar& owner) :
 	LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 	NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.)"},
-		{ "EnTT", R"(The MIT License (MIT)
+        { "EnTT", R"(The MIT License (MIT)
 
 	Copyright (c) 2017-2020 Michele Caini
 
@@ -256,7 +256,7 @@ MenuBar::AboutSection::AboutSection(MenuBar& owner) :
 	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 	SOFTWARE.)" },
-		{ "GLEW", R"(The OpenGL Extension Wrangler Library
+        { "GLEW", R"(The OpenGL Extension Wrangler Library
 	Copyright (C) 2002-2007, Milan Ikits <milan ikits[]ieee org>
 	Copyright (C) 2002-2007, Marcelo E. Magallon <mmagallo[]debian org>
 	Copyright (C) 2002, Lev Povalahev
@@ -329,7 +329,7 @@ MenuBar::AboutSection::AboutSection(MenuBar& owner) :
 	CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 	TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 	MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.)" },
-		{ "GLFW", R"(Copyright (c) 2002-2006 Marcus Geelnard
+        { "GLFW", R"(Copyright (c) 2002-2006 Marcus Geelnard
 
 	Copyright (c) 2006-2019 Camilla Löwy
 
@@ -351,7 +351,7 @@ MenuBar::AboutSection::AboutSection(MenuBar& owner) :
 
 	3. This notice may not be removed or altered from any source
 	   distribution.)" },
-		{ "GLM", R"(================================================================================
+        { "GLM", R"(================================================================================
 	OpenGL Mathematics (GLM)
 	--------------------------------------------------------------------------------
 	GLM is licensed under The Happy Bunny License or MIT License
@@ -405,7 +405,7 @@ MenuBar::AboutSection::AboutSection(MenuBar& owner) :
 	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 	THE SOFTWARE.)" },
-		{ "IconFontCppHeaders", R"(Copyright (c) 2017 Juliette Foucaut and Doug Binks
+        { "IconFontCppHeaders", R"(Copyright (c) 2017 Juliette Foucaut and Doug Binks
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -422,7 +422,7 @@ MenuBar::AboutSection::AboutSection(MenuBar& owner) :
 	2. Altered source versions must be plainly marked as such, and must not be
 	   misrepresented as being the original software.
 	3. This notice may not be removed or altered from any source distribution.)" },
-		{ "Dear ImGui", R"(The MIT License (MIT)
+        { "Dear ImGui", R"(The MIT License (MIT)
 
 	Copyright (c) 2014-2020 Omar Cornut
 
@@ -443,7 +443,7 @@ MenuBar::AboutSection::AboutSection(MenuBar& owner) :
 	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 	SOFTWARE.)" },
-		{ "STBI", R"(This software is available under 2 licenses -- choose whichever you prefer.
+        { "STBI", R"(This software is available under 2 licenses -- choose whichever you prefer.
 	------------------------------------------------------------------------------
 	ALTERNATIVE A - MIT License
 	Copyright (c) 2017 Sean Barrett
@@ -480,7 +480,7 @@ MenuBar::AboutSection::AboutSection(MenuBar& owner) :
 	AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
 	ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 	WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.)" },
-		{ "TinyFileDialogs", R"(This software is provided 'as-is', without any express or implied
+        { "TinyFileDialogs", R"(This software is provided 'as-is', without any express or implied
 	warranty.  In no event will the authors be held liable for any damages
 	arising from the use of this software.
 	Permission is granted to anyone to use this software for any purpose,
@@ -493,7 +493,7 @@ MenuBar::AboutSection::AboutSection(MenuBar& owner) :
 	2. Altered source versions must be plainly marked as such, and must not be
 	misrepresented as being the original software.
 	3. This notice may not be removed or altered from any source distribution.)" },
-		{ "TinyXML2", R"(This software is provided 'as-is', without any express or implied
+        { "TinyXML2", R"(This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any
 	damages arising from the use of this software.
 
@@ -511,7 +511,7 @@ MenuBar::AboutSection::AboutSection(MenuBar& owner) :
 
 	3. This notice may not be removed or altered from any source
 	distribution.)" },
-		{ "EZEasing", R"(Zamazingo Licence[2021 - 2022 Doga Oruc]
+        { "EZEasing", R"(Zamazingo Licence[2021 - 2022 Doga Oruc]
 
 	From now on, the term "library owner" refers to "Doga Oruc[aeris170]"
 
@@ -538,55 +538,55 @@ MenuBar::AboutSection::AboutSection(MenuBar& owner) :
 
 	In the event that YOU, the library user, accept these terms, you are free
 	to use this software free of charge, with or without modifications. Have fun : )" }
-	}) {}
+             }) {}
 
 void MenuBar::AboutSection::RenderAboutPopup() {
-	GUI& gui = mb.get().gui;
-	if (ab) {
-		ImGui::OpenPopup(ABOUT_POPUP_TITLE_TEXT);
-		ab_open = true;
-	}
+    GUI& gui = mb.get().gui;
+    if (ab) {
+        ImGui::OpenPopup(ABOUT_POPUP_TITLE_TEXT);
+        ab_open = true;
+    }
 
-	auto center = ImGui::GetMainViewport()->GetCenter();
-	static ImVec2 size{ 500, 400 };
-	ImGui::SetNextWindowSize(size);
-	ImGui::SetNextWindowPos({ center.x - size.x / 2, center.y - size.y / 2 });
+    auto center = ImGui::GetMainViewport()->GetCenter();
+    static ImVec2 size{ 500, 400 };
+    ImGui::SetNextWindowSize(size);
+    ImGui::SetNextWindowPos({ center.x - size.x / 2, center.y - size.y / 2 });
 
-	if (ImGui::BeginPopupModal(ABOUT_POPUP_TITLE_TEXT, &ab_open, ImGuiWindowFlags_NoResize)) {
-		ImGui::PushFont(gui.GetFont());
-		ImGui::TextColored({ 0.7f, 0.7f, 0.7f, 1.0f }, PRODUCT_NAME);
-		ImGui::PopFont();
-		ImGui::Image(reinterpret_cast<void*>(neodoaBanner.lock()->_glTextureID), { ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().x / 2 }, { 0, 1 }, { 1, 0 });
-		ImGui::Text(PRODUCT_DESCRIPTION);
-		ImGui::Dummy({ 0, 20 });
-		if (ImGui::Button(LIBS_BUTTON_TEXT, { ImGui::GetContentRegionAvail().x, 30 })) {
-			ImGui::OpenPopup(LIBS_POPUP_TITLE_TEXT);
-			lib_open = true;
-		}
+    if (ImGui::BeginPopupModal(ABOUT_POPUP_TITLE_TEXT, &ab_open, ImGuiWindowFlags_NoResize)) {
+        ImGui::PushFont(gui.GetFont());
+        ImGui::TextColored({ 0.7f, 0.7f, 0.7f, 1.0f }, PRODUCT_NAME);
+        ImGui::PopFont();
+        ImGui::Image(reinterpret_cast<void*>(neodoaBanner.lock()->_glTextureID), { ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().x / 2 }, { 0, 1 }, { 1, 0 });
+        ImGui::Text(PRODUCT_DESCRIPTION);
+        ImGui::Dummy({ 0, 20 });
+        if (ImGui::Button(LIBS_BUTTON_TEXT, { ImGui::GetContentRegionAvail().x, 30 })) {
+            ImGui::OpenPopup(LIBS_POPUP_TITLE_TEXT);
+            lib_open = true;
+        }
 
-		static ImVec2 libsSize{ 800, 600 };
-		ImGui::SetNextWindowSize(libsSize);
-		ImGui::SetNextWindowPos({ center.x - libsSize.x / 2, center.y - libsSize.y / 2 });
-		if (ImGui::BeginPopupModal(LIBS_POPUP_TITLE_TEXT, &lib_open, ImGuiWindowFlags_NoResize)) {
-			RenderLicenceNotices();
-			ImGui::EndPopup();
-		}
-		ImGui::EndPopup();
-	} else {
-		ab = false;
-	}
+        static ImVec2 libsSize{ 800, 600 };
+        ImGui::SetNextWindowSize(libsSize);
+        ImGui::SetNextWindowPos({ center.x - libsSize.x / 2, center.y - libsSize.y / 2 });
+        if (ImGui::BeginPopupModal(LIBS_POPUP_TITLE_TEXT, &lib_open, ImGuiWindowFlags_NoResize)) {
+            RenderLicenceNotices();
+            ImGui::EndPopup();
+        }
+        ImGui::EndPopup();
+    } else {
+        ab = false;
+    }
 }
 
 void MenuBar::AboutSection::RenderLicenceNotices() {
-	GUI& gui = mb.get().gui;
-	for (auto& [name, licence] : licences) {
-		ImGui::PushFont(gui.GetFont());
-		ImGui::TextColored({ 0.7f, 0.7f, 0.7f, 1.0f }, name.c_str());
-		ImGui::PopFont();
-		auto title = (std::string("License###") + name);
-		if (ImGui::CollapsingHeader(title.c_str(), ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick)) {
-			ImGui::Text(licence.c_str());
-		}
-	}
+    GUI& gui = mb.get().gui;
+    for (auto& [name, licence] : licences) {
+        ImGui::PushFont(gui.GetFont());
+        ImGui::TextColored({ 0.7f, 0.7f, 0.7f, 1.0f }, name.c_str());
+        ImGui::PopFont();
+        auto title = (std::string("License###") + name);
+        if (ImGui::CollapsingHeader(title.c_str(), ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick)) {
+            ImGui::Text(licence.c_str());
+        }
+    }
 }
 // Inner struct: About Section
