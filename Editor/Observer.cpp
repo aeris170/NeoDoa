@@ -225,8 +225,10 @@ void Observer::RenderTextView(AssetHandle textAsset) {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
 
+        auto size = ImGui::GetContentRegionAvail();
+        size.y -= 5; /* this "hides" the "1px vertical scroll-bar" in observer window */
         ImGuiInputTextFlags flags = ImGuiInputTextFlags_ReadOnly;
-        ImGui::InputTextMultiline("", content.data(), content.size(), ImGui::GetContentRegionAvail(), flags);
+        ImGui::InputTextMultiline("", content.data(), content.size(), size, flags);
 
         ImGui::EndTable();
     }
