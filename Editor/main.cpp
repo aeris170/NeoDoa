@@ -6,7 +6,7 @@
 
 #include <iostream>
 int main() {
-    CorePtr& core = Core::CreateCore({ 2000, 2000 }, "NeoDoa Editor", false, "Images/neodoalogo", true);
+    const CorePtr& core = Core::CreateCore({ 2000, 2000 }, "NeoDoa Editor", false, "Images/neodoalogo", true);
 
     std::shared_ptr<GUI> gui_ptr = std::make_shared<GUI>(core);
     ImGuiAddRenderCommand([gui = gui_ptr](float delta) { gui->operator()(delta); });

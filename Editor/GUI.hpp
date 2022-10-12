@@ -48,7 +48,7 @@ struct GUI {
     ImGuiWindowFlags window_flags{ ImGuiWindowFlags_None };
     ImGuiDockNodeFlags dockspace_flags{ ImGuiDockNodeFlags_None };
 
-    CorePtr& core;
+    const CorePtr& core;
     WindowPtr& window;
     std::string defaultWindowName{ "NeoDoa Editor" };
     bool dockspaceOpen{ true };
@@ -66,7 +66,7 @@ struct GUI {
 
     float delta;
 
-    GUI(CorePtr& core) noexcept;
+    GUI(const CorePtr& core) noexcept;
 
     void Prepare();
     void operator() (float delta);

@@ -7,7 +7,7 @@
 #include <Window.hpp>
 #include <Texture.hpp>
 
-GUI::GUI(CorePtr& core) noexcept :
+GUI::GUI(const CorePtr& core) noexcept :
     core(core),
     window(core->Window()),
     mb(*this),

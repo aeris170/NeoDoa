@@ -23,7 +23,7 @@
 
 static void message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, GLchar const* message, void const* user_param);
 
-CorePtr& Core::CreateCore(Resolution resolution, const char* title, bool isFullscreen, const char* windowIcon, bool renderOffscreen) {
+const CorePtr& Core::CreateCore(Resolution resolution, const char* title, bool isFullscreen, const char* windowIcon, bool renderOffscreen) {
 #pragma region GLFW and Core/Window/Input Initialization
     glfwInit();
     glfwWindowHint(GLFW_MAXIMIZED, GL_TRUE);
@@ -194,7 +194,7 @@ CorePtr& Core::CreateCore(Resolution resolution, const char* title, bool isFulls
 
     return _this;
 }
-CorePtr& Core::GetCore() { return _this; }
+const CorePtr& Core::GetCore() { return _this; }
 void Core::DestroyCore() {
     _this->Stop();
     _this.reset();

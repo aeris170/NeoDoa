@@ -16,11 +16,12 @@ struct FrameBuffer;
 struct Project;
 struct Resolution;
 
-using CorePtr = std::unique_ptr<Core, std::function<void(Core*)>>;
+using CoreDeleter = std::function<void(Core*)>;
+using CorePtr = std::unique_ptr<Core, CoreDeleter>;
 
 struct Core {
-    static CorePtr& CreateCore(Resolution resolution, const char* title, bool isFullscreen, const char* windowIcon = nullptr, bool renderOffscreen = false);
-    static CorePtr& GetCore();
+    static const CorePtr& CreateCore(Resolution resolution, const char* title, bool isFullscreen, const char* windowIcon = nullptr, bool renderOffscreen = false);
+    static const CorePtr& GetCore();
     static void DestroyCore();
 
     bool IsRunning() const;
