@@ -169,7 +169,7 @@ void GUI::OpenProjectFromDisk(const std::string& path) {
         nullptr,
         nullptr,
         path
-               });
+    });
     openProject.emplace(DeserializeProject(&file));
     core->LoadProject(openProject.value());
 
