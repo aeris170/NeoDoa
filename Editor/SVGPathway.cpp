@@ -132,7 +132,7 @@ void SVGPathway::Initialize(Color&& color) {
 
 
             if (small != Texture::Empty() && medium != Texture::Empty() && large != Texture::Empty()) {
-                Textures.emplace(name, TexturePack{ std::move(small), std::move(medium), std::move(large) });
+                TexturesPadded.emplace(name, TexturePack{ std::move(small), std::move(medium), std::move(large) });
             }
         }
 
