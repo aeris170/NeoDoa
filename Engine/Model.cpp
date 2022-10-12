@@ -17,13 +17,13 @@ Model::Model(std::string_view name, std::vector<Mesh>&& meshes) noexcept :
 
 Model::~Model() noexcept {}
 
-static std::vector<std::weak_ptr<Texture>> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string_view typeName) {
-    std::vector<std::weak_ptr<Texture>> textures;
+static std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string_view typeName) {
+    std::vector<Texture> textures;
     for (unsigned int i = 0; i < mat->GetTextureCount(type); i++) {
         aiString str;
         mat->GetTexture(type, i, &str);
-        auto t = CreateTexture(str.C_Str(), std::string("Images/").append(str.C_Str()).c_str());
-        if (!t.expired()) { textures.emplace_back(t); }
+        auto t = Texture::CreateTexture(str.C_Str(), std::string("Images/").append(str.C_Str()).c_str());
+        if (t != Texture::Empty()) { textures.emplace_back(std::move(t)); }
     }
     return textures;
 }
@@ -31,7 +31,7 @@ static std::vector<std::weak_ptr<Texture>> loadMaterialTextures(aiMaterial* mat,
 static Mesh processMesh(aiMesh* mesh, const aiScene* scene) {
     std::vector<Vertex> vs;
     std::vector<GLuint> is;
-    std::vector<std::weak_ptr<Texture>> ts;
+    std::vector<Texture> ts;
 
     for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
         Vertex v;
@@ -56,16 +56,17 @@ static Mesh processMesh(aiMesh* mesh, const aiScene* scene) {
     if (mesh->mMaterialIndex >= 0) {
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-        std::vector<std::weak_ptr<Texture>> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+        std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+        /*
         ts.insert(ts.end(), diffuseMaps.begin(), diffuseMaps.end());
         if (diffuseMaps.size() > 0) {
             for (auto& v : vs) {
                 v.texIndex = 0; // mesh->mMaterialIndex;
             }
-        }
+        }*/
 
-        std::vector<std::weak_ptr<Texture>> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
-        ts.insert(ts.end(), specularMaps.begin(), specularMaps.end());
+        std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+        //ts.insert(ts.end(), specularMaps.begin(), specularMaps.end());
     }
 
     return Mesh(std::move(vs), std::move(is));

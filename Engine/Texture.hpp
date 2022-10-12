@@ -1,33 +1,38 @@
 #pragma once
 
-#include <memory>
-
 #include "TypedefsAndConstants.hpp"
 
-struct Texture : std::enable_shared_from_this<Texture> {
-    std::string _name;
-    TEX _glTextureID{ 0 };
-    std::vector<unsigned char> _pixelData;
+struct Texture {
+    static Texture Empty() { return{ "", 0, 0, 0, false }; };
+
+    static Texture CreateTexture(std::string_view name, const char* path, bool hasTransparency = true);
+    static Texture CreateTexture(std::string_view name, const unsigned char* data, size_t length, bool hasTransparency = true);
+    static Texture CreateTextureRaw(std::string_view name, const unsigned char* pixelData, size_t width, size_t height, bool hasTransparency = true);
+
+    const std::string& Name() const;
+    TEX TextureID() const;
 
     void Bind(int slot = 0);
 
-    // don't call use CreateTexture
-    Texture(std::string_view name, int width, int height, const unsigned char* const pixelData, bool hasTransparency) noexcept;
     ~Texture() noexcept;
     Texture(const Texture&) = delete;
     Texture(Texture&&) noexcept;
     Texture& operator=(const Texture&) = delete;
     Texture& operator=(Texture&&) noexcept;
+    bool operator==(const Texture& other);
+    bool operator!=(const Texture& other);
 
 private:
-    static bool FACTORY_FLAG;
+#ifdef _DEBUG
+    static inline bool FACTORY_FLAG{ false };
+#endif
 
-    friend std::weak_ptr<Texture> CreateTexture(std::string_view name, const char* path, bool hasTransparency);
-    friend std::weak_ptr<Texture> CreateTexture(std::string_view name, const unsigned char* data, int length, bool hasTransparency);
-    friend std::weak_ptr<Texture> CreateTextureRaw(std::string_view name, const unsigned char* data, int width, int height, bool hasTransparency);
+    using ByteVector = std::vector<unsigned char>;
+
+    std::string _name;
+    TEX _glTextureID{ 0 };
+    ByteVector _pixelData;
+
+    /* don't call ctor, use factory functions */
+    Texture(std::string_view name, size_t width, size_t height, const unsigned char* const pixelData, bool hasTransparency) noexcept;
 };
-
-std::weak_ptr<Texture> CreateTexture(std::string_view name, const char* path, bool hasTransparency = true);
-std::weak_ptr<Texture> CreateTexture(std::string_view name, const unsigned char* data, int length, bool hasTransparency = true);
-std::weak_ptr<Texture> CreateTextureRaw(std::string_view name, const unsigned char* data, int width, int height, bool hasTransparency = true);
-std::weak_ptr<Texture> FindTexture(std::string_view name);

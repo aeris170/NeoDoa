@@ -6,7 +6,6 @@
 #include <Core.hpp>
 #include <Log.hpp>
 #include <Angel.hpp>
-#include <Texture.hpp>
 
 #include "GUI.hpp"
 
@@ -118,7 +117,7 @@ void MenuBar::RenderHelpSubMenu() {
 // Inner struct: About Section
 MenuBar::AboutSection::AboutSection(MenuBar& owner) :
     mb(owner),
-    neodoaBanner(CreateTexture("!!neodoa_banner!!", "Images/social.png")),
+    neodoaBanner(Texture::CreateTexture("!!neodoa_banner!!", "Images/social.png")),
     licences({
         { "NeoDoa", R"(NeoDoa Public Licence
 
@@ -556,7 +555,7 @@ void MenuBar::AboutSection::RenderAboutPopup() {
         ImGui::PushFont(gui.GetFont());
         ImGui::TextColored({ 0.7f, 0.7f, 0.7f, 1.0f }, PRODUCT_NAME);
         ImGui::PopFont();
-        ImGui::Image(reinterpret_cast<void*>(neodoaBanner.lock()->_glTextureID), { ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().x / 2 }, { 0, 1 }, { 1, 0 });
+        ImGui::Image(reinterpret_cast<void*>(neodoaBanner.TextureID()), { ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().x / 2 }, { 0, 1 }, { 1, 0 });
         ImGui::Text(PRODUCT_DESCRIPTION);
         ImGui::Dummy({ 0, 20 });
         if (ImGui::Button(LIBS_BUTTON_TEXT, { ImGui::GetContentRegionAvail().x, 30 })) {

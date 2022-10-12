@@ -49,11 +49,15 @@ const CorePtr& Core::CreateCore(Resolution resolution, const char* title, bool i
 #pragma endregion
 
 #pragma region Built-in Stuff Initialization
-    std::weak_ptr<Texture> def = CreateTexture("!!default!!", "Images/default_texture.png");
-    std::weak_ptr<Texture> defx = CreateTexture("!!default_x!!", "Images/default_texture_x.png");
-    std::weak_ptr<Texture> defy = CreateTexture("!!default_y!!", "Images/default_texture_y.png");
-    std::weak_ptr<Texture> defz = CreateTexture("!!default_z!!", "Images/default_texture_z.png");
-    CreateTexture("!!missing!!", "Images/missing_texture.png").lock()->Bind();
+    // TODO MOVE THIS INTO THE "DEFAULT RENDERER" CTOR (or INITER whatever)
+    /*
+    auto def = Texture::CreateTexture("!!default!!", "Images/default_texture.png");
+    auto defx = Texture::CreateTexture("!!default_x!!", "Images/default_texture_x.png");
+    auto defy = Texture::CreateTexture("!!default_y!!", "Images/default_texture_y.png");
+    auto defz = Texture::CreateTexture("!!default_z!!", "Images/default_texture_z.png");
+    auto miss = Texture::CreateTexture("!!missing!!", "Images/missing_texture.png");
+    miss->Bind(); // TODO miss is dead after this function returns
+
     Shader::CreateFromFile("!!pick!!", "Shaders/mousePickVertexShader.vert", "Shaders/mousePickFragmentShader.frag");
     Shader::CreateFromFile("Simple Instanced Shader", "Shaders/simpleVertexShaderInstanced.vert", "Shaders/simpleFragmentShaderInstanced.frag");
     Shader::CreateFromFile("Simple Shader", "Shaders/simpleVertexShader.vert", "Shaders/simpleFragmentShader.frag");
@@ -61,7 +65,7 @@ const CorePtr& Core::CreateCore(Resolution resolution, const char* title, bool i
 
     std::vector<Vertex> vertices;
     std::vector<GLuint> indices;
-    std::vector<std::weak_ptr<Texture>> textures;
+    std::vector<Texture> textures;
     std::vector<Mesh> meshes;
 #pragma region Cube
     // front face
@@ -142,9 +146,9 @@ const CorePtr& Core::CreateCore(Resolution resolution, const char* title, bool i
     indices.push_back(23);
     indices.push_back(22);
 
-    textures.emplace_back(defx);
-    textures.emplace_back(defy);
-    textures.emplace_back(defz);
+    textures.push_back(defx);
+    textures.push_back(defy);
+    textures.push_back(defz);
 
     meshes.emplace_back(std::move(vertices), std::move(indices));
 
@@ -176,6 +180,7 @@ const CorePtr& Core::CreateCore(Resolution resolution, const char* title, bool i
     indices.clear();
     textures.clear();
     meshes.clear();
+    */
 #pragma endregion
 
     if (renderOffscreen) {

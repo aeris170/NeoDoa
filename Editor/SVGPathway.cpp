@@ -60,24 +60,24 @@ void SVGPathway::Initialize(Color&& color) {
                 static_cast<uint32_t>((box[3] - box[1]) * SCALE_FACTOR_SMALL),
                 RASTER_BG_COLOR
             );
-            auto small = CreateTextureRaw("!!" + name + "_none_small!!", bitmapScaledAspect.data(), bitmapScaledAspect.width(), bitmapScaledAspect.height(), true);
+            auto small = Texture::CreateTextureRaw("!!" + name + "_none_small!!", bitmapScaledAspect.data(), bitmapScaledAspect.width(), bitmapScaledAspect.height(), true);
 
             bitmapScaledAspect = lunadoc->renderToBitmap(
                 static_cast<uint32_t>((box[2] - box[0]) * SCALE_FACTOR_MEDIUM),
                 static_cast<uint32_t>((box[3] - box[1]) * SCALE_FACTOR_MEDIUM),
                 RASTER_BG_COLOR
             );
-            auto medium = CreateTextureRaw("!!" + name + "_none_medium!!", bitmapScaledAspect.data(), bitmapScaledAspect.width(), bitmapScaledAspect.height(), true);
+            auto medium = Texture::CreateTextureRaw("!!" + name + "_none_medium!!", bitmapScaledAspect.data(), bitmapScaledAspect.width(), bitmapScaledAspect.height(), true);
 
             bitmapScaledAspect = lunadoc->renderToBitmap(
                 static_cast<uint32_t>((box[2] - box[0]) * SCALE_FACTOR_LARGE),
                 static_cast<uint32_t>((box[3] - box[1]) * SCALE_FACTOR_LARGE),
                 RASTER_BG_COLOR
             );
-            auto large = CreateTextureRaw("!!" + name + "_none_large!!", bitmapScaledAspect.data(), bitmapScaledAspect.width(), bitmapScaledAspect.height(), true);
+            auto large = Texture::CreateTextureRaw("!!" + name + "_none_large!!", bitmapScaledAspect.data(), bitmapScaledAspect.width(), bitmapScaledAspect.height(), true);
 
-            if (!small.expired() && !medium.expired() && !large.expired()) {
-                Textures.emplace(name, TexturePack{ small, medium, large });
+            if (small != Texture::Empty() && medium != Texture::Empty() && large != Texture::Empty()) {
+                Textures.emplace(name, TexturePack{ std::move(small), std::move(medium), std::move(large) });
             }
         }
 
@@ -121,7 +121,7 @@ void SVGPathway::Initialize(Color&& color) {
                     }
                 }
 
-                auto tex = CreateTextureRaw("!!" + name + "_padded_" + scaleFactorName + "!!", (unsigned char*) (paddedBuf), dimension, dimension, true);
+                auto tex = Texture::CreateTextureRaw("!!" + name + "_padded_" + scaleFactorName + "!!", (unsigned char*) (paddedBuf), dimension, dimension, true);
                 delete[] paddedBuf;
                 return tex;
             };
@@ -130,17 +130,21 @@ void SVGPathway::Initialize(Color&& color) {
             auto medium = paddingFunction(lunadoc, box, name, "medium", SCALE_FACTOR_MEDIUM);
             auto large = paddingFunction(lunadoc, box, name, "large", SCALE_FACTOR_LARGE);
 
-            if (!small.expired() && !medium.expired() && !large.expired()) {
-                TexturesPadded.emplace(name, TexturePack{ small, medium, large });
+
+            if (small != Texture::Empty() && medium != Texture::Empty() && large != Texture::Empty()) {
+                Textures.emplace(name, TexturePack{ std::move(small), std::move(medium), std::move(large) });
             }
         }
 
         lunasvg::Bitmap bitmapScaled;
         { // Fill the "TexturesScaled"
             bitmapScaled = lunadoc->renderToBitmap(WIDTH, HEIGHT, RASTER_BG_COLOR);
-            auto tex = CreateTextureRaw("!!" + name + "_scaled!!", bitmapScaled.data(), bitmapScaled.width(), bitmapScaled.height(), true);
-            if (!tex.expired()) {
-                TexturesScaled.emplace(name, tex);
+            auto tex = Texture::CreateTextureRaw("!!" + name + "_scaled!!", bitmapScaled.data(), bitmapScaled.width(), bitmapScaled.height(), true);
+            if (tex != Texture::Empty()) {
+                /* we cannot copy (we can but why copy?), there is no "size" defined for scaled texture. if there were it
+                wouldn't make sense. "Hey SVG, pls give me A SMALL SCALED texture", what even is a SMALL SCALED texture? there is only one
+                scaled texture and it is placed to the beginning of the pack. for future: ref. [1] */
+                TexturesScaled.emplace(name, TexturePack{ std::move(tex), std::move(Texture::Empty()), std::move(Texture::Empty()) });
             }
         }
     }
@@ -148,7 +152,7 @@ void SVGPathway::Initialize(Color&& color) {
     Initialized = true;
 }
 
-std::weak_ptr<Texture> SVGPathway::Get(const std::string& key, const TextureStyle style, const TextureSize size) {
+const Texture& SVGPathway::Get(const std::string& key, const TextureStyle style, const TextureSize size) {
     assert(Initialized, "SVGPathway not initialized.");
     switch (style) {
     case TextureStyle::NONE:
@@ -156,7 +160,7 @@ std::weak_ptr<Texture> SVGPathway::Get(const std::string& key, const TextureStyl
     case TextureStyle::PADDED:
         return TexturesPadded.at(key)[static_cast<size_t>(size)];
     case TextureStyle::SCALED:
-        return TexturesScaled.at(key)[static_cast<size_t>(size)];
+        return TexturesScaled.at(key)[static_cast<size_t>(TextureSize::SMALL)]; /* see ref. [1] */
     }
     assert(false, "no such texture");
 }

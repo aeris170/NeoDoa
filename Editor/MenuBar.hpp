@@ -5,10 +5,11 @@
 #include <vector>
 #include <memory>
 
+#include <Texture.hpp>
+
 struct GUI;
 struct ImGuiIO;
 struct ImFont;
-struct Texture;
 
 struct MenuBar {
 
@@ -31,7 +32,7 @@ private:
         static constexpr auto PRODUCT_DESCRIPTION{ "A game engine. Build: Windows" };
 
         std::reference_wrapper<MenuBar> mb;
-        std::weak_ptr<Texture> neodoaBanner;
+        Texture neodoaBanner;
         std::vector<std::tuple<std::string, std::string>> licences;
 
         bool ab{ false }, ab_open{ true }, lib_open{ true };

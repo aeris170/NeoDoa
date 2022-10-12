@@ -25,10 +25,10 @@ struct SVGPathway {
 
     static void Initialize(Color&& color = { 1, 1, 1, 1 });
 
-    static std::weak_ptr<Texture> Get(const std::string& key, const TextureStyle style = TextureStyle::NONE, const TextureSize size = TextureSize::MEDIUM);
+    static const Texture& Get(const std::string& key, const TextureStyle style = TextureStyle::NONE, const TextureSize size = TextureSize::MEDIUM);
 
 private:
-    using TexturePack = std::array<std::weak_ptr<Texture>, static_cast<size_t>(TextureSize::SIZE_COUNT)>;
+    using TexturePack = std::array<Texture, static_cast<size_t>(TextureSize::SIZE_COUNT)>;
 
     static constexpr const char* const PATH{ "SVGs" };
     static constexpr int WIDTH{ 1024 };
