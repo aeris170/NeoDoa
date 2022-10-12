@@ -3,7 +3,13 @@
 #include "TypedefsAndConstants.hpp"
 
 struct Texture {
-    static Texture Empty() { return{ "", 0, 0, 0, false }; };
+    static Texture Empty() {
+#ifdef _DEBUG
+        Texture::FACTORY_FLAG = true; return { "", 0, 0, 0, false }; Texture::FACTORY_FLAG = false;
+#else
+        return { "", 0, 0, 0, false };
+#endif
+    };
 
     static Texture CreateTexture(std::string_view name, const char* path, bool hasTransparency = true);
     static Texture CreateTexture(std::string_view name, const unsigned char* data, size_t length, bool hasTransparency = true);
