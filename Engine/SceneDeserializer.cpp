@@ -32,6 +32,11 @@ static void loopElement(tinyxml2::XMLElement* element, auto lambda) {
     }
 }
 
+Scene DeserializeScene(const FNode& file) {
+    file.ReadContent();
+    return DeserializeScene(file.DisposeContent());
+}
+
 Scene DeserializeScene(const std::string& data) {
     tinyxml2::XMLDocument doc;
     tinyxml2::XMLError err = doc.Parse(data.c_str());

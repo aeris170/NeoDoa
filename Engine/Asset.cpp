@@ -47,16 +47,13 @@ void Asset::Serialize() {
 void Asset::Deserialize() {
     if (!std::get_if<std::monostate>(&data)) { return; } // already deserialized
 
-    file->ReadContent();
-
     if (IsScene()) {
-        data = DeserializeScene(file->content);
+        data = DeserializeScene(*file);
+    }
     }
     /*
     * TODO others
     */
-
-    file->DisposeContent();
 }
 void Asset::ForceDeserialize() {
     DeleteDeserializedData();
