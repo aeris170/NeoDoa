@@ -45,7 +45,7 @@ Scene DeserializeScene(const std::string& data) {
     tinyxml2::XMLElement* configNode = rootNode->FirstChildElement("config");
     std::string name = configNode->Attribute("name");
 
-    Scene scene = Scene(name);
+    Scene scene{ std::move(name) };
 
     { // fill config
         tinyxml2::XMLElement* clearColor = configNode->FirstChildElement("clearColor");

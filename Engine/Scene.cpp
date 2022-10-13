@@ -29,9 +29,9 @@ Scene& Scene::GetLoadedScene() {
 }
 
 Scene::Scene(std::string_view name) noexcept :
-    Name(name),
-    _usingOrthoCamera(true),
-    _usingPerspectiveCamera(false) {} // default camera is orthographic
+    Name(name) {}
+Scene::Scene(std::string&& name) noexcept :
+    Name(std::move(name)) {}
 
 bool Scene::IsOrtho() const { return _usingOrthoCamera; }
 bool Scene::IsPerspective() const { return _usingPerspectiveCamera; }

@@ -24,6 +24,7 @@ struct Scene {
     Color SelectionOutlineColor{ 0.68f, 0.49f, 0 };
 
     Scene(std::string_view name = "New Scene") noexcept;
+    Scene(std::string&& name) noexcept;
 
     bool IsOrtho() const;
     bool IsPerspective() const;
@@ -126,7 +127,7 @@ private:
     OutlineRenderer _outlineRenderer;
 
     OrthoCamera _oc{ OrthoCamera(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f) };
-    bool _usingOrthoCamera{ false };
+    bool _usingOrthoCamera{ true }; // default camera is orthographic
     PerspectiveCamera _pc{ PerspectiveCamera(110.0f, 19.0f / 9.0f, 0.001f, 1000.0f) };
     bool _usingPerspectiveCamera{ false };
 
