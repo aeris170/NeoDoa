@@ -181,6 +181,8 @@
     <ClInclude Include="Shader.hpp" />
     <ClCompile Include="System.cpp" />
     <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="TextureDeserializer.cpp" />
+    <ClCompile Include="TextureSerializer.cpp" />
     <ClCompile Include="TransformComponent.cpp" />
     <ClCompile Include="UUID.cpp" />
     <ClCompile Include="Window.cpp" />
@@ -190,6 +192,8 @@
     <ClInclude Include="NeoDoa.hpp" />
     <ClInclude Include="System.hpp" />
     <ClInclude Include="Texture.hpp" />
+    <ClInclude Include="TextureDeserializer.hpp" />
+    <ClInclude Include="TextureSerializer.hpp" />
     <ClInclude Include="TransformComponent.hpp" />
     <ClInclude Include="TypedefsAndConstants.hpp" />
     <ClInclude Include="Resolution.hpp" />

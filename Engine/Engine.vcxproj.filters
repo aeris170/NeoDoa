@@ -72,6 +72,9 @@
     <Filter Include="Asset\Texture">
       <UniqueIdentifier>{e36699f6-a520-4163-8b1b-10a80572c5ec}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Asset\Texture\Serialize">
+      <UniqueIdentifier>{a77e8c4c-dc09-47e5-9fb4-d43b1398564d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core.cpp">
@@ -181,6 +184,12 @@
     </ClCompile>
     <ClCompile Include="UUID.cpp">
       <Filter>Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureDeserializer.cpp">
+      <Filter>Asset\Texture\Serialize</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureSerializer.cpp">
+      <Filter>Asset\Texture\Serialize</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -327,6 +336,12 @@
     </ClInclude>
     <ClInclude Include="UUID.hpp">
       <Filter>Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureDeserializer.hpp">
+      <Filter>Asset\Texture\Serialize</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureSerializer.hpp">
+      <Filter>Asset\Texture\Serialize</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

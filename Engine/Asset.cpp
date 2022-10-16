@@ -4,6 +4,8 @@
 #include "ProjectDeserializer.hpp"
 #include "SceneDeserializer.hpp"
 #include "SceneSerializer.hpp"
+#include "TextureDeserializer.hpp"
+#include "TextureSerializer.hpp"
 
 Asset::Asset() noexcept :
     Asset(UUID::Empty(), nullptr) {}
