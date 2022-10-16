@@ -32,18 +32,21 @@ FNode* Asset::File() const { return file; }
 const AssetData& Asset::Data() const { return data; }
 
 void Asset::Serialize() {
-    std::string serializedData;
-
     if (IsScene()) {
+        std::string serializedData;
         serializedData = SerializeScene(DataAs<Scene>());
+        tinyxml2::XMLDocument doc;
+        doc.Parse(serializedData.c_str());
+        doc.SaveFile(file->AbsolutePath().string().c_str());
+        return;
+    }
+    if (IsTexture()) {
+        SerializeTexture(DataAs<Texture>());
+        // TODO WRITE TO FILE
     }
     /*
     * TODO others
     */
-
-    tinyxml2::XMLDocument doc;
-    doc.Parse(serializedData.c_str());
-    doc.SaveFile(file->AbsolutePath().string().c_str());
 }
 
 void Asset::Deserialize() {
@@ -52,6 +55,8 @@ void Asset::Deserialize() {
     if (IsScene()) {
         data = DeserializeScene(*file);
     }
+    if (IsTexture()) {
+        data = DeserializeTexture(*file);
     }
     /*
     * TODO others
