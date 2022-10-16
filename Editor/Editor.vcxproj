@@ -83,7 +83,7 @@
       <PreprocessorDefinitions>EDITOR;NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)AngelScript\include\;$(SolutionDir)AngelScript\add_on\;$(SolutionDir)Detector\;$(SolutionDir)Engine\;$(SolutionDir)EZEasing\;$(SolutionDir)EnTT\;$(SolutionDir)GLEW\include\;$(SolutionDir)GLFW\include\;$(SolutionDir)GLM\;$(SolutionDir)IconFontCppHeaders\;$(SolutionDir)ImGui\;$(SolutionDir)LunaSVG\include\;$(SolutionDir)TinyFD\;$(SolutionDir)TinyXML2\;$(SolutionDir)Utility\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
