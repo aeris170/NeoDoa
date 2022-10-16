@@ -27,9 +27,6 @@
     <Filter Include="Asset\Script">
       <UniqueIdentifier>{a01999ce-82b7-40ce-813f-15db2b4737c3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Asset\Texture">
-      <UniqueIdentifier>{e36699f6-a520-4163-8b1b-10a80572c5ec}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Asset\Model">
       <UniqueIdentifier>{4314fd8e-54a6-46e9-afa2-f8946191c35e}</UniqueIdentifier>
     </Filter>
@@ -71,6 +68,9 @@
     </Filter>
     <Filter Include="Misc">
       <UniqueIdentifier>{d605cb33-a818-420e-a4a2-e3d54955826c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Asset\Texture">
+      <UniqueIdentifier>{e36699f6-a520-4163-8b1b-10a80572c5ec}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
