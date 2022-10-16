@@ -78,6 +78,7 @@ WindowPtr Window::CreateWindow(Resolution resolution, const char* title, bool is
 #pragma endregion
 
     glfwMakeContextCurrent(rv->_glfwWindow);
+    //glfwSwapInterval(0); // TODO VSYNC
 
     glfwSetFramebufferSizeCallback(rv->_glfwWindow, glfwWindowOnResize);
     glfwSetKeyCallback(rv->_glfwWindow, glfwWindowOnKeyStateChange);
