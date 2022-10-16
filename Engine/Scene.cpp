@@ -64,6 +64,7 @@ ACamera& Scene::GetActiveCamera() {
         return _pc;
     } else {
         assert("no camera?");
+        throw "no camera?";
     }
 }
 
