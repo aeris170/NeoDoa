@@ -158,7 +158,7 @@ void Observer::RenderFolderView(FNode* folder) {
             ImGui::TableSetColumnIndex(1);
             ImGui::Text(child->FullName().c_str());
             ImGui::TableSetColumnIndex(2);
-            std::string size = FormatBytes(child->Size());
+            std::string size = FormatBytes(static_cast<float>(child->Size()));
             ImGui::Text(size.c_str());
         }
         ImGui::EndTable();

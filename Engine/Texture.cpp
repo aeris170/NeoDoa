@@ -31,7 +31,7 @@ Texture Texture::CreateTexture(std::string_view name, const char* path, Transpar
 Texture Texture::CreateTexture(std::string_view name, const unsigned char* data, size_t length, Transparency transparency) {
     stbi_set_flip_vertically_on_load(true);
     int width, height, nrChannels;
-    unsigned char* pixelData = stbi_load_from_memory(data, length, &width, &height, &nrChannels, transparency == Transparency::YES ? STBI_rgb_alpha : STBI_rgb);
+    unsigned char* pixelData = stbi_load_from_memory(data, static_cast<int>(length), &width, &height, &nrChannels, transparency == Transparency::YES ? STBI_rgb_alpha : STBI_rgb);
     if (pixelData == nullptr) {
         stbi_image_free(pixelData);
         DOA_LOG_WARNING("Couldn't load %s!");
@@ -82,6 +82,7 @@ size_t Texture::Width() const { return _width; }
 size_t Texture::Height() const { return _height; }
 bool Texture::HasTransparency() const { return _transparency == Transparency::YES ? true : false; }
 TEX Texture::TextureID() const { return _glTextureID; }
+void* Texture::TextureIDRaw() const { return reinterpret_cast<void*>(static_cast<uint64_t>(_glTextureID)); }
 
 Texture::~Texture() noexcept {
     DeallocateGPU();
@@ -148,8 +149,8 @@ void Texture::AllocateGPU() noexcept {
     glTextureParameteri(_glTextureID, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTextureParameteri(_glTextureID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    glTextureStorage2D(_glTextureID, 1, _transparency == Transparency::YES ? GL_RGBA8 : GL_RGB8, _width, _height);
-    glTextureSubImage2D(_glTextureID, 0, 0, 0, _width, _height, _transparency == Transparency::YES ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, _pixelData.data());
+    glTextureStorage2D(_glTextureID, 1, _transparency == Transparency::YES ? GL_RGBA8 : GL_RGB8, static_cast<GLsizei>(_width), static_cast<GLsizei>(_height));
+    glTextureSubImage2D(_glTextureID, 0, 0, 0, static_cast<GLsizei>(_width), static_cast<GLsizei>(_height), _transparency == Transparency::YES ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, _pixelData.data());
     glGenerateTextureMipmap(_glTextureID);
     glTextureParameterf(_glTextureID, GL_TEXTURE_LOD_BIAS, -0.5f);
 

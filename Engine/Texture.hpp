@@ -33,6 +33,7 @@ struct Texture {
     size_t Height() const;
     bool HasTransparency() const;
     TEX TextureID() const;
+    void* TextureIDRaw() const;
 
     ~Texture() noexcept;
     Texture(const Texture&) = delete;

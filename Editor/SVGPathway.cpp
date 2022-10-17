@@ -84,7 +84,11 @@ void SVGPathway::Initialize(Color&& color) {
         { // Fill the "TexturesPadded"
             auto paddingFunction = [](std::unique_ptr<lunasvg::Document>& lunadoc, const std::vector<int>& box, const std::string& name, std::string&& scaleFactorName, float scaleFactor) {
                 lunasvg::Bitmap bitmapPadded;
-                bitmapPadded = lunadoc->renderToBitmap((box[2] - box[0]) * scaleFactor, (box[3] - box[1]) * scaleFactor, RASTER_BG_COLOR);
+                bitmapPadded = lunadoc->renderToBitmap(
+                    (box[2] - box[0]) * static_cast<uint32_t>(scaleFactor),
+                    (box[3] - box[1]) * static_cast<uint32_t>(scaleFactor),
+                    RASTER_BG_COLOR
+                );
                 const int width = bitmapPadded.width();
                 const int height = bitmapPadded.height();
                 const int elemWidth = 4;

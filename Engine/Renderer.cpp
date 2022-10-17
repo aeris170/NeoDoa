@@ -59,7 +59,7 @@ void Renderer::Register(std::weak_ptr<Shader> shader, std::weak_ptr<Model> model
     glNamedBufferData(vbo, defaultSize * m4s, nullptr, GL_DYNAMIC_DRAW);
 
     for (auto& mesh : model.lock()->_meshes) {
-        glVertexArrayVertexBuffer(mesh.VertexArrayObject(), 1, vbo, 0, m4s);
+        glVertexArrayVertexBuffer(mesh.VertexArrayObject(), 1, vbo, 0, static_cast<GLsizei>(m4s));
 
         glEnableVertexArrayAttrib(mesh.VertexArrayObject(), 0);
         glEnableVertexArrayAttrib(mesh.VertexArrayObject(), 1);
@@ -71,10 +71,10 @@ void Renderer::Register(std::weak_ptr<Shader> shader, std::weak_ptr<Model> model
         glVertexArrayAttribBinding(mesh.VertexArrayObject(), 2, 1);
         glVertexArrayAttribBinding(mesh.VertexArrayObject(), 3, 1);
 
-        glVertexArrayAttribFormat(mesh.VertexArrayObject(), 0, 4, GL_FLOAT, GL_FALSE, v4s * 0);
-        glVertexArrayAttribFormat(mesh.VertexArrayObject(), 1, 4, GL_FLOAT, GL_FALSE, v4s * 1);
-        glVertexArrayAttribFormat(mesh.VertexArrayObject(), 2, 4, GL_FLOAT, GL_FALSE, v4s * 2);
-        glVertexArrayAttribFormat(mesh.VertexArrayObject(), 3, 4, GL_FLOAT, GL_FALSE, v4s * 3);
+        glVertexArrayAttribFormat(mesh.VertexArrayObject(), 0, 4, GL_FLOAT, GL_FALSE, static_cast<GLuint>(v4s * 0));
+        glVertexArrayAttribFormat(mesh.VertexArrayObject(), 1, 4, GL_FLOAT, GL_FALSE, static_cast<GLuint>(v4s * 1));
+        glVertexArrayAttribFormat(mesh.VertexArrayObject(), 2, 4, GL_FLOAT, GL_FALSE, static_cast<GLuint>(v4s * 2));
+        glVertexArrayAttribFormat(mesh.VertexArrayObject(), 3, 4, GL_FLOAT, GL_FALSE, static_cast<GLuint>(v4s * 3));
 
         glVertexArrayBindingDivisor(mesh.VertexArrayObject(), 1, 1);
     }
@@ -106,7 +106,7 @@ void Renderer::Render(entt::registry& registry, ACamera* cam) {
             toBeDeleted.push_back(std::get<VBO>(element));
         }
     }
-    glDeleteBuffers(toBeDeleted.size(), toBeDeleted.data());
+    glDeleteBuffers(static_cast<GLsizei>(toBeDeleted.size()), toBeDeleted.data());
     // done
     for (auto& pair : _current) {
         auto& shader = pair.first;
