@@ -134,6 +134,8 @@ Texture Texture::Copy(const Texture& scene) { return Empty(); }
 
 //-----------------------------------------------------------------
 
+
+Texture::Texture() noexcept {}
 Texture::Texture(std::string_view name, size_t width, size_t height, const unsigned char* const pixelData, TextureTransparency transparency) noexcept :
     _name(name),
     _width(width),
@@ -144,7 +146,11 @@ Texture::Texture(std::string_view name, size_t width, size_t height, const unsig
     for (auto i = 0; i < _pixelData.size(); i++) {
         _pixelData[i] = pixelData[i];
     }
-    AllocateGPU();
+    if (_width > 0 && _height > 0) {
+        AllocateGPU();
+    } else {
+        DOA_LOG_ERROR("Textures must have positive dimensions! Expected width > 0 && height > 0, received width = %d height = %d", _width, _height);
+    }
 }
 
 void Texture::AllocateGPU() noexcept {

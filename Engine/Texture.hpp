@@ -22,9 +22,9 @@ struct Texture {
 
     static Texture Empty() noexcept {
 #ifdef _DEBUG
-        Texture::FACTORY_FLAG = true; return { "", 0, 0, 0, TextureTransparency::NO }; Texture::FACTORY_FLAG = false;
+        Texture::FACTORY_FLAG = true; return {}; Texture::FACTORY_FLAG = false;
 #else
-        return { "", 0, 0, 0, Transparency::NO };
+        return {};
 #endif
     };
 
@@ -65,11 +65,12 @@ private:
 
     std::string _name{};
     size_t _width{ 0 }, _height{ 0 };
-    TextureTransparency _transparency;
+    TextureTransparency _transparency{ TextureTransparency::NO };
     TEX _glTextureID{ 0 };
-    ByteVector _pixelData;
+    ByteVector _pixelData{};
 
     /* don't call ctor, use factory functions */
+    Texture() noexcept;
     Texture(std::string_view name, size_t width, size_t height, const unsigned char* const pixelData, TextureTransparency transparency) noexcept;
 
     void AllocateGPU() noexcept;
