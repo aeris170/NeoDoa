@@ -26,13 +26,13 @@ struct Texture {
     static void ApplyPixelDataTo(Texture& texture, const ByteVector& data);
     static void ApplyPixelDataTo(Texture& texture, ByteVector&& data);
 
+    void Bind(int slot = 0);
+
     const std::string& Name() const;
     size_t Width() const;
     size_t Height() const;
     bool HasTransparency() const;
     TEX TextureID() const;
-
-    void Bind(int slot = 0);
 
     ~Texture() noexcept;
     Texture(const Texture&) = delete;
