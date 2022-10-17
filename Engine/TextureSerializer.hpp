@@ -1,15 +1,6 @@
 #pragma once
 
-#include "Texture.hpp"
+struct Texture;
+struct TextureData;
 
-struct SerializedTexture {
-
-    std::string name;
-
-    void* data;
-    int dataSize;
-
-    bool hasTransparency;
-};
-
-SerializedTexture SerializeTexture(const Texture& texture);
+TextureData SerializeTexture(const Texture& texture);

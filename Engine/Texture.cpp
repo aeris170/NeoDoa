@@ -4,14 +4,16 @@
 
 #include <stb_image.h>
 
-#include "Log.hpp"
-#include <span>
 #include <TemplateUtilities.hpp>
 
-Texture Texture::CreateTexture(std::string_view name, const char* path, Transparency transparency) {
+#include "TextureSerializer.hpp"
+#include "TextureDeserializer.hpp"
+#include "Log.hpp"
+
+Texture Texture::CreateTexture(std::string_view name, const char* path, TextureTransparency transparency) {
     stbi_set_flip_vertically_on_load(true);
     int width, height, nrChannels;
-    unsigned char* pixelData = stbi_load(path, &width, &height, &nrChannels, transparency == Transparency::YES ? STBI_rgb_alpha : STBI_rgb);
+    unsigned char* pixelData = stbi_load(path, &width, &height, &nrChannels, transparency == TextureTransparency::YES ? STBI_rgb_alpha : STBI_rgb);
     if (pixelData == nullptr) {
         stbi_image_free(pixelData);
         DOA_LOG_WARNING("Couldn't load %s! No such file at %s!", name.data(), path);
@@ -28,10 +30,10 @@ Texture Texture::CreateTexture(std::string_view name, const char* path, Transpar
     stbi_image_free(pixelData);
     return rv;
 }
-Texture Texture::CreateTexture(std::string_view name, const unsigned char* data, size_t length, Transparency transparency) {
+Texture Texture::CreateTexture(std::string_view name, const unsigned char* data, size_t length, TextureTransparency transparency) {
     stbi_set_flip_vertically_on_load(true);
     int width, height, nrChannels;
-    unsigned char* pixelData = stbi_load_from_memory(data, static_cast<int>(length), &width, &height, &nrChannels, transparency == Transparency::YES ? STBI_rgb_alpha : STBI_rgb);
+    unsigned char* pixelData = stbi_load_from_memory(data, static_cast<int>(length), &width, &height, &nrChannels, transparency == TextureTransparency::YES ? STBI_rgb_alpha : STBI_rgb);
     if (pixelData == nullptr) {
         stbi_image_free(pixelData);
         DOA_LOG_WARNING("Couldn't load %s!");
@@ -48,7 +50,7 @@ Texture Texture::CreateTexture(std::string_view name, const unsigned char* data,
     stbi_image_free(pixelData);
     return rv;
 }
-Texture Texture::CreateTextureRaw(std::string_view name, const unsigned char* pixelData, size_t width, size_t height, Transparency transparency) {
+Texture Texture::CreateTextureRaw(std::string_view name, const unsigned char* pixelData, size_t width, size_t height, TextureTransparency transparency) {
     if (pixelData == nullptr) {
         DOA_LOG_WARNING("Couldn't load %s from raw pointer to memory! Pointer is nullptr");
         return Empty();
@@ -80,7 +82,7 @@ void Texture::Bind(int slot) {
 const std::string& Texture::Name() const { return _name; }
 size_t Texture::Width() const { return _width; }
 size_t Texture::Height() const { return _height; }
-bool Texture::HasTransparency() const { return _transparency == Transparency::YES ? true : false; }
+bool Texture::HasTransparency() const { return _transparency == TextureTransparency::YES ? true : false; }
 TEX Texture::TextureID() const { return _glTextureID; }
 void* Texture::TextureIDRaw() const { return reinterpret_cast<void*>(static_cast<uint64_t>(_glTextureID)); }
 
@@ -91,14 +93,14 @@ Texture::Texture(Texture&& other) noexcept :
     _name(std::move(other._name)),
     _width(std::exchange(other._width, 0)),
     _height(std::exchange(other._height, 0)),
-    _transparency(std::exchange(other._transparency, Transparency::NO)),
+    _transparency(std::exchange(other._transparency, TextureTransparency::NO)),
     _pixelData(std::move(other._pixelData)),
     _glTextureID(std::exchange(other._glTextureID, 0)) {}
 Texture& Texture::operator=(Texture&& other) noexcept {
     _name = std::move(other._name);
     _width =  std::exchange(other._width, 0);
     _height = std::exchange(other._height, 0);
-    _transparency = std::exchange(other._transparency, Transparency::NO);
+    _transparency = std::exchange(other._transparency, TextureTransparency::NO);
     _glTextureID = std::exchange(other._glTextureID, 0);
     _pixelData = std::move(other._pixelData);
     return *this;
@@ -124,16 +126,20 @@ bool Texture::operator==(const Texture& other) noexcept {
 }
 bool Texture::operator!=(const Texture& other) noexcept { return !this->operator==(other); }
 
+
+TextureData Texture::Serialize() const { return SerializeTexture(*this); }
+Texture Texture::Deserialize(const TextureData& data) { return DeserializeTexture(data); }
+
 Texture Texture::Copy(const Texture& scene) { return Empty(); }
 
 //-----------------------------------------------------------------
 
-Texture::Texture(std::string_view name, size_t width, size_t height, const unsigned char* const pixelData, Transparency transparency) noexcept :
+Texture::Texture(std::string_view name, size_t width, size_t height, const unsigned char* const pixelData, TextureTransparency transparency) noexcept :
     _name(name),
     _width(width),
     _height(height),
     _transparency(transparency),
-    _pixelData(width * height * (transparency == Transparency::YES ? static_cast<size_t>(4) : static_cast<size_t>(3))) {
+    _pixelData(width * height * (transparency == TextureTransparency::YES ? static_cast<size_t>(4) : static_cast<size_t>(3))) {
     assert(FACTORY_FLAG, "don't call ctor directly, use CreateTexture");
     for (auto i = 0; i < _pixelData.size(); i++) {
         _pixelData[i] = pixelData[i];
@@ -149,8 +155,8 @@ void Texture::AllocateGPU() noexcept {
     glTextureParameteri(_glTextureID, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTextureParameteri(_glTextureID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    glTextureStorage2D(_glTextureID, 1, _transparency == Transparency::YES ? GL_RGBA8 : GL_RGB8, static_cast<GLsizei>(_width), static_cast<GLsizei>(_height));
-    glTextureSubImage2D(_glTextureID, 0, 0, 0, static_cast<GLsizei>(_width), static_cast<GLsizei>(_height), _transparency == Transparency::YES ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, _pixelData.data());
+    glTextureStorage2D(_glTextureID, 1, _transparency == TextureTransparency::YES ? GL_RGBA8 : GL_RGB8, static_cast<GLsizei>(_width), static_cast<GLsizei>(_height));
+    glTextureSubImage2D(_glTextureID, 0, 0, 0, static_cast<GLsizei>(_width), static_cast<GLsizei>(_height), _transparency == TextureTransparency::YES ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, _pixelData.data());
     glGenerateTextureMipmap(_glTextureID);
     glTextureParameterf(_glTextureID, GL_TEXTURE_LOD_BIAS, -0.5f);
 
