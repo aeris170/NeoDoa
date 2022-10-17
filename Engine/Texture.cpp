@@ -5,6 +5,8 @@
 #include <stb_image.h>
 
 #include "Log.hpp"
+#include <span>
+#include <TemplateUtilities.hpp>
 
 Texture Texture::CreateTexture(std::string_view name, const char* path, Transparency transparency) {
     stbi_set_flip_vertically_on_load(true);
@@ -132,13 +134,14 @@ Texture::Texture(std::string_view name, size_t width, size_t height, const unsig
     _transparency(transparency),
     _pixelData(width * height * (transparency == Transparency::YES ? static_cast<size_t>(4) : static_cast<size_t>(3))) {
     assert(FACTORY_FLAG, "don't call ctor directly, use CreateTexture");
+    std::span pixelSpan{ _pixelData, };
     for (auto i = 0; i < _pixelData.size(); i++) {
-        _pixelData[i] = pixelData[i];
+        pixelSpan[i] = pixelData[i];
     }
     AllocateGPU();
 }
 
-void Texture::AllocateGPU() {
+void Texture::AllocateGPU() noexcept {
     glCreateTextures(GL_TEXTURE_2D, 1, &_glTextureID);
 
     glTextureParameteri(_glTextureID, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -152,4 +155,4 @@ void Texture::AllocateGPU() {
     glTextureParameterf(_glTextureID, GL_TEXTURE_LOD_BIAS, -0.5f);
 
 }
-void Texture::DeallocateGPU() { glDeleteTextures(1, &_glTextureID); }
+void Texture::DeallocateGPU() noexcept { glDeleteTextures(1, &_glTextureID); }

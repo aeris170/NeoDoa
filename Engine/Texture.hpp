@@ -10,7 +10,7 @@ struct Texture {
         YES, NO
     };
 
-    static Texture Empty() {
+    static Texture Empty() noexcept {
 #ifdef _DEBUG
         Texture::FACTORY_FLAG = true; return { "", 0, 0, 0, Transparency::NO }; Texture::FACTORY_FLAG = false;
 #else
@@ -58,6 +58,6 @@ private:
     /* don't call ctor, use factory functions */
     Texture(std::string_view name, size_t width, size_t height, const unsigned char* const pixelData, Transparency transparency) noexcept;
 
-    void AllocateGPU();
-    void DeallocateGPU();
+    void AllocateGPU() noexcept;
+    void DeallocateGPU() noexcept;
 };
