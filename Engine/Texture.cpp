@@ -102,7 +102,7 @@ Texture& Texture::operator=(Texture&& other) noexcept {
     _pixelData = std::move(other._pixelData);
     return *this;
 }
-bool Texture::operator==(const Texture& other) {
+bool Texture::operator==(const Texture& other) noexcept {
     if (this == &other) return true;
     /*
         note that we don't need to check _glTextureID
@@ -121,7 +121,7 @@ bool Texture::operator==(const Texture& other) {
     }
     return false;
 }
-bool Texture::operator!=(const Texture& other) { return !this->operator==(other); }
+bool Texture::operator!=(const Texture& other) noexcept { return !this->operator==(other); }
 
 Texture Texture::Copy(const Texture& scene) { return Empty(); }
 
@@ -134,9 +134,8 @@ Texture::Texture(std::string_view name, size_t width, size_t height, const unsig
     _transparency(transparency),
     _pixelData(width * height * (transparency == Transparency::YES ? static_cast<size_t>(4) : static_cast<size_t>(3))) {
     assert(FACTORY_FLAG, "don't call ctor directly, use CreateTexture");
-    std::span pixelSpan{ _pixelData, };
     for (auto i = 0; i < _pixelData.size(); i++) {
-        pixelSpan[i] = pixelData[i];
+        _pixelData[i] = pixelData[i];
     }
     AllocateGPU();
 }

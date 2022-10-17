@@ -39,8 +39,8 @@ struct Texture {
     Texture(Texture&&) noexcept;
     Texture& operator=(const Texture&) = delete;
     Texture& operator=(Texture&&) noexcept;
-    bool operator==(const Texture& other);
-    bool operator!=(const Texture& other);
+    bool operator==(const Texture& other) noexcept;
+    bool operator!=(const Texture& other) noexcept;
 
     static Texture Copy(const Texture& scene);
 

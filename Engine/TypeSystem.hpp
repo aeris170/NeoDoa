@@ -5,6 +5,6 @@
 using Type = entt::type_info;
 
 template<typename T>
-Type GetType() {
+Type GetType() noexcept {
     return entt::type_id<T>();
 }
