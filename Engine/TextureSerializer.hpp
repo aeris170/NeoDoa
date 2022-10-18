@@ -1,6 +1,5 @@
 #pragma once
 
-struct Texture;
-struct TextureData;
+#include "Texture.hpp"
 
-TextureData SerializeTexture(const Texture& texture);
+EncodedTextureData SerializeTexture(const Texture& texture, TextureEncoding encoding = TextureEncoding::PNG);

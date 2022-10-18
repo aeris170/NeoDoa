@@ -5,11 +5,10 @@
 #include "TextureSerializer.hpp"
 
 Texture DeserializeTexture(const FNode& file) { return Texture::CreateTexture(file.Name(), file.AbsolutePath().string().c_str()); }
-Texture DeserializeTexture(const TextureData& data) {
+Texture DeserializeTexture(const EncodedTextureData& data) {
     return Texture::CreateTexture(
         data.name,
-        reinterpret_cast<const unsigned char*>(data.data),
-        data.dataSize,
+        data.data,
         data.hasTransparency ? TextureTransparency::YES : TextureTransparency::NO
     );
 }

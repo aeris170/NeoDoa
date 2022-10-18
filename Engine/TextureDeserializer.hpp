@@ -2,7 +2,7 @@
 
 struct FNode;
 struct Texture;
-struct TextureData;
+struct EncodedTextureData;
 
 Texture DeserializeTexture(const FNode& file);
-Texture DeserializeTexture(const TextureData& data);
+Texture DeserializeTexture(const EncodedTextureData& data);

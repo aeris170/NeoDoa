@@ -232,7 +232,6 @@ void Observer::RenderTextView(AssetHandle textAsset) {
 
         ImGui::EndTable();
     }
-
 }
 
 void Observer::ResetDisplayTarget() { displayTarget = std::monostate{}; }

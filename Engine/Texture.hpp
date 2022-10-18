@@ -2,14 +2,21 @@
 
 #include "TypedefsAndConstants.hpp"
 
-struct TextureData {
+using ByteVector = std::vector<std::byte>;
+
+enum class TextureEncoding {
+    PNG, BMP, TGA, JPG,
+};
+
+struct EncodedTextureData {
 
     std::string name;
 
-    void* data;
-    int dataSize;
+    ByteVector data;
 
     bool hasTransparency;
+
+    TextureEncoding encoding;
 };
 
 enum class TextureTransparency {
@@ -17,8 +24,6 @@ enum class TextureTransparency {
 };
 
 struct Texture {
-
-    using ByteVector = std::vector<unsigned char>;
 
     static Texture Empty() noexcept {
 #ifdef _DEBUG
@@ -30,6 +35,7 @@ struct Texture {
 
     static Texture CreateTexture(std::string_view name, const char* path, TextureTransparency transparency = TextureTransparency::YES);
     static Texture CreateTexture(std::string_view name, const unsigned char* data, size_t length, TextureTransparency transparency = TextureTransparency::YES);
+    static Texture CreateTexture(std::string_view name, ByteVector data, TextureTransparency transparency = TextureTransparency::YES);
     static Texture CreateTextureRaw(std::string_view name, const unsigned char* pixelData, size_t width, size_t height, TextureTransparency transparency = TextureTransparency::YES);
 
     static ByteVector RequestPixelDataOf(const Texture& texture);
@@ -53,8 +59,8 @@ struct Texture {
     bool operator==(const Texture& other) noexcept;
     bool operator!=(const Texture& other) noexcept;
 
-    TextureData Serialize() const;
-    static Texture Deserialize(const TextureData& data);
+    EncodedTextureData Serialize(TextureEncoding encoding = TextureEncoding::PNG) const;
+    static Texture Deserialize(const EncodedTextureData& data);
 
     static Texture Copy(const Texture& scene);
 

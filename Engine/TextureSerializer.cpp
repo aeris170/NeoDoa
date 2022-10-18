@@ -2,34 +2,47 @@
 
 #include <cstring>
 #include <cstdlib>
+#include <span>
 
 #include <stb_image_write.h>
 
-#include "Texture.hpp"
+static void WriteFunction(void* ctx, void* data, int size) {
+    std::span pixels{ reinterpret_cast<std::byte*>(data), static_cast<size_t>(size) };
 
-TextureData SerializeTexture(const Texture& texture) {
-    TextureData rv;
+    EncodedTextureData* etd = reinterpret_cast<EncodedTextureData*>(ctx);
+    etd->data.reserve(size);
+
+    std::copy(pixels.begin(), pixels.end(), etd->data.begin());
+}
+
+EncodedTextureData SerializeTexture(const Texture& texture, TextureEncoding encoding) {
+    stbi_flip_vertically_on_write(true);
+
+    EncodedTextureData rv;
     rv.name = texture.Name();
     rv.hasTransparency = texture.HasTransparency();
 
     int texW = static_cast<int>(texture.Width());
     int texH = static_cast<int>(texture.Height());
     int stride = rv.hasTransparency ? 4 : 3;
+    auto pixel = Texture::RequestPixelDataOf(texture);
 
-    stbi_write_png_to_func(
-        [](void* ctx, void* data, int size) {
-            TextureData* st = reinterpret_cast<TextureData*>(ctx);
-            st->data = std::malloc(size);
-            assert(st->data != 0, "no memory?");
-            std::memcpy(st->data, data, size);
-        },
-        &rv,
-        texW,
-        texH,
-        stride,
-        Texture::RequestPixelDataOf(texture).data(),
-        texH * stride
-    );
+    switch (encoding) {
+    case TextureEncoding::PNG:
+        stbi_write_png_to_func(
+            WriteFunction, &rv, texW, texH, stride, pixel.data(), texH * stride);
+        break;
+    case TextureEncoding::BMP:
+        stbi_write_bmp_to_func(WriteFunction, &rv, texW, texH, stride, pixel.data());
+        break;
+    case TextureEncoding::TGA:
+        stbi_write_tga_to_func(WriteFunction, &rv, texW, texH, stride, pixel.data());
+        break;
+    case TextureEncoding::JPG:
+        stbi_write_jpg_to_func(WriteFunction, &rv, texW, texH, stride, pixel.data(), 100);
+        break;
+    }
 
+    rv.encoding = encoding;
     return rv;
 }

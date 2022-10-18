@@ -36,7 +36,7 @@ Texture Texture::CreateTexture(std::string_view name, const unsigned char* data,
     unsigned char* pixelData = stbi_load_from_memory(data, static_cast<int>(length), &width, &height, &nrChannels, transparency == TextureTransparency::YES ? STBI_rgb_alpha : STBI_rgb);
     if (pixelData == nullptr) {
         stbi_image_free(pixelData);
-        DOA_LOG_WARNING("Couldn't load %s!");
+        DOA_LOG_WARNING("Couldn't load %s!", name.data());
         return Empty();
     }
 
@@ -50,9 +50,12 @@ Texture Texture::CreateTexture(std::string_view name, const unsigned char* data,
     stbi_image_free(pixelData);
     return rv;
 }
+Texture Texture::CreateTexture(std::string_view name, ByteVector data, TextureTransparency transparency){
+    return CreateTexture(name, reinterpret_cast<const unsigned char*>(data.data()), data.size(), transparency);
+}
 Texture Texture::CreateTextureRaw(std::string_view name, const unsigned char* pixelData, size_t width, size_t height, TextureTransparency transparency) {
     if (pixelData == nullptr) {
-        DOA_LOG_WARNING("Couldn't load %s from raw pointer to memory! Pointer is nullptr");
+        DOA_LOG_WARNING("Couldn't load %s from raw pointer to memory! Pointer is nullptr", name.data());
         return Empty();
     }
 #ifdef _DEBUG
@@ -65,7 +68,7 @@ Texture Texture::CreateTextureRaw(std::string_view name, const unsigned char* pi
     return rv;
 }
 
-Texture::ByteVector Texture::RequestPixelDataOf(const Texture& texture) { return texture._pixelData; }
+ByteVector Texture::RequestPixelDataOf(const Texture& texture) { return texture._pixelData; }
 void Texture::ApplyPixelDataTo(Texture& texture, const ByteVector& data) {
     Texture::ApplyPixelDataTo(texture, std::move(ByteVector(data)));
 }
@@ -127,8 +130,8 @@ bool Texture::operator==(const Texture& other) noexcept {
 bool Texture::operator!=(const Texture& other) noexcept { return !this->operator==(other); }
 
 
-TextureData Texture::Serialize() const { return SerializeTexture(*this); }
-Texture Texture::Deserialize(const TextureData& data) { return DeserializeTexture(data); }
+EncodedTextureData Texture::Serialize(TextureEncoding encoding) const { return SerializeTexture(*this, encoding); }
+Texture Texture::Deserialize(const EncodedTextureData& data) { return DeserializeTexture(data); }
 
 Texture Texture::Copy(const Texture& scene) { return Empty(); }
 
@@ -144,7 +147,7 @@ Texture::Texture(std::string_view name, size_t width, size_t height, const unsig
     _pixelData(width * height * (transparency == TextureTransparency::YES ? static_cast<size_t>(4) : static_cast<size_t>(3))) {
     assert(FACTORY_FLAG, "don't call ctor directly, use CreateTexture");
     for (auto i = 0; i < _pixelData.size(); i++) {
-        _pixelData[i] = pixelData[i];
+        _pixelData[i] = static_cast<std::byte>(pixelData[i]);
     }
     if (_width > 0 && _height > 0) {
         AllocateGPU();
@@ -161,8 +164,24 @@ void Texture::AllocateGPU() noexcept {
     glTextureParameteri(_glTextureID, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTextureParameteri(_glTextureID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    glTextureStorage2D(_glTextureID, 1, _transparency == TextureTransparency::YES ? GL_RGBA8 : GL_RGB8, static_cast<GLsizei>(_width), static_cast<GLsizei>(_height));
-    glTextureSubImage2D(_glTextureID, 0, 0, 0, static_cast<GLsizei>(_width), static_cast<GLsizei>(_height), _transparency == TextureTransparency::YES ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, _pixelData.data());
+    glTextureStorage2D(
+        _glTextureID,
+        1,
+        _transparency == TextureTransparency::YES ? GL_RGBA8 : GL_RGB8,
+        static_cast<GLsizei>(_width),
+        static_cast<GLsizei>(_height)
+    );
+    glTextureSubImage2D(
+        _glTextureID,
+        0,
+        0,
+        0,
+        static_cast<GLsizei>(_width),
+        static_cast<GLsizei>(_height),
+        _transparency == TextureTransparency::YES ? GL_RGBA : GL_RGB,
+        GL_UNSIGNED_BYTE,
+        _pixelData.data()
+    );
     glGenerateTextureMipmap(_glTextureID);
     glTextureParameterf(_glTextureID, GL_TEXTURE_LOD_BIAS, -0.5f);
 
