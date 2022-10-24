@@ -68,6 +68,7 @@ Texture Texture::CreateTextureRaw(std::string_view name, const unsigned char* pi
     return rv;
 }
 
+const std::byte* const Texture::GetByteBufferOf(const Texture& texture) { return texture._pixelData.data(); }
 ByteVector Texture::RequestPixelDataOf(const Texture& texture) { return texture._pixelData; }
 void Texture::ApplyPixelDataTo(Texture& texture, const ByteVector& data) {
     Texture::ApplyPixelDataTo(texture, std::move(ByteVector(data)));

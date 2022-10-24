@@ -38,6 +38,7 @@ struct Texture {
     static Texture CreateTexture(std::string_view name, ByteVector data, TextureTransparency transparency = TextureTransparency::YES);
     static Texture CreateTextureRaw(std::string_view name, const unsigned char* pixelData, size_t width, size_t height, TextureTransparency transparency = TextureTransparency::YES);
 
+    static const std::byte* const GetByteBufferOf(const Texture& texture);
     static ByteVector RequestPixelDataOf(const Texture& texture);
     static void ApplyPixelDataTo(Texture& texture, const ByteVector& data);
     static void ApplyPixelDataTo(Texture& texture, ByteVector&& data);

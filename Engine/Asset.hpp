@@ -42,6 +42,7 @@ struct Asset {
     void Deserialize();
     void ForceDeserialize();
     void DeleteDeserializedData();
+    bool HasDeserializedData() const;
 
     UUID Instantiate() const;
 

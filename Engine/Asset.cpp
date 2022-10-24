@@ -50,7 +50,7 @@ void Asset::Serialize() {
 }
 
 void Asset::Deserialize() {
-    if (!std::get_if<std::monostate>(&data)) { return; } // already deserialized
+    if (HasDeserializedData()) { return; }
 
     if (IsScene()) {
         data = DeserializeScene(*file);
@@ -67,6 +67,7 @@ void Asset::ForceDeserialize() {
     Deserialize();
 }
 void Asset::DeleteDeserializedData() { data = std::monostate{}; }
+bool Asset::HasDeserializedData() const { return !std::holds_alternative<std::monostate>(data); }
 
 UUID Asset::Instantiate() const {
     return UUID();
