@@ -85,10 +85,8 @@ void Observer::Render(Scene& scene) {
                 RenderFolderView(file);
             } else {
                 AssetHandle h = gui.openProject->Assets().FindAssetAt(*file);
-                if (h->IsScene()) {
-                    RenderSceneView(h);
-                } else {
-                    RenderTextView(h);
+                if (h.HasValue()) {
+                    RenderAssetView(h);
                 }
             }
         }
@@ -162,6 +160,15 @@ void Observer::RenderFolderView(FNode* folder) {
             ImGui::Text(size.c_str());
         }
         ImGui::EndTable();
+    }
+}
+void Observer::RenderAssetView(AssetHandle asset) {
+    if (asset->IsScene()) {
+        RenderSceneView(asset);
+    } else if (asset->IsTexture()) {
+        RenderTextureView(asset);
+    } else {
+        RenderTextView(asset);
     }
 }
 void Observer::RenderSceneView(AssetHandle sceneAsset) {

@@ -33,6 +33,7 @@ struct Observer {
 
     void RenderComponents(Scene& scene, const Entity entt);
     void RenderFolderView(FNode* folder);
+    void RenderAssetView(AssetHandle asset);
     void RenderSceneView(AssetHandle sceneAsset);
     void RenderTextView(AssetHandle textAsset);
 
