@@ -36,6 +36,7 @@ struct Observer {
     void RenderAssetView(AssetHandle asset);
     void RenderSceneView(AssetHandle sceneAsset);
     void RenderTextView(AssetHandle textAsset);
+    void RenderTextureView(AssetHandle textureAsset);
 
     template<DisplayableInObserver T>
     void SetDisplayTarget(T target) { displayTarget = target; }

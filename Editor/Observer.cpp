@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include <imgui.h>
+#include <imgInspect.h>
 
 #include <nameof.hpp>
 #include <prettify.hpp>
@@ -238,6 +239,82 @@ void Observer::RenderTextView(AssetHandle textAsset) {
         ImGui::InputTextMultiline("", content.data(), content.size(), size, flags);
 
         ImGui::EndTable();
+    }
+}
+void Observer::RenderTextureView(AssetHandle textureAsset) {
+    assert(textureAsset->IsTexture());
+    /* channels */
+    static bool r{ true }, g{ true }, b{ true }, a{ true };
+    /* inspect params */
+    static bool drawInspector{ true }, drawHistogram{ false }, drawNormals{ false };
+
+    static int bottomContentLineCount = 3;
+    float lineHeight = ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2;
+    static float extraPadding = 16; /* pad by an extra amount to remove scroll bar, don't pad and see the scroll bar appear on right side */
+    //ImGui::SliderFloat("label", &extraPadding, 0, 50); /* was used to test padding amount, not deleted to easily re-test in future */
+    float totalBottomPadding = lineHeight * bottomContentLineCount + extraPadding;
+
+    auto [windowWidth, windowHeight] = ImGui::GetContentRegionAvail();
+    windowWidth = windowWidth - ImGui::GetStyle().FramePadding.x;
+    windowHeight = windowHeight - totalBottomPadding;
+
+    if (textureAsset->HasDeserializedData()) {
+        Texture& tex = textureAsset->DataAs<Texture>();
+        float w = static_cast<float>(tex.Width());
+        float h = static_cast<float>(tex.Height());
+        float aspect = w / h;
+
+        float maxWidth = windowWidth;
+        float maxHeight = windowHeight;
+
+        w = maxWidth;
+        h = w / aspect;
+
+        if (h > maxHeight) {
+            aspect = w / h;
+            h = maxHeight;
+            w = h * aspect;
+        }
+
+        ImGui::Image(tex.TextureIDRaw(), { w, h }, { 0, 1 }, { 1, 0 }, { (float) r, (float) g, (float) b, (float) a }, { 1, 1, 0, 1 });
+
+        if (drawInspector) {
+            ImRect rc = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+            ImVec2 mouseUVCoord = (ImGui::GetIO().MousePos - rc.Min) / rc.GetSize();
+            mouseUVCoord.y = 1.f - mouseUVCoord.y;
+            if (mouseUVCoord.x >= 0.0f &&
+                mouseUVCoord.y >= 0.0f &&
+                mouseUVCoord.x <= 1.0f &&
+                mouseUVCoord.y <= 1.0f) {
+                float w = static_cast<float>(tex.Width());
+                float h = static_cast<float>(tex.Height());
+                auto pixels = reinterpret_cast<const unsigned char*>(Texture::GetByteBufferOf(tex));
+                ImageInspect::inspect(w, h, pixels, mouseUVCoord, { w, h }, drawNormals, drawHistogram);
+            }
+        }
+    } else {
+        ImGui::Text("Texture is not deserialized...");
+    }
+
+    ImGui::SetCursorPosY(ImGui::GetWindowHeight() - totalBottomPadding);
+    ImGui::AlignTextToFramePadding(); ImGui::Text("Channels");
+    ImGui::SameLine(); ImGui::TextColored({ 1.0f, 0.0f, 0.0f, 1.0f }, "R:"); ImGui::SameLine(); ImGui::Checkbox("##r", &r);
+    ImGui::SameLine(); ImGui::TextColored({ 0.0f, 1.0f, 0.0f, 1.0f }, "G:"); ImGui::SameLine(); ImGui::Checkbox("##g", &g);
+    ImGui::SameLine(); ImGui::TextColored({ 0.2f, 0.2f, 1.0f, 1.0f }, "B:"); ImGui::SameLine(); ImGui::Checkbox("##b", &b);
+    ImGui::SameLine(); ImGui::TextColored({ 0.5f, 0.5f, 0.5f, 1.0f }, "A:"); ImGui::SameLine(); ImGui::Checkbox("##a", &a);
+
+    ImGui::AlignTextToFramePadding(); ImGui::Text("Image Inspect:");   ImGui::SameLine(); ImGui::Checkbox("##inspect", &drawInspector);
+    ImGui::SameLine(); ImGui::Text("Normals:");    ImGui::SameLine(); ImGui::Checkbox("##normals", &drawNormals);
+    ImGui::SameLine(); ImGui::Text("Histogram:");  ImGui::SameLine(); ImGui::Checkbox("##histogram", &drawHistogram);
+    if (ImGui::Button("Refresh", { ImGui::GetContentRegionAvail().x, 0 })) {
+        textureAsset->ForceDeserialize();
+    }
+    if (ImGui::IsItemHovered()) {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted("Forces deserialization on this texture. All data in RAM/VRAM is purged, and new data is read from disk.");
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
     }
 }
 
