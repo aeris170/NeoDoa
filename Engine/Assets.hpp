@@ -88,7 +88,9 @@ struct Assets {
     void DeleteAsset(const AssetHandle asset);
 
     AssetHandle FindAsset(UUID uuid);
-    AssetHandle FindAssetAt(const FNode& file) const;
+    const AssetHandle FindAsset(UUID uuid) const;
+    AssetHandle FindAssetAt(const FNode& file);
+    const AssetHandle FindAssetAt(const FNode& file) const;
     bool IsAssetExistsAt(const FNode& file) const;
 
     FNode& Root();

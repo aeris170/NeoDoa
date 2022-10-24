@@ -105,10 +105,22 @@ void Assets::DeleteAsset(const AssetHandle asset) {
 }
 
 AssetHandle Assets::FindAsset(UUID uuid) {
-    if (!database.contains(uuid)) { return nullptr; }
-    return { &database[uuid] };
+    return const_cast<const Assets*>(this)->FindAsset(uuid);
 }
-AssetHandle Assets::FindAssetAt(const FNode& file) const {
+const AssetHandle Assets::FindAsset(UUID uuid) const {
+    if (!database.contains(uuid)) { return nullptr; }
+
+    /*
+    * casting away const is safe here
+    * because database does not contain "const Asset*"
+    * in the first place, it contains "Asset*"
+    */
+    return { const_cast<Asset*>(&database.at(uuid)) };
+}
+AssetHandle Assets::FindAssetAt(const FNode& file) {
+    return const_cast<const Assets*>(this)->FindAssetAt(file);
+}
+const AssetHandle Assets::FindAssetAt(const FNode& file) const {
     for (auto& [uuid, asset] : database) {
         if (asset.File() == &file) {
             /*

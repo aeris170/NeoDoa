@@ -14,8 +14,7 @@ struct Project {
 
     inline static const std::string DEFAULT_PATH = std::getenv("USERPROFILE");
 
-    Project(std::filesystem::path workspace, std::string name) noexcept;
-    Project(std::filesystem::path workspace, std::string name, UUID startupSceneUUID) noexcept;
+    Project(std::filesystem::path workspace, std::string name, UUID startupSceneID = UUID::Empty()) noexcept;
     ~Project() = default;
     Project(const Project& other) = delete;
     Project(Project&& other) noexcept;
@@ -27,16 +26,17 @@ struct Project {
     const std::string& Name() const;
 
     Assets& Assets();
+    const struct Assets& Assets() const;
 
     void OpenStartupScene();
-    AssetHandle GetStartupScene() const;
-    void SetStartupScene(AssetHandle sceneFile);
+    UUID GetStartupScene() const;
+    void SetStartupScene(UUID sceneID);
 
-    void OpenScene(AssetHandle sceneFile);
+    void OpenScene(UUID sceneID);
     void CloseScene();
     bool HasOpenScene() const;
     Scene& GetOpenScene();
-    AssetHandle GetOpenSceneAsset() const;
+    UUID GetOpenSceneID() const;
 
     void SaveToDisk();
     void SaveOpenSceneToDisk();
@@ -45,7 +45,7 @@ private:
     std::filesystem::path _workspace;
     std::string _name;
     struct Assets _assets;
-    AssetHandle _startupScene{};
+    UUID _startupSceneID{ UUID::Empty() };
     Scene* _openScene{ nullptr };
-    AssetHandle _openSceneAsset{};
+    UUID _openSceneID{ UUID::Empty() };
 };

@@ -78,6 +78,7 @@ void AssetManager::RenderMenuBar() {
             if (hasContent) {
                 assets->ReimportAll();
                 SetCurrentFolder(root);
+                gui.openProject->OpenStartupScene();
             } else {
                 DOA_LOG_WARNING("Didn't refresh! No open project.");
             }
@@ -331,7 +332,7 @@ void AssetManager::OpenFileAtFileNode(FNode* file) {
         SetSelectedNode(nullptr);
     } else if (file->IsFile()) {
         if (Assets::IsSceneFile(file)) {
-            gui.openProject->OpenScene(assets->FindAssetAt(*file));
+            gui.openProject->OpenScene(assets->FindAssetAt(*file)->ID());
         }
     }
 }
