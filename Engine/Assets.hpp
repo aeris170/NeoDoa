@@ -41,7 +41,7 @@ struct Assets {
 
     inline static std::string SCENE_EXT{ ".scn" };
     inline static std::string SCRIPT_EXT{ ".scrpt" };
-    inline static std::string TEXTURE_EXT{ ".tex" };
+    inline static std::string TEXTURE_EXT{ ".png" };
     inline static std::string MODEL_EXT{ ".mdl" };
     inline static std::string MATERIAL_EXT{ ".mat" };
     inline static std::string SHADER_EXT{ ".shdr" };
