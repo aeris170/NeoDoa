@@ -73,10 +73,10 @@ void MenuBar::RenderProjectSubMenu() {
         }
     }
     ImGui::Separator();
-    if (ImGui::MenuItem("Save Project", "Ctrl+Shift+S")) {
+    if (ImGui::MenuItem("Save Project", "Ctrl+Shift+S", nullptr, gui.HasOpenProject())) {
         gui.SaveProjectToDisk();
     }
-    if (ImGui::MenuItem("Close Project", "Ctrl+Shift+S")) {
+    if (ImGui::MenuItem("Close Project", "Ctrl+Shift+S", nullptr, gui.HasOpenProject())) {
         gui.CloseProject();
     }
     ImGui::Separator();
@@ -101,7 +101,7 @@ void MenuBar::RenderSceneSubMenu() {
         ImGui::EndMenu();
     }
     ImGui::Separator();
-    if (ImGui::MenuItem("Save Scene", "Ctrl+S")) {
+    if (ImGui::MenuItem("Save Scene", "Ctrl+S", nullptr, gui.HasOpenProject())) {
         if (gui.HasOpenScene()) {
             gui.openProject->SaveOpenSceneToDisk();
         }
