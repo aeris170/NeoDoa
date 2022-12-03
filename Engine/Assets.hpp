@@ -47,12 +47,12 @@ struct Assets {
     inline static std::string SHADER_EXT{ ".shdr" };
     inline static std::string ID_EXT{ ".id" };
 
-    static bool IsSceneFile(const FNode* file);
-    static bool IsScriptFile(const FNode* file);
-    static bool IsTextureFile(const FNode* file);
-    static bool IsModelFile(const FNode* file);
-    static bool IsMaterialFile(const FNode* file);
-    static bool IsShaderFile(const FNode* file);
+    static bool IsSceneFile(const FNode& file);
+    static bool IsScriptFile(const FNode& file);
+    static bool IsTextureFile(const FNode& file);
+    static bool IsModelFile(const FNode& file);
+    static bool IsMaterialFile(const FNode& file);
+    static bool IsShaderFile(const FNode& file);
 
     Assets(const Project* owner) noexcept;
     ~Assets() = default;
@@ -129,8 +129,8 @@ private:
 
     friend struct Project;
 
-    inline void __pointersInvalidated(Project* newOwner) {
+    inline void __onMove(const Project* newOwner) {
         project = newOwner;
-        _root.__pointersInvalidated(newOwner);
+        _root.__onMove(newOwner);
     }
 };

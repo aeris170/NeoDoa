@@ -148,16 +148,16 @@ void Observer::RenderFolderView(FNode* folder) {
         ImGui::TableSetupColumn("Size", ImGuiTableColumnFlags_WidthStretch, 0.3f);
         ImGui::TableHeadersRow();
 
-        for (auto child : folder->Children()) {
-            if (!child->IsDirectory() && !gui.openProject->Assets().IsAssetExistsAt(*child)) { continue; }
+        for (auto& child : folder->Children()) {
+            if (!child.IsDirectory() && !gui.openProject->Assets().IsAssetExistsAt(child)) { continue; }
 
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
-            ImGui::Image(gui.FindIconForFileType(*child, TextureSize::SMALL), { 16.0f, 16.0f });
+            ImGui::Image(gui.FindIconForFileType(child, TextureSize::SMALL), { 16.0f, 16.0f });
             ImGui::TableSetColumnIndex(1);
-            ImGui::Text(child->FullName().c_str());
+            ImGui::Text(child.FullName().c_str());
             ImGui::TableSetColumnIndex(2);
-            std::string size = FormatBytes(static_cast<float>(child->Size()));
+            std::string size = FormatBytes(static_cast<float>(child.Size()));
             ImGui::Text(size.c_str());
         }
         ImGui::EndTable();

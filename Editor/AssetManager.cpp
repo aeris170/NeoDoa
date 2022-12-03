@@ -89,18 +89,18 @@ void AssetManager::RenderMenuBar() {
 
 void AssetManager::RenderTreeView() {
     if (!hasContent) return;
-    RenderTreeViewRecursive(root);
+    RenderTreeViewRecursive(*root);
 }
 
-void AssetManager::RenderTreeViewRecursive(FNode* current) {
-    if (!current->IsDirectory()) return;
+void AssetManager::RenderTreeViewRecursive(FNode& current) {
+    if (!current.IsDirectory()) return;
     GUI& gui = this->gui;
 
     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_NavLeftJumpsBackHere | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 
-    std::vector<FNode*> children;
-    for (auto& child : current->Children()) {
-        if (child->IsDirectory()) { children.push_back(child); }
+    std::vector<std::reference_wrapper<FNode>> children;
+    for (auto& child : current.Children()) {
+        if (child.IsDirectory()) { children.push_back(child); }
     }
 
     if (children.size() == 0) {
@@ -108,13 +108,13 @@ void AssetManager::RenderTreeViewRecursive(FNode* current) {
     }
 
     std::string title(ICON_FA_FOLDER " ");
-    if (current == root) {
+    if (&current == root) {
         title = ICON_FA_FOLDER_TREE " ROOT";
     }
-    title.append(current->Name());
+    title.append(current.Name());
     if (ImGui::TreeNodeEx(title.c_str(), flags)) {
         if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-            SetCurrentFolder(current);
+            SetCurrentFolder(&current);
         }
 
         for (auto& child : children) {
@@ -209,8 +209,8 @@ void AssetManager::RenderSelectedFolderContent() {
 
         int i = 0;
         ImGui::TableNextRow();
-        for (auto child : currentFolder->Children()) {
-            if (!child->IsDirectory() && !assets->IsAssetExistsAt(*child)) { continue; }
+        for (auto& child : currentFolder->Children()) {
+            if (!child.IsDirectory() && !assets->IsAssetExistsAt(child)) { continue; }
 
             ImGui::PushID(i);
 
@@ -219,14 +219,14 @@ void AssetManager::RenderSelectedFolderContent() {
             }
             ImGui::TableSetColumnIndex(i++ % columns);
 
-            void* icon = gui.FindIconForFileType(*child);
+            void* icon = gui.FindIconForFileType(child);
 
             ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
             ImGui::ImageButton(icon, { currentFolderContentSettings.thumbnailSize, currentFolderContentSettings.thumbnailSize });
             if (ImGui::BeginPopupContextItem()) {
 
                 if (ImGui::MenuItem("Delete")) {
-                    deletedNode = child;
+                    deletedNode = &child;
                     ImGui::Separator();
                 }
 
@@ -237,12 +237,12 @@ void AssetManager::RenderSelectedFolderContent() {
                 if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
                     OpenFileAtFileNode(child);
                 } else if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-                    SetSelectedNode(child);
+                    SetSelectedNode(&child);
                 }
             }
             ImGui::PopStyleColor();
 
-            std::string fileName = child->Name();
+            std::string fileName = child.Name();
 
             float textHeight = ImGui::GetTextLineHeight();
             auto textSize = ImGui::CalcTextSize(fileName.c_str(), nullptr, true, currentFolderContentSettings.thumbnailSize);
@@ -275,17 +275,17 @@ void AssetManager::RenderSelectedFolderContent() {
 
         ImGui::EndTable();
     } else if (currentFolderContentSettings.viewMode == CurrentFolderContentSettings::ViewMode::List) {
-        for (auto child : currentFolder->Children()) {
-            if (!child->IsDirectory() && !assets->IsAssetExistsAt(*child)) { continue; }
+        for (auto& child : currentFolder->Children()) {
+            if (!child.IsDirectory() && !assets->IsAssetExistsAt(child)) { continue; }
 
-            void* icon = gui.FindIconForFileType(*child);
+            void* icon = gui.FindIconForFileType(child);
 
-            if (ImGui::TreeNodeEx(child->Name().c_str(), ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf)) {
+            if (ImGui::TreeNodeEx(child.Name().c_str(), ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf)) {
                 if (ImGui::IsItemHovered()) {
                     if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
                         OpenFileAtFileNode(child);
                     } else if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-                        SetSelectedNode(child);
+                        SetSelectedNode(&child);
                     }
                 }
 
@@ -325,14 +325,14 @@ void AssetManager::RenderContextMenu() {
     if (isDisabled) { ImGui::EndDisabled(); }
 }
 
-void AssetManager::OpenFileAtFileNode(FNode* file) {
+void AssetManager::OpenFileAtFileNode(FNode& file) {
     GUI& gui = this->gui;
-    if (file->IsDirectory()) {
-        currentFolder = file;
+    if (file.IsDirectory()) {
+        currentFolder = &file;
         SetSelectedNode(nullptr);
-    } else if (file->IsFile()) {
+    } else if (file.IsFile()) {
         if (Assets::IsSceneFile(file)) {
-            gui.openProject->OpenScene(assets->FindAssetAt(*file)->ID());
+            gui.openProject->OpenScene(assets->FindAssetAt(file)->ID());
         }
     }
 }

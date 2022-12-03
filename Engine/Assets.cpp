@@ -27,12 +27,12 @@ bool AssetHandle::HasValue() const { return _asset != nullptr; }
 Asset& AssetHandle::Value() const { return *_asset; }
 void AssetHandle::Reset() { _asset = nullptr; }
 
-bool Assets::IsSceneFile(const FNode* file) { return file->ext == SCENE_EXT; }
-bool Assets::IsScriptFile(const FNode* file) { return file->ext == SCRIPT_EXT; }
-bool Assets::IsTextureFile(const FNode* file) { return file->ext == TEXTURE_EXT; }
-bool Assets::IsModelFile(const FNode* file) { return file->ext == MODEL_EXT; }
-bool Assets::IsMaterialFile(const FNode* file) { return file->ext == MATERIAL_EXT; }
-bool Assets::IsShaderFile(const FNode* file) { return file->ext == SHADER_EXT; }
+bool Assets::IsSceneFile(const FNode& file) { return file.ext == SCENE_EXT; }
+bool Assets::IsScriptFile(const FNode& file) { return file.ext == SCRIPT_EXT; }
+bool Assets::IsTextureFile(const FNode& file) { return file.ext == TEXTURE_EXT; }
+bool Assets::IsModelFile(const FNode& file) { return file.ext == MODEL_EXT; }
+bool Assets::IsMaterialFile(const FNode& file) { return file.ext == MATERIAL_EXT; }
+bool Assets::IsShaderFile(const FNode& file) { return file.ext == SHADER_EXT; }
 
 Assets::Assets(const Project* owner) noexcept :
     project(owner),
@@ -40,7 +40,6 @@ Assets::Assets(const Project* owner) noexcept :
     BuildFileNodeTree(_root);
     ImportAllFiles(database, _root);
 }
-
 Assets::Assets(Assets&& other) noexcept :
     project(std::exchange(other.project, nullptr)),
     _root(std::move(other._root)),
@@ -51,8 +50,9 @@ Assets::Assets(Assets&& other) noexcept :
     textureAssets(std::move(other.textureAssets)),
     modelAssets(std::move(other.modelAssets)),
     shaderAssets(std::move(other.shaderAssets)),
-    shaderUniformBlockAssets(std::move(other.shaderUniformBlockAssets)) {}
-
+    shaderUniformBlockAssets(std::move(other.shaderUniformBlockAssets)) {
+    __onMove(project);
+}
 Assets& Assets::operator=(Assets&& other) noexcept {
     project = std::exchange(other.project, nullptr);
     _root = std::move(other._root);
@@ -64,6 +64,7 @@ Assets& Assets::operator=(Assets&& other) noexcept {
     modelAssets = std::move(other.modelAssets);
     shaderAssets = std::move(other.shaderAssets);
     shaderUniformBlockAssets = std::move(other.shaderUniformBlockAssets);
+    __onMove(project);
     return *this;
 }
 
@@ -225,7 +226,7 @@ AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
 void Assets::ImportAllFiles(AssetDatabase& database, const FNode& root) {
     ImportFile(database, root);
     for (auto& child : root.Children()) {
-        ImportAllFiles(database, *child);
+        ImportAllFiles(database, child);
     }
 }
 
@@ -233,19 +234,27 @@ void Assets::BuildFileNodeTree(FNode& root) {
     std::filesystem::current_path(project->Workspace());
     auto it = std::filesystem::directory_iterator(project->Workspace() / root.Path());
     for (const auto& entry : it) {
-        root.children.push_back(new FNode({
-            project,
-            &root,
-            entry.path().filename().replace_extension().string(),
-            entry.path().extension().string(),
-            "",
-            entry.is_directory()
-                                          }));
+        if(entry.is_directory()) {
+            root.children.emplace_back(FNodeCreationParams{
+                .owner = root.owner,
+                .parent = &root,
+                .name = entry.path().filename().replace_extension().string(),
+                .isDirectory = true,
+            });
+        } else {
+            root.children.emplace_back(FNodeCreationParams{
+                .owner = root.owner,
+                .parent = &root,
+                .name = entry.path().filename().replace_extension().string(),
+                .ext = entry.path().extension().string(),
+                .isDirectory = false,
+            });
+        }
     }
     // DON'T merge this loop with the above.
     for (auto& child : root.children) {
-        if (child->IsDirectory()) {
-            BuildFileNodeTree(*child);
+        if (child.IsDirectory()) {
+            BuildFileNodeTree(child);
         }
     }
 }

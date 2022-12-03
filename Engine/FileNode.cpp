@@ -21,11 +21,6 @@ FNode::FNode(FNodeCreationParams&& params) noexcept :
     fullName(std::move(name + ext)),
     content(std::move(params.content)),
     isDirectory(std::move(params.isDirectory)) {}
-FNode::~FNode() noexcept {
-    for (auto& child : children) {
-        delete child;
-    }
-}
 FNode::FNode(FNode&& other) noexcept :
     owner(std::exchange(other.owner, nullptr)),
     parent(std::exchange(other.parent, nullptr)),
@@ -35,7 +30,7 @@ FNode::FNode(FNode&& other) noexcept :
     content(std::move(other.content)),
     isDirectory(std::exchange(other.isDirectory, false)),
     children(std::move(other.children)) {
-    FixPointers(*this);
+    __onMove(this);
 }
 FNode& FNode::operator=(FNode&& other) noexcept {
     owner = std::exchange(other.owner, nullptr);
@@ -46,9 +41,11 @@ FNode& FNode::operator=(FNode&& other) noexcept {
     content = std::move(other.content);
     isDirectory = std::exchange(other.isDirectory, false);
     children = std::move(other.children);
-    FixPointers(*this);
+    __onMove(this);
     return *this;
 }
+bool FNode::operator==(const FNode& other) const noexcept { return this->Path() == other.Path(); }
+bool FNode::operator!=(const FNode& other) const noexcept { return !(*this == other); }
 
 std::filesystem::path FNode::Path() const {
     if (parent) {
@@ -177,23 +174,18 @@ std::string FNode::DisposeContent() const {
     return data; // move or possibly NRVO
 }
 
-uintmax_t FNode::Size() const { return std::filesystem::file_size(AbsolutePath()); }
-
-bool FNode::IsFile() const { return !IsDirectory(); }
-bool FNode::IsDirectory() const { return isDirectory; }
-
-const Project* FNode::OwningProject() const { return owner; }
-FNode* FNode::RootNode() const { return owner ? &const_cast<Project*>(owner)->Assets().Root() : nullptr; }
-FNode* FNode::ParentNode() const { return parent; }
 void FNode::MoveUnder(FNode& directory) {
     if (!directory.IsDirectory()) {
         DOA_LOG_ERROR("FNode::MoveUnder cannot move under something that isn't a directory!");
         DOA_LOG_ERROR("\tnode must be a directory");
         return;
     }
-    parent->children.erase(std::remove(parent->children.begin(), parent->children.end(), this), parent->children.end());
+    auto found = std::find(parent->children.begin(), parent->children.end(), *this);
+    if (found != parent->children.end()) {
+        found = parent->children.erase(found);
+    }
     parent = &directory;
-    parent->children.push_back(this);
+    parent->children.emplace_back(std::move(*this));
 
     if (owner) {
         std::filesystem::current_path(owner->Workspace());
@@ -204,8 +196,22 @@ void FNode::Delete() {
     FNode::DeleteChildNode(this);
 }
 
-std::vector<FNode*> FNode::Children() { return children; }
-const std::vector<FNode*>& FNode::Children() const { return children; }
+uintmax_t FNode::Size() const { return std::filesystem::file_size(AbsolutePath()); }
+
+bool FNode::IsFile() const { return !IsDirectory(); }
+bool FNode::IsDirectory() const { return isDirectory; }
+
+bool FNode::HasOwningProject() const { return OwningProject() != nullptr; }
+const Project* FNode::OwningProject() const { return owner; }
+
+bool FNode::HasRootNode() const { return RootNode() != nullptr; }
+FNode* FNode::RootNode() const { return owner ? &const_cast<Project*>(owner)->Assets().Root() : nullptr; }
+
+bool FNode::HasParentNode() const { return ParentNode() != nullptr; }
+FNode* FNode::ParentNode() const { return parent; }
+
+std::vector<FNode>& FNode::Children() { return children; }
+const std::vector<FNode>& FNode::Children() const { return children; }
 auto FNode::begin() { return children.begin(); }
 auto FNode::end() { return children.end(); }
 
@@ -233,8 +239,8 @@ FNode* FNode::CreateChildFile(FNodeCreationParams&& params) {
         int appendCount = 0;
         do {
             found = false;
-            for (auto child : children) {
-                if (child->IsFile() && child->name == params.name) {
+            for (auto& child : children) {
+                if (child.IsFile() && child.name == params.name) {
                     found = true;
                     break;
                 }
@@ -257,9 +263,7 @@ FNode* FNode::CreateChildFile(FNodeCreationParams&& params) {
     file.flush();
     file.close();
 
-    FNode* ptr = new FNode(std::move(params));
-    children.push_back(ptr);
-    return ptr;
+    return &children.emplace_back(std::move(params));
 }
 FNode* FNode::CreateChildFolder(FNodeCreationParams&& params) {
     if (!owner) {
@@ -282,8 +286,8 @@ FNode* FNode::CreateChildFolder(FNodeCreationParams&& params) {
         int appendCount = 0;
         do {
             found = false;
-            for (auto child : children) {
-                if (child->IsDirectory() && child->name == params.name) {
+            for (auto& child : children) {
+                if (child.IsDirectory() && child.name == params.name) {
                     found = true;
                     break;
                 }
@@ -303,9 +307,7 @@ FNode* FNode::CreateChildFolder(FNodeCreationParams&& params) {
     std::filesystem::current_path(owner->Workspace());
     bool success = std::filesystem::create_directory(params.parent->Path() / params.name);
     if (success) {
-        FNode* ptr = new FNode(std::move(params));
-        children.push_back(ptr);
-        return ptr;
+        return &children.emplace_back(std::move(params));
     } else {
         return nullptr;
     }
@@ -324,7 +326,7 @@ bool FNode::DeleteChildNode(FNode* child) {
     if (this != child->parent) {
         return false;
     }
-    auto pos = std::find(children.begin(), children.end(), child);
+    auto pos = std::find(children.begin(), children.end(), *child);
     assert(pos != children.end(), "Something is wrong, child has this as parent but this does not have child as a child!");
     children.erase(pos);
 
@@ -332,11 +334,4 @@ bool FNode::DeleteChildNode(FNode* child) {
     std::filesystem::remove_all(child->Path());
 
     return true;
-}
-
-void FNode::FixPointers(FNode& node) {
-    for (auto& child : node.children) {
-        child->parent = &node;
-        FixPointers(*child);
-    }
 }

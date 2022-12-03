@@ -22,7 +22,6 @@ Project::Project(Project&& other) noexcept :
     _startupSceneID(std::exchange(other._startupSceneID, UUID::Empty())),
     _openScene(std::exchange(other._openScene, nullptr)),
     _openSceneID(std::exchange(other._openSceneID, UUID::Empty())) {
-    _assets.__pointersInvalidated(this);
 }
 
 Project& Project::operator=(Project&& other) noexcept {
@@ -30,7 +29,6 @@ Project& Project::operator=(Project&& other) noexcept {
     _name = std::move(other._name);
 
     _assets = std::move(other._assets);
-    _assets.__pointersInvalidated(this);
 
     _startupSceneID = std::exchange(other._startupSceneID, UUID::Empty());
 

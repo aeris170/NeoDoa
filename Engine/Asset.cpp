@@ -73,9 +73,9 @@ UUID Asset::Instantiate() const {
     return UUID();
 }
 
-bool Asset::IsScene() const { return Assets::IsSceneFile(file); }
-bool Asset::IsScript() const { return Assets::IsScriptFile(file); }
-bool Asset::IsTexture() const { return Assets::IsTextureFile(file); }
-bool Asset::IsModel() const { return Assets::IsModelFile(file); }
-bool Asset::IsMaterial() const { return Assets::IsMaterialFile(file); }
-bool Asset::IsShader() const { return Assets::IsShaderFile(file); }
+bool Asset::IsScene() const { return Assets::IsSceneFile(*file); }
+bool Asset::IsScript() const { return Assets::IsScriptFile(*file); }
+bool Asset::IsTexture() const { return Assets::IsTextureFile(*file); }
+bool Asset::IsModel() const { return Assets::IsModelFile(*file); }
+bool Asset::IsMaterial() const { return Assets::IsMaterialFile(*file); }
+bool Asset::IsShader() const { return Assets::IsShaderFile(*file); }

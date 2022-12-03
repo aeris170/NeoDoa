@@ -50,11 +50,11 @@ private:
 
     void RenderMenuBar();
     void RenderTreeView();
-    void RenderTreeViewRecursive(FNode* current);
+    void RenderTreeViewRecursive(FNode& current);
 
     void RenderSelectedFolderContent();
     void RenderContextMenu();
-    void OpenFileAtFileNode(FNode* file);
+    void OpenFileAtFileNode(FNode& file);
 
     void SetSelectedNode(FNode* node);
     void SetCurrentFolder(FNode* folder);

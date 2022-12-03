@@ -8,9 +8,9 @@ struct Project;
 struct FNode;
 
 struct FNodeCreationParams {
-    const Project* owner{ nullptr }; /* optional, if the file in question is owned by a project, set it*/
-    FNode* parent{ nullptr }; /* flexible, nullptr denotes root node, non-nullptr denotes non-root nodes*/
-    std::string name{}; /* mandatory, name of file/folder */
+    const Project* owner{ nullptr }; /* optional, if the file in question is owned by a project, set it */
+    FNode* parent{ nullptr }; /* flexible, nullptr denotes root node, non-nullptr denotes non-root nodes */
+    std::string name{}; /* mandatory, name of file/folder (extension is not part of the name) */
     std::string ext{}; /* optional, only applicable to files */
     std::string content{}; /* optional, only applicable to files */
     bool isDirectory{ false };
@@ -21,11 +21,13 @@ struct FNode {
     FNode(const FNodeCreationParams& params) noexcept;
     FNode(FNodeCreationParams&& params) noexcept;
 
-    ~FNode() noexcept;
+    ~FNode() noexcept = default;
     FNode(const FNode& other) noexcept = delete;
     FNode(FNode&& other) noexcept;
     FNode& operator=(const FNode& other) = delete;
     FNode& operator=(FNode&& other) noexcept;
+    bool operator==(const FNode& other) const noexcept;
+    bool operator!=(const FNode& other) const noexcept;
 
     std::filesystem::path Path() const;
     std::filesystem::path AbsolutePath() const;
@@ -52,19 +54,25 @@ struct FNode {
     void ModifyContent(std::string&& content);
     std::string DisposeContent() const;
 
+    void MoveUnder(FNode& directory);
+    void Delete();
+
     size_t Size() const;
 
     bool IsFile() const;
     bool IsDirectory() const;
 
+    bool HasOwningProject() const;
     const Project* OwningProject() const;
-    FNode* RootNode() const;
-    FNode* ParentNode() const;
-    void MoveUnder(FNode& directory);
-    void Delete();
 
-    std::vector<FNode*> Children();
-    const std::vector<FNode*>& Children() const;
+    bool HasRootNode() const;
+    FNode* RootNode() const;
+
+    bool HasParentNode() const;
+    FNode* ParentNode() const;
+
+    std::vector<FNode>& Children();
+    const std::vector<FNode>& Children() const;
     auto begin();
     auto end();
 
@@ -85,17 +93,22 @@ private:
 
     bool isDirectory{ false };
 
-    std::vector<FNode*> children{};
-
-    static void FixPointers(FNode& node);
+    std::vector<FNode> children{};
 
     friend struct Asset;
     friend struct Assets;
 
-    inline void __pointersInvalidated(Project* newOwner) {
+    inline void __onMove(FNode* newParent) {
+        for (auto& child : newParent->children) {
+            child.parent = newParent;
+            __onMove(&child);
+        }
+    }
+
+    inline void __onMove(const Project* newOwner) {
         owner = newOwner;
-        for (auto child : children) {
-            child->__pointersInvalidated(newOwner);
+        for (auto& child : children) {
+            child.__onMove(newOwner);
         }
     }
 };
