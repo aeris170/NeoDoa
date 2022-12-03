@@ -48,4 +48,8 @@ private:
     UUID _startupSceneID{ UUID::Empty() };
     Scene* _openScene{ nullptr };
     UUID _openSceneID{ UUID::Empty() };
+
+    inline void __onMove() {
+        _assets.__onMove(this);
+    }
 };

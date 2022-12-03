@@ -51,7 +51,6 @@ Assets::Assets(Assets&& other) noexcept :
     modelAssets(std::move(other.modelAssets)),
     shaderAssets(std::move(other.shaderAssets)),
     shaderUniformBlockAssets(std::move(other.shaderUniformBlockAssets)) {
-    __onMove(project);
 }
 Assets& Assets::operator=(Assets&& other) noexcept {
     project = std::exchange(other.project, nullptr);
@@ -64,7 +63,6 @@ Assets& Assets::operator=(Assets&& other) noexcept {
     modelAssets = std::move(other.modelAssets);
     shaderAssets = std::move(other.shaderAssets);
     shaderUniformBlockAssets = std::move(other.shaderUniformBlockAssets);
-    __onMove(project);
     return *this;
 }
 

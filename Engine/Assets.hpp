@@ -129,8 +129,8 @@ private:
 
     friend struct Project;
 
-    inline void __onMove(const Project* newOwner) {
-        project = newOwner;
-        _root.__onMove(newOwner);
+    inline void __onMove(const Project* project) {
+        this->project = project;
+        _root.__onMove(project);
     }
 };

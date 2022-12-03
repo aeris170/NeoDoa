@@ -98,17 +98,17 @@ private:
     friend struct Asset;
     friend struct Assets;
 
-    inline void __onMove(FNode* newParent) {
-        for (auto& child : newParent->children) {
-            child.parent = newParent;
-            __onMove(&child);
+    inline void __onMove(FNode* parent) {
+        for (auto& child : children) {
+            child.parent = parent;
+            child.__onMove(&child);
         }
     }
 
-    inline void __onMove(const Project* newOwner) {
-        owner = newOwner;
+    inline void __onMove(const Project* owner) {
+        this->owner = owner;
         for (auto& child : children) {
-            child.__onMove(newOwner);
+            child.__onMove(owner);
         }
     }
 };

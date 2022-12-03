@@ -14,7 +14,6 @@ Project::Project(std::filesystem::path workspace, std::string name, UUID startup
     _startupSceneID(startupSceneID) {
     OpenStartupScene();
 }
-
 Project::Project(Project&& other) noexcept :
     _workspace(std::move(other._workspace)),
     _name(std::move(other._name)),
@@ -22,8 +21,8 @@ Project::Project(Project&& other) noexcept :
     _startupSceneID(std::exchange(other._startupSceneID, UUID::Empty())),
     _openScene(std::exchange(other._openScene, nullptr)),
     _openSceneID(std::exchange(other._openSceneID, UUID::Empty())) {
+    __onMove();
 }
-
 Project& Project::operator=(Project&& other) noexcept {
     _workspace = std::move(other._workspace);
     _name = std::move(other._name);
@@ -34,6 +33,8 @@ Project& Project::operator=(Project&& other) noexcept {
 
     _openScene = std::exchange(other._openScene, nullptr);
     _openSceneID = std::exchange(other._openSceneID, UUID::Empty());
+
+    __onMove();
     return *this;
 }
 
