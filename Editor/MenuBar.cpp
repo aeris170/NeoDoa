@@ -1,6 +1,5 @@
 #include "MenuBar.hpp"
 
-#include <imgui.h>
 #include <tinyfiledialogs.h>
 
 #include <Core.hpp>
@@ -8,14 +7,19 @@
 #include <Angel.hpp>
 
 #include "GUI.hpp"
+#include "ImGuiExtensions.hpp"
 
 MenuBar::MenuBar(GUI& owner) :
     gui(owner),
+	newProjectModal(*this),
+	openProjectModal(*this),
     aboutSection(*this) {}
 
 void MenuBar::Begin() {}
 
 void MenuBar::Render() {
+	GUI& gui = this->gui;
+
     if (ImGui::BeginMenuBar()) {
         if (ImGui::BeginMenu("Project")) {
             RenderProjectSubMenu();
@@ -32,7 +36,9 @@ void MenuBar::Render() {
         ImGui::EndMenuBar();
     }
 
-    // due to how imgui works, this must be outside the begin/end menubar :(
+    // due to how imgui works, these must be outside the begin/end menubar :(
+	newProjectModal.Render();
+	openProjectModal.Render();
     aboutSection.RenderAboutPopup();
 }
 
@@ -41,36 +47,10 @@ void MenuBar::End() {}
 void MenuBar::RenderProjectSubMenu() {
     GUI& gui = this->gui;
     if (ImGui::MenuItem("New Project", "Ctrl+Shift+N")) {
-        if (tinyfd_messageBox("Warning", "You may have unsaved changes. Are you sure you want to create a new project?", "yesno", "warning", 0)) {
-            const char* path = tinyfd_selectFolderDialog("Select a folder for New Project", "");
-            if (path) {
-                const char* name = nullptr;
-                bool badName = true;
-                while (badName) {
-                    name = tinyfd_inputBox("Enter a name for the New Project", "Enter a name for the New Project", "New Project");
-                    badName = name == nullptr || std::string(name) == "";
-                    if (badName) {
-                        tinyfd_messageBox("Warning", "Projects cannot be unnamed.", "ok", "warning", 1);
-                    }
-                }
-                gui.CloseProject();
-                gui.CreateNewProject(path, name);
-                gui.SaveProjectToDisk();
-                DOA_LOG_INFO("Succesfully created a new project named %s at %s", name, name);
-            }
-        }
+		newProjectModal.modal_active = true;
     }
     if (ImGui::MenuItem("Open Project...", "Ctrl+Shift+O")) {
-        if (tinyfd_messageBox("Warning", "You may have unsaved changes. Are you sure you want to open another project?", "yesno", "warning", 0)) {
-            static const char* const types[] = { "*.doa" };
-            gui.core->Angel()->_scriptLoaderMutex.lock();
-            const char* path = tinyfd_openFileDialog("Select Project File", nullptr, 1, types, "NeoDoa Project Files", 0);
-            gui.core->Angel()->_scriptLoaderMutex.unlock();
-            if (path) {
-                gui.CloseProject();
-                gui.OpenProjectFromDisk(path);
-            }
-        }
+		openProjectModal.modal_active = true;
     }
     ImGui::Separator();
     if (ImGui::MenuItem("Save Project", "Ctrl+Shift+S", nullptr, gui.HasOpenProject())) {
@@ -112,6 +92,125 @@ void MenuBar::RenderHelpSubMenu() {
     if (ImGui::MenuItem(AboutSection::ABOUT_BUTTON_TEXT)) {
         aboutSection.ab = true;
     }
+}
+
+// Inner struct: NewProjectModal
+MenuBar::NewProjectModal::NewProjectModal(MenuBar& owner) :
+	mb(owner) {}
+
+void MenuBar::NewProjectModal::Render() {
+	GUI& gui = mb.get().gui;
+
+	ImGui::PushID("new_project_modal");
+
+	if (modal_active) {
+		ImGui::OpenPopup(MODAL_TITLE_TEXT);
+		modal_open = true;
+	}
+
+	ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+	ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+	if (ImGui::BeginPopupModal(MODAL_TITLE_TEXT, &modal_open, ImGuiWindowFlags_AlwaysAutoResize)) {
+		ImGui::Text(MODAL_CONTENT_TEXT);
+		ImGui::Separator();
+
+		ImGuiStyle& style = ImGui::GetStyle();
+
+		float size = (MODAL_BUTTONS_SIZE.x + style.ItemSpacing.x) * 2.0f;
+		float avail = ImGui::GetWindowSize().x;
+
+		float offset = (avail - size) * 0.5f;
+		if (offset > 0.0f)
+			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
+
+		if (ImGui::Button(MODAL_YES_BUTTON_TEXT, MODAL_BUTTONS_SIZE)) {
+			const char* path = tinyfd_selectFolderDialog("Select a folder for New Project", "");
+			if (path) {
+				const char* name = nullptr;
+				bool badName = true;
+				while (badName) {
+					name = tinyfd_inputBox("Enter a name for the New Project", "Enter a name for the New Project", "New Project");
+					badName = name == nullptr || std::string(name) == "";
+					if (badName) {
+						tinyfd_messageBox("Warning", "Projects cannot be unnamed.", "ok", "warning", 1);
+					}
+				}
+				gui.CloseProject();
+				gui.CreateNewProject(path, name);
+				gui.SaveProjectToDisk();
+				DOA_LOG_INFO("Succesfully created a new project named %s at %s", name, name);
+			}
+
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::SetItemDefaultFocus();
+		ImGui::SameLine();
+		if (ImGui::Button(MODAL_NO_BUTTON_TEXT, MODAL_BUTTONS_SIZE)) {
+			modal_active = false;
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndPopup();
+	} else {
+		modal_active = false;
+	}
+	ImGui::PopID();
+}
+
+// Inner struct: OpenProjectModal
+MenuBar::OpenProjectModal::OpenProjectModal(MenuBar& owner) :
+	mb(owner) {}
+
+void MenuBar::OpenProjectModal::Render() {
+	GUI& gui = mb.get().gui;
+
+	ImGui::PushID("open_project_modal");
+
+	if (modal_active) {
+		ImGui::OpenPopup(MODAL_TITLE_TEXT);
+		modal_open = true;
+	}
+
+	ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+	ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+	if (ImGui::BeginPopupModal(MODAL_TITLE_TEXT, &modal_open,  ImGuiWindowFlags_AlwaysAutoResize)) {
+		ImGui::Text(MODAL_CONTENT_TEXT);
+		ImGui::Separator();
+
+		ImGuiStyle& style = ImGui::GetStyle();
+
+		float size = (MODAL_BUTTONS_SIZE.x + style.ItemSpacing.x) * 2.0f;
+		float avail = ImGui::GetWindowSize().x;
+
+		float offset = (avail - size) * 0.5f;
+		if (offset > 0.0f)
+			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
+
+		if (ImGui::Button(MODAL_YES_BUTTON_TEXT, MODAL_BUTTONS_SIZE)) {
+			static const char* const types[] = { "*.doa" };
+			gui.core->Angel()->_scriptLoaderMutex.lock();
+			const char* path = tinyfd_openFileDialog("Select Project File", nullptr, 1, types, "NeoDoa Project Files", 0);
+			gui.core->Angel()->_scriptLoaderMutex.unlock();
+			if (path) {
+				gui.CloseProject();
+				gui.OpenProjectFromDisk(path);
+				free((void*) path);
+			}
+
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::SetItemDefaultFocus();
+		ImGui::SameLine();
+		if (ImGui::Button(MODAL_NO_BUTTON_TEXT, MODAL_BUTTONS_SIZE)) {
+			modal_active = false;
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndPopup();
+	} else {
+		modal_active = false;
+	}
+	ImGui::PopID();
 }
 
 // Inner struct: About Section
