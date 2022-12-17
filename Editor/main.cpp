@@ -5,6 +5,7 @@
 #include "OutlineAttachment.hpp"
 
 #include <iostream>
+#include <vld.h>
 int main() {
     std::cout << "Allocating " << sizeof(Core) << " bytes..." << std::endl;
     const CorePtr& core = Core::CreateCore({ 2000, 2000 }, "NeoDoa Editor", false, "Images/neodoalogo", true);
