@@ -166,9 +166,7 @@ void GUI::OpenProjectFromDisk(const std::string& path) {
 
     // TODO
     FNode file(FNodeCreationParams{
-        nullptr,
-        nullptr,
-        path
+        .name = path
     });
     openProject.emplace(DeserializeProject(&file));
     core->LoadProject(openProject.value());
