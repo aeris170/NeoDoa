@@ -89,6 +89,7 @@ void AssetManager::RenderMenuBar() {
 
 void AssetManager::RenderTreeView() {
     if (!hasContent) return;
+    DrawRowsBackground(30); /* display bg for 30 items - more than enough for foreseeable future resolutions */
     RenderTreeViewRecursive(*root);
 }
 
@@ -275,6 +276,7 @@ void AssetManager::RenderSelectedFolderContent() {
 
         ImGui::EndTable();
     } else if (currentFolderContentSettings.viewMode == CurrentFolderContentSettings::ViewMode::List) {
+        DrawRowsBackground(30); /* display bg for 30 items - more than enough for foreseeable future resolutions */
         for (auto& child : currentFolder->Children()) {
             if (!child.IsDirectory() && !assets->IsAssetExistsAt(child)) { continue; }
 
