@@ -8,6 +8,7 @@ struct GLFWwindow;
 struct ImGuiContext;
 
 inline const ImVec4 WINDOW_BG{ 0.1f, 0.105f, 0.11f, 1.0f };
+inline const ImVec4 WINDOW_BG_ALT{ 0.2f, 0.205f, 0.21f, 1.0f };
 
 inline const ImVec4 IDLE{ 0.2f, 0.205f, 0.21f, 1.0f };
 inline const ImVec4 HOVER{ 0.3f, 0.305f, 0.31f, 1.0f };
