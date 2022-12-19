@@ -143,12 +143,13 @@ void MenuBar::NewProjectModal::Render() {
 			}
 
 			ImGui::CloseCurrentPopup();
+			modal_active = false;
 		}
 		ImGui::SetItemDefaultFocus();
 		ImGui::SameLine();
 		if (ImGui::Button(MODAL_NO_BUTTON_TEXT, MODAL_BUTTONS_SIZE)) {
-			modal_active = false;
 			ImGui::CloseCurrentPopup();
+			modal_active = false;
 		}
 		ImGui::EndPopup();
 	} else {
@@ -197,14 +198,14 @@ void MenuBar::OpenProjectModal::Render() {
 				gui.OpenProjectFromDisk(path);
 				free((void*) path);
 			}
-
 			ImGui::CloseCurrentPopup();
+			modal_active = false;
 		}
 		ImGui::SetItemDefaultFocus();
 		ImGui::SameLine();
 		if (ImGui::Button(MODAL_NO_BUTTON_TEXT, MODAL_BUTTONS_SIZE)) {
-			modal_active = false;
 			ImGui::CloseCurrentPopup();
+			modal_active = false;
 		}
 		ImGui::EndPopup();
 	} else {
