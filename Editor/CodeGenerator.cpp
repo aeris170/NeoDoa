@@ -1,13 +1,10 @@
 #include "CodeGenerator.hpp"
 
+#include <format>
+#include <sstream>
+
 std::string CodeGenerator::GenerateComponentDeclaration(std::string_view componentName) {
-    std::string s = R"(#pragma once
-
-struct )"; s.append(componentName); s.append(R"( {
-
-};
-)");
-    return s;
+    return std::format("class {} : Component {{\n\n\}};", componentName);
 }
 
 std::string CodeGenerator::GenerateSystemDeclaration(std::string_view systemName) {

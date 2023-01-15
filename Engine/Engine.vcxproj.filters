@@ -345,134 +345,128 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="Shaders\simpleFragmentShaderInstanced.frag">
+    <CopyFileToFolders Include="Models\12140_Skull_v3_L2.mtl">
       <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="Shaders\simpleVertexShaderInstanced.vert">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Models\12140_Skull_v3_L2.obj">
       <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="Shaders\mousePickVertexShader.vert">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Images\ch.jpg">
       <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="Shaders\mousePickFragmentShader.frag">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Models\Christmas tree N260410.3ds">
       <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="Shaders\simpleVertexShader.vert">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Images\default_texture.png">
       <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="Shaders\solidColorFragmentShader.frag">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Images\default_texture_x.png">
       <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="Shaders\solidColorVertexShader.vert">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Images\default_texture_y.png">
       <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="Shaders\simpleFragmentShader.frag">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Images\default_texture_z.png">
       <Filter>Resource Files</Filter>
-    </Text>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="Images\neodoalogo.png">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Fonts\fa-regular-400.ttf">
       <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Images\missing_texture.png">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Fonts\fa-regular-400-pro.ttf">
       <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Images\ch.jpg">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Fonts\fa-solid-900.ttf">
       <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Images\neodoalogo-16_x_16.png">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Fonts\fa-solid-900-pro.ttf">
       <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Images\neodoalogo-32_x_32.png">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Images\gradient_box.png">
       <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Images\neodoalogo-48_x_48.png">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Images\missing_texture.png">
       <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Images\neodoalogo-64_x_64.png">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Shaders\mousePickFragmentShader.frag">
       <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Images\neodoalogo-128_x_128.png">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Shaders\mousePickVertexShader.vert">
       <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Images\neodoalogo-256_x_256.png">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Images\neodoalogo.png">
       <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Images\social.png">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Images\neodoalogo-16_x_16.png">
       <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Images\default_texture.png">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Images\neodoalogo-32_x_32.png">
       <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Images\default_texture_x.png">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Images\neodoalogo-48_x_48.png">
       <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Images\default_texture_y.png">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Images\neodoalogo-64_x_64.png">
       <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Images\default_texture_z.png">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Images\neodoalogo-128_x_128.png">
       <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Images\gradient_box.png">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Images\neodoalogo-256_x_256.png">
       <Filter>Resource Files</Filter>
-    </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <Font Include="Fonts\OpenSans-ExtraBoldItalic.ttf">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Fonts\OpenSans-Bold.ttf">
       <Filter>Resource Files</Filter>
-    </Font>
-    <Font Include="Fonts\OpenSans-Italic.ttf">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Fonts\OpenSans-BoldItalic.ttf">
       <Filter>Resource Files</Filter>
-    </Font>
-    <Font Include="Fonts\OpenSans-Light.ttf">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Fonts\OpenSans-ExtraBold.ttf">
       <Filter>Resource Files</Filter>
-    </Font>
-    <Font Include="Fonts\OpenSans-LightItalic.ttf">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Fonts\OpenSans-ExtraBoldItalic.ttf">
       <Filter>Resource Files</Filter>
-    </Font>
-    <Font Include="Fonts\OpenSans-Regular.ttf">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Fonts\OpenSans-Italic.ttf">
       <Filter>Resource Files</Filter>
-    </Font>
-    <Font Include="Fonts\OpenSans-SemiBold.ttf">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Fonts\OpenSans-Light.ttf">
       <Filter>Resource Files</Filter>
-    </Font>
-    <Font Include="Fonts\OpenSans-SemiBoldItalic.ttf">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Fonts\OpenSans-LightItalic.ttf">
       <Filter>Resource Files</Filter>
-    </Font>
-    <Font Include="Fonts\OpenSans-Bold.ttf">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Fonts\OpenSans-Regular.ttf">
       <Filter>Resource Files</Filter>
-    </Font>
-    <Font Include="Fonts\OpenSans-BoldItalic.ttf">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Fonts\OpenSans-SemiBold.ttf">
       <Filter>Resource Files</Filter>
-    </Font>
-    <Font Include="Fonts\OpenSans-ExtraBold.ttf">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Fonts\OpenSans-SemiBoldItalic.ttf">
       <Filter>Resource Files</Filter>
-    </Font>
-    <Font Include="Fonts\fa-regular-400.ttf">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Shaders\simpleFragmentShader.frag">
       <Filter>Resource Files</Filter>
-    </Font>
-    <Font Include="Fonts\fa-solid-900.ttf">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Shaders\simpleFragmentShaderInstanced.frag">
       <Filter>Resource Files</Filter>
-    </Font>
-    <Font Include="Fonts\fa-regular-400-pro.ttf">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Shaders\simpleVertexShader.vert">
       <Filter>Resource Files</Filter>
-    </Font>
-    <Font Include="Fonts\fa-solid-900-pro.ttf">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Shaders\simpleVertexShaderInstanced.vert">
       <Filter>Resource Files</Filter>
-    </Font>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Models\12140_Skull_v3_L2.mtl">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Images\social.png">
       <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Models\12140_Skull_v3_L2.obj">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Shaders\solidColorFragmentShader.frag">
       <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Models\Christmas tree N260410.3ds">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Shaders\solidColorVertexShader.vert">
       <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Models\troll_yeni.fbx">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Models\troll_yeni.fbx">
       <Filter>Resource Files</Filter>
-    </None>
+    </CopyFileToFolders>
   </ItemGroup>
 </Project>

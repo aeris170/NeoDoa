@@ -39,6 +39,12 @@ struct Angel {
     ~Angel() noexcept;
 
     ScriptComponent InstantiateScriptComponentIncomplete(std::string_view moduleType);
+
+    asIScriptEngine& ScriptEngine();
+    CScriptBuilder& ScriptBuilder();
+
+    bool IsComponentDefinition(asITypeInfo* typeInfo) const;
+
 private:
     Angel(const Angel&) = delete;
     Angel(const Angel&&) = delete;
@@ -63,4 +69,6 @@ private:
         r = _scriptEngine->RegisterObjectMethod(typeName, std::string(t + "& opMul(const " + t + "& in) const").c_str(), asFUNCTIONPR(glm::operator*, (const T&, const T&), T), asCALL_CDECL_OBJLAST); assert(r >= 0);
         r = _scriptEngine->RegisterObjectMethod(typeName, std::string(t + "& opDiv(const " + t + "& in) const").c_str(), asFUNCTIONPR(glm::operator/, (const T&, const T&), T), asCALL_CDECL_OBJLAST); assert(r >= 0);
     }
+
+    asITypeInfo* _componentTypeInfo;
 };

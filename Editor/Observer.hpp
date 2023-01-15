@@ -10,9 +10,12 @@
 
 #include "TemplateUtilities.hpp"
 
+#include "ImGuiExtensions/TextEditor.h"
+
 struct GUI;
 struct Scene;
 struct FNode;
+struct Component;
 struct AssetHandle;
 
 #define DISPLAYABLE Entity, FNode*

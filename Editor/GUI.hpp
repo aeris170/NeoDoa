@@ -9,6 +9,7 @@
 #include <Core.hpp>
 
 #include "SVGPathway.hpp"
+#include "ImGuiExtensions/FileDialog.hpp"
 
 #include "MenuBar.hpp"
 #include "SceneHierarchy.hpp"
@@ -23,6 +24,7 @@ struct GUI {
 
     static constexpr auto SCENE_HIERARCHY_TITLE{ "Scene Hierarchy" };
     static constexpr auto OBSERVER_TITLE{ "Observer" };
+    static constexpr auto CODE_EDITOR_TITLE{ "Code Editor" };
     static constexpr auto CONSOLE_TITLE{ "Console" };
     static constexpr auto ASSET_MANAGER_TITLE{ "Asset Manager" };
     static constexpr auto SCENE_VIEWPORT_TITLE{ "Scene Viewport" };
@@ -31,6 +33,7 @@ struct GUI {
 
     static constexpr auto SCENE_HIERARCHY_ID{ "###Scene Hierarchy" };
     static constexpr auto OBSERVER_ID{ "###Observer" };
+    static constexpr auto CODE_EDITOR_ID{ "###Code Editor" };
     static constexpr auto CONSOLE_ID{ "###Console" };
     static constexpr auto ASSET_MANAGER_ID{ "###Asset Manager" };
     static constexpr auto SCENE_VIEWPORT_ID{ "###Scene Viewport" };
@@ -40,6 +43,7 @@ struct GUI {
     static constexpr auto FOLDER_ICON_KEY{ "folder-open" };
     static constexpr auto PROJECT_ICON_KEY{ "neodoa" };
     static constexpr auto SCENE_ICON_KEY{ "diagram-project" };
+    static constexpr auto COMPONENT_ICON_KEY{ "gear" };
     static constexpr auto FILE_ICON_KEY{ "file" };
     static constexpr auto BACK_ARROW_ICON_KEY{ "arrow-left" };
 
@@ -58,6 +62,7 @@ struct GUI {
     MenuBar mb;
     SceneHierarchy sh;
     Observer obs;
+    CodeEditor ce;
     AssetManager am;
     Console con;
     SceneViewport sv;
@@ -89,6 +94,7 @@ struct GUI {
     void* GetFolderIcon(TextureSize size = TextureSize::MEDIUM);
     void* GetProjectIcon(TextureSize size = TextureSize::MEDIUM);
     void* GetSceneIcon(TextureSize size = TextureSize::MEDIUM);
+    void* GetComponentIcon(TextureSize size = TextureSize::MEDIUM);
     void* GetFileIcon(TextureSize size = TextureSize::MEDIUM);
     void* GetBackArrowIcon(TextureSize size = TextureSize::MEDIUM);
 

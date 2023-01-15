@@ -86,7 +86,7 @@ void SceneHierarchy::Render(Scene& scene) {
         ResetSelectedEntity();
     }
 
-    if (ImGui::BeginPopupContextWindow(0, ImGuiMouseButton_Right, false)) {
+    if (ImGui::BeginPopupContextWindow(0, ImGuiMouseButton_Right)) {
         if (ImGui::MenuItem(ICON_FA_PLUS " Create New Entity")) {
             scene.CreateEntity();
         }

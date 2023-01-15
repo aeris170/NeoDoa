@@ -186,23 +186,42 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="Scripts\Rotate.as">
+    <CopyFileToFolders Include="SVGs\arrow-left.svg">
       <Filter>Resource Files</Filter>
-    </Text>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="SVGs\diagram-project.svg">
+      <Filter>Resource Files</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Images\document.png">
+      <Filter>Resource Files</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Editor.rc">
+      <Filter>Resource Files</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="SVGs\file.svg">
+      <Filter>Resource Files</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Images\folder.png">
+      <Filter>Resource Files</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="SVGs\folder-open.svg">
+      <Filter>Resource Files</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="SVGs\gear.svg">
+      <Filter>Resource Files</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="SVGs\neodoa.svg">
+      <Filter>Resource Files</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="resource.h">
+      <Filter>Resource Files</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Scripts\Rotate.as">
+      <Filter>Resource Files</Filter>
+    </CopyFileToFolders>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Editor.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="..\Engine\Images\neodoalogo.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Images\document.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Images\folder.png">
+    <Image Include="Images\neodoalogo.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

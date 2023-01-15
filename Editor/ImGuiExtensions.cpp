@@ -39,3 +39,12 @@ bool Splitter(bool split_vertically, float thickness, float* size1, float* size2
     bb.Max = ImVec2(bb.Min.x + itemSize.x, bb.Min.y + itemSize.y);
     return SplitterBehavior(bb, id, split_vertically ? ImGuiAxis_X : ImGuiAxis_Y, size1, size2, min_size1, min_size2, 0.0f);
 }
+
+float BeginTableColumnCenterText(std::string_view text) {
+	float oldX = ImGui::GetCursorPosX();
+	ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetColumnWidth(ImGui::TableGetColumnIndex()) - ImGui::CalcTextSize(text.data()).x) / 2.0f);
+	return oldX;
+}
+void EndTableColumnCenterText(float returnValueOfBegin) {
+	ImGui::SetCursorPosX(returnValueOfBegin);
+}

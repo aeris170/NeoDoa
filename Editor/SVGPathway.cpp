@@ -85,8 +85,8 @@ void SVGPathway::Initialize(Color&& color) {
             auto paddingFunction = [](std::unique_ptr<lunasvg::Document>& lunadoc, const std::vector<int>& box, const std::string& name, std::string&& scaleFactorName, float scaleFactor) {
                 lunasvg::Bitmap bitmapPadded;
                 bitmapPadded = lunadoc->renderToBitmap(
-                    (box[2] - box[0]) * static_cast<uint32_t>(scaleFactor),
-                    (box[3] - box[1]) * static_cast<uint32_t>(scaleFactor),
+                    static_cast<uint32_t>((box[2] - box[0]) * scaleFactor),
+                    static_cast<uint32_t>((box[3] - box[1]) * scaleFactor),
                     RASTER_BG_COLOR
                 );
                 const int width = bitmapPadded.width();
@@ -145,7 +145,7 @@ void SVGPathway::Initialize(Color&& color) {
             bitmapScaled = lunadoc->renderToBitmap(WIDTH, HEIGHT, RASTER_BG_COLOR);
             auto tex = Texture::CreateTextureRaw("!!" + name + "_scaled!!", bitmapScaled.data(), bitmapScaled.width(), bitmapScaled.height());
             if (tex != Texture::Empty()) {
-                /* we cannot copy (we can but why copy?), there is no "size" defined for scaled texture. if there were it
+                /* we cannot copy (we can but why copy?), there is no "size" defined for scaled texture. if there were, it
                 wouldn't make sense. "Hey SVG, pls give me A SMALL SCALED texture", what even is a SMALL SCALED texture? there is only one
                 scaled texture and it is placed to the beginning of the pack. for future: ref. [1] */
                 TexturesScaled.emplace(name, TexturePack{ std::move(tex), std::move(Texture::Empty()), std::move(Texture::Empty()) });

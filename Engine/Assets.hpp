@@ -21,10 +21,12 @@ struct AssetHandle {
     AssetHandle(AssetHandle&& other) = default;
     AssetHandle& operator=(const AssetHandle& other) = default;
     AssetHandle& operator=(AssetHandle&& other) = default;
-    Asset& operator*() const;
-    Asset* operator->() const;
-    operator Asset* () const;
-    operator bool() const;
+    bool operator==(const AssetHandle& rhs) const noexcept;
+    bool operator!=(const AssetHandle& rhs) const noexcept;
+    Asset& operator*() const noexcept;
+    Asset* operator->() const noexcept;
+    operator Asset* () const noexcept;
+    operator bool() const noexcept;
 
     bool HasValue() const;
     Asset& Value() const;
@@ -45,6 +47,7 @@ struct Assets {
     inline static std::string MODEL_EXT{ ".mdl" };
     inline static std::string MATERIAL_EXT{ ".mat" };
     inline static std::string SHADER_EXT{ ".shdr" };
+    inline static std::string COMP_EXT{ ".ncd" };
     inline static std::string ID_EXT{ ".id" };
 
     static bool IsSceneFile(const FNode& file);
@@ -53,6 +56,7 @@ struct Assets {
     static bool IsModelFile(const FNode& file);
     static bool IsMaterialFile(const FNode& file);
     static bool IsShaderFile(const FNode& file);
+    static bool IsComponentDefinitionFile(const FNode& file);
 
     Assets(const Project* owner) noexcept;
     ~Assets() = default;
@@ -103,6 +107,7 @@ struct Assets {
     const UUIDCollection& ShaderAssetIDs() const;
     const UUIDCollection& ShaderUniformBlockAssetIDs() const;
 
+    void Import(const FNode& file);
     void ReimportAll();
 
 private:

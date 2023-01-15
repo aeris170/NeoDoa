@@ -165,7 +165,7 @@ void GUI::OpenProjectFromDisk(const std::string& path) {
     CloseProject();
 
     // TODO
-    FNode file(FNodeCreationParams{
+    FNode file(FNodeCreationParams {
         .name = path
     });
     openProject.emplace(DeserializeProject(&file));
@@ -204,6 +204,7 @@ ImFont* GUI::GetFontBold() { return fontBold; }
 void* GUI::GetFolderIcon(TextureSize size) { return SVGPathway::Get(FOLDER_ICON_KEY, TextureStyle::PADDED, size).TextureIDRaw(); }
 void* GUI::GetProjectIcon(TextureSize size) { return SVGPathway::Get(PROJECT_ICON_KEY, TextureStyle::PADDED, size).TextureIDRaw(); }
 void* GUI::GetSceneIcon(TextureSize size) { return SVGPathway::Get(SCENE_ICON_KEY, TextureStyle::PADDED, size).TextureIDRaw(); }
+void* GUI::GetComponentIcon(TextureSize size) { return SVGPathway::Get(COMPONENT_ICON_KEY, TextureStyle::PADDED, size).TextureIDRaw(); }
 void* GUI::GetFileIcon(TextureSize size) { return SVGPathway::Get(FILE_ICON_KEY, TextureStyle::PADDED, size).TextureIDRaw(); }
 void* GUI::GetBackArrowIcon(TextureSize size) { return SVGPathway::Get(BACK_ARROW_ICON_KEY, TextureStyle::PADDED, size).TextureIDRaw(); }
 
@@ -218,6 +219,7 @@ void* GUI::FindIconForFileType(const FNode& file, TextureSize size) {
     AssetHandle asset = project.Assets().FindAssetAt(file);
 
     if (asset->IsScene()) { return GetSceneIcon(size); }
+    if (asset->IsComponentDefinition()) { return GetComponentIcon(size); }
     if (asset->IsScript()) { return GetSceneIcon(size); }
     if (asset->IsTexture()) { return GetSceneIcon(size); }
     if (asset->IsModel()) { return GetSceneIcon(size); }

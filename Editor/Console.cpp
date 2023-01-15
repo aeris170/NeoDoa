@@ -4,15 +4,7 @@
 
 #include "GUI.hpp"
 #include "Icons.hpp"
-
-const ImVec4 Console::TRACE_COLOR{ 0.7f, 0.7f, 0.7f, 1.0f };
-const ImVec4 Console::INFO_COLOR{ 0.7f, 1.0f, 0.7f, 1.0f };
-const ImVec4 Console::WARNING_COLOR{ 1.0f, 0.5f, 0.1f, 1.0f };
-const ImVec4 Console::ERROR_COLOR{ 1.0f, 0.6f, 0.6f, 1.0f };
-const ImVec4 Console::FATAL_COLOR{ 1.0f, 0.4f, 0.4f, 1.0f };
-const ImVec4 Console::OPENGL_COLOR{ 0.32f, 0.51f, 0.62f, 1.0f };
-const ImVec4 Console::VULKAN_COLOR{ 0.62f, 0.11f, 0.13f, 1.0f };
-const ImVec4 Console::DIRECTX_COLOR{ 0.48f, 0.71f, 0.0f, 1.0f };
+#include "ImGuiExtensions.hpp"
 
 Console::Console(GUI& gui) noexcept :
     gui(gui) {}
@@ -190,7 +182,7 @@ void Console::RenderMessageLog() {
     bool visible = ImGui::BeginTable(
         "log",
         2,
-        ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersH | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_ScrollY,
+        ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersH | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_PadOuterX,
         { ImGui::GetContentRegionAvail() }
     );
     if (!visible) return;
@@ -208,55 +200,46 @@ void Console::RenderMessageLog() {
             ImVec4 color;
             const char* tooltipMessage;
 
-            float oldX = ImGui::GetCursorPosX();
             switch (message._severity) {
             case LogSeverity::TRACE:
                 icon = ConsoleIcons::TRACE_ICON;
                 color = TRACE_COLOR;
                 tooltipMessage = TRACE_TOOLTIP_MESSAGE;
-                ImGui::SetCursorPosX(oldX + 14);
                 break;
             case LogSeverity::INFO:
                 icon = ConsoleIcons::INFO_ICON;
                 color = INFO_COLOR;
                 tooltipMessage = INFO_TOOLTIP_MESSAGE;
-                ImGui::SetCursorPosX(oldX + 14);
                 break;
             case LogSeverity::WARNING:
                 icon = ConsoleIcons::WARNING_ICON;
                 color = WARNING_COLOR;
                 tooltipMessage = WARNING_TOOLTIP_MESSAGE;
-                ImGui::SetCursorPosX(oldX + 9);
                 break;
             case LogSeverity::ERRO:
                 icon = ConsoleIcons::ERROR_ICON;
                 color = ERROR_COLOR;
                 tooltipMessage = ERROR_TOOLTIP_MESSAGE;
-                ImGui::SetCursorPosX(oldX + 8);
                 break;
             case LogSeverity::FATAL:
                 icon = ConsoleIcons::FATAL_ICON;
                 color = FATAL_COLOR;
                 tooltipMessage = FATAL_TOOLTIP_MESSAGE;
-                ImGui::SetCursorPosX(oldX + 8);
                 break;
             case LogSeverity::OPENGL:
                 icon = ConsoleIcons::OPENGL_ICON;
                 color = OPENGL_COLOR;
                 tooltipMessage = OPENGL_TOOLTIP_MESSAGE;
-                ImGui::SetCursorPosX(oldX + 9);
                 break;
             case LogSeverity::VULKAN:
                 icon = ConsoleIcons::VULKAN_ICON;
                 color = VULKAN_COLOR;
                 tooltipMessage = VULKAN_TOOLTIP_MESSAGE;
-                ImGui::SetCursorPosX(oldX + 9);
                 break;
             case LogSeverity::DIRECTX:
                 icon = ConsoleIcons::DIRECTX_ICON;
                 color = DIRECTX_COLOR;
                 tooltipMessage = DIRECTX_TOOLTIP_MESSAGE;
-                ImGui::SetCursorPosX(oldX + 9);
                 break;
             default:
                 icon = "??";
@@ -266,15 +249,16 @@ void Console::RenderMessageLog() {
             }
 
             ImGui::PushStyleColor(ImGuiCol_Text, color);
-
             ImGui::PushFont(gui.GetFontBold());
+
+            float r = BeginTableColumnCenterText(icon);
             ImGui::Text(icon);
+            EndTableColumnCenterText(r);
             if (ImGui::IsItemHovered()) {
                 ImGui::BeginTooltip();
                 ImGui::Text(tooltipMessage);
                 ImGui::EndTooltip();
             }
-            ImGui::SetCursorPosX(oldX);
             ImGui::PopFont();
 
             ImGui::TableSetColumnIndex(1);

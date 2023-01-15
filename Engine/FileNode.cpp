@@ -256,8 +256,8 @@ FNode* FNode::CreateChildFile(FNodeCreationParams&& params) {
             }
         } while (found);
     }
-
-    std::ofstream file(params.parent->Path() / params.name, std::ofstream::trunc | std::ofstream::binary);
+    std::string fullName = params.name + params.ext;
+    std::ofstream file(params.parent->Path() / fullName, std::ofstream::trunc | std::ofstream::binary);
     assert(file.is_open(), "file should be open by default");
     file << params.content;
     file.flush();

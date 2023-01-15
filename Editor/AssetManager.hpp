@@ -1,6 +1,8 @@
 #pragma once
 
 #include <functional>
+
+#include <imgui.h>
 #include <IconsFontAwesome5Pro.h>
 
 struct GUI;
@@ -31,7 +33,7 @@ private:
     struct TreeViewSettings {
         float currentWidth = 120.0f;
         float minWidth = 30.0f;
-    } treeViewSettings;
+    } treeViewSettings{};
 
     struct CurrentFolderContentSettings {
         float currentWidth = 300.0f;
@@ -46,7 +48,7 @@ private:
             Icons,
             List
         } viewMode = ViewMode::Icons;
-    } currentFolderContentSettings;
+    } currentFolderContentSettings{};
 
     void RenderMenuBar();
     void RenderTreeView();

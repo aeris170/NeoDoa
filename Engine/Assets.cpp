@@ -18,10 +18,12 @@ AssetHandle::AssetHandle() noexcept :
 AssetHandle::AssetHandle(Asset* const asset) noexcept :
     _asset(asset) {}
 
-Asset& AssetHandle::operator*() const { return *_asset; }
-Asset* AssetHandle::operator->() const { return _asset; }
-AssetHandle::operator Asset* () const { return _asset; }
-AssetHandle::operator bool() const { return HasValue(); }
+bool AssetHandle::operator==(const AssetHandle& other) const noexcept { return _asset == other._asset; }
+bool AssetHandle::operator!=(const AssetHandle& other) const noexcept { return !(*this == other); }
+Asset& AssetHandle::operator*() const noexcept { return *_asset; }
+Asset* AssetHandle::operator->() const noexcept { return _asset; }
+AssetHandle::operator Asset* () const noexcept { return _asset; }
+AssetHandle::operator bool() const noexcept { return HasValue(); }
 
 bool AssetHandle::HasValue() const { return _asset != nullptr; }
 Asset& AssetHandle::Value() const { return *_asset; }
@@ -33,6 +35,7 @@ bool Assets::IsTextureFile(const FNode& file) { return file.ext == TEXTURE_EXT; 
 bool Assets::IsModelFile(const FNode& file) { return file.ext == MODEL_EXT; }
 bool Assets::IsMaterialFile(const FNode& file) { return file.ext == MATERIAL_EXT; }
 bool Assets::IsShaderFile(const FNode& file) { return file.ext == SHADER_EXT; }
+bool Assets::IsComponentDefinitionFile(const FNode& file) { return file.ext == COMP_EXT; }
 
 Assets::Assets(const Project* owner) noexcept :
     project(owner),
@@ -82,7 +85,7 @@ void Assets::DeleteFolder(FNode& folder) {
 
 void Assets::MoveAsset(const AssetHandle asset, FNode& targetParentFolder) {
     if (!asset.HasValue()) { return; }
-    asset->File()->MoveUnder(targetParentFolder);
+    asset->File().MoveUnder(targetParentFolder);
     ReimportAll();
 }
 void Assets::DeleteAsset(const AssetHandle asset) {
@@ -98,7 +101,7 @@ void Assets::DeleteAsset(const AssetHandle asset) {
     std::erase(shaderAssets, id);
     std::erase(shaderUniformBlockAssets, id);
 
-    asset->File()->Delete();
+    asset->File().Delete();
 
     ReimportAll();
 }
@@ -121,7 +124,7 @@ AssetHandle Assets::FindAssetAt(const FNode& file) {
 }
 const AssetHandle Assets::FindAssetAt(const FNode& file) const {
     for (auto& [uuid, asset] : database) {
-        if (asset.File() == &file) {
+        if (asset.File() == file) {
             /*
             * casting away const is safe here
             * because database does not contain "const Asset*"
@@ -144,6 +147,7 @@ const Assets::UUIDCollection& Assets::ModelAssetIDs() const { return modelAssets
 const Assets::UUIDCollection& Assets::ShaderAssetIDs() const { return shaderAssets; }
 const Assets::UUIDCollection& Assets::ShaderUniformBlockAssetIDs() const { return shaderUniformBlockAssets; }
 
+void Assets::Import(const FNode& file) { ImportFile(database, file); }
 void Assets::ReimportAll() {
     database.clear();
     _root = FNode(FNodeCreationParams{ project, nullptr, "", "", "", true });

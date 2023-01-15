@@ -31,7 +31,7 @@ struct Asset {
     Asset& operator=(Asset&& other) noexcept;
 
     UUID ID() const;
-    FNode* File() const;
+    FNode& File() const;
     const AssetData& Data() const;
     template<AssetType T>
     T& DataAs() {
@@ -58,8 +58,21 @@ struct Asset {
     bool IsMaterial() const;
     bool IsShader() const;
 
+    bool HasInfoMessages() const;
+    const std::vector<std::any>& InfoMessages() const;
+
+    bool HasWarningMessages() const;
+    const std::vector<std::any>& WarningMessages() const;
+
+    bool HasErrorMessages() const;
+    const std::vector<std::any>& ErrorMessages() const;
+
 private:
-    UUID id;
-    FNode* file;
+    UUID id {};
+    FNode* file { nullptr };
     AssetData data{ std::monostate{} };
+
+    std::vector<std::any> infoList{};
+    std::vector<std::any> warningList{};
+    std::vector<std::any> errorList {};
 };

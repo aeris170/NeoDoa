@@ -9,6 +9,7 @@
 namespace WindowIcons {
     inline constexpr auto SCENE_HIERARCHY_WINDOW_ICON{ ICON_FA_PROJECT_DIAGRAM " " };
     inline constexpr auto OBSERVER_WINDOW_ICON{ ICON_FA_EYE " " };
+    inline constexpr auto CODE_EDITOR_WINDOW_ICON{ ICON_FA_FILE_CODE " " };
     inline constexpr auto CONSOLE_WINDOW_ICON{ ICON_FA_CODE " " };
     inline constexpr auto ASSET_MANAGER_WINDOW_ICON{ ICON_FA_CUBES " " };
     inline constexpr auto SCENE_VIEWPORT_WINDOW_ICON{ ICON_FA_DESKTOP " " }; // TODO CHANGE TO ICON_FA_DISPLAY ONCE 6.0 IS AVAILABLE
@@ -32,6 +33,12 @@ namespace ComponentIcons {
         { nameof(PerspectiveCameraComponent), ICON_FA_CAMERA_MOVIE " " },
         { nameof(ModelRenderer), ICON_FA_COCKTAIL " " }
     };
+}
+
+namespace ComponentDefinitionViewIcons {
+    inline constexpr auto INFO_ICON{ ICON_FA_INFO };
+    inline constexpr auto WARNING_ICON{ ICON_FA_EXCLAMATION_CIRCLE };
+    inline constexpr auto ERROR_ICON{ ICON_FA_EXCLAMATION_TRIANGLE };
 }
 
 namespace ConsoleIcons {

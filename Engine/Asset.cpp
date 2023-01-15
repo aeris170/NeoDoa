@@ -16,19 +16,25 @@ Asset::Asset(const UUID id, FNode* file) noexcept :
 
 Asset::Asset(Asset&& other) noexcept :
     id(std::move(other.id)),
-    file(std::exchange(other.file, nullptr)) {
-    DeleteDeserializedData();
-}
+    file(std::exchange(other.file, nullptr)),
+    data(std::move(other.data)),
+    infoList(std::move(other.infoList)),
+    warningList(std::move(other.warningList)),
+    errorList(std::move(other.errorList)) {}
 
 Asset& Asset::operator=(Asset&& other) noexcept {
     id = std::move(other.id);
     file = std::exchange(other.file, nullptr);
     DeleteDeserializedData();
+    data.swap(other.data);
+    infoList = std::move(other.infoList);
+    warningList = std::move(other.warningList);
+    errorList = std::move(other.errorList);
     return *this;
 }
 
 UUID Asset::ID() const { return id; }
-FNode* Asset::File() const { return file; }
+FNode& Asset::File() const { return *file; }
 const AssetData& Asset::Data() const { return data; }
 
 void Asset::Serialize() {
@@ -66,7 +72,12 @@ void Asset::ForceDeserialize() {
     DeleteDeserializedData();
     Deserialize();
 }
-void Asset::DeleteDeserializedData() { data = std::monostate{}; }
+void Asset::DeleteDeserializedData() {
+    data = std::monostate{};
+    infoList.clear();
+    warningList.clear();
+    errorList.clear();
+}
 bool Asset::HasDeserializedData() const { return !std::holds_alternative<std::monostate>(data); }
 
 UUID Asset::Instantiate() const {
@@ -79,3 +90,12 @@ bool Asset::IsTexture() const { return Assets::IsTextureFile(*file); }
 bool Asset::IsModel() const { return Assets::IsModelFile(*file); }
 bool Asset::IsMaterial() const { return Assets::IsMaterialFile(*file); }
 bool Asset::IsShader() const { return Assets::IsShaderFile(*file); }
+
+bool Asset::HasInfoMessages() const { return infoList.size() > 0; }
+const std::vector<std::any>& Asset::InfoMessages() const { return infoList; }
+
+bool Asset::HasWarningMessages() const { return warningList.size() > 0; }
+const std::vector<std::any>& Asset::WarningMessages() const { return warningList; }
+
+bool Asset::HasErrorMessages() const { return errorList.size() > 0; }
+const std::vector<std::any>& Asset::ErrorMessages() const { return errorList; }

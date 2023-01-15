@@ -19,9 +19,12 @@
 #include <ScriptStorageComponent.hpp>
 #include <Assets.hpp>
 
+#include <ComponentDeserializer.hpp>
+
 #include "GUI.hpp"
 #include "Icons.hpp"
 #include "ComponentUI.hpp"
+#include "ImGuiExtensions.hpp"
 
 Observer::Observer(GUI& gui) noexcept :
     gui(gui) {}
@@ -31,12 +34,20 @@ void Observer::Begin(Scene* scene) {
     ImGui::PushID(gui.OBSERVER_TITLE);
     std::string title(WindowIcons::OBSERVER_WINDOW_ICON);
     title.append(gui.OBSERVER_TITLE);
-    if (scene) {
-        if (gui.sh.selectedEntity != NULL_ENTT) {
+    std::visit(overloaded::lambda {
+        [](std::monostate arg) {},
+        [&](Entity entt) {
+            if (scene && entt != NULL_ENTT) {
+                title.append(" - ");
+                title.append(scene->GetComponent<IDComponent>(entt).GetTag());
+            }
+        },
+        [&](FNode* file) {
             title.append(" - ");
-            title.append(scene->GetComponent<IDComponent>(gui.sh.selectedEntity).GetTag());
+            title.append(file->Name());
         }
-    }
+    }, displayTarget);
+
     title.append(gui.OBSERVER_ID);
     ImGui::Begin(title.c_str());
 }
@@ -222,8 +233,8 @@ void Observer::RenderSceneView(AssetHandle sceneAsset) {
     }
 }
 void Observer::RenderTextView(AssetHandle textAsset) {
-    textAsset->File()->ReadContent();
-    std::string content = textAsset->File()->DisposeContent();
+    textAsset->File().ReadContent();
+    std::string content{ textAsset->File().DisposeContent() };
 
     ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders;
     if (ImGui::BeginTable("content", 1, flags)) {

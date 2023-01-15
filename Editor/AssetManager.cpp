@@ -1,7 +1,6 @@
 #include "AssetManager.hpp"
 
 #include <algorithm>
-#include <imgui.h>
 #include <imgui_internal.h>
 #include <detector.hpp>
 
@@ -45,13 +44,13 @@ void AssetManager::Render() {
     currentFolderContentSettings.currentWidth = ImGui::GetContentRegionAvail().x - treeViewSettings.currentWidth;
     Splitter(true, 8.0f, &treeViewSettings.currentWidth, &currentFolderContentSettings.currentWidth, treeViewSettings.minWidth, currentFolderContentSettings.minWidth);
 
-    ImGui::BeginChild("test", { treeViewSettings.currentWidth, 0 }, true);
+    ImGui::BeginChild("tree", { treeViewSettings.currentWidth, 0 }, true);
     RenderTreeView();
     ImGui::EndChild();
 
     ImGui::SameLine();
 
-    ImGui::BeginChild("test2", { currentFolderContentSettings.currentWidth, 0 }, true);
+    ImGui::BeginChild("content", { currentFolderContentSettings.currentWidth, 0 }, true);
     RenderContextMenu();
     RenderSelectedFolderContent();
     ImGui::EndChild();
@@ -171,7 +170,7 @@ void AssetManager::RenderSelectedFolderContent() {
         } else {
             throw; // platform not supported
         }
-        cmd.append(currentFolder->Path().string());
+        cmd.append(currentFolder->AbsolutePath().string());
         std::system(cmd.c_str());
     }
 
