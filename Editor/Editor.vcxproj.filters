@@ -201,9 +201,6 @@
     <CopyFileToFolders Include="Images\document.png">
       <Filter>Resource Files</Filter>
     </CopyFileToFolders>
-    <CopyFileToFolders Include="Editor.rc">
-      <Filter>Resource Files</Filter>
-    </CopyFileToFolders>
     <CopyFileToFolders Include="SVGs\file.svg">
       <Filter>Resource Files</Filter>
     </CopyFileToFolders>
@@ -217,9 +214,6 @@
       <Filter>Resource Files</Filter>
     </CopyFileToFolders>
     <CopyFileToFolders Include="SVGs\neodoa.svg">
-      <Filter>Resource Files</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="resource.h">
       <Filter>Resource Files</Filter>
     </CopyFileToFolders>
     <CopyFileToFolders Include="Scripts\Rotate.as">
