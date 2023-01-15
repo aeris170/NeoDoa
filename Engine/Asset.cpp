@@ -4,6 +4,7 @@
 #include "ProjectDeserializer.hpp"
 #include "SceneDeserializer.hpp"
 #include "SceneSerializer.hpp"
+#include "ComponentDeserializer.hpp"
 #include "TextureDeserializer.hpp"
 #include "TextureSerializer.hpp"
 
@@ -61,6 +62,23 @@ void Asset::Deserialize() {
     if (IsScene()) {
         data = DeserializeScene(*file);
     }
+    if (IsComponentDefinition()) {
+        auto result = DeserializeComponent(*file);
+        for (auto& message : result.messages) {
+            switch (message.messageType) {
+                case ComponentCompilerMessageType::INFO:
+                    infoList.emplace_back(std::move(message));
+                    break;
+                case ComponentCompilerMessageType::WARNING:
+                    warningList.emplace_back(std::move(message));
+                    break;
+                case ComponentCompilerMessageType::ERROR:
+                    errorList.emplace_back(std::move(message));
+                    break;
+            }
+        }
+        data = std::move(result.deserializedComponent);
+    }
     if (IsTexture()) {
         data = DeserializeTexture(*file);
     }
@@ -85,6 +103,7 @@ UUID Asset::Instantiate() const {
 }
 
 bool Asset::IsScene() const { return Assets::IsSceneFile(*file); }
+bool Asset::IsComponentDefinition() const { return Assets::IsComponentDefinitionFile(*file); }
 bool Asset::IsScript() const { return Assets::IsScriptFile(*file); }
 bool Asset::IsTexture() const { return Assets::IsTextureFile(*file); }
 bool Asset::IsModel() const { return Assets::IsModelFile(*file); }

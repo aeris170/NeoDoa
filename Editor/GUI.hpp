@@ -14,6 +14,7 @@
 #include "MenuBar.hpp"
 #include "SceneHierarchy.hpp"
 #include "Observer.hpp"
+#include "CodeEditor.hpp"
 #include "Console.hpp"
 #include "AssetManager.hpp"
 #include "SceneViewport.hpp"

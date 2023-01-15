@@ -4,6 +4,7 @@
 #include "FileNode.hpp"
 
 #include "Scene.hpp"
+#include "Component.hpp"
 //#include "Script.hpp"
 #include "Texture.hpp"
 #include "Model.hpp"
@@ -14,7 +15,7 @@
 
 #include <variant>
 
-#define ASSET_TYPE Scene, Texture, Model, Shader
+#define ASSET_TYPE Scene, Component, Texture/*, Model, Shader */
 template<typename T>
 concept AssetType = concepts::IsAnyOf<T, ASSET_TYPE> && concepts::Copyable<T> && concepts::Serializable<T> && std::movable<T>;
 using AssetData = std::variant<std::monostate, ASSET_TYPE>;
@@ -52,6 +53,7 @@ struct Asset {
     }
 
     bool IsScene() const;
+    bool IsComponentDefinition() const;
     bool IsScript() const;
     bool IsTexture() const;
     bool IsModel() const;

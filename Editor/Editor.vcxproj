@@ -106,6 +106,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AssetManager.cpp" />
+    <ClCompile Include="CodeEditor.cpp" />
     <ClCompile Include="ComponentUI.cpp" />
     <ClCompile Include="ComponentWidgets.cpp" />
     <ClCompile Include="Console.cpp" />
@@ -129,6 +130,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssetManager.hpp" />
+    <ClInclude Include="CodeEditor.hpp" />
     <ClInclude Include="ComponentUI.hpp" />
     <ClInclude Include="ComponentWidgets.hpp" />
     <ClInclude Include="Console.hpp" />

@@ -53,6 +53,9 @@
     <Filter Include="UI\GUI\SceneViewport\Gizmos">
       <UniqueIdentifier>{968e200f-ef59-4dbc-bbaa-9b91dc213e0b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="UI\GUI\CodeEditor">
+      <UniqueIdentifier>{467c6ac8-8d05-40e2-bffc-e7fab513cf59}</UniqueIdentifier>
+    </Filter>
     <Filter Include="UI\Extensions\FileDialog">
       <UniqueIdentifier>{3919d511-3dfb-4181-af23-24b371957a6c}</UniqueIdentifier>
     </Filter>
@@ -109,6 +112,9 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Gizmos.cpp">
       <Filter>UI\GUI\SceneViewport\Gizmos</Filter>
+    </ClCompile>
+    <ClCompile Include="CodeEditor.cpp">
+      <Filter>UI\GUI\CodeEditor</Filter>
     </ClCompile>
     <ClCompile Include="ImGuiExtensions\FileDialog.cpp">
       <Filter>UI\Extensions\FileDialog</Filter>
@@ -175,8 +181,8 @@
     <ClInclude Include="Gizmos.hpp">
       <Filter>UI\GUI\SceneViewport\Gizmos</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>Resource Files</Filter>
+    <ClInclude Include="CodeEditor.hpp">
+      <Filter>UI\GUI\CodeEditor</Filter>
     </ClInclude>
     <ClInclude Include="ImGuiExtensions\FileDialog.hpp">
       <Filter>UI\Extensions\FileDialog</Filter>

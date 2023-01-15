@@ -13,6 +13,7 @@ GUI::GUI(const CorePtr& core) noexcept :
     mb(*this),
     sh(*this),
     obs(*this),
+    ce(*this),
     am(*this),
     con(*this),
     sv(*this),
@@ -21,6 +22,7 @@ GUI::GUI(const CorePtr& core) noexcept :
     delta(0) {
     ImVec4 txtColor = ImGui::GetStyle().Colors[ImGuiCol_Text];
     SVGPathway::Initialize({ txtColor.x, txtColor.y, txtColor.z, txtColor.w });
+    FileDialog::Initialize();
     window->SetTitle(defaultWindowName);
 }
 
@@ -116,6 +118,10 @@ void GUI::operator() (float delta) {
         obs.Render(openProject->GetOpenScene());
     }
     obs.End();
+
+    ce.Begin();
+    ce.Render();
+    ce.End();
 
     con.Begin();
     con.Render();

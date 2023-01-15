@@ -189,15 +189,9 @@ void MenuBar::OpenProjectModal::Render() {
 			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
 
 		if (ImGui::Button(MODAL_YES_BUTTON_TEXT, MODAL_BUTTONS_SIZE)) {
-			static const char* const types[] = { "*.doa" };
 			gui.core->Angel()->_scriptLoaderMutex.lock();
-			const char* path = tinyfd_openFileDialog("Select Project File", nullptr, 1, types, "NeoDoa Project Files", 0);
+			FileDialog::Instance().Open("ProjectOpenDialog", "Select Project File", "NeoDoa Project Files (*.doa){.doa},.*");
 			gui.core->Angel()->_scriptLoaderMutex.unlock();
-			if (path) {
-				gui.CloseProject();
-				gui.OpenProjectFromDisk(path);
-				free((void*) path);
-			}
 			ImGui::CloseCurrentPopup();
 			modal_active = false;
 		}
@@ -210,6 +204,15 @@ void MenuBar::OpenProjectModal::Render() {
 		ImGui::EndPopup();
 	} else {
 		modal_active = false;
+	}
+
+	if (FileDialog::Instance().IsDone("ProjectOpenDialog")) {
+		if (FileDialog::Instance().HasResult()) {
+			std::string path = FileDialog::Instance().GetResult().string();
+			gui.CloseProject();
+			gui.OpenProjectFromDisk(path);
+		}
+		FileDialog::Instance().Close();
 	}
 	ImGui::PopID();
 }

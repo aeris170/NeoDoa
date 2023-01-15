@@ -125,6 +125,8 @@
     <ClCompile Include="BehaviourComponent.cpp" />
     <ClCompile Include="CameraComponent.cpp" />
     <ClCompile Include="ChildComponent.cpp" />
+    <ClCompile Include="Component.cpp" />
+    <ClCompile Include="ComponentDeserializer.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="FileNode.cpp" />
     <ClCompile Include="FrameBuffer.cpp" />
@@ -158,6 +160,8 @@
     <ClInclude Include="CameraComponent.hpp" />
     <ClInclude Include="ChildComponent.hpp" />
     <ClInclude Include="Color.hpp" />
+    <ClInclude Include="Component.hpp" />
+    <ClInclude Include="ComponentDeserializer.hpp" />
     <ClInclude Include="Entity.hpp" />
     <ClInclude Include="EnumValue.hpp" />
     <ClInclude Include="FileNode.hpp" />

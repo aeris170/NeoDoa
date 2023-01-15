@@ -9,6 +9,7 @@
 #include "GUI.hpp"
 #include "Icons.hpp"
 #include "ImGuiExtensions.hpp"
+#include "CodeGenerator.hpp"
 
 AssetManager::AssetManager(GUI& gui) noexcept :
     gui(gui) {}
@@ -62,6 +63,8 @@ void AssetManager::Render() {
         }
         deletedNode = nullptr;
     }
+
+    newComponentModal.Render();
 }
 
 void AssetManager::End() {
@@ -317,6 +320,9 @@ void AssetManager::RenderContextMenu() {
                 });
             }
             ImGui::Separator();
+            if (ImGui::MenuItem("Component")) {
+                newComponentModal.Activate(currentFolder, [this](const FNode& file) { this->gui.get().openProject->Assets().Import(file); });
+            }
 
             ImGui::EndMenu();
         }
@@ -332,8 +338,12 @@ void AssetManager::OpenFileAtFileNode(FNode& file) {
         currentFolder = &file;
         SetSelectedNode(nullptr);
     } else if (file.IsFile()) {
+        AssetHandle handle = assets->FindAssetAt(file);
+
         if (Assets::IsSceneFile(file)) {
-            gui.openProject->OpenScene(assets->FindAssetAt(file)->ID());
+            gui.openProject->OpenScene(handle->ID());
+        } else if (Assets::IsComponentDefinitionFile(file)) {
+            gui.ce.AddTab(handle);
         }
     }
 }
@@ -364,4 +374,63 @@ void AssetManager::SetCurrentFolder(FNode* folder) {
         SetSelectedNode(folder);
     }
     currentFolder = folder;
+}
+
+// Inner struct: NewComponentModal
+void AssetManager::NewComponentModal::Activate(FNode* currentFolder, OnCreateNewComponent callback) {
+    this->currentFolder = currentFolder;
+    this->callback = callback;
+    memset(compName, '\0', sizeof(compName));
+    strcpy(compName, "MyComponent");
+    modal_active = true;
+}
+
+void AssetManager::NewComponentModal::Render() {
+    if (!currentFolder) { return; }
+
+    ImGui::PushID("new_component_modal");
+
+    if (modal_active) {
+        ImGui::OpenPopup(MODAL_TITLE_TEXT);
+        modal_open = true;
+    }
+
+    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+    if (ImGui::BeginPopupModal(MODAL_TITLE_TEXT, &modal_open, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::Text(MODAL_CONTENT_TEXT);
+        ImGui::Separator();
+
+        ImGuiInputTextFlags flags = ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_CharsNoBlank | ImGuiInputTextFlags_EnterReturnsTrue;
+        ImGui::InputTextWithHint("##componentname", "MyComponent", compName, sizeof(compName), flags);
+
+        ImGuiStyle& style = ImGui::GetStyle();
+
+        float size = MODAL_BUTTON_SIZE.x + style.ItemSpacing.x;
+        float avail = ImGui::GetWindowSize().x;
+
+        float offset = (avail - size) * 0.5f;
+        if (offset > 0.0f)
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
+
+        if (ImGui::Button(MODAL_BUTTON_TEXT, MODAL_BUTTON_SIZE)) {
+            // check if name is empty
+            if (compName[0] != '\0') {
+
+                FNode* file = currentFolder->CreateChildFile(FNodeCreationParams{
+                    .name = compName,
+                    .ext = Assets::COMP_EXT,
+                    .content = CodeGenerator::GenerateComponentDeclaration(compName)
+                });
+                if (callback) { callback(*file); }
+                ImGui::CloseCurrentPopup();
+                modal_active = false;
+            }
+        }
+        ImGui::EndPopup();
+    } else {
+        modal_active = false;
+    }
+    ImGui::PopID();
 }

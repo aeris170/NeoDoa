@@ -50,6 +50,26 @@ private:
         } viewMode = ViewMode::Icons;
     } currentFolderContentSettings{};
 
+    struct NewComponentModal {
+
+        using OnCreateNewComponent = std::function<void(const FNode& file)>;
+
+        static constexpr auto MODAL_TITLE_TEXT{ "Create a new component" };
+        static constexpr auto MODAL_CONTENT_TEXT{ "Please enter a name for the new component.\n" };
+        static constexpr auto MODAL_BUTTON_TEXT{ "OK" };
+        inline static const ImVec2 MODAL_BUTTON_SIZE{ 120, 0 };
+
+        void Activate(FNode* currentFolder, OnCreateNewComponent callback = {});
+        void Render();
+
+
+    private:
+        FNode* currentFolder{ nullptr };
+        OnCreateNewComponent callback{};
+        bool modal_active{ false }, modal_open{ true };
+        char compName[128]{ "MyComponent" };
+    } newComponentModal{};
+
     void RenderMenuBar();
     void RenderTreeView();
     void RenderTreeViewRecursive(FNode& current);
