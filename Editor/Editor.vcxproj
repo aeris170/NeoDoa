@@ -145,6 +145,7 @@
     <ClInclude Include="MenuBar.hpp" />
     <ClInclude Include="Observer.hpp" />
     <ClInclude Include="OutlineAttachment.hpp" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="SceneHierarchy.hpp" />
     <ClInclude Include="SceneSettings.hpp" />
     <ClInclude Include="SceneViewport.hpp" />
@@ -186,6 +187,7 @@
       <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)%(RelativeDir)</DestinationFolders>
       <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)%(RelativeDir)</DestinationFolders>
     </Image>
+    <Image Include="Images\neodoawindow.ico" />
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="SVGs\arrow-left.svg">
@@ -242,6 +244,9 @@
       <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)%(RelativeDir)</DestinationFolders>
       <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)%(RelativeDir)</DestinationFolders>
     </CopyFileToFolders>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Editor.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
