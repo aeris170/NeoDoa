@@ -75,7 +75,7 @@ Entity Scene::CreateEntity(std::string name, uint32_t desiredID) {
         entt = _registry.create();
     }
 
-    if (name == "") {
+    if (name.empty()) {
         name = "New Entity ";
         name.append(std::to_string(entt));
     }

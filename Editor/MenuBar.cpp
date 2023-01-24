@@ -131,7 +131,7 @@ void MenuBar::NewProjectModal::Render() {
 				bool badName = true;
 				while (badName) {
 					name = tinyfd_inputBox("Enter a name for the New Project", "Enter a name for the New Project", "New Project");
-					badName = name == nullptr || std::string(name) == "";
+					badName = name == nullptr || std::string(name).empty();
 					if (badName) {
 						tinyfd_messageBox("Warning", "Projects cannot be unnamed.", "ok", "warning", 1);
 					}
