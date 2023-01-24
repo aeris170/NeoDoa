@@ -157,7 +157,7 @@ void SVGPathway::Initialize(Color&& color) {
 }
 
 const Texture& SVGPathway::Get(const std::string& key, const TextureStyle style, const TextureSize size) {
-    assert(Initialized, "SVGPathway not initialized.");
+    assert(Initialized); /* SVGPathway not initialized. */
     switch (style) {
     case TextureStyle::NONE:
         return Textures.at(key)[static_cast<size_t>(size)];
@@ -166,6 +166,7 @@ const Texture& SVGPathway::Get(const std::string& key, const TextureStyle style,
     case TextureStyle::SCALED:
         return TexturesScaled.at(key)[static_cast<size_t>(TextureSize::SMALL)]; /* see ref. [1] */
     }
-    assert(false, "no such texture");
+    assert(false); /* no such texture */
+    throw 1;
 }
 

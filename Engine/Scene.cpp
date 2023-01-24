@@ -62,6 +62,7 @@ ACamera& Scene::GetActiveCamera() {
         return _pc;
     }
     assert(false); // no camera?
+    throw 1;
 }
 
 Renderer::Stats Scene::GetRendererStats() const { return _renderer.stats; }
