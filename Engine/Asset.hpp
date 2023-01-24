@@ -49,7 +49,7 @@ struct Asset {
 
     template<AssetType T>
     void UpdateData(T&& newData) {
-        data = std::move(newData);
+        data = std::forward<T>(newData);
     }
 
     bool IsScene() const;
@@ -70,11 +70,11 @@ struct Asset {
     const std::vector<std::any>& ErrorMessages() const;
 
 private:
-    UUID id {};
-    FNode* file { nullptr };
+    UUID id{};
+    FNode* file{ nullptr };
     AssetData data{ std::monostate{} };
 
     std::vector<std::any> infoList{};
     std::vector<std::any> warningList{};
-    std::vector<std::any> errorList {};
+    std::vector<std::any> errorList{};
 };

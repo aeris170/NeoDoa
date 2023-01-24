@@ -18,7 +18,7 @@
 #include "ComponentWidgets.hpp"
 
 void IDComponentUI::Render(const IDComponent& idComponent) {
-    static std::unordered_map<::std::string, ::std::string> UINames = {
+    static unordered_string_map<std::string> UINames = {
         { nameof(IDComponent::entity), Prettify(nameof(IDComponent::entity)) },
         { nameof(IDComponent::tag), Prettify(nameof(IDComponent::tag)) }
     };
@@ -29,7 +29,7 @@ void IDComponentUI::Render(const IDComponent& idComponent) {
 }
 
 void TransformComponentUI::Render(const TransformComponent& transformComponent) {
-    static std::unordered_map<::std::string, ::std::string> UINames = {
+    static unordered_string_map<std::string> UINames = {
         { nameof(TransformComponent::localTranslation), Prettify(nameof(TransformComponent::localTranslation)) },
         { nameof(TransformComponent::localRotation), Prettify(nameof(TransformComponent::localRotation)) },
         { nameof(TransformComponent::localScale), Prettify(nameof(TransformComponent::localScale)) }
@@ -62,7 +62,7 @@ void TransformComponentUI::Render(const TransformComponent& transformComponent) 
 }
 
 void ParentComponentUI::Render(const ParentComponent& parentComponent) {
-    static std::unordered_map<::std::string, ::std::string> UINames = {
+    static unordered_string_map<std::string> UINames = {
         { nameof(ParentComponent::children), Prettify(nameof(ParentComponent::children)) }
     };
 
@@ -71,7 +71,7 @@ void ParentComponentUI::Render(const ParentComponent& parentComponent) {
 }
 
 void ChildComponentUI::Render(const ChildComponent& childComponent) {
-    static std::unordered_map<::std::string, ::std::string> UINames = {
+    static unordered_string_map<std::string> UINames = {
         { nameof(ChildComponent::parent), Prettify(nameof(ChildComponent::parent)) }
     };
 
@@ -80,7 +80,7 @@ void ChildComponentUI::Render(const ChildComponent& childComponent) {
 }
 
 void OrthoCameraComponentUI::Render(const OrthoCameraComponent& orthoCameraComponent) {
-    static std::unordered_map<::std::string, ::std::string> UINames = {
+    static unordered_string_map<std::string> UINames = {
         { nameof(OrthoCameraComponent::isActiveAndRendering), Prettify(nameof(OrthoCameraComponent::isActiveAndRendering)) },
         { nameof(OrthoCameraComponent::data), Prettify("orthoCameraProperties") },
         { nameof(FrameBuffer::ClearColor), Prettify("clearColor") },
@@ -112,7 +112,7 @@ void OrthoCameraComponentUI::Render(const OrthoCameraComponent& orthoCameraCompo
 }
 
 void PerspectiveCameraComponentUI::Render(const PerspectiveCameraComponent& perspectiveCameraComponent) {
-    static std::unordered_map<::std::string, ::std::string> UINames = {
+    static unordered_string_map<std::string> UINames = {
         { nameof(PerspectiveCameraComponent::isActiveAndRendering), Prettify(nameof(PerspectiveCameraComponent::isActiveAndRendering)) },
         { nameof(PerspectiveCameraComponent::data), Prettify("orthoCameraProperties") },
         { nameof(FrameBuffer::ClearColor), Prettify("clearColor") },
@@ -160,42 +160,42 @@ bool ComponentUI::Begin(const Observer& observer, std::string_view componentType
     }
     return rv;
 }
-void ComponentUI::RenderIDComponent(const Observer& observer, Scene& scene, IDComponent& idComponent) {
+void ComponentUI::RenderIDComponent(const Observer& observer, const IDComponent& idComponent) {
     bool show = ComponentUI::Begin(observer, nameof(IDComponent));
     if (show) {
         IDComponentUI::Render(idComponent);
     }
     ComponentUI::End(show);
 }
-void ComponentUI::RenderTransformComponent(const Observer& observer, Scene& scene, TransformComponent& transformComponent) {
+void ComponentUI::RenderTransformComponent(const Observer& observer, const TransformComponent& transformComponent) {
     bool show = ComponentUI::Begin(observer, nameof(TransformComponent));
     if (show) {
         TransformComponentUI::Render(transformComponent);
     }
     ComponentUI::End(show);
 }
-void ComponentUI::RenderParentComponent(const Observer& observer, Scene& scene, ParentComponent& parentComponent) {
+void ComponentUI::RenderParentComponent(const Observer& observer, const ParentComponent& parentComponent) {
     bool show = ComponentUI::Begin(observer, nameof(ParentComponent));
     if (show) {
         ParentComponentUI::Render(parentComponent);
     }
     ComponentUI::End(show);
 }
-void ComponentUI::RenderChildComponent(const Observer& observer, Scene& scene, ChildComponent& childComponent) {
+void ComponentUI::RenderChildComponent(const Observer& observer, const ChildComponent& childComponent) {
     bool show = ComponentUI::Begin(observer, nameof(ChildComponent));
     if (show) {
         ChildComponentUI::Render(childComponent);
     }
     ComponentUI::End(show);
 }
-void ComponentUI::RenderOrthoCameraComponent(const Observer& observer, Scene& scene, OrthoCameraComponent& orthoCameraComponent) {
+void ComponentUI::RenderOrthoCameraComponent(const Observer& observer, const OrthoCameraComponent& orthoCameraComponent) {
     bool show = ComponentUI::Begin(observer, nameof(OrthoCameraComponent));
     if (show) {
         OrthoCameraComponentUI::Render(orthoCameraComponent);
     }
     ComponentUI::End(show);
 }
-void ComponentUI::RenderPerspectiveCameraComponent(const Observer& observer, Scene& scene, PerspectiveCameraComponent& perspectiveCameraComponent) {
+void ComponentUI::RenderPerspectiveCameraComponent(const Observer& observer, const PerspectiveCameraComponent& perspectiveCameraComponent) {
     bool show = ComponentUI::Begin(observer, nameof(PerspectiveCameraComponent));
     if (show) {
         PerspectiveCameraComponentUI::Render(perspectiveCameraComponent);

@@ -13,8 +13,6 @@
 #include "Registry.hpp"
 #include "Color.hpp"
 
-struct ScriptStorageComponent;
-
 struct Scene {
 
     static Scene& GetLoadedScene();
@@ -23,8 +21,8 @@ struct Scene {
     Color ClearColor{ 0.2f, 0.3f, 0.3f };
     Color SelectionOutlineColor{ 0.68f, 0.49f, 0 };
 
-    Scene(std::string_view name = "New Scene") noexcept;
-    Scene(std::string&& name) noexcept;
+    explicit Scene(std::string_view name = "New Scene") noexcept;
+    explicit Scene(std::string&& name) noexcept;
 
     bool IsOrtho() const;
     bool IsPerspective() const;
@@ -51,13 +49,11 @@ struct Scene {
     // E - Entity
     Entity CreateEntity(std::string name = "", uint32_t desiredID = EntityTo<uint32_t>(NULL_ENTT));
     void DeleteEntity(Entity entt);
-    bool ContainsEntity(Entity entt);
-    size_t EntityCount();
+    bool ContainsEntity(Entity entt) const;
+    size_t EntityCount() const;
     const std::vector<Entity>& GetAllEntites() const;
 
     // C - Component
-    ScriptStorageComponent& Scripts(Entity entt);
-
     template <typename Component, typename... Args>
         requires std::constructible_from<Component, Entity, Args...>
     void EmplaceComponent(Entity entity, Args&&... args) {
@@ -108,7 +104,7 @@ struct Scene {
     }
 
     template <typename Component>
-    const Component GetComponent(Entity entity) const {
+    Component GetComponent(Entity entity) const {
         return _registry.get<Component>(entity);
     }
 
@@ -134,9 +130,6 @@ private:
     Registry _registry;
     std::vector<Entity> _entities;
     std::vector<entt::poly<System>> _systems;
-
-    std::unordered_map<Entity, std::vector<std::string>> _attachList; // scripts that call Attach add to this map
-    std::unordered_map<Entity, std::vector<std::string>> _detachList; // scripts that call Detach add to this map
 
     void Update(float delta);
     void Render();

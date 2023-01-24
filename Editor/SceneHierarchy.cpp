@@ -42,7 +42,7 @@ void SceneHierarchy::Render(Scene& scene) {
             scene.RemoveComponent<ChildComponent>(child.GetEntity());
 
             std::erase(parent.GetChildren(), dropped);
-            if (parent.GetChildren().size() == 0) {
+            if (parent.GetChildren().empty()) {
                 scene.RemoveComponent<ParentComponent>(parent.GetEntity());
             }
 
@@ -67,7 +67,7 @@ void SceneHierarchy::Render(Scene& scene) {
                 scene.RemoveComponent<ChildComponent>(child.GetEntity());
 
                 std::erase(parent.GetChildren(), dropped);
-                if (parent.GetChildren().size() == 0) {
+                if (parent.GetChildren().empty()) {
                     scene.RemoveComponent<ParentComponent>(parent.GetEntity());
                 }
 
@@ -86,7 +86,6 @@ void SceneHierarchy::Render(Scene& scene) {
         ResetSelectedEntity();
     }
 
-    if (ImGui::BeginPopupContextWindow(0, ImGuiMouseButton_Right)) {
         if (ImGui::MenuItem(ICON_FA_PLUS " Create New Entity")) {
             scene.CreateEntity();
         }
@@ -113,7 +112,7 @@ void SceneHierarchy::End() {
 
 void SceneHierarchy::RenderEntityNode(Scene& scene, const Entity entity) {
     GUI& gui = this->gui;
-    IDComponent& id = scene.GetComponent<IDComponent>(entity);
+    const IDComponent& id = scene.GetComponent<IDComponent>(entity);
 
     std::string title;
     title.reserve(64);
@@ -122,7 +121,7 @@ void SceneHierarchy::RenderEntityNode(Scene& scene, const Entity entity) {
     bool isLeaf = true;
     if (scene.HasComponent<ParentComponent>(entity)) {
         ParentComponent& parent = scene.GetComponent<ParentComponent>(entity);
-        isLeaf = parent.GetChildren().size() == 0;
+        isLeaf = parent.GetChildren().empty();
     }
 
     panel_flags = ImGuiTreeNodeFlags_SpanAvailWidth;
@@ -138,21 +137,21 @@ void SceneHierarchy::RenderEntityNode(Scene& scene, const Entity entity) {
 
     if (entity == highlightedEntity) {
         panel_flags |= ImGuiTreeNodeFlags_Selected;
-        static auto origHeaderColor = ImGui::GetStyleColorVec4(ImGuiCol_Header);
-        static auto origTextColor = ImGui::GetStyleColorVec4(ImGuiCol_Text);
+        static auto& origHeaderColor = ImGui::GetStyleColorVec4(ImGuiCol_Header);
+        static auto& origTextColor = ImGui::GetStyleColorVec4(ImGuiCol_Text);
         float factor = _highlightTime / highlight_expire;
         ImGui::PushStyleColor(ImGuiCol_Header, {
             eze::easeInSine(1.0f, origHeaderColor.x, factor),
             eze::easeInSine(1.0f, origHeaderColor.y, factor),
             eze::easeInSine(0.31f, origHeaderColor.z, factor),
             1
-                              });
+        });
         ImGui::PushStyleColor(ImGuiCol_Text, {
             eze::easeInSine(0.0f, origTextColor.x, factor),
             eze::easeInSine(0.0f, origTextColor.y, factor),
             eze::easeInSine(0.0f, origTextColor.z, factor),
             1
-                              });
+        });
         _highlightTime += gui.delta;
 
         // if highlighted entity changed during the highlight anim., restart the anim

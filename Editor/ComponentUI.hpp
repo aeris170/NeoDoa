@@ -39,13 +39,13 @@ struct Observer;
 namespace ComponentUI {
     bool Begin(const Observer& observer, std::string_view componentTypeName);
 
-    void RenderIDComponent(const Observer& observer, Scene& scene, IDComponent& idComponent);
-    void RenderTransformComponent(const Observer& observer, Scene& scene, TransformComponent& transformComponent);
-    void RenderParentComponent(const Observer& observer, Scene& scene, ParentComponent& parentComponent);
-    void RenderChildComponent(const Observer& observer, Scene& scene, ChildComponent& childComponent);
-    void RenderOrthoCameraComponent(const Observer& observer, Scene& scene, OrthoCameraComponent& orthoCameraComponent);
-    void RenderPerspectiveCameraComponent(const Observer& observer, Scene& scene, PerspectiveCameraComponent& perspectiveCameraComponent);
     void RenderScriptStorageComponent(const Observer& observer, Scene& scene, ScriptStorageComponent& scriptStorageComponent);
 
+    void RenderIDComponent(const Observer& observer, const IDComponent& idComponent);
+    void RenderTransformComponent(const Observer& observer, const TransformComponent& transformComponent);
+    void RenderParentComponent(const Observer& observer, const ParentComponent& parentComponent);
+    void RenderChildComponent(const Observer& observer, const ChildComponent& childComponent);
+    void RenderOrthoCameraComponent(const Observer& observer, const OrthoCameraComponent& orthoCameraComponent);
+    void RenderPerspectiveCameraComponent(const Observer& observer, const PerspectiveCameraComponent& perspectiveCameraComponent);
     void End(bool show);
 };

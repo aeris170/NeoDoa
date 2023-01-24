@@ -8,7 +8,7 @@ struct UUID {
 
     UUID() noexcept : uuid(uid(mt)) {}
     constexpr UUID(uint64_t uuid) noexcept : uuid(uuid) {}
-    UUID(const std::string& string) noexcept;
+    explicit UUID(const std::string& string) noexcept;
     constexpr UUID(const UUID& other) = default;
     constexpr UUID& operator=(const UUID& other) = default;
     constexpr UUID(UUID&& other) = default;
@@ -24,23 +24,10 @@ private:
     static std::uniform_int_distribution<uint64_t> uid;
 
     uint64_t uuid;
-    std::string stringValue;
 
     friend struct std::hash<UUID>;
-    friend constexpr bool operator== (const UUID& id1, const UUID& id2);
-    friend constexpr bool operator!= (const UUID& id1, const UUID& id2);
-    friend constexpr bool operator< (const UUID& id1, const UUID& id2);
-    friend constexpr bool operator> (const UUID& id1, const UUID& id2);
-    friend constexpr bool operator<= (const UUID& id1, const UUID& id2);
-    friend constexpr bool operator>= (const UUID& id1, const UUID& id2);
+    friend constexpr std::strong_ordering operator<=>(const UUID& id1, const UUID& id2) = default;
 };
-
-constexpr bool operator== (const UUID& id1, const UUID& id2) { return id1.uuid == id2.uuid; }
-constexpr bool operator!= (const UUID& id1, const UUID& id2) { return id1.uuid != id2.uuid; }
-constexpr bool operator< (const UUID& id1, const UUID& id2) { return id1.uuid < id2.uuid; }
-constexpr bool operator> (const UUID& id1, const UUID& id2) { return id1.uuid > id2.uuid; }
-constexpr bool operator<= (const UUID& id1, const UUID& id2) { return id1.uuid <= id2.uuid; }
-constexpr bool operator>= (const UUID& id1, const UUID& id2) { return id1.uuid >= id2.uuid; }
 
 namespace std {
     template<>

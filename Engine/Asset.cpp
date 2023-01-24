@@ -110,11 +110,12 @@ bool Asset::IsModel() const { return Assets::IsModelFile(*file); }
 bool Asset::IsMaterial() const { return Assets::IsMaterialFile(*file); }
 bool Asset::IsShader() const { return Assets::IsShaderFile(*file); }
 
-bool Asset::HasInfoMessages() const { return infoList.size() > 0; }
+bool Asset::HasInfoMessages() const { return !infoList.empty(); }
 const std::vector<std::any>& Asset::InfoMessages() const { return infoList; }
 
-bool Asset::HasWarningMessages() const { return warningList.size() > 0; }
+bool Asset::HasWarningMessages() const { return !warningList.empty(); }
 const std::vector<std::any>& Asset::WarningMessages() const { return warningList; }
 
-bool Asset::HasErrorMessages() const { return errorList.size() > 0; }
+bool Asset::HasErrorMessages() const { return !errorList.empty(); }
 const std::vector<std::any>& Asset::ErrorMessages() const { return errorList; }
+

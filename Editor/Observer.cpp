@@ -111,30 +111,30 @@ void Observer::End() {
 }
 
 void Observer::RenderComponents(Scene& scene, const Entity entt) {
-    IDComponent& idComponent = scene.GetComponent<IDComponent>(entt);
-    ComponentUI::RenderIDComponent(*this, scene, idComponent);
+    const auto& idComponent = scene.GetComponent<IDComponent>(entt);
+    ComponentUI::RenderIDComponent(*this, idComponent);
 
-    TransformComponent& transformComponent = scene.GetComponent<TransformComponent>(entt);
-    ComponentUI::RenderTransformComponent(*this, scene, transformComponent);
+    const auto& transformComponent = scene.GetComponent<TransformComponent>(entt);
+    ComponentUI::RenderTransformComponent(*this, transformComponent);
 
     if (scene.HasComponent<ParentComponent>(entt)) {
-        ParentComponent& parentComponent = scene.GetComponent<ParentComponent>(entt);
-        ComponentUI::RenderParentComponent(*this, scene, parentComponent);
+        const auto& parentComponent = scene.GetComponent<ParentComponent>(entt);
+        ComponentUI::RenderParentComponent(*this, parentComponent);
     }
 
     if (scene.HasComponent<ChildComponent>(entt)) {
-        ChildComponent& childComponent = scene.GetComponent<ChildComponent>(entt);
-        ComponentUI::RenderChildComponent(*this, scene, childComponent);
+        const auto& childComponent = scene.GetComponent<ChildComponent>(entt);
+        ComponentUI::RenderChildComponent(*this, childComponent);
     }
 
     if (scene.HasComponent<OrthoCameraComponent>(entt)) {
-        OrthoCameraComponent& orthoCameraComponent = scene.GetComponent<OrthoCameraComponent>(entt);
-        ComponentUI::RenderOrthoCameraComponent(*this, scene, orthoCameraComponent);
+        const auto& orthoCameraComponent = scene.GetComponent<OrthoCameraComponent>(entt);
+        ComponentUI::RenderOrthoCameraComponent(*this, orthoCameraComponent);
     }
 
     if (scene.HasComponent<PerspectiveCameraComponent>(entt)) {
-        PerspectiveCameraComponent& perspectiveCameraComponent = scene.GetComponent<PerspectiveCameraComponent>(entt);
-        ComponentUI::RenderPerspectiveCameraComponent(*this, scene, perspectiveCameraComponent);
+        const auto& perspectiveCameraComponent = scene.GetComponent<PerspectiveCameraComponent>(entt);
+        ComponentUI::RenderPerspectiveCameraComponent(*this, perspectiveCameraComponent);
     }
 
     if (scene.HasComponent<ScriptStorageComponent>(entt)) {
@@ -240,7 +240,7 @@ void Observer::RenderComponentDefinitionView(AssetHandle componentDefAsset) {
     ComponentDefinitionDisplay::RenderMessagesTable(componentDefAsset);
 
     if (!componentDefAsset->HasErrorMessages()) {
-        Component& component = componentDefAsset->DataAs<Component>();
+        const auto& component = componentDefAsset->DataAs<Component>();
         ComponentDefinitionDisplay::RenderFields(component);
         ImGui::Separator();
         ComponentDefinitionDisplay::RenderSourceCode(component);
@@ -284,7 +284,7 @@ void Observer::RenderTextureView(AssetHandle textureAsset) {
     windowHeight = windowHeight - totalBottomPadding;
 
     if (textureAsset->HasDeserializedData()) {
-        Texture& tex = textureAsset->DataAs<Texture>();
+        const auto& tex = textureAsset->DataAs<Texture>();
         float w = static_cast<float>(tex.Width());
         float h = static_cast<float>(tex.Height());
         float aspect = w / h;

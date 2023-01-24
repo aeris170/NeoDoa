@@ -7,15 +7,13 @@
 #include "ModelRenderer.hpp"
 #include "Renderer.hpp"
 
-#include "Angel.hpp"
-#include "ScriptComponent.hpp"
+#include "Core.hpp"
 
 #include "Log.hpp"
 #include "Texture.hpp"
 #include "TransformComponent.hpp"
 #include "IDComponent.hpp"
 #include "ParentComponent.hpp"
-#include "ScriptStorageComponent.hpp"
 #include "CameraComponent.hpp"
 #include "Project.hpp"
 #include "SceneSerializer.hpp"
@@ -23,8 +21,8 @@
 
 Scene& Scene::GetLoadedScene() {
     static auto& core = Core::GetCore();
-    assert(core->GetLoadedProject() != nullptr, "There is no loaded project, hence no loaded scene.");
-    assert(core->GetLoadedProject()->HasOpenScene(), "There is no loaded scene.");
+    assert(core->GetLoadedProject() != nullptr); // There is no loaded project, hence no loaded scene.
+    assert(core->GetLoadedProject()->HasOpenScene()); // There is no loaded scene.
     return core->GetLoadedProject()->GetOpenScene();
 }
 
@@ -62,17 +60,15 @@ ACamera& Scene::GetActiveCamera() {
         return _oc;
     } else if (IsPerspective()) {
         return _pc;
-    } else {
-        assert("no camera?");
-        throw "no camera?";
     }
+    assert(false); // no camera?
 }
 
 Renderer::Stats Scene::GetRendererStats() const { return _renderer.stats; }
 
 Entity Scene::CreateEntity(std::string name, uint32_t desiredID) {
     Entity entt;
-    if (desiredID != EntityTo<uint32_t>(NULL_ENTT) && desiredID >= 0) {
+    if (desiredID != EntityTo<uint32_t>(NULL_ENTT)) {
         entt = _registry.create(Entity(desiredID));
     } else {
         entt = _registry.create();
@@ -84,7 +80,6 @@ Entity Scene::CreateEntity(std::string name, uint32_t desiredID) {
     }
     _registry.emplace<IDComponent>(entt, entt, name);
     _registry.emplace<TransformComponent>(entt, entt);
-    _registry.emplace<ScriptStorageComponent>(entt, entt);
 
     _entities.push_back(entt);
     return entt;
@@ -93,7 +88,7 @@ Entity Scene::CreateEntity(std::string name, uint32_t desiredID) {
 void Scene::DeleteEntity(Entity entt) {
     if (HasComponent<ParentComponent>(entt)) {
         auto& parent = GetComponent<ParentComponent>(entt);
-        for (auto& child : parent.GetChildren()) {
+        for (const auto& child : parent.GetChildren()) {
             DeleteEntity(child);
         }
     }
@@ -102,11 +97,9 @@ void Scene::DeleteEntity(Entity entt) {
     std::erase(_entities, entt);
 }
 
-bool Scene::ContainsEntity(Entity entt) { return _registry.valid(entt); }
-size_t Scene::EntityCount() { return _registry.alive(); }
+bool Scene::ContainsEntity(Entity entt) const { return _registry.valid(entt); }
+size_t Scene::EntityCount() const { return _registry.alive(); }
 const std::vector<Entity>& Scene::GetAllEntites() const { return _entities; }
-
-ScriptStorageComponent& Scene::Scripts(Entity entt) { return _registry.get<ScriptStorageComponent>(entt); }
 
 Registry& Scene::GetRegistry() { return _registry; }
 
@@ -116,21 +109,6 @@ Scene Scene::Deserialize(const std::string& data) { return DeserializeScene(data
 Scene Scene::Copy(const Scene& scene) { return scene.Deserialize(scene.Serialize()); }
 
 void Scene::Update(float deltaTime) {
-    for (auto& [id, list] : _attachList) {
-        auto& scripts = Scripts(id);
-        for (auto& type : list) {
-            scripts.Attach(type);
-        }
-    }
-    _attachList.clear();
-    for (auto& [id, list] : _detachList) {
-        auto& scripts = Scripts(id);
-        for (auto& type : list) {
-            scripts.Detach(type);
-        }
-    }
-    _detachList.clear();
-
     for (entt::poly<System>& s : _systems) {
         s->Init(_registry);
         s->Execute(_registry, deltaTime);
@@ -145,7 +123,7 @@ void Scene::Render() {
     _registry.view<OrthoCameraComponent>().each([](Entity entt, OrthoCameraComponent& camera) {
         if (!camera.IsActiveAndRendering()) { return; }
         camera.UpdateMatrices();
-        auto& fbo = camera.GetFrameBuffer();
+        const auto& fbo = camera.GetFrameBuffer();
         fbo.Bind();
         fbo.ClearBuffers();
         DOA_LOG_INFO("%s %d", "ortho camera attached to", EntityTo<int>(camera.GetEntity()));
@@ -156,7 +134,7 @@ void Scene::Render() {
     _registry.view<PerspectiveCameraComponent>().each([](Entity entt, PerspectiveCameraComponent& camera) {
         if (!camera.IsActiveAndRendering()) { return; }
         camera.UpdateMatrices();
-        auto& fbo = camera.GetFrameBuffer();
+        const auto& fbo = camera.GetFrameBuffer();
         fbo.Bind();
         fbo.ClearBuffers();
         DOA_LOG_INFO("%s %d", "perspective camera attached to", EntityTo<int>(camera.GetEntity()));
