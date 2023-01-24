@@ -25,5 +25,8 @@
     <ClInclude Include="FormatBytes.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ObserverPattern.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
