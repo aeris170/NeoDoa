@@ -3,7 +3,8 @@
 #include <memory>
 #include <string>
 #include <string_view>
-#include <unordered_map>
+
+#include <string_map.hpp>
 
 #include <Color.hpp>
 #include <Texture.hpp>
@@ -23,7 +24,7 @@ enum class TextureSize {
 
 struct SVGPathway {
 
-    static void Initialize(Color&& color = { 1, 1, 1, 1 });
+    static void Initialize(Color color = { 1, 1, 1, 1 });
 
     static const Texture& Get(const std::string& key, const TextureStyle style = TextureStyle::NONE, const TextureSize size = TextureSize::MEDIUM);
 
@@ -39,8 +40,8 @@ private:
     static constexpr uint32_t RASTER_BG_COLOR{ 0xffffff00 };
 
     static bool Initialized;
-    static std::unordered_map<std::string, TexturePack> Textures;
-    static std::unordered_map<std::string, TexturePack> TexturesPadded;
-    static std::unordered_map<std::string, TexturePack> TexturesScaled;
+    static unordered_string_map<SVGPathway::TexturePack> Textures;
+    static unordered_string_map<SVGPathway::TexturePack> TexturesPadded;
+    static unordered_string_map<SVGPathway::TexturePack> TexturesScaled;
 };
 

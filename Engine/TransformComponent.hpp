@@ -10,26 +10,9 @@
 
 #include "Entity.hpp"
 
-struct Scene;
-namespace tinyxml2 {
-    class XMLPrinter;
-    class XMLElement;
-}
-
 struct TransformComponent {
-private:
-    Entity entity;
-
-    glm::vec3 localTranslation{ glm::vec3(0, 0, 0) };
-    glm::quat localRotation{ glm::quat_identity<float, glm::packed_highp>() };
-    glm::vec3 localScale{ glm::vec3(1, 1, 1) };
-    glm::mat4 localMatrix{ glm::identity<glm::mat4>() };
-
+    explicit TransformComponent(const Entity owner) noexcept;
     TransformComponent(const Entity owner, glm::mat4&& matrix) noexcept;
-
-public:
-
-    TransformComponent(const Entity owner) noexcept;
 
     static void InsertTranslation(glm::mat4& m, const glm::vec3& translation);
     static void InsertRotation(glm::mat4& m, const glm::quat& rotation);
@@ -65,7 +48,11 @@ public:
     glm::mat4 GetLocalMatrix() const;
     void SetLocalMatrix(glm::mat4 localMatrix);
 
-    friend void SerializeTransformComponent(tinyxml2::XMLPrinter& printer, const TransformComponent& transform);
-    friend TransformComponent DeserializeTransformComponent(tinyxml2::XMLElement* component, const Entity entity);
+private:
+    Entity entity;
 
+    glm::vec3 localTranslation{ glm::vec3(0, 0, 0) };
+    glm::quat localRotation{ glm::quat_identity<float, glm::packed_highp>() };
+    glm::vec3 localScale{ glm::vec3(1, 1, 1) };
+    glm::mat4 localMatrix{ glm::identity<glm::mat4>() };
 };

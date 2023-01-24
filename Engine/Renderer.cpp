@@ -12,7 +12,6 @@
 #include "Texture.hpp"
 #include "Core.hpp"
 #include "TransformComponent.hpp"
-#include "ScriptComponent.hpp"
 #include "MeshComponent.hpp"
 
 #include "Log.hpp"

@@ -149,8 +149,6 @@
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneDeserializer.cpp" />
     <ClCompile Include="SceneSerializer.cpp" />
-    <ClCompile Include="ScriptComponent.cpp" />
-    <ClCompile Include="ScriptStorageComponent.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClInclude Include="Angel.hpp" />
     <ClInclude Include="Asset.hpp" />
@@ -187,9 +185,6 @@
     <ClInclude Include="Scene.hpp" />
     <ClInclude Include="SceneDeserializer.hpp" />
     <ClInclude Include="SceneSerializer.hpp" />
-    <ClInclude Include="ScriptComponent.hpp" />
-    <ClInclude Include="ScriptComponentData.hpp" />
-    <ClInclude Include="ScriptStorageComponent.hpp" />
     <ClInclude Include="Shader.hpp" />
     <ClCompile Include="System.cpp" />
     <ClCompile Include="Texture.cpp" />

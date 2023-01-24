@@ -122,7 +122,6 @@
 #include "Angel.hpp"
 #include "PropertyData.hpp"
 #include "EnumValue.hpp"
-#include "ScriptComponent.hpp"
 #pragma endregion
 #pragma region Shader
 #include "Shader.hpp"

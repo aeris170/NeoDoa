@@ -1,22 +1,14 @@
 #include "SceneSerializer.hpp"
 
-#include <entt.hpp>
-using namespace entt::literals;
-
 #include <nameof.hpp>
 
-#include "Scene.hpp"
 #include "Core.hpp"
-#include "Angel.hpp"
-#include "ModelRenderer.hpp"
-#include "PropertyData.hpp"
+#include "Scene.hpp"
 #include "IDComponent.hpp"
 #include "TransformComponent.hpp"
 #include "ParentComponent.hpp"
 #include "ChildComponent.hpp"
 #include "CameraComponent.hpp"
-#include "ScriptStorageComponent.hpp"
-#include "ScriptComponent.hpp"
 
 std::string SerializeScene(const Scene& scene) {
     auto& _scene = const_cast<Scene&>(scene);
@@ -50,10 +42,11 @@ std::string SerializeScene(const Scene& scene) {
                     } else if (_scene.IsPerspective()) {
                         printer.PushAttribute("type", "perspective");
                     } else {
-                        assert(false, "no camera?");
+                        assert(false); /* no camera? */
+                        throw 1;
                     }
 
-                    ACamera& activeCamera = _scene.GetActiveCamera();
+                    const ACamera& activeCamera = _scene.GetActiveCamera();
                     printer.OpenElement("eye");
                     printer.PushAttribute("x", activeCamera.eye.x);
                     printer.PushAttribute("y", activeCamera.eye.y);
@@ -80,7 +73,7 @@ std::string SerializeScene(const Scene& scene) {
 
                 printer.OpenElement("orthoCamera");
                 {
-                    OrthoCamera& oc = _scene.GetOrtho();
+                    const OrthoCamera& oc = _scene.GetOrtho();
                     printer.PushAttribute("left", oc._left);
                     printer.PushAttribute("right", oc._right);
                     printer.PushAttribute("bottom", oc._bottom);
@@ -92,7 +85,7 @@ std::string SerializeScene(const Scene& scene) {
 
                 printer.OpenElement("perspectiveCamera");
                 {
-                    PerspectiveCamera& pc = _scene.GetPerspective();
+                    const PerspectiveCamera& pc = _scene.GetPerspective();
                     printer.PushAttribute("fov", pc._fov);
                     printer.PushAttribute("aspect", pc._aspect);
                     printer.PushAttribute("near", pc._near);
@@ -115,7 +108,7 @@ std::string SerializeScene(const Scene& scene) {
                     printer.OpenElement("cpp-component");
                     {
                         printer.PushAttribute("name", nameof_c(IDComponent));
-                        IDComponent& id = _scene.GetComponent<IDComponent>(entity);
+                        const auto& id = _scene.GetComponent<IDComponent>(entity);
                         SerializeIDComponent(printer, id);
                     }
                     printer.CloseElement();
@@ -125,7 +118,7 @@ std::string SerializeScene(const Scene& scene) {
                     printer.OpenElement("cpp-component");
                     {
                         printer.PushAttribute("name", nameof_c(TransformComponent));
-                        TransformComponent& transform = _scene.GetComponent<TransformComponent>(entity);
+                        const auto& transform = _scene.GetComponent<TransformComponent>(entity);
                         SerializeTransformComponent(printer, transform);
                     }
                     printer.CloseElement();
@@ -136,7 +129,7 @@ std::string SerializeScene(const Scene& scene) {
                         printer.OpenElement("cpp-component");
                         {
                             printer.PushAttribute("name", nameof_c(ParentComponent));
-                            ParentComponent& parent = _scene.GetComponent<ParentComponent>(entity);
+                            const auto& parent = _scene.GetComponent<ParentComponent>(entity);
                             SerializeParentComponent(printer, parent);
                         }
                         printer.CloseElement();
@@ -148,13 +141,13 @@ std::string SerializeScene(const Scene& scene) {
                         printer.OpenElement("cpp-component");
                         {
                             printer.PushAttribute("name", nameof_c(ChildComponent));
-                            ChildComponent& child = _scene.GetComponent<ChildComponent>(entity);
+                            const auto& child = _scene.GetComponent<ChildComponent>(entity);
                             SerializeChildComponent(printer, child);
                         }
                         printer.CloseElement();
                     }
 #pragma endregion
-
+/*
 #pragma region ScriptStorageComponent
                     if (_scene.HasComponent<ScriptStorageComponent>(entity)) {
                         ScriptStorageComponent& scripts = _scene.GetComponent<ScriptStorageComponent>(entity);
@@ -167,6 +160,7 @@ std::string SerializeScene(const Scene& scene) {
                         }
                     }
 #pragma endregion
+*/
                 }
                 printer.CloseElement(); // entity close
             }
@@ -328,6 +322,7 @@ void SerializePerspectiveCameraComponent(tinyxml2::XMLPrinter& printer, const Pe
     // TODO implement
 }
 void SerializeScriptComponent(tinyxml2::XMLPrinter& printer, const ScriptComponent& script) {
+    /*
     printer.PushAttribute("name", script._name.c_str());
     auto* type = script._underlyingInstance->GetObjectType();
 
@@ -362,5 +357,5 @@ void SerializeScriptComponent(tinyxml2::XMLPrinter& printer, const ScriptCompone
             }
         }
         printer.CloseElement(); // prop.name.c_str() end
-    }
+    }*/
 }

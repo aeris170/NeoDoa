@@ -1,44 +1,17 @@
 #pragma once
 
-#include "Core.hpp"
-
-#include <atomic>
-#include <thread>
-#include <unordered_map>
-#include <unordered_set>
-#include <mutex>
+#include <cassert>
 
 #include <angelscript.h>
 #include <scriptbuilder/scriptbuilder.h>
 
-#include "PropertyData.hpp"
-#include "EnumValue.hpp"
+#include <glm/glm.hpp>
 
-struct Scene;
-struct ScriptComponent;
+#include "PropertyData.hpp"
 
 struct Angel {
-
-    asIScriptEngine* _scriptEngine;
-    asIScriptModule* _scriptModule;
-    asIScriptContext* _scriptCtx;
-    CScriptBuilder _scriptBuilder;
-
-    std::vector<std::string> _scriptFiles;
-    std::vector<std::string> _scriptFilesContent;
-
-    std::unordered_map<std::string, std::vector<PropertyData>> _scriptComponentData;
-    std::unordered_map<std::string, asIScriptFunction*> _scriptComponentCtors;
-    std::unordered_map<std::string, std::vector<EnumValue>> _enums;
-
-    std::atomic<bool> _scriptLoaderRunning{ true };
-    std::mutex _scriptLoaderMutex;
-    std::thread _scriptLoaderDeamon;
-
     Angel() noexcept;
     ~Angel() noexcept;
-
-    ScriptComponent InstantiateScriptComponentIncomplete(std::string_view moduleType);
 
     asIScriptEngine& ScriptEngine();
     CScriptBuilder& ScriptBuilder();
@@ -46,13 +19,15 @@ struct Angel {
     bool IsComponentDefinition(asITypeInfo* typeInfo) const;
 
 private:
+    asIScriptEngine* _scriptEngine;
+    asIScriptModule* _scriptModule;
+    asIScriptContext* _scriptCtx;
+    CScriptBuilder _scriptBuilder;
+
     Angel(const Angel&) = delete;
     Angel(const Angel&&) = delete;
     Angel& operator=(const Angel&) = delete;
     Angel& operator=(const Angel&&) = delete;
-
-    void FindAndBuildScripts();
-    bool Rebuild();
 
     template <typename T>
     void RegisterGLMVector(const char* typeName) {

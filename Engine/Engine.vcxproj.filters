@@ -57,9 +57,6 @@
     <Filter Include="ECS\Systems">
       <UniqueIdentifier>{929d2981-d50b-4931-908a-fbd35c51e06b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ECS\Components\Script">
-      <UniqueIdentifier>{727a50c3-de1f-48c7-b8f5-5f6afff1dc97}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ECS\Entity">
       <UniqueIdentifier>{4add9540-7c21-4c9e-83b5-8d25b8200492}</UniqueIdentifier>
     </Filter>
@@ -148,12 +145,6 @@
     </ClCompile>
     <ClCompile Include="System.cpp">
       <Filter>ECS\Systems</Filter>
-    </ClCompile>
-    <ClCompile Include="ScriptStorageComponent.cpp">
-      <Filter>ECS\Components\Script</Filter>
-    </ClCompile>
-    <ClCompile Include="ScriptComponent.cpp">
-      <Filter>ECS\Components\Script</Filter>
     </ClCompile>
     <ClCompile Include="IDComponent.cpp">
       <Filter>ECS\Components</Filter>
@@ -301,12 +292,6 @@
     <ClInclude Include="IDComponent.hpp">
       <Filter>ECS\Components</Filter>
     </ClInclude>
-    <ClInclude Include="ScriptComponent.hpp">
-      <Filter>ECS\Components\Script</Filter>
-    </ClInclude>
-    <ClInclude Include="ScriptStorageComponent.hpp">
-      <Filter>ECS\Components\Script</Filter>
-    </ClInclude>
     <ClInclude Include="Entity.hpp">
       <Filter>ECS\Entity</Filter>
     </ClInclude>
@@ -318,9 +303,6 @@
     </ClInclude>
     <ClInclude Include="ChildComponent.hpp">
       <Filter>ECS\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="ScriptComponentData.hpp">
-      <Filter>ECS\Components\Script</Filter>
     </ClInclude>
     <ClInclude Include="ProjectSerializer.hpp">
       <Filter>Project\Serialize</Filter>

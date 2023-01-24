@@ -115,7 +115,7 @@ void MenuBar::NewProjectModal::Render() {
 		ImGui::Text(MODAL_CONTENT_TEXT);
 		ImGui::Separator();
 
-		ImGuiStyle& style = ImGui::GetStyle();
+		const ImGuiStyle& style = ImGui::GetStyle();
 
 		float size = (MODAL_BUTTONS_SIZE.x + style.ItemSpacing.x) * 2.0f;
 		float avail = ImGui::GetWindowSize().x;
@@ -179,7 +179,7 @@ void MenuBar::OpenProjectModal::Render() {
 		ImGui::Text(MODAL_CONTENT_TEXT);
 		ImGui::Separator();
 
-		ImGuiStyle& style = ImGui::GetStyle();
+		const ImGuiStyle& style = ImGui::GetStyle();
 
 		float size = (MODAL_BUTTONS_SIZE.x + style.ItemSpacing.x) * 2.0f;
 		float avail = ImGui::GetWindowSize().x;
@@ -189,9 +189,7 @@ void MenuBar::OpenProjectModal::Render() {
 			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
 
 		if (ImGui::Button(MODAL_YES_BUTTON_TEXT, MODAL_BUTTONS_SIZE)) {
-			gui.core->Angel()->_scriptLoaderMutex.lock();
 			FileDialog::Instance().Open("ProjectOpenDialog", "Select Project File", "NeoDoa Project Files (*.doa){.doa},.*");
-			gui.core->Angel()->_scriptLoaderMutex.unlock();
 			ImGui::CloseCurrentPopup();
 			modal_active = false;
 		}
