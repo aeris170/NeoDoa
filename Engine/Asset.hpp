@@ -11,6 +11,7 @@
 //#include "Material.hpp"
 #include "Shader.hpp"
 
+#include "ObserverPattern.hpp"
 #include "TemplateUtilities.hpp"
 
 #include <variant>
@@ -21,14 +22,14 @@ concept AssetType = concepts::IsAnyOf<T, ASSET_TYPE> && concepts::Copyable<T> &&
 using AssetData = std::variant<std::monostate, ASSET_TYPE>;
 #undef ASSET_TYPE
 
-struct Asset {
+struct Asset final : ObserverPattern::Observable {
 
     Asset() noexcept;
     Asset(const UUID id, FNode* file) noexcept;
-    ~Asset() = default;
-    Asset(const Asset& other) = default;
+    ~Asset() override = default;
+    Asset(const Asset& other) = delete;
     Asset(Asset&& other) noexcept;
-    Asset& operator=(const Asset& other) = default;
+    Asset& operator=(const Asset& other) = delete;
     Asset& operator=(Asset&& other) noexcept;
 
     UUID ID() const;
@@ -69,6 +70,9 @@ struct Asset {
 
     bool HasErrorMessages() const;
     const std::vector<std::any>& ErrorMessages() const;
+
+protected:
+    void NotifyObservers(ObserverPattern::Notification message) final;
 
 private:
     UUID id{};

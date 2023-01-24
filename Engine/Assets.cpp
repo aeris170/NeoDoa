@@ -51,6 +51,7 @@ Assets::Assets(Assets&& other) noexcept :
     sceneAssets(std::move(other.sceneAssets)),
     scriptAssets(std::move(other.scriptAssets)),
     textureAssets(std::move(other.textureAssets)),
+    componentDefinitionAssets(std::move(other.componentDefinitionAssets)),
     modelAssets(std::move(other.modelAssets)),
     shaderAssets(std::move(other.shaderAssets)),
     shaderUniformBlockAssets(std::move(other.shaderUniformBlockAssets)) {
@@ -63,6 +64,7 @@ Assets& Assets::operator=(Assets&& other) noexcept {
     sceneAssets = std::move(other.sceneAssets);
     scriptAssets = std::move(other.scriptAssets);
     textureAssets = std::move(other.textureAssets);
+    componentDefinitionAssets = std::move(other.componentDefinitionAssets);
     modelAssets = std::move(other.modelAssets);
     shaderAssets = std::move(other.shaderAssets);
     shaderUniformBlockAssets = std::move(other.shaderUniformBlockAssets);
@@ -143,6 +145,7 @@ const FNode& Assets::Root() const { return _root; }
 const Assets::UUIDCollection& Assets::SceneAssetIDs() const { return sceneAssets; }
 const Assets::UUIDCollection& Assets::ScriptAssetIDs() const { return scriptAssets; }
 const Assets::UUIDCollection& Assets::TextureAssetIDs() const { return textureAssets; }
+const Assets::UUIDCollection& Assets::ComponentDefinitionAssetIDs() const { return componentDefinitionAssets; }
 const Assets::UUIDCollection& Assets::ModelAssetIDs() const { return modelAssets; }
 const Assets::UUIDCollection& Assets::ShaderAssetIDs() const { return shaderAssets; }
 const Assets::UUIDCollection& Assets::ShaderUniformBlockAssetIDs() const { return shaderUniformBlockAssets; }
@@ -216,6 +219,10 @@ AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
         // Step 8
         if (asset.IsScene()) {
             sceneAssets.push_back(asset.ID());
+        }
+
+        if (asset.IsComponentDefinition()) {
+            componentDefinitionAssets.push_back(asset.ID());
         }
 
         return &asset;

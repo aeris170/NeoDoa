@@ -16,6 +16,7 @@
 #include "Icons.hpp"
 #include "Observer.hpp"
 #include "ComponentWidgets.hpp"
+#include "UserDefinedComponentStorage.hpp"
 
 void IDComponentUI::Render(const IDComponent& idComponent) {
     static unordered_string_map<std::string> UINames = {
@@ -143,6 +144,49 @@ void PerspectiveCameraComponentUI::Render(const PerspectiveCameraComponent& pers
     }
 }
 
+void UserDefinedComponentStorageUI::RenderComponentInstance(Assets& assets, const ComponentInstance& componentInstance) {
+    ComponentInstance& instance = const_cast<ComponentInstance&>(componentInstance);
+    const auto& component{ assets.FindAsset(instance.ComponentAssetID())->DataAs<Component>() };
+    for (int i = 0; i < component.fields.size(); i++) {
+        auto& field{ component.fields[i] };
+        const auto& type{ field.typeName };
+        auto& value{ instance.MemberValues()[i] };
+        if (type == "bool") {
+            BoolWidget(field.name, value.As<bool&>());
+        }
+        if (type == "int8") {
+            Int8Widget(field.name, value.As<int8_t&>());
+        }
+        if (type == "int16") {
+            Int16Widget(field.name, value.As<int16_t&>());
+        }
+        if (type == "int") {
+            Int32Widget(field.name, value.As<int32_t&>());
+        }
+        if (type == "long") {
+            Int64Widget(field.name, value.As<int64_t&>());
+        }
+        if (type == "uint8") {
+            UInt8Widget(field.name, value.As<uint8_t&>());
+        }
+        if (type == "uint16") {
+            UInt16Widget(field.name, value.As<uint16_t&>());
+        }
+        if (type == "unsigned int") {
+            UInt32Widget(field.name, value.As<uint32_t&>());
+        }
+        if (type == "unsigned long") {
+            UInt64Widget(field.name, value.As<uint64_t&>());
+        }
+        if (type == "float") {
+            FloatWidget(field.name, value.As<float_t&>());
+        }
+        if (type == "double") {
+            DoubleWidget(field.name, value.As<double_t&>());
+        }
+    }
+}
+
 bool ComponentUI::Begin(const Observer& observer, std::string_view componentTypeName) {
     std::string title(Prettify(std::string(componentTypeName)));
     std::string titleWithIcon;
@@ -202,8 +246,15 @@ void ComponentUI::RenderPerspectiveCameraComponent(const Observer& observer, con
     }
     ComponentUI::End(show);
 }
-void ComponentUI::RenderScriptStorageComponent(const Observer& observer, Scene& scene, ScriptStorageComponent& scriptStorageComponent) {
-
+void ComponentUI::RenderUserDefinedComponentStorage(const Observer& observer, const UserDefinedComponentStorage& storageComponent) {
+    for (auto& [name, instance] : storageComponent.Components()) {
+        bool show = ComponentUI::Begin(observer, name);
+        if (show) {
+            Assets& assets{ observer.gui.get().openProject->Assets() };
+            UserDefinedComponentStorageUI::RenderComponentInstance(assets, instance);
+        }
+        ComponentUI::End(show);
+    }
 }
 void ComponentUI::End(bool show) {
     if (show) {

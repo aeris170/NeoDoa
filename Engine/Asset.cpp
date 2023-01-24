@@ -15,16 +15,19 @@ Asset::Asset(const UUID id, FNode* file) noexcept :
     id(id),
     file(file) {}
 
-Asset::Asset(Asset&& other) noexcept :
+Asset::Asset(Asset&& other) noexcept : ObserverPattern::Observable(std::move(other)),
     id(std::move(other.id)),
     file(std::exchange(other.file, nullptr)),
     data(std::move(other.data)),
     version(std::exchange(other.version, 0)),
     infoList(std::move(other.infoList)),
     warningList(std::move(other.warningList)),
-    errorList(std::move(other.errorList)) {}
+    errorList(std::move(other.errorList)) {
+    NotifyObservers("moved"_hs);
+}
 
 Asset& Asset::operator=(Asset&& other) noexcept {
+    ObserverPattern::Observable::operator=(std::move(other));
     id = std::move(other.id);
     file = std::exchange(other.file, nullptr);
     DeleteDeserializedData();
@@ -33,6 +36,7 @@ Asset& Asset::operator=(Asset&& other) noexcept {
     infoList = std::move(other.infoList);
     warningList = std::move(other.warningList);
     errorList = std::move(other.errorList);
+    NotifyObservers("moved"_hs);
     return *this;
 }
 
@@ -89,6 +93,7 @@ void Asset::Deserialize() {
     * TODO others
     */
     version++;
+    NotifyObservers("deserialized"_hs);
 }
 void Asset::ForceDeserialize() {
     DeleteDeserializedData();
@@ -100,6 +105,7 @@ void Asset::DeleteDeserializedData() {
     warningList.clear();
     errorList.clear();
     version++;
+    NotifyObservers("data_deleted"_hs);
 }
 bool Asset::HasDeserializedData() const { return !std::holds_alternative<std::monostate>(data); }
 
@@ -124,3 +130,4 @@ const std::vector<std::any>& Asset::WarningMessages() const { return warningList
 bool Asset::HasErrorMessages() const { return !errorList.empty(); }
 const std::vector<std::any>& Asset::ErrorMessages() const { return errorList; }
 
+void Asset::NotifyObservers(ObserverPattern::Notification message) { ObserverPattern::Observable::NotifyObservers(message); }

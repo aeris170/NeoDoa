@@ -8,13 +8,13 @@
 #include "GUI.hpp"
 #include "Icons.hpp"
 
+#include "UserDefinedComponentStorage.hpp"
+
+#include <Scene.hpp>
 #include <IDComponent.hpp>
 #include <ParentComponent.hpp>
 #include <ChildComponent.hpp>
 #include <CameraComponent.hpp>
-#include <ScriptStorageComponent.hpp>
-#include <Core.hpp>
-#include <Angel.hpp>
 
 SceneHierarchy::SceneHierarchy(GUI& gui) noexcept :
     gui(gui) {}
@@ -86,6 +86,7 @@ void SceneHierarchy::Render(Scene& scene) {
         ResetSelectedEntity();
     }
 
+    if (ImGui::BeginPopupContextWindow(0, ImGuiMouseButton_Right | ImGuiPopupFlags_NoOpenOverItems)) {
         if (ImGui::MenuItem(ICON_FA_PLUS " Create New Entity")) {
             scene.CreateEntity();
         }
@@ -240,20 +241,26 @@ void SceneHierarchy::RenderEntityNode(Scene& scene, const Entity entity) {
             // cpp components end
 
             // script components start
-            if (!scene.HasComponent<ScriptStorageComponent>(entity)) {
-                scene.EmplaceComponent<ScriptStorageComponent>(entity);
+            if (!scene.HasComponent<UserDefinedComponentStorage>(entity)) {
+                scene.EmplaceComponent<UserDefinedComponentStorage>(entity);
             }
-            ScriptStorageComponent& storage = scene.GetComponent<ScriptStorageComponent>(entity);
-            for (auto& [typeName, declData] : Core::GetCore()->Angel()->_scriptComponentData) {
-                std::string name = typeName;
+            UserDefinedComponentStorage& storage = scene.GetComponent<UserDefinedComponentStorage>(entity);
+            Assets& assets{ gui.openProject->Assets() };
+            for (auto cmpid : assets.ComponentDefinitionAssetIDs()) {
+                AssetHandle handle = assets.FindAsset(cmpid);
+                if (!handle->HasDeserializedData()) { continue; }
+
+                const Component& cmp = handle->DataAs<Component>();
+                std::string name = cmp.name;
                 auto icon = ComponentIcons::DEFINED_COMPONENT_ICONS.find(name);
                 if (icon != ComponentIcons::DEFINED_COMPONENT_ICONS.end()) {
                     name.insert(0, icon->second);
                 } else {
                     name.insert(0, ComponentIcons::GENERIC_COMPONENT_ICON);
                 }
+                name.insert(0, " ");
                 if (ImGui::MenuItem(name.c_str())) {
-                    storage.Attach(typeName);
+                    storage.AttachComponent(assets, cmpid);
                 }
             }
             //script components end

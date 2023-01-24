@@ -16,7 +16,6 @@
 #include <ParentComponent.hpp>
 #include <ChildComponent.hpp>
 #include <CameraComponent.hpp>
-#include <ScriptStorageComponent.hpp>
 #include <Assets.hpp>
 
 #include <ComponentDeserializer.hpp>
@@ -25,6 +24,7 @@
 #include "Icons.hpp"
 #include "ComponentUI.hpp"
 #include "ImGuiExtensions.hpp"
+#include "UserDefinedComponentStorage.hpp"
 
 Observer::Observer(GUI& gui) noexcept :
     gui(gui) {}
@@ -137,9 +137,9 @@ void Observer::RenderComponents(Scene& scene, const Entity entt) {
         ComponentUI::RenderPerspectiveCameraComponent(*this, perspectiveCameraComponent);
     }
 
-    if (scene.HasComponent<ScriptStorageComponent>(entt)) {
-        ScriptStorageComponent& scriptStorageComponent = scene.GetComponent<ScriptStorageComponent>(entt);
-        ComponentUI::RenderScriptStorageComponent(*this, scene, scriptStorageComponent);
+    if (scene.HasComponent<UserDefinedComponentStorage>(entt)) {
+        const auto& storageComponent = scene.GetComponent<UserDefinedComponentStorage>(entt);
+        ComponentUI::RenderUserDefinedComponentStorage(*this, storageComponent);
     }
 }
 void Observer::RenderFolderView(FNode* folder) {
@@ -214,8 +214,8 @@ void Observer::RenderSceneView(AssetHandle sceneAsset) {
                 if (scene.HasComponent<PerspectiveCameraComponent>(entt)) {
                     ImGui::Text(nameof_c(PerspectiveCameraComponent));
                 }
-                if (scene.HasComponent<ScriptStorageComponent>(entt)) {
-                    ImGui::Text(nameof_c(ScriptStorageComponent));
+                if (scene.HasComponent<UserDefinedComponentStorage>(entt)) {
+                    ImGui::Text(nameof_c(UserDefinedComponentStorage));
                 }
             }
         }

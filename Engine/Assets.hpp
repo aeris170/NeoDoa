@@ -103,6 +103,7 @@ struct Assets {
     const UUIDCollection& SceneAssetIDs() const;
     const UUIDCollection& ScriptAssetIDs() const;
     const UUIDCollection& TextureAssetIDs() const;
+    const UUIDCollection& ComponentDefinitionAssetIDs() const;
     const UUIDCollection& ModelAssetIDs() const;
     const UUIDCollection& ShaderAssetIDs() const;
     const UUIDCollection& ShaderUniformBlockAssetIDs() const;
@@ -123,6 +124,7 @@ private:
     UUIDCollection sceneAssets{};
     UUIDCollection scriptAssets{};
     UUIDCollection textureAssets{};
+    UUIDCollection componentDefinitionAssets{};
     UUIDCollection modelAssets{};
     UUIDCollection shaderAssets{};
     UUIDCollection shaderUniformBlockAssets{};
