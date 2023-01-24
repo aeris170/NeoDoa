@@ -15,7 +15,7 @@
 
 #include <variant>
 
-#define ASSET_TYPE Scene, Component, Texture/*, Model, Shader */
+#define ASSET_TYPE Scene, Component, Texture
 template<typename T>
 concept AssetType = concepts::IsAnyOf<T, ASSET_TYPE> && concepts::Copyable<T> && concepts::Serializable<T> && std::movable<T>;
 using AssetData = std::variant<std::monostate, ASSET_TYPE>;
@@ -38,6 +38,7 @@ struct Asset {
     T& DataAs() {
         return std::get<T>(data);
     }
+    uint64_t Version() const;
 
     void Serialize();
     void Deserialize();
@@ -73,6 +74,7 @@ private:
     UUID id{};
     FNode* file{ nullptr };
     AssetData data{ std::monostate{} };
+    uint64_t version{};
 
     std::vector<std::any> infoList{};
     std::vector<std::any> warningList{};

@@ -19,6 +19,7 @@ Asset::Asset(Asset&& other) noexcept :
     id(std::move(other.id)),
     file(std::exchange(other.file, nullptr)),
     data(std::move(other.data)),
+    version(std::exchange(other.version, 0)),
     infoList(std::move(other.infoList)),
     warningList(std::move(other.warningList)),
     errorList(std::move(other.errorList)) {}
@@ -28,6 +29,7 @@ Asset& Asset::operator=(Asset&& other) noexcept {
     file = std::exchange(other.file, nullptr);
     DeleteDeserializedData();
     data.swap(other.data);
+    version = std::exchange(other.version, 0);
     infoList = std::move(other.infoList);
     warningList = std::move(other.warningList);
     errorList = std::move(other.errorList);
@@ -37,6 +39,7 @@ Asset& Asset::operator=(Asset&& other) noexcept {
 UUID Asset::ID() const { return id; }
 FNode& Asset::File() const { return *file; }
 const AssetData& Asset::Data() const { return data; }
+uint64_t Asset::Version() const { return version; }
 
 void Asset::Serialize() {
     if (IsScene()) {
@@ -85,6 +88,7 @@ void Asset::Deserialize() {
     /*
     * TODO others
     */
+    version++;
 }
 void Asset::ForceDeserialize() {
     DeleteDeserializedData();
@@ -95,6 +99,7 @@ void Asset::DeleteDeserializedData() {
     infoList.clear();
     warningList.clear();
     errorList.clear();
+    version++;
 }
 bool Asset::HasDeserializedData() const { return !std::holds_alternative<std::monostate>(data); }
 
