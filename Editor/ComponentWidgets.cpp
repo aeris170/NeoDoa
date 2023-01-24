@@ -98,11 +98,83 @@ void UneditableEntityWidget(const std::string& label, const Entity value) {
     EndWidget();
 }
 
+bool Int8Widget(const std::string& label, int8_t& value) {
+    BeginWidget(label);
+    std::stringstream ss;
+    ss << "##" << label;
+    bool rv = ImGui::DragScalar(ss.str().c_str(), ImGuiDataType_S8, &value);
+    EndWidget();
+    return rv;
+}
+bool Int16Widget(const std::string& label, int16_t& value) {
+    BeginWidget(label);
+    std::stringstream ss;
+    ss << "##" << label;
+    bool rv = ImGui::DragScalar(ss.str().c_str(), ImGuiDataType_S16, &value);
+    EndWidget();
+    return rv;
+}
+bool Int32Widget(const std::string& label, int32_t& value) {
+    BeginWidget(label);
+    std::stringstream ss;
+    ss << "##" << label;
+    bool rv = ImGui::DragScalar(ss.str().c_str(), ImGuiDataType_S32, &value);
+    EndWidget();
+    return rv;
+}
+bool Int64Widget(const std::string& label, int64_t& value) {
+    BeginWidget(label);
+    std::stringstream ss;
+    ss << "##" << label;
+    bool rv = ImGui::DragScalar(ss.str().c_str(), ImGuiDataType_S64, &value);
+    EndWidget();
+    return rv;
+}
+bool UInt8Widget(const std::string& label, uint8_t& value) {
+    BeginWidget(label);
+    std::stringstream ss;
+    ss << "##" << label;
+    bool rv = ImGui::DragScalar(ss.str().c_str(), ImGuiDataType_U8, &value);
+    EndWidget();
+    return rv;
+}
+bool UInt16Widget(const std::string& label, uint16_t& value) {
+    BeginWidget(label);
+    std::stringstream ss;
+    ss << "##" << label;
+    bool rv = ImGui::DragScalar(ss.str().c_str(), ImGuiDataType_U16, &value);
+    EndWidget();
+    return rv;
+}
+bool UInt32Widget(const std::string& label, uint32_t& value) {
+    BeginWidget(label);
+    std::stringstream ss;
+    ss << "##" << label;
+    bool rv = ImGui::DragScalar(ss.str().c_str(), ImGuiDataType_U32, &value);
+    EndWidget();
+    return rv;
+}
+bool UInt64Widget(const std::string& label, uint64_t& value) {
+    BeginWidget(label);
+    std::stringstream ss;
+    ss << "##" << label;
+    bool rv = ImGui::DragScalar(ss.str().c_str(), ImGuiDataType_U64, &value);
+    EndWidget();
+    return rv;
+}
 bool IntWidget(const std::string& label, int& value) {
     BeginWidget(label);
     std::stringstream ss;
     ss << "##" << label;
     bool rv = ImGui::DragInt(ss.str().c_str(), &value);
+    EndWidget();
+    return rv;
+}
+bool LongWidget(const std::string& label, long& value) {
+    BeginWidget(label);
+    std::stringstream ss;
+    ss << "##" << label;
+    bool rv = ImGui::DragScalar(ss.str().c_str(), ImGuiDataType_S64, &value);
     EndWidget();
     return rv;
 }

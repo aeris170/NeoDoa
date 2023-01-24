@@ -221,7 +221,16 @@ bool EntityWidget(const std::string& label, Entity& value);
 
 void UneditableEntityWidget(const std::string& label, const Entity value);
 
+bool Int8Widget(const std::string& label, int8_t& value);
+bool Int16Widget(const std::string& label, int16_t& value);
+bool Int32Widget(const std::string& label, int32_t& value);
+bool Int64Widget(const std::string& label, int64_t& value);
+bool UInt8Widget(const std::string& label, uint8_t& value);
+bool UInt16Widget(const std::string& label, uint16_t& value);
+bool UInt32Widget(const std::string& label, uint32_t& value);
+bool UInt64Widget(const std::string& label, uint64_t& value);
 bool IntWidget(const std::string& label, int& value);
+bool LongWidget(const std::string& label, long& value);
 
 bool FloatWidget(const std::string& label, float& value, float step = 0.1f, float min = 0.0f, float max = 0.0f);
 
