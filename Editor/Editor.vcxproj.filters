@@ -62,6 +62,9 @@
     <Filter Include="UI\Extensions\TextEditor">
       <UniqueIdentifier>{c2ec8113-083f-4187-a47c-31f249740fa3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="EditorMeta">
+      <UniqueIdentifier>{d2884142-9a72-4274-a1fa-e4857515d079}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CodeGenerator.cpp">
@@ -128,6 +131,12 @@
     <ClCompile Include="ImGuiExtensions\TextEditor.cpp">
       <Filter>UI\Extensions\TextEditor</Filter>
     </ClCompile>
+    <ClCompile Include="ComponentInstance.cpp">
+      <Filter>EditorMeta</Filter>
+    </ClCompile>
+    <ClCompile Include="UserDefinedComponentStorage.cpp">
+      <Filter>EditorMeta</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CodeGenerator.hpp">
@@ -191,6 +200,12 @@
       <Filter>UI\Extensions\TextEditor</Filter>
     </ClInclude>
     <ClInclude Include="resource.h" />
+    <ClInclude Include="ComponentInstance.hpp">
+      <Filter>EditorMeta</Filter>
+    </ClInclude>
+    <ClInclude Include="UserDefinedComponentStorage.hpp">
+      <Filter>EditorMeta</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="SVGs\arrow-left.svg">

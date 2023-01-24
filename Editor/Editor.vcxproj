@@ -107,6 +107,7 @@
   <ItemGroup>
     <ClCompile Include="AssetManager.cpp" />
     <ClCompile Include="CodeEditor.cpp" />
+    <ClCompile Include="ComponentInstance.cpp" />
     <ClCompile Include="ComponentUI.cpp" />
     <ClCompile Include="ComponentWidgets.cpp" />
     <ClCompile Include="Console.cpp" />
@@ -127,10 +128,12 @@
     <ClCompile Include="SceneSettings.cpp" />
     <ClCompile Include="SceneViewport.cpp" />
     <ClCompile Include="SVGPathway.cpp" />
+    <ClCompile Include="UserDefinedComponentStorage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssetManager.hpp" />
     <ClInclude Include="CodeEditor.hpp" />
+    <ClInclude Include="ComponentInstance.hpp" />
     <ClInclude Include="ComponentUI.hpp" />
     <ClInclude Include="ComponentWidgets.hpp" />
     <ClInclude Include="Console.hpp" />
@@ -150,6 +153,7 @@
     <ClInclude Include="SceneSettings.hpp" />
     <ClInclude Include="SceneViewport.hpp" />
     <ClInclude Include="SVGPathway.hpp" />
+    <ClInclude Include="UserDefinedComponentStorage.hpp" />
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="Scripts\Rotate.as">
