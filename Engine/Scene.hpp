@@ -36,13 +36,14 @@ struct Scene {
     void SetOrthoCamera(OrthoCamera&& ortho);
     void SetPerspectiveCamera(PerspectiveCamera&& perspective);
 
-    OrthoCamera GetOrtho() const;
     OrthoCamera& GetOrtho();
+    const OrthoCamera& GetOrtho() const;
 
-    PerspectiveCamera GetPerspective() const;
     PerspectiveCamera& GetPerspective();
+    const PerspectiveCamera& GetPerspective() const;
 
     ACamera& GetActiveCamera();
+    const ACamera& GetActiveCamera() const;
 
     Renderer::Stats GetRendererStats() const;
 
@@ -104,7 +105,7 @@ struct Scene {
     }
 
     template <typename Component>
-    Component GetComponent(Entity entity) const {
+    const Component& GetComponent(Entity entity) const {
         return _registry.get<Component>(entity);
     }
 

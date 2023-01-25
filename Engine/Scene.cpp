@@ -49,13 +49,22 @@ void Scene::SetPerpective(float fov, float aspect, float near, float far) { _pc.
 void Scene::SetOrthoCamera(OrthoCamera&& ortho) { _oc = std::move(ortho); }
 void Scene::SetPerspectiveCamera(PerspectiveCamera&& perspective) { _pc = std::move(perspective); }
 
-OrthoCamera Scene::GetOrtho() const { return _oc; }
 OrthoCamera& Scene::GetOrtho() { return _oc; }
+const OrthoCamera& Scene::GetOrtho() const { return _oc; }
 
-PerspectiveCamera Scene::GetPerspective() const { return _pc; }
 PerspectiveCamera& Scene::GetPerspective() { return _pc; }
+const PerspectiveCamera& Scene::GetPerspective() const { return _pc; }
 
 ACamera& Scene::GetActiveCamera() {
+    if (IsOrtho()) {
+        return _oc;
+    } else if (IsPerspective()) {
+        return _pc;
+    }
+    assert(false); // no camera?
+    throw 1;
+}
+const ACamera& Scene::GetActiveCamera() const {
     if (IsOrtho()) {
         return _oc;
     } else if (IsPerspective()) {
