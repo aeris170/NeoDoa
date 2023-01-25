@@ -211,7 +211,7 @@ void SceneSerializer::Entities::DefaultSerializeChildComponent(tinyxml2::XMLPrin
     }
     printer.CloseElement();
 }
-void SceneSerializer::Entities::DefaultSerializeUserDefinedComponents(tinyxml2::XMLPrinter& printer, const Scene& scene, Entity entity) {}
+void SceneSerializer::Entities::DefaultSerializeUserDefinedComponents(tinyxml2::XMLPrinter&, const Scene&, Entity) {}
 
 std::string SerializeScene(const Scene& scene) {
     tinyxml2::XMLPrinter printer;

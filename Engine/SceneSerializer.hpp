@@ -76,7 +76,7 @@ namespace SceneSerializer {
         void DefaultSerializeTransformComponent(tinyxml2::XMLPrinter& printer, const TransformComponent& component);
         void DefaultSerializeParentComponent(tinyxml2::XMLPrinter& printer, const ParentComponent& component);
         void DefaultSerializeChildComponent(tinyxml2::XMLPrinter& printer, const ChildComponent& component);
-        void DefaultSerializeUserDefinedComponents(tinyxml2::XMLPrinter& printer, const Scene& scene, Entity entity);
+        void DefaultSerializeUserDefinedComponents(tinyxml2::XMLPrinter&, const Scene&, Entity);
     }
 
     /* ----- Serializer Functions ----- */
