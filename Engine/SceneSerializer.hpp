@@ -22,7 +22,8 @@ struct ParentComponent;
 struct ChildComponent;
 struct OrthoCameraComponent;
 struct PerspectiveCameraComponent;
-/* This big bad bada-boom of serializers, this function will call appropriate serializers. See below for an overview! */
+
+/* This is the big bad bada-boom of serializers, this function will call appropriate serializers. See below for an overview! */
 std::string SerializeScene(const Scene& scene);
 
 /* Here is the general overview */

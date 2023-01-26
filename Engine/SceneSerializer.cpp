@@ -9,6 +9,14 @@
 #include "ChildComponent.hpp"
 #include "CameraComponent.hpp"
 
+std::string SerializeScene(const Scene& scene) {
+    tinyxml2::XMLPrinter printer;
+    SceneSerializer::HeaderComment(printer, scene);
+    SceneSerializer::Serialize(printer, scene);
+
+    return printer.CStr();
+}
+
 void SceneSerializer::DefaultHeaderComment(tinyxml2::XMLPrinter& printer, [[maybe_unused]] const Scene& scene) {
     printer.PushComment("WARNING!! This file is not for editing! Don't!");
 }
@@ -212,14 +220,6 @@ void SceneSerializer::Entities::DefaultSerializeChildComponent(tinyxml2::XMLPrin
     printer.CloseElement();
 }
 void SceneSerializer::Entities::DefaultSerializeUserDefinedComponents(tinyxml2::XMLPrinter&, const Scene&, Entity) {}
-
-std::string SerializeScene(const Scene& scene) {
-    tinyxml2::XMLPrinter printer;
-    SceneSerializer::HeaderComment(printer, scene);
-    SceneSerializer::Serialize(printer, scene);
-
-    return printer.CStr();
-}
 
 void SceneSerializer::Helpers::SerializeEntityID(tinyxml2::XMLPrinter& printer, Entity entity) {
     printer.PushAttribute("type", "Entity");
