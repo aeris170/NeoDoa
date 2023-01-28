@@ -21,10 +21,10 @@ SceneHierarchy::SceneHierarchy(GUI& gui) noexcept :
 
 void SceneHierarchy::Begin() {
     GUI& gui = this->gui;
-    ImGui::PushID(gui.SCENE_HIERARCHY_TITLE);
+    ImGui::PushID(GUI::SCENE_HIERARCHY_TITLE);
     std::string title(WindowIcons::SCENE_HIERARCHY_WINDOW_ICON);
-    title.append(gui.SCENE_HIERARCHY_TITLE);
-    title.append(gui.SCENE_HIERARCHY_ID);
+    title.append(GUI::SCENE_HIERARCHY_TITLE);
+    title.append(GUI::SCENE_HIERARCHY_ID);
     ImGui::Begin(title.c_str());
 }
 

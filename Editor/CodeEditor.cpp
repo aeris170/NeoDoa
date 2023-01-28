@@ -15,10 +15,10 @@ CodeEditor::CodeEditor(GUI& gui) noexcept :
 void CodeEditor::Begin() {
     GUI& gui = this->gui;
 
-    ImGui::PushID(gui.CODE_EDITOR_TITLE);
+    ImGui::PushID(GUI::CODE_EDITOR_TITLE);
     std::string title(WindowIcons::CODE_EDITOR_WINDOW_ICON);
-    title.append(gui.CODE_EDITOR_TITLE);
-    title.append(gui.CODE_EDITOR_ID);
+    title.append(GUI::CODE_EDITOR_TITLE);
+    title.append(GUI::CODE_EDITOR_ID);
     ImGui::Begin(title.c_str(), nullptr, ImGuiWindowFlags_MenuBar);
 }
 void CodeEditor::Render() {
@@ -56,7 +56,7 @@ void CodeEditor::Render() {
         ImGui::EndTabBar();
     }
 
-    if (tabs.size() == 0) {
+    if (tabs.empty()) {
         emptyTab.Render();
     }
 }
@@ -183,7 +183,7 @@ void CodeEditor::RenderMenuBar() {
 void CodeEditor::AddTab(AssetHandle assetHandle) {
     if (!assetHandle.HasValue()) { return; }
 
-    auto search = std::find_if(tabs.begin(), tabs.end(), [&assetHandle](EditorTab& element) {
+    auto search = std::ranges::find_if(tabs, [&assetHandle](EditorTab& element) {
         return element.currentAsset == assetHandle;
     });
     if (search != tabs.end()) {
@@ -191,7 +191,7 @@ void CodeEditor::AddTab(AssetHandle assetHandle) {
         return;
     }
 
-    auto& tab = tabs.emplace_back(assetHandle, isSyntaxColoringEnabled, isShortTabGlyphsVisible, isWhitespaceVisible, tabSize);
+    tabs.emplace_back(assetHandle, isSyntaxColoringEnabled, isShortTabGlyphsVisible, isWhitespaceVisible, tabSize);
     selectedTabIndex++;
 }
 

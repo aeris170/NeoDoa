@@ -17,10 +17,11 @@ SceneViewport::SceneViewport(GUI& gui) noexcept :
 
 void SceneViewport::Begin(Scene* scene) {
     GUI& gui = this->gui;
-    ImGui::PushID(gui.SCENE_VIEWPORT_TITLE);
+
+    ImGui::PushID(GUI::SCENE_VIEWPORT_TITLE);
     std::string title(WindowIcons::SCENE_VIEWPORT_WINDOW_ICON);
-    title.append(gui.SCENE_VIEWPORT_TITLE);
-    title.append(gui.SCENE_VIEWPORT_ID);
+    title.append(GUI::SCENE_VIEWPORT_TITLE);
+    title.append(GUI::SCENE_VIEWPORT_ID);
     ImGui::Begin(title.c_str());
 
 
@@ -223,7 +224,7 @@ void SceneViewport::HandleMouseControls(Scene& scene) {
             direction.z = sin(glm::radians(controls.yaw)) * cos(glm::radians(controls.pitch));
             forward = glm::normalize(direction);
         } else {
-            assert(false, "no camera?");
+            assert(false); /* no camera? */
         }
         controls.prevDelta = v;
     }

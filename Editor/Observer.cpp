@@ -31,31 +31,31 @@ Observer::Observer(GUI& gui) noexcept :
 
 void Observer::Begin(Scene* scene) {
     GUI& gui = this->gui;
-    ImGui::PushID(gui.OBSERVER_TITLE);
+    ImGui::PushID(GUI::OBSERVER_TITLE);
     std::string title(WindowIcons::OBSERVER_WINDOW_ICON);
-    title.append(gui.OBSERVER_TITLE);
+    title.append(GUI::OBSERVER_TITLE);
     std::visit(overloaded::lambda {
-        [](std::monostate arg) {},
-        [&](Entity entt) {
+        [](std::monostate) { /* skip */ },
+        [&scene, &title](Entity entt) {
             if (scene && entt != NULL_ENTT) {
                 title.append(" - ");
                 title.append(scene->GetComponent<IDComponent>(entt).GetTag());
             }
         },
-        [&](FNode* file) {
+        [&title](FNode* file) {
             title.append(" - ");
             title.append(file->Name());
         }
     }, displayTarget);
 
-    title.append(gui.OBSERVER_ID);
+    title.append(GUI::OBSERVER_ID);
     ImGui::Begin(title.c_str());
 }
 
 void Observer::Render(Scene& scene) {
     GUI& gui = this->gui;
     std::visit(overloaded::lambda{
-        [](std::monostate arg) {
+        [](std::monostate) {
             const char* text = "Nothing to display here :)";
             ImVec2 size = ImGui::GetContentRegionAvail();
             ImVec2 txtSize = ImGui::CalcTextSize(text);
@@ -65,8 +65,8 @@ void Observer::Render(Scene& scene) {
                 ImGui::NewLine();
             }
         },
-        [&](Entity entt) { RenderComponents(scene, gui.sh.selectedEntity); },
-        [&](FNode* file) {
+        [this, &scene, &gui](Entity) { RenderComponents(scene, gui.sh.selectedEntity); },
+        [this, &gui](FNode* file) {
             static const ImVec2 iconSize{ 64.0f, 64.0f };
             ImGui::Columns(2);
             ImGui::SetColumnWidth(0, iconSize.x * 1.25f);
@@ -314,7 +314,7 @@ void Observer::RenderTextureView(AssetHandle textureAsset) {
                 float w = static_cast<float>(tex.Width());
                 float h = static_cast<float>(tex.Height());
                 auto pixels = reinterpret_cast<const unsigned char*>(Texture::GetByteBufferOf(tex));
-                ImageInspect::inspect(w, h, pixels, mouseUVCoord, { w, h }, drawNormals, drawHistogram);
+                ImageInspect::inspect(static_cast<int>(w), static_cast<int>(h), pixels, mouseUVCoord, { w, h }, drawNormals, drawHistogram);
             }
         }
     } else {
