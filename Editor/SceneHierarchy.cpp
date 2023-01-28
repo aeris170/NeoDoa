@@ -191,7 +191,7 @@ void SceneHierarchy::RenderEntityNode(Scene& scene, const Entity entity) {
             Entity current = entity;
 
             while (scene.HasComponent<ChildComponent>(current)) {
-                ChildComponent& child = scene.GetComponent<ChildComponent>(current);
+                auto& child = scene.GetComponent<ChildComponent>(current);
                 if (child.GetEntity() == dropped) {
                     badAdopt = true; break;
                 }
