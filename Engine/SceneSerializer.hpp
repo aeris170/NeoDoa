@@ -121,6 +121,4 @@ namespace SceneSerializer::Helpers {
     void SerializeMat2(tinyxml2::XMLPrinter& printer, const glm::mat2& mat);
     void SerializeMat3(tinyxml2::XMLPrinter& printer, const glm::mat3& mat);
     void SerializeMat4(tinyxml2::XMLPrinter& printer, const glm::mat4& mat);
-    void SerializeOrthoCameraComponent(tinyxml2::XMLPrinter& printer, const OrthoCameraComponent& camera);
-    void SerializePerspectiveCameraComponent(tinyxml2::XMLPrinter& printer, const PerspectiveCameraComponent& camera);
 }

@@ -319,12 +319,7 @@ void SceneSerializer::Helpers::SerializeMat4(tinyxml2::XMLPrinter& printer, cons
     printer.PushAttribute("w4", mat[3][3]);
 
 }
-void SceneSerializer::Helpers::SerializeOrthoCameraComponent(tinyxml2::XMLPrinter& printer, const OrthoCameraComponent& camera) {
-    // TODO implement
-}
-void SceneSerializer::Helpers::SerializePerspectiveCameraComponent(tinyxml2::XMLPrinter& printer, const PerspectiveCameraComponent& camera) {
-    // TODO implement
-}    /*
+/*
 void SceneSerializer::Helpers::SerializeScriptComponent(tinyxml2::XMLPrinter& printer, const ScriptComponent& script) {
 
     printer.PushAttribute("name", script._name.c_str());
