@@ -65,6 +65,12 @@
     <Filter Include="EditorMeta">
       <UniqueIdentifier>{d2884142-9a72-4274-a1fa-e4857515d079}</UniqueIdentifier>
     </Filter>
+    <Filter Include="EditorMeta\Serialize">
+      <UniqueIdentifier>{3b54c722-0735-4db6-9f25-b0793034cd8d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="EditorMeta\Initializer">
+      <UniqueIdentifier>{286d3322-2e9a-4058-bbc9-5eed74de10e6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CodeGenerator.cpp">
@@ -137,6 +143,15 @@
     <ClCompile Include="UserDefinedComponentStorage.cpp">
       <Filter>EditorMeta</Filter>
     </ClCompile>
+    <ClCompile Include="EditorMetaInitializer.cpp">
+      <Filter>EditorMeta\Initializer</Filter>
+    </ClCompile>
+    <ClCompile Include="UserDefinedComponentStorageSerializer.cpp">
+      <Filter>EditorMeta\Serialize</Filter>
+    </ClCompile>
+    <ClCompile Include="UserDefinedComponentStorageDeserializer.cpp">
+      <Filter>EditorMeta\Serialize</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CodeGenerator.hpp">
@@ -205,6 +220,15 @@
     </ClInclude>
     <ClInclude Include="UserDefinedComponentStorage.hpp">
       <Filter>EditorMeta</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorMetaInitializer.hpp">
+      <Filter>EditorMeta\Initializer</Filter>
+    </ClInclude>
+    <ClInclude Include="UserDefinedComponentStorageSerializer.hpp">
+      <Filter>EditorMeta\Serialize</Filter>
+    </ClInclude>
+    <ClInclude Include="UserDefinedComponentStorageDeserializer.hpp">
+      <Filter>EditorMeta\Serialize</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

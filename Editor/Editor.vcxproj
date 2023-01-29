@@ -112,6 +112,7 @@
     <ClCompile Include="ComponentWidgets.cpp" />
     <ClCompile Include="Console.cpp" />
     <ClCompile Include="CodeGenerator.cpp" />
+    <ClCompile Include="EditorMetaInitializer.cpp" />
     <ClCompile Include="GameViewport.cpp" />
     <ClCompile Include="Gizmos.cpp" />
     <ClCompile Include="GUI.cpp" />
@@ -129,6 +130,8 @@
     <ClCompile Include="SceneViewport.cpp" />
     <ClCompile Include="SVGPathway.cpp" />
     <ClCompile Include="UserDefinedComponentStorage.cpp" />
+    <ClCompile Include="UserDefinedComponentStorageDeserializer.cpp" />
+    <ClCompile Include="UserDefinedComponentStorageSerializer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssetManager.hpp" />
@@ -138,6 +141,7 @@
     <ClInclude Include="ComponentWidgets.hpp" />
     <ClInclude Include="Console.hpp" />
     <ClInclude Include="CodeGenerator.hpp" />
+    <ClInclude Include="EditorMetaInitializer.hpp" />
     <ClInclude Include="GameViewport.hpp" />
     <ClInclude Include="Gizmos.hpp" />
     <ClInclude Include="GUI.hpp" />
@@ -154,6 +158,8 @@
     <ClInclude Include="SceneViewport.hpp" />
     <ClInclude Include="SVGPathway.hpp" />
     <ClInclude Include="UserDefinedComponentStorage.hpp" />
+    <ClInclude Include="UserDefinedComponentStorageDeserializer.hpp" />
+    <ClInclude Include="UserDefinedComponentStorageSerializer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="Scripts\Rotate.as">
