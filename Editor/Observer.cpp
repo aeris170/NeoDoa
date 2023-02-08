@@ -22,6 +22,7 @@
 
 #include "GUI.hpp"
 #include "Icons.hpp"
+#include "Colors.hpp"
 #include "ComponentUI.hpp"
 #include "ImGuiExtensions.hpp"
 #include "UserDefinedComponentStorage.hpp"
@@ -413,7 +414,7 @@ void Observer::ComponentDefinitionDisplay::RenderMessagesTable(const AssetHandle
     ImGui::TableHeadersRow();
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
 
-    ImGui::PushStyleColor(ImGuiCol_Text, ERROR_COLOR);
+    ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::ERROR_COLOR);
     for (auto& message : componentDefAsset->ErrorMessages()) {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
@@ -429,7 +430,7 @@ void Observer::ComponentDefinitionDisplay::RenderMessagesTable(const AssetHandle
     }
     ImGui::PopStyleColor();
 
-    ImGui::PushStyleColor(ImGuiCol_Text, WARNING_COLOR);
+    ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::WARNING_COLOR);
     for (auto& message : componentDefAsset->WarningMessages()) {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
@@ -445,7 +446,7 @@ void Observer::ComponentDefinitionDisplay::RenderMessagesTable(const AssetHandle
     }
     ImGui::PopStyleColor();
 
-    ImGui::PushStyleColor(ImGuiCol_Text, INFO_COLOR);
+    ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::INFO_COLOR);
     for (auto& message : componentDefAsset->InfoMessages()) {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);

@@ -136,6 +136,7 @@
   <ItemGroup>
     <ClInclude Include="AssetManager.hpp" />
     <ClInclude Include="CodeEditor.hpp" />
+    <ClInclude Include="Colors.hpp" />
     <ClInclude Include="ComponentInstance.hpp" />
     <ClInclude Include="ComponentUI.hpp" />
     <ClInclude Include="ComponentWidgets.hpp" />

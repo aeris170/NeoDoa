@@ -71,6 +71,9 @@
     <Filter Include="EditorMeta\Initializer">
       <UniqueIdentifier>{286d3322-2e9a-4058-bbc9-5eed74de10e6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="UI\Colors">
+      <UniqueIdentifier>{8132db86-6eb4-4351-9045-9cbbb246e6d8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CodeGenerator.cpp">
@@ -229,6 +232,9 @@
     </ClInclude>
     <ClInclude Include="UserDefinedComponentStorageDeserializer.hpp">
       <Filter>EditorMeta\Serialize</Filter>
+    </ClInclude>
+    <ClInclude Include="Colors.hpp">
+      <Filter>UI\Colors</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

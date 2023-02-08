@@ -4,6 +4,7 @@
 
 #include "GUI.hpp"
 #include "Icons.hpp"
+#include "Colors.hpp"
 #include "ImGuiExtensions.hpp"
 
 Console::Console(GUI& gui) noexcept :
@@ -55,7 +56,7 @@ void Console::RenderFilterButtons() {
     GUI& gui = this->gui;
 #pragma region Trace
     ImGui::PushID("TRACE");
-    ImGui::PushStyleColor(ImGuiCol_Text, TRACE_COLOR);
+    ImGui::PushStyleColor(ImGuiCol_Text, ConsoleColors::TRACE_COLOR);
     if (selectedSeverity == LogSeverity::TRACE) {
         ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0, 0, 0, 0 });
@@ -77,7 +78,7 @@ void Console::RenderFilterButtons() {
 
 #pragma region Info
     ImGui::PushID("INFO");
-    ImGui::PushStyleColor(ImGuiCol_Text, INFO_COLOR);
+    ImGui::PushStyleColor(ImGuiCol_Text, ConsoleColors::INFO_COLOR);
     if (selectedSeverity == LogSeverity::INFO) {
         ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0, 0, 0, 0 });
@@ -99,7 +100,7 @@ void Console::RenderFilterButtons() {
 
 #pragma region Warning
     ImGui::PushID("WARNING");
-    ImGui::PushStyleColor(ImGuiCol_Text, WARNING_COLOR);
+    ImGui::PushStyleColor(ImGuiCol_Text, ConsoleColors::WARNING_COLOR);
     if (selectedSeverity == LogSeverity::WARNING) {
         ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0, 0, 0, 0 });
@@ -121,7 +122,7 @@ void Console::RenderFilterButtons() {
 
 #pragma region Error
     ImGui::PushID("ERROR");
-    ImGui::PushStyleColor(ImGuiCol_Text, ERROR_COLOR);
+    ImGui::PushStyleColor(ImGuiCol_Text, ConsoleColors::ERROR_COLOR);
     if (selectedSeverity == LogSeverity::ERRO) {
         ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0, 0, 0, 0 });
@@ -143,7 +144,7 @@ void Console::RenderFilterButtons() {
 
 #pragma region Fatal
     ImGui::PushID("FATAL");
-    ImGui::PushStyleColor(ImGuiCol_Text, FATAL_COLOR);
+    ImGui::PushStyleColor(ImGuiCol_Text, ConsoleColors::FATAL_COLOR);
     if (selectedSeverity == LogSeverity::FATAL) {
         ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0, 0, 0, 0 });
@@ -206,42 +207,42 @@ void Console::RenderMessageLog() {
             using enum LogSeverity;
             case TRACE:
                 icon = ConsoleIcons::TRACE_ICON;
-                color = TRACE_COLOR;
+                color = ConsoleColors::TRACE_COLOR;
                 tooltipMessage = TRACE_TOOLTIP_MESSAGE;
                 break;
             case INFO:
                 icon = ConsoleIcons::INFO_ICON;
-                color = INFO_COLOR;
+                color = ConsoleColors::INFO_COLOR;
                 tooltipMessage = INFO_TOOLTIP_MESSAGE;
                 break;
             case WARNING:
                 icon = ConsoleIcons::WARNING_ICON;
-                color = WARNING_COLOR;
+                color = ConsoleColors::WARNING_COLOR;
                 tooltipMessage = WARNING_TOOLTIP_MESSAGE;
                 break;
             case ERRO:
                 icon = ConsoleIcons::ERROR_ICON;
-                color = ERROR_COLOR;
+                color = ConsoleColors::ERROR_COLOR;
                 tooltipMessage = ERROR_TOOLTIP_MESSAGE;
                 break;
             case FATAL:
                 icon = ConsoleIcons::FATAL_ICON;
-                color = FATAL_COLOR;
+                color = ConsoleColors::FATAL_COLOR;
                 tooltipMessage = FATAL_TOOLTIP_MESSAGE;
                 break;
             case OPENGL:
                 icon = ConsoleIcons::OPENGL_ICON;
-                color = OPENGL_COLOR;
+                color = ConsoleColors::OPENGL_COLOR;
                 tooltipMessage = OPENGL_TOOLTIP_MESSAGE;
                 break;
             case VULKAN:
                 icon = ConsoleIcons::VULKAN_ICON;
-                color = VULKAN_COLOR;
+                color = ConsoleColors::VULKAN_COLOR;
                 tooltipMessage = VULKAN_TOOLTIP_MESSAGE;
                 break;
             case DIRECTX:
                 icon = ConsoleIcons::DIRECTX_ICON;
-                color = DIRECTX_COLOR;
+                color = ConsoleColors::DIRECTX_COLOR;
                 tooltipMessage = DIRECTX_TOOLTIP_MESSAGE;
                 break;
             default:

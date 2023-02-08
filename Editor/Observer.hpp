@@ -51,10 +51,6 @@ private:
 
     struct ComponentDefinitionDisplay {
 
-        static constexpr ImVec4 ERROR_COLOR{ 1.0f, 0.6f, 0.6f, 1.0f };
-        static constexpr ImVec4 INFO_COLOR{ 0.7f, 1.0f, 0.7f, 1.0f };
-        static constexpr ImVec4 WARNING_COLOR{ 1.0f, 0.5f, 0.1f, 1.0f };
-
         static void RenderMessagesTable(const AssetHandle componentDefAsset);
         static void RenderFields(const Component& componentDef);
         static void RenderSourceCode(const Component& componentDef);
