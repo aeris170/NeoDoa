@@ -19,13 +19,15 @@
 SceneHierarchy::SceneHierarchy(GUI& gui) noexcept :
     gui(gui) {}
 
-void SceneHierarchy::Begin() {
+bool SceneHierarchy::Begin() {
     GUI& gui = this->gui;
     ImGui::PushID(GUI::SCENE_HIERARCHY_TITLE);
     std::string title(WindowIcons::SCENE_HIERARCHY_WINDOW_ICON);
     title.append(GUI::SCENE_HIERARCHY_TITLE);
     title.append(GUI::SCENE_HIERARCHY_ID);
-    ImGui::Begin(title.c_str());
+    bool visible = ImGui::Begin(title.c_str());
+
+    return visible;
 }
 
 void SceneHierarchy::Render(Scene& scene) {
@@ -92,7 +94,7 @@ void SceneHierarchy::Render(Scene& scene) {
         }
         ImGui::Separator();
         if (ImGui::MenuItem(ICON_FA_WINDOW_CLOSE " Close Scene")) {
-            gui.openProject.value().CloseScene();
+            gui.CORE->LoadedProject()->CloseScene();
         }
         ImGui::EndPopup();
     }
@@ -191,7 +193,7 @@ void SceneHierarchy::RenderEntityNode(Scene& scene, const Entity entity) {
             Entity current = entity;
 
             while (scene.HasComponent<ChildComponent>(current)) {
-                auto& child = scene.GetComponent<ChildComponent>(current);
+                const auto& child = scene.GetComponent<ChildComponent>(current);
                 if (child.GetEntity() == dropped) {
                     badAdopt = true; break;
                 }
@@ -228,6 +230,25 @@ void SceneHierarchy::RenderEntityNode(Scene& scene, const Entity entity) {
     if (ImGui::IsItemHovered(ImGuiHoveredFlags_None) && ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
         SetSelectedEntity(entity);
     }
+    RenderContextMenu(scene, entity);
+
+    if (opened) {
+        if (scene.HasComponent<ParentComponent>(entity)) {
+            ParentComponent& parent = scene.GetComponent<ParentComponent>(entity);
+            const std::vector<Entity>& children = parent.GetChildren();
+
+            for (auto& entt : children) {
+                RenderEntityNode(scene, entt);
+            }
+        }
+
+        if (!isLeaf) {
+            ImGui::TreePop();
+        }
+    }
+}
+void SceneHierarchy::RenderContextMenu(Scene& scene, const Entity entity) {
+    GUI& gui = this->gui;
 
     if (ImGui::BeginPopupContextItem(0, ImGuiPopupFlags_MouseButtonRight)) {
         if (ImGui::BeginMenu(ICON_FA_LINK " Attach Module")) {
@@ -245,9 +266,9 @@ void SceneHierarchy::RenderEntityNode(Scene& scene, const Entity entity) {
                 scene.EmplaceComponent<UserDefinedComponentStorage>(entity);
             }
             UserDefinedComponentStorage& storage = scene.GetComponent<UserDefinedComponentStorage>(entity);
-            Assets& assets{ gui.openProject->Assets() };
-            for (auto cmpid : assets.ComponentDefinitionAssetIDs()) {
-                AssetHandle handle = assets.FindAsset(cmpid);
+            auto& assets{ gui.CORE->Assets() };
+            for (auto cmpid : assets->ComponentDefinitionAssetIDs()) {
+                AssetHandle handle = assets->FindAsset(cmpid);
                 if (!handle->HasDeserializedData()) { continue; }
 
                 const Component& cmp = handle->DataAs<Component>();
@@ -260,7 +281,7 @@ void SceneHierarchy::RenderEntityNode(Scene& scene, const Entity entity) {
                 }
                 name.insert(0, " ");
                 if (ImGui::MenuItem(name.c_str())) {
-                    storage.AttachComponent(assets, cmpid);
+                    storage.AttachComponent(cmpid);
                 }
             }
             //script components end
@@ -270,21 +291,6 @@ void SceneHierarchy::RenderEntityNode(Scene& scene, const Entity entity) {
             deletedEntity = entity;
         }
         ImGui::EndPopup();
-    }
-
-    if (opened) {
-        if (scene.HasComponent<ParentComponent>(entity)) {
-            ParentComponent& parent = scene.GetComponent<ParentComponent>(entity);
-            const std::vector<Entity>& children = parent.GetChildren();
-
-            for (auto& entt : children) {
-                RenderEntityNode(scene, entt);
-            }
-        }
-
-        if (!isLeaf) {
-            ImGui::TreePop();
-        }
     }
 }
 

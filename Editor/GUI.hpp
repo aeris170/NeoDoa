@@ -53,24 +53,22 @@ struct GUI {
     ImGuiWindowFlags window_flags{ ImGuiWindowFlags_None };
     ImGuiDockNodeFlags dockspace_flags{ ImGuiDockNodeFlags_None };
 
-    const CorePtr& core;
+    const CorePtr& CORE;
     WindowPtr& window;
     std::string defaultWindowName{ "NeoDoa Editor" };
     bool dockspaceOpen{ true };
 
-    std::optional<Project> openProject{ std::nullopt };
+    MenuBar mb{ *this };
+    SceneHierarchy sh{ *this };
+    Observer obs{ *this };
+    CodeEditor ce{ *this };
+    AssetManager am{ *this };
+    Console con{ *this };
+    SceneViewport sv{ *this };
+    GameViewport gv{ *this };
+    SceneSettings ss{ *this };
 
-    MenuBar mb;
-    SceneHierarchy sh;
-    Observer obs;
-    CodeEditor ce;
-    AssetManager am;
-    Console con;
-    SceneViewport sv;
-    GameViewport gv;
-    SceneSettings ss;
-
-    float delta;
+    float delta{ 0 };
 
     GUI(const CorePtr& core) noexcept;
 
@@ -85,21 +83,23 @@ struct GUI {
 
     void CreateNewScene(std::string_view relativePath, std::string_view name);
 
-    bool HasOpenProject();
-    bool HasOpenScene();
+    bool HasOpenProject() const;
+    Project& GetOpenProject() const;
+    bool HasOpenScene() const;
+    Scene& GetOpenScene() const;
 
-    ImGuiIO* IO();
-    ImFont* GetFont();
-    ImFont* GetFontBold();
+    ImGuiIO* IO() const;
+    ImFont* GetFont() const;
+    ImFont* GetFontBold() const;
 
-    void* GetFolderIcon(TextureSize size = TextureSize::MEDIUM);
-    void* GetProjectIcon(TextureSize size = TextureSize::MEDIUM);
-    void* GetSceneIcon(TextureSize size = TextureSize::MEDIUM);
-    void* GetComponentIcon(TextureSize size = TextureSize::MEDIUM);
-    void* GetFileIcon(TextureSize size = TextureSize::MEDIUM);
-    void* GetBackArrowIcon(TextureSize size = TextureSize::MEDIUM);
+    void* GetFolderIcon(TextureSize size = TextureSize::MEDIUM) const;
+    void* GetProjectIcon(TextureSize size = TextureSize::MEDIUM) const;
+    void* GetSceneIcon(TextureSize size = TextureSize::MEDIUM) const;
+    void* GetComponentIcon(TextureSize size = TextureSize::MEDIUM) const;
+    void* GetFileIcon(TextureSize size = TextureSize::MEDIUM) const;
+    void* GetBackArrowIcon(TextureSize size = TextureSize::MEDIUM) const;
 
-    void* FindIconForFileType(const FNode& file, TextureSize = TextureSize::MEDIUM);
+    void* FindIconForFileType(const FNode& file, TextureSize = TextureSize::MEDIUM) const;
 
 private:
     ImGuiIO* io{ nullptr };

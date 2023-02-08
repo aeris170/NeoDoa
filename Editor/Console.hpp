@@ -39,9 +39,9 @@ struct Console {
 
     std::reference_wrapper<GUI> gui;
 
-    Console(GUI& gui) noexcept;
+    explicit Console(GUI& gui) noexcept;
 
-    void Begin();
+    bool Begin();
     void Render();
     void End();
 
@@ -55,7 +55,7 @@ private:
 
     void RenderTopPanel();
     void RenderFilterButtons();
-    void RenderDummyArea();
+    void RenderDummyArea() const;
     void RenderClearButton();
 
     void RenderMessageLog();

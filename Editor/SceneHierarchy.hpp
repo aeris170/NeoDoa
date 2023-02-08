@@ -24,14 +24,15 @@ struct SceneHierarchy {
     Entity highlightedEntity{ NULL_ENTT };
     Entity deletedEntity{ NULL_ENTT };
 
-    SceneHierarchy(GUI& gui) noexcept;
+    explicit SceneHierarchy(GUI& gui) noexcept;
 
-    void Begin();
+    bool Begin();
     void Render(Scene& scene);
     void End();
 
 private:
     void RenderEntityNode(Scene& scene, const Entity entity);
+    void RenderContextMenu(Scene& scene, const Entity entity);
 
     void SetSelectedEntity(Entity entt);
     void ResetSelectedEntity();

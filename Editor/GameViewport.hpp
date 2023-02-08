@@ -8,9 +8,9 @@ struct GameViewport {
 
     std::reference_wrapper<GUI> gui;
 
-    GameViewport(GUI& gui) noexcept;
+    explicit GameViewport(GUI& gui) noexcept;
 
-    void Begin();
+    bool Begin();
     void Render();
     void End();
 

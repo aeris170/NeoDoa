@@ -5,28 +5,26 @@
 #include <optional>
 #include <filesystem>
 
-#include "Assets.hpp"
-#include "Scene.hpp"
+#include "Core.hpp"
+#include "UUID.hpp"
 
 struct FNode;
+struct Scene;
 
 struct Project {
 
     inline static const std::string DEFAULT_PATH = std::getenv("USERPROFILE");
 
-    Project(std::filesystem::path workspace, std::string name, UUID startupSceneID = UUID::Empty()) noexcept;
+    Project(const std::filesystem::path& workspace, const std::string& name, UUID startupSceneID = UUID::Empty()) noexcept;
     ~Project() = default;
     Project(const Project& other) = delete;
-    Project(Project&& other) noexcept;
+    Project(Project&& other) noexcept = default;
     Project& operator=(const Project& other) = delete;
-    Project& operator=(Project&& other) noexcept;
+    Project& operator=(Project&& other) noexcept = default;
 
     std::filesystem::path Workspace() const;
     std::string WorkspaceName() const;
     const std::string& Name() const;
-
-    Assets& Assets();
-    const struct Assets& Assets() const;
 
     void OpenStartupScene();
     UUID GetStartupScene() const;
@@ -38,18 +36,13 @@ struct Project {
     Scene& GetOpenScene();
     UUID GetOpenSceneID() const;
 
-    void SaveToDisk();
     void SaveOpenSceneToDisk();
 
 private:
-    std::filesystem::path _workspace;
-    std::string _name;
-    struct Assets _assets;
-    UUID _startupSceneID{ UUID::Empty() };
-    Scene* _openScene{ nullptr };
-    UUID _openSceneID{ UUID::Empty() };
-
-    inline void __onMove() {
-        _assets.__onMove(this);
-    }
+    const CorePtr& CORE{ Core::GetCore() };
+    std::filesystem::path workspace;
+    std::string name;
+    UUID startupSceneID{ UUID::Empty() };
+    Scene* openScene{ nullptr };
+    UUID openSceneID{ UUID::Empty() };
 };

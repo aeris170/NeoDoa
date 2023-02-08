@@ -9,14 +9,16 @@
 Console::Console(GUI& gui) noexcept :
     gui(gui) {}
 
-void Console::Begin() {
+bool Console::Begin() {
     GUI& gui = this->gui;
-    ImGui::PushID(gui.CONSOLE_TITLE);
+    ImGui::PushID(GUI::CONSOLE_TITLE);
     std::string title(WindowIcons::CONSOLE_WINDOW_ICON);
-    title.append(gui.CONSOLE_TITLE);
-    title.append(gui.CONSOLE_ID);
-    ImGui::Begin(title.c_str());
+    title.append(GUI::CONSOLE_TITLE);
+    title.append(GUI::CONSOLE_ID);
+    bool visible = ImGui::Begin(title.c_str());
     ImGui::SetWindowFontScale(0.9f);
+
+    return visible;
 }
 
 void Console::Render() {
@@ -160,7 +162,7 @@ void Console::RenderFilterButtons() {
 #pragma endregion
 }
 
-void Console::RenderDummyArea() {
+void Console::RenderDummyArea() const {
     ImGui::Dummy({ ImGui::GetContentRegionAvail().x - 60, buttonSize.y });
 }
 
@@ -190,8 +192,8 @@ void Console::RenderMessageLog() {
     ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, 30);
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
 
-    auto& messages = Log::_messages;
-    for (auto& message : messages) {
+    const auto& messages = Log::_messages;
+    for (const auto& message : messages) {
         if (selectedSeverity <= message._severity) {
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
@@ -201,42 +203,43 @@ void Console::RenderMessageLog() {
             const char* tooltipMessage;
 
             switch (message._severity) {
-            case LogSeverity::TRACE:
+            using enum LogSeverity;
+            case TRACE:
                 icon = ConsoleIcons::TRACE_ICON;
                 color = TRACE_COLOR;
                 tooltipMessage = TRACE_TOOLTIP_MESSAGE;
                 break;
-            case LogSeverity::INFO:
+            case INFO:
                 icon = ConsoleIcons::INFO_ICON;
                 color = INFO_COLOR;
                 tooltipMessage = INFO_TOOLTIP_MESSAGE;
                 break;
-            case LogSeverity::WARNING:
+            case WARNING:
                 icon = ConsoleIcons::WARNING_ICON;
                 color = WARNING_COLOR;
                 tooltipMessage = WARNING_TOOLTIP_MESSAGE;
                 break;
-            case LogSeverity::ERRO:
+            case ERRO:
                 icon = ConsoleIcons::ERROR_ICON;
                 color = ERROR_COLOR;
                 tooltipMessage = ERROR_TOOLTIP_MESSAGE;
                 break;
-            case LogSeverity::FATAL:
+            case FATAL:
                 icon = ConsoleIcons::FATAL_ICON;
                 color = FATAL_COLOR;
                 tooltipMessage = FATAL_TOOLTIP_MESSAGE;
                 break;
-            case LogSeverity::OPENGL:
+            case OPENGL:
                 icon = ConsoleIcons::OPENGL_ICON;
                 color = OPENGL_COLOR;
                 tooltipMessage = OPENGL_TOOLTIP_MESSAGE;
                 break;
-            case LogSeverity::VULKAN:
+            case VULKAN:
                 icon = ConsoleIcons::VULKAN_ICON;
                 color = VULKAN_COLOR;
                 tooltipMessage = VULKAN_TOOLTIP_MESSAGE;
                 break;
-            case LogSeverity::DIRECTX:
+            case DIRECTX:
                 icon = ConsoleIcons::DIRECTX_ICON;
                 color = DIRECTX_COLOR;
                 tooltipMessage = DIRECTX_TOOLTIP_MESSAGE;

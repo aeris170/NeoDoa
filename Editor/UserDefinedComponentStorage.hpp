@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Core.hpp>
 #include <Entity.hpp>
 #include <Assets.hpp>
 
@@ -20,7 +21,8 @@ struct UserDefinedComponentStorage {
     unordered_string_map<ComponentInstance>& Components();
     const unordered_string_map<ComponentInstance>& Components() const;
 
-    ComponentInstance* AttachComponent(Assets& assets, UUID component);
+    ComponentInstance* AttachComponent(UUID component);
+    ComponentInstance* AttachComponentWithData(UUID component, std::vector<ComponentInstance::Field>&& data);
 
     void DetachComponent(UUID component);
     void DetachComponent(std::string_view componentName);

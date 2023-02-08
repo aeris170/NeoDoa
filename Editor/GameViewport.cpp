@@ -8,13 +8,15 @@
 GameViewport::GameViewport(GUI& gui) noexcept :
     gui(gui) {}
 
-void GameViewport::Begin() {
+bool GameViewport::Begin() {
     GUI& gui = this->gui;
-    ImGui::PushID(gui.GAME_VIEWPORT_TITLE);
+    ImGui::PushID(GUI::GAME_VIEWPORT_TITLE);
     std::string title(WindowIcons::GAME_VIEWPORT_WINDOW_ICON);
-    title.append(gui.GAME_VIEWPORT_TITLE);
-    title.append(gui.GAME_VIEWPORT_ID);
-    ImGui::Begin(title.c_str());
+    title.append(GUI::GAME_VIEWPORT_TITLE);
+    title.append(GUI::GAME_VIEWPORT_ID);
+    bool visible = ImGui::Begin(title.c_str());
+
+    return visible;
 }
 
 void GameViewport::Render() {

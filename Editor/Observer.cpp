@@ -29,7 +29,7 @@
 Observer::Observer(GUI& gui) noexcept :
     gui(gui) {}
 
-void Observer::Begin(Scene* scene) {
+bool Observer::Begin(Scene* scene) {
     GUI& gui = this->gui;
     ImGui::PushID(GUI::OBSERVER_TITLE);
     std::string title(WindowIcons::OBSERVER_WINDOW_ICON);
@@ -49,12 +49,14 @@ void Observer::Begin(Scene* scene) {
     }, displayTarget);
 
     title.append(GUI::OBSERVER_ID);
-    ImGui::Begin(title.c_str());
+    bool visible = ImGui::Begin(title.c_str());
+
+    return visible;
 }
 
 void Observer::Render(Scene& scene) {
     GUI& gui = this->gui;
-    std::visit(overloaded::lambda{
+    std::visit(overloaded::lambda {
         [](std::monostate) {
             const char* text = "Nothing to display here :)";
             ImVec2 size = ImGui::GetContentRegionAvail();
@@ -96,7 +98,7 @@ void Observer::Render(Scene& scene) {
             if (file->IsDirectory()) {
                 RenderFolderView(file);
             } else {
-                AssetHandle h = gui.openProject->Assets().FindAssetAt(*file);
+                AssetHandle h = gui.CORE->Assets()->FindAssetAt(*file);
                 if (h.HasValue()) {
                     RenderAssetView(h);
                 }
@@ -160,7 +162,7 @@ void Observer::RenderFolderView(FNode* folder) {
         ImGui::TableHeadersRow();
 
         for (auto& child : folder->Children()) {
-            if (!child.IsDirectory() && !gui.openProject->Assets().IsAssetExistsAt(child)) { continue; }
+            if (!child.IsDirectory() && !gui.CORE->Assets()->IsAssetExistsAt(child)) { continue; }
 
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
@@ -186,6 +188,7 @@ void Observer::RenderAssetView(AssetHandle asset) {
     }
 }
 void Observer::RenderSceneView(AssetHandle sceneAsset) {
+    GUI& gui = this->gui;
     assert(sceneAsset->IsScene());
 
     Scene& scene = sceneAsset->DataAs<Scene>();
@@ -200,22 +203,48 @@ void Observer::RenderSceneView(AssetHandle sceneAsset) {
             ImGui::TableSetColumnIndex(0);
             std::string label = std::to_string(entt).append("\t\t(").append(scene.GetComponent<IDComponent>(entt).GetTagRef()).append(")");
             if (ImGui::CollapsingHeader(label.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth)) {
-                ImGui::Text(nameof_c(IDComponent));
-                ImGui::Text(nameof_c(TransformComponent));
+                std::string nameWithIcon{};
+
+                nameWithIcon = ComponentIcons::FindIconByComponentName(nameof(IDComponent)) + nameof(IDComponent);
+                ImGui::Text(nameWithIcon.c_str());
+
+                nameWithIcon = ComponentIcons::FindIconByComponentName(nameof(TransformComponent)) + nameof(TransformComponent);
+                ImGui::Text(nameWithIcon.c_str());
                 if (scene.HasComponent<ParentComponent>(entt)) {
-                    ImGui::Text(nameof_c(ParentComponent));
+                    nameWithIcon = ComponentIcons::FindIconByComponentName(nameof(ParentComponent)) + nameof(ParentComponent);
+                    ImGui::Text(nameWithIcon.c_str());
                 }
                 if (scene.HasComponent<ChildComponent>(entt)) {
-                    ImGui::Text(nameof_c(ChildComponent));
+                    nameWithIcon = ComponentIcons::FindIconByComponentName(nameof(ChildComponent)) + nameof(ChildComponent);
+                    ImGui::Text(nameWithIcon.c_str());
                 }
                 if (scene.HasComponent<OrthoCameraComponent>(entt)) {
-                    ImGui::Text(nameof_c(OrthoCameraComponent));
+                    nameWithIcon = ComponentIcons::FindIconByComponentName(nameof(OrthoCameraComponent)) + nameof(OrthoCameraComponent);
+                    ImGui::Text(nameWithIcon.c_str());
                 }
                 if (scene.HasComponent<PerspectiveCameraComponent>(entt)) {
-                    ImGui::Text(nameof_c(PerspectiveCameraComponent));
+                    nameWithIcon = ComponentIcons::FindIconByComponentName(nameof(PerspectiveCameraComponent)) + nameof(PerspectiveCameraComponent);
+                    ImGui::Text(nameWithIcon.c_str());
                 }
                 if (scene.HasComponent<UserDefinedComponentStorage>(entt)) {
-                    ImGui::Text(nameof_c(UserDefinedComponentStorage));
+                    auto& udcs{ scene.GetComponent<UserDefinedComponentStorage>(entt) };
+                    for (const auto& [name, instance] : udcs.Components()) {
+                        if (!instance.HasError()) {
+                            AssetHandle cmpAsset{ gui.CORE->Assets()->FindAsset(instance.ComponentAssetID()) };
+                            nameWithIcon = ComponentIcons::FindIconByComponentName(name) + name;
+                            ImGui::Text(nameWithIcon.c_str());
+                        } else {
+                            ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 0.5f, 0.1f, 1.0f });
+
+                            nameWithIcon = ComponentIcons::FindIconForInstantiationError(instance.GetError()) + name;
+                            ImGui::Text(nameWithIcon.c_str());
+                            if (ImGui::IsItemHovered()) {
+                                ImGui::SetTooltip(instance.ErrorString().data());
+                            }
+
+                            ImGui::PopStyleColor();
+                        }
+                    }
                 }
             }
         }
@@ -239,11 +268,32 @@ void Observer::RenderComponentDefinitionView(AssetHandle componentDefAsset) {
 
     ComponentDefinitionDisplay::RenderMessagesTable(componentDefAsset);
 
-    if (!componentDefAsset->HasErrorMessages()) {
-        const auto& component = componentDefAsset->DataAs<Component>();
-        ComponentDefinitionDisplay::RenderFields(component);
-        ImGui::Separator();
-        ComponentDefinitionDisplay::RenderSourceCode(component);
+    if(componentDefAsset->HasDeserializedData()) {
+        if (!componentDefAsset->HasErrorMessages()) {
+            const auto& component = componentDefAsset->DataAs<Component>();
+            ComponentDefinitionDisplay::RenderFields(component);
+            ImGui::Separator();
+            ComponentDefinitionDisplay::RenderSourceCode(component);
+        }
+    } else {
+        ImGui::Text("Component Definition is not deserialized...");
+    }
+
+    static int extraPadding = 16;
+    float lineHeight = ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2;
+    if (ImGui::GetContentRegionAvail().y > 34.0f) {
+        ImGui::SetCursorPosY(ImGui::GetWindowHeight() - lineHeight - extraPadding);
+    }
+
+    if (ImGui::Button("Refresh", { ImGui::GetContentRegionAvail().x, 0 })) {
+        componentDefAsset->ForceDeserialize();
+    }
+    if (ImGui::IsItemHovered()) {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted("Forces deserialization on this component definition. All data in RAM is purged, and new data is read from disk. This operation will cause re-instantiation of user defined components without loss of data.");
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
     }
 }
 void Observer::RenderTextView(AssetHandle textAsset) {
@@ -446,7 +496,7 @@ void Observer::ComponentDefinitionDisplay::RenderSourceCode(const Component& com
     ImGui::TableNextRow();
     ImGui::TableSetColumnIndex(0);
 
-    TextEditor.Render("##", false, { 0.0f, -10.0f }, false);
+    TextEditor.Render("##", true, { 0.0f, -32.0f }, false);
 
     ImGui::EndTable();
 }

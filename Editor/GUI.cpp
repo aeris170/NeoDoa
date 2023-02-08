@@ -8,18 +8,8 @@
 #include <Texture.hpp>
 
 GUI::GUI(const CorePtr& core) noexcept :
-    core(core),
-    window(core->Window()),
-    mb(*this),
-    sh(*this),
-    obs(*this),
-    ce(*this),
-    am(*this),
-    con(*this),
-    sv(*this),
-    gv(*this),
-    ss(*this),
-    delta(0) {
+    CORE(core),
+    window(core->Window()) {
     ImVec4 txtColor = ImGui::GetStyle().Colors[ImGuiCol_Text];
     SVGPathway::Initialize({ txtColor.x, txtColor.y, txtColor.z, txtColor.w });
     FileDialog::Initialize();
@@ -82,6 +72,7 @@ void GUI::Prepare() {
 
             ImGui::DockBuilderDockWindow(OBSERVER_ID, rightUp);
             ImGui::DockBuilderDockWindow(SCENE_SETTINGS_ID, rightUp);
+            ImGui::DockBuilderDockWindow(CODE_EDITOR_ID, rightUp);
 
             ImGui::DockBuilderDockWindow(ASSET_MANAGER_ID, rightDown);
             ImGui::DockBuilderDockWindow(CONSOLE_ID, rightDown);
@@ -99,47 +90,57 @@ void GUI::operator() (float delta) {
     this->delta = delta;
     Prepare();
 
-    mb.Begin();
-    mb.Render();
+    if (mb.Begin()) {
+        mb.Render();
+    }
     mb.End();
 
-    am.Begin();
-    am.Render();
+    if (am.Begin()) {
+        am.Render();
+    }
     am.End();
 
-    sh.Begin();
-    if (HasOpenScene()) {
-        sh.Render(openProject->GetOpenScene());
+    if (sh.Begin()) {
+        if (HasOpenScene()) {
+            sh.Render(GetOpenScene());
+        }
     }
     sh.End();
 
-    obs.Begin(HasOpenProject() ? &openProject->GetOpenScene() : nullptr);
-    if (HasOpenScene()) {
-        obs.Render(openProject->GetOpenScene());
+    Scene* scenePtr = HasOpenProject() && HasOpenScene() ? &GetOpenScene() : nullptr;
+    if (obs.Begin(scenePtr)) {
+        if (HasOpenScene()) {
+            obs.Render(GetOpenScene());
+        }
     }
     obs.End();
 
-    ce.Begin();
-    ce.Render();
+    if (ce.Begin()) {
+        ce.Render();
+    }
     ce.End();
 
-    con.Begin();
-    con.Render();
+    if (con.Begin()) {
+        con.Render();
+    }
     con.End();
 
-    sv.Begin(HasOpenProject() ? &openProject->GetOpenScene() : nullptr);
-    if (HasOpenScene()) {
-        sv.Render(openProject->GetOpenScene());
+    if (sv.Begin(scenePtr)) {
+        if (HasOpenScene()) {
+            sv.Render(GetOpenScene());
+        }
     }
     sv.End();
 
-    gv.Begin();
-    gv.Render();
+    if (gv.Begin()) {
+        gv.Render();
+    }
     gv.End();
 
-    ss.Begin(HasOpenProject() ? &openProject->GetOpenScene() : nullptr);
-    if (HasOpenScene()) {
-        ss.Render(openProject->GetOpenScene());
+    if (ss.Begin(scenePtr)) {
+        if (HasOpenScene()) {
+            ss.Render(GetOpenScene());
+        }
     }
     ss.End();
 
@@ -152,41 +153,32 @@ void GUI::End() {
 }
 
 void GUI::CreateNewProject(std::string_view workspace, std::string_view name) {
-    openProject.emplace(std::string(workspace), std::string(name));
-    core->LoadProject(openProject.value());
+    CORE->CreateAndLoadProject(workspace, name);
 
     std::string title = defaultWindowName;
     title.append(" - ");
-    title.append(openProject->Name());
+    title.append(CORE->LoadedProject()->Name());
     window->SetTitle(title);
 }
 
 void GUI::SaveProjectToDisk() {
-    if (openProject) {
-        openProject->SaveToDisk();
+    if (CORE->HasLoadedProject()) {
+        CORE->SaveLoadedProjectToDisk();
     }
 }
 
 void GUI::OpenProjectFromDisk(const std::string& path) {
-    CloseProject();
-
-    // TODO
-    FNode file(FNodeCreationParams {
-        .name = path
-    });
-    openProject.emplace(DeserializeProject(&file));
-    core->LoadProject(openProject.value());
+    CORE->LoadProject(path);
 
     std::string title = defaultWindowName;
     title.append(" - ");
-    title.append(openProject->Name());
+    title.append(CORE->LoadedProject()->Name());
     window->SetTitle(title);
 }
 
 void GUI::CloseProject() {
     obs.ResetDisplayTarget();
-    openProject.reset();
-    core->UnloadProject();
+    CORE->UnloadProject();
 }
 
 void GUI::CreateNewScene(std::string_view relativePath, std::string_view name) {
@@ -200,29 +192,30 @@ void GUI::CreateNewScene(std::string_view relativePath, std::string_view name) {
     */
 }
 
-bool GUI::HasOpenProject() { return openProject.has_value(); }
-bool GUI::HasOpenScene() { return HasOpenProject() && openProject->HasOpenScene(); }
+bool GUI::HasOpenProject() const { return CORE->HasLoadedProject(); }
+Project& GUI::GetOpenProject() const { return *CORE->LoadedProject().get(); }
+bool GUI::HasOpenScene() const { return HasOpenProject() && CORE->LoadedProject()->HasOpenScene(); }
+Scene& GUI::GetOpenScene() const { return CORE->LoadedProject()->GetOpenScene(); }
 
-ImGuiIO* GUI::IO() { return io; }
-ImFont* GUI::GetFont() { return font; }
-ImFont* GUI::GetFontBold() { return fontBold; }
+ImGuiIO* GUI::IO() const { return io; }
+ImFont* GUI::GetFont() const { return font; }
+ImFont* GUI::GetFontBold() const { return fontBold; }
 
-void* GUI::GetFolderIcon(TextureSize size) { return SVGPathway::Get(FOLDER_ICON_KEY, TextureStyle::PADDED, size).TextureIDRaw(); }
-void* GUI::GetProjectIcon(TextureSize size) { return SVGPathway::Get(PROJECT_ICON_KEY, TextureStyle::PADDED, size).TextureIDRaw(); }
-void* GUI::GetSceneIcon(TextureSize size) { return SVGPathway::Get(SCENE_ICON_KEY, TextureStyle::PADDED, size).TextureIDRaw(); }
-void* GUI::GetComponentIcon(TextureSize size) { return SVGPathway::Get(COMPONENT_ICON_KEY, TextureStyle::PADDED, size).TextureIDRaw(); }
-void* GUI::GetFileIcon(TextureSize size) { return SVGPathway::Get(FILE_ICON_KEY, TextureStyle::PADDED, size).TextureIDRaw(); }
-void* GUI::GetBackArrowIcon(TextureSize size) { return SVGPathway::Get(BACK_ARROW_ICON_KEY, TextureStyle::PADDED, size).TextureIDRaw(); }
+void* GUI::GetFolderIcon(TextureSize size) const    { return SVGPathway::Get(FOLDER_ICON_KEY,     TextureStyle::PADDED, size).TextureIDRaw(); }
+void* GUI::GetProjectIcon(TextureSize size) const   { return SVGPathway::Get(PROJECT_ICON_KEY,    TextureStyle::PADDED, size).TextureIDRaw(); }
+void* GUI::GetSceneIcon(TextureSize size) const     { return SVGPathway::Get(SCENE_ICON_KEY,      TextureStyle::PADDED, size).TextureIDRaw(); }
+void* GUI::GetComponentIcon(TextureSize size) const { return SVGPathway::Get(COMPONENT_ICON_KEY,  TextureStyle::PADDED, size).TextureIDRaw(); }
+void* GUI::GetFileIcon(TextureSize size) const      { return SVGPathway::Get(FILE_ICON_KEY,       TextureStyle::PADDED, size).TextureIDRaw(); }
+void* GUI::GetBackArrowIcon(TextureSize size) const { return SVGPathway::Get(BACK_ARROW_ICON_KEY, TextureStyle::PADDED, size).TextureIDRaw(); }
 
-void* GUI::FindIconForFileType(const FNode& file, TextureSize size) {
+void* GUI::FindIconForFileType(const FNode& file, TextureSize size) const {
     assert(HasOpenProject());
 
     if (file.IsDirectory()) { return GetFolderIcon(size); }
     if (file.Extension() == ".doa") { return GetProjectIcon(size); } /* TODO FIX THIS SHITTY EXTENSION CHECK */
 
-    Project& project = openProject.value();
-    assert(project.Assets().IsAssetExistsAt(file));
-    AssetHandle asset = project.Assets().FindAssetAt(file);
+    assert(CORE->Assets()->IsAssetExistsAt(file));
+    AssetHandle asset = CORE->Assets()->FindAssetAt(file);
 
     if (asset->IsScene()) { return GetSceneIcon(size); }
     if (asset->IsComponentDefinition()) { return GetComponentIcon(size); }

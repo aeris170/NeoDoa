@@ -6,6 +6,8 @@
 
 #include <nameof.hpp>
 
+#include "ComponentInstance.hpp"
+
 namespace WindowIcons {
     inline constexpr auto SCENE_HIERARCHY_WINDOW_ICON{ ICON_FA_PROJECT_DIAGRAM " " };
     inline constexpr auto OBSERVER_WINDOW_ICON{ ICON_FA_EYE " " };
@@ -23,16 +25,57 @@ namespace SceneHierarchyIcons {
 }
 
 namespace ComponentIcons {
-    inline constexpr auto GENERIC_COMPONENT_ICON = ICON_FA_FILE_CODE " "; // or ICON_FA_COG
-    inline const std::unordered_map<std::string, const std::string> DEFINED_COMPONENT_ICONS{
-        { nameof(IDComponent), ICON_FA_ADDRESS_CARD " " },
-        { nameof(TransformComponent), ICON_FA_SEEDLING " " },
-        { nameof(ParentComponent), ICON_FA_USER_CROWN " " },
-        { nameof(ChildComponent), ICON_FA_USER " " },
-        { nameof(OrthoCameraComponent), ICON_FA_VIDEO " " },
-        { nameof(PerspectiveCameraComponent), ICON_FA_CAMERA_MOVIE " " },
-        { nameof(ModelRenderer), ICON_FA_COCKTAIL " " }
+    inline constexpr auto GENERIC_COMPONENT_ICON = ICON_FA_COG "  ";
+    inline const unordered_string_map<const std::string> DEFINED_COMPONENT_ICONS {
+        { nameof(IDComponent), ICON_FA_ADDRESS_CARD "  " },
+        { nameof(TransformComponent), ICON_FA_SEEDLING "  " },
+        { nameof(ParentComponent), ICON_FA_USER_CROWN "  " },
+        { nameof(ChildComponent), ICON_FA_USER "  " },
+        { nameof(OrthoCameraComponent), ICON_FA_VIDEO "  " },
+        { nameof(PerspectiveCameraComponent), ICON_FA_CAMERA_MOVIE "  " },
+        { nameof(ModelRenderer), ICON_FA_COCKTAIL "  " }
     };
+
+    inline const std::string& FindIconByComponentName(std::string_view componentName) {
+        auto search = DEFINED_COMPONENT_ICONS.find(componentName);
+        if (search != ComponentIcons::DEFINED_COMPONENT_ICONS.end()) {
+            return search->second;
+        } else {
+            static std::string gci{ GENERIC_COMPONENT_ICON };
+            return gci;
+        }
+    }
+
+    inline const std::string& FindIconForInstantiationError(InstantiationError error) {
+        switch (error) {
+            using enum InstantiationError;
+            case DEFINITION_MISSING:
+            {
+                static std::string icon{ ICON_FA_MAP_MARKER_QUESTION " " };
+                return icon;
+            }
+            case NON_DEFITION_INSTANTIATION:
+            {
+                static std::string icon{ ICON_FA_TIMES " " };
+                return icon;
+            }
+            case DEFINITION_COMPILE_ERROR:
+            {
+                static std::string icon{ ICON_FA_BUG " " };
+                return icon;
+            }
+            case DEFINITION_NOT_DESERIALIZED:
+            {
+                static std::string icon{ ICON_FA_WRENCH " " };
+                return icon;
+            }
+            default:
+            {
+                static std::string icon{ ICON_FA_CHECK_CIRCLE " " };
+                return icon;
+            }
+        }
+    }
 }
 
 namespace ComponentDefinitionViewIcons {

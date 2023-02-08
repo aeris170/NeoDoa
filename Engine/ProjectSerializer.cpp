@@ -19,12 +19,7 @@ std::string SerializeProject(const Project& project) {
         printer.CloseElement(); // name close
         printer.OpenElement("startup");
         {
-            const AssetHandle startup = project.Assets().FindAsset(project.GetStartupScene());
-            if (startup.HasValue()) {
-                printer.PushText(startup->ID());
-            } else {
-                printer.PushText(UUID::Empty());
-            }
+            printer.PushText(project.GetStartupScene());
         }
         printer.CloseElement(); // name close
     }

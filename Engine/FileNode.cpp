@@ -3,6 +3,8 @@
 #include <fstream>
 #include <cassert>
 
+#include "Log.hpp"
+#include "Assets.hpp"
 #include "Project.hpp"
 
 FNode::FNode(const FNodeCreationParams& params) noexcept :
@@ -193,7 +195,9 @@ void FNode::MoveUnder(FNode& directory) {
     }
 }
 void FNode::Delete() {
-    FNode::DeleteChildNode(this);
+    if (parent == nullptr) { return; }
+
+    parent->DeleteChildNode(this);
 }
 
 uintmax_t FNode::Size() const { return std::filesystem::file_size(AbsolutePath()); }
@@ -205,7 +209,7 @@ bool FNode::HasOwningProject() const { return OwningProject() != nullptr; }
 const Project* FNode::OwningProject() const { return owner; }
 
 bool FNode::HasRootNode() const { return RootNode() != nullptr; }
-FNode* FNode::RootNode() const { return owner ? &const_cast<Project*>(owner)->Assets().Root() : nullptr; }
+FNode* FNode::RootNode() const { return owner ? &Core::GetCore()->Assets()->Root() : nullptr; }
 
 bool FNode::HasParentNode() const { return ParentNode() != nullptr; }
 FNode* FNode::ParentNode() const { return parent; }
@@ -328,10 +332,14 @@ bool FNode::DeleteChildNode(FNode* child) {
     }
     auto pos = std::find(children.begin(), children.end(), *child);
     assert(pos != children.end(), "Something is wrong, child has this as parent but this does not have child as a child!");
-    children.erase(pos);
 
     std::filesystem::current_path(owner->Workspace());
     std::filesystem::remove_all(child->Path());
+    child->ext += ".id";
+    child->fullName += ".id";
+    std::filesystem::remove_all(child->Path());
+
+    children.erase(pos);
 
     return true;
 }

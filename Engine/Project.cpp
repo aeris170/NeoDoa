@@ -1,85 +1,57 @@
 #include "Project.hpp"
 
-#include <tinyxml2.h>
+#include "Scene.hpp"
+#include "Assets.hpp"
 
-#include "Asset.hpp"
-#include "SceneSerializer.hpp"
-#include "SceneDeserializer.hpp"
-#include "ProjectSerializer.hpp"
+Project::Project(const std::filesystem::path& workspace, const std::string& name, UUID startupSceneID) noexcept :
+    workspace(workspace),
+    name(name),
+    startupSceneID(startupSceneID) {}
 
-Project::Project(std::filesystem::path workspace, std::string name, UUID startupSceneID) noexcept :
-    _workspace(workspace),
-    _name(name),
-    _assets(this),
-    _startupSceneID(startupSceneID) {
-    OpenStartupScene();
-}
-Project::Project(Project&& other) noexcept :
-    _workspace(std::move(other._workspace)),
-    _name(std::move(other._name)),
-    _assets(std::move(other._assets)),
-    _startupSceneID(std::exchange(other._startupSceneID, UUID::Empty())),
-    _openScene(std::exchange(other._openScene, nullptr)),
-    _openSceneID(std::exchange(other._openSceneID, UUID::Empty())) {
-    __onMove();
-}
-Project& Project::operator=(Project&& other) noexcept {
-    _workspace = std::move(other._workspace);
-    _name = std::move(other._name);
+std::filesystem::path Project::Workspace() const { return workspace; }
+std::string Project::WorkspaceName() const { return workspace.string(); }
+const std::string& Project::Name() const { return name; }
 
-    _assets = std::move(other._assets);
-
-    _startupSceneID = std::exchange(other._startupSceneID, UUID::Empty());
-
-    _openScene = std::exchange(other._openScene, nullptr);
-    _openSceneID = std::exchange(other._openSceneID, UUID::Empty());
-
-    __onMove();
-    return *this;
-}
-
-std::filesystem::path Project::Workspace() const { return _workspace; }
-std::string Project::WorkspaceName() const { return _workspace.string(); }
-const std::string& Project::Name() const { return _name; }
-
-Assets& Project::Assets() { return _assets; }
-const Assets& Project::Assets() const { return _assets; }
-
-void Project::OpenStartupScene() { OpenScene(_startupSceneID); }
-UUID Project::GetStartupScene() const { return _startupSceneID; }
-void Project::SetStartupScene(UUID sceneID) { _startupSceneID = sceneID; }
+void Project::OpenStartupScene() { OpenScene(startupSceneID); }
+UUID Project::GetStartupScene() const { return startupSceneID; }
+void Project::SetStartupScene(UUID sceneID) { startupSceneID = sceneID; }
 
 void Project::OpenScene(UUID sceneID) {
     if (sceneID == UUID::Empty()) { return; }
 
-    AssetHandle sceneAsset = _assets.FindAsset(sceneID);
+    AssetHandle sceneAsset = CORE->Assets()->FindAsset(sceneID);
 
-    if (!sceneAsset.HasValue() || !sceneAsset.Value().IsScene()) { return; }
+    if (!sceneAsset.HasValue()) {
+        DOA_LOG_ERROR("Cannot open scene! Asset with id %ul not found!", sceneID);
+        return;
+    }
+    if (!sceneAsset->IsScene()) {
+        DOA_LOG_ERROR("Cannot open scene! Asset with id %ul is not a scene!", sceneID);
+        return;
+    }
 
     sceneAsset->ForceDeserialize();
-    _openScene = &sceneAsset->DataAs<Scene>();
-    _openSceneID = sceneAsset->ID();
+    openScene = &sceneAsset->DataAs<Scene>();
+    openSceneID = sceneAsset->ID();
 }
 void Project::CloseScene() {
-    _openScene = nullptr;
-    AssetHandle openScene = _assets.FindAsset(_openSceneID);
+    UUID id = openSceneID;
+
+    openScene = nullptr;
+    openSceneID = UUID::Empty();
+
+    AssetHandle openScene = CORE->Assets()->FindAsset(id);
+    if (!openScene.HasValue()) { return; }
     openScene->DeleteDeserializedData();
 }
-bool Project::HasOpenScene() const { return _openScene != nullptr; }
-Scene& Project::GetOpenScene() { return *_openScene; }
-UUID Project::GetOpenSceneID() const { return _openSceneID; }
-
-void Project::SaveToDisk() {
-    tinyxml2::XMLDocument doc;
-    doc.Parse(SerializeProject(*this).c_str());
-    doc.SaveFile((_workspace / (_name + ".doa")).string().c_str());
-}
+bool Project::HasOpenScene() const { return openScene != nullptr; }
+Scene& Project::GetOpenScene() { return *openScene; }
+UUID Project::GetOpenSceneID() const { return openSceneID; }
 
 void Project::SaveOpenSceneToDisk() {
-    if (!_openScene) return;
+    if (!openScene) return;
 
-    AssetHandle openScene = _assets.FindAsset(_openSceneID);
-    openScene->UpdateData(std::move(*_openScene));
+    AssetHandle openScene = CORE->Assets()->FindAsset(openSceneID);
     openScene->Serialize();
     OpenScene(openScene->ID());
 }

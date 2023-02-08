@@ -6,6 +6,7 @@
 
 #include <entt.hpp>
 
+#include "Core.hpp"
 #include "UUID.hpp"
 #include "Asset.hpp"
 #include "FileNode.hpp"
@@ -16,13 +17,6 @@ struct AssetHandle {
 
     AssetHandle() noexcept;
     AssetHandle(Asset* const asset) noexcept;
-    ~AssetHandle() = default;
-    AssetHandle(const AssetHandle& other) = default;
-    AssetHandle(AssetHandle&& other) = default;
-    AssetHandle& operator=(const AssetHandle& other) = default;
-    AssetHandle& operator=(AssetHandle&& other) = default;
-    bool operator==(const AssetHandle& rhs) const noexcept;
-    bool operator!=(const AssetHandle& rhs) const noexcept;
     Asset& operator*() const noexcept;
     Asset* operator->() const noexcept;
     operator Asset* () const noexcept;
@@ -31,6 +25,8 @@ struct AssetHandle {
     bool HasValue() const;
     Asset& Value() const;
     void Reset();
+
+    friend bool operator==(const AssetHandle& handle1, const AssetHandle& handle2) = default;
 
 private:
     Asset* _asset;
@@ -58,7 +54,7 @@ struct Assets {
     static bool IsShaderFile(const FNode& file);
     static bool IsComponentDefinitionFile(const FNode& file);
 
-    Assets(const Project* owner) noexcept;
+    Assets() noexcept;
     ~Assets() = default;
     Assets(const Assets& other) = delete;
     Assets(Assets&& other) noexcept;
@@ -91,10 +87,8 @@ struct Assets {
     void MoveAsset(const AssetHandle asset, FNode& targetParentFolder);
     void DeleteAsset(const AssetHandle asset);
 
-    AssetHandle FindAsset(UUID uuid);
-    const AssetHandle FindAsset(UUID uuid) const;
-    AssetHandle FindAssetAt(const FNode& file);
-    const AssetHandle FindAssetAt(const FNode& file) const;
+    AssetHandle FindAsset(UUID uuid) const;
+    AssetHandle FindAssetAt(const FNode& file) const;
     bool IsAssetExistsAt(const FNode& file) const;
 
     FNode& Root();
@@ -111,11 +105,14 @@ struct Assets {
     void Import(const FNode& file);
     void ReimportAll();
 
+    void EnsureDeserialization();
+
 private:
 
     using AssetDatabase = entt::dense_hash_map<UUID, Asset>;
 
-    const Project* project{ nullptr };
+    const CorePtr& CORE{ Core::GetCore() };
+
     AssetDatabase database{};
     AssetFileDatabase files{};
 
@@ -131,13 +128,7 @@ private:
 
     AssetHandle ImportFile(AssetDatabase& database, const FNode& file);
     void ImportAllFiles(AssetDatabase& database, const FNode& root);
+    void Deserialize(const UUIDCollection& assets);
 
     void BuildFileNodeTree(FNode& root);
-
-    friend struct Project;
-
-    inline void __onMove(const Project* project) {
-        this->project = project;
-        _root.__onMove(project);
-    }
 };

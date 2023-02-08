@@ -39,9 +39,9 @@ struct CodeEditor {
 
     std::reference_wrapper<GUI> gui;
 
-    CodeEditor(GUI& gui) noexcept;
+    explicit CodeEditor(GUI& gui) noexcept;
 
-    void Begin();
+    bool Begin();
     void Render();
     void End();
 

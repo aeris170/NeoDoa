@@ -14,17 +14,17 @@
 AssetManager::AssetManager(GUI& gui) noexcept :
     gui(gui) {}
 
-void AssetManager::Begin() {
+bool AssetManager::Begin() {
     GUI& gui = this->gui;
-    ImGui::PushID(gui.ASSET_MANAGER_TITLE);
+    ImGui::PushID(GUI::ASSET_MANAGER_TITLE);
     std::string title(WindowIcons::ASSET_MANAGER_WINDOW_ICON);
-    title.append(gui.ASSET_MANAGER_TITLE);
-    title.append(gui.ASSET_MANAGER_ID);
-    ImGui::Begin(title.c_str(), nullptr, ImGuiWindowFlags_MenuBar);
+    title.append(GUI::ASSET_MANAGER_TITLE);
+    title.append(GUI::ASSET_MANAGER_ID);
+    bool visible = ImGui::Begin(title.c_str(), nullptr, ImGuiWindowFlags_MenuBar);
 
     hasContent = gui.HasOpenProject();
     if (hasContent) {
-        assets = &gui.openProject->Assets();
+        assets = gui.CORE->Assets().get();
         root = &assets->Root();
         if (currentFolder == nullptr) {
             SetCurrentFolder(root);
@@ -34,6 +34,7 @@ void AssetManager::Begin() {
         root = nullptr;
         SetCurrentFolder(root);
     }
+    return visible;
 }
 
 void AssetManager::Render() {
@@ -57,7 +58,7 @@ void AssetManager::Render() {
     ImGui::EndChild();
 
     if (deletedNode != nullptr) {
-        deletedNode->ParentNode()->DeleteChildNode(deletedNode);
+        assets->DeleteAsset(assets->FindAssetAt(*deletedNode));
         if (currentFolder == deletedNode) {
             SetCurrentFolder(root);
         }
@@ -80,7 +81,7 @@ void AssetManager::RenderMenuBar() {
             if (hasContent) {
                 assets->ReimportAll();
                 SetCurrentFolder(root);
-                gui.openProject->OpenStartupScene();
+                gui.CORE->LoadedProject()->OpenStartupScene();
             } else {
                 DOA_LOG_WARNING("Didn't refresh! No open project.");
             }
@@ -106,7 +107,7 @@ void AssetManager::RenderTreeViewRecursive(FNode& current) {
         if (child.IsDirectory()) { children.push_back(child); }
     }
 
-    if (children.size() == 0) {
+    if (children.empty()) {
         flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet;
     }
 
@@ -170,8 +171,6 @@ void AssetManager::RenderSelectedFolderContent() {
             cmd = "open ";
         } else if constexpr (detect::is_linux_v) {
             cmd = "nautilus --browser "; // linux not supported
-        } else {
-            throw; // platform not supported
         }
         cmd.append(currentFolder->AbsolutePath().string());
         std::system(cmd.c_str());
@@ -321,7 +320,7 @@ void AssetManager::RenderContextMenu() {
             }
             ImGui::Separator();
             if (ImGui::MenuItem("Component")) {
-                newComponentModal.Activate(currentFolder, [this](const FNode& file) { this->gui.get().openProject->Assets().Import(file); });
+                newComponentModal.Activate(currentFolder, [this](const FNode& file) { gui.get().CORE->Assets()->Import(file); });
             }
 
             ImGui::EndMenu();
@@ -341,7 +340,7 @@ void AssetManager::OpenFileAtFileNode(FNode& file) {
         AssetHandle handle = assets->FindAssetAt(file);
 
         if (Assets::IsSceneFile(file)) {
-            gui.openProject->OpenScene(handle->ID());
+            gui.CORE->LoadedProject()->OpenScene(handle->ID());
         } else if (Assets::IsComponentDefinitionFile(file)) {
             gui.ce.AddTab(handle);
         }
@@ -405,7 +404,7 @@ void AssetManager::NewComponentModal::Render() {
         ImGuiInputTextFlags flags = ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_CharsNoBlank | ImGuiInputTextFlags_EnterReturnsTrue;
         ImGui::InputTextWithHint("##componentname", "MyComponent", compName, sizeof(compName), flags);
 
-        ImGuiStyle& style = ImGui::GetStyle();
+        const ImGuiStyle& style = ImGui::GetStyle();
 
         float size = MODAL_BUTTON_SIZE.x + style.ItemSpacing.x;
         float avail = ImGui::GetWindowSize().x;
@@ -418,7 +417,7 @@ void AssetManager::NewComponentModal::Render() {
             // check if name is empty
             if (compName[0] != '\0') {
 
-                FNode* file = currentFolder->CreateChildFile(FNodeCreationParams{
+                const FNode* file = currentFolder->CreateChildFile(FNodeCreationParams{
                     .name = compName,
                     .ext = Assets::COMP_EXT,
                     .content = CodeGenerator::GenerateComponentDeclaration(compName)

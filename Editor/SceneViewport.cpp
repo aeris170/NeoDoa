@@ -15,18 +15,19 @@ SceneViewport::SceneViewport(GUI& gui) noexcept :
     gui(gui),
     gizmos(*this) {}
 
-void SceneViewport::Begin(Scene* scene) {
+bool SceneViewport::Begin(Scene* scene) {
     GUI& gui = this->gui;
 
     ImGui::PushID(GUI::SCENE_VIEWPORT_TITLE);
     std::string title(WindowIcons::SCENE_VIEWPORT_WINDOW_ICON);
     title.append(GUI::SCENE_VIEWPORT_TITLE);
     title.append(GUI::SCENE_VIEWPORT_ID);
-    ImGui::Begin(title.c_str());
-
+    bool visible = ImGui::Begin(title.c_str());
 
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
     DrawViewportSettings(scene);
+
+    return visible;
 }
 
 void SceneViewport::Render(Scene& scene) {
@@ -38,7 +39,7 @@ void SceneViewport::Render(Scene& scene) {
     };
 
     ImVec2 size{ static_cast<float>(viewportSize.w), static_cast<float>(viewportSize.h) };
-    ImGui::Image(reinterpret_cast<void*>(gui.core->FrameBuffer()->_tex), size, { 0, 1 }, { 1, 0 });
+    ImGui::Image(reinterpret_cast<void*>(gui.CORE->FrameBuffer()->_tex), size, { 0, 1 }, { 1, 0 });
 
     ImGui::PushClipRect({ viewportPosition.x, viewportPosition.y }, { viewportPosition.x + size.x, viewportPosition.y + size.y }, false);
     gizmos.settings.viewportSize = viewportSize;
@@ -131,12 +132,12 @@ void SceneViewport::DrawViewportSettings(Scene* scene) {
     if (!scene) {
         ImGui::BeginDisabled();
     }
-    if (gui.core->IsPlaying()) {
+    if (gui.CORE->IsPlaying()) {
         if (ImGui::Button(ICON_FA_STOP, buttonSize)) {
-            gui.core->SetPlaying(false);
+            gui.CORE->SetPlaying(false);
         }
     } else if (ImGui::Button(ICON_FA_PLAY, buttonSize)) {
-        gui.core->SetPlaying(true);
+        gui.CORE->SetPlaying(true);
     }
     if (!scene) {
         ImGui::EndDisabled();
@@ -199,16 +200,16 @@ void SceneViewport::HandleMouseControls(Scene& scene) {
         } else if (scene.IsPerspective()) {
             glm::vec3 right = glm::normalize(glm::cross(forward, up)) * (controls.cameraSpeed * gui.delta);
             glm::vec3 fwd = glm::normalize(forward) * (controls.cameraSpeed * gui.delta);
-            if (gui.core->Input()->IsKeyPressed(KEY_W)) {
+            if (gui.CORE->Input()->IsKeyPressed(KEY_W)) {
                 eye += fwd;
             }
-            if (gui.core->Input()->IsKeyPressed(KEY_A)) {
+            if (gui.CORE->Input()->IsKeyPressed(KEY_A)) {
                 eye -= right;
             }
-            if (gui.core->Input()->IsKeyPressed(KEY_S)) {
+            if (gui.CORE->Input()->IsKeyPressed(KEY_S)) {
                 eye -= fwd;
             }
-            if (gui.core->Input()->IsKeyPressed(KEY_D)) {
+            if (gui.CORE->Input()->IsKeyPressed(KEY_D)) {
                 eye += right;
             }
             controls.yaw += delta.x;

@@ -123,8 +123,9 @@ void SceneDeserializer::Entities::DefaultDeserializeEntity(tinyxml2::XMLElement&
             } else if (name == nameof(ChildComponent)) {
                 DeserializeChildComponent(*component, scene, entt);
             }
+        } else {
+            DeserializeUserDefinedComponents(*component, scene, entt, name);
         }
-        DeserializeUserDefinedComponents(*component, scene, entt, name);
     }
 }
 void SceneDeserializer::Entities::DefaultDeserializeIDComponent(tinyxml2::XMLElement& componentNode, Scene& scene, Entity& readEntity) {
@@ -157,20 +158,68 @@ void SceneDeserializer::Entities::DefaultDeserializeChildComponent(tinyxml2::XML
 }
 void SceneDeserializer::Entities::DefaultDeserializeUserDefinedComponents(tinyxml2::XMLElement&, Scene&, Entity, const std::string& name) {}
 
-Entity SceneDeserializer::Helpers::DeserializeEntityID(const tinyxml2::XMLElement& property, std::string_view identifierOverride) {
-    return static_cast<Entity>(property.UnsignedAttribute(identifierOverride.data(), -1));
-}
+
+/*
+ int DeserializeEnum(const tinyxml2::XMLElement& property);
+ Entity DeserializeEntityID(const tinyxml2::XMLElement& property, std::string_view identifierOverride = "id");
+ int8_t DeserializeInt8  (const tinyxml2::XMLElement& property);
+ int16_t DeserializeInt16 (const tinyxml2::XMLElement& property);
+ int32_t DeserializeInt32 (const tinyxml2::XMLElement& property);
+ int64_t DeserializeInt64 (const tinyxml2::XMLElement& property);
+ uint8_t DeserializeUInt8 (const tinyxml2::XMLElement& property);
+ uint16_t DeserializeUInt16(const tinyxml2::XMLElement& property);
+ uint32_t DeserializeUInt32(const tinyxml2::XMLElement& property);
+ uint64_t DeserializeUInt64(const tinyxml2::XMLElement& property);
+ int DeserializeInt(const tinyxml2::XMLElement& property);
+ float DeserializeFloat(const tinyxml2::XMLElement& property);
+ double DeserializeDouble(const tinyxml2::XMLElement& property);
+ bool DeserializeBool(const tinyxml2::XMLElement& property);
+*/
+
 int SceneDeserializer::Helpers::DeserializeEnum(const tinyxml2::XMLElement& property) {
     return property.IntAttribute("value");
 }
+Entity SceneDeserializer::Helpers::DeserializeEntityID(const tinyxml2::XMLElement& property, std::string_view identifierOverride) {
+    return static_cast<Entity>(property.UnsignedAttribute(identifierOverride.data(), -1));
+}
+int8_t SceneDeserializer::Helpers::DeserializeInt8(const tinyxml2::XMLElement& property) {
+    return static_cast<int8_t>(property.IntAttribute("value"));
+}
+int16_t SceneDeserializer::Helpers::DeserializeInt16(const tinyxml2::XMLElement& property) {
+    return static_cast<int16_t>(property.IntAttribute("value"));
+}
+int32_t SceneDeserializer::Helpers::DeserializeInt32(const tinyxml2::XMLElement& property) {
+    return property.IntAttribute("value");
+    }
+int64_t SceneDeserializer::Helpers::DeserializeInt64(const tinyxml2::XMLElement& property) {
+    return property.Int64Attribute("value");
+}
+uint8_t SceneDeserializer::Helpers::DeserializeUInt8(const tinyxml2::XMLElement& property) {
+    return static_cast<uint8_t>(property.UnsignedAttribute("value"));
+}
+uint16_t SceneDeserializer::Helpers::DeserializeUInt16(const tinyxml2::XMLElement& property) {
+    return static_cast<uint16_t>(property.UnsignedAttribute("value"));
+}
+uint32_t SceneDeserializer::Helpers::DeserializeUInt32(const tinyxml2::XMLElement& property) {
+    return property.UnsignedAttribute("value");
+}
+uint64_t SceneDeserializer::Helpers::DeserializeUInt64(const tinyxml2::XMLElement& property) {
+    return property.Unsigned64Attribute("value");
+}
 int SceneDeserializer::Helpers::DeserializeInt(const tinyxml2::XMLElement& property) {
     return property.IntAttribute("value");
+}
+long SceneDeserializer::Helpers::DeserializeLong(const tinyxml2::XMLElement& property) {
+    return static_cast<long>(property.Int64Attribute("value"));
 }
 float SceneDeserializer::Helpers::DeserializeFloat(const tinyxml2::XMLElement& property) {
     return property.FloatAttribute("value");
 }
 double SceneDeserializer::Helpers::DeserializeDouble(const tinyxml2::XMLElement& property) {
     return property.DoubleAttribute("value");
+}
+bool SceneDeserializer::Helpers::DeserializeBool(const tinyxml2::XMLElement& property) {
+    return property.BoolAttribute("value");
 }
 std::string SceneDeserializer::Helpers::DeserializeString(const tinyxml2::XMLElement& property) {
     return property.Attribute("value");

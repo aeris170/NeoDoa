@@ -12,14 +12,16 @@ CodeEditor::CodeEditor(GUI& gui) noexcept :
     emptyTab.textEditor.SetReadOnly(true);
 }
 
-void CodeEditor::Begin() {
+bool CodeEditor::Begin() {
     GUI& gui = this->gui;
 
     ImGui::PushID(GUI::CODE_EDITOR_TITLE);
     std::string title(WindowIcons::CODE_EDITOR_WINDOW_ICON);
     title.append(GUI::CODE_EDITOR_TITLE);
     title.append(GUI::CODE_EDITOR_ID);
-    ImGui::Begin(title.c_str(), nullptr, ImGuiWindowFlags_MenuBar);
+    bool visible = ImGui::Begin(title.c_str(), nullptr, ImGuiWindowFlags_MenuBar);
+
+    return visible;
 }
 void CodeEditor::Render() {
     GUI& gui = this->gui;

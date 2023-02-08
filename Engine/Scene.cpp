@@ -21,9 +21,9 @@
 
 Scene& Scene::GetLoadedScene() {
     static auto& core = Core::GetCore();
-    assert(core->GetLoadedProject() != nullptr); // There is no loaded project, hence no loaded scene.
-    assert(core->GetLoadedProject()->HasOpenScene()); // There is no loaded scene.
-    return core->GetLoadedProject()->GetOpenScene();
+    assert(core->LoadedProject() != nullptr); // There is no loaded project, hence no loaded scene.
+    assert(core->LoadedProject()->HasOpenScene()); // There is no loaded scene.
+    return core->LoadedProject()->GetOpenScene();
 }
 
 Scene::Scene(std::string_view name) noexcept :

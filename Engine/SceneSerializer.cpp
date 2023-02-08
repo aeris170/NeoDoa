@@ -221,27 +221,67 @@ void SceneSerializer::Entities::DefaultSerializeChildComponent(tinyxml2::XMLPrin
 }
 void SceneSerializer::Entities::DefaultSerializeUserDefinedComponents(tinyxml2::XMLPrinter&, const Scene&, Entity) {}
 
-void SceneSerializer::Helpers::SerializeEntityID(tinyxml2::XMLPrinter& printer, Entity entity) {
-    printer.PushAttribute("type", "Entity");
-    printer.PushAttribute("id", static_cast<uint32_t>(entity));
-}
-void SceneSerializer::Helpers::SerializeEnum(tinyxml2::XMLPrinter& printer, std::string_view name, int value) {
+void SceneSerializer::Helpers::SerializeEnum(tinyxml2::XMLPrinter& printer, std::string_view name, const int value) {
     printer.PushAttribute("type", name.data());
     printer.PushAttribute("value", value);
 }
-void SceneSerializer::Helpers::SerializeInt(tinyxml2::XMLPrinter& printer, int value) {
+void SceneSerializer::Helpers::SerializeEntityID(tinyxml2::XMLPrinter& printer, const Entity entity) {
+    printer.PushAttribute("type", "Entity");
+    printer.PushAttribute("id", static_cast<uint32_t>(entity));
+}
+void SceneSerializer::Helpers::SerializeInt8(tinyxml2::XMLPrinter& printer, const int8_t value) {
+    printer.PushAttribute("type", "int8");
+    printer.PushAttribute("value", value);
+}
+void SceneSerializer::Helpers::SerializeInt16(tinyxml2::XMLPrinter& printer, const int16_t value) {
+    printer.PushAttribute("type", "int16");
+    printer.PushAttribute("value", value);
+}
+void SceneSerializer::Helpers::SerializeInt32(tinyxml2::XMLPrinter& printer, const int32_t value) {
     printer.PushAttribute("type", "int");
     printer.PushAttribute("value", value);
 }
-void SceneSerializer::Helpers::SerializeFloat(tinyxml2::XMLPrinter& printer, float value) {
+void SceneSerializer::Helpers::SerializeInt64(tinyxml2::XMLPrinter& printer, const int64_t value) {
+    printer.PushAttribute("type", "long");
+    printer.PushAttribute("value", value);
+}
+void SceneSerializer::Helpers::SerializeUInt8(tinyxml2::XMLPrinter& printer, const uint8_t value) {
+    printer.PushAttribute("type", "uint8");
+    printer.PushAttribute("value", value);
+}
+void SceneSerializer::Helpers::SerializeUInt16(tinyxml2::XMLPrinter& printer, const uint16_t value) {
+    printer.PushAttribute("type", "uint16");
+    printer.PushAttribute("value", value);
+}
+void SceneSerializer::Helpers::SerializeUInt32(tinyxml2::XMLPrinter& printer, const uint32_t value) {
+    printer.PushAttribute("type", "unsigned int");
+    printer.PushAttribute("value", value);
+}
+void SceneSerializer::Helpers::SerializeUInt64(tinyxml2::XMLPrinter& printer, const uint64_t value) {
+    printer.PushAttribute("type", "unsigned long");
+    printer.PushAttribute("value", value);
+}
+void SceneSerializer::Helpers::SerializeInt(tinyxml2::XMLPrinter& printer, const int value) {
+    printer.PushAttribute("type", "int");
+    printer.PushAttribute("value", value);
+}
+void SceneSerializer::Helpers::SerializeLong(tinyxml2::XMLPrinter& printer, const long value) {
+    printer.PushAttribute("type", "int");
+    printer.PushAttribute("value", static_cast<int64_t>(value));
+}
+void SceneSerializer::Helpers::SerializeFloat(tinyxml2::XMLPrinter& printer, const float value) {
     printer.PushAttribute("type", "float");
     printer.PushAttribute("value", value);
 }
-void SceneSerializer::Helpers::SerializeDouble(tinyxml2::XMLPrinter& printer, double value) {
+void SceneSerializer::Helpers::SerializeDouble(tinyxml2::XMLPrinter& printer, const double value) {
     printer.PushAttribute("type", "double");
     printer.PushAttribute("value", value);
 }
-void SceneSerializer::Helpers::SerializeString(tinyxml2::XMLPrinter& printer, std::string_view value) {
+void SceneSerializer::Helpers::SerializeBool(tinyxml2::XMLPrinter& printer, const bool value) {
+    printer.PushAttribute("type", "bool");
+    printer.PushAttribute("value", value);
+}
+void SceneSerializer::Helpers::SerializeString(tinyxml2::XMLPrinter& printer, const std::string_view value) {
     printer.PushAttribute("type", "string");
     printer.PushAttribute("value", value.data());
 }
@@ -317,44 +357,4 @@ void SceneSerializer::Helpers::SerializeMat4(tinyxml2::XMLPrinter& printer, cons
     printer.PushAttribute("y4", mat[3][1]);
     printer.PushAttribute("z4", mat[3][2]);
     printer.PushAttribute("w4", mat[3][3]);
-
 }
-/*
-void SceneSerializer::Helpers::SerializeScriptComponent(tinyxml2::XMLPrinter& printer, const ScriptComponent& script) {
-
-    printer.PushAttribute("name", script._name.c_str());
-    auto* type = script._underlyingInstance->GetObjectType();
-
-    const std::vector<PropertyData>& props = script.Properties();
-    for (int i = 0; i < props.size(); i++) {
-        const PropertyData& prop = props[i];
-        if (prop.isPrivate || prop.isProtected) { continue; } // don't serialize private or protected variables as they are never visible in editor!
-        printer.OpenElement(prop.name.c_str());
-        {
-            auto it = Core::GetCore()->Angel()->_enums.find(prop.typeName);
-            if (it != Core::GetCore()->Angel()->_enums.end()) SerializeEnum(printer, prop.typeName.c_str(), script.GetAt<int>(i));
-            else if (prop.typeName == "Entity")        SerializeEntityID(printer, script.GetAt<Entity>(i));
-            else if (prop.typeName == "int")           SerializeInt(printer, script.GetAt<int>(i));
-            else if (prop.typeName == "float")         SerializeFloat(printer, script.GetAt<float>(i));
-            else if (prop.typeName == "double")        SerializeDouble(printer, script.GetAt<double>(i));
-            else if (prop.typeName == "string")        SerializeString(printer, script.GetAt<std::string>(i).c_str());
-            else if (prop.typeName == "vec2")          SerializeVec2(printer, script.GetAt<glm::vec2>(i));
-            else if (prop.typeName == "vec3")          SerializeVec3(printer, script.GetAt<glm::vec3>(i));
-            else if (prop.typeName == "vec4")          SerializeVec4(printer, script.GetAt<glm::vec4>(i));
-            else if (prop.typeName == "quat")          SerializeQuat(printer, script.GetAt<glm::quat>(i));
-            else if (prop.typeName == "mat2")          SerializeMat2(printer, script.GetAt<glm::mat2>(i));
-            else if (prop.typeName == "mat3")          SerializeMat3(printer, script.GetAt<glm::mat3>(i));
-            else if (prop.typeName == "mat4")          SerializeMat4(printer, script.GetAt<glm::mat4>(i));
-            else {
-                if (prop.isReference) {
-                    // TODO
-                    DOA_LOG_TRACE("prop.isReference");
-                } else {
-                    // TODO
-                    DOA_LOG_TRACE("!prop.isReference");
-                }
-            }
-        }
-        printer.CloseElement(); // prop.name.c_str() end
-    }
-}*/

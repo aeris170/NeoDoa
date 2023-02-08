@@ -7,6 +7,8 @@ inline bool isUpperCase(char chr) {
 }
 
 inline std::string Prettify(const std::string& string) {
+    if (string.empty()) { return string; }
+
     std::string rv;
     rv.reserve(64);
     rv.replace(0, 1, 1, string[0] >= 'a' ? (char) toupper(string[0]) : string[0]); // probably incorrect usage

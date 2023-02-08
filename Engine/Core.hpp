@@ -3,6 +3,7 @@
 #include <tuple>
 #include <memory>
 #include <functional>
+#include <filesystem>
 
 #include <entt.hpp>
 #include <glm/glm.hpp>
@@ -15,6 +16,7 @@ struct Input;
 struct FrameBuffer;
 struct Project;
 struct Resolution;
+struct Assets;
 
 using CoreDeleter = std::function<void(Core*)>;
 using CorePtr = std::unique_ptr<Core, CoreDeleter>;
@@ -33,9 +35,15 @@ struct Core {
     std::unique_ptr<Input>& Input();
     std::unique_ptr<FrameBuffer>& FrameBuffer();
 
-    void LoadProject(const Project& project);
-    Project* GetLoadedProject() const;
+    void CreateAndLoadProject(std::string_view workspace, std::string_view name);
+    void LoadProject(const std::string& path);
+    void LoadProject(const std::filesystem::path& path);
+    std::unique_ptr<Project>& LoadedProject();
     void UnloadProject();
+    void SaveLoadedProjectToDisk() const;
+    bool HasLoadedProject();
+
+    std::unique_ptr<Assets>& Assets();
 
     void Start();
     void Stop();
@@ -43,14 +51,15 @@ struct Core {
 private:
     inline static CorePtr _this{ nullptr };
 
-    bool _running{ false };
-    bool _playing{ false };
+    bool running{ false };
+    bool playing{ false };
 
-    std::unique_ptr<struct Angel> _angel{ nullptr };
-    WindowPtr _window{ nullptr };
-    std::unique_ptr<struct Input> _input{ nullptr };
-    std::unique_ptr<struct FrameBuffer> _offscreenBuffer{ nullptr };
-    Project* _project{ nullptr };
+    std::unique_ptr<struct Angel> angel{ nullptr };
+    WindowPtr window{ nullptr };
+    std::unique_ptr<struct Input> input{ nullptr };
+    std::unique_ptr<struct FrameBuffer> offscreenBuffer{ nullptr };
+    std::unique_ptr<Project> project{ nullptr };
+    std::unique_ptr<struct Assets> assets{ nullptr };
 
     Core() = default;
     ~Core() = default;

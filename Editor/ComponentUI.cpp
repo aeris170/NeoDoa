@@ -17,6 +17,7 @@
 #include "Observer.hpp"
 #include "ComponentWidgets.hpp"
 #include "UserDefinedComponentStorage.hpp"
+#include <defer.hpp>
 
 void IDComponentUI::Render(const IDComponent& idComponent) {
     static unordered_string_map<std::string> UINames = {
@@ -144,9 +145,11 @@ void PerspectiveCameraComponentUI::Render(const PerspectiveCameraComponent& pers
     }
 }
 
-void UserDefinedComponentStorageUI::RenderComponentInstance(Assets& assets, const ComponentInstance& componentInstance) {
+void UserDefinedComponentStorageUI::RenderComponentInstance(const ComponentInstance& componentInstance) {
     ComponentInstance& instance = const_cast<ComponentInstance&>(componentInstance);
-    const auto& component{ assets.FindAsset(instance.ComponentAssetID())->DataAs<Component>() };
+    AssetHandle cmpAsset{ Core::GetCore()->Assets()->FindAsset(instance.ComponentAssetID()) };
+    const auto& component{ cmpAsset->DataAs<Component>() };
+    if (!cmpAsset.HasValue() || cmpAsset->HasErrorMessages()) { return; }
     for (int i = 0; i < component.fields.size(); i++) {
         auto& field{ component.fields[i] };
         const auto& type{ field.typeName };
@@ -189,13 +192,7 @@ void UserDefinedComponentStorageUI::RenderComponentInstance(Assets& assets, cons
 
 bool ComponentUI::Begin(const Observer& observer, std::string_view componentTypeName) {
     std::string title(Prettify(std::string(componentTypeName)));
-    std::string titleWithIcon;
-    auto icon = ComponentIcons::DEFINED_COMPONENT_ICONS.find(std::string(componentTypeName));
-    if (icon != ComponentIcons::DEFINED_COMPONENT_ICONS.end()) {
-        titleWithIcon = icon->second + " " + title;
-    } else {
-        titleWithIcon = ComponentIcons::GENERIC_COMPONENT_ICON + title;
-    }
+    std::string titleWithIcon = ComponentIcons::FindIconByComponentName(componentTypeName) + title;
     ImGui::PushFont(observer.gui.get().GetFontBold());
 
     bool rv = ImGui::CollapsingHeader(titleWithIcon.c_str(), ImGuiTreeNodeFlags_DefaultOpen);
@@ -247,13 +244,48 @@ void ComponentUI::RenderPerspectiveCameraComponent(const Observer& observer, con
     ComponentUI::End(show);
 }
 void ComponentUI::RenderUserDefinedComponentStorage(const Observer& observer, const UserDefinedComponentStorage& storageComponent) {
-    for (auto& [name, instance] : storageComponent.Components()) {
-        bool show = ComponentUI::Begin(observer, name);
+    /* casting away const is safe, storage is never created const */
+    auto& storage{ const_cast<UserDefinedComponentStorage&>(storageComponent) };
+    UUID removee{ UUID::Empty() };
+
+    for (auto& [name, instance] : storage.Components()) {
+        bool show{ false };
+        if (!instance.HasError()) {
+            show = ComponentUI::Begin(observer, name);
+        } else {
+            std::string title(Prettify(name));
+            std::string titleWithIcon = ComponentIcons::FindIconForInstantiationError(instance.GetError()) + title;
+            ImGui::PushFont(observer.gui.get().GetFontBold());
+            ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 0.5f, 0.1f, 1.0f });
+            ImGui::CollapsingHeader(titleWithIcon.c_str(), ImGuiTreeNodeFlags_Leaf);
+            if (ImGui::IsItemHovered()) {
+                ImGui::SetTooltip(instance.ErrorString().data());
+            }
+            ImGui::PopStyleColor();
+        }
+#pragma region ContextMenu
+        ImGui::PushFont(observer.gui.get().GetFontBold());
+        if (ImGui::BeginPopupContextItem(nullptr, ImGuiPopupFlags_MouseButtonRight)) {
+            if (ImGui::MenuItem(ICON_FA_UNDO " Reset Component Data")) {
+                for (auto& member : instance.MemberValues()) {
+                    member.Reset();
+                }
+            }
+            if (ImGui::MenuItem(ICON_FA_TRASH " Detach Component")) {
+                removee = instance.ComponentAssetID();
+            }
+            ImGui::EndPopup();
+        }
+        ImGui::PopFont();
+#pragma endregion
         if (show) {
-            Assets& assets{ observer.gui.get().openProject->Assets() };
-            UserDefinedComponentStorageUI::RenderComponentInstance(assets, instance);
+            UserDefinedComponentStorageUI::RenderComponentInstance(instance);
         }
         ComponentUI::End(show);
+    }
+
+    if (removee != UUID::Empty()) {
+        storage.DetachComponent(removee);
     }
 }
 void ComponentUI::End(bool show) {

@@ -4,7 +4,7 @@
 #include <sstream>
 
 std::string CodeGenerator::GenerateComponentDeclaration(std::string_view componentName) {
-    return std::format("class {} : Component {{\n\n\}};", componentName);
+    return std::format("class {} : Component {{\n\n}};", componentName);
 }
 
 std::string CodeGenerator::GenerateSystemDeclaration(std::string_view systemName) {

@@ -108,12 +108,22 @@ namespace SceneSerializer {
 
 /* Some Helper functions to trivially serialize trivial data types */
 namespace SceneSerializer::Helpers {
-    void SerializeEntityID(tinyxml2::XMLPrinter& printer, Entity entity);
-    void SerializeEnum(tinyxml2::XMLPrinter& printer, std::string_view name, int value);
-    void SerializeInt(tinyxml2::XMLPrinter& printer, int value);
-    void SerializeFloat(tinyxml2::XMLPrinter& printer, float value);
-    void SerializeDouble(tinyxml2::XMLPrinter& printer, double value);
-    void SerializeString(tinyxml2::XMLPrinter& printer, std::string_view value);
+    void SerializeEnum(tinyxml2::XMLPrinter& printer, std::string_view name, const int value);
+    void SerializeEntityID(tinyxml2::XMLPrinter& printer, const Entity entity);
+    void SerializeInt8(tinyxml2::XMLPrinter& printer, const int8_t value);
+    void SerializeInt16(tinyxml2::XMLPrinter& printer, const int16_t value);
+    void SerializeInt32(tinyxml2::XMLPrinter& printer, const int32_t value);
+    void SerializeInt64(tinyxml2::XMLPrinter& printer, const int64_t value);
+    void SerializeUInt8(tinyxml2::XMLPrinter& printer, const uint8_t value);
+    void SerializeUInt16(tinyxml2::XMLPrinter& printer, const uint16_t value);
+    void SerializeUInt32(tinyxml2::XMLPrinter& printer, const uint32_t value);
+    void SerializeUInt64(tinyxml2::XMLPrinter& printer, const uint64_t value);
+    void SerializeInt(tinyxml2::XMLPrinter& printer, const int value);
+    void SerializeLong(tinyxml2::XMLPrinter& printer, const long value);
+    void SerializeFloat(tinyxml2::XMLPrinter& printer, const float value);
+    void SerializeDouble(tinyxml2::XMLPrinter& printer, const double value);
+    void SerializeBool(tinyxml2::XMLPrinter& printer, const bool value);
+    void SerializeString(tinyxml2::XMLPrinter& printer, const std::string_view value);
     void SerializeVec2(tinyxml2::XMLPrinter& printer, const glm::vec2& vec);
     void SerializeVec3(tinyxml2::XMLPrinter& printer, const glm::vec3& vec);
     void SerializeVec4(tinyxml2::XMLPrinter& printer, const glm::vec4& vec);

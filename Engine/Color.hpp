@@ -1,25 +1,27 @@
 #pragma once
 
-#include <string>
 #include <cmath>
+#include <string>
+#include <format>
 #include <algorithm>
 
+#include <imgui.h>
 #include <glm/glm.hpp>
 
 struct Color {
 
-    inline static constexpr Color WHITE() { return { 1.0f, 1.0f, 1.0f, 1.0f }; };
-    inline static constexpr Color GRAY() { return { 0.5f, 0.5f, 0.5f, 1.0f }; };
-    inline static constexpr Color BLACK() { return { 0.0f, 0.0f, 0.0f, 1.0f }; };
-    inline static constexpr Color RED() { return { 1.0f, 0.0f, 0.0f, 1.0f }; };
-    inline static constexpr Color GREEN() { return { 0.0f, 1.0f, 0.0f, 1.0f }; };
-    inline static constexpr Color BLUE() { return { 0.0f, 0.0f, 1.0f, 1.0f }; };
-    inline static constexpr Color CYAN() { return { 0.0f, 1.0f, 1.0f, 1.0f }; };
-    inline static constexpr Color MAGENTA() { return { 1.0f, 0.0f, 1.0f, 1.0f }; };
-    inline static constexpr Color YELLOW() { return { 1.0f, 1.0f, 0.0f, 1.0f }; };
-    inline static constexpr Color ZERO() { return { 0.0f, 0.0f, 0.0f, 0.0f }; };
+    static constexpr Color WHITE() { return { 1.0f, 1.0f, 1.0f, 1.0f }; };
+    static constexpr Color GRAY() { return { 0.5f, 0.5f, 0.5f, 1.0f }; };
+    static constexpr Color BLACK() { return { 0.0f, 0.0f, 0.0f, 1.0f }; };
+    static constexpr Color RED() { return { 1.0f, 0.0f, 0.0f, 1.0f }; };
+    static constexpr Color GREEN() { return { 0.0f, 1.0f, 0.0f, 1.0f }; };
+    static constexpr Color BLUE() { return { 0.0f, 0.0f, 1.0f, 1.0f }; };
+    static constexpr Color CYAN() { return { 0.0f, 1.0f, 1.0f, 1.0f }; };
+    static constexpr Color MAGENTA() { return { 1.0f, 0.0f, 1.0f, 1.0f }; };
+    static constexpr Color YELLOW() { return { 1.0f, 1.0f, 0.0f, 1.0f }; };
+    static constexpr Color ZERO() { return { 0.0f, 0.0f, 0.0f, 0.0f }; };
 
-    inline static float ConvertGammaToLinear(float value) {
+    constexpr static float ConvertGammaToLinear(float value) {
         if (value <= 0.04045f) {
             return value / 12.92f;
         } else if (value < 1.0f) {
@@ -28,7 +30,7 @@ struct Color {
             return std::pow(value, 2.2f);
         }
     }
-    inline static float ConvertLinearToGamma(float value) {
+    constexpr static float ConvertLinearToGamma(float value) {
         if (value <= 0.0f) {
             return 0.0f;
         } else if (value <= 0.0031308f) {
@@ -42,24 +44,23 @@ struct Color {
 
     float r, g, b, a;
 
-    inline constexpr Color() noexcept : r(1.0f), g(1.0f), b(1.0f), a(1.0f) {}
-    inline constexpr Color(const Color& color) noexcept = default;
-    inline constexpr Color(const Color& color, float a) noexcept : r(color.r), g(color.g), b(color.b), a(a) {}
-    inline constexpr Color(float v) noexcept : r(v), g(v), b(v), a(1.0f) {}
-    inline constexpr Color(float r, float g, float b) noexcept : r(r), g(g), b(b), a(1.0f) {}
-    inline constexpr Color(float r, float g, float b, float a) noexcept : r(r), g(g), b(b), a(a) {}
-    inline constexpr Color(const float* data) noexcept : r(data[0]), g(data[1]), b(data[2]), a(data[3]) {}
-    inline constexpr Color(const glm::vec3& color) noexcept : Color(color.r, color.g, color.b) {}
-    inline constexpr Color(const glm::vec4& color) noexcept : Color(color.r, color.g, color.b, color.a) {}
+    constexpr Color() noexcept : r(1.0f), g(1.0f), b(1.0f), a(1.0f) {}
+    constexpr Color(const Color& color) noexcept = default;
+    constexpr Color(const Color& color, float a) noexcept : r(color.r), g(color.g), b(color.b), a(a) {}
+    constexpr explicit Color(float v) noexcept : r(v), g(v), b(v), a(1.0f) {}
+    constexpr Color(float r, float g, float b) noexcept : r(r), g(g), b(b), a(1.0f) {}
+    constexpr Color(float r, float g, float b, float a) noexcept : r(r), g(g), b(b), a(a) {}
+    constexpr explicit Color(const float* data) noexcept : r(data[0]), g(data[1]), b(data[2]), a(data[3]) {}
+    constexpr explicit Color(const glm::vec3& color) noexcept : Color(color.r, color.g, color.b) {}
+    constexpr explicit Color(const glm::vec4& color) noexcept : Color(color.r, color.g, color.b, color.a) {}
 
-    inline constexpr Color& operator=(const Color& rhs) noexcept = default;
-    inline constexpr bool operator==(const Color& rhs) const { return r == rhs.r && g == rhs.g && b == rhs.b && a == rhs.a; }
-    inline constexpr bool operator!=(const Color& rhs) const { return r != rhs.r || g != rhs.g || b != rhs.b || a != rhs.a; }
-    inline constexpr Color operator*(float rhs) const { return Color(r * rhs, g * rhs, b * rhs, a * rhs); }
-    inline constexpr Color operator+(const Color& rhs) const { return Color(r + rhs.r, g + rhs.g, b + rhs.b, a + rhs.a); }
-    inline constexpr Color operator-() const { return Color(-r, -g, -b, -a); }
-    inline constexpr Color operator-(const Color& rhs) const { return Color(r - rhs.r, g - rhs.g, b - rhs.b, a - rhs.a); }
-    inline constexpr Color& operator+=(const Color& rhs) {
+    constexpr Color& operator=(const Color& rhs) noexcept = default;
+    constexpr bool operator==(const Color& rhs) const { return r == rhs.r && g == rhs.g && b == rhs.b && a == rhs.a; }
+    constexpr Color operator*(float rhs) const { return Color(r * rhs, g * rhs, b * rhs, a * rhs); }
+    constexpr Color operator+(const Color& rhs) const { return Color(r + rhs.r, g + rhs.g, b + rhs.b, a + rhs.a); }
+    constexpr Color operator-() const { return Color(-r, -g, -b, -a); }
+    constexpr Color operator-(const Color& rhs) const { return Color(r - rhs.r, g - rhs.g, b - rhs.b, a - rhs.a); }
+    constexpr Color& operator+=(const Color& rhs) {
         r += rhs.r;
         g += rhs.g;
         b += rhs.b;
@@ -67,17 +68,17 @@ struct Color {
         return *this;
     }
 
-    inline float* Data() { return &r; }
-    inline const float* Data() const { return &r; }
+    constexpr float* Data() { return &r; }
+    constexpr const float* Data() const { return &r; }
 
-    inline unsigned int ToUInt() const {
+    constexpr unsigned int ToUInt() const {
         auto r = (unsigned) std::clamp(((int) (this->r * 255.0f)), 0, 255);
         auto g = (unsigned) std::clamp(((int) (this->g * 255.0f)), 0, 255);
         auto b = (unsigned) std::clamp(((int) (this->b * 255.0f)), 0, 255);
         auto a = (unsigned) std::clamp(((int) (this->a * 255.0f)), 0, 255);
         return (a << 24u) | (b << 16u) | (g << 8u) | r;
     }
-    inline glm::vec3 ToHSL() const {
+    constexpr glm::vec3 ToHSL() const {
         float min, max;
         Bounds(&min, &max, true);
 
@@ -87,7 +88,7 @@ struct Color {
 
         return { h, s, l };
     }
-    inline glm::vec3 ToHSV() const {
+    constexpr glm::vec3 ToHSV() const {
         float min, max;
         Bounds(&min, &max, true);
 
@@ -98,7 +99,7 @@ struct Color {
         return { h, s, v };
     }
 
-    inline void FromUInt(unsigned color) {
+    constexpr void FromUInt(unsigned color) {
         a = ((color >> 24u) & 0xffu) / 255.0f;
         b = ((color >> 16u) & 0xffu) / 255.0f;
         g = ((color >> 8u) & 0xffu) / 255.0f;
@@ -122,46 +123,48 @@ struct Color {
         this->a = a;
     }
 
-    inline glm::vec3 ToVec3() const { return { r, g, b }; }
-    inline glm::vec4 ToVec4() const { return { r, g, b, a }; }
+    constexpr glm::vec3 ToVec3() const { return { r, g, b }; }
+    constexpr glm::vec4 ToVec4() const { return { r, g, b, a }; }
 
-    inline float SumRGB() const { return r + g + b; }
-    inline float Average() const { return (r + g + b) / 3.0f; }
-    inline float Luma() const { return r * 0.299f + g * 0.587f + b * 0.114f; } // greyscale component
+    constexpr ImVec4 ToImVec4() const { return { r, g, b, a }; }
 
-    inline float Chroma() const {
+    constexpr float SumRGB() const { return r + g + b; }
+    constexpr float Average() const { return (r + g + b) / 3.0f; }
+    constexpr float Luma() const { return r * 0.299f + g * 0.587f + b * 0.114f; } // greyscale component
+
+    constexpr float Chroma() const {
         float min, max;
         Bounds(&min, &max, true);
         return max - min;
     }
-    inline float Hue() const {
+    constexpr float Hue() const {
         float min, max;
         Bounds(&min, &max, true);
         return Hue(min, max);
     }
-    inline float SaturationHSL() const {
+    constexpr float SaturationHSL() const {
         float min, max;
         Bounds(&min, &max, true);
         return SaturationHSL(min, max);
     }
-    inline float SaturationHSV() const {
+    constexpr float SaturationHSV() const {
         float min, max;
         Bounds(&min, &max, true);
         return SaturationHSV(min, max);
     }
-    inline float Value() const {
+    constexpr float Value() const {
         return LargestComponent();
     }
-    inline float Lightness() const {
+    constexpr float Lightness() const {
         float min, max;
         Bounds(&min, &max, true);
         return (max + min) * 0.5f;
     }
 
-    inline Color GammaToLinear() const { return { ConvertGammaToLinear(r), ConvertGammaToLinear(g), ConvertGammaToLinear(b), a }; }
-    inline Color LinearToGamma() const { return { ConvertLinearToGamma(r), ConvertLinearToGamma(g), ConvertLinearToGamma(b), a }; }
+    constexpr Color GammaToLinear() const { return { ConvertGammaToLinear(r), ConvertGammaToLinear(g), ConvertGammaToLinear(b), a }; }
+    constexpr Color LinearToGamma() const { return { ConvertLinearToGamma(r), ConvertLinearToGamma(g), ConvertLinearToGamma(b), a }; }
 
-    inline void Bounds(float* min, float* max, bool clipped) const {
+    constexpr void Bounds(float* min, float* max, bool clipped) const {
         assert(min && max);
 
         if (r > g) {
@@ -191,15 +194,15 @@ struct Color {
             *min = *min > 1.0f ? 1.0f : (*min < 0.0f ? 0.0f : *min);
         }
     }
-    inline float LargestComponent() const { return std::max({ r, g, b }); }
-    inline float SmallestComponent() const { return std::min({ r, g, b }); }
-    inline float ComponentRange() const {
+    constexpr float LargestComponent() const { return std::max({ r, g, b }); }
+    constexpr float SmallestComponent() const { return std::min({ r, g, b }); }
+    constexpr float ComponentRange() const {
         float min, max;
         Bounds(&min, &max, true);
         return max - min;
     }
 
-    inline void Clip(bool clipAlpha) {
+    constexpr void Clip(bool clipAlpha) {
         r = std::clamp(r, 0.0f, 1.0f);
         g = std::clamp(g, 0.0f, 1.0f);
         b = std::clamp(b, 0.0f, 1.0f);
@@ -207,7 +210,7 @@ struct Color {
             a = std::clamp(a, 0.0f, 1.0f);
         }
     }
-    inline void Invert(bool invertAlpha) {
+    constexpr void Invert(bool invertAlpha) {
         r = 1.0f - r;
         g = 1.0f - g;
         b = 1.0f - b;
@@ -216,7 +219,7 @@ struct Color {
         }
     }
 
-    inline Color Lerp(const Color& rhs, float t) const {
+    constexpr Color Lerp(const Color& rhs, float t) const {
         float invT = 1.0f - t;
         return Color(
             r * invT + rhs.r * t,
@@ -225,22 +228,22 @@ struct Color {
             a * invT + rhs.a * t
         );
     }
-    inline Color Lighten(float t) const {
+    constexpr Color Lighten(float t) const {
         return Lerp(WHITE(), t);
     }
-    inline Color Darken(float t) const {
+    constexpr Color Darken(float t) const {
         return Lerp(BLACK(), t);
     }
 
-    inline Color Abs() const { return { std::abs(r), std::abs(g), std::abs(b), std::abs(a) }; }
+    constexpr Color Abs() const { return { std::abs(r), std::abs(g), std::abs(b), std::abs(a) }; }
 
-    inline bool Equals(const Color& rhs) const { return epsilonEquals(r, rhs.r) && epsilonEquals(g, rhs.g) && epsilonEquals(b, rhs.b) && epsilonEquals(a, rhs.a); }
+    constexpr bool Equals(const Color& rhs) const { return epsilonEquals(r, rhs.r) && epsilonEquals(g, rhs.g) && epsilonEquals(b, rhs.b) && epsilonEquals(a, rhs.a); }
 
-    inline std::string ToString() const { return "Color[" + std::to_string(r) + ", " + std::to_string(g) + ", " + std::to_string(b) + ", " + std::to_string(a) + "]"; }
-    inline unsigned int ToHash() const { return ToUInt(); }
+    inline std::string ToString() const { return std::format("Color[{}, {}, {}, {}]", r, g, b, a); }
+    constexpr unsigned int ToHash() const { return ToUInt(); }
 
 protected:
-    inline float Hue(float min, float max) const {
+    constexpr float Hue(float min, float max) const {
         float chroma = max - min;
 
         // If chroma equals zero, hue is undefined
@@ -258,13 +261,13 @@ protected:
         }
 
     }
-    inline float SaturationHSV(float min, float max) const {
+    constexpr float SaturationHSV(float min, float max) const {
         if (max <= std::numeric_limits<float>::epsilon()) {
             return 0.0f;
         }
         return 1.0f - (min / max);
     }
-    inline float SaturationHSL(float min, float max) const {
+    constexpr float SaturationHSL(float min, float max) const {
         if (max <= std::numeric_limits<float>::epsilon() || min >= 1.0f - std::numeric_limits<float>::epsilon()) {
             return 0.0f;
         }
@@ -318,7 +321,7 @@ protected:
     }
 
 private:
-    inline static bool epsilonEquals(float lhs, float rhs) {
+    constexpr static bool epsilonEquals(float lhs, float rhs) {
         return lhs + std::numeric_limits<float>::epsilon() >= rhs && lhs - std::numeric_limits<float>::epsilon() <= rhs;
     }
 };

@@ -28,9 +28,9 @@ struct Observer {
 
     std::reference_wrapper<GUI> gui;
 
-    Observer(GUI& gui) noexcept;
+    explicit Observer(GUI& gui) noexcept;
 
-    void Begin(Scene* scene);
+    bool Begin(Scene* scene);
     void Render(Scene& scene);
     void End();
 

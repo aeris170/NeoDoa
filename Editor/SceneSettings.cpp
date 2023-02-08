@@ -9,14 +9,16 @@
 SceneSettings::SceneSettings(GUI& gui) noexcept :
     gui(gui) {}
 
-void SceneSettings::Begin(Scene* scene) {
+bool  SceneSettings::Begin(Scene* scene) {
     GUI& gui = this->gui;
     ImGui::PushID(gui.SCENE_SETTINGS_TITLE);
     std::string title(WindowIcons::SCENE_SETTINGS_WINDOW_ICON);
     title.append(gui.SCENE_SETTINGS_TITLE);
     title.append(gui.SCENE_SETTINGS_ID);
-    ImGui::Begin(title.c_str());
+    bool visible = ImGui::Begin(title.c_str());
     ImGui::PushFont(gui.GetFont());
+
+    return visible;
 }
 
 void SceneSettings::Render(Scene& scene) {
@@ -31,7 +33,7 @@ void SceneSettings::End() {
     ImGui::PopID();
 }
 
-void SceneSettings::DrawStats(Scene& scene) {
+void SceneSettings::DrawStats(Scene& scene) const {
     GUI& gui = this->gui;
     ImGui::BeginGroup();
 

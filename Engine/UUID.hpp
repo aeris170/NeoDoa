@@ -9,10 +9,6 @@ struct UUID {
     UUID() noexcept : uuid(uid(mt)) {}
     constexpr UUID(uint64_t uuid) noexcept : uuid(uuid) {}
     explicit UUID(const std::string& string) noexcept;
-    constexpr UUID(const UUID& other) = default;
-    constexpr UUID& operator=(const UUID& other) = default;
-    constexpr UUID(UUID&& other) = default;
-    constexpr UUID& operator=(UUID&& other) = default;
 
     std::string AsString() const;
 
@@ -38,8 +34,10 @@ namespace std {
     };
 }
 
+#ifdef _DEBUG
 #include <type_traits>
 static_assert(std::is_copy_constructible_v<UUID>);
 static_assert(std::is_copy_assignable_v<UUID>);
 static_assert(std::is_move_constructible_v<UUID>);
 static_assert(std::is_move_assignable_v<UUID>);
+#endif

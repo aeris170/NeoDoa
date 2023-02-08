@@ -16,9 +16,9 @@ struct AssetManager {
 
     std::reference_wrapper<GUI> gui;
 
-    AssetManager(GUI& gui) noexcept;
+    explicit AssetManager(GUI& gui) noexcept;
 
-    void Begin();
+    bool Begin();
     void Render();
     void End();
 
@@ -62,12 +62,11 @@ private:
         void Activate(FNode* currentFolder, OnCreateNewComponent callback = {});
         void Render();
 
-
     private:
         FNode* currentFolder{ nullptr };
         OnCreateNewComponent callback{};
         bool modal_active{ false }, modal_open{ true };
-        char compName[128]{ "MyComponent" };
+        char compName[128]{ "MyComponent" }; /* we dont need to incur a dyn-alloc with std::string */
     } newComponentModal{};
 
     void RenderMenuBar();

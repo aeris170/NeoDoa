@@ -28,7 +28,7 @@ void Gizmos::Render(Scene& scene) {
     } else if (scene.IsOrtho()) {
         ImGuizmo::SetOrthographic(true);
     }
-    auto& camera = scene.GetActiveCamera();
+    const auto& camera = scene.GetActiveCamera();
     glm::mat4 proj = camera._projectionMatrix;
     glm::mat4 view = camera._viewMatrix;
 
@@ -43,7 +43,7 @@ void Gizmos::Render(Scene& scene) {
     TransformComponent& transformComponent = scene.GetComponent<TransformComponent>(gui.sh.selectedEntity);
     glm::mat4 matrix = transformComponent.GetWorldMatrix();
 
-    bool snap = gui.core->Input()->IsKeyPressed(KEY_LEFT_CONTROL);
+    bool snap = gui.CORE->Input()->IsKeyPressed(KEY_LEFT_CONTROL);
     float snapValue = 0.5f;
     if (settings.type == ImGuizmo::OPERATION::ROTATE) { snapValue = 5.0f; }
 

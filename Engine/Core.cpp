@@ -2,6 +2,7 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <tinyxml2.h>
 
 #include "Angel.hpp"
 #include "Scene.hpp"
@@ -13,6 +14,8 @@
 #include "Project.hpp"
 #include "Resolution.hpp"
 #include "Input.hpp"
+#include "ProjectSerializer.hpp"
+#include "ProjectDeserializer.hpp"
 
 static void message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, GLchar const* message, void const* user_param);
 
@@ -21,8 +24,8 @@ const CorePtr& Core::CreateCore(Resolution resolution, const char* title, bool i
     glfwInit();
     glfwWindowHint(GLFW_MAXIMIZED, GL_TRUE);
     _this = CorePtr(new Core, DeleteCore);
-    _this->_window = Window::CreateWindow(resolution, title, isFullscreen, windowIcon);
-    _this->_input = CreateInput();
+    _this->window = Window::CreateWindow(resolution, title, isFullscreen, windowIcon);
+    _this->input = CreateInput();
 #pragma endregion
 
 #pragma region GLEW Initialization
@@ -38,7 +41,7 @@ const CorePtr& Core::CreateCore(Resolution resolution, const char* title, bool i
 #pragma endregion
 
 #pragma region Angel Initialization
-    _this->_angel = std::make_unique<struct Angel>();
+    _this->angel = std::make_unique<struct Angel>();
 #pragma endregion
 
 #pragma region Built-in Stuff Initialization
@@ -177,7 +180,7 @@ const CorePtr& Core::CreateCore(Resolution resolution, const char* title, bool i
 #pragma endregion
 
     if (renderOffscreen) {
-        _this->_offscreenBuffer = std::make_unique<struct FrameBuffer>(resolution);
+        _this->offscreenBuffer = std::make_unique<struct FrameBuffer>(resolution);
     }
 #pragma endregion
 
@@ -199,24 +202,46 @@ void Core::DestroyCore() {
 }
 void Core::DeleteCore(Core* core) { delete core; }
 
-bool Core::IsRunning() const { return _running; }
-bool Core::IsPlaying() const { return _playing; }
-void Core::SetPlaying(bool playing) { _playing = playing; }
+bool Core::IsRunning() const { return running; }
+bool Core::IsPlaying() const { return playing; }
+void Core::SetPlaying(bool playing) { this->playing = playing; }
 
-std::unique_ptr<Angel>& Core::Angel() { return _angel; }
-WindowPtr& Core::Window() { return _window; }
-std::unique_ptr<Input>& Core::Input() { return _input; }
-std::unique_ptr<FrameBuffer>& Core::FrameBuffer() { return _offscreenBuffer; }
+std::unique_ptr<Angel>& Core::Angel() { return angel; }WindowPtr& Core::Window() { return window; }
+std::unique_ptr<Input>& Core::Input() { return input; }
+std::unique_ptr<FrameBuffer>& Core::FrameBuffer() { return offscreenBuffer; }
 
-void Core::LoadProject(const Project& project) { _project = &const_cast<Project&>(project); }
-Project* Core::GetLoadedProject() const { return _project; }
-void Core::UnloadProject() {
-    _playing = false;
-    _project = nullptr;
+void Core::CreateAndLoadProject(std::string_view workspace, std::string_view name) {
+    UnloadProject();
+    project = std::make_unique<Project>(std::string(workspace), std::string(name));
+    assets = std::make_unique<struct Assets>();
+    assets->EnsureDeserialization();
 }
+void Core::LoadProject(const std::string& path) {
+    UnloadProject();
+
+    FNode file({ .name = path });
+    project = std::make_unique<Project>(DeserializeProject(&file));
+    assets = std::make_unique<struct Assets>();
+    assets->EnsureDeserialization();
+    project->OpenStartupScene();
+}
+void Core::LoadProject(const std::filesystem::path& path) { LoadProject(path.string()); }
+std::unique_ptr<Project>& Core::LoadedProject() { return project; }
+void Core::UnloadProject() {
+    playing = false;
+    project.reset();
+}
+void Core::SaveLoadedProjectToDisk() const {
+    tinyxml2::XMLDocument doc;
+    doc.Parse(SerializeProject(*project.get()).c_str());
+    doc.SaveFile((project->Workspace() / (project->Name() + ".doa")).string().c_str());
+}
+bool Core::HasLoadedProject() { return project != nullptr; }
+
+std::unique_ptr<Assets>& Core::Assets() { return assets; }
 
 void Core::Start() {
-    static bool renderingOffscreen = _offscreenBuffer != nullptr;
+    static bool renderingOffscreen = offscreenBuffer != nullptr;
     float lastTime = static_cast<float>(glfwGetTime());
     float currentTime;
 
@@ -227,49 +252,48 @@ void Core::Start() {
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
 
-    _running = true;
-    while (_running) {
+    running = true;
+    while (running) {
         currentTime = static_cast<float>(glfwGetTime());
-        glViewport(0, 0, _window->GetContentResolution().w, _window->GetContentResolution().h);
+        glViewport(0, 0, window->GetContentResolution().w, window->GetContentResolution().h);
 
         float delta = currentTime - lastTime;
 
-        if (_project != nullptr && _project->HasOpenScene()) {
+        if (project != nullptr && project->HasOpenScene()) {
             for (auto& [id, attachment] : _attachments) {
-                attachment->BeforeFrame(_project);
+                attachment->BeforeFrame(project.get());
             }
-            Scene& scene = _project->GetOpenScene();
-            if (_playing) {
+            Scene& scene = project->GetOpenScene();
+            if (playing) {
                 scene.Update(delta);
             }
             if (renderingOffscreen) {
-                _offscreenBuffer->Bind();
+                offscreenBuffer->Bind();
             }
             glClearColor(scene.ClearColor.r, scene.ClearColor.g, scene.ClearColor.b, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
             scene.Render();
             if (renderingOffscreen) {
-                _offscreenBuffer->UnBind(_window->GetContentResolution());
+                offscreenBuffer->UnBind(window->GetContentResolution());
             }
             for (auto& [id, attachment] : _attachments) {
-                attachment->AfterFrame(_project);
+                attachment->AfterFrame(project.get());
             }
         }
 
         ImGuiRender(delta);
 
-        glfwSwapBuffers(_window->GetPlatformWindow());
+        glfwSwapBuffers(window->GetPlatformWindow());
         glfwPollEvents();
         lastTime = currentTime;
 
-        if (glfwWindowShouldClose(_window->GetPlatformWindow())) {
+        if (glfwWindowShouldClose(window->GetPlatformWindow())) {
             Stop();
         }
     }
 }
-
 void Core::Stop() {
-    _running = false;
+    running = false;
 }
 
 static void message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, GLchar const* message, void const* user_param) {

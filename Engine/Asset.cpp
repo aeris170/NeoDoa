@@ -14,7 +14,7 @@ Asset::Asset() noexcept :
 Asset::Asset(const UUID id, FNode* file) noexcept :
     id(id),
     file(file) {}
-
+Asset::~Asset() noexcept { NotifyObservers("destructed"_hs); }
 Asset::Asset(Asset&& other) noexcept : ObserverPattern::Observable(std::move(other)),
     id(std::move(other.id)),
     file(std::exchange(other.file, nullptr)),
@@ -25,7 +25,6 @@ Asset::Asset(Asset&& other) noexcept : ObserverPattern::Observable(std::move(oth
     errorList(std::move(other.errorList)) {
     NotifyObservers("moved"_hs);
 }
-
 Asset& Asset::operator=(Asset&& other) noexcept {
     ObserverPattern::Observable::operator=(std::move(other));
     id = std::move(other.id);

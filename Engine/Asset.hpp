@@ -26,7 +26,7 @@ struct Asset final : ObserverPattern::Observable {
 
     Asset() noexcept;
     Asset(const UUID id, FNode* file) noexcept;
-    ~Asset() override = default;
+    ~Asset() noexcept override;
     Asset(const Asset& other) = delete;
     Asset(Asset&& other) noexcept;
     Asset& operator=(const Asset& other) = delete;

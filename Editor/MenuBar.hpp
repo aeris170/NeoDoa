@@ -15,9 +15,9 @@ struct MenuBar {
 
     std::reference_wrapper<GUI> gui;
 
-    MenuBar(GUI& owner);
+    explicit MenuBar(GUI& owner);
 
-    void Begin();
+    bool Begin();
     void Render();
     void End();
 
@@ -33,7 +33,7 @@ private:
         std::reference_wrapper<MenuBar> mb;
 
         bool modal_active{ false }, modal_open{ true };
-        NewProjectModal(MenuBar& owner);
+        explicit NewProjectModal(MenuBar& owner);
 
         void Render();
     } newProjectModal;
@@ -49,7 +49,7 @@ private:
         std::reference_wrapper<MenuBar> mb;
 
         bool modal_active{ false }, modal_open{ true };
-        OpenProjectModal(MenuBar& owner);
+        explicit OpenProjectModal(MenuBar& owner);
 
         void Render();
     } openProjectModal;
@@ -68,7 +68,7 @@ private:
         std::vector<std::tuple<std::string, std::string>> licences;
 
         bool ab{ false }, ab_open{ true }, lib_open{ true };
-        AboutSection(MenuBar& owner);
+        explicit AboutSection(MenuBar& owner);
 
         void RenderAboutPopup();
         void RenderLicenceNotices();

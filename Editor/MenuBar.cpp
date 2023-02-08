@@ -15,7 +15,7 @@ MenuBar::MenuBar(GUI& owner) :
 	openProjectModal(*this),
     aboutSection(*this) {}
 
-void MenuBar::Begin() {}
+bool MenuBar::Begin() { return true; }
 
 void MenuBar::Render() {
 	GUI& gui = this->gui;
@@ -61,7 +61,7 @@ void MenuBar::RenderProjectSubMenu() {
     }
     ImGui::Separator();
     if (ImGui::MenuItem("Exit", "Alt+F4")) {
-        gui.core->Stop();
+        gui.CORE->Stop();
     }
 }
 
@@ -71,11 +71,11 @@ void MenuBar::RenderSceneSubMenu() {
         gui.CreateNewScene("", "New Scene");
     }
     if (ImGui::BeginMenu("Open Scene...", gui.HasOpenProject())) {
-        Assets& assets = gui.openProject->Assets();
-        for (auto& uuid : assets.SceneAssetIDs()) {
-            AssetHandle sceneAsset = assets.FindAsset(uuid);
+        auto& assets = gui.CORE->Assets();
+        for (auto& uuid : assets->SceneAssetIDs()) {
+            AssetHandle sceneAsset = assets->FindAsset(uuid);
             if (ImGui::MenuItem(sceneAsset.Value().File().Name().c_str(), nullptr, nullptr)) {
-                gui.openProject->OpenScene(uuid);
+                gui.CORE->LoadedProject()->OpenScene(uuid);
             }
         }
         ImGui::EndMenu();
@@ -83,7 +83,7 @@ void MenuBar::RenderSceneSubMenu() {
     ImGui::Separator();
     if (ImGui::MenuItem("Save Scene", "Ctrl+S", nullptr, gui.HasOpenProject())) {
         if (gui.HasOpenScene()) {
-            gui.openProject->SaveOpenSceneToDisk();
+            gui.CORE->LoadedProject()->SaveOpenSceneToDisk();
         }
     }
 }

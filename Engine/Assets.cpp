@@ -14,12 +14,8 @@
 
 AssetHandle::AssetHandle() noexcept :
     _asset(nullptr) {}
-
 AssetHandle::AssetHandle(Asset* const asset) noexcept :
     _asset(asset) {}
-
-bool AssetHandle::operator==(const AssetHandle& other) const noexcept { return _asset == other._asset; }
-bool AssetHandle::operator!=(const AssetHandle& other) const noexcept { return !(*this == other); }
 Asset& AssetHandle::operator*() const noexcept { return *_asset; }
 Asset* AssetHandle::operator->() const noexcept { return _asset; }
 AssetHandle::operator Asset* () const noexcept { return _asset; }
@@ -37,38 +33,10 @@ bool Assets::IsMaterialFile(const FNode& file) { return file.ext == MATERIAL_EXT
 bool Assets::IsShaderFile(const FNode& file) { return file.ext == SHADER_EXT; }
 bool Assets::IsComponentDefinitionFile(const FNode& file) { return file.ext == COMP_EXT; }
 
-Assets::Assets(const Project* owner) noexcept :
-    project(owner),
-    _root({ owner, nullptr, "", "", "", true }) {
+Assets::Assets() noexcept :
+    _root({ CORE->LoadedProject().get(), nullptr, "", "", "", true }) {
     BuildFileNodeTree(_root);
     ImportAllFiles(database, _root);
-}
-Assets::Assets(Assets&& other) noexcept :
-    project(std::exchange(other.project, nullptr)),
-    _root(std::move(other._root)),
-    database(std::move(other.database)),
-    files(std::move(other.files)),
-    sceneAssets(std::move(other.sceneAssets)),
-    scriptAssets(std::move(other.scriptAssets)),
-    textureAssets(std::move(other.textureAssets)),
-    componentDefinitionAssets(std::move(other.componentDefinitionAssets)),
-    modelAssets(std::move(other.modelAssets)),
-    shaderAssets(std::move(other.shaderAssets)),
-    shaderUniformBlockAssets(std::move(other.shaderUniformBlockAssets)) {
-}
-Assets& Assets::operator=(Assets&& other) noexcept {
-    project = std::exchange(other.project, nullptr);
-    _root = std::move(other._root);
-    database = std::move(other.database);
-    files = std::move(other.files);
-    sceneAssets = std::move(other.sceneAssets);
-    scriptAssets = std::move(other.scriptAssets);
-    textureAssets = std::move(other.textureAssets);
-    componentDefinitionAssets = std::move(other.componentDefinitionAssets);
-    modelAssets = std::move(other.modelAssets);
-    shaderAssets = std::move(other.shaderAssets);
-    shaderUniformBlockAssets = std::move(other.shaderUniformBlockAssets);
-    return *this;
 }
 
 FNode& Assets::CreateFolder(FNode& parentFolder, const std::string_view folderName) {
@@ -93,25 +61,19 @@ void Assets::MoveAsset(const AssetHandle asset, FNode& targetParentFolder) {
 void Assets::DeleteAsset(const AssetHandle asset) {
     if (!asset.HasValue()) { return; }
 
-    UUID id = asset->ID();
-
-    database.erase(id);
-    std::erase(sceneAssets, id);
-    std::erase(scriptAssets, id);
-    std::erase(textureAssets, id);
-    std::erase(modelAssets, id);
-    std::erase(shaderAssets, id);
-    std::erase(shaderUniformBlockAssets, id);
-
+    files.erase(&asset->File());
     asset->File().Delete();
 
-    ReimportAll();
+    UUID id = asset->ID();
+    database.erase(id);
+    std::erase(sceneAssets, id);
+    std::erase(componentDefinitionAssets, id);
+    std::erase(textureAssets, id);
+
+    //ReimportAll();
 }
 
-AssetHandle Assets::FindAsset(UUID uuid) {
-    return const_cast<const Assets*>(this)->FindAsset(uuid);
-}
-const AssetHandle Assets::FindAsset(UUID uuid) const {
+AssetHandle Assets::FindAsset(UUID uuid) const {
     if (!database.contains(uuid)) { return nullptr; }
 
     /*
@@ -121,10 +83,7 @@ const AssetHandle Assets::FindAsset(UUID uuid) const {
     */
     return { const_cast<Asset*>(&database.at(uuid)) };
 }
-AssetHandle Assets::FindAssetAt(const FNode& file) {
-    return const_cast<const Assets*>(this)->FindAssetAt(file);
-}
-const AssetHandle Assets::FindAssetAt(const FNode& file) const {
+AssetHandle Assets::FindAssetAt(const FNode& file) const {
     for (auto& [uuid, asset] : database) {
         if (asset.File() == file) {
             /*
@@ -153,20 +112,32 @@ const Assets::UUIDCollection& Assets::ShaderUniformBlockAssetIDs() const { retur
 void Assets::Import(const FNode& file) { ImportFile(database, file); }
 void Assets::ReimportAll() {
     database.clear();
-    _root = FNode(FNodeCreationParams{ project, nullptr, "", "", "", true });
+    sceneAssets.clear();
+    textureAssets.clear();
+    componentDefinitionAssets.clear();
+
+    _root = FNode({ CORE->LoadedProject().get(), nullptr, "", "", "", true });
     BuildFileNodeTree(_root);
     ImportAllFiles(database, _root);
+    EnsureDeserialization();
+}
+
+void Assets::EnsureDeserialization() {
+    Deserialize(componentDefinitionAssets);
+    Deserialize(sceneAssets);
+    Deserialize(textureAssets);
 }
 
 AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
     /* Import a file:
-        * Step 1: Get the sibling file fileName.fileExtension.id
+        * Step 1: Get the sibling file: fileName.fileExtension.id
         * Step 2: Check if such file exists
         * Step 3: If not exists, create it, generate a UUID and write the UUID
         * Step 4: Read the file for the UUID
         * Step 5: If there is a collision, resolve it by generating new UUID's until the collision is resolved
         * Step 6: Register the file into the database
-        * Step 7: Call the importer to import the content to the memory
+        * ------- Step 7: Call the importer to import the content to the memory
+        (this is no longer the case, as we have dependencies between assets eg. Scene depends on ComponentDefinition)
         * Step 8: Separate imported asset to its own subcategory
     */
     if (file.IsDirectory()) { return nullptr; }
@@ -209,20 +180,20 @@ AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
         }
 
         // Step 6
-        auto result = database.emplace(uuid, Asset{ uuid, const_cast<FNode*>(&file) });
-        Asset& asset = std::get<Asset>(*result.first);
-        files.emplace(&file, asset.ID());
+        auto&& [itr, result] = database.emplace(uuid, Asset{ uuid, const_cast<FNode*>(&file) });
+        auto&& [id, asset] = *itr;
+        files.emplace(&file, id);
 
         // Step 7
-        asset.Deserialize();
+        // asset.Deserialize();
 
         // Step 8
         if (asset.IsScene()) {
-            sceneAssets.push_back(asset.ID());
+            sceneAssets.push_back(id);
         }
 
         if (asset.IsComponentDefinition()) {
-            componentDefinitionAssets.push_back(asset.ID());
+            componentDefinitionAssets.push_back(id);
         }
 
         return &asset;
@@ -231,17 +202,22 @@ AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
         return nullptr;
     }
 }
-
 void Assets::ImportAllFiles(AssetDatabase& database, const FNode& root) {
     ImportFile(database, root);
     for (auto& child : root.Children()) {
         ImportAllFiles(database, child);
     }
 }
+void Assets::Deserialize(const UUIDCollection& assets) {
+    for (const UUID id : assets) {
+        database[id].DeleteDeserializedData();
+        database[id].ForceDeserialize();
+    }
+}
 
 void Assets::BuildFileNodeTree(FNode& root) {
-    std::filesystem::current_path(project->Workspace());
-    auto it = std::filesystem::directory_iterator(project->Workspace() / root.Path());
+    std::filesystem::current_path(CORE->LoadedProject()->Workspace());
+    auto it = std::filesystem::directory_iterator(CORE->LoadedProject()->Workspace() / root.Path());
     for (const auto& entry : it) {
         if(entry.is_directory()) {
             root.children.emplace_back(FNodeCreationParams{

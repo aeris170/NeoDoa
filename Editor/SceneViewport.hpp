@@ -21,9 +21,9 @@ struct SceneViewport {
     std::reference_wrapper<GUI> gui;
     Gizmos gizmos;
 
-    SceneViewport(GUI& gui) noexcept;
+    explicit SceneViewport(GUI& gui) noexcept;
 
-    void Begin(Scene* scene);
+    bool Begin(Scene* scene);
     void Render(Scene& scene);
     void End();
 

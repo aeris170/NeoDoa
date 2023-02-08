@@ -96,11 +96,21 @@ namespace SceneDeserializer {
 }
 
 namespace SceneDeserializer::Helpers {
-    Entity DeserializeEntityID(const tinyxml2::XMLElement& property, std::string_view identifierOverride = "id");
     int DeserializeEnum(const tinyxml2::XMLElement& property);
+    Entity DeserializeEntityID(const tinyxml2::XMLElement& property, std::string_view identifierOverride = "id");
+    int8_t DeserializeInt8  (const tinyxml2::XMLElement& property);
+    int16_t DeserializeInt16 (const tinyxml2::XMLElement& property);
+    int32_t DeserializeInt32 (const tinyxml2::XMLElement& property);
+    int64_t DeserializeInt64 (const tinyxml2::XMLElement& property);
+    uint8_t DeserializeUInt8 (const tinyxml2::XMLElement& property);
+    uint16_t DeserializeUInt16(const tinyxml2::XMLElement& property);
+    uint32_t DeserializeUInt32(const tinyxml2::XMLElement& property);
+    uint64_t DeserializeUInt64(const tinyxml2::XMLElement& property);
     int DeserializeInt(const tinyxml2::XMLElement& property);
+    long DeserializeLong(const tinyxml2::XMLElement& property);
     float DeserializeFloat(const tinyxml2::XMLElement& property);
     double DeserializeDouble(const tinyxml2::XMLElement& property);
+    bool DeserializeBool(const tinyxml2::XMLElement& property);
     std::string DeserializeString(const tinyxml2::XMLElement& property);
     glm::vec2 DeserializeVec2(const tinyxml2::XMLElement& property);
     glm::vec3 DeserializeVec3(const tinyxml2::XMLElement& property);

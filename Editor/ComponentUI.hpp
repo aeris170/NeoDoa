@@ -37,13 +37,14 @@ struct Assets;
 struct ComponentInstance;
 struct UserDefinedComponentStorage;
 namespace UserDefinedComponentStorageUI {
-    void RenderComponentInstance(Assets& assets, const ComponentInstance& instance);
+    void RenderComponentInstance(const ComponentInstance& instance);
 }
 
 struct Scene;
 struct Observer;
 namespace ComponentUI {
     bool Begin(const Observer& observer, std::string_view componentTypeName);
+    bool Begin(const Observer& observer, const ComponentInstance& instance);
 
     void RenderIDComponent(const Observer& observer, const IDComponent& idComponent);
     void RenderTransformComponent(const Observer& observer, const TransformComponent& transformComponent);
