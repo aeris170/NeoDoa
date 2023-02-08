@@ -22,7 +22,7 @@ struct Gizmos {
         Resolution viewportSize{};
     } settings;
 
-    Gizmos(SceneViewport& sv) noexcept;
+    explicit Gizmos(SceneViewport& sv) noexcept;
 
     void Render(Scene& scene);
 

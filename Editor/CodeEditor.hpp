@@ -16,8 +16,6 @@ struct GUI;
 struct CodeEditor {
 
     struct EditorTab {
-        static inline constexpr auto DIRTY_SYMBOL = " *";
-
         EditorTab() noexcept = default;
         EditorTab(AssetHandle currentAsset, bool isSyntaxColoringEnabled, bool isShortTabGlyphsVisible, bool isWhitespaceVisible, int tabSize) noexcept;
 
@@ -64,5 +62,4 @@ private:
     void CloseTabAt(int index);
 
     void RenderMenuBar();
-    void RenderEditorInfo(EditorTab& tab);
 };
