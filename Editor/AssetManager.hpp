@@ -3,7 +3,6 @@
 #include <functional>
 
 #include <imgui.h>
-#include <IconsFontAwesome5Pro.h>
 
 struct GUI;
 struct Assets;

@@ -4,6 +4,7 @@
 
 #include <imgui.h>
 #include <EZEasing.hpp>
+#include <constexpr_concat.hpp>
 
 #include "GUI.hpp"
 #include "Icons.hpp"
@@ -89,11 +90,11 @@ void SceneHierarchy::Render(Scene& scene) {
     }
 
     if (ImGui::BeginPopupContextWindow(0, ImGuiMouseButton_Right | ImGuiPopupFlags_NoOpenOverItems)) {
-        if (ImGui::MenuItem(ICON_FA_PLUS " Create New Entity")) {
+        if (ImGui::MenuItem(cat(SceneHierarchyIcons::ContextMenu::CREATE_NEW_ENTITY_ICON, "Create New Entity"))) {
             scene.CreateEntity();
         }
         ImGui::Separator();
-        if (ImGui::MenuItem(ICON_FA_WINDOW_CLOSE " Close Scene")) {
+        if (ImGui::MenuItem(cat(SceneHierarchyIcons::ContextMenu::CLOSE_SCENE_ICON, "Close Scene"))) {
             gui.CORE->LoadedProject()->CloseScene();
         }
         ImGui::EndPopup();
@@ -251,7 +252,7 @@ void SceneHierarchy::RenderContextMenu(Scene& scene, const Entity entity) {
     GUI& gui = this->gui;
 
     if (ImGui::BeginPopupContextItem(0, ImGuiPopupFlags_MouseButtonRight)) {
-        if (ImGui::BeginMenu(ICON_FA_LINK " Attach Module")) {
+        if (ImGui::BeginMenu(cat(SceneHierarchyIcons::ContextMenu::ATTACH_COMPONENT_ICON, "Attach Component"))) {
             // cpp components start
             if (ImGui::MenuItem("Ortho")) {
                 scene.EmplaceComponent<OrthoCameraComponent>(entity);
@@ -287,7 +288,7 @@ void SceneHierarchy::RenderContextMenu(Scene& scene, const Entity entity) {
             //script components end
             ImGui::EndMenu();
         }
-        if (ImGui::MenuItem(ICON_FA_TRASH " Delete Entity")) {
+        if (ImGui::MenuItem(cat(SceneHierarchyIcons::ContextMenu::DELETE_ENTITY_ICON, "Delete Entity"))) {
             deletedEntity = entity;
         }
         ImGui::EndPopup();

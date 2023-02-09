@@ -1,6 +1,6 @@
 // Generated for NeoDoa
-// from https://github.com/FortAwesome/Font-Awesome/raw/6.x/metadata/icons.yml
-// for use with https://github.com/FortAwesome/Font-Awesome/blob/5.x/webfonts/fa-brands-400.ttf
+// from icons.yml
+// for use with fa-brands-400.ttf
 #pragma once
 
 #define FONT_ICON_FILE_NAME_FAB "fa-brands-400.ttf"
@@ -278,7 +278,6 @@
 #define ICON_FA_NUTRITIONIX "\xef\x8f\x96"	// U+f3d6
 #define ICON_FA_OCTOPUS_DEPLOY "\xee\x82\x82"	// U+e082
 #define ICON_FA_ODNOKLASSNIKI "\xef\x89\xa3"	// U+f263
-#define ICON_FA_ODYSEE "\xee\x97\x86"	// U+e5c6
 #define ICON_FA_OLD_REPUBLIC "\xef\x94\x90"	// U+f510
 #define ICON_FA_OPENCART "\xef\x88\xbd"	// U+f23d
 #define ICON_FA_OPENID "\xef\x86\x9b"	// U+f19b
@@ -397,7 +396,6 @@
 #define ICON_FA_STRAVA "\xef\x90\xa8"	// U+f428
 #define ICON_FA_STRIPE "\xef\x90\xa9"	// U+f429
 #define ICON_FA_STRIPE_S "\xef\x90\xaa"	// U+f42a
-#define ICON_FA_STUBBER "\xee\x97\x87"	// U+e5c7
 #define ICON_FA_STUDIOVINARI "\xef\x8f\xb8"	// U+f3f8
 #define ICON_FA_STUMBLEUPON "\xef\x86\xa4"	// U+f1a4
 #define ICON_FA_STUMBLEUPON_CIRCLE "\xef\x86\xa3"	// U+f1a3

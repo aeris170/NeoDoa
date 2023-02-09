@@ -48,6 +48,12 @@
     <ClInclude Include="IconsFontAwesome6Brands.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="IconsFontAwesome6Pro.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IconsFontAwesome6ProBrands.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="GenerateIconFontCppHeaders.py">

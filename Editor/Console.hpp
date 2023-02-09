@@ -2,7 +2,6 @@
 
 #include <functional>
 #include <imgui.h>
-#include <IconsFontAwesome5Pro.h>
 
 #include <Log.hpp>
 

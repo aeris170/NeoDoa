@@ -465,11 +465,5 @@
     <CopyFileToFolders Include="Fonts\FA6\fa-solid-900.ttf">
       <Filter>Resource Files</Filter>
     </CopyFileToFolders>
-    <CopyFileToFolders Include="Fonts\FA6\Font Awesome 6 Pro-Regular-400.otf">
-      <Filter>Resource Files</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="Fonts\FA6\Font Awesome 6 Pro-Solid-900.otf">
-      <Filter>Resource Files</Filter>
-    </CopyFileToFolders>
   </ItemGroup>
 </Project>

@@ -1,7 +1,5 @@
 #include "Console.hpp"
 
-#include <IconsFontAwesome5Pro.h>
-
 #include "GUI.hpp"
 #include "Icons.hpp"
 #include "Colors.hpp"
@@ -61,10 +59,10 @@ void Console::RenderFilterButtons() {
         ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0, 0, 0, 0 });
         ImGui::PushFont(gui.GetFontBold());
-        ImGui::Button(ICON_FA_INFO, buttonSize);
+        ImGui::Button(ConsoleIcons::TRACE_ICON, buttonSize);
         ImGui::PopFont();
         ImGui::PopStyleColor(2);
-    } else if (ImGui::Button(ICON_FA_INFO, buttonSize)) {
+    } else if (ImGui::Button(ConsoleIcons::TRACE_ICON, buttonSize)) {
         selectedSeverity = LogSeverity::TRACE;
     }
     if (ImGui::IsItemHovered()) {
@@ -83,10 +81,10 @@ void Console::RenderFilterButtons() {
         ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0, 0, 0, 0 });
         ImGui::PushFont(gui.GetFontBold());
-        ImGui::Button(ICON_FA_INFO, buttonSize);
+        ImGui::Button(ConsoleIcons::INFO_ICON, buttonSize);
         ImGui::PopFont();
         ImGui::PopStyleColor(2);
-    } else if (ImGui::Button(ICON_FA_INFO, buttonSize)) {
+    } else if (ImGui::Button(ConsoleIcons::INFO_ICON, buttonSize)) {
         selectedSeverity = LogSeverity::INFO;
     }
     if (ImGui::IsItemHovered()) {
@@ -105,10 +103,10 @@ void Console::RenderFilterButtons() {
         ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0, 0, 0, 0 });
         ImGui::PushFont(gui.GetFontBold());
-        ImGui::Button(ICON_FA_EXCLAMATION_CIRCLE, buttonSize);
+        ImGui::Button(ConsoleIcons::WARNING_ICON, buttonSize);
         ImGui::PopFont();
         ImGui::PopStyleColor(2);
-    } else if (ImGui::Button(ICON_FA_EXCLAMATION_CIRCLE, buttonSize)) {
+    } else if (ImGui::Button(ConsoleIcons::WARNING_ICON, buttonSize)) {
         selectedSeverity = LogSeverity::WARNING;
     }
     if (ImGui::IsItemHovered()) {
@@ -127,10 +125,10 @@ void Console::RenderFilterButtons() {
         ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0, 0, 0, 0 });
         ImGui::PushFont(gui.GetFontBold());
-        ImGui::Button(ICON_FA_EXCLAMATION_TRIANGLE, buttonSize);
+        ImGui::Button(ConsoleIcons::ERROR_ICON, buttonSize);
         ImGui::PopFont();
         ImGui::PopStyleColor(2);
-    } else if (ImGui::Button(ICON_FA_EXCLAMATION_TRIANGLE, buttonSize)) {
+    } else if (ImGui::Button(ConsoleIcons::ERROR_ICON, buttonSize)) {
         selectedSeverity = LogSeverity::ERRO;
     }
     if (ImGui::IsItemHovered()) {
@@ -149,10 +147,10 @@ void Console::RenderFilterButtons() {
         ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0, 0, 0, 0 });
         ImGui::PushFont(gui.GetFontBold());
-        ImGui::Button(ICON_FA_EXCLAMATION_TRIANGLE, buttonSize);
+        ImGui::Button(ConsoleIcons::FATAL_ICON, buttonSize);
         ImGui::PopFont();
         ImGui::PopStyleColor(2);
-    } else if (ImGui::Button(ICON_FA_EXCLAMATION_TRIANGLE, buttonSize)) {
+    } else if (ImGui::Button(ConsoleIcons::FATAL_ICON, buttonSize)) {
         selectedSeverity = LogSeverity::FATAL;
     }
     if (ImGui::IsItemHovered()) {

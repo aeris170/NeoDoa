@@ -5,6 +5,8 @@
 #include <nameof.hpp>
 #include <prettify.hpp>
 
+#include <constexpr_concat.hpp>
+
 #include <Scene.hpp>
 #include <IDComponent.hpp>
 #include <TransformComponent.hpp>
@@ -17,7 +19,6 @@
 #include "Observer.hpp"
 #include "ComponentWidgets.hpp"
 #include "UserDefinedComponentStorage.hpp"
-#include <defer.hpp>
 
 void IDComponentUI::Render(const IDComponent& idComponent) {
     static unordered_string_map<std::string> UINames = {
@@ -266,12 +267,12 @@ void ComponentUI::RenderUserDefinedComponentStorage(const Observer& observer, co
 #pragma region ContextMenu
         ImGui::PushFont(observer.gui.get().GetFontBold());
         if (ImGui::BeginPopupContextItem(nullptr, ImGuiPopupFlags_MouseButtonRight)) {
-            if (ImGui::MenuItem(ICON_FA_UNDO " Reset Component Data")) {
+            if (ImGui::MenuItem(cat(ObserverIcons::ContextMenu::RESET_COMPONENT_DATA_ICON, "Reset Component Data"))) {
                 for (auto& member : instance.MemberValues()) {
                     member.Reset();
                 }
             }
-            if (ImGui::MenuItem(ICON_FA_TRASH " Detach Component")) {
+            if (ImGui::MenuItem(ObserverIcons::ContextMenu::DETACH_COMPONENT_ICON, "Detach Component")) {
                 removee = instance.ComponentAssetID();
             }
             ImGui::EndPopup();

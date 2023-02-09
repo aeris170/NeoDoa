@@ -3,6 +3,8 @@
 #include <imgui.h>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <constexpr_concat.hpp>
+
 #include <Core.hpp>
 #include <Input.hpp>
 #include <Window.hpp>
@@ -83,11 +85,11 @@ void SceneViewport::DrawViewportSettings(Scene* scene) {
     ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0, 0, 0, 0 });
     if (gizmos.settings.mode == ImGuizmo::MODE::WORLD) {
-        if (ImGui::Button(ICON_FA_GLOBE " World")) {
+        if (ImGui::Button(cat(SceneViewportIcons::Gizmos::GIZMO_MODE_GLOBAL_ICON, "World"))) {
             gizmos.settings.mode = ImGuizmo::MODE::LOCAL;
         }
     } else if (gizmos.settings.mode == ImGuizmo::MODE::LOCAL) {
-        if (ImGui::Button(ICON_FA_MALE " Local")) {
+        if (ImGui::Button(cat(SceneViewportIcons::Gizmos::GIZMO_MODE_LOCAL_ICON, "Local"))) {
             gizmos.settings.mode = ImGuizmo::MODE::WORLD;
         }
     }
@@ -98,9 +100,9 @@ void SceneViewport::DrawViewportSettings(Scene* scene) {
         if (gizmos.settings.type == ImGuizmo::OPERATION::TRANSLATE) {
             ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0, 0, 0, 0 });
-            ImGui::Button(ICON_FA_ARROWS_ALT, buttonSize);
+            ImGui::Button(SceneViewportIcons::Gizmos::GIZMO_TRANSLATE_ICON, buttonSize);
             ImGui::PopStyleColor(2);
-        } else if (ImGui::Button(ICON_FA_ARROWS_ALT, buttonSize)) {
+        } else if (ImGui::Button(SceneViewportIcons::Gizmos::GIZMO_TRANSLATE_ICON, buttonSize)) {
             gizmos.settings.type = ImGuizmo::OPERATION::TRANSLATE;
         }
         ImGui::SameLine();
@@ -108,9 +110,9 @@ void SceneViewport::DrawViewportSettings(Scene* scene) {
         if (gizmos.settings.type == ImGuizmo::OPERATION::ROTATE) {
             ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0, 0, 0, 0 });
-            ImGui::Button(ICON_FA_SYNC_ALT, buttonSize);
+            ImGui::Button(SceneViewportIcons::Gizmos::GIZMO_ROTATE_ICON, buttonSize);
             ImGui::PopStyleColor(2);
-        } else if (ImGui::Button(ICON_FA_SYNC_ALT, buttonSize)) {
+        } else if (ImGui::Button(SceneViewportIcons::Gizmos::GIZMO_ROTATE_ICON, buttonSize)) {
             gizmos.settings.type = ImGuizmo::OPERATION::ROTATE;
         }
         ImGui::SameLine();
@@ -118,9 +120,9 @@ void SceneViewport::DrawViewportSettings(Scene* scene) {
         if (gizmos.settings.type == ImGuizmo::OPERATION::SCALE) {
             ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0, 0, 0, 0 });
-            ImGui::Button(ICON_FA_EXPAND_ALT, buttonSize);
+            ImGui::Button(SceneViewportIcons::Gizmos::GIZMO_SCALE_ICON, buttonSize);
             ImGui::PopStyleColor(2);
-        } else if (ImGui::Button(ICON_FA_EXPAND_ALT, buttonSize)) {
+        } else if (ImGui::Button(SceneViewportIcons::Gizmos::GIZMO_SCALE_ICON, buttonSize)) {
             gizmos.settings.type = ImGuizmo::OPERATION::SCALE;
         }
         ImGui::SameLine();
@@ -133,10 +135,10 @@ void SceneViewport::DrawViewportSettings(Scene* scene) {
         ImGui::BeginDisabled();
     }
     if (gui.CORE->IsPlaying()) {
-        if (ImGui::Button(ICON_FA_STOP, buttonSize)) {
+        if (ImGui::Button(SceneViewportIcons::STOP_ICON, buttonSize)) {
             gui.CORE->SetPlaying(false);
         }
-    } else if (ImGui::Button(ICON_FA_PLAY, buttonSize)) {
+    } else if (ImGui::Button(SceneViewportIcons::PLAY_ICON, buttonSize)) {
         gui.CORE->SetPlaying(true);
     }
     if (!scene) {
