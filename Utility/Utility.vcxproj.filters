@@ -31,5 +31,8 @@
     <ClInclude Include="defer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="constexpr_concat.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

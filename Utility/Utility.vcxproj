@@ -87,6 +87,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="constexpr_concat.hpp" />
     <ClInclude Include="defer.hpp" />
     <ClInclude Include="FormatBytes.hpp" />
     <ClInclude Include="nameof.hpp" />
