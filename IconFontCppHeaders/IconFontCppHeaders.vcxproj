@@ -92,6 +92,8 @@
     <ClInclude Include="IconsFontAwesome5Brands.h" />
     <ClInclude Include="IconsFontAwesome5Pro.h" />
     <ClInclude Include="IconsFontAwesome5ProBrands.h" />
+    <ClInclude Include="IconsFontAwesome6.h" />
+    <ClInclude Include="IconsFontAwesome6Brands.h" />
     <ClInclude Include="IconsForkAwesome.h" />
     <ClInclude Include="IconsKenney.h" />
     <ClInclude Include="IconsMaterialDesign.h" />

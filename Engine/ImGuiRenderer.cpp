@@ -6,7 +6,7 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-#include <IconsFontAwesome5.h>
+#include "FontAwesome.hpp"
 
 static std::vector<ImGuiFunction> commands;
 static ImGuiContext* context;
@@ -32,9 +32,9 @@ ImGuiContext* ImGuiInit(GLFWwindow* window) {
     icons_config.PixelSnapH = true;
 
     io.Fonts->AddFontFromFileTTF("Fonts/OpenSans-Regular.ttf", 18.0f, nullptr, ICONS_RANGES_TURKISH);
-    io.Fonts->AddFontFromFileTTF("Fonts/fa-regular-400-pro.ttf", 16.0f, &icons_config, icons_ranges);
+    io.Fonts->AddFontFromFileTTF("Fonts/FA6/fa-regular-400.ttf", 16.0f, &icons_config, icons_ranges);
     io.FontDefault = io.Fonts->AddFontFromFileTTF("Fonts/OpenSans-Bold.ttf", 18.0f, nullptr, ICONS_RANGES_TURKISH);
-    io.Fonts->AddFontFromFileTTF("Fonts/fa-solid-900-pro.ttf", 16.0f, &icons_config, icons_ranges);
+    io.Fonts->AddFontFromFileTTF("Fonts/FA6/fa-solid-900.ttf", 16.0f, &icons_config, icons_ranges);
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(GLSL_VERSION);

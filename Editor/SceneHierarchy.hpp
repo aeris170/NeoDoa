@@ -4,8 +4,6 @@
 
 #include <imgui.h>
 
-#include "IconsFontAwesome5Pro.h"
-
 #include <Entity.hpp>
 
 struct GUI;

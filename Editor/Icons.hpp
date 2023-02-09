@@ -2,7 +2,7 @@
 
 #include <unordered_map>
 
-#include <IconsFontAwesome5Pro.h>
+#include <FontAwesome.hpp>
 
 #include <nameof.hpp>
 

@@ -2,17 +2,21 @@
 # icon font parameters to C, C++ and C# compatible formats.
 #
 #------------------------------------------------------------------------------
+#
 # 1 - Source material
 #
 #   1.1 - Font Awesome
+#
 #       1.1.1 - version 4
-#           https://raw.githubusercontent.com/FortAwesome/Font-Awesome/fa-4/src/icons.yml
-#           https://github.com/FortAwesome/Font-Awesome/blob/fa-4/fonts/fontawesome-webfont.ttf
-#       1.1.2 - version 5
-#           https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/metadata/icons.yml
-#           https://github.com/FortAwesome/Font-Awesome/blob/master/webfonts/fa-brands-400.ttf
-#           https://github.com/FortAwesome/Font-Awesome/blob/master/webfonts/fa-regular-400.ttf
-#           https://github.com/FortAwesome/Font-Awesome/blob/master/webfonts/fa-solid-900.ttf
+#           https://github.com/FortAwesome/Font-Awesome/blob/4.x/src/icons.yml
+#           https://github.com/FortAwesome/Font-Awesome/blob/4.x/fonts/fontawesome-webfont.ttf
+#
+#       1.1.2 - version 5 Free
+#           https://github.com/FortAwesome/Font-Awesome/blob/5.x/metadata/icons.yml
+#           https://github.com/FortAwesome/Font-Awesome/blob/5.x/webfonts/fa-brands-400.ttf
+#           https://github.com/FortAwesome/Font-Awesome/blob/5.x/webfonts/fa-regular-400.ttf
+#           https://github.com/FortAwesome/Font-Awesome/blob/5.x/webfonts/fa-solid-900.ttf
+#
 #       1.1.3 - version 5 Pro
 #           Download files from https://fontawesome.com
 #           \fontawesome-pro-n.n.n-web\metadata\icons.yml
@@ -20,47 +24,69 @@
 #           \fontawesome-pro-n.n.n-web\webfonts\fa-light-300.ttf
 #           \fontawesome-pro-n.n.n-web\webfonts\fa-regular-400.ttf
 #           \fontawesome-pro-n.n.n-web\webfonts\fa-solid-900.ttf
+#
+#       1.1.4 - version 6 Free
+#           https://github.com/FortAwesome/Font-Awesome/blob/6.x/metadata/icons.yml
+#           https://github.com/FortAwesome/Font-Awesome/blob/6.x/webfonts/fa-brands-400.ttf
+#           https://github.com/FortAwesome/Font-Awesome/blob/6.x/webfonts/fa-regular-400.ttf
+#           https://github.com/FortAwesome/Font-Awesome/blob/6.x/webfonts/fa-solid-900.ttf
+#
 #   1.2 - Fork Awesome
-#           https://raw.githubusercontent.com/ForkAwesome/Fork-Awesome/master/src/icons/icons.yml
+#           https://github.com/ForkAwesome/Fork-Awesome/blob/master/src/icons/icons.yml
 #           https://github.com/ForkAwesome/Fork-Awesome/blob/master/fonts/forkawesome-webfont.ttf
+#
 #   1.3 - Google Material Design
-#           https://raw.githubusercontent.com/google/material-design-icons/master/iconfont/codepoints
-#           https://github.com/google/material-design-icons/blob/master/iconfont/MaterialIcons-Regular.ttf
+#           https://github.com/google/material-design-icons/blob/master/font/MaterialIcons-Regular.codepoints
+#           https://github.com/google/material-design-icons/blob/master/font/MaterialIcons-Regular.ttf
+#
 #   1.4 - Kenney Game icons
-#           https://raw.githubusercontent.com/nicodinh/kenney-icon-font/master/css/kenney-icons.css
+#           https://github.com/nicodinh/kenney-icon-font/blob/master/css/kenney-icons.css
 #           https://github.com/nicodinh/kenney-icon-font/blob/master/fonts/kenney-icon-font.ttf
+#
 #   1.5 - Fontaudio
-#           https://raw.githubusercontent.com/fefanto/fontaudio/master/font/fontaudio.css
+#           https://github.com/fefanto/fontaudio/blob/master/font/fontaudio.css
 #           https://github.com/fefanto/fontaudio/blob/master/font/fontaudio.ttf
+#
 #------------------------------------------------------------------------------
+#
 # 2 - Data sample
 #
-#   Font Awesome example:
-#           - input:            music:
-#                                 changes:
-#                                   - '1'
-#                                   - 5.0.0
-#                                 label: Music
-#                                 search:
-#                                   terms:
-#                                     - note
-#                                     - sound
-#                                 styles:
-#                                   - solid
-#                                 unicode: f001
+#   Font Awesome 4 example:
+#
+#           - input:                music:
+#                                     changes:
+#                                       - '1'
+#                                       - 5.0.0
+#                                     label: Music
+#                                     search:
+#                                       terms:
+#                                         - note
+#                                         - sound
+#                                     styles:
+#                                       - solid
+#                                     unicode: f001
+#
 #           - output C and C++:     #define ICON_FA_MUSIC "\xef\x80\x81"	// U+f001
+#
 #           - output C#:            public const string Music = "\uf001";
 #
-#   All fonts have computed min and max unicode fonts ICON_MIN and ICON_MAX
+#   All fonts have computed min, max_16 and max unicode fonts.
+#   The min excludes the ASCII characters code points.
+#   The max_16 is for use with libraries that only support 16 bit code points.
+#
 #           - output C and C++:     #define ICON_MIN_FA 0xf000
+#                                   #define ICON_MAX_16_FA 0xf2e0
 #                                   #define ICON_MAX_FA 0xf2e0
-#               Exception for Font Awesome brands: we use ICON_MIN_FAB and ICON_MAX_FAB
-#               to differentiate between brand and non-brand icons so they can be used together
-#               (the defines must be unique in C and C++).
+#             Exception for Font Awesome brands: we use ICON_MIN_FAB, ICON_MAX_16_FAB and ICON_MAX_FAB
+#             to differentiate between brand and non-brand icons so they can be used together
+#             (the defines must be unique in C and C++).
+#
 #           - output C#:            public const int IconMin = 0xf000;
+#                                   public const int IconMax16 = 0xf2e0;
 #                                   public const int IconMax = 0xf2e0;
 #
 #------------------------------------------------------------------------------
+#
 # 3 - Script dependencies
 #
 #   3.1 - Fonts source material online
@@ -69,6 +95,7 @@
 #   3.4 - PyYAML - https://pypi.org/project/PyYAML/
 #
 #------------------------------------------------------------------------------
+#
 # 4 - References
 #
 #   GitHub repository: https://github.com/juliettef/IconFontCppHeaders/
@@ -136,41 +163,53 @@ class Font:
 class FontFA4( Font ):              # legacy Font Awesome version 4
     font_name = 'Font Awesome 4'
     font_abbr = 'FA'
-    font_data = 'https://raw.githubusercontent.com/FortAwesome/Font-Awesome/fa-4/src/icons.yml'
-    ttfs = [[ font_abbr, 'fontawesome-webfont.ttf', 'https://github.com/FortAwesome/Font-Awesome/blob/fa-4/fonts/fontawesome-webfont.ttf' ]]
+    font_data = 'https://github.com/FortAwesome/Font-Awesome/raw/4.x/src/icons.yml'
+    ttfs = [[ font_abbr, 'fontawesome-webfont.ttf', 'https://github.com/FortAwesome/Font-Awesome/blob/4.x/fonts/fontawesome-webfont.ttf' ]]
 
     @classmethod
     def get_icons( cls, input_data ):
         icons_data = { }
         data = yaml.safe_load( input_data )
-        font_min = 'ffff'
-        font_max = '0'
+        font_min = '0x10ffff'
+        font_min_int = int( font_min, 16 )
+        font_max_16 = '0x0'   # 16 bit max 
+        font_max_16_int = int( font_max_16, 16 )
+        font_max = '0x0'
+        font_max_int = int( font_max, 16 )
         icons = []
         for item in data[ 'icons' ]:
-            if item[ 'unicode' ] < font_min:
-                font_min = item[ 'unicode' ]
-            if item[ 'unicode' ] >= font_max:
-                font_max = item[ 'unicode' ]
-            icons.append([ item[ 'id' ], item[ 'unicode' ]])
+            item_unicode = item[ 'unicode' ].zfill( 4 )
+            item_int = int( item_unicode, 16 )
+            if item_int < font_min_int and item_int > 0x0127 :  # exclude ASCII characters code points
+                font_min = item_unicode
+                font_min_int = item_int
+            if item_int > font_max_16_int and item_int <= 0xffff:   # exclude code points > 16 bits
+                font_max_16 = item_unicode
+                font_max_16_int = item_int
+            if item_int > font_max_int:
+                font_max = item_unicode
+                font_max_int = item_int
+            icons.append([ item[ 'id' ], item_unicode ])
         icons_data.update({ 'font_min' : font_min,
-                        'font_max' : font_max,
-                        'icons' : icons })
+                            'font_max_16' : font_max_16,
+                            'font_max' : font_max,
+                            'icons' : icons })
         return icons_data
 
 
 class FontFK( FontFA4 ):            # Fork Awesome, based on Font Awesome 4
     font_name = 'Fork Awesome'
     font_abbr = 'FK'
-    font_data = 'https://raw.githubusercontent.com/ForkAwesome/Fork-Awesome/master/src/icons/icons.yml'
+    font_data = 'https://github.com/ForkAwesome/Fork-Awesome/raw/master/src/icons/icons.yml'
     ttfs = [[ font_abbr, 'forkawesome-webfont.ttf', 'https://github.com/ForkAwesome/Fork-Awesome/blob/master/fonts/forkawesome-webfont.ttf' ]]
 
 
 class FontFA5( Font ):              # Font Awesome version 5 - Regular and Solid styles
     font_name = 'Font Awesome 5'
     font_abbr = 'FA'
-    font_data = 'https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/metadata/icons.yml'
-    ttfs = [[ 'FAR', 'fa-regular-400.ttf', 'https://github.com/FortAwesome/Font-Awesome/blob/master/webfonts/fa-regular-400.ttf' ],
-            [ 'FAS', 'fa-solid-900.ttf', 'https://github.com/FortAwesome/Font-Awesome/blob/master/webfonts/fa-solid-900.ttf' ]]
+    font_data = 'https://github.com/FortAwesome/Font-Awesome/raw/5.x/metadata/icons.yml'
+    ttfs = [[ 'FAR', 'fa-regular-400.ttf', 'https://github.com/FortAwesome/Font-Awesome/blob/5.x/webfonts/fa-regular-400.ttf' ],
+            [ 'FAS', 'fa-solid-900.ttf', 'https://github.com/FortAwesome/Font-Awesome/blob/5.x/webfonts/fa-solid-900.ttf' ]]
     font_fa_style = [ 'regular', 'solid' ]
 
     @classmethod
@@ -178,27 +217,41 @@ class FontFA5( Font ):              # Font Awesome version 5 - Regular and Solid
         icons_data = { }
         data = yaml.safe_load( input_data )
         if data:
-            font_min = 'ffff'
-            font_max = '0'
+            font_min = '0x10ffff'
+            font_min_int = int( font_min, 16 )
+            font_max_16 = '0x0'   # 16 bit max 
+            font_max_16_int = int( font_max_16, 16 )
+            font_max = '0x0'
+            font_max_int = int( font_max, 16 )
             icons = []
             for key in data:
                 item = data[ key ]
                 for style in item[ 'styles' ]:
                     if style in cls.font_fa_style:
-                        if [ key, item[ 'unicode' ]] not in icons:
-                            if item[ 'unicode' ] < font_min:
-                                font_min = item[ 'unicode' ]
-                            if item[ 'unicode' ] >= font_max:
-                                font_max = item[ 'unicode' ]
-                            icons.append([ key, item[ 'unicode' ]])
-            icons_data.update({ 'font_min':font_min, 'font_max':font_max, 'icons':icons })
+                        item_unicode = item[ 'unicode' ].zfill( 4 )
+                        if [ key, item_unicode ] not in icons:
+                            item_int = int( item_unicode, 16 )
+                            if item_int < font_min_int and item_int > 0x0127 :  # exclude ASCII characters code points
+                                font_min = item_unicode
+                                font_min_int = item_int
+                            if item_int > font_max_16_int and item_int <= 0xffff:   # exclude code points > 16 bits
+                                font_max_16 = item_unicode
+                                font_max_16_int = item_int
+                            if item_int > font_max_int:
+                                font_max = item_unicode
+                                font_max_int = item_int
+                            icons.append([ key, item_unicode ])
+            icons_data.update({ 'font_min':font_min, 
+                                'font_max_16' : font_max_16,
+                                'font_max':font_max, 
+                                'icons':icons })
         return icons_data
 
 
 class FontFA5Brands( FontFA5 ):     # Font Awesome version 5 - Brand style
     font_name = 'Font Awesome 5 Brands'
     font_minmax_abbr = 'FAB'
-    ttfs = [[ 'FAB', 'fa-brands-400.ttf', 'https://github.com/FortAwesome/Font-Awesome/blob/master/webfonts/fa-brands-400.ttf' ]]
+    ttfs = [[ 'FAB', 'fa-brands-400.ttf', 'https://github.com/FortAwesome/Font-Awesome/blob/5.x/webfonts/fa-brands-400.ttf' ]]
     font_fa_style = [ 'brands' ]
 
 
@@ -211,37 +264,60 @@ class FontFA5Pro( FontFA5 ):        # Font Awesome version 5 Pro - Light, Regula
     font_fa_style = [ 'light', 'regular', 'solid' ]
 
 
-class FontFA5ProBrands( FontFA5 ):  # Font Awesome version 5 Pro - Brand style
+class FontFA5ProBrands( FontFA5Brands ):  # Font Awesome version 5 Pro - Brand style
     font_name = 'Font Awesome 5 Pro Brands'
-    font_minmax_abbr = 'FAB'
     font_data = 'icons.yml'
     ttfs = [[ 'FAB', 'fa-brands-400.ttf', 'fa-brands-400.ttf' ]]
-    font_fa_style = [ 'brands' ]
+
+
+class FontFA6( FontFA5 ):           # Font Awesome version 6 - Regular and Solid styles
+    font_name = 'Font Awesome 6'
+    font_data = 'https://github.com/FortAwesome/Font-Awesome/raw/6.x/metadata/icons.yml'
+    ttfs = [[ 'FAR', 'fa-regular-400.ttf', 'https://github.com/FortAwesome/Font-Awesome/blob/6.x/webfonts/fa-regular-400.ttf' ],
+            [ 'FAS', 'fa-solid-900.ttf', 'https://github.com/FortAwesome/Font-Awesome/blob/6.x/webfonts/fa-solid-900.ttf' ]]
+
+
+class FontFA6Brands( FontFA5Brands ):     # Font Awesome version 6 - Brand style
+    font_name = 'Font Awesome 6 Brands'
+    font_data = 'https://github.com/FortAwesome/Font-Awesome/raw/6.x/metadata/icons.yml'
+    ttfs = [[ 'FAB', 'fa-brands-400.ttf', 'https://github.com/FortAwesome/Font-Awesome/blob/6.x/webfonts/fa-brands-400.ttf' ]]
 
 
 class FontMD( Font ):               # Material Design
     font_name = 'Material Design'
     font_abbr = 'MD'
-    font_data = 'https://raw.githubusercontent.com/google/material-design-icons/master/iconfont/codepoints'
-    ttfs = [[ font_abbr, 'MaterialIcons-Regular.ttf', 'https://github.com/google/material-design-icons/blob/master/iconfont/MaterialIcons-Regular.ttf' ]]
+    font_data = 'https://github.com/google/material-design-icons/raw/master/font/MaterialIcons-Regular.codepoints'
+    ttfs = [[ font_abbr, 'MaterialIcons-Regular.ttf', 'https://github.com/google/material-design-icons/blob/master/font/MaterialIcons-Regular.ttf' ]]
 
     @classmethod
     def get_icons( cls, input_data ):
         icons_data = {}
         lines = str.split( input_data, '\n' )
         if lines:
-            font_min = 'ffff'
-            font_max = '0'
+            font_min = '0x10ffff'
+            font_min_int = int( font_min, 16 )
+            font_max_16 = '0x0'   # 16 bit max 
+            font_max_16_int = int( font_max_16, 16 )
+            font_max = '0x0'
+            font_max_int = int( font_max, 16 )
             icons = []
             for line in lines :
                 words = str.split(line)
                 if words and len( words ) >= 2:
-                    if words[ 1 ] < font_min:
-                        font_min = words[ 1 ]
-                    if words[ 1 ] >= font_max:
-                        font_max = words[ 1 ]
+                    word_unicode = words[ 1 ].zfill( 4 )
+                    word_int = int( word_unicode, 16 )
+                    if word_int < font_min_int and word_int > 0x0127 :  # exclude ASCII characters code points
+                        font_min = word_unicode
+                        font_min_int = word_int
+                    if word_int > font_max_16_int and word_int <= 0xffff:   # exclude code points > 16 bits
+                        font_max_16 = word_unicode
+                        font_max_16_int = word_int
+                    if word_int > font_max_int:
+                        font_max = word_unicode
+                        font_max_int = word_int
                     icons.append( words )
             icons_data.update({ 'font_min' : font_min,
+                                'font_max_16' : font_max_16,
                                 'font_max' : font_max,
                                 'icons' : icons })
         return icons_data
@@ -250,7 +326,7 @@ class FontMD( Font ):               # Material Design
 class FontKI( Font ):               # Kenney Game icons
     font_name = 'Kenney'
     font_abbr = 'KI'
-    font_data = 'https://raw.githubusercontent.com/nicodinh/kenney-icon-font/master/css/kenney-icons.css'
+    font_data = 'https://github.com/nicodinh/kenney-icon-font/raw/master/css/kenney-icons.css'
     ttfs = [[ font_abbr, 'kenney-icon-font.ttf', 'https://github.com/nicodinh/kenney-icon-font/blob/master/fonts/kenney-icon-font.ttf' ]]
 
     @classmethod
@@ -258,21 +334,32 @@ class FontKI( Font ):               # Kenney Game icons
         icons_data = {}
         lines = str.split( input_data, '\n' )
         if lines:
-            font_min = 'ffff'
-            font_max = '0'
+            font_min = '0x10ffff'
+            font_min_int = int( font_min, 16 )
+            font_max_16 = '0x0'   # 16 bit max 
+            font_max_16_int = int( font_max_16, 16 )
+            font_max = '0x0'
+            font_max_int = int( font_max, 16 )
             icons = []
             for line in lines :
                 if '.ki-' in line:
                     words = str.split(line)
                     if words and '.ki-' in words[ 0 ]:
                         font_id = words[ 0 ].partition( '.ki-' )[ 2 ].partition( ':before' )[ 0 ]
-                        font_code = words[ 2 ].partition( '"\\' )[ 2 ].partition( '";' )[ 0 ]
-                        if font_code < font_min:
+                        font_code = words[ 2 ].partition( '"\\' )[ 2 ].partition( '";' )[ 0 ].zfill( 4 )
+                        font_code_int = int( font_code, 16 )
+                        if font_code_int < font_min_int and font_code_int > 0x0127 :  # exclude ASCII characters code points
                             font_min = font_code
-                        if font_code >= font_max:
+                            font_min_int = font_code_int
+                        if font_code_int > font_max_16_int and font_code_int <= 0xffff:   # exclude code points > 16 bits
+                            font_max_16 = font_code
+                            font_max_16_int = font_code_int
+                        if font_code_int > font_max_int:
                             font_max = font_code
+                            font_max_int = font_code_int
                         icons.append([ font_id, font_code ])
             icons_data.update({ 'font_min' : font_min,
+                                'font_max_16' : font_max_16,
                                 'font_max' : font_max,
                                 'icons' : icons  })
         return icons_data
@@ -281,7 +368,7 @@ class FontKI( Font ):               # Kenney Game icons
 class FontFAD( Font ):               # Fontaudio
     font_name = 'Fontaudio'
     font_abbr = 'FAD'
-    font_data = 'https://raw.githubusercontent.com/fefanto/fontaudio/master/font/fontaudio.css'
+    font_data = 'https://github.com/fefanto/fontaudio/raw/master/font/fontaudio.css'
     ttfs = [[ font_abbr, 'fontaudio.ttf', 'https://github.com/fefanto/fontaudio/blob/master/font/fontaudio.ttf' ]]
 
     @classmethod
@@ -289,21 +376,32 @@ class FontFAD( Font ):               # Fontaudio
         icons_data = {}
         lines = str.split( input_data, '}\n' )
         if lines:
-            font_min = 'ffff'
-            font_max = '0'
+            font_min = '0x10ffff'
+            font_min_int = int( font_min, 16 )
+            font_max_16 = '0x0'   # 16 bit max 
+            font_max_16_int = int( font_max_16, 16 )
+            font_max = '0x0'
+            font_max_int = int( font_max, 16 )
             icons = []
             for line in lines :
                 if '.icon-fad-' in line:
                     words = str.split( line )
                     if words and '.icon-fad-' in words[ 0 ]:
                         font_id = words[ 0 ].partition( '.icon-fad-' )[ 2 ].partition( ':before' )[ 0 ]
-                        font_code = words[ 3 ].partition( '"\\' )[ 2 ].partition( '";' )[ 0 ]
-                        if font_code < font_min:
+                        font_code = words[ 3 ].partition( '"\\' )[ 2 ].partition( '";' )[ 0 ].zfill( 4 )
+                        font_code_int = int( font_code, 16 )
+                        if font_code_int < font_min_int and font_code_int > 0x0127 :  # exclude ASCII characters code points
                             font_min = font_code
-                        if font_code >= font_max:
+                            font_min_int = font_code_int
+                        if font_code_int > font_max_16_int and font_code_int <= 0xffff:   # exclude code points > 16 bits
+                            font_max_16 = font_code
+                            font_max_16_int = font_code_int
+                        if font_code_int > font_max_int:
                             font_max = font_code
+                            font_max_int = font_code_int
                         icons.append([ font_id, font_code ])
             icons_data.update({ 'font_min' : font_min,
+                                'font_max_16' : font_max_16,
                                 'font_max' : font_max,
                                 'icons' : icons  })
         return icons_data
@@ -386,11 +484,15 @@ class LanguageC( Language ):
     @classmethod
     def lines_minmax( cls ):
         tmpl_line_minmax = '#define ICON_{minmax}_{abbr} 0x{val}\n'
+        abbreviation = cls.intermediate.get( 'font_minmax_abbr' ) if cls.intermediate.get( 'font_minmax_abbr' ) else cls.intermediate.get('font_abbr')
         result = tmpl_line_minmax.format( minmax = 'MIN',
-                                          abbr = cls.intermediate.get( 'font_minmax_abbr' ) if cls.intermediate.get( 'font_minmax_abbr' ) else cls.intermediate.get('font_abbr'),
+                                          abbr = abbreviation,
                                           val = cls.intermediate.get( 'font_min' )) + \
+                 tmpl_line_minmax.format( minmax = 'MAX_16',
+                                          abbr = abbreviation,
+                                          val = cls.intermediate.get( 'font_max_16' )) + \
                  tmpl_line_minmax.format( minmax = 'MAX',
-                                          abbr = cls.intermediate.get( 'font_minmax_abbr' ) if cls.intermediate.get( 'font_minmax_abbr' ) else cls.intermediate.get('font_abbr'),
+                                          abbr = abbreviation,
                                           val = cls.intermediate.get( 'font_max' ))
         return result
 
@@ -491,6 +593,8 @@ class LanguageCSharp( Language ):
         tmpl_line_minmax = '        public const int Icon{minmax} = 0x{val};\n'
         result = tmpl_line_minmax.format(minmax = 'Min',
                                          val = cls.intermediate.get( 'font_min' )) + \
+                 tmpl_line_minmax.format(minmax = 'Max16',
+                                         val = cls.intermediate.get( 'font_max_16' )) + \
                  tmpl_line_minmax.format(minmax = 'Max',
                                          val = cls.intermediate.get( 'font_max' ))
         return result
@@ -504,7 +608,7 @@ class LanguageCSharp( Language ):
 
         if icon_name[ 0 ].isdigit():
             # Variable may not start with a digit
-            icon_name = 'The' + icon_name
+            icon_name = 'Num' + icon_name
 
         if icon_name == cls.intermediate.get( 'font_name' ).replace( ' ', '' ):
             # Member may not have same name as enclosing class
@@ -524,7 +628,7 @@ class LanguageCSharp( Language ):
 
 
 # Main
-fonts = [ FontFA4, FontFA5, FontFA5Brands, FontFA5Pro, FontFA5ProBrands, FontFK, FontKI, FontFAD ] # FontMD - Issue #19
+fonts = [ FontFA4, FontFA5, FontFA5Brands, FontFA5Pro, FontFA5ProBrands, FontFA6, FontFA6Brands, FontFK, FontMD, FontKI, FontFAD ]
 languages = [ LanguageC, LanguageCSharp ]
 ttf2headerC = False # convert ttf files to C and C++ headers
 

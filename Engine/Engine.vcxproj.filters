@@ -343,6 +343,9 @@
     <ClInclude Include="ComponentDeserializer.hpp">
       <Filter>Asset\Component\Serialize</Filter>
     </ClInclude>
+    <ClInclude Include="FontAwesome.hpp">
+      <Filter>ImGui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="Models\12140_Skull_v3_L2.mtl">
@@ -367,18 +370,6 @@
       <Filter>Resource Files</Filter>
     </CopyFileToFolders>
     <CopyFileToFolders Include="Images\default_texture_z.png">
-      <Filter>Resource Files</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="Fonts\fa-regular-400.ttf">
-      <Filter>Resource Files</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="Fonts\fa-regular-400-pro.ttf">
-      <Filter>Resource Files</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="Fonts\fa-solid-900.ttf">
-      <Filter>Resource Files</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="Fonts\fa-solid-900-pro.ttf">
       <Filter>Resource Files</Filter>
     </CopyFileToFolders>
     <CopyFileToFolders Include="Images\gradient_box.png">
@@ -466,6 +457,18 @@
       <Filter>Resource Files</Filter>
     </CopyFileToFolders>
     <CopyFileToFolders Include="Models\troll_yeni.fbx">
+      <Filter>Resource Files</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Fonts\FA6\fa-regular-400.ttf">
+      <Filter>Resource Files</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Fonts\FA6\fa-solid-900.ttf">
+      <Filter>Resource Files</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Fonts\FA6\Font Awesome 6 Pro-Regular-400.otf">
+      <Filter>Resource Files</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Fonts\FA6\Font Awesome 6 Pro-Solid-900.otf">
       <Filter>Resource Files</Filter>
     </CopyFileToFolders>
   </ItemGroup>
