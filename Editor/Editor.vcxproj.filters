@@ -265,6 +265,9 @@
     <CopyFileToFolders Include="Scripts\Rotate.as">
       <Filter>Resource Files</Filter>
     </CopyFileToFolders>
+    <CopyFileToFolders Include="SVGs\cubes-stacked.svg">
+      <Filter>Resource Files</Filter>
+    </CopyFileToFolders>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\neodoalogo.ico">

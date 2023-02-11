@@ -43,7 +43,7 @@ struct GUI {
 
     static constexpr auto FOLDER_ICON_KEY{ "folder-open" };
     static constexpr auto PROJECT_ICON_KEY{ "neodoa" };
-    static constexpr auto SCENE_ICON_KEY{ "diagram-project" };
+    static constexpr auto SCENE_ICON_KEY{ "cubes-stacked" };
     static constexpr auto COMPONENT_ICON_KEY{ "gear" };
     static constexpr auto FILE_ICON_KEY{ "file" };
     static constexpr auto BACK_ARROW_ICON_KEY{ "arrow-left" };
@@ -70,7 +70,7 @@ struct GUI {
 
     float delta{ 0 };
 
-    GUI(const CorePtr& core) noexcept;
+    explicit GUI(const CorePtr& core) noexcept;
 
     void Prepare();
     void operator() (float delta);

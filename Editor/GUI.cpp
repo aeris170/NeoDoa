@@ -18,7 +18,7 @@ GUI::GUI(const CorePtr& core) noexcept :
 
 void GUI::Prepare() {
     window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-    ImGuiViewport* viewport = ImGui::GetMainViewport();
+    const ImGuiViewport* viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(viewport->Pos);
     ImGui::SetNextWindowSize(viewport->Size);
     ImGui::SetNextWindowViewport(viewport->ID);
