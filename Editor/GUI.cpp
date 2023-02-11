@@ -10,8 +10,6 @@
 GUI::GUI(const CorePtr& core) noexcept :
     CORE(core),
     window(core->Window()) {
-    ImVec4 txtColor = ImGui::GetStyle().Colors[ImGuiCol_Text];
-    SVGPathway::Initialize({ txtColor.x, txtColor.y, txtColor.z, txtColor.w });
     FileDialog::Initialize();
     window->SetTitle(defaultWindowName);
 }
