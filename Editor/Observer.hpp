@@ -10,6 +10,7 @@
 
 #include "TemplateUtilities.hpp"
 
+#include "MetaAssetInfo.hpp"
 #include "ImGuiExtensions/TextEditor.h"
 
 struct GUI;
@@ -34,20 +35,34 @@ struct Observer {
     void Render(Scene& scene);
     void End();
 
-    void RenderComponents(Scene& scene, const Entity entt);
-    void RenderFolderView(FNode* folder);
-    void RenderAssetView(AssetHandle asset);
-    void RenderSceneView(AssetHandle sceneAsset);
-    void RenderComponentDefinitionView(AssetHandle componentDefAsset);
-    void RenderTextView(AssetHandle textAsset);
-    void RenderTextureView(AssetHandle textureAsset);
-
     template<DisplayableInObserver T>
     void SetDisplayTarget(T target) { displayTarget = target; }
     void ResetDisplayTarget();
 
 private:
+
     DisplayTarget displayTarget;
+
+    struct DisplayTargetRenderer {
+        static void Render(Observer& observer, Scene& scene);
+    private:
+        static void HandleTargetWhenEmpty();
+        static void HandleTargetWhenEntity(const Observer& observer, Scene& scene, const Entity entt);
+        static void HandleTargetWhenFile(const Observer& observer, FNode& file);
+        static void RenderIconChangePopup(const FNode& file, MetaAssetInfo& meta);
+
+        static void RenderFolderView(const Observer& observer, FNode& folder);
+        static void RenderAssetView(const Observer& observer, AssetHandle h);
+        static void RenderSceneView(const Observer& observer, AssetHandle h);
+        static void RenderComponentDefinitionView(const Observer& observer, AssetHandle h);
+        static void RenderTextureView(const Observer& observer, AssetHandle h);
+        static void RenderTextView(const Observer& observer, AssetHandle h);
+    };
+
+    struct SceneDisplay {
+        static void RenderEntities(const Observer& observer, Scene& scene);
+        static void RenderSystems(const Observer& observer, const Scene& scene);
+    };
 
     struct ComponentDefinitionDisplay {
 

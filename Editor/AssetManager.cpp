@@ -111,10 +111,11 @@ void AssetManager::RenderTreeViewRecursive(FNode& current) {
         flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet;
     }
 
-    std::string title(ICON_FA_FOLDER " ");
+    std::string title{ gui.GetMetaInfoOf(current).fa_icon };
     if (&current == root) {
         title = ICON_FA_FOLDER_TREE " ROOT";
     }
+    title.append(" ");
     title.append(current.Name());
     if (ImGui::TreeNodeEx(title.c_str(), flags)) {
         if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
@@ -221,7 +222,7 @@ void AssetManager::RenderSelectedFolderContent() {
             }
             ImGui::TableSetColumnIndex(i++ % columns);
 
-            void* icon = gui.FindIconForFileType(child);
+            void* icon = gui.GetMetaInfoOf(child).GetSVGIcon();
 
             ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
             ImGui::ImageButton(icon, { currentFolderContentSettings.thumbnailSize, currentFolderContentSettings.thumbnailSize });
@@ -281,7 +282,7 @@ void AssetManager::RenderSelectedFolderContent() {
         for (auto& child : currentFolder->Children()) {
             if (!child.IsDirectory() && !assets->IsAssetExistsAt(child)) { continue; }
 
-            void* icon = gui.FindIconForFileType(child);
+            void* icon = gui.GetMetaInfoOf(child).GetSVGIcon();
 
             if (ImGui::TreeNodeEx(child.Name().c_str(), ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf)) {
                 if (ImGui::IsItemHovered()) {
