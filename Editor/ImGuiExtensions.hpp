@@ -13,3 +13,7 @@ bool Splitter(bool split_vertically, float thickness, float* size1, float* size2
 [[nodiscard("The return value of BeginTableColumnCenterText is required for EndTableColumnCenterText")]]
 float BeginTableColumnCenterText(std::string_view text);
 void EndTableColumnCenterText(float returnValueOfBegin);
+
+void ImRotateStart();
+ImVec2 ImRotationCenter();
+void ImRotateEnd(float rad = 0, ImVec2 center = ImRotationCenter());

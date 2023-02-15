@@ -48,3 +48,31 @@ float BeginTableColumnCenterText(std::string_view text) {
 void EndTableColumnCenterText(float returnValueOfBegin) {
 	ImGui::SetCursorPosX(returnValueOfBegin);
 }
+
+namespace rotation {
+	static int start_index;
+}
+void ImRotateStart() {
+	rotation::start_index = ImGui::GetWindowDrawList()->VtxBuffer.Size;
+}
+ImVec2 ImRotationCenter() {
+	ImVec2 l(FLT_MAX, FLT_MAX), u(-FLT_MAX, -FLT_MAX); // bounds
+
+	const auto& buf = ImGui::GetWindowDrawList()->VtxBuffer;
+	for (int i = rotation::start_index; i < buf.Size; i++) {
+		l = ImMin(l, buf[i].pos), u = ImMax(u, buf[i].pos);
+	}
+
+	return ImVec2((l.x + u.x) / 2, (l.y + u.y) / 2); // or use _ClipRectStack?
+}
+void ImRotateEnd(float rad, ImVec2 center) {
+	float s = sin(rad), c = cos(rad);
+	ImVec2 cntr{ ImRotate(center, c, s) };
+	center = { cntr.x - center.x, cntr.y - center.y };
+
+	auto& buf = ImGui::GetWindowDrawList()->VtxBuffer;
+	for (int i = rotation::start_index; i < buf.Size; i++) {
+		ImVec2 bufpos{ ImRotate(buf[i].pos, c, s) };
+		buf[i].pos = { bufpos.x - center.x, bufpos.y - center.y };
+	}
+}
