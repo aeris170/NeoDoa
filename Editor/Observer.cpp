@@ -566,7 +566,9 @@ void Observer::ComponentDefinitionDisplay::RenderFields(const Component& compone
 void Observer::ComponentDefinitionDisplay::RenderSourceCode(const Component& componentDef) {
     TextEditor.SetReadOnly(true);
     TextEditor.SetLanguageDefinition(TextEditor::LanguageDefinition::AngelScript());
-    TextEditor.SetText(componentDef.declaration);
+    if (TextEditor.GetText() != componentDef.declaration) {
+        TextEditor.SetText(componentDef.declaration);
+    }
 
     ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders;
     ImGui::BeginTable("source_code", 1, flags);
@@ -576,7 +578,7 @@ void Observer::ComponentDefinitionDisplay::RenderSourceCode(const Component& com
     ImGui::TableNextRow();
     ImGui::TableSetColumnIndex(0);
 
-    TextEditor.Render("##", true, { 0.0f, -32.0f }, false);
+    TextEditor.Render("ObserverComponentDefSourceCodeViewer", true, { 0.0f, -32.0f }, false);
 
     ImGui::EndTable();
 }
