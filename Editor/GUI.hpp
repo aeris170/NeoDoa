@@ -10,6 +10,7 @@
 
 #include "SVGPathway.hpp"
 #include "ImGuiExtensions/FileDialog.hpp"
+#include "MetaAssetInfo.hpp"
 
 #include "MenuBar.hpp"
 #include "SceneHierarchy.hpp"
@@ -100,11 +101,16 @@ struct GUI {
     void* GetBackArrowIcon(TextureSize size = TextureSize::MEDIUM) const;
 
     void* FindIconForFileType(const FNode& file, TextureSize = TextureSize::MEDIUM) const;
+    void* FindIconByName(const std::string_view key, TextureSize size = TextureSize::MEDIUM) const;
+
+    MetaAssetInfo& GetMetaInfoOf(const FNode& file);
 
 private:
     ImGuiIO* io{ nullptr };
     ImFont* font{ nullptr };
     ImFont* fontBold{ nullptr };
+
+    std::unordered_map<const FNode*, MetaAssetInfo> metaInfo;
 
     // TODO REMOVE ME WHEN IMGUI IMPLEMENTS THIS WORKAROUND AS API FUNC.
     void ExecuteDockBuilderFocusWorkAround();

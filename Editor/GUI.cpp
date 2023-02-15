@@ -7,6 +7,8 @@
 #include <Window.hpp>
 #include <Texture.hpp>
 
+#include "Icons.hpp"
+
 GUI::GUI(const CorePtr& core) noexcept :
     CORE(core),
     window(core->Window()) {
@@ -223,6 +225,35 @@ void* GUI::FindIconForFileType(const FNode& file, TextureSize size) const {
     if (asset->IsMaterial()) { return GetSceneIcon(size); }
     if (asset->IsShader()) { return GetSceneIcon(size); }
     return GetFileIcon(size);
+}
+void* GUI::FindIconByName(const std::string_view key, TextureSize size) const { return SVGPathway::Get(std::string(key), TextureStyle::PADDED, size).TextureIDRaw(); }
+
+MetaAssetInfo& GUI::GetMetaInfoOf(const FNode& file) {
+    if (file.IsDirectory()) {
+        auto& [fa_icon, svg_icon_key] = FileIcons::GetAllDirectoryIcons()[0];
+        metaInfo.try_emplace(&file, &file, 0, fa_icon.c_str(), svg_icon_key);
+        return metaInfo.at(&file);
+    } else {
+        AssetHandle handle = CORE->Assets()->FindAssetAt(file);
+        assert(handle.HasValue());
+        if (handle->IsScene()) {
+            auto& [fa_icon, svg_icon_key] = FileIcons::GetAllSceneIcons()[0];
+            metaInfo.try_emplace(&file, &file, 0, fa_icon.c_str(), svg_icon_key);
+            return metaInfo.at(&file);
+        }
+        if (handle->IsComponentDefinition()) {
+            auto& [fa_icon, svg_icon_key] = FileIcons::GetAllComponentIcons()[0];
+            metaInfo.try_emplace(&file, &file, 0, fa_icon.c_str(), svg_icon_key);
+            return metaInfo.at(&file);
+        }
+        if (handle->IsTexture()) {
+            auto& [fa_icon, svg_icon_key] = FileIcons::GetAllTextureIcons()[0];
+            metaInfo.try_emplace(&file, &file, 0, fa_icon.c_str(), svg_icon_key);
+            return metaInfo.at(&file);
+        }
+        metaInfo.try_emplace(&file, &file, 0, ICON_FA_FILE, FILE_ICON_KEY);
+        return metaInfo.at(&file);
+    }
 }
 
 // TODO REMOVE ME WHEN IMGUI IMPLEMENTS THIS WORKAROUND AS API FUNC.

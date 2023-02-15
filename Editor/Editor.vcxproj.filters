@@ -158,6 +158,9 @@
     <ClCompile Include="UserDefinedComponentStorageDeserializer.cpp">
       <Filter>EditorMeta\Serialize</Filter>
     </ClCompile>
+    <ClCompile Include="MetaAssetInfo.cpp">
+      <Filter>EditorMeta</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CodeGenerator.hpp">
@@ -239,7 +242,9 @@
     <ClInclude Include="Colors.hpp">
       <Filter>UI\Colors</Filter>
     </ClInclude>
-    <ClInclude Include="MetaAssetInfo.hpp" />
+    <ClInclude Include="MetaAssetInfo.hpp">
+      <Filter>EditorMeta</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\neodoalogo.ico">
