@@ -127,6 +127,8 @@ void FNode::ChangeExtension(std::string&& extension) {
 std::string FNode::FullName() { return fullName; }
 const std::string& FNode::FullName() const { return fullName; }
 
+std::string_view FNode::Content() { return content; }
+bool FNode::HasContent() const { return !content.empty(); }
 bool FNode::ReadContent() const {
     if (!owner) {
         DOA_LOG_ERROR("FNode::ReadContent cannot read contents of a non-owned file node!");

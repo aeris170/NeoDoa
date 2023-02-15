@@ -48,6 +48,8 @@ struct FNode {
     std::string FullName();
     const std::string& FullName() const;
 
+    std::string_view Content();
+    bool HasContent() const;
     bool ReadContent() const;
     void ModifyContent(std::string_view content);
     void ModifyContent(const std::string& content);
