@@ -24,8 +24,6 @@ struct MetaAssetInfoBank {
     using DataStructure = entt::dense_hash_map<const FNode*, MetaAssetInfo>;
 #endif
 
-    MetaAssetInfoBank() noexcept;
-
     void Clear();
     void Emplace(MetaAssetInfo&& emplacee);
     MetaAssetInfo& GetMetaInfoOf(const FNode& file, const MetaAssetInfo& emplaceThisIfAbsent = {});
