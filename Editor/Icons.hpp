@@ -297,5 +297,3 @@ namespace FileIcons {
         std::pair{ FILE_ICON_ZIPPER,             "file-zipper"             }
     };
 }
-
-
