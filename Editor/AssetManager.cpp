@@ -214,7 +214,8 @@ void AssetManager::RenderSelectedFolderContent() {
         int i = 0;
         ImGui::TableNextRow();
         for (auto& child : currentFolder->Children()) {
-            if (!child.IsDirectory() && !assets->IsAssetExistsAt(child)) { continue; }
+            bool visible = fileFilter.CheckVisibility(child);
+            if (!visible) { continue; }
 
             ImGui::PushID(i);
 
@@ -281,7 +282,8 @@ void AssetManager::RenderSelectedFolderContent() {
     } else if (currentFolderContentSettings.viewMode == CurrentFolderContentSettings::ViewMode::List) {
         DrawRowsBackground(30); /* display bg for 30 items - more than enough for foreseeable future resolutions */
         for (auto& child : currentFolder->Children()) {
-            if (!child.IsDirectory() && !assets->IsAssetExistsAt(child)) { continue; }
+            bool visible = fileFilter.CheckVisibility(child);
+            if (!visible) { continue; }
 
             void* icon = gui.GetMetaInfoOf(child).GetSVGIcon();
 
@@ -375,6 +377,16 @@ void AssetManager::SetCurrentFolder(FNode* folder) {
         SetSelectedNode(folder);
     }
     currentFolder = folder;
+}
+
+// Inner struct: FileFilter
+bool AssetManager::FileFilter::CheckVisibility(const FNode& file) const {
+    if (!file.IsDirectory() && !Owner.get().assets->IsAssetExistsAt(file)) { return false; }
+    if (file.Extension() == ".id") { return false; }
+    if (file.Extension() == ".doa") { return false; }
+    if (file.FullName() == "metaAssetInfo.bank") { return false; }
+    if (file.FullName() == "imgui.ini") { return false; }
+    return true;
 }
 
 // Inner struct: NewComponentModal

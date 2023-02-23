@@ -49,6 +49,11 @@ private:
         } viewMode = ViewMode::Icons;
     } currentFolderContentSettings{};
 
+    struct FileFilter {
+        std::reference_wrapper<AssetManager> Owner;
+        bool CheckVisibility(const FNode& file) const;
+    } fileFilter{ *this };
+
     struct NewComponentModal {
 
         using OnCreateNewComponent = std::function<void(const FNode& file)>;
