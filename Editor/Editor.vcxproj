@@ -124,6 +124,8 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MenuBar.cpp" />
     <ClCompile Include="MetaAssetInfo.cpp" />
+    <ClCompile Include="MetaAssetInfoDeserializer.cpp" />
+    <ClCompile Include="MetaAssetInfoSerializer.cpp" />
     <ClCompile Include="Observer.cpp" />
     <ClCompile Include="OutlineAttachment.cpp" />
     <ClCompile Include="SceneHierarchy.cpp" />
@@ -153,6 +155,8 @@
     <ClInclude Include="ImGuiExtensions\TextEditor.h" />
     <ClInclude Include="MenuBar.hpp" />
     <ClInclude Include="MetaAssetInfo.hpp" />
+    <ClInclude Include="MetaAssetInfoDeserializer.hpp" />
+    <ClInclude Include="MetaAssetInfoSerializer.hpp" />
     <ClInclude Include="Observer.hpp" />
     <ClInclude Include="OutlineAttachment.hpp" />
     <ClInclude Include="resource.h" />

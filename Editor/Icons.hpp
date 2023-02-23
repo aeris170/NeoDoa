@@ -6,6 +6,7 @@
 #include <FontAwesome.hpp>
 
 #include <nameof.hpp>
+#include <string_map.hpp>
 
 #include "ComponentInstance.hpp"
 
@@ -133,7 +134,7 @@ namespace AssetManagerIcons {
 }
 
 namespace FileIcons {
-    using KeyType = std::string;
+    using KeyType = const char*;
     using ValueType = std::string;
     using ElementType = std::pair<KeyType, ValueType>;
 
@@ -154,56 +155,40 @@ namespace FileIcons {
     inline constexpr const char DIRECTORY_ICON_BOOKMARK[]         { ICON_FA_FOLDER_BOOKMARK         };
     inline constexpr const char DIRECTORY_ICON_ARROW_UP[]         { ICON_FA_FOLDER_ARROW_UP         };
     inline constexpr const char DIRECTORY_ICON_ARROW_DOWN[]       { ICON_FA_FOLDER_ARROW_DOWN       };
-
-    inline const std::array<ElementType, 17>& GetAllDirectoryIcons() {
-        static std::array<ElementType, 17> icons {
-            std::pair{ DIRECTORY_ICON_OPEN,             "folder-open"             },
-            std::pair{ DIRECTORY_ICON,                  "folder"                  },
-            std::pair{ DIRECTORY_ICON_MULTIPLE,         "folders"                 },
-            std::pair{ DIRECTORY_ICON_XMARK,            "folder-xmark"            },
-            std::pair{ DIRECTORY_ICON_USER,             "folder-user"             },
-            std::pair{ DIRECTORY_ICON_PLUS,             "folder-plus"             },
-            std::pair{ DIRECTORY_ICON_MUSIC,            "folder-music"            },
-            std::pair{ DIRECTORY_ICON_MINUS,            "folder-minus"            },
-            std::pair{ DIRECTORY_ICON_MEDICAL,          "folder-medical"          },
-            std::pair{ DIRECTORY_ICON_MAGNIFYING_GLASS, "folder-magnifying-glass" },
-            std::pair{ DIRECTORY_ICON_IMAGE,            "folder-image"            },
-            std::pair{ DIRECTORY_ICON_HEART,            "folder-heart"            },
-            std::pair{ DIRECTORY_ICON_GRID,             "folder-grid"             },
-            std::pair{ DIRECTORY_ICON_GEAR,             "folder-gear"             },
-            std::pair{ DIRECTORY_ICON_BOOKMARK,         "folder-bookmark"         },
-            std::pair{ DIRECTORY_ICON_ARROW_UP,         "folder-arrow-up"         },
-            std::pair{ DIRECTORY_ICON_ARROW_DOWN,       "folder-arrow-down"       },
-        };
-        return icons;
-    }
+    inline std::array<ElementType, 17> DirectoryIcons {
+        std::pair{ DIRECTORY_ICON_OPEN,             "folder-open"             },
+        std::pair{ DIRECTORY_ICON,                  "folder"                  },
+        std::pair{ DIRECTORY_ICON_MULTIPLE,         "folders"                 },
+        std::pair{ DIRECTORY_ICON_XMARK,            "folder-xmark"            },
+        std::pair{ DIRECTORY_ICON_USER,             "folder-user"             },
+        std::pair{ DIRECTORY_ICON_PLUS,             "folder-plus"             },
+        std::pair{ DIRECTORY_ICON_MUSIC,            "folder-music"            },
+        std::pair{ DIRECTORY_ICON_MINUS,            "folder-minus"            },
+        std::pair{ DIRECTORY_ICON_MEDICAL,          "folder-medical"          },
+        std::pair{ DIRECTORY_ICON_MAGNIFYING_GLASS, "folder-magnifying-glass" },
+        std::pair{ DIRECTORY_ICON_IMAGE,            "folder-image"            },
+        std::pair{ DIRECTORY_ICON_HEART,            "folder-heart"            },
+        std::pair{ DIRECTORY_ICON_GRID,             "folder-grid"             },
+        std::pair{ DIRECTORY_ICON_GEAR,             "folder-gear"             },
+        std::pair{ DIRECTORY_ICON_BOOKMARK,         "folder-bookmark"         },
+        std::pair{ DIRECTORY_ICON_ARROW_UP,         "folder-arrow-up"         },
+        std::pair{ DIRECTORY_ICON_ARROW_DOWN,       "folder-arrow-down"       },
+    };
 
     inline constexpr const char SCENE_ICON[]{ ICON_FA_CUBES_STACKED };
-
-    inline const std::array<ElementType, 1>& GetAllSceneIcons() {
-        static std::array<ElementType, 1> icons {
-            std::pair{ SCENE_ICON, "cubes-stacked" }
-        };
-        return icons;
-    }
+    inline std::array<ElementType, 1> SceneIcons{
+        std::pair{ SCENE_ICON, "cubes-stacked" }
+    };
 
     inline constexpr const char TEXTURE_ICON[]{ ICON_FA_IMAGE };
-
-    inline const std::array<ElementType, 1>& GetAllTextureIcons() {
-        static std::array<ElementType, 1> icons {
-            std::pair{ TEXTURE_ICON, "image" }
-        };
-        return icons;
-    }
+    inline std::array<ElementType, 1> TextureIcons{
+        std::pair{ TEXTURE_ICON, "image" }
+    };
 
     inline constexpr const char COMPONENT_ICON[]{ ICON_FA_GEAR };
-
-    inline const std::array<ElementType, 1>& GetAllComponentIcons() {
-        static std::array<ElementType, 1> icons {
-            std::pair{ COMPONENT_ICON, "gear" }
-        };
-        return icons;
-    }
+    inline std::array<ElementType, 1> ComponentIcons{
+        std::pair{ COMPONENT_ICON, "gear" }
+    };
 
     inline constexpr const char FILE_ICON[]                    { ICON_FA_FILE                    };
     inline constexpr const char FILE_ICON_MULTIPLE[]           { ICON_FA_FILES                   };
@@ -257,64 +242,60 @@ namespace FileIcons {
     inline constexpr const char FILE_ICON_WORD[]               { ICON_FA_FILE_WORD               };
     inline constexpr const char FILE_ICON_XMARK[]              { ICON_FA_FILE_XMARK              };
     inline constexpr const char FILE_ICON_ZIPPER[]             { ICON_FA_FILE_ZIPPER             };
-
-    inline const std::array<ElementType, 52>& GetAllRegularFileIcons() {
-        static std::array<ElementType, 52> icons{
-            std::pair{ FILE_ICON,                    "file"                    },
-            std::pair{ FILE_ICON_MULTIPLE,           "files"                   },
-            std::pair{ FILE_ICON_ARROW_DOWN,         "file-arrow-down"         },
-            std::pair{ FILE_ICON_ARROW_UP,           "file-arrow-up"           },
-            std::pair{ FILE_ICON_AUDIO,              "file-audio"              },
-            std::pair{ FILE_ICON_BINARY,             "file-binary"             },
-            std::pair{ FILE_ICON_CERTIFICATE,        "file-certificate"        },
-            std::pair{ FILE_ICON_COLUMN,             "file-chart-column"       },
-            std::pair{ FILE_ICON_CHART_PIE,          "file-chart-pie"          },
-            std::pair{ FILE_ICON_CHECK,              "file-check"              },
-            std::pair{ FILE_ICON_CIRCLE_CHECK,       "file-circle-check"       },
-            std::pair{ FILE_ICON_CIRCLE_EXCLAMATION, "file-circle-exclamation" },
-            std::pair{ FILE_ICON_CIRCLE_INFO,        "file-circle-info"        },
-            std::pair{ FILE_ICON_CIRCLE_MINUS,       "file-circle-minus"       },
-            std::pair{ FILE_ICON_CIRCLE_PLUS,        "file-circle-plus"        },
-            std::pair{ FILE_ICON_CIRCLE_QUESTION,    "file-circle-question"    },
-            std::pair{ FILE_ICON_CIRCLE_XMARK,       "file-circle-xmark"       },
-            std::pair{ FILE_ICON_CODE,               "file-code"               },
-            std::pair{ FILE_ICON_CONTRACT,           "file-contract"           },
-            std::pair{ FILE_ICON_CSV,                "file-csv"                },
-            std::pair{ FILE_ICON_DASHED_LINE,        "file-dashed-line"        },
-            std::pair{ FILE_ICON_EXCEL,              "file-excel"              },
-            std::pair{ FILE_ICON_EXCLAMATION,        "file-exclamation"        },
-            std::pair{ FILE_ICON_EXPORT,             "file-export"             },
-            std::pair{ FILE_ICON_HEART,              "file-heart"              },
-            std::pair{ FILE_ICON_IMAGE,              "file-image"              },
-            std::pair{ FILE_ICON_IMPORT,             "file-import"             },
-            std::pair{ FILE_ICON_INVOICE,            "file-invoice"            },
-            std::pair{ FILE_ICON_INVOICE_DOLLAR,     "file-invoice-dollar"     },
-            std::pair{ FILE_ICON_LINES,              "file-lines"              },
-            std::pair{ FILE_ICON_LOCK,               "file-lock"               },
-            std::pair{ FILE_ICON_MAGNIFYING_GLASS,   "file-magnifying-glass"   },
-            std::pair{ FILE_ICON_MEDICAL,            "file-medical"            },
-            std::pair{ FILE_ICON_MEDICAL_MULTIPLE,   "files-medical"           },
-            std::pair{ FILE_ICON_MINUS,              "file-minus"              },
-            std::pair{ FILE_ICON_MUSIC,              "file-music"              },
-            std::pair{ FILE_ICON_PDF,                "file-pdf"                },
-            std::pair{ FILE_ICON_PEN,                "file-pen"                },
-            std::pair{ FILE_ICON_PLUS,               "file-plus"               },
-            std::pair{ FILE_ICON_PLUS_MINUS,         "file-plus-minus"         },
-            std::pair{ FILE_ICON_POWERPOINT,         "file-powerpoint"         },
-            std::pair{ FILE_ICON_PRESCRIPTION,       "file-prescription"       },
-            std::pair{ FILE_ICON_SHIELD,             "file-shield"             },
-            std::pair{ FILE_ICON_SIGNATURE,          "file-signature"          },
-            std::pair{ FILE_ICON_SLASH,              "file-slash"              },
-            std::pair{ FILE_ICON_SPREADSHEET,        "file-spreadsheet"        },
-            std::pair{ FILE_ICON_USER,               "file-user"               },
-            std::pair{ FILE_ICON_VIDEO,              "file-video"              },
-            std::pair{ FILE_ICON_WAVEFORM,           "file-waveform"           },
-            std::pair{ FILE_ICON_WORD,               "file-word"               },
-            std::pair{ FILE_ICON_XMARK,              "file-xmark"              },
-            std::pair{ FILE_ICON_ZIPPER,             "file-zipper"             }
-        };
-        return icons;
-    }
+    inline std::array<ElementType, 52> RegularFileIcons{
+        std::pair{ FILE_ICON,                    "file"                    },
+        std::pair{ FILE_ICON_MULTIPLE,           "files"                   },
+        std::pair{ FILE_ICON_ARROW_DOWN,         "file-arrow-down"         },
+        std::pair{ FILE_ICON_ARROW_UP,           "file-arrow-up"           },
+        std::pair{ FILE_ICON_AUDIO,              "file-audio"              },
+        std::pair{ FILE_ICON_BINARY,             "file-binary"             },
+        std::pair{ FILE_ICON_CERTIFICATE,        "file-certificate"        },
+        std::pair{ FILE_ICON_COLUMN,             "file-chart-column"       },
+        std::pair{ FILE_ICON_CHART_PIE,          "file-chart-pie"          },
+        std::pair{ FILE_ICON_CHECK,              "file-check"              },
+        std::pair{ FILE_ICON_CIRCLE_CHECK,       "file-circle-check"       },
+        std::pair{ FILE_ICON_CIRCLE_EXCLAMATION, "file-circle-exclamation" },
+        std::pair{ FILE_ICON_CIRCLE_INFO,        "file-circle-info"        },
+        std::pair{ FILE_ICON_CIRCLE_MINUS,       "file-circle-minus"       },
+        std::pair{ FILE_ICON_CIRCLE_PLUS,        "file-circle-plus"        },
+        std::pair{ FILE_ICON_CIRCLE_QUESTION,    "file-circle-question"    },
+        std::pair{ FILE_ICON_CIRCLE_XMARK,       "file-circle-xmark"       },
+        std::pair{ FILE_ICON_CODE,               "file-code"               },
+        std::pair{ FILE_ICON_CONTRACT,           "file-contract"           },
+        std::pair{ FILE_ICON_CSV,                "file-csv"                },
+        std::pair{ FILE_ICON_DASHED_LINE,        "file-dashed-line"        },
+        std::pair{ FILE_ICON_EXCEL,              "file-excel"              },
+        std::pair{ FILE_ICON_EXCLAMATION,        "file-exclamation"        },
+        std::pair{ FILE_ICON_EXPORT,             "file-export"             },
+        std::pair{ FILE_ICON_HEART,              "file-heart"              },
+        std::pair{ FILE_ICON_IMAGE,              "file-image"              },
+        std::pair{ FILE_ICON_IMPORT,             "file-import"             },
+        std::pair{ FILE_ICON_INVOICE,            "file-invoice"            },
+        std::pair{ FILE_ICON_INVOICE_DOLLAR,     "file-invoice-dollar"     },
+        std::pair{ FILE_ICON_LINES,              "file-lines"              },
+        std::pair{ FILE_ICON_LOCK,               "file-lock"               },
+        std::pair{ FILE_ICON_MAGNIFYING_GLASS,   "file-magnifying-glass"   },
+        std::pair{ FILE_ICON_MEDICAL,            "file-medical"            },
+        std::pair{ FILE_ICON_MEDICAL_MULTIPLE,   "files-medical"           },
+        std::pair{ FILE_ICON_MINUS,              "file-minus"              },
+        std::pair{ FILE_ICON_MUSIC,              "file-music"              },
+        std::pair{ FILE_ICON_PDF,                "file-pdf"                },
+        std::pair{ FILE_ICON_PEN,                "file-pen"                },
+        std::pair{ FILE_ICON_PLUS,               "file-plus"               },
+        std::pair{ FILE_ICON_PLUS_MINUS,         "file-plus-minus"         },
+        std::pair{ FILE_ICON_POWERPOINT,         "file-powerpoint"         },
+        std::pair{ FILE_ICON_PRESCRIPTION,       "file-prescription"       },
+        std::pair{ FILE_ICON_SHIELD,             "file-shield"             },
+        std::pair{ FILE_ICON_SIGNATURE,          "file-signature"          },
+        std::pair{ FILE_ICON_SLASH,              "file-slash"              },
+        std::pair{ FILE_ICON_SPREADSHEET,        "file-spreadsheet"        },
+        std::pair{ FILE_ICON_USER,               "file-user"               },
+        std::pair{ FILE_ICON_VIDEO,              "file-video"              },
+        std::pair{ FILE_ICON_WAVEFORM,           "file-waveform"           },
+        std::pair{ FILE_ICON_WORD,               "file-word"               },
+        std::pair{ FILE_ICON_XMARK,              "file-xmark"              },
+        std::pair{ FILE_ICON_ZIPPER,             "file-zipper"             }
+    };
 }
 
 

@@ -20,9 +20,9 @@ FNode::FNode(FNodeCreationParams&& params) noexcept :
     parent(std::exchange(params.parent, nullptr)),
     name(std::move(params.name)),
     ext(std::move(params.ext)),
-    fullName(std::move(name + ext)),
+    fullName(name + ext),
     content(std::move(params.content)),
-    isDirectory(std::move(params.isDirectory)) {}
+    isDirectory(params.isDirectory) {}
 FNode::FNode(FNode&& other) noexcept :
     owner(std::exchange(other.owner, nullptr)),
     parent(std::exchange(other.parent, nullptr)),
@@ -127,7 +127,7 @@ void FNode::ChangeExtension(std::string&& extension) {
 std::string FNode::FullName() { return fullName; }
 const std::string& FNode::FullName() const { return fullName; }
 
-std::string_view FNode::Content() { return content; }
+std::string_view FNode::Content() const { return content; }
 bool FNode::HasContent() const { return !content.empty(); }
 bool FNode::ReadContent() const {
     if (!owner) {
@@ -168,7 +168,7 @@ void FNode::ModifyContent(std::string&& content) {
     std::filesystem::current_path(owner->Workspace());
     this->content = std::move(content);
     std::ofstream file(Path(), std::ofstream::trunc | std::ofstream::binary);
-    assert(file.is_open(), "file should be open by default");
+    assert(file.is_open()); /* file should be open by default */
     file << this->content;
     file.close();
 }
@@ -184,7 +184,7 @@ void FNode::MoveUnder(FNode& directory) {
         DOA_LOG_ERROR("\tnode must be a directory");
         return;
     }
-    auto found = std::find(parent->children.begin(), parent->children.end(), *this);
+    auto found = std::ranges::find(parent->children, *this);
     if (found != parent->children.end()) {
         found = parent->children.erase(found);
     }
@@ -245,7 +245,7 @@ FNode* FNode::CreateChildFile(FNodeCreationParams&& params) {
         int appendCount = 0;
         do {
             found = false;
-            for (auto& child : children) {
+            for (const auto& child : children) {
                 if (child.IsFile() && child.name == params.name) {
                     found = true;
                     break;
@@ -264,7 +264,7 @@ FNode* FNode::CreateChildFile(FNodeCreationParams&& params) {
     }
     std::string fullName = params.name + params.ext;
     std::ofstream file(params.parent->Path() / fullName, std::ofstream::trunc | std::ofstream::binary);
-    assert(file.is_open(), "file should be open by default");
+    assert(file.is_open()); /* file should be open by default */
     file << params.content;
     file.flush();
     file.close();
@@ -292,7 +292,7 @@ FNode* FNode::CreateChildFolder(FNodeCreationParams&& params) {
         int appendCount = 0;
         do {
             found = false;
-            for (auto& child : children) {
+            for (const auto& child : children) {
                 if (child.IsDirectory() && child.name == params.name) {
                     found = true;
                     break;
@@ -332,8 +332,8 @@ bool FNode::DeleteChildNode(FNode* child) {
     if (this != child->parent) {
         return false;
     }
-    auto pos = std::find(children.begin(), children.end(), *child);
-    assert(pos != children.end(), "Something is wrong, child has this as parent but this does not have child as a child!");
+    auto pos = std::ranges::find(children, *child);
+    assert(pos != children.end()); /* Something is wrong, child has this as parent but this does not have child as a child! */
 
     std::filesystem::current_path(owner->Workspace());
     std::filesystem::remove_all(child->Path());
@@ -344,4 +344,20 @@ bool FNode::DeleteChildNode(FNode* child) {
     children.erase(pos);
 
     return true;
+}
+FNode& FNode::FindChild(const std::filesystem::path& path) {
+    auto itr = path.begin();
+    FNode* search{ this };
+    do {
+        auto result = std::ranges::find_if(search->children, [&itr](const FNode& element) { return element.FullName() == itr->string(); });
+        if (result != search->children.end()) {
+            /* ps: explicit call to operator*() is redundant but &*result */
+            /* looked weird as hell so I decided to write it this way */
+            search = &(result.operator*());
+            ++itr;
+        } else {
+            break;
+        }
+    } while (itr != path.end());
+    return *search;
 }

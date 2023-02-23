@@ -154,6 +154,8 @@ void GUI::End() {
 
 void GUI::CreateNewProject(std::string_view workspace, std::string_view name) {
     CORE->CreateAndLoadProject(workspace, name);
+    metaInfo.Clear();
+    metaInfo.SaveToDisk(CORE->LoadedProject()->Workspace());
 
     std::string title = defaultWindowName;
     title.append(" - ");
@@ -164,11 +166,13 @@ void GUI::CreateNewProject(std::string_view workspace, std::string_view name) {
 void GUI::SaveProjectToDisk() {
     if (CORE->HasLoadedProject()) {
         CORE->SaveLoadedProjectToDisk();
+        metaInfo.SaveToDisk(CORE->LoadedProject()->Workspace());
     }
 }
 
 void GUI::OpenProjectFromDisk(const std::string& path) {
     CORE->LoadProject(path);
+    metaInfo.LoadFromDisk(*CORE->LoadedProject());
 
     std::string title = defaultWindowName;
     title.append(" - ");
@@ -228,33 +232,8 @@ void* GUI::FindIconForFileType(const FNode& file, TextureSize size) const {
 }
 void* GUI::FindIconByName(const std::string_view key, TextureSize size) const { return SVGPathway::Get(std::string(key), TextureStyle::PADDED, size).TextureIDRaw(); }
 
-MetaAssetInfo& GUI::GetMetaInfoOf(const FNode& file) {
-    if (file.IsDirectory()) {
-        auto& [fa_icon, svg_icon_key] = FileIcons::GetAllDirectoryIcons()[0];
-        metaInfo.try_emplace(&file, &file, 0, fa_icon.c_str(), svg_icon_key);
-        return metaInfo.at(&file);
-    } else {
-        AssetHandle handle = CORE->Assets()->FindAssetAt(file);
-        assert(handle.HasValue());
-        if (handle->IsScene()) {
-            auto& [fa_icon, svg_icon_key] = FileIcons::GetAllSceneIcons()[0];
-            metaInfo.try_emplace(&file, &file, 0, fa_icon.c_str(), svg_icon_key);
-            return metaInfo.at(&file);
-        }
-        if (handle->IsComponentDefinition()) {
-            auto& [fa_icon, svg_icon_key] = FileIcons::GetAllComponentIcons()[0];
-            metaInfo.try_emplace(&file, &file, 0, fa_icon.c_str(), svg_icon_key);
-            return metaInfo.at(&file);
-        }
-        if (handle->IsTexture()) {
-            auto& [fa_icon, svg_icon_key] = FileIcons::GetAllTextureIcons()[0];
-            metaInfo.try_emplace(&file, &file, 0, fa_icon.c_str(), svg_icon_key);
-            return metaInfo.at(&file);
-        }
-        metaInfo.try_emplace(&file, &file, 0, ICON_FA_FILE, FILE_ICON_KEY);
-        return metaInfo.at(&file);
-    }
-}
+MetaAssetInfo& GUI::GetMetaInfoOf(const FNode& file) { return metaInfo.GetMetaInfoOf(file); }
+void GUI::ReloadMetaInfo() { return metaInfo.LoadFromDisk(*CORE->LoadedProject()); }
 
 // TODO REMOVE ME WHEN IMGUI IMPLEMENTS THIS WORKAROUND AS API FUNC.
 void GUI::ExecuteDockBuilderFocusWorkAround() {

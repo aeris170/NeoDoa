@@ -77,6 +77,12 @@
     <Filter Include="Resource Files\SVG">
       <UniqueIdentifier>{fa38a996-1a1d-4cdf-8446-901360bbe120}</UniqueIdentifier>
     </Filter>
+    <Filter Include="EditorMeta\MetaAssetInfo">
+      <UniqueIdentifier>{c0ea341a-8a5d-4f69-a650-1cfe423f49b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="EditorMeta\MetaAssetInfo\Serialize">
+      <UniqueIdentifier>{6aa9da94-2392-4b3a-8d7e-ad43d7ea8d3d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CodeGenerator.cpp">
@@ -159,7 +165,13 @@
       <Filter>EditorMeta\Serialize</Filter>
     </ClCompile>
     <ClCompile Include="MetaAssetInfo.cpp">
-      <Filter>EditorMeta</Filter>
+      <Filter>EditorMeta\MetaAssetInfo</Filter>
+    </ClCompile>
+    <ClCompile Include="MetaAssetInfoSerializer.cpp">
+      <Filter>EditorMeta\MetaAssetInfo\Serialize</Filter>
+    </ClCompile>
+    <ClCompile Include="MetaAssetInfoDeserializer.cpp">
+      <Filter>EditorMeta\MetaAssetInfo\Serialize</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -243,7 +255,13 @@
       <Filter>UI\Colors</Filter>
     </ClInclude>
     <ClInclude Include="MetaAssetInfo.hpp">
-      <Filter>EditorMeta</Filter>
+      <Filter>EditorMeta\MetaAssetInfo</Filter>
+    </ClInclude>
+    <ClInclude Include="MetaAssetInfoSerializer.hpp">
+      <Filter>EditorMeta\MetaAssetInfo\Serialize</Filter>
+    </ClInclude>
+    <ClInclude Include="MetaAssetInfoDeserializer.hpp">
+      <Filter>EditorMeta\MetaAssetInfo\Serialize</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

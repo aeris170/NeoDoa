@@ -174,23 +174,23 @@ void Observer::DisplayTargetRenderer::RenderIconChangePopup(const FNode& file, M
     if (ImGui::BeginPopup("assetIconCombo")) {
         const FileIcons::ElementType *begin{ nullptr }, *end{ nullptr };
         if (file.IsDirectory()) {
-            auto& items = FileIcons::GetAllDirectoryIcons();
+            auto& items = FileIcons::DirectoryIcons;
             begin = &items.front();
             end = &items.back() + 1;
         } else if (Assets::IsSceneFile(file)) {
-            auto& items = FileIcons::GetAllSceneIcons();
+            auto& items = FileIcons::SceneIcons;
             begin = &items.front();
             end = &items.back() + 1;
         } else if (Assets::IsComponentDefinitionFile(file)) {
-            auto& items = FileIcons::GetAllComponentIcons();
+            auto& items = FileIcons::ComponentIcons;
             begin = &items.front();
             end = &items.back() + 1;
         } else if (Assets::IsTextureFile(file)) {
-            auto& items = FileIcons::GetAllTextureIcons();
+            auto& items = FileIcons::TextureIcons;
             begin = &items.front();
             end = &items.back() + 1;
         } else {
-            auto& items = FileIcons::GetAllRegularFileIcons();
+            auto& items = FileIcons::RegularFileIcons;
             begin = &items.front();
             end = &items.back() + 1;
         }
@@ -200,7 +200,7 @@ void Observer::DisplayTargetRenderer::RenderIconChangePopup(const FNode& file, M
         auto selectedItem = begin + meta.icon_index;
         for (auto current = begin; current != end; current++) {
             const bool isSelected{ current == selectedItem };
-            if (ImGui::Selectable(current->first.c_str(), isSelected)) {
+            if (ImGui::Selectable(current->first, isSelected)) {
                 selectedItem = current;
             }
             // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
@@ -210,7 +210,7 @@ void Observer::DisplayTargetRenderer::RenderIconChangePopup(const FNode& file, M
         }
 
         meta.icon_index = selectedItem - begin;
-        meta.fa_icon = selectedItem->first.c_str();
+        meta.fa_icon = selectedItem->first;
         meta.svg_icon_key = selectedItem->second;
         ImGui::EndPopup();
     }

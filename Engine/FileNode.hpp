@@ -48,7 +48,7 @@ struct FNode {
     std::string FullName();
     const std::string& FullName() const;
 
-    std::string_view Content();
+    std::string_view Content() const;
     bool HasContent() const;
     bool ReadContent() const;
     void ModifyContent(std::string_view content);
@@ -83,6 +83,7 @@ struct FNode {
     FNode* CreateChildFile(FNodeCreationParams&& params);
     FNode* CreateChildFolder(FNodeCreationParams&& params);
     bool DeleteChildNode(FNode* child);
+    FNode& FindChild(const std::filesystem::path& path);
 
 private:
     const Project* owner{ nullptr };
@@ -104,13 +105,6 @@ private:
         for (auto& child : children) {
             child.parent = parent;
             child.__onMove(&child);
-        }
-    }
-
-    inline void __onMove(const Project* owner) {
-        this->owner = owner;
-        for (auto& child : children) {
-            child.__onMove(owner);
         }
     }
 };

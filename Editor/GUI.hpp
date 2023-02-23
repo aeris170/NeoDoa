@@ -104,13 +104,14 @@ struct GUI {
     void* FindIconByName(const std::string_view key, TextureSize size = TextureSize::MEDIUM) const;
 
     MetaAssetInfo& GetMetaInfoOf(const FNode& file);
+    void ReloadMetaInfo();
 
 private:
     ImGuiIO* io{ nullptr };
     ImFont* font{ nullptr };
     ImFont* fontBold{ nullptr };
 
-    std::unordered_map<const FNode*, MetaAssetInfo> metaInfo;
+    MetaAssetInfoBank metaInfo{};
 
     // TODO REMOVE ME WHEN IMGUI IMPLEMENTS THIS WORKAROUND AS API FUNC.
     void ExecuteDockBuilderFocusWorkAround();
