@@ -82,6 +82,7 @@ void AssetManager::RenderMenuBar() {
                 assets->ReimportAll();
                 SetCurrentFolder(root);
                 gui.CORE->LoadedProject()->OpenStartupScene();
+                gui.ReloadMetaInfo();
             } else {
                 DOA_LOG_WARNING("Didn't refresh! No open project.");
             }
