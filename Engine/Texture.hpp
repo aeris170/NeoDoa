@@ -63,7 +63,7 @@ struct Texture {
     EncodedTextureData Serialize(TextureEncoding encoding = TextureEncoding::PNG) const;
     static Texture Deserialize(const EncodedTextureData& data);
 
-    static Texture Copy(const Texture& scene);
+    static Texture Copy(const Texture& texture);
 
 private:
 #ifdef _DEBUG

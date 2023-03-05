@@ -58,9 +58,9 @@ std::weak_ptr<Shader> Shader::CreateFromMemory(std::string_view name, const char
     }
 
     glCompileShader(f);
-    glGetShaderiv(v, GL_COMPILE_STATUS, &success);
+    glGetShaderiv(f, GL_COMPILE_STATUS, &success);
     if (!success) {
-        glGetShaderInfoLog(v, 512, NULL, infoLog);
+        glGetShaderInfoLog(f, 512, NULL, infoLog);
         DOA_LOG_ERROR(infoLog);
         return std::weak_ptr<Shader>();
     }

@@ -134,7 +134,7 @@ bool Texture::operator!=(const Texture& other) noexcept { return !this->operator
 EncodedTextureData Texture::Serialize(TextureEncoding encoding) const { return SerializeTexture(*this, encoding); }
 Texture Texture::Deserialize(const EncodedTextureData& data) { return DeserializeTexture(data); }
 
-Texture Texture::Copy(const Texture& scene) { return Empty(); }
+Texture Texture::Copy(const Texture& texture) { return CreateTextureRaw(texture._name, reinterpret_cast<const unsigned char*>(texture._pixelData.data()), texture._width, texture._height, texture._transparency); }
 
 //-----------------------------------------------------------------
 
