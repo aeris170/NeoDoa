@@ -87,13 +87,23 @@ void AssetManager::RenderMenuBar() {
                 DOA_LOG_WARNING("Didn't refresh! No open project.");
             }
         }
+        static constexpr int searchBarWidth{ 270 };
+        ImGui::PushItemWidth(searchBarWidth);
+        ImGui::SameLine(ImGui::GetWindowContentRegionMax().x - searchBarWidth);
+        ImGui::InputTextWithHint(
+            "",
+            ICON_FA_MAGNIFYING_GLASS "  Search an asset...",
+            fileFilter.SearchQuery.data(), fileFilter.SearchQuery.size(),
+            ImGuiInputTextFlags_AutoSelectAll |
+            ImGuiInputTextFlags_EnterReturnsTrue |
+            ImGuiInputTextFlags_EscapeClearsAll
+        );
         ImGui::EndMenuBar();
     }
 }
 
 void AssetManager::RenderTreeView() {
     if (!hasContent) return;
-    DrawRowsBackground(30); /* display bg for 30 items - more than enough for foreseeable future resolutions */
     RenderTreeViewRecursive(*root);
 }
 
@@ -101,7 +111,10 @@ void AssetManager::RenderTreeViewRecursive(FNode& current) {
     if (!current.IsDirectory()) return;
     GUI& gui = this->gui;
 
-    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_NavLeftJumpsBackHere | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
+    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_NavLeftJumpsBackHere | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
+    if (&current == currentFolder) {
+        flags |= ImGuiTreeNodeFlags_Selected;
+    }
 
     std::vector<std::reference_wrapper<FNode>> children;
     for (auto& child : current.Children()) {
@@ -118,11 +131,11 @@ void AssetManager::RenderTreeViewRecursive(FNode& current) {
     }
     title.append(" ");
     title.append(current.Name());
-    if (ImGui::TreeNodeEx(title.c_str(), flags)) {
-        if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-            SetCurrentFolder(&current);
-        }
-
+    bool expanded = ImGui::TreeNodeEx(title.c_str(), flags);
+    if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+        SetCurrentFolder(&current);
+    }
+    if (expanded) {
         for (auto& child : children) {
             RenderTreeViewRecursive(child);
         }
@@ -158,8 +171,13 @@ void AssetManager::RenderSelectedFolderContent() {
     std::string title(AssetManagerIcons::SELECTED_FOLDER_CONTENT_TITLE_ICON);
     title.append(SELECTED_FOLDER_CONTENT_TITLE_TEXT);
     if (currentFolder != nullptr) {
-        title.append(" - ROOT: ");
-        title.append(currentFolder->Path().string());
+        if (fileFilter.SearchQuery[0] == '\0') {
+            title.append(" - ROOT: ");
+            title.append(currentFolder->Path().string());
+        } else {
+            title.append(" - SEARCH: ");
+            title.append(fileFilter.SearchQuery.data());
+        }
     }
     ImGui::PushFont(gui.GetFontBold());
     ImGui::Text(title.c_str());
@@ -187,7 +205,7 @@ void AssetManager::RenderSelectedFolderContent() {
                 if (currentFolderContentSettings.viewMode != CurrentFolderContentSettings::ViewMode::List) {
                     currentFolderContentSettings.viewMode = CurrentFolderContentSettings::ViewMode::List;
                 }
-            } else if (mWheelDelta > 0 && currentFolderContentSettings.viewMode != CurrentFolderContentSettings::ViewMode::Icons) {
+            } else if (mWheelDelta > 0) {
                 if (currentFolderContentSettings.viewMode != CurrentFolderContentSettings::ViewMode::Icons) {
                     currentFolderContentSettings.viewMode = CurrentFolderContentSettings::ViewMode::Icons;
                     mWheelDelta = 0;
@@ -386,6 +404,13 @@ bool AssetManager::FileFilter::CheckVisibility(const FNode& file) const {
     if (file.Extension() == ".doa") { return false; }
     if (file.FullName() == "metaAssetInfo.bank") { return false; }
     if (file.FullName() == "imgui.ini") { return false; }
+
+    /* if query is empty, there is no query, hence no search is needed, all is shown */
+    if (SearchQuery[0] == '\0') { return true; }
+
+    /* query is not present in the string, as whole, thus search failed, hide thjis file */
+    if (file.FullName().find(SearchQuery.data()) == std::string::npos) { return false; }
+
     return true;
 }
 

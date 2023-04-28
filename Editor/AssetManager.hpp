@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <functional>
 
 #include <imgui.h>
@@ -51,6 +52,7 @@ private:
 
     struct FileFilter {
         std::reference_wrapper<AssetManager> Owner;
+        std::array<char, 32> SearchQuery{};
         bool CheckVisibility(const FNode& file) const;
     } fileFilter{ *this };
 
