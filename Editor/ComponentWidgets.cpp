@@ -23,7 +23,7 @@ void detail::BeginWidget(const std::string& label) {
     float w = ImGui::GetContentRegionAvail().x;
 
     ImGui::PushID(label.c_str());
-    ImGui::Columns(2);
+    ImGui::Columns(2, nullptr, false);
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { ImGui::GetStyle().ItemSpacing.x, 0 });
     ImGui::SetColumnWidth(0, w - compFieldWidth);
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f + 3);
