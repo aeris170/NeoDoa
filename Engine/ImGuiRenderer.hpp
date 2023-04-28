@@ -21,6 +21,8 @@ inline const ImVec4 TAB_ACTIVE_NO_FOCUS{ 0.2f, 0.205f, 0.21f, 1.0f };
 
 inline const ImVec4 TITLE{ 0.15f, 0.1505f, 0.151f, 1.0f };
 
+inline const ImVec4 CHECKMARK{ 0.2f, 0.702f, 0.2f, 1.0f };
+
 inline const ImWchar ICONS_RANGES_TURKISH[] = {
     0x0020, 0x00FF, // Basic Latin + Latin Supplement
     0x00c7, 0x00c7, // Ç

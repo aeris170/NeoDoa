@@ -73,6 +73,9 @@ ImGuiContext* ImGuiInit(GLFWwindow* window) {
         colors[ImGuiCol_TitleBgActive] = TITLE;
         colors[ImGuiCol_TitleBgCollapsed] = TITLE;
 
+        // Misc.
+        colors[ImGuiCol_CheckMark] = CHECKMARK;
+
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
             ImGuiStyle& style = ImGui::GetStyle();
             style.WindowRounding = 0.0f;
