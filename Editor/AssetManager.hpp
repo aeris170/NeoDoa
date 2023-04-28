@@ -32,7 +32,8 @@ private:
 
     struct TreeViewSettings {
         float currentWidth = 120.0f;
-        float minWidth = 30.0f;
+        float minWidth = 1.0f;
+        int selectedElemIndex = 0;
     } treeViewSettings{};
 
     struct CurrentFolderContentSettings {
