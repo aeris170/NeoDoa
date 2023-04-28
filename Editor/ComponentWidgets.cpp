@@ -201,7 +201,9 @@ bool BoolWidget(const std::string& label, bool& value) {
     BeginWidget(label);
     std::stringstream ss;
     ss << "##" << label;
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4);
     bool rv = ImGui::Checkbox(ss.str().c_str(), &value);
+    ImGui::PopStyleVar();
     EndWidget();
     return rv;
 }
