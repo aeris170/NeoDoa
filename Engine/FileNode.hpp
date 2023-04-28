@@ -27,7 +27,6 @@ struct FNode {
     FNode& operator=(const FNode& other) = delete;
     FNode& operator=(FNode&& other) noexcept;
     bool operator==(const FNode& other) const noexcept;
-    bool operator!=(const FNode& other) const noexcept;
 
     std::filesystem::path Path() const;
     std::filesystem::path AbsolutePath() const;

@@ -47,7 +47,6 @@ FNode& FNode::operator=(FNode&& other) noexcept {
     return *this;
 }
 bool FNode::operator==(const FNode& other) const noexcept { return this->Path() == other.Path(); }
-bool FNode::operator!=(const FNode& other) const noexcept { return !(*this == other); }
 
 std::filesystem::path FNode::Path() const {
     if (parent) {
