@@ -1,7 +1,0 @@
-C:/Users/Simge/Desktop/DOA/Test/NeoDoa/GLM/bin/CMakeFiles/RUN_TESTS.dir
-C:/Users/Simge/Desktop/DOA/Test/NeoDoa/GLM/bin/CMakeFiles/ALL_BUILD.dir
-C:/Users/Simge/Desktop/DOA/Test/NeoDoa/GLM/bin/CMakeFiles/ZERO_CHECK.dir
-C:/Users/Simge/Desktop/DOA/Test/NeoDoa/GLM/bin/glm/CMakeFiles/RUN_TESTS.dir
-C:/Users/Simge/Desktop/DOA/Test/NeoDoa/GLM/bin/glm/CMakeFiles/glm_static.dir
-C:/Users/Simge/Desktop/DOA/Test/NeoDoa/GLM/bin/glm/CMakeFiles/glm_shared.dir
-C:/Users/Simge/Desktop/DOA/Test/NeoDoa/GLM/bin/test/CMakeFiles/RUN_TESTS.dir
