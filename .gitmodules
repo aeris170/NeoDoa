@@ -1,39 +1,39 @@
 [submodule "Dependencies/AngelScript"]
 	path = Dependencies/AngelScript
-	url = git@github.com:codecat/angelscript-mirror.git
+	url = git@github.com:NeoDoa-Collective/angelscript-mirror.git
 [submodule "Dependencies/EZEasing"]
 	path = Dependencies/EZEasing
-	url = git@github.com:aeris170/ezeasing.git
+	url = git@github.com:NeoDoa-Collective/ezeasing.git
 [submodule "Dependencies/EnTT"]
 	path = Dependencies/EnTT
-	url = git@github.com:skypjack/entt.git
+	url = git@github.com:NeoDoa-Collective/entt.git
 [submodule "Dependencies/GLEW"]
 	path = Dependencies/GLEW
-	url = git@github.com:nigels-com/glew.git
+	url = git@github.com:NeoDoa-Collective/glew.git
 [submodule "Dependencies/GLFW"]
 	path = Dependencies/GLFW
-	url = git@github.com:glfw/glfw.git
+	url = git@github.com:NeoDoa-Collective/glfw.git
 [submodule "Dependencies/GLM"]
 	path = Dependencies/GLM
-	url = git@github.com:g-truc/glm.git
+	url = git@github.com:NeoDoa-Collective/glm.git
 [submodule "Dependencies/DearImGui"]
 	path = Dependencies/DearImGui
-	url = git@github.com:ocornut/imgui.git
+	url = git@github.com:NeoDoa-Collective/imgui.git
 [submodule "Dependencies/Assimp"]
 	path = Dependencies/Assimp
-	url = git@github.com:assimp/assimp.git
+	url = git@github.com:NeoDoa-Collective/assimp.git
 [submodule "Dependencies/LunaSVG"]
 	path = Dependencies/LunaSVG
-	url = git@github.com:sammycage/lunasvg.git
+	url = git@github.com:NeoDoa-Collective/lunasvg.git
 [submodule "Dependencies/STB"]
 	path = Dependencies/STB
-	url = git@github.com:nothings/stb.git
+	url = git@github.com:NeoDoa-Collective/stb.git
 [submodule "Dependencies/TinyFD"]
 	path = Dependencies/TinyFD
-	url = git@github.com:native-toolkit/libtinyfiledialogs.git
+	url = git@github.com:NeoDoa-Collective/libtinyfiledialogs.git
 [submodule "Dependencies/TinyXML2"]
 	path = Dependencies/TinyXML2
-	url = git@github.com:leethomason/tinyxml2
+	url = git@github.com:NeoDoa-Collective/tinyxml2
 [submodule "Dependencies/Detector"]
 	path = Dependencies/Detector
-	url = git@github.com:TerensTare/detector.git
+	url = git@github.com:NeoDoa-Collective/detector.git
