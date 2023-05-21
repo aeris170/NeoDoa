@@ -7,6 +7,6 @@
 [submodule "Submodules/Detector"]
 	path = Submodules/Detector
 	url = git@github.com:NeoDoa-Collective/detector.git
-[submodule "Submodules/Detector"]
-	path = Submodules/Detector
+[submodule "Submodules/IconFontCppHeaders"]
+	path = Submodules/IconFontCppHeaders
 	url = git@github.com:NeoDoa-Collective/IconFontCppHeaders.git
