@@ -9,4 +9,4 @@
 	url = git@github.com:NeoDoa-Collective/detector.git
 [submodule "Submodules/IconFontCppHeaders"]
 	path = Submodules/IconFontCppHeaders
-	url = git@github.com:NeoDoa-Collective/IconFontCppHeaders.git
+	url = https://github.com/NeoDoa-Collective/IconFontCppHeaders
