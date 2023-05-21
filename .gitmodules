@@ -1,9 +1,12 @@
-[submodule "Dependencies/EZEasing"]
-	path = Dependencies/EZEasing
+[submodule "Submodules/EZEasing"]
+	path = Submodules/EZEasing
 	url = git@github.com:NeoDoa-Collective/ezeasing.git
-[submodule "Dependencies/TinyFD"]
-	path = Dependencies/TinyFD
+[submodule "Submodules/TinyFD"]
+	path = Submodules/TinyFD
 	url = git@github.com:NeoDoa-Collective/libtinyfiledialogs.git
-[submodule "Dependencies/Detector"]
-	path = Dependencies/Detector
+[submodule "Submodules/Detector"]
+	path = Submodules/Detector
 	url = git@github.com:NeoDoa-Collective/detector.git
+[submodule "Submodules/Detector"]
+	path = Submodules/Detector
+	url = git@github.com:NeoDoa-Collective/IconFontCppHeaders.git
