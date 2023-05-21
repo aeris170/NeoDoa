@@ -1,39 +1,9 @@
-[submodule "Dependencies/AngelScript"]
-	path = Dependencies/AngelScript
-	url = git@github.com:NeoDoa-Collective/angelscript-mirror.git
 [submodule "Dependencies/EZEasing"]
 	path = Dependencies/EZEasing
 	url = git@github.com:NeoDoa-Collective/ezeasing.git
-[submodule "Dependencies/EnTT"]
-	path = Dependencies/EnTT
-	url = git@github.com:NeoDoa-Collective/entt.git
-[submodule "Dependencies/GLEW"]
-	path = Dependencies/GLEW
-	url = git@github.com:NeoDoa-Collective/glew.git
-[submodule "Dependencies/GLFW"]
-	path = Dependencies/GLFW
-	url = git@github.com:NeoDoa-Collective/glfw.git
-[submodule "Dependencies/GLM"]
-	path = Dependencies/GLM
-	url = git@github.com:NeoDoa-Collective/glm.git
-[submodule "Dependencies/DearImGui"]
-	path = Dependencies/DearImGui
-	url = git@github.com:NeoDoa-Collective/imgui.git
-[submodule "Dependencies/Assimp"]
-	path = Dependencies/Assimp
-	url = git@github.com:NeoDoa-Collective/assimp.git
-[submodule "Dependencies/LunaSVG"]
-	path = Dependencies/LunaSVG
-	url = git@github.com:NeoDoa-Collective/lunasvg.git
-[submodule "Dependencies/STB"]
-	path = Dependencies/STB
-	url = git@github.com:NeoDoa-Collective/stb.git
 [submodule "Dependencies/TinyFD"]
 	path = Dependencies/TinyFD
 	url = git@github.com:NeoDoa-Collective/libtinyfiledialogs.git
-[submodule "Dependencies/TinyXML2"]
-	path = Dependencies/TinyXML2
-	url = git@github.com:NeoDoa-Collective/tinyxml2
 [submodule "Dependencies/Detector"]
 	path = Dependencies/Detector
 	url = git@github.com:NeoDoa-Collective/detector.git
