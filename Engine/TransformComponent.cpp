@@ -8,9 +8,9 @@
 TransformComponent::TransformComponent(const Entity owner) noexcept :
     entity(owner) {}
 
-TransformComponent::TransformComponent(const Entity owner, glm::mat4&& matrix) noexcept :
-    TransformComponent(owner) {
-    localMatrix = std::move(matrix);
+TransformComponent::TransformComponent(const Entity owner, const glm::mat4& matrix) noexcept :
+    entity(owner),
+    localMatrix(matrix) {
     Decompose(localMatrix, localTranslation, localRotation, localScale);
 }
 

@@ -4,7 +4,7 @@
 
 #include <stb_image.h>
 
-#include <TemplateUtilities.hpp>
+#include <Utility/TemplateUtilities.hpp>
 
 #include "TextureSerializer.hpp"
 #include "TextureDeserializer.hpp"

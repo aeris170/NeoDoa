@@ -4,14 +4,11 @@
 #include <filesystem>
 #include <cstdlib>
 
-#include <entt.hpp>
+#include <entt/entt.hpp>
 
-#include "Core.hpp"
 #include "UUID.hpp"
 #include "Asset.hpp"
 #include "FileNode.hpp"
-
-struct Project;
 
 struct AssetHandle {
 
@@ -35,7 +32,7 @@ private:
 struct Assets {
 
     using UUIDCollection = std::vector<UUID>;
-    using AssetFileDatabase = entt::dense_hash_map<const FNode*, UUID>;
+    using AssetFileDatabase = entt::dense_map<const FNode*, UUID>;
 
     inline static std::string SCENE_EXT{ ".scn" };
     inline static std::string SCRIPT_EXT{ ".scrpt" };
@@ -56,10 +53,10 @@ struct Assets {
 
     Assets() noexcept;
     ~Assets() = default;
-    Assets(const Assets& other) = delete;
-    Assets(Assets&& other) noexcept;
-    Assets& operator=(const Assets& other) = delete;
-    Assets& operator=(Assets&& other) noexcept;
+    Assets(const Assets&) = delete;
+    Assets(Assets&&) = default;
+    Assets& operator=(const Assets&) = delete;
+    Assets& operator=(Assets&&) = default;
 
     FNode& CreateFolder(FNode& parentFolder, const std::string_view folderName);
     void MoveFolder(FNode& folder, FNode& targetParentFolder);
@@ -109,9 +106,7 @@ struct Assets {
 
 private:
 
-    using AssetDatabase = entt::dense_hash_map<UUID, Asset>;
-
-    const CorePtr& CORE{ Core::GetCore() };
+    using AssetDatabase = entt::dense_map<UUID, Asset>;
 
     AssetDatabase database{};
     AssetFileDatabase files{};

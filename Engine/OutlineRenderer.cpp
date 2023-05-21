@@ -11,7 +11,6 @@
 #include "PerspectiveCamera.hpp"
 
 #include "Texture.hpp"
-#include "ModelRenderer.hpp"
 
 //-----------------------------------------------------------------
 

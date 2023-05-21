@@ -4,8 +4,8 @@
 #include <memory>
 #include <unordered_map>
 
-#include <entt.hpp>
-#include <glm\glm.hpp>
+#include <entt/entt.hpp>
+#include <glm/glm.hpp>
 
 #include "Shader.hpp"
 #include "Entity.hpp"

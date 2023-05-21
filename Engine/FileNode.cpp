@@ -4,6 +4,7 @@
 #include <cassert>
 
 #include "Log.hpp"
+#include "Core.hpp"
 #include "Assets.hpp"
 #include "Project.hpp"
 

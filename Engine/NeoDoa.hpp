@@ -70,64 +70,64 @@
 #pragma region Engine
 
 #pragma region Core
-#include "Core.hpp"
-#include "Input.hpp"
-#include "Window.hpp"
-#include "FrameBuffer.hpp"
+#include <Core/Core.hpp>
+#include <Core/Input.hpp>
+#include <Core/Window.hpp>
+#include <Core/FrameBuffer.hpp>
 #pragma endregion
 
 #pragma region Log
-#include "Log.hpp"
+#include <Log/Log.hpp>
 #pragma endregion
 
 #pragma region ImGui
-#include "ImGuiRenderer.hpp"
-#include "ImGuiRenderCommand.hpp"
+#include <ImGui/ImGuiRenderer.hpp>
+#include <ImGui/ImGuiRenderCommand.hpp>
 #pragma endregion
 
 #pragma region Renderer
-#include "Renderer.hpp"
+#include <Renderer/Renderer.hpp>
 #pragma endregion
 
 #pragma region Project
 #pragma region Scene
 #pragma region Serialize
-#include "SceneSerializer.hpp"
-#include "SceneDeserializer.hpp"
+#include <Project/Scene/Serialize/SceneSerializer.hpp>
+#include <Project/Scene/Serialize/SceneDeserializer.hpp>
 #pragma endregion
-#include "Scene.hpp"
-#include "OrthoCamera.hpp"
-#include "PerspectiveCamera.hpp"
+#include <Project/Scene/Scene.hpp>
+#include <Project/Scene/OrthoCamera.hpp>
+#include <Project/Scene/PerspectiveCamera.hpp>
 #pragma endregion
-#include "Project.hpp"
+#include <Project/Project.hpp>
 #pragma endregion
 
 #pragma region Asset
 #pragma region Manager
-#include "FileNode.hpp"
-#include "AssetManager.hpp"
+#include <Asset/Manager/FileNode.hpp>
+#include <Asset/Assets.hpp>
 #pragma endregion
 #pragma region Color
-#include "Color.hpp"
+#include <Asset/Color/Color.hpp>
 #pragma endregion
 #pragma region Model
-#include "Vertex.hpp"
-#include "Mesh.hpp"
-#include "Model.hpp"
+#include <Vertex.hpp>
+#include <Mesh.hpp>
+#include <Model.hpp>
 #pragma endregion
 #pragma region ScriptComponent
 #pragma region Modules
-#include "ModelRenderer.hpp"
+#include <ModelRenderer.hpp>
 #pragma endregion
-#include "Angel.hpp"
-#include "PropertyData.hpp"
-#include "EnumValue.hpp"
+#include <Angel.hpp>
+#include <PropertyData.hpp>
+#include <EnumValue.hpp>
 #pragma endregion
 #pragma region Shader
-#include "Shader.hpp"
+#include <Shader.hpp>
 #pragma endregion
 #pragma region Texture
-#include "Texture.hpp"
+#include <Texture.hpp>
 #pragma endregion
 #pragma endregion
 

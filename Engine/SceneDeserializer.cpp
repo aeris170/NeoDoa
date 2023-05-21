@@ -1,6 +1,6 @@
 #include "SceneDeserializer.hpp"
 
-#include <nameof.hpp>
+#include <Utility/nameof.hpp>
 
 #include "Scene.hpp"
 #include "Core.hpp"
@@ -133,11 +133,12 @@ void SceneDeserializer::Entities::DefaultDeserializeIDComponent(tinyxml2::XMLEle
     auto tag = componentNode.FirstChildElement(nameof_c(IDComponent::tag))->Attribute("value");
     IDComponent id{ entity, tag };
     readEntity = scene.CreateEntity(id.GetTagRef(), static_cast<uint32_t>(id.GetEntity()));
+    scene.RemoveComponent<TransformComponent>(id.GetEntity()); /* remove tr-cmp bevause we will deserialize one from file */
 }
 void SceneDeserializer::Entities::DefaultDeserializeTransformComponent(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity) {
     auto matrix = Helpers::DeserializeMat4(*componentNode.FirstChildElement(nameof_c(TransformComponent::localMatrix)));
-    TransformComponent transform = { entity, std::move(matrix) };
-    scene.ReplaceComponent<TransformComponent>(transform.GetEntity(), std::move(transform));
+    TransformComponent transform = { entity, matrix };
+    scene.InsertComponent<TransformComponent>(transform.GetEntity(), std::move(transform));
 }
 void SceneDeserializer::Entities::DefaultDeserializeParentComponent(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity) {
     std::vector<Entity> children;

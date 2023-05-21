@@ -78,7 +78,7 @@ struct ShaderUniformTable {
     void SetMat4v(std::string_view name, float* values, bool transpose = false, size_t count = 1);
 
 private:
-    entt::dense_hash_map<std::string, ShaderUniform> uniforms;
+    entt::dense_map<std::string, ShaderUniform> uniforms;
 };
 
 struct ShaderUniform {

@@ -260,7 +260,7 @@ void Core::Start() {
         float delta = currentTime - lastTime;
 
         if (project != nullptr && project->HasOpenScene()) {
-            for (auto& [id, attachment] : _attachments) {
+            for (auto [id, attachment] : _attachments) {
                 attachment->BeforeFrame(project.get());
             }
             Scene& scene = project->GetOpenScene();
@@ -276,7 +276,7 @@ void Core::Start() {
             if (renderingOffscreen) {
                 offscreenBuffer->UnBind(window->GetContentResolution());
             }
-            for (auto& [id, attachment] : _attachments) {
+            for (auto [id, attachment] : _attachments) {
                 attachment->AfterFrame(project.get());
             }
         }

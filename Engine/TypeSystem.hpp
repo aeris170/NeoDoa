@@ -1,6 +1,6 @@
 #pragma once
 
-#include <entt.hpp>
+#include <entt/entt.hpp>
 
 using Type = entt::type_info;
 

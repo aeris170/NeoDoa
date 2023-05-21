@@ -8,6 +8,9 @@
 
 #include "FontAwesome.hpp"
 
+#define ICON_MIN_FA 0
+#define ICON_MAX_FA 0
+
 static std::vector<ImGuiFunction> commands;
 static ImGuiContext* context;
 

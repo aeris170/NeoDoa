@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include <entt.hpp>
+#include <entt/entt.hpp>
 
 using namespace entt::literals;
 
