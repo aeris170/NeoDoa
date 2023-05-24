@@ -1,5 +1,3 @@
-#include <vld.h>
-
 #include <Core.hpp>
 #include <ImGuiRenderer.hpp>
 
