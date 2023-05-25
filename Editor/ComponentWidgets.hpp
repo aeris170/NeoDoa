@@ -5,7 +5,7 @@
 #include <vector>
 #include <stdexcept>
 
-#include "NeoDoa.hpp"
+#include <Engine/NeoDoa.hpp>
 
 inline constexpr int compFieldWidth = 300; // must be divisible by both 3 and 4 (and 1 and 2, but you know... MaThS...) (x,y,z,w)
 

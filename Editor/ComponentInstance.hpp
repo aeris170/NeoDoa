@@ -5,11 +5,11 @@
 #include <vector>
 #include <string_view>
 
-#include <UUID.hpp>
-#include <Assets.hpp>
-#include <Component.hpp>
+#include <Utility/ObserverPattern.hpp>
 
-#include <ObserverPattern.hpp>
+#include <Engine/UUID.hpp>
+#include <Engine/Assets.hpp>
+#include <Engine/Component.hpp>
 
 enum class InstantiationError {
     OK = 0,

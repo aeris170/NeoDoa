@@ -2,10 +2,10 @@
 
 #include <string>
 
-#include <UUID.hpp>
-#include <FileNode.hpp>
+#include <Engine/UUID.hpp>
+#include <Engine/FileNode.hpp>
 
-#include "SVGPathway.hpp"
+#include <Editor/SVGPathway.hpp>
 
 struct MetaAssetInfo {
     const FNode* file;

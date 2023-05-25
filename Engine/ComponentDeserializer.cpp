@@ -357,4 +357,5 @@ ComponentDeserializationResult DeserializeComponent(const std::string_view data)
     }
 
     rv.deserializedComponent.declaration = content;
+    return rv;
 }

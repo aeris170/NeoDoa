@@ -1,4 +1,5 @@
 #pragma once
+
 #include <ctime>
 #include <stack>
 #include <string>
@@ -9,7 +10,7 @@
 #include <unordered_map>
 #include <algorithm>
 
-#include <TypedefsAndConstants.hpp>
+#include <Engine/TypedefsAndConstants.hpp>
 
 #define IFD_DIALOG_FILE			0
 #define IFD_DIALOG_DIRECTORY	1

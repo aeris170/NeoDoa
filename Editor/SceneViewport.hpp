@@ -3,13 +3,13 @@
 #include <optional>
 #include <functional>
 
-#include <glm\glm.hpp>
+#include <glm/glm.hpp>
 #include <imgui.h>
 #include <ImGuizmo.h>
 
-#include <Resolution.hpp>
+#include <Engine/Resolution.hpp>
 
-#include "Gizmos.hpp"
+#include <Editor/Gizmos.hpp>
 
 struct GUI;
 struct Scene;

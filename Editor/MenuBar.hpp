@@ -7,7 +7,7 @@
 
 #include <imgui.h>
 
-#include <Texture.hpp>
+#include <Engine/Texture.hpp>
 
 struct GUI;
 

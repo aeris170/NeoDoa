@@ -7,7 +7,7 @@
 
 #include <glm\glm.hpp>
 
-#include <Resolution.hpp>
+#include <Engine/Resolution.hpp>
 
 struct Scene;
 struct SceneViewport;

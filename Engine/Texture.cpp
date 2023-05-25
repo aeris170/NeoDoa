@@ -146,7 +146,7 @@ Texture::Texture(std::string_view name, size_t width, size_t height, const unsig
     _height(height),
     _transparency(transparency),
     _pixelData(width * height * (transparency == TextureTransparency::YES ? static_cast<size_t>(4) : static_cast<size_t>(3))) {
-    assert(FACTORY_FLAG, "don't call ctor directly, use CreateTexture");
+    assert(FACTORY_FLAG); /* don't call ctor directly, use CreateTexture */
     for (auto i = 0; i < _pixelData.size(); i++) {
         _pixelData[i] = static_cast<std::byte>(pixelData[i]);
     }
