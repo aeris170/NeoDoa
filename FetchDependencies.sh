@@ -12,6 +12,7 @@ echo "Installing Assimp"
 
 echo "Installing ImGui"
 ./vcpkg install imgui[core,docking-experimental,glfw-binding,opengl3-binding] --triplet x64-windows --recurse
+./vcpkg install imguizmo --triplet x64-windows
 
 echo "Installing EnTT"
 ./vcpkg install entt --triplet x64-windows
