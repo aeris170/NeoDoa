@@ -13,3 +13,9 @@
 [submodule "Submodules/imgInspect"]
 	path = Submodules/imgInspect
 	url = https://github.com/NeoDoa-Collective/imgInspect
+[submodule "Submodules/stb_impl"]
+	path = Submodules/stb_impl
+	url = https://github.com/NeoDoa-Collective/stb_impl
+[submodule "Submodules/angelscript_addons_impl"]
+	path = Submodules/angelscript_addons_impl
+	url = https://github.com/NeoDoa-Collective/angelscript_addons_impl
