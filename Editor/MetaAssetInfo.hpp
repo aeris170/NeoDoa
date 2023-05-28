@@ -8,11 +8,11 @@
 #include <Editor/SVGPathway.hpp>
 
 struct MetaAssetInfo {
-    const FNode* file;
+    const FNode* file{ nullptr };
 
-    int icon_index;
-    const char* fa_icon; /* from IconsFontAwesome6Pro.h */
-    std::string svg_icon_key; /* for SVGPathway::Get */
+    int icon_index{ -1 };
+    const char* fa_icon{ nullptr }; /* from IconsFontAwesome6Pro.h */
+    std::string svg_icon_key{}; /* for SVGPathway::Get */
 
     void* GetSVGIcon(TextureStyle style = TextureStyle::PADDED) const;
 };
@@ -23,6 +23,11 @@ struct MetaAssetInfoBank {
 #elif
     using DataStructure = entt::dense_hash_map<const FNode*, MetaAssetInfo>;
 #endif
+    MetaAssetInfoBank() noexcept = default;
+    MetaAssetInfoBank(const MetaAssetInfoBank& other) noexcept = default;
+    MetaAssetInfoBank(MetaAssetInfoBank&& other) noexcept = default;
+    MetaAssetInfoBank& operator=(const MetaAssetInfoBank& other) noexcept = default;
+    MetaAssetInfoBank& operator=(MetaAssetInfoBank&& other) noexcept = default;
 
     void Clear();
     void Emplace(MetaAssetInfo&& emplacee);
@@ -48,14 +53,14 @@ private:
 static_assert(std::is_default_constructible_v<MetaAssetInfo>);
 static_assert(std::is_copy_constructible_v<MetaAssetInfo>);
 static_assert(std::is_copy_assignable_v<MetaAssetInfo>);
-static_assert(std::is_move_constructible_v<MetaAssetInfo>);
-static_assert(std::is_move_assignable_v<MetaAssetInfo>);
+static_assert(std::is_nothrow_move_constructible_v<MetaAssetInfo>);
+static_assert(std::is_nothrow_move_assignable_v<MetaAssetInfo>);
 static_assert(std::is_aggregate_v<MetaAssetInfo>);
 
 static_assert(std::is_default_constructible_v<MetaAssetInfoBank>);
 static_assert(std::is_copy_constructible_v<MetaAssetInfoBank>);
 static_assert(std::is_copy_assignable_v<MetaAssetInfoBank>);
-static_assert(std::is_move_constructible_v<MetaAssetInfoBank>);
-static_assert(std::is_move_assignable_v<MetaAssetInfoBank>);
+static_assert(std::is_nothrow_move_constructible_v<MetaAssetInfoBank>);
+static_assert(std::is_nothrow_move_assignable_v<MetaAssetInfoBank>);
 static_assert(!std::is_aggregate_v<MetaAssetInfoBank>);
 #endif

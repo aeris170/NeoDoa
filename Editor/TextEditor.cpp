@@ -1,4 +1,4 @@
-#include "TextEditor.h"
+#include "TextEditor.hpp"
 
 #include <algorithm>
 #include <chrono>
@@ -6,7 +6,6 @@
 #include <regex>
 #include <cmath>
 
-#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h> // for imGui::GetCurrentWindow()
 
 // TODO

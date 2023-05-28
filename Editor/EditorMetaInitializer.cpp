@@ -1,10 +1,10 @@
 #include "EditorMetaInitializer.hpp"
 
-#include <SceneSerializer.hpp>
-#include <SceneDeserializer.hpp>
+#include <Engine/SceneSerializer.hpp>
+#include <Engine/SceneDeserializer.hpp>
 
-#include "UserDefinedComponentStorageSerializer.hpp"
-#include "UserDefinedComponentStorageDeserializer.hpp"
+#include <Editor/UserDefinedComponentStorageSerializer.hpp>
+#include <Editor/UserDefinedComponentStorageDeserializer.hpp>
 
 void InitializeEditorMeta() {
     SceneSerializer::Entities::SerializeUserDefinedComponents = SerializeUserDefinedComponentStorage;

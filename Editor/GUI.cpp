@@ -1,13 +1,9 @@
-#include "GUI.hpp"
+#include <Editor/GUI.hpp>
 
 #include <imgui.h>
 #include <imgui_internal.h>
-#include <ProjectSerializer.hpp>
-#include <ProjectDeserializer.hpp>
-#include <Window.hpp>
-#include <Texture.hpp>
 
-#include "Icons.hpp"
+#include <Editor/Icons.hpp>
 
 GUI::GUI(const CorePtr& core) noexcept :
     CORE(core),

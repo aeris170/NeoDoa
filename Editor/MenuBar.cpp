@@ -1,13 +1,11 @@
-#include "MenuBar.hpp"
+#include <Editor/MenuBar.hpp>
 
-#include <tinyfiledialogs.h>
+#include <Engine/Core.hpp>
+#include <Engine/Log.hpp>
+#include <Engine/Angel.hpp>
 
-#include <Core.hpp>
-#include <Log.hpp>
-#include <Angel.hpp>
-
-#include "GUI.hpp"
-#include "ImGuiExtensions.hpp"
+#include <Editor/GUI.hpp>
+#include <Editor/ImGuiExtensions.hpp>
 
 MenuBar::MenuBar(GUI& owner) :
     gui(owner),
@@ -123,7 +121,7 @@ void MenuBar::NewProjectModal::Render() {
 		float offset = (avail - size) * 0.5f;
 		if (offset > 0.0f)
 			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
-
+		/*
 		if (ImGui::Button(MODAL_YES_BUTTON_TEXT, MODAL_BUTTONS_SIZE)) {
 			const char* path = tinyfd_selectFolderDialog("Select a folder for New Project", "");
 			if (path) {
@@ -145,6 +143,7 @@ void MenuBar::NewProjectModal::Render() {
 			ImGui::CloseCurrentPopup();
 			modal_active = false;
 		}
+		*/
 		ImGui::SetItemDefaultFocus();
 		ImGui::SameLine();
 		if (ImGui::Button(MODAL_NO_BUTTON_TEXT, MODAL_BUTTONS_SIZE)) {

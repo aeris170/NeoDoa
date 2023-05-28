@@ -1,4 +1,4 @@
-#include "Observer.hpp"
+#include <Editor/Observer.hpp>
 
 #include <string>
 #include <sstream>
@@ -6,26 +6,25 @@
 #include <imgui.h>
 #include <imgInspect.h>
 
-#include <nameof.hpp>
-#include <prettify.hpp>
-#include <FormatBytes.hpp>
+#include <Utility/nameof.hpp>
+#include <Utility/prettify.hpp>
+#include <Utility/FormatBytes.hpp>
 
-#include <Scene.hpp>
-#include <IDComponent.hpp>
-#include <TransformComponent.hpp>
-#include <ParentComponent.hpp>
-#include <ChildComponent.hpp>
-#include <CameraComponent.hpp>
-#include <Assets.hpp>
+#include <Engine/Scene.hpp>
+#include <Engine/IDComponent.hpp>
+#include <Engine/TransformComponent.hpp>
+#include <Engine/ParentComponent.hpp>
+#include <Engine/ChildComponent.hpp>
+#include <Engine/CameraComponent.hpp>
+#include <Engine/Assets.hpp>
+#include <Engine/ComponentDeserializer.hpp>
 
-#include <ComponentDeserializer.hpp>
-
-#include "GUI.hpp"
-#include "Icons.hpp"
-#include "Colors.hpp"
-#include "ComponentUI.hpp"
-#include "ImGuiExtensions.hpp"
-#include "UserDefinedComponentStorage.hpp"
+#include <Editor/GUI.hpp>
+#include <Editor/Icons.hpp>
+#include <Editor/Colors.hpp>
+#include <Editor/ComponentUI.hpp>
+#include <Editor/ImGuiExtensions.hpp>
+#include <Editor/UserDefinedComponentStorage.hpp>
 
 Observer::Observer(GUI& gui) noexcept :
     gui(gui) {}

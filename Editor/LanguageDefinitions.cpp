@@ -1,4 +1,4 @@
-#include "TextEditor.h"
+#include "TextEditor.hpp"
 
 static bool TokenizeCStyleString(const char* in_begin, const char* in_end, const char*& out_begin, const char*& out_end)
 {

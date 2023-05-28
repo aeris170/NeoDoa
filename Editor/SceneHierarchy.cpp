@@ -3,19 +3,19 @@
 #include <map>
 
 #include <imgui.h>
+
 #include <EZEasing.hpp>
-#include <constexpr_concat.hpp>
+#include <Utility/constexpr_concat.hpp>
 
-#include "GUI.hpp"
-#include "Icons.hpp"
+#include <Engine/Scene.hpp>
+#include <Engine/IDComponent.hpp>
+#include <Engine/ParentComponent.hpp>
+#include <Engine/ChildComponent.hpp>
+#include <Engine/CameraComponent.hpp>
 
-#include "UserDefinedComponentStorage.hpp"
-
-#include <Scene.hpp>
-#include <IDComponent.hpp>
-#include <ParentComponent.hpp>
-#include <ChildComponent.hpp>
-#include <CameraComponent.hpp>
+#include <Editor/GUI.hpp>
+#include <Editor/Icons.hpp>
+#include <Editor/UserDefinedComponentStorage.hpp>
 
 SceneHierarchy::SceneHierarchy(GUI& gui) noexcept :
     gui(gui) {}

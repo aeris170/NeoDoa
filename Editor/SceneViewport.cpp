@@ -1,17 +1,17 @@
-#include "SceneViewport.hpp"
+#include <Editor/SceneViewport.hpp>
 
 #include <imgui.h>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <constexpr_concat.hpp>
+#include <Utility/constexpr_concat.hpp>
 
-#include <Core.hpp>
-#include <Input.hpp>
-#include <Window.hpp>
-#include <FrameBuffer.hpp>
+#include <Engine/Core.hpp>
+#include <Engine/Input.hpp>
+#include <Engine/Window.hpp>
+#include <Engine/FrameBuffer.hpp>
 
-#include "GUI.hpp"
-#include "Icons.hpp"
+#include <Editor/GUI.hpp>
+#include <Editor/Icons.hpp>
 
 SceneViewport::SceneViewport(GUI& gui) noexcept :
     gui(gui),
