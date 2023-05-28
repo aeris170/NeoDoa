@@ -5,7 +5,7 @@ cd vcpkg
 ./vcpkg integrate install
 
 echo "Installing AngelScript"
-./vcpkg install angelscript[*] --triplet x64-windows --recurse
+./vcpkg install angelscript[addons] --triplet x64-windows --recurse
 
 echo "Installing Assimp"
 ./vcpkg install assimp --triplet x64-windows
