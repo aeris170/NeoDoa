@@ -35,3 +35,5 @@ set_target_properties(EZEasing PROPERTIES FOLDER Submodules)
 set_target_properties(IconFontCppHeaders PROPERTIES FOLDER Submodules)
 set_target_properties(imgInspect PROPERTIES FOLDER Submodules)
 set_target_properties(stb_impl PROPERTIES FOLDER Submodules)
+
+set_target_properties(Editor PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>)
