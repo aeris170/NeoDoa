@@ -5,10 +5,10 @@
 #include <filesystem>
 #include <string_view>
 
-#include <string_map.hpp>
+#include <Utility/string_map.hpp>
 
-#include <Color.hpp>
-#include <Texture.hpp>
+#include <Engine/Color.hpp>
+#include <Engine/Texture.hpp>
 
 enum class TextureStyle {
     NONE,

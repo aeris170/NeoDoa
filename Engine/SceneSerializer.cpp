@@ -1,6 +1,6 @@
 #include "SceneSerializer.hpp"
 
-#include <nameof.hpp>
+#include <Utility/nameof.hpp>
 
 #include "Scene.hpp"
 #include "IDComponent.hpp"

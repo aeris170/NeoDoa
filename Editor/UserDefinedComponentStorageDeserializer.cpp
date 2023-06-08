@@ -1,9 +1,9 @@
 #include "UserDefinedComponentStorageDeserializer.hpp"
 
-#include <Core.hpp>
-#include <Project.hpp>
+#include <Engine/Core.hpp>
+#include <Engine/Project.hpp>
 
-#include "UserDefinedComponentStorage.hpp"
+#include <Editor/UserDefinedComponentStorage.hpp>
 
 void DeserializeUserDefinedComponentStorage(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity, const std::string& name) {
     if (!scene.HasComponent<UserDefinedComponentStorage>(entity)) {

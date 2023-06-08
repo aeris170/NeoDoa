@@ -1,5 +1,6 @@
 #include "Project.hpp"
 
+#include "Core.hpp"
 #include "Scene.hpp"
 #include "Assets.hpp"
 
@@ -19,7 +20,7 @@ void Project::SetStartupScene(UUID sceneID) { startupSceneID = sceneID; }
 void Project::OpenScene(UUID sceneID) {
     if (sceneID == UUID::Empty()) { return; }
 
-    AssetHandle sceneAsset = CORE->Assets()->FindAsset(sceneID);
+    AssetHandle sceneAsset = Core::GetCore()->Assets()->FindAsset(sceneID);
 
     if (!sceneAsset.HasValue()) {
         DOA_LOG_ERROR("Cannot open scene! Asset with id %ul not found!", sceneID);
@@ -40,7 +41,7 @@ void Project::CloseScene() {
     openScene = nullptr;
     openSceneID = UUID::Empty();
 
-    AssetHandle openScene = CORE->Assets()->FindAsset(id);
+    AssetHandle openScene = Core::GetCore()->Assets()->FindAsset(id);
     if (!openScene.HasValue()) { return; }
     openScene->DeleteDeserializedData();
 }
@@ -51,7 +52,7 @@ UUID Project::GetOpenSceneID() const { return openSceneID; }
 void Project::SaveOpenSceneToDisk() {
     if (!openScene) return;
 
-    AssetHandle openScene = CORE->Assets()->FindAsset(openSceneID);
+    AssetHandle openScene = Core::GetCore()->Assets()->FindAsset(openSceneID);
     openScene->Serialize();
     OpenScene(openScene->ID());
 }

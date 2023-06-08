@@ -3,15 +3,14 @@
 
 #include <glm/glm.hpp>
 
-#include <Core.hpp>
-#include <Project.hpp>
-#include <FrameBuffer.hpp>
-#include <Resolution.hpp>
+#include <Engine/Core.hpp>
+#include <Engine/Project.hpp>
+#include <Engine/FrameBuffer.hpp>
+#include <Engine/Resolution.hpp>
+#include <Engine/TransformComponent.hpp>
+#include <Engine/MeshComponent.hpp>
 
-#include <TransformComponent.hpp>
-#include <MeshComponent.hpp>
-
-#include "GUI.hpp"
+#include <Editor/GUI.hpp>
 
 struct OutlineAttachment {
 

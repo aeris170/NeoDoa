@@ -4,23 +4,23 @@
 
 #include <imgui.h>
 
-#include <Project.hpp>
-#include <ImGuiRenderCommand.hpp>
-#include <Core.hpp>
+#include <Engine/Core.hpp>
+#include <Engine/Project.hpp>
+#include <Engine/ImGuiRenderCommand.hpp>
 
-#include "SVGPathway.hpp"
-#include "ImGuiExtensions/FileDialog.hpp"
-#include "MetaAssetInfo.hpp"
+#include <Editor/SVGPathway.hpp>
+#include <Editor/FileDialog.hpp>
+#include <Editor/MetaAssetInfo.hpp>
 
-#include "MenuBar.hpp"
-#include "SceneHierarchy.hpp"
-#include "Observer.hpp"
-#include "CodeEditor.hpp"
-#include "Console.hpp"
-#include "AssetManager.hpp"
-#include "SceneViewport.hpp"
-#include "GameViewport.hpp"
-#include "SceneSettings.hpp"
+#include <Editor/MenuBar.hpp>
+#include <Editor/SceneHierarchy.hpp>
+#include <Editor/Observer.hpp>
+#include <Editor/CodeEditor.hpp>
+#include <Editor/Console.hpp>
+#include <Editor/AssetManager.hpp>
+#include <Editor/SceneViewport.hpp>
+#include <Editor/GameViewport.hpp>
+#include <Editor/SceneSettings.hpp>
 
 struct GUI {
 

@@ -1,4 +1,4 @@
-#include "SVGPathway.hpp"
+#include <Editor/SVGPathway.hpp>
 
 #include <format>
 #include <string>
@@ -11,9 +11,9 @@
 #include <tinyxml2.h>
 #include <lunasvg.h>
 
-#include <Log.hpp>
+#include <Utility/split.hpp>
 
-#include <split.hpp>
+#include <Engine/Log.hpp>
 
 void SVGPathway::Initialize(const std::filesystem::path& directory, Color color) {
     SVGPathway::directory = directory;

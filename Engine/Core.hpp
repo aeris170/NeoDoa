@@ -5,18 +5,18 @@
 #include <functional>
 #include <filesystem>
 
-#include <entt.hpp>
+#include <entt/entt.hpp>
 #include <glm/glm.hpp>
 
+#include "Angel.hpp"
+#include "Input.hpp"
+#include "Assets.hpp"
 #include "Window.hpp"
+#include "Project.hpp"
+#include "FrameBuffer.hpp"
 
 struct Core;
-struct Angel;
-struct Input;
-struct FrameBuffer;
-struct Project;
 struct Resolution;
-struct Assets;
 
 using CoreDeleter = std::function<void(Core*)>;
 using CorePtr = std::unique_ptr<Core, CoreDeleter>;
@@ -94,7 +94,7 @@ public:
     }
 
 private:
-    entt::dense_hash_map<entt::id_type, entt::poly<Attachment>> _attachments{};
+    entt::dense_map<entt::id_type, entt::poly<Attachment>> _attachments{};
     //std::vector<entt::poly<Attachment>> _attachments{};
     /* Core Attachment */
 };

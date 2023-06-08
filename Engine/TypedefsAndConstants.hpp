@@ -2,7 +2,7 @@
 
 #include <functional>
 
-#include <entt.hpp>
+#include <entt/entt.hpp>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 

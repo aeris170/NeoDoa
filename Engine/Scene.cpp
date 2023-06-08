@@ -4,7 +4,6 @@
 
 #include "Shader.hpp"
 #include "Model.hpp"
-#include "ModelRenderer.hpp"
 #include "Renderer.hpp"
 
 #include "Core.hpp"

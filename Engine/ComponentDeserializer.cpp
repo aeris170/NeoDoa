@@ -4,7 +4,7 @@
 #include <vector>
 #include <sstream>
 
-#include <split.hpp>
+#include <Utility/split.hpp>
 
 #include "Core.hpp"
 #include "Angel.hpp"
@@ -357,4 +357,5 @@ ComponentDeserializationResult DeserializeComponent(const std::string_view data)
     }
 
     rv.deserializedComponent.declaration = content;
+    return rv;
 }

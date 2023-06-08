@@ -1,17 +1,10 @@
-#include "Gizmos.hpp"
+#include <Editor/Gizmos.hpp>
 
 #include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/string_cast.hpp>
 
-#include <Core.hpp>
-#include <Project.hpp>
-#include <Scene.hpp>
-#include <Input.hpp>
-#include <TransformComponent.hpp>
+#include <Engine/TransformComponent.hpp>
 
-#include "GUI.hpp"
-#include "SceneViewport.hpp"
-#include "SceneHierarchy.hpp"
+#include <Editor/GUI.hpp>
 
 Gizmos::Gizmos(SceneViewport& sv) noexcept :
     sv(sv) {}

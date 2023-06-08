@@ -8,6 +8,7 @@
 
 #include <stb_image.h>
 
+#include "Core.hpp"
 #include "Project.hpp"
 #include "Log.hpp"
 #include "SceneSerializer.hpp"
@@ -34,7 +35,7 @@ bool Assets::IsShaderFile(const FNode& file) { return file.ext == SHADER_EXT; }
 bool Assets::IsComponentDefinitionFile(const FNode& file) { return file.ext == COMP_EXT; }
 
 Assets::Assets() noexcept :
-    _root({ CORE->LoadedProject().get(), nullptr, "", "", "", true }) {
+    _root({ Core::GetCore()->LoadedProject().get(), nullptr, "", "", "", true }) {
     BuildFileNodeTree(_root);
     ImportAllFiles(database, _root);
 }
@@ -84,7 +85,7 @@ AssetHandle Assets::FindAsset(UUID uuid) const {
     return { const_cast<Asset*>(&database.at(uuid)) };
 }
 AssetHandle Assets::FindAssetAt(const FNode& file) const {
-    for (auto& [uuid, asset] : database) {
+    for (auto [uuid, asset] : database) {
         if (asset.File() == file) {
             /*
             * casting away const is safe here
@@ -116,7 +117,7 @@ void Assets::ReimportAll() {
     textureAssets.clear();
     componentDefinitionAssets.clear();
 
-    _root = FNode({ CORE->LoadedProject().get(), nullptr, "", "", "", true });
+    _root = FNode({ Core::GetCore()->LoadedProject().get(), nullptr, "", "", "", true });
     BuildFileNodeTree(_root);
     ImportAllFiles(database, _root);
     EnsureDeserialization();
@@ -216,8 +217,9 @@ void Assets::Deserialize(const UUIDCollection& assets) {
 }
 
 void Assets::BuildFileNodeTree(FNode& root) {
-    std::filesystem::current_path(CORE->LoadedProject()->Workspace());
-    auto it = std::filesystem::directory_iterator(CORE->LoadedProject()->Workspace() / root.Path());
+    auto ws = Core::GetCore()->LoadedProject()->Workspace();
+    std::filesystem::current_path(ws);
+    auto it = std::filesystem::directory_iterator(ws / root.Path());
     for (const auto& entry : it) {
         if(entry.is_directory()) {
             root.children.emplace_back(FNodeCreationParams{

@@ -6,12 +6,12 @@
 #include <optional>
 #include <variant>
 
-#include "Entity.hpp"
+#include <Utility/TemplateUtilities.hpp>
 
-#include "TemplateUtilities.hpp"
+#include <Engine/Entity.hpp>
 
-#include "MetaAssetInfo.hpp"
-#include "ImGuiExtensions/TextEditor.h"
+#include <Editor/MetaAssetInfo.hpp>
+#include <Editor/TextEditor.hpp>
 
 struct GUI;
 struct Scene;

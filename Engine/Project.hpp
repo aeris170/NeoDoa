@@ -5,7 +5,6 @@
 #include <optional>
 #include <filesystem>
 
-#include "Core.hpp"
 #include "UUID.hpp"
 
 struct FNode;
@@ -39,7 +38,6 @@ struct Project {
     void SaveOpenSceneToDisk();
 
 private:
-    const CorePtr& CORE{ Core::GetCore() };
     std::filesystem::path workspace;
     std::string name;
     UUID startupSceneID{ UUID::Empty() };

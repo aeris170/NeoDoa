@@ -11,8 +11,8 @@
 //#include "Material.hpp"
 #include "Shader.hpp"
 
-#include "ObserverPattern.hpp"
-#include "TemplateUtilities.hpp"
+#include <Utility/ObserverPattern.hpp>
+#include <Utility/TemplateUtilities.hpp>
 
 #include <variant>
 

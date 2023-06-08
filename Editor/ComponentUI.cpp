@@ -1,24 +1,23 @@
-#include "ComponentUI.hpp"
+#include <Editor/ComponentUI.hpp>
 
 #include <unordered_map>
 
-#include <nameof.hpp>
-#include <prettify.hpp>
+#include <Utility/nameof.hpp>
+#include <Utility/prettify.hpp>
+#include <Utility/constexpr_concat.hpp>
 
-#include <constexpr_concat.hpp>
+#include <Engine/Scene.hpp>
+#include <Engine/IDComponent.hpp>
+#include <Engine/TransformComponent.hpp>
+#include <Engine/ParentComponent.hpp>
+#include <Engine/ChildComponent.hpp>
+#include <Engine/CameraComponent.hpp>
 
-#include <Scene.hpp>
-#include <IDComponent.hpp>
-#include <TransformComponent.hpp>
-#include <ParentComponent.hpp>
-#include <ChildComponent.hpp>
-#include <CameraComponent.hpp>
-
-#include "GUI.hpp"
-#include "Icons.hpp"
-#include "Observer.hpp"
-#include "ComponentWidgets.hpp"
-#include "UserDefinedComponentStorage.hpp"
+#include <Editor/GUI.hpp>
+#include <Editor/Icons.hpp>
+#include <Editor/Observer.hpp>
+#include <Editor/ComponentWidgets.hpp>
+#include <Editor/UserDefinedComponentStorage.hpp>
 
 void IDComponentUI::Render(const IDComponent& idComponent) {
     static unordered_string_map<std::string> UINames = {

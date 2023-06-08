@@ -4,8 +4,8 @@
 
 #include <tinyxml2.h>
 
-#include <Scene.hpp>
-#include <Entity.hpp>
-#include <SceneDeserializer.hpp>
+#include <Engine/Scene.hpp>
+#include <Engine/Entity.hpp>
+#include <Engine/SceneDeserializer.hpp>
 
 void DeserializeUserDefinedComponentStorage(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity, const std::string&);

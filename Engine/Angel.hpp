@@ -3,7 +3,7 @@
 #include <cassert>
 
 #include <angelscript.h>
-#include <scriptbuilder/scriptbuilder.h>
+#include <angelscript/scriptbuilder/scriptbuilder.h>
 
 #include <glm/glm.hpp>
 

@@ -1,10 +1,9 @@
-#include "CodeEditor.hpp"
-
-#include "GUI.hpp"
-#include "Icons.hpp"
-#include "FileNode.hpp"
+#include <Editor/CodeEditor.hpp>
 
 #include <imgui_internal.h>
+
+#include <Editor/GUI.hpp>
+#include <Editor/Icons.hpp>
 
 CodeEditor::CodeEditor(GUI& gui) noexcept :
     gui(gui) {

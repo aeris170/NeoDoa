@@ -3,12 +3,12 @@
 #include <utility>
 #include <unordered_map>
 
-#include <FontAwesome.hpp>
+#include <Utility/nameof.hpp>
+#include <Utility/string_map.hpp>
 
-#include <nameof.hpp>
-#include <string_map.hpp>
+#include <Engine/FontAwesome.hpp>
 
-#include "ComponentInstance.hpp"
+#include <Editor/ComponentInstance.hpp>
 
 namespace WindowIcons {
     inline constexpr const char SCENE_HIERARCHY_WINDOW_ICON[]{ ICON_FA_CUBES_STACKED " " };

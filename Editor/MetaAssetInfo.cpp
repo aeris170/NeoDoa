@@ -1,14 +1,14 @@
-#include "MetaAssetInfo.hpp"
+#include <Editor/MetaAssetInfo.hpp>
 
 #include <tinyxml2.h>
 
-#include <Core.hpp>
-#include <FileNode.hpp>
+#include <Engine/Core.hpp>
+#include <Engine/FileNode.hpp>
 
-#include "GUI.hpp"
-#include "Icons.hpp"
-#include "MetaAssetInfoSerializer.hpp"
-#include "MetaAssetInfoDeserializer.hpp"
+#include <Editor/GUI.hpp>
+#include <Editor/Icons.hpp>
+#include <Editor/MetaAssetInfoSerializer.hpp>
+#include <Editor/MetaAssetInfoDeserializer.hpp>
 
 void* MetaAssetInfo::GetSVGIcon(TextureStyle style) const { return SVGPathway::Get(svg_icon_key, style).TextureIDRaw(); }
 

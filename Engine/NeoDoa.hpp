@@ -4,28 +4,28 @@
 
 #pragma region AngelScript
 #include <angelscript.h>
-#include <contextmgr/contextmgr.h>
-#include <datetime/datetime.h>
-#include <debugger/debugger.h>
-#include <scriptany/scriptany.h>
-#include <scriptarray/scriptarray.h>
-#include <scriptbuilder/scriptbuilder.h>
-#include <scriptdictionary/scriptdictionary.h>
-#include <scriptfile/scriptfile.h>
-#include <scriptgrid/scriptgrid.h>
-#include <scripthandle/scripthandle.h>
-#include <scripthelper/scripthelper.h>
-#include <scriptmath/scriptmath.h>
-#include <scriptstdstring/scriptstdstring.h>
-#include <serializer/serializer.h>
-#include <weakref/weakref.h>
+#include <angelscript/contextmgr/contextmgr.h>
+#include <angelscript/datetime/datetime.h>
+#include <angelscript/debugger/debugger.h>
+#include <angelscript/scriptany/scriptany.h>
+#include <angelscript/scriptarray/scriptarray.h>
+#include <angelscript/scriptbuilder/scriptbuilder.h>
+#include <angelscript/scriptdictionary/scriptdictionary.h>
+#include <angelscript/scriptfile/scriptfile.h>
+#include <angelscript/scriptgrid/scriptgrid.h>
+#include <angelscript/scripthandle/scripthandle.h>
+#include <angelscript/scripthelper/scripthelper.h>
+#include <angelscript/scriptmath/scriptmath.h>
+#include <angelscript/scriptstdstring/scriptstdstring.h>
+#include <angelscript/serializer/serializer.h>
+#include <angelscript/weakref/weakref.h>
 #pragma endregion
 
 #pragma region Assimp
 #pragma endregion
 
 #pragma region EnTT
-#include <entt.hpp>
+#include <entt/entt.hpp>
 #pragma endregion
 
 #pragma region EzEasing
@@ -52,6 +52,15 @@
 #pragma endregion
 
 #pragma region [ImGui]zmo
+// define extra conversion here before including imgui, don't do it in the imconfig.h
+#define IM_VEC2_CLASS_EXTRA \
+    constexpr ImVec2(glm::vec2& f) : x(f.x), y(f.y) {} \
+    operator glm::vec2() const { return glm::vec2(x, y); }
+
+#define IM_VEC4_CLASS_EXTRA \
+        constexpr ImVec4(const glm::vec4& f) : x(f.x), y(f.y), z(f.z), w(f.w) {} \
+        operator glm::vec4() const { return glm::vec4(x,y,z,w); }
+
 #include <imgui.h>
 #include <ImGuizmo.h>
 #pragma endregion
@@ -70,64 +79,64 @@
 #pragma region Engine
 
 #pragma region Core
-#include "Core.hpp"
-#include "Input.hpp"
-#include "Window.hpp"
-#include "FrameBuffer.hpp"
+#include <Engine/Core.hpp>
+#include <Engine/Input.hpp>
+#include <Engine/Window.hpp>
+#include <Engine/FrameBuffer.hpp>
 #pragma endregion
 
 #pragma region Log
-#include "Log.hpp"
+#include <Engine/Log.hpp>
 #pragma endregion
 
 #pragma region ImGui
-#include "ImGuiRenderer.hpp"
-#include "ImGuiRenderCommand.hpp"
+#include <Engine/ImGuiRenderer.hpp>
+#include <Engine/ImGuiRenderCommand.hpp>
 #pragma endregion
 
 #pragma region Renderer
-#include "Renderer.hpp"
+#include <Engine/Renderer.hpp>
 #pragma endregion
 
 #pragma region Project
 #pragma region Scene
 #pragma region Serialize
-#include "SceneSerializer.hpp"
-#include "SceneDeserializer.hpp"
+#include <Engine/SceneSerializer.hpp>
+#include <Engine/SceneDeserializer.hpp>
 #pragma endregion
-#include "Scene.hpp"
-#include "OrthoCamera.hpp"
-#include "PerspectiveCamera.hpp"
+#include <Engine/Scene.hpp>
+#include <Engine/OrthoCamera.hpp>
+#include <Engine/PerspectiveCamera.hpp>
 #pragma endregion
-#include "Project.hpp"
+#include <Engine/Project.hpp>
 #pragma endregion
 
 #pragma region Asset
 #pragma region Manager
-#include "FileNode.hpp"
-#include "AssetManager.hpp"
+#include <Engine/FileNode.hpp>
+#include <Engine/Assets.hpp>
 #pragma endregion
 #pragma region Color
-#include "Color.hpp"
+#include <Engine/Color.hpp>
 #pragma endregion
 #pragma region Model
-#include "Vertex.hpp"
-#include "Mesh.hpp"
-#include "Model.hpp"
+#include <Engine/Vertex.hpp>
+#include <Engine/Mesh.hpp>
+#include <Engine/Model.hpp>
 #pragma endregion
 #pragma region ScriptComponent
 #pragma region Modules
-#include "ModelRenderer.hpp"
+//#include <Engine/ModelRenderer.hpp>
 #pragma endregion
-#include "Angel.hpp"
-#include "PropertyData.hpp"
-#include "EnumValue.hpp"
+#include <Engine/Angel.hpp>
+#include <Engine/PropertyData.hpp>
+#include <Engine/EnumValue.hpp>
 #pragma endregion
 #pragma region Shader
-#include "Shader.hpp"
+#include <Engine/Shader.hpp>
 #pragma endregion
 #pragma region Texture
-#include "Texture.hpp"
+#include <Engine/Texture.hpp>
 #pragma endregion
 #pragma endregion
 

@@ -3,16 +3,17 @@
 #include <filesystem>
 #include <fstream>
 
-#include <scriptstdstring/scriptstdstring.h>
-#include <scriptany/scriptany.h>
-#include <scriptarray/scriptarray.h>
-#include <scriptdictionary/scriptdictionary.h>
-#include <scriptfile/scriptfile.h>
-#include <scriptgrid/scriptgrid.h>
-#include <scripthandle/scripthandle.h>
-#include <scripthelper/scripthelper.h>
-#include <scriptmath/scriptmath.h>
-#include <datetime/datetime.h>
+#include <angelscript.h>
+#include <angelscript/scriptstdstring/scriptstdstring.h>
+#include <angelscript/scriptany/scriptany.h>
+#include <angelscript/scriptarray/scriptarray.h>
+#include <angelscript/scriptdictionary/scriptdictionary.h>
+#include <angelscript/scriptfile/scriptfile.h>
+#include <angelscript/scriptgrid/scriptgrid.h>
+#include <angelscript/scripthandle/scripthandle.h>
+#include <angelscript/scripthelper/scripthelper.h>
+#include <angelscript/scriptmath/scriptmath.h>
+#include <angelscript/datetime/datetime.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
@@ -20,7 +21,7 @@
 
 #include <imgui.h>
 
-#include <prettify.hpp>
+#include <Utility/prettify.hpp>
 
 #include "Input.hpp"
 #include "TypedefsAndConstants.hpp"

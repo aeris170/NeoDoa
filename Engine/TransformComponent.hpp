@@ -8,11 +8,11 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/transform.hpp>
 
-#include "Entity.hpp"
+#include <Engine/Entity.hpp>
 
 struct TransformComponent {
     explicit TransformComponent(const Entity owner) noexcept;
-    TransformComponent(const Entity owner, glm::mat4&& matrix) noexcept;
+    TransformComponent(const Entity owner, const glm::mat4& matrix) noexcept;
 
     static void InsertTranslation(glm::mat4& m, const glm::vec3& translation);
     static void InsertRotation(glm::mat4& m, const glm::quat& rotation);

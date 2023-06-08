@@ -4,7 +4,7 @@
 
 #include <imgui.h>
 
-#include <Entity.hpp>
+#include <Engine/Entity.hpp>
 
 struct GUI;
 struct Scene;

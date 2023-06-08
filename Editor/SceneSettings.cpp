@@ -1,10 +1,8 @@
-#include "SceneSettings.hpp"
+#include <Editor/SceneSettings.hpp>
 
-#include "GUI.hpp"
-#include "Icons.hpp"
-#include "ComponentWidgets.hpp"
-
-#include <Scene.hpp>
+#include <Editor/GUI.hpp>
+#include <Editor/Icons.hpp>
+#include <Editor/ComponentWidgets.hpp>
 
 SceneSettings::SceneSettings(GUI& gui) noexcept :
     gui(gui) {}

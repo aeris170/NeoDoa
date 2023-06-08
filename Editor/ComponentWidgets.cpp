@@ -387,23 +387,23 @@ bool ImGui::NeoDoaColorPickerPopup(const char* label, float col[4], ImGuiColorEd
         // This check is optional. Suppose we have two color widgets side by side, both widgets display different colors, but both colors have hue and/or saturation undefined.
         // With color check: hue/saturation is preserved in one widget. Editing color in one widget would reset hue/saturation in another one.
         // Without color check: common hue/saturation would be displayed in all widgets that have hue/saturation undefined.
-        // g.ColorEditLastColor is stored as ImU32 RGB value: this essentially gives us color equality check with reduced precision.
+        // g.ColorEditSavedColor is stored as ImU32 RGB value: this essentially gives us color equality check with reduced precision.
         // Tiny external color changes would not be detected and this check would still pass. This is OK, since we only restore hue/saturation _only_ if they are undefined,
         // therefore this change flipping hue/saturation from undefined to a very tiny value would still be represented in color picker.
         ImGuiContext& g = *GImGui;
-        if (g.ColorEditLastColor != ImGui::ColorConvertFloat4ToU32(ImVec4(col[0], col[1], col[2], 0))) {
+        if (g.ColorEditSavedColor != ImGui::ColorConvertFloat4ToU32(ImVec4(col[0], col[1], col[2], 0))) {
             return;
         }
 
         // When S == 0, H is undefined.
         // When H == 1 it wraps around to 0.
-        if (*S == 0.0f || (*H == 0.0f && g.ColorEditLastHue == 1)) {
-            *H = g.ColorEditLastHue;
+        if (*S == 0.0f || (*H == 0.0f && g.ColorEditSavedHue == 1)) {
+            *H = g.ColorEditSavedHue;
         }
 
         // When V == 0, S is undefined.
         if (*V == 0.0f) {
-            *S = g.ColorEditLastSat;
+            *S = g.ColorEditSavedSat;
         }
     };
 
@@ -533,8 +533,8 @@ bool ImGui::NeoDoaColorPickerPopup(const char* label, float col[4], ImGuiColorEd
             V = 1.0f - ImSaturate((io.MousePos.y - picker_pos.y) / (sv_picker_size - 1));
 
             // Greatly reduces hue jitter and reset to 0 when hue == 255 and color is rapidly modified using SV square.
-            if (g.ColorEditLastColor == ColorConvertFloat4ToU32(ImVec4(col[0], col[1], col[2], 0))) {
-                H = g.ColorEditLastHue;
+            if (g.ColorEditSavedColor == ColorConvertFloat4ToU32(ImVec4(col[0], col[1], col[2], 0))) {
+                H = g.ColorEditSavedHue;
             }
             value_changed = value_changed_sv = true;
         }
@@ -602,9 +602,9 @@ bool ImGui::NeoDoaColorPickerPopup(const char* label, float col[4], ImGuiColorEd
     if (value_changed_h || value_changed_sv) {
         if (flags & ImGuiColorEditFlags_InputRGB) {
             ColorConvertHSVtoRGB(H, S, V, col[0], col[1], col[2]);
-            g.ColorEditLastHue = H;
-            g.ColorEditLastSat = S;
-            g.ColorEditLastColor = ColorConvertFloat4ToU32(ImVec4(col[0], col[1], col[2], 0));
+            g.ColorEditSavedHue = H;
+            g.ColorEditSavedSat = S;
+            g.ColorEditSavedColor = ColorConvertFloat4ToU32(ImVec4(col[0], col[1], col[2], 0));
         } else if (flags & ImGuiColorEditFlags_InputHSV) {
             col[0] = H;
             col[1] = S;
@@ -704,10 +704,10 @@ bool ImGui::NeoDoaColorPickerPopup(const char* label, float col[4], ImGuiColorEd
                     f[n] = denorm[n] / 255.0f;
                 }
 
-                g.ColorEditLastHue = f[0];
-                g.ColorEditLastSat = f[1];
+                g.ColorEditSavedHue = f[0];
+                g.ColorEditSavedSat = f[1];
                 ColorConvertHSVtoRGB(f[0], f[1], f[2], f[0], f[1], f[2]);
-                g.ColorEditLastColor = ColorConvertFloat4ToU32(ImVec4(f[0], f[1], f[2], 0));
+                g.ColorEditSavedColor = ColorConvertFloat4ToU32(ImVec4(f[0], f[1], f[2], 0));
                 col[0] = f[0];
                 col[1] = f[1];
                 col[2] = f[2];

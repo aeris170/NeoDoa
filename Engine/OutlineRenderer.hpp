@@ -1,7 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include <entt.hpp>
+#include <entt/entt.hpp>
 
 struct Transform;
 struct ModelRenderer;

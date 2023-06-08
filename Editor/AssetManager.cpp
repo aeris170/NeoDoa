@@ -2,9 +2,9 @@
 
 #include <algorithm>
 #include <imgui_internal.h>
-#include <detector.hpp>
+#include <submodules/detector/detector.hpp>
 
-#include <Texture.hpp>
+#include <Engine/Texture.hpp>
 
 #include "GUI.hpp"
 #include "Icons.hpp"

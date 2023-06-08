@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include <entt.hpp>
+#include <entt/entt.hpp>
 
 using Entity = entt::entity;
 constexpr Entity NULL_ENTT = entt::null;

@@ -1,12 +1,12 @@
 #pragma once
 
-#include <Core.hpp>
-#include <Entity.hpp>
-#include <Assets.hpp>
+#include <Utility/string_map.hpp>
 
-#include <string_map.hpp>
+#include <Engine/Core.hpp>
+#include <Engine/Entity.hpp>
+#include <Engine/Assets.hpp>
 
-#include "ComponentInstance.hpp"
+#include <Editor/ComponentInstance.hpp>
 
 struct UserDefinedComponentStorage {
 

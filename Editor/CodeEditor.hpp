@@ -7,9 +7,9 @@
 
 #include <imgui.h>
 
-#include "Assets.hpp"
+#include <Engine/Assets.hpp>
 
-#include "ImGuiExtensions/TextEditor.h"
+#include <Editor/TextEditor.hpp>
 
 struct GUI;
 

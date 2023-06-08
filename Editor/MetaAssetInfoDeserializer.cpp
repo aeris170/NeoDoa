@@ -4,14 +4,14 @@
 
 #include <tinyxml2.h>
 
-#include <Log.hpp>
-#include <Core.hpp>
-#include <Assets.hpp>
+#include <Utility/nameof.hpp>
 
-#include <nameof.hpp>
+#include <Engine/Log.hpp>
+#include <Engine/Core.hpp>
+#include <Engine/Assets.hpp>
 
-#include "Icons.hpp"
-#include "MetaAssetInfo.hpp"
+#include <Editor/Icons.hpp>
+#include <Editor/MetaAssetInfo.hpp>
 
 static const char* FindIconInIcons(const char* icon);
 

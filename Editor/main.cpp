@@ -1,7 +1,5 @@
-#include <vld.h>
-
-#include <Core.hpp>
-#include <ImGuiRenderer.hpp>
+#include <Engine/Core.hpp>
+#include <Engine/ImGuiRenderer.hpp>
 
 #include "GUI.hpp"
 #include "OutlineAttachment.hpp"
