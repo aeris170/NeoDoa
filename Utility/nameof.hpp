@@ -34,8 +34,8 @@
 #define nameof(x) _nameof(#x)
 #define nameof_c(x) _nameof(#x).c_str()
 
-#include <string>
 #include <regex>
+#include <string>
 #include <stdexcept>
 
 namespace detail {
