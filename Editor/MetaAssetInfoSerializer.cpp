@@ -26,7 +26,7 @@ std::string SerializeMetaAssetInfoBank(const MetaAssetInfoBank& bank) {
     printer.OpenElement("bank");
     {
         tinyxml2::XMLDocument doc;
-        for(auto& [file, info] : bank) {
+        for (const auto& [file, info] : bank) {
             doc.Parse(SerializeMetaAssetInfo(info).c_str());
             doc.Accept(&printer);
             doc.Clear();
