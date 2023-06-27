@@ -20,8 +20,8 @@ struct MetaAssetInfo {
 struct MetaAssetInfoBank {
 #ifdef _DEBUG
     using DataStructure = std::unordered_map<const FNode*, MetaAssetInfo>;
-#elif
-    using DataStructure = entt::dense_hash_map<const FNode*, MetaAssetInfo>;
+#else
+    using DataStructure = entt::dense_map<const FNode*, MetaAssetInfo>;
 #endif
     MetaAssetInfoBank() noexcept = default;
     MetaAssetInfoBank(const MetaAssetInfoBank& other) noexcept = default;
