@@ -7,6 +7,11 @@ function(copy_folder_post_build folder)
 			${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/${folder})
 endfunction()
 
+if (MSVC AND WIN32 AND NOT MSVC_VERSION VERSION_LESS 142)
+    add_link_option($<$<CONFIG:Debug>:/INCREMENTAL>)
+    add_compile_option($<$<CONFIG:Debug>:/ZI>)
+endif()
+
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Editor)
 set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake)
