@@ -16,7 +16,7 @@
 #include <Engine/ParentComponent.hpp>
 #include <Engine/ChildComponent.hpp>
 #include <Engine/CameraComponent.hpp>
-#include <Engine/Assets.hpp>
+#include <Engine/ShaderDeserializer.hpp>
 #include <Engine/ComponentDeserializer.hpp>
 
 #include <Editor/GUI.hpp>
@@ -27,7 +27,10 @@
 #include <Editor/UserDefinedComponentStorage.hpp>
 
 Observer::Observer(GUI& gui) noexcept :
-    gui(gui) {}
+    gui(gui) {
+    ComponentDefinitionDisplay::Init();
+    ShaderDisplay::Init();
+}
 
 bool Observer::Begin(Scene* scene) {
     GUI& gui = this->gui;
@@ -184,6 +187,10 @@ void Observer::DisplayTargetRenderer::RenderIconChangePopup(const FNode& file, M
             auto& items = FileIcons::ComponentIcons;
             begin = &items.front();
             end = &items.back() + 1;
+        } else if (Assets::IsShaderFile(file)) {
+            auto& items = FileIcons::ShaderIcons;
+            begin = &items.front();
+            end = &items.back() + 1;
         } else if (Assets::IsTextureFile(file)) {
             auto& items = FileIcons::TextureIcons;
             begin = &items.front();
@@ -252,6 +259,8 @@ void Observer::DisplayTargetRenderer::RenderAssetView(const Observer& observer, 
         RenderSceneView(observer, h);
     } else if (h->IsComponentDefinition()) {
         RenderComponentDefinitionView(observer, h);
+    } else if (h->IsShader()) {
+        RenderShaderView(observer, h);
     } else if (h->IsTexture()) {
         RenderTextureView(observer, h);
     } else {
@@ -270,17 +279,51 @@ void Observer::DisplayTargetRenderer::RenderSceneView(const Observer& observer, 
 void Observer::DisplayTargetRenderer::RenderComponentDefinitionView(const Observer& observer, AssetHandle h) {
     assert(h->IsComponentDefinition());
 
-    ComponentDefinitionDisplay::RenderMessagesTable(h);
+    ComponentDefinitionDisplay::SetRenderTarget(h);
+    ComponentDefinitionDisplay::RenderMessagesTable();
 
     if (h->HasDeserializedData()) {
         if (!h->HasErrorMessages()) {
-            const auto& component = h->DataAs<Component>();
-            ComponentDefinitionDisplay::RenderFields(component);
+            ComponentDefinitionDisplay::RenderFields();
             ImGui::Separator();
-            ComponentDefinitionDisplay::RenderSourceCode(component);
+            ComponentDefinitionDisplay::RenderSourceCode();
         }
     } else {
         ImGui::Text("Component Definition is not deserialized...");
+    }
+
+    static int extraPadding = 16;
+    float lineHeight = ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2;
+    if (ImGui::GetContentRegionAvail().y > 34.0f) {
+        ImGui::SetCursorPosY(ImGui::GetWindowHeight() - lineHeight - extraPadding);
+    }
+
+    if (ImGui::Button("Refresh", { ImGui::GetContentRegionAvail().x, 0 })) {
+        h->ForceDeserialize();
+    }
+
+    if (ImGui::IsItemHovered()) {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted("Forces deserialization on this component definition. All data in RAM is purged, and new data is read from disk. This operation will cause re-instantiation of user defined components without loss of data.");
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
+}
+void Observer::DisplayTargetRenderer::RenderShaderView(const Observer& observer, AssetHandle h) {
+    assert(h->IsShader());
+
+    ShaderDisplay::SetRenderTarget(h);
+    ShaderDisplay::RenderMessagesTable();
+
+    if (h->HasDeserializedData()) {
+        if (!h->HasErrorMessages()) {
+            ShaderDisplay::RenderFields();
+            ImGui::Separator();
+            ShaderDisplay::RenderSourceCode();
+        }
+    } else {
+        ImGui::Text("Shader is not deserialized...");
     }
 
     static int extraPadding = 16;
@@ -476,10 +519,30 @@ void Observer::SceneDisplay::RenderSystems(const Observer& observer, const Scene
 }
 
 // Inner-struct ComponentDefinitionDisplay
-void Observer::ComponentDefinitionDisplay::RenderMessagesTable(const AssetHandle componentDefAsset) {
-    if(!componentDefAsset->HasErrorMessages() &&
-        !componentDefAsset->HasWarningMessages() &&
-        !componentDefAsset->HasInfoMessages()) {
+void Observer::ComponentDefinitionDisplay::Init() {
+    TextEditor.SetColorizerEnable(true);
+    TextEditor.SetReadOnlyEnabled(true);
+    TextEditor.SetShowWhitespaces(false);
+    TextEditor.SetText(std::string(10, ' '));
+    TextEditor.SetLanguageDefinition(TextEditor::LanguageDefinition::AngelScript());
+}
+
+void Observer::ComponentDefinitionDisplay::SetRenderTarget(const AssetHandle componentDefAsset) {
+    assert(componentDefAsset->IsComponentDefinition());
+    if (ComponentDefAsset != componentDefAsset) {
+        ComponentDefAsset = componentDefAsset;
+        if (ComponentDefAsset->HasDeserializedData() && !ComponentDefAsset->HasErrorMessages()) {
+            const auto& componentDef = ComponentDefAsset->DataAs<Component>();
+            TextEditor.SetText(componentDef.declaration);
+        }
+    }
+}
+
+void Observer::ComponentDefinitionDisplay::RenderMessagesTable() {
+    assert(ComponentDefAsset.HasValue());
+    if(!ComponentDefAsset->HasErrorMessages() &&
+        !ComponentDefAsset->HasWarningMessages() &&
+        !ComponentDefAsset->HasInfoMessages()) {
         return;
     }
 
@@ -493,7 +556,7 @@ void Observer::ComponentDefinitionDisplay::RenderMessagesTable(const AssetHandle
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
 
     ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::ERROR_COLOR);
-    for (auto& message : componentDefAsset->ErrorMessages()) {
+    for (auto& message : ComponentDefAsset->ErrorMessages()) {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
 
@@ -509,7 +572,7 @@ void Observer::ComponentDefinitionDisplay::RenderMessagesTable(const AssetHandle
     ImGui::PopStyleColor();
 
     ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::WARNING_COLOR);
-    for (auto& message : componentDefAsset->WarningMessages()) {
+    for (auto& message : ComponentDefAsset->WarningMessages()) {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
 
@@ -525,7 +588,7 @@ void Observer::ComponentDefinitionDisplay::RenderMessagesTable(const AssetHandle
     ImGui::PopStyleColor();
 
     ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::INFO_COLOR);
-    for (auto& message : componentDefAsset->InfoMessages()) {
+    for (auto& message : ComponentDefAsset->InfoMessages()) {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
 
@@ -543,7 +606,12 @@ void Observer::ComponentDefinitionDisplay::RenderMessagesTable(const AssetHandle
     ImGui::PopStyleVar();
     ImGui::EndTable();
 }
-void Observer::ComponentDefinitionDisplay::RenderFields(const Component& componentDef) {
+void Observer::ComponentDefinitionDisplay::RenderFields() {
+    assert(ComponentDefAsset->HasDeserializedData());
+    assert(!ComponentDefAsset->HasErrorMessages());
+
+    const auto& componentDef = ComponentDefAsset->DataAs<Component>();
+
     ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders;
     if (ImGui::CollapsingHeader(componentDef.name.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
         if (ImGui::BeginTable("component_fields", 2, flags)) {
@@ -562,13 +630,7 @@ void Observer::ComponentDefinitionDisplay::RenderFields(const Component& compone
         }
     }
 }
-void Observer::ComponentDefinitionDisplay::RenderSourceCode(const Component& componentDef) {
-    TextEditor.SetReadOnly(true);
-    TextEditor.SetLanguageDefinition(TextEditor::LanguageDefinition::AngelScript());
-    if (TextEditor.GetText() != componentDef.declaration) {
-        TextEditor.SetText(componentDef.declaration);
-    }
-
+void Observer::ComponentDefinitionDisplay::RenderSourceCode() {
     ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders;
     ImGui::BeginTable("source_code", 1, flags);
     ImGui::TableSetupColumn("Source Code", ImGuiTableColumnFlags_WidthStretch);
@@ -577,7 +639,130 @@ void Observer::ComponentDefinitionDisplay::RenderSourceCode(const Component& com
     ImGui::TableNextRow();
     ImGui::TableSetColumnIndex(0);
 
-    TextEditor.Render("ObserverComponentDefSourceCodeViewer", true, { 0.0f, -32.0f }, false);
+    TextEditor.Render("###ObserverComponentDefSourceCodeViewer", false, { 0.0f, -32.0f });
+
+    ImGui::EndTable();
+}
+
+// Inner-struct ShaderDisplay
+void Observer::ShaderDisplay::Init() {
+    TextEditor.SetColorizerEnable(true);
+    TextEditor.SetReadOnlyEnabled(true);
+    TextEditor.SetShowWhitespaces(false);
+    TextEditor.SetText(std::string(10, ' '));
+    TextEditor.SetLanguageDefinition(TextEditor::LanguageDefinition::GLSL());
+}
+
+void Observer::ShaderDisplay::SetRenderTarget(const AssetHandle shaderAsset) {
+    assert(shaderAsset->IsShader());
+    if (ShaderAsset != shaderAsset) {
+        ShaderAsset = shaderAsset;
+        if (ShaderAsset->HasDeserializedData() && !ShaderAsset->HasErrorMessages()) {
+            const auto& shader = ShaderAsset->DataAs<Shader>();
+            TextEditor.SetText(shader.sourceCode);
+        }
+    }
+}
+
+void Observer::ShaderDisplay::RenderMessagesTable() {
+    assert(ShaderAsset.HasValue());
+    if (!ShaderAsset->HasErrorMessages() &&
+        !ShaderAsset->HasWarningMessages() &&
+        !ShaderAsset->HasInfoMessages()) {
+        return;
+    }
+
+    ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders;
+
+    ImGui::BeginTable("compiler_logs", 2, flags);
+
+    ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, 30);
+    ImGui::TableSetupColumn("Compiler Logs", ImGuiTableColumnFlags_WidthStretch);
+    ImGui::TableHeadersRow();
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
+
+    ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::ERROR_COLOR);
+    for (auto& message : ShaderAsset->ErrorMessages()) {
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+
+        float r = BeginTableColumnCenterText(ComponentDefinitionViewIcons::ERROR_ICON);
+        ImGui::Text(ComponentDefinitionViewIcons::ERROR_ICON);
+        EndTableColumnCenterText(r);
+
+        ImGui::TableSetColumnIndex(1);
+
+        const ShaderCompilerMessage& m{ std::any_cast<const ShaderCompilerMessage&>(message) };
+        ImGui::TextWrapped(m.shortMessage.c_str());
+    }
+    ImGui::PopStyleColor();
+
+    ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::WARNING_COLOR);
+    for (auto& message : ShaderAsset->WarningMessages()) {
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+
+        float r = BeginTableColumnCenterText(ComponentDefinitionViewIcons::WARNING_ICON);
+        ImGui::Text(ComponentDefinitionViewIcons::WARNING_ICON);
+        EndTableColumnCenterText(r);
+
+        ImGui::TableSetColumnIndex(1);
+
+        const ShaderCompilerMessage& m{ std::any_cast<const ShaderCompilerMessage&>(message) };
+        ImGui::TextWrapped(m.shortMessage.c_str());
+    }
+    ImGui::PopStyleColor();
+
+    ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::INFO_COLOR);
+    for (auto& message : ShaderAsset->InfoMessages()) {
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+
+        float r = BeginTableColumnCenterText(ComponentDefinitionViewIcons::INFO_ICON);
+        ImGui::Text(ComponentDefinitionViewIcons::INFO_ICON);
+        EndTableColumnCenterText(r);
+
+        ImGui::TableSetColumnIndex(1);
+
+        const ShaderCompilerMessage& m{ std::any_cast<const ShaderCompilerMessage&>(message) };
+        ImGui::TextWrapped(m.shortMessage.c_str());
+    }
+    ImGui::PopStyleColor();
+
+    ImGui::PopStyleVar();
+    ImGui::EndTable();
+}
+void Observer::ShaderDisplay::RenderFields() {
+    /*
+    ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders;
+    if (ImGui::CollapsingHeader(componentDef.name.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
+        if (ImGui::BeginTable("component_fields", 2, flags)) {
+            ImGui::TableSetupColumn("Field", ImGuiTableColumnFlags_WidthStretch);
+            ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_WidthStretch);
+            ImGui::TableHeadersRow();
+
+            for (auto& field : componentDef.fields) {
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+                ImGui::Text(field.name.c_str());
+                ImGui::TableSetColumnIndex(1);
+                ImGui::Text(field.typeName.c_str());
+            }
+            ImGui::EndTable();
+        }
+    }
+    */
+}
+void Observer::ShaderDisplay::RenderSourceCode() {
+    ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders;
+    ImGui::BeginTable("source_code", 1, flags);
+    ImGui::TableSetupColumn("Source Code", ImGuiTableColumnFlags_WidthStretch);
+    ImGui::TableHeadersRow();
+
+    ImGui::TableNextRow();
+    ImGui::TableSetColumnIndex(0);
+
+    TextEditor.Render("###ObserverShaderSourceCodeViewer", false, { 0.0f, -32.0f });
 
     ImGui::EndTable();
 }

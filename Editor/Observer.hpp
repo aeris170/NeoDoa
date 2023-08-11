@@ -8,6 +8,7 @@
 
 #include <Utility/TemplateUtilities.hpp>
 
+#include <Engine/Assets.hpp>
 #include <Engine/Entity.hpp>
 
 #include <Editor/MetaAssetInfo.hpp>
@@ -16,6 +17,7 @@
 struct GUI;
 struct Scene;
 struct FNode;
+struct Shader;
 struct Component;
 struct AssetHandle;
 
@@ -55,6 +57,7 @@ private:
         static void RenderAssetView(const Observer& observer, AssetHandle h);
         static void RenderSceneView(const Observer& observer, AssetHandle h);
         static void RenderComponentDefinitionView(const Observer& observer, AssetHandle h);
+        static void RenderShaderView(const Observer& observer, AssetHandle h);
         static void RenderTextureView(const Observer& observer, AssetHandle h);
         static void RenderTextView(const Observer& observer, AssetHandle h);
     };
@@ -66,11 +69,31 @@ private:
 
     struct ComponentDefinitionDisplay {
 
-        static void RenderMessagesTable(const AssetHandle componentDefAsset);
-        static void RenderFields(const Component& componentDef);
-        static void RenderSourceCode(const Component& componentDef);
+        static void Init();
+
+        static void SetRenderTarget(const AssetHandle componentDefAsset);
+
+        static void RenderMessagesTable();
+        static void RenderFields();
+        static void RenderSourceCode();
 
     private:
+        static inline AssetHandle ComponentDefAsset{};
+        static inline TextEditor TextEditor{};
+    };
+
+    struct ShaderDisplay {
+
+        static void Init();
+
+        static void SetRenderTarget(const AssetHandle shaderAsset);
+
+        static void RenderMessagesTable();
+        static void RenderFields();
+        static void RenderSourceCode();
+
+    private:
+        static inline AssetHandle ShaderAsset{};
         static inline TextEditor TextEditor{};
     };
 

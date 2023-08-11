@@ -3,20 +3,21 @@
 #include "UUID.hpp"
 #include "FileNode.hpp"
 
-#include "Scene.hpp"
-#include "Component.hpp"
+#include <Engine/Scene.hpp>
+#include <Engine/Shader.hpp>
+#include <Engine/Component.hpp>
 //#include "Script.hpp"
 #include "Texture.hpp"
 #include "Model.hpp"
 //#include "Material.hpp"
-#include "Shader.hpp"
 
 #include <Utility/ObserverPattern.hpp>
 #include <Utility/TemplateUtilities.hpp>
 
+#include <any>
 #include <variant>
 
-#define ASSET_TYPE Scene, Component, Texture
+#define ASSET_TYPE Scene, Component, Shader, ShaderProgram, Texture, Model
 template<typename T>
 concept AssetType = concepts::IsAnyOf<T, ASSET_TYPE> && concepts::Copyable<T> && concepts::Serializable<T> && std::movable<T>;
 using AssetData = std::variant<std::monostate, ASSET_TYPE>;

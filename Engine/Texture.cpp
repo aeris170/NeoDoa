@@ -130,14 +130,12 @@ bool Texture::operator==(const Texture& other) noexcept {
 }
 bool Texture::operator!=(const Texture& other) noexcept { return !this->operator==(other); }
 
-
 EncodedTextureData Texture::Serialize(TextureEncoding encoding) const { return SerializeTexture(*this, encoding); }
 Texture Texture::Deserialize(const EncodedTextureData& data) { return DeserializeTexture(data); }
 
 Texture Texture::Copy(const Texture& texture) { return CreateTextureRaw(texture._name, reinterpret_cast<const unsigned char*>(texture._pixelData.data()), texture._width, texture._height, texture._transparency); }
 
 //-----------------------------------------------------------------
-
 
 Texture::Texture() noexcept {}
 Texture::Texture(std::string_view name, size_t width, size_t height, const unsigned char* const pixelData, TextureTransparency transparency) noexcept :

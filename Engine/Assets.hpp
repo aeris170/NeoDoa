@@ -39,7 +39,12 @@ struct Assets {
     inline static std::string TEXTURE_EXT{ ".png" };
     inline static std::string MODEL_EXT{ ".mdl" };
     inline static std::string MATERIAL_EXT{ ".mat" };
-    inline static std::string SHADER_EXT{ ".shdr" };
+    inline static std::string VERTEX_SHADER_EXT{ ".vert" };
+    inline static std::string TESS_CTRL_SHADER_EXT{ ".tesc" };
+    inline static std::string TESS_EVAL_SHADER_EXT{ ".tese" };
+    inline static std::string GEOMETRY_SHADER_EXT{ ".geom" };
+    inline static std::string FRAGMENT_SHADER_EXT{ ".frag" };
+    inline static std::string COMPUTE_SHADER_EXT{ ".comp" };
     inline static std::string COMP_EXT{ ".ncd" };
     inline static std::string ID_EXT{ ".id" };
 
@@ -49,9 +54,15 @@ struct Assets {
     static bool IsModelFile(const FNode& file);
     static bool IsMaterialFile(const FNode& file);
     static bool IsShaderFile(const FNode& file);
+    static bool IsVertexShaderFile(const FNode& file);
+    static bool IsTessellationControlShaderFile(const FNode& file);
+    static bool IsTessellationEvaluationShaderFile(const FNode& file);
+    static bool IsGeometryShaderFile(const FNode& file);
+    static bool IsFragmentShaderFile(const FNode& file);
+    static bool IsComputeShaderFile(const FNode& file);
     static bool IsComponentDefinitionFile(const FNode& file);
 
-    Assets() noexcept;
+    explicit Assets(FNode&& root) noexcept;
     ~Assets() = default;
     Assets(const Assets&) = delete;
     Assets(Assets&&) = default;

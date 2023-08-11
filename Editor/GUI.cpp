@@ -201,12 +201,18 @@ ImGuiIO* GUI::IO() const { return io; }
 ImFont* GUI::GetFont() const { return font; }
 ImFont* GUI::GetFontBold() const { return fontBold; }
 
-void* GUI::GetFolderIcon(TextureSize size) const    { return SVGPathway::Get(FOLDER_ICON_KEY,     TextureStyle::PADDED, size).TextureIDRaw(); }
-void* GUI::GetProjectIcon(TextureSize size) const   { return SVGPathway::Get(PROJECT_ICON_KEY,    TextureStyle::PADDED, size).TextureIDRaw(); }
-void* GUI::GetSceneIcon(TextureSize size) const     { return SVGPathway::Get(SCENE_ICON_KEY,      TextureStyle::PADDED, size).TextureIDRaw(); }
-void* GUI::GetComponentIcon(TextureSize size) const { return SVGPathway::Get(COMPONENT_ICON_KEY,  TextureStyle::PADDED, size).TextureIDRaw(); }
-void* GUI::GetFileIcon(TextureSize size) const      { return SVGPathway::Get(FILE_ICON_KEY,       TextureStyle::PADDED, size).TextureIDRaw(); }
-void* GUI::GetBackArrowIcon(TextureSize size) const { return SVGPathway::Get(BACK_ARROW_ICON_KEY, TextureStyle::PADDED, size).TextureIDRaw(); }
+void* GUI::GetFolderIcon(TextureSize size) const                       { return SVGPathway::Get(FOLDER_ICON_KEY,           TextureStyle::PADDED, size).TextureIDRaw(); }
+void* GUI::GetProjectIcon(TextureSize size) const                      { return SVGPathway::Get(PROJECT_ICON_KEY,          TextureStyle::PADDED, size).TextureIDRaw(); }
+void* GUI::GetSceneIcon(TextureSize size) const                        { return SVGPathway::Get(SCENE_ICON_KEY,            TextureStyle::PADDED, size).TextureIDRaw(); }
+void* GUI::GetComponentIcon(TextureSize size) const                    { return SVGPathway::Get(COMPONENT_ICON_KEY,        TextureStyle::PADDED, size).TextureIDRaw(); }
+void* GUI::GetVertexShaderIcon(TextureSize size) const                 { return SVGPathway::Get(VERTEX_SHADER_ICON_KEY,    TextureStyle::PADDED, size).TextureIDRaw(); }
+void* GUI::GetTessellationControlShaderIcon(TextureSize size) const    { return SVGPathway::Get(TESS_CTRL_SHADER_ICON_KEY, TextureStyle::PADDED, size).TextureIDRaw(); }
+void* GUI::GetTessellationEvaluationShaderIcon(TextureSize size) const { return SVGPathway::Get(TESS_EVAL_SHADER_ICON_KEY, TextureStyle::PADDED, size).TextureIDRaw(); }
+void* GUI::GetGeometryShaderIcon(TextureSize size) const               { return SVGPathway::Get(GEOMETRY_SHADER_ICON_KEY,  TextureStyle::PADDED, size).TextureIDRaw(); }
+void* GUI::GetFragmentShaderIcon(TextureSize size) const               { return SVGPathway::Get(FRAGMENT_SHADER_ICON_KEY,  TextureStyle::PADDED, size).TextureIDRaw(); }
+void* GUI::GetComputeShaderIcon(TextureSize size) const                { return SVGPathway::Get(COMPUTE_SHADER_ICON_KEY,   TextureStyle::PADDED, size).TextureIDRaw(); }
+void* GUI::GetFileIcon(TextureSize size) const                         { return SVGPathway::Get(FILE_ICON_KEY,             TextureStyle::PADDED, size).TextureIDRaw(); }
+void* GUI::GetBackArrowIcon(TextureSize size) const                    { return SVGPathway::Get(BACK_ARROW_ICON_KEY,       TextureStyle::PADDED, size).TextureIDRaw(); }
 
 void* GUI::FindIconForFileType(const FNode& file, TextureSize size) const {
     assert(HasOpenProject());
@@ -217,13 +223,20 @@ void* GUI::FindIconForFileType(const FNode& file, TextureSize size) const {
     assert(CORE->Assets()->IsAssetExistsAt(file));
     AssetHandle asset = CORE->Assets()->FindAssetAt(file);
 
-    if (asset->IsScene()) { return GetSceneIcon(size); }
-    if (asset->IsComponentDefinition()) { return GetComponentIcon(size); }
-    if (asset->IsScript()) { return GetSceneIcon(size); }
-    if (asset->IsTexture()) { return GetSceneIcon(size); }
-    if (asset->IsModel()) { return GetSceneIcon(size); }
-    if (asset->IsMaterial()) { return GetSceneIcon(size); }
-    if (asset->IsShader()) { return GetSceneIcon(size); }
+    if (asset->IsScene())                                              { return GetSceneIcon(size);                        }
+    if (asset->IsComponentDefinition())                                { return GetComponentIcon(size);                    }
+    if (asset->IsScript())                                             { return GetSceneIcon(size);                        }
+    if (asset->IsTexture())                                            { return GetSceneIcon(size);                        }
+    if (asset->IsModel())                                              { return GetSceneIcon(size);                        }
+    if (asset->IsMaterial())                                           { return GetSceneIcon(size);                        }
+    if (asset->IsShader()) {
+        if (Assets::IsVertexShaderFile(asset->File()))                 { return GetVertexShaderIcon(size);                 }
+        if (Assets::IsTessellationControlShaderFile(asset->File()))    { return GetTessellationControlShaderIcon(size);    }
+        if (Assets::IsTessellationEvaluationShaderFile(asset->File())) { return GetTessellationEvaluationShaderIcon(size); }
+        if (Assets::IsGeometryShaderFile(asset->File()))               { return GetGeometryShaderIcon(size);               }
+        if (Assets::IsFragmentShaderFile(asset->File()))               { return GetFragmentShaderIcon(size);               }
+        if (Assets::IsComputeShaderFile(asset->File()))                { return GetComputeShaderIcon(size);                }
+    }
     return GetFileIcon(size);
 }
 void* GUI::FindIconByName(const std::string_view key, TextureSize size) const { return SVGPathway::Get(std::string(key), TextureStyle::PADDED, size).TextureIDRaw(); }

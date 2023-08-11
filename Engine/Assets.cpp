@@ -31,11 +31,24 @@ bool Assets::IsScriptFile(const FNode& file) { return file.ext == SCRIPT_EXT; }
 bool Assets::IsTextureFile(const FNode& file) { return file.ext == TEXTURE_EXT; }
 bool Assets::IsModelFile(const FNode& file) { return file.ext == MODEL_EXT; }
 bool Assets::IsMaterialFile(const FNode& file) { return file.ext == MATERIAL_EXT; }
-bool Assets::IsShaderFile(const FNode& file) { return file.ext == SHADER_EXT; }
+bool Assets::IsShaderFile(const FNode& file) {
+    return  IsVertexShaderFile(file) ||
+            IsTessellationControlShaderFile(file) ||
+            IsTessellationEvaluationShaderFile(file) ||
+            IsGeometryShaderFile(file) ||
+            IsFragmentShaderFile(file) ||
+            IsComputeShaderFile(file);
+}
+bool Assets::IsVertexShaderFile(const FNode& file) { return file.ext == VERTEX_SHADER_EXT; }
+bool Assets::IsTessellationControlShaderFile(const FNode& file) { return file.ext == TESS_CTRL_SHADER_EXT; }
+bool Assets::IsTessellationEvaluationShaderFile(const FNode& file) { return file.ext == TESS_EVAL_SHADER_EXT; }
+bool Assets::IsGeometryShaderFile(const FNode& file) { return file.ext == GEOMETRY_SHADER_EXT; }
+bool Assets::IsFragmentShaderFile(const FNode& file) { return file.ext == FRAGMENT_SHADER_EXT; }
+bool Assets::IsComputeShaderFile(const FNode & file) { return file.ext == COMPUTE_SHADER_EXT; }
 bool Assets::IsComponentDefinitionFile(const FNode& file) { return file.ext == COMP_EXT; }
 
-Assets::Assets() noexcept :
-    _root({ Core::GetCore()->LoadedProject().get(), nullptr, "", "", "", true }) {
+Assets::Assets(FNode&& root) noexcept :
+    _root(std::move(root)) {
     BuildFileNodeTree(_root);
     ImportAllFiles(database, _root);
 }
@@ -127,6 +140,7 @@ void Assets::EnsureDeserialization() {
     Deserialize(componentDefinitionAssets);
     Deserialize(sceneAssets);
     Deserialize(textureAssets);
+    Deserialize(shaderAssets);
 }
 
 AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
@@ -138,7 +152,8 @@ AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
         * Step 5: If there is a collision, resolve it by generating new UUID's until the collision is resolved
         * Step 6: Register the file into the database
         * ------- Step 7: Call the importer to import the content to the memory
-        (this is no longer the case, as we have dependencies between assets eg. Scene depends on ComponentDefinition)
+        (this is no longer the case, as we have dependencies between assets
+        eg. Scene depends on ComponentDefinition or Material depends on Program, Program depends on Shader etc.)
         * Step 8: Separate imported asset to its own subcategory
     */
     if (file.IsDirectory()) { return nullptr; }
@@ -192,14 +207,19 @@ AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
         if (asset.IsScene()) {
             sceneAssets.push_back(id);
         }
-
         if (asset.IsComponentDefinition()) {
             componentDefinitionAssets.push_back(id);
+        }
+        if (asset.IsShader()) {
+            shaderAssets.push_back(id);
+        }
+        if (asset.IsTexture()) {
+            textureAssets.push_back(id);
         }
 
         return &asset;
     } else {
-        DOA_LOG_ERROR("Failed to import asset at %s do you have write access to the directory?", file.Path());
+        DOA_LOG_ERROR("Failed to import asset at %s do you have read/write access to the directory?", std::quoted(file.Path().c_str()));
         return nullptr;
     }
 }

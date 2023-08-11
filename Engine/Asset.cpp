@@ -5,6 +5,7 @@
 #include "SceneDeserializer.hpp"
 #include "SceneSerializer.hpp"
 #include "ComponentDeserializer.hpp"
+#include "ShaderDeserializer.hpp"
 #include "TextureDeserializer.hpp"
 #include "TextureSerializer.hpp"
 
@@ -84,6 +85,41 @@ void Asset::Deserialize() {
             }
         }
         data = std::move(result.deserializedComponent);
+    }
+    if (IsShader()) {
+        ShaderDeserializationResult result;
+        if (Assets::IsVertexShaderFile(*file)) {
+            result = DeserializeVertexShader(*file);
+        }
+        if (Assets::IsTessellationControlShaderFile(*file)) {
+            result = DeserializeTessellationControlShader(*file);
+        }
+        if (Assets::IsTessellationEvaluationShaderFile(*file)) {
+            result = DeserializeTessellationEvaluationShader(*file);
+        }
+        if (Assets::IsGeometryShaderFile(*file)) {
+            result = DeserializeGeometryShader(*file);
+        }
+        if (Assets::IsFragmentShaderFile(*file)) {
+            result = DeserializeFragmentShader(*file);
+        }
+        if (Assets::IsComputeShaderFile(*file)) {
+            result = DeserializeComputeShader(*file);
+        }
+        for (auto& message : result.messages) {
+            switch (message.messageType) {
+            case ShaderCompilerMessageType::INFO:
+                infoList.emplace_back(std::move(message));
+                break;
+            case ShaderCompilerMessageType::WARNING:
+                warningList.emplace_back(std::move(message));
+                break;
+            case ShaderCompilerMessageType::ERROR:
+                errorList.emplace_back(std::move(message));
+                break;
+            }
+        }
+        data = std::move(result.deserializedShader);
     }
     if (IsTexture()) {
         data = DeserializeTexture(*file);

@@ -61,6 +61,37 @@ void MetaAssetInfoBank::TryEmplace(const FNode& file, const MetaAssetInfo& empla
             const auto& [_fa_icon, _svg_icon_key] = FileIcons::ComponentIcons[0];
             fa_icon = _fa_icon;
             svg_icon_key = _svg_icon_key;
+        } else if (handle->IsShader()) {
+            if (Assets::IsVertexShaderFile(handle->File())) {
+                const auto& [_fa_icon, _svg_icon_key] = FileIcons::ShaderIcons[0];
+                fa_icon = _fa_icon;
+                svg_icon_key = _svg_icon_key;
+            }
+            if (Assets::IsTessellationControlShaderFile(handle->File())) {
+                const auto& [_fa_icon, _svg_icon_key] = FileIcons::ShaderIcons[1];
+                fa_icon = _fa_icon;
+                svg_icon_key = _svg_icon_key;
+            }
+            if (Assets::IsTessellationEvaluationShaderFile(handle->File())) {
+                const auto& [_fa_icon, _svg_icon_key] = FileIcons::ShaderIcons[2];
+                fa_icon = _fa_icon;
+                svg_icon_key = _svg_icon_key;
+            }
+            if (Assets::IsGeometryShaderFile(handle->File())) {
+                const auto& [_fa_icon, _svg_icon_key] = FileIcons::ShaderIcons[3];
+                fa_icon = _fa_icon;
+                svg_icon_key = _svg_icon_key;
+            }
+            if (Assets::IsFragmentShaderFile(handle->File())) {
+                const auto& [_fa_icon, _svg_icon_key] = FileIcons::ShaderIcons[4];
+                fa_icon = _fa_icon;
+                svg_icon_key = _svg_icon_key;
+            }
+            if (Assets::IsComputeShaderFile(handle->File())) {
+                const auto& [_fa_icon, _svg_icon_key] = FileIcons::ShaderIcons[5];
+                fa_icon = _fa_icon;
+                svg_icon_key = _svg_icon_key;
+            }
         } else if (handle->IsTexture()) {
             const auto& [_fa_icon, _svg_icon_key] = FileIcons::TextureIcons[0];
             fa_icon = _fa_icon;

@@ -365,6 +365,8 @@ void AssetManager::OpenFileAtFileNode(FNode& file) {
             gui.CORE->LoadedProject()->OpenScene(handle->ID());
         } else if (Assets::IsComponentDefinitionFile(file)) {
             gui.ce.AddTab(handle);
+        } else if (Assets::IsShaderFile(file)) {
+            gui.ce.AddTab(handle);
         }
     }
 }

@@ -206,7 +206,13 @@ CodeEditor::EditorTab::EditorTab(AssetHandle currentAsset, bool isSyntaxColoring
     currentAsset->File().ReadContent();
     unsavedText = currentAsset->File().DisposeContent();
     textEditor.SetText(unsavedText);
-    textEditor.SetLanguageDefinition(TextEditor::LanguageDefinition::NeoDoaComponentDefinition());
+    if (currentAsset->IsComponentDefinition()) {
+        textEditor.SetLanguageDefinition(TextEditor::LanguageDefinition::AngelScript());
+    } else if (currentAsset->IsShader()) {
+        textEditor.SetLanguageDefinition(TextEditor::LanguageDefinition::GLSL());
+    } else {
+        textEditor.SetLanguageDefinition({});
+    }
     tabName = currentAsset->File().Name();
     tabName.append("###");
     tabName.append(currentAsset->File().AbsolutePath().string());
