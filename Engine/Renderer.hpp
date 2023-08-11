@@ -17,15 +17,13 @@ struct Mesh;
 struct Shader;
 struct ACamera;
 
-struct MeshComponent;
-
 struct Renderer {
 
     struct DrawCallData {
         const std::weak_ptr<Mesh> meshData;
         const glm::mat4 model;
         const glm::mat4 viewProj;
-        const ShaderUniformTable uniforms;
+        //const ShaderUniformTable uniforms;
     };
     //entt::dense_hash_map<std::weak_ptr<Shader>, std::vector<DrawCallData>> drawCalls;
 
@@ -44,7 +42,7 @@ struct Renderer {
     void Render(entt::registry& registry, ACamera* cam);
 
 
-    void Submit(const std::weak_ptr<Mesh> mesh, const std::weak_ptr<Shader> shader, const glm::mat4& transform, const glm::mat4& viewProjMatrix, const ShaderUniformTable& uniforms);
+    //void Submit(const std::weak_ptr<Mesh> mesh, const std::weak_ptr<Shader> shader, const glm::mat4& transform, const glm::mat4& viewProjMatrix, const ShaderUniformTable& uniforms);
 };
 
 struct RendererSystem {

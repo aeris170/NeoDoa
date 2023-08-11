@@ -265,7 +265,7 @@ bool ColorWidget(const std::string& label, Color& value) {
 }
 
 bool ResolutionWidget(const std::string& label, Resolution& resolution) {
-    glm::vec2 res{ resolution.w, resolution.h };
+    glm::vec2 res{ resolution.Width, resolution.Height };
     FancyVectorWidgetSettings<display::XY> settingsFBO;
     settingsFBO.resetEnabled = false;
     settingsFBO.speed = 1;

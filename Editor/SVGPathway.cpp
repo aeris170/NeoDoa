@@ -112,7 +112,8 @@ void SVGPathway::Load(std::string_view key) {
         );
         auto large = Texture::CreateTextureRaw("!!" + name + "_none_large!!", bitmapScaledAspect.data(), bitmapScaledAspect.width(), bitmapScaledAspect.height());
 
-        if (small != Texture::Empty() && medium != Texture::Empty() && large != Texture::Empty()) {
+        auto empty = Texture::Empty();
+        if (small != empty && medium != empty && large != empty) {
             Textures.try_emplace(name, std::move(small), std::move(medium), std::move(large));
         }
     }
@@ -170,8 +171,8 @@ void SVGPathway::Load(std::string_view key) {
         auto medium = paddingFunction(lunadoc, box, name, "medium", SCALE_FACTOR_MEDIUM);
         auto large = paddingFunction(lunadoc, box, name, "large", SCALE_FACTOR_LARGE);
 
-
-        if (small != Texture::Empty() && medium != Texture::Empty() && large != Texture::Empty()) {
+        auto empty = Texture::Empty();
+        if (small != empty && medium != empty && large != empty) {
             TexturesPadded.try_emplace(name, std::move(small), std::move(medium), std::move(large));
         }
     }

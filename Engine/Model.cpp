@@ -1,119 +1,213 @@
-#include "Model.hpp"
+#include <Engine/Model.hpp>
 
-#include <unordered_map>
+#include <memory>
+#include <iostream>
+#include <algorithm>
 
-#include <assimp/Importer.hpp>
 #include <assimp/scene.h>
+#include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
+#include <assimp/DefaultLogger.hpp>
 
-#include "Log.hpp"
-#include "Texture.hpp"
+#include <Engine/Vertex.hpp>
+#include <Engine/Buffer.hpp>
+#include <Engine/VertexArray.hpp>
+#include <Engine/AssimpGLMConvert.hpp>
 
-static std::unordered_map<std::string, std::shared_ptr<Model>> MODELS;
+Model::Model(std::string_view path) noexcept {
+    std::cout << "Creating model from disk: " << path << std::endl;
 
-Model::Model(std::string_view name, std::vector<Mesh>&& meshes) noexcept :
-    _name(name),
-    _meshes(std::move(meshes)) {}
+#if defined(_DEBUG)
+    Assimp::DefaultLogger::create("", Assimp::Logger::VERBOSE, aiDefaultLogStream_STDOUT);
+#else
+    Assimp::DefaultLogger::create("", Assimp::Logger::NORMAL, aiDefaultLogStream_STDOUT);
+#endif
+    Assimp::Importer importer;
+    const aiScene* scene = importer.ReadFile(path.data(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_FlipWindingOrder | aiProcess_GenSmoothNormals | aiProcess_FixInfacingNormals);
+    Assimp::DefaultLogger::kill();
 
-Model::~Model() noexcept {}
-
-static std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string_view typeName) {
-    std::vector<Texture> textures;
-    for (unsigned int i = 0; i < mat->GetTextureCount(type); i++) {
-        aiString str;
-        mat->GetTexture(type, i, &str);
-        auto t = Texture::CreateTexture(str.C_Str(), std::string("Images/").append(str.C_Str()).c_str());
-        if (t != Texture::Empty()) { textures.emplace_back(std::move(t)); }
+    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+        std::cout << "Couldn't read scene file: " << importer.GetErrorString() << std::endl;
+        return;
     }
-    return textures;
+    this->name = path.substr(path.find_last_of("/\\") + 1);
+    this->path = path;
+
+    processNode(avatar, scene->mRootNode, scene);
+    meshes = realizeMeshes(avatar);
+    CalculateAABB();
 }
 
-static Mesh processMesh(aiMesh* mesh, const aiScene* scene) {
-    std::vector<Vertex> vs;
-    std::vector<GLuint> is;
-    std::vector<Texture> ts;
+const std::string& Model::Name() const noexcept { return name; }
+const std::string& Model::Path() const noexcept { return path; }
 
+const Avatar& Model::GetAvatar() const noexcept { return avatar; }
+
+void Model::CalculateAABB() const noexcept {
+    aabb = meshes[0].AABB;
+
+    for (const auto& mesh : meshes) {
+        const auto& bb = mesh.AABB;
+
+        aabb.Min = glm::min(aabb.Min, bb.Min);
+        aabb.Max = glm::max(aabb.Max, bb.Max);
+    }
+}
+const AABB& Model::GetAABB() const noexcept { return aabb; }
+
+//-----------------------------------------------------------------
+void Model::processNode(struct Avatar& avatar, aiNode* node, const aiScene* scene) noexcept {
+    Avatar::Node* parent{ nullptr };
+    if (node->mParent) {
+        parent = &avatar.Nodes[node->mParent->mName.C_Str()];
+    }
+    auto [iter, _] = avatar.Nodes.try_emplace(
+        std::string(node->mName.C_Str()),
+        std::string(node->mName.C_Str()),
+        aiMat4ToGLMMat4(node->mTransformation),
+        nullptr, //parent,
+        0,
+        std::array<Avatar::Node*, 128>{}
+    );
+    Avatar::Node& current = iter->second;
+    if (parent) {
+        parent->Children[parent->ChildCount++] = &current;
+    }
+
+    for (unsigned int i = 0; i < node->mNumMeshes; i++) {
+        aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+        Avatar::Node::Mesh& processedMesh = processMesh(current, mesh);
+        if (mesh->mNumBones == 0) { /* boneless animation */
+            int boneId = static_cast<int>(avatar.Bones.size());
+            avatar.Bones.try_emplace(
+                current.Name,
+                boneId,
+                current.Name,
+                glm::mat4(1)
+            );
+            for (auto& vertex : processedMesh.Vertices) {
+                vertex.BoneIDs[0] = boneId;
+                vertex.BoneWeights[0] = 1.0f;
+            }
+        } else { /* skeletal animation */
+            for (unsigned int j = 0; j < mesh->mNumBones; j++) {
+                processBone(avatar, processedMesh, mesh->mBones[j]);
+            }
+        }
+    }
+
+    for (unsigned int i = 0; i < node->mNumChildren; i++) {
+        processNode(avatar, node->mChildren[i], scene);
+    }
+
+    if (node == scene->mRootNode) {
+        avatar.RootNode = &current;
+    }
+}
+Avatar::Node::Mesh& Model::processMesh(Avatar::Node& node, aiMesh* mesh) noexcept {
+    auto [iter, _] = node.Meshes.try_emplace(
+        mesh->mName.C_Str(),
+        mesh->mName.C_Str(),
+        std::vector<Vertex>{},
+        std::vector<unsigned int>{}
+    );
+    Avatar::Node::Mesh& current = iter->second;
+    current.Vertices.resize(mesh->mNumVertices);
     for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
-        Vertex v;
-        v.position = { mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z };
-        v.normal = { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z };
+        Vertex& vertex = current.Vertices[i];
+
+        vertex.Position = aiVecToGLMVec(mesh->mVertices[i]);
+        vertex.Normal = aiVecToGLMVec(mesh->mNormals[i]);
         if (mesh->mColors[0]) {
-            v.color = { mesh->mColors[0][i].r, mesh->mColors[0][i].g, mesh->mColors[0][i].b, mesh->mColors[0][i].a };
+            vertex.Color = aiColorToGLMVec(mesh->mColors[0][i]);
+        } else {
+            vertex.Color = { 1.0f, 1.0f, 1.0f, 1.0f };
         }
-        if (mesh->mTextureCoords[0]) {
-            v.uv = { mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y };
+        if (mesh->mTextureCoords[0]) { // does the mesh contain texture coordinates?
+            vertex.TexCoords = aiVecToGLMVec(mesh->mTextureCoords[0][i]);
+        } else {
+            vertex.TexCoords = { 0.0f, 0.0f };
         }
-        vs.push_back(v);
+
+        vertex.BoneIDs.fill(-1);
+        vertex.BoneWeights.fill(0.0f);
     }
 
     for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
         aiFace face = mesh->mFaces[i];
         for (unsigned int j = 0; j < face.mNumIndices; j++) {
-            is.push_back(face.mIndices[j]);
+            current.Indices.emplace_back(face.mIndices[j]);
         }
     }
 
-    if (mesh->mMaterialIndex >= 0) {
-        aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-
-        std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-        /*
-        ts.insert(ts.end(), diffuseMaps.begin(), diffuseMaps.end());
-        if (diffuseMaps.size() > 0) {
-            for (auto& v : vs) {
-                v.texIndex = 0; // mesh->mMaterialIndex;
+    return current;
+}
+void Model::processBone(struct Avatar& avatar, Avatar::Node::Mesh& mesh, aiBone* bone) noexcept {
+    auto SetVertexBoneData = [](Vertex& vertex, int boneID, float weight) {
+        for (int i = 0; i < Vertex::MAX_BONE_PER_VERTEX; ++i) {
+            if (vertex.BoneIDs[i] < 0) {
+                vertex.BoneIDs[i] = boneID;
+                vertex.BoneWeights[i] = weight;
+                break;
             }
-        }*/
+        }
+    };
 
-        std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
-        //ts.insert(ts.end(), specularMaps.begin(), specularMaps.end());
+    auto [iter, _] = avatar.Bones.try_emplace(
+        bone->mName.C_Str(),
+        avatar.Bones.size(),
+        bone->mName.C_Str(),
+        aiMat4ToGLMMat4(bone->mOffsetMatrix)
+    );
+    Avatar::Bone& current = iter->second;
+
+    auto weights = bone->mWeights;
+    auto numWeights = bone->mNumWeights;
+
+    for (unsigned int j = 0; j < numWeights; j++) {
+        auto vertexID = weights[j].mVertexId;
+        auto weight = weights[j].mWeight;
+        assert(vertexID <= mesh.Vertices.size()); /* this also practically should never happen! re-export your model */
+        SetVertexBoneData(mesh.Vertices[vertexID], current.Id, weight);
     }
-
-    return Mesh(std::move(vs), std::move(is));
 }
-
-static std::vector<Mesh> processNode(aiNode* node, const aiScene* scene) {
-    std::vector<Mesh> meshes;
-    for (unsigned int i = 0; i < node->mNumMeshes; i++) {
-        aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-        meshes.emplace_back(std::move(processMesh(mesh, scene)));
+std::vector<Model::RenderableMesh> Model::realizeMeshes(const Avatar& avatar) noexcept {
+    std::vector<Model::RenderableMesh> rv{};
+    for (const auto& [_, node] : avatar.Nodes) {
+        for (const auto& [__, mesh] : node.Meshes) {
+            rv.emplace_back(&mesh);
+        }
     }
-
-    for (unsigned int i = 0; i < node->mNumChildren; i++) {
-        auto rv{ processNode(node->mChildren[i], scene) };
-        meshes.insert(meshes.end(), std::make_move_iterator(rv.begin()), std::make_move_iterator(rv.end()));
-    }
-    return meshes;
-}
-
-std::weak_ptr<Model> CreateModelFromMesh(std::string_view name, std::vector<Mesh>&& meshes) {
-    auto rv = std::make_shared<Model>(name, std::move(meshes));
-    MODELS.emplace(name, rv);
     return rv;
 }
 
-std::optional<std::weak_ptr<Model>> CreateModelFromFileSystem(std::string_view modelPath) {
-    Assimp::Importer importer;
-    auto steps = aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_OptimizeMeshes | aiProcess_PreTransformVertices;
-    auto* scene = importer.ReadFile(modelPath.data(), steps);
+Model::RenderableMesh::RenderableMesh(const Avatar::Node::Mesh* const mesh) noexcept :
+    Mesh(mesh) {
+    Buffer vbo(Buffer::Accept(mesh->Vertices));
+    VertexAttribLayout layout;
+    layout.Define<float>(3); // Position
+    layout.Define<float>(3); // Normal
+    layout.Define<float>(4); // Color
+    layout.Define<float>(2); // UV
+    layout.Define<int>(4);   // BoneIDs
+    layout.Define<float>(4); // BoneWeights
+    VAO.BindVertexAttribBuffer(std::move(vbo), std::move(layout));
 
-    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-        DOA_LOG_ERROR("Cannot load mesh, returned nullptr! %s", importer.GetErrorString());
-        return {};
+    Buffer ebo(Buffer::Accept(mesh->Indices));
+    VAO.BindElementBuffer(std::move(ebo));
+    // ---------------------------------------------------------------
+    AABB.Min = glm::vec3(std::numeric_limits<float>::max());
+    AABB.Max = -glm::vec3(std::numeric_limits<float>::max());
+
+    for (const auto& vertex : mesh->Vertices) {
+        const auto& position = vertex.Position;
+
+        AABB.Min.x = std::min(AABB.Min.x, position.x);
+        AABB.Min.y = std::min(AABB.Min.y, position.y);
+        AABB.Min.z = std::min(AABB.Min.z, position.z);
+
+        AABB.Max.x = std::max(AABB.Max.x, position.x);
+        AABB.Max.y = std::max(AABB.Max.y, position.y);
+        AABB.Max.z = std::max(AABB.Max.z, position.z);
     }
-    std::string name(modelPath);
-    name = name.substr(name.find_last_of("/\\") + 1);
-    auto rv = std::make_shared<Model>(name, processNode(scene->mRootNode, scene)); //std::move(processNode) prevents copy elision here...
-    MODELS.emplace(name, rv);
-
-    return rv;
-}
-
-std::optional<std::weak_ptr<Model>> FindModel(std::string_view name) {
-    auto it = MODELS.find(name.data());
-    if (it == MODELS.end()) {
-        DOA_LOG_WARNING("There is no Model named %s!", name);
-        return {};
-    }
-    return it->second;
 }

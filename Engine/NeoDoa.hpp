@@ -121,7 +121,6 @@
 #pragma endregion
 #pragma region Model
 #include <Engine/Vertex.hpp>
-#include <Engine/Mesh.hpp>
 #include <Engine/Model.hpp>
 #pragma endregion
 #pragma region ScriptComponent

@@ -38,8 +38,8 @@ WindowPtr Window::CreateWindow(Resolution resolution, const char* title, bool is
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_SAMPLES, 4);
-    rv->_glfwWindow = glfwCreateWindow(rv->_resolution.w, rv->_resolution.h, title, isFullscreen ? glfwGetPrimaryMonitor() : nullptr, nullptr);
-    glfwGetWindowSize(rv->_glfwWindow, &rv->_contentResolution.w, &rv->_contentResolution.h);
+    rv->_glfwWindow = glfwCreateWindow(rv->_resolution.Width, rv->_resolution.Height, title, isFullscreen ? glfwGetPrimaryMonitor() : nullptr, nullptr);
+    glfwGetWindowSize(rv->_glfwWindow, &rv->_contentResolution.Width, &rv->_contentResolution.Height);
 
 #pragma region Window Icon Initialization
     GLFWimage img[6];
@@ -103,7 +103,7 @@ void Window::DeleteWindow(Window* window) {
 void Window::glfwWindowOnResize(GLFWwindow* window, int width, int height) {
     static auto& Window = Core::GetCore()->Window();
     Window->_resolution = { width, height };
-    glfwGetWindowSize(Window->_glfwWindow, &Window->_contentResolution.w, &Window->_contentResolution.h);
+    glfwGetWindowSize(Window->_glfwWindow, &Window->_contentResolution.Width, &Window->_contentResolution.Height);
 }
 
 void Window::glfwWindowOnKeyStateChange(GLFWwindow* window, int key, int scancode, int action, int mods) {

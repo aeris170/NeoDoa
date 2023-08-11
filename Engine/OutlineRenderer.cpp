@@ -5,7 +5,6 @@
 
 #include "Model.hpp"
 #include "Shader.hpp"
-#include "Mesh.hpp"
 
 #include "OrthoCamera.hpp"
 #include "PerspectiveCamera.hpp"

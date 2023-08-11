@@ -2,7 +2,7 @@
 
 OutlineAttachment::OutlineAttachment(std::shared_ptr<GUI> gui) noexcept :
     gui(gui),
-    fbo({ 1024, 1024 }) {}
+    fbo() {}
 
 void OutlineAttachment::BeforeFrame(Project* project) {}
 void OutlineAttachment::AfterFrame(Project* project) {
@@ -11,13 +11,11 @@ void OutlineAttachment::AfterFrame(Project* project) {
 
     Scene& scene = project->GetOpenScene();
     Entity entt = gui->sh.selectedEntity;
-    if (!scene.HasComponent<MeshComponent>(entt)) return;
+    //if (!scene.HasComponent<MeshComponent>(entt)) return;
     TransformComponent& transformComponent = scene.GetComponent<TransformComponent>(entt);
-    MeshComponent& meshComponent = scene.GetComponent<MeshComponent>(entt);
+    //MeshComponent& meshComponent = scene.GetComponent<MeshComponent>(entt);
 
     fbo.Bind();
     // Graphics::DrawMesh(meshComponent.mesh, transformComponent.GetWorldMatrix(), solidColorShader, )
     glDepthMask(GL_FALSE);
-
-    fbo.UnBind();
 }

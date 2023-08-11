@@ -22,12 +22,12 @@ private:
     Entity entity;
 
     bool isActiveAndRendering{ true };
-    OrthoCamera data{
+    OrthoCamera data {
         -1.0f, 1.0f,
         -1.0f, 1.0f,
         -1.0f, 1.0f
     };
-    FrameBuffer frameBuffer{ Resolution{ 1920, 1080 } };
+    FrameBuffer frameBuffer{};
 
     OrthoCameraComponent(const Entity owner, OrthoCamera&& matrix) noexcept;
 
@@ -47,7 +47,6 @@ public:
 
     FrameBuffer& GetFrameBuffer();
     const FrameBuffer& GetFrameBuffer() const;
-    void SetUpFrameBuffer(Resolution resolution);
 
     friend void SerializeOrthoCameraComponent(tinyxml2::XMLPrinter& printer, const OrthoCameraComponent& camera);
     friend OrthoCameraComponent DeserializeOrthoCameraComponent(tinyxml2::XMLElement* component, const Entity entity, const Scene& scene);
@@ -58,13 +57,13 @@ private:
     Entity entity;
 
     bool isActiveAndRendering{ true };
-    PerspectiveCamera data{
+    PerspectiveCamera data {
         110,
         16.0f / 9.0f,
         0.001f,
         10000.0f
     };
-    FrameBuffer frameBuffer{ Resolution{ 1920, 1080 } };
+    FrameBuffer frameBuffer{};
 
     PerspectiveCameraComponent(const Entity owner, PerspectiveCamera&& data) noexcept;
 
@@ -84,7 +83,6 @@ public:
 
     FrameBuffer& GetFrameBuffer();
     const FrameBuffer& GetFrameBuffer() const;
-    void SetUpFrameBuffer(Resolution resolution);
 
     friend void SerializePerspectiveCameraComponent(tinyxml2::XMLPrinter& printer, const PerspectiveCameraComponent& camera);
     friend PerspectiveCameraComponent DeserializePerspectiveCameraComponent(tinyxml2::XMLElement* component, const Entity entity, const Scene& scene);

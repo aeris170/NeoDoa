@@ -180,7 +180,11 @@ const CorePtr& Core::CreateCore(Resolution resolution, const char* title, bool i
 #pragma endregion
 
     if (renderOffscreen) {
-        _this->offscreenBuffer = std::make_unique<struct FrameBuffer>(resolution);
+        FrameBufferBuilder builder;
+        builder.SetResolution(resolution);
+        builder.AddColorAttachment(OpenGL::RGB8);
+        builder.SetDepthStencilAttachment(OpenGL::DEPTH24_STENCIL8);
+        _this->offscreenBuffer = builder.BuildUnique();
     }
 #pragma endregion
 
@@ -255,7 +259,7 @@ void Core::Start() {
     running = true;
     while (running) {
         currentTime = static_cast<float>(glfwGetTime());
-        glViewport(0, 0, window->GetContentResolution().w, window->GetContentResolution().h);
+        glViewport(0, 0, window->GetContentResolution().Width, window->GetContentResolution().Height);
 
         float delta = currentTime - lastTime;
 
@@ -274,7 +278,8 @@ void Core::Start() {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
             scene.Render();
             if (renderingOffscreen) {
-                offscreenBuffer->UnBind(window->GetContentResolution());
+                FrameBuffer::BackBuffer().Bind();
+                glViewport(0, 0, window->GetContentResolution().Width, window->GetContentResolution().Height);
             }
             for (auto [id, attachment] : _attachments) {
                 attachment->AfterFrame(project.get());

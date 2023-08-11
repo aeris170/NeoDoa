@@ -1,9 +1,9 @@
 #include <Engine/Core.hpp>
 #include <Engine/ImGuiRenderer.hpp>
 
-#include "GUI.hpp"
-#include "OutlineAttachment.hpp"
-#include "EditorMetaInitializer.hpp"
+#include <Editor/GUI.hpp>
+#include <Editor/OutlineAttachment.hpp>
+#include <Editor/EditorMetaInitializer.hpp>
 
 int main() {
     InitializeEditorMeta();

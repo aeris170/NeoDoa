@@ -27,7 +27,6 @@
 #include "TypedefsAndConstants.hpp"
 #include "Log.hpp"
 #include "Scene.hpp"
-#include "Mesh.hpp"
 #include "Model.hpp"
 #include "Shader.hpp"
 #include "Color.hpp"
@@ -359,11 +358,10 @@ Angel::Angel() noexcept :
 #pragma region Core Types
     r = _scriptEngine->RegisterObjectType("Vertex", sizeof(Vertex), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<Vertex>()); assert(r >= 0);
     r = _scriptEngine->RegisterObjectBehaviour("Vertex", asBEHAVE_CONSTRUCT, "void f()", asFUNCTION(vertexCtor), asCALL_CDECL_OBJFIRST); assert(r >= 0);
-    r = _scriptEngine->RegisterObjectProperty("Vertex", "vec3 position", asOFFSET(Vertex, position)); assert(r >= 0);
-    r = _scriptEngine->RegisterObjectProperty("Vertex", "vec3 normal", asOFFSET(Vertex, normal)); assert(r >= 0);
-    r = _scriptEngine->RegisterObjectProperty("Vertex", "vec4 color", asOFFSET(Vertex, color)); assert(r >= 0);
-    r = _scriptEngine->RegisterObjectProperty("Vertex", "vec2 uv", asOFFSET(Vertex, uv)); assert(r >= 0);
-    r = _scriptEngine->RegisterObjectProperty("Vertex", "int texIndex", asOFFSET(Vertex, texIndex)); assert(r >= 0);
+    r = _scriptEngine->RegisterObjectProperty("Vertex", "vec3 position", asOFFSET(Vertex, Position)); assert(r >= 0);
+    r = _scriptEngine->RegisterObjectProperty("Vertex", "vec3 normal", asOFFSET(Vertex, Normal)); assert(r >= 0);
+    r = _scriptEngine->RegisterObjectProperty("Vertex", "vec4 color", asOFFSET(Vertex, Color)); assert(r >= 0);
+    r = _scriptEngine->RegisterObjectProperty("Vertex", "vec2 uv", asOFFSET(Vertex, TexCoords)); assert(r >= 0);
 
     r = _scriptEngine->RegisterObjectType("Color", sizeof(Color), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<Color>()); assert(r >= 0);
     r = _scriptEngine->RegisterObjectBehaviour("Color", asBEHAVE_CONSTRUCT, "void f()", asFUNCTION(colorCtor), asCALL_CDECL_OBJFIRST); assert(r >= 0);

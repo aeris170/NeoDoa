@@ -40,8 +40,8 @@ void SceneViewport::Render(Scene& scene) {
         ImGui::GetWindowPos().y + ImGui::GetCursorPos().y
     };
 
-    ImVec2 size{ static_cast<float>(viewportSize.w), static_cast<float>(viewportSize.h) };
-    ImGui::Image(reinterpret_cast<void*>(gui.CORE->FrameBuffer()->_tex), size, { 0, 1 }, { 1, 0 });
+    ImVec2 size{ static_cast<float>(viewportSize.Width), static_cast<float>(viewportSize.Height) };
+    ImGui::Image(reinterpret_cast<void*>(gui.CORE->FrameBuffer()->GetColorAttachment()), size, { 0, 1 }, { 1, 0 });
 
     ImGui::PushClipRect({ viewportPosition.x, viewportPosition.y }, { viewportPosition.x + size.x, viewportPosition.y + size.y }, false);
     gizmos.settings.viewportSize = viewportSize;
@@ -154,7 +154,7 @@ void SceneViewport::DrawCubeControl(Scene& scene) {
     camera.UpdateView();
     glm::mat4 view = camera._viewMatrix;
     ImGuizmo::SetDrawlist();
-    ImGuizmo::ViewManipulate(glm::value_ptr(view), 8, { viewportPosition.x + viewportSize.w - 128 , viewportPosition.y }, { 128, 128 }, 0x10101080);
+    ImGuizmo::ViewManipulate(glm::value_ptr(view), 8, { viewportPosition.x + viewportSize.Width - 128 , viewportPosition.y }, { 128, 128 }, 0x10101080);
     camera.forward = glm::normalize(glm::vec3(-view[0].z, -view[1].z, -view[2].z)); // forward is INVERTED!!!
 
     // don't change up vector, fuck space sims. up being something other than 0, 1, 0 is VERBOTEN!

@@ -38,9 +38,6 @@ bool OrthoCameraComponent::IsActiveAndRendering() const { return isActiveAndRend
 
 FrameBuffer& OrthoCameraComponent::GetFrameBuffer() { return frameBuffer; }
 const FrameBuffer& OrthoCameraComponent::GetFrameBuffer() const { return frameBuffer; }
-void OrthoCameraComponent::SetUpFrameBuffer(Resolution resolution) {
-    frameBuffer = resolution;
-}
 
 /* Ortho Camera Above */
 /* Perpective Camera Below */
@@ -75,9 +72,5 @@ bool PerspectiveCameraComponent::IsActiveAndRendering() const { return isActiveA
 
 FrameBuffer& PerspectiveCameraComponent::GetFrameBuffer() { return frameBuffer; }
 const FrameBuffer& PerspectiveCameraComponent::GetFrameBuffer() const { return frameBuffer; }
-void PerspectiveCameraComponent::SetUpFrameBuffer(Resolution resolution) {
-    frameBuffer = resolution;
-    data._aspect = resolution.Aspect();
-}
 
 /* Perspective Camera Above*/

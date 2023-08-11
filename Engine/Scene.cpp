@@ -132,23 +132,21 @@ void Scene::Render() {
     _registry.view<OrthoCameraComponent>().each([](Entity entt, OrthoCameraComponent& camera) {
         if (!camera.IsActiveAndRendering()) { return; }
         camera.UpdateMatrices();
-        const auto& fbo = camera.GetFrameBuffer();
+        auto& fbo = camera.GetFrameBuffer();
         fbo.Bind();
         fbo.ClearBuffers();
-        DOA_LOG_INFO("%s %d", "ortho camera attached to", EntityTo<int>(camera.GetEntity()));
+        DOA_LOG_INFO("ortho camera attached to entity %d", EntityTo<int>(camera.GetEntity()));
         //render stuff here
-        fbo.UnBind();
     });
 
     _registry.view<PerspectiveCameraComponent>().each([](Entity entt, PerspectiveCameraComponent& camera) {
         if (!camera.IsActiveAndRendering()) { return; }
         camera.UpdateMatrices();
-        const auto& fbo = camera.GetFrameBuffer();
+        auto& fbo = camera.GetFrameBuffer();
         fbo.Bind();
         fbo.ClearBuffers();
-        DOA_LOG_INFO("%s %d", "perspective camera attached to", EntityTo<int>(camera.GetEntity()));
+        DOA_LOG_INFO("perspective camera attached to entity %d", EntityTo<int>(camera.GetEntity()));
         //render stuff here
-        fbo.UnBind();
     });
 
     /*

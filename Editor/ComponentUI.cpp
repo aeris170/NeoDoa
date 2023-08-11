@@ -98,12 +98,12 @@ void OrthoCameraComponentUI::Render(const OrthoCameraComponent& orthoCameraCompo
     Space();
     Header(UINames[nameof(OrthoCameraComponent::data)]);
 
-    ColorWidget(UINames[nameof(FrameBuffer::ClearColor)], orthoCamera.GetFrameBuffer().ClearColor);
+    //ColorWidget(UINames[nameof(FrameBuffer::ClearColor)], orthoCamera.ClearColor);
 
-    Resolution r = orthoCamera.GetFrameBuffer()._resolution;
-    if (ResolutionWidget(UINames[nameof(OrthoCameraComponent::frameBuffer)], r)) {
-        orthoCamera.SetUpFrameBuffer(r);
-    }
+    //Resolution r = orthoCamera.GetFrameBuffer();
+    //if (ResolutionWidget(UINames[nameof(OrthoCameraComponent::frameBuffer)], r)) {
+    //   orthoCamera.SetUpFrameBuffer(r);
+    //}
 
     Space();
 
@@ -130,12 +130,12 @@ void PerspectiveCameraComponentUI::Render(const PerspectiveCameraComponent& pers
     Space();
     Header(UINames[nameof(PerspectiveCameraComponent::data)]);
 
-    ColorWidget(UINames[nameof(PerspectiveCameraComponent::ClearColor)], perspectiveCamera.GetFrameBuffer().ClearColor);
+    //ColorWidget(UINames[nameof(PerspectiveCameraComponent::ClearColor)], perspectiveCamera.ClearColor);
 
-    Resolution r = perspectiveCamera.GetFrameBuffer()._resolution;
-    if (ResolutionWidget(UINames[nameof(PerspectiveCameraComponent::frameBuffer)], r)) {
-        perspectiveCamera.SetUpFrameBuffer(r);
-    }
+    //Resolution r = perspectiveCamera.GetFrameBuffer()._resolution;
+    //if (ResolutionWidget(UINames[nameof(PerspectiveCameraComponent::frameBuffer)], r)) {
+    //    perspectiveCamera.SetUpFrameBuffer(r);
+    //}
 
     Space();
 

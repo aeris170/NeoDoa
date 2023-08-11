@@ -8,7 +8,6 @@
 #include <Engine/FrameBuffer.hpp>
 #include <Engine/Resolution.hpp>
 #include <Engine/TransformComponent.hpp>
-#include <Engine/MeshComponent.hpp>
 
 #include <Editor/GUI.hpp>
 

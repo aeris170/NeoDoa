@@ -28,8 +28,8 @@ void Gizmos::Render(Scene& scene) {
     ImGuizmo::SetRect(
         settings.viewportPosition.x,
         settings.viewportPosition.y,
-        static_cast<float>(settings.viewportSize.w),
-        static_cast<float>(settings.viewportSize.h)
+        static_cast<float>(settings.viewportSize.Width),
+        static_cast<float>(settings.viewportSize.Height)
     );
 
     // Entity transform
