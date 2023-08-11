@@ -17,7 +17,7 @@ struct CodeEditor {
 
     struct EditorTab {
         EditorTab() noexcept = default;
-        EditorTab(AssetHandle currentAsset, bool isSyntaxColoringEnabled, bool isShortTabGlyphsVisible, bool isWhitespaceVisible, int tabSize) noexcept;
+        EditorTab(AssetHandle currentAsset, bool isSyntaxColoringEnabled, bool isWhitespaceVisible, int tabSize) noexcept;
 
         bool IsUnsaved() const;
         void SaveChanges();
@@ -49,7 +49,6 @@ struct CodeEditor {
 
 private:
     bool isSyntaxColoringEnabled{ true };
-    bool isShortTabGlyphsVisible{ false };
     bool isWhitespaceVisible{ true };
     int tabSize{ 4 };
 

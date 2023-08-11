@@ -8,7 +8,7 @@
 CodeEditor::CodeEditor(GUI& gui) noexcept :
     gui(gui) {
     tabs.reserve(10);
-    emptyTab.textEditor.SetReadOnly(true);
+    emptyTab.textEditor.SetReadOnlyEnabled(true);
 }
 
 bool CodeEditor::Begin() {
@@ -116,7 +116,7 @@ void CodeEditor::RenderMenuBar() {
                 te->Redo();
             }
             ImGui::Separator();
-            bool editorHasSelection = te ? te->HasSelection() : false;
+            bool editorHasSelection = te ? te->AnyCursorHasSelection() : false;
             if (ImGui::MenuItem("Copy", "Ctrl-C", nullptr, menuBarEnabled && editorHasSelection)) {
                 te->Copy();
             }
@@ -158,11 +158,6 @@ void CodeEditor::RenderMenuBar() {
                     tab.textEditor.SetColorizerEnable(isSyntaxColoringEnabled);
                 }
             }
-            if (ImGui::Checkbox("Short Tab Glyphs", &isShortTabGlyphsVisible)) {
-                for (auto& tab : tabs) {
-                    tab.textEditor.SetShowShortTabGlyphs(isShortTabGlyphsVisible);
-                }
-            }
             if (ImGui::Checkbox("Whitespaces", &isWhitespaceVisible)) {
                 for (auto& tab : tabs) {
                     tab.textEditor.SetShowWhitespaces(isWhitespaceVisible);
@@ -192,7 +187,7 @@ void CodeEditor::AddTab(AssetHandle assetHandle) {
         return;
     }
 
-    tabs.emplace_back(assetHandle, isSyntaxColoringEnabled, isShortTabGlyphsVisible, isWhitespaceVisible, tabSize);
+    tabs.emplace_back(assetHandle, isSyntaxColoringEnabled, isWhitespaceVisible, tabSize);
     selectedTabIndex++;
 }
 
@@ -203,10 +198,9 @@ void CodeEditor::SaveAllChanges() {
 }
 
 // Inner-struct: EditorTab
-CodeEditor::EditorTab::EditorTab(AssetHandle currentAsset, bool isSyntaxColoringEnabled, bool isShortTabGlyphsVisible, bool isWhitespaceVisible, int tabSize) noexcept :
+CodeEditor::EditorTab::EditorTab(AssetHandle currentAsset, bool isSyntaxColoringEnabled, bool isWhitespaceVisible, int tabSize) noexcept :
     currentAsset(currentAsset) {
     textEditor.SetColorizerEnable(isSyntaxColoringEnabled);
-    textEditor.SetShowShortTabGlyphs(isShortTabGlyphsVisible);
     textEditor.SetShowWhitespaces(isWhitespaceVisible);
     textEditor.SetTabSize(tabSize);
     currentAsset->File().ReadContent();
