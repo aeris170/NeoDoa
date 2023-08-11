@@ -14,9 +14,11 @@ set(SOURCE_LIST
     "split.hpp"
     "string_map.hpp"
     "TemplateUtilities.hpp"
+    "trim.hpp"
 )
 
 add_library(Utility INTERFACE ${SOURCE_LIST})
 target_include_directories(Utility INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_features(Utility INTERFACE cxx_std_23)
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_LIST})
