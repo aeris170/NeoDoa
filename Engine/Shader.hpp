@@ -35,15 +35,23 @@ struct Shader {
 
 struct ShaderProgram {
 
-    std::string name;
+    GLuint ID;
+    std::string Name;
 
-                  Shader  vertexShader;
-    std::optional<Shader> tesselationControlShader;
-    std::optional<Shader> tesselationEvaluationShader;
-    std::optional<Shader> geometryShader;
-                  Shader  fragmentShader;
+    UUID VertexShader{ UUID::Empty() };
+    UUID TessellationControlShader{ UUID::Empty() };
+    UUID TessellationEvaluationShader{ UUID::Empty() };
+    UUID GeometryShader{ UUID::Empty() };
+    UUID FragmentShader{ UUID::Empty() };
 
-    std::vector<Shader::Uniform> uniforms;
+    bool IsComplete() const;
+    bool HasVertexShader() const;
+    bool HasTessellationControlShader() const;
+    bool HasTessellationEvaluationShader() const;
+    bool HasGeometryShader() const;
+    bool HasFragmentShader() const;
+
+    std::vector<Shader::Uniform> Uniforms;
 
     std::string Serialize() const;
     static ShaderProgram Deserialize(const std::string_view data);

@@ -58,6 +58,8 @@ set(GROUP_LIST
     "Asset/Shader/Shader.hpp"
 	"Asset/Shader/Serialize/ShaderDeserializer.cpp"
     "Asset/Shader/Serialize/ShaderDeserializer.hpp"
+	"Asset/Shader/Serialize/ShaderProgramDeserializer.cpp"
+    "Asset/Shader/Serialize/ShaderProgramDeserializer.hpp"
     "Asset/Texture/Texture.cpp"
     "Asset/Texture/Texture.hpp"
     "Asset/Texture/Serialize/TextureSerializer.cpp"
