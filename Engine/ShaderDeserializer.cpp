@@ -2,16 +2,11 @@
 
 #include <regex>
 #include <vector>
-#include <sstream>
+#include <cassert>
 
 #include <Utility/trim.hpp>
-#include <Utility/split.hpp>
 
-#include "Core.hpp"
-#include "Angel.hpp"
-#include "Log.hpp"
-
-#include "FileNode.hpp"
+#include <Engine/FileNode.hpp>
 
 static std::vector<std::string> SplitCompilerMessages(const std::string& messages) {
     static const std::regex regex{ "\n(?!\\s)" };
@@ -56,7 +51,7 @@ ShaderDeserializationResult DeserializeVertexShader(const FNode& file) {
     file.ReadContent();
     auto rv = DeserializeVertexShader(file.DisposeContent());
     if (!rv.erred) {
-        rv.deserializedShader.name = file.Name();
+        rv.deserializedShader.Name = file.Name();
     }
     return rv;
 }
@@ -96,7 +91,11 @@ ShaderDeserializationResult DeserializeVertexShader(const std::string_view data)
 
 ShaderDeserializationResult DeserializeTessellationControlShader(const FNode& file) {
     file.ReadContent();
-    return DeserializeTessellationControlShader(file.DisposeContent());
+    auto rv = DeserializeTessellationControlShader(file.DisposeContent());
+    if (!rv.erred) {
+        rv.deserializedShader.Name = file.Name();
+    }
+    return rv;
 }
 ShaderDeserializationResult DeserializeTessellationControlShader(const std::string_view data) {
     ShaderDeserializationResult rv;
@@ -134,7 +133,11 @@ ShaderDeserializationResult DeserializeTessellationControlShader(const std::stri
 
 ShaderDeserializationResult DeserializeTessellationEvaluationShader(const FNode& file) {
     file.ReadContent();
-    return DeserializeTessellationEvaluationShader(file.DisposeContent());
+    auto rv = DeserializeTessellationEvaluationShader(file.DisposeContent());
+    if (!rv.erred) {
+        rv.deserializedShader.Name = file.Name();
+    }
+    return rv;
 }
 ShaderDeserializationResult DeserializeTessellationEvaluationShader(const std::string_view data) {
     ShaderDeserializationResult rv;
@@ -172,7 +175,11 @@ ShaderDeserializationResult DeserializeTessellationEvaluationShader(const std::s
 
 ShaderDeserializationResult DeserializeGeometryShader(const FNode& file) {
     file.ReadContent();
-    return DeserializeGeometryShader(file.DisposeContent());
+    auto rv = DeserializeGeometryShader(file.DisposeContent());
+    if (!rv.erred) {
+        rv.deserializedShader.Name = file.Name();
+    }
+    return rv;
 }
 ShaderDeserializationResult DeserializeGeometryShader(const std::string_view data) {
     ShaderDeserializationResult rv;
@@ -210,7 +217,11 @@ ShaderDeserializationResult DeserializeGeometryShader(const std::string_view dat
 
 ShaderDeserializationResult DeserializeFragmentShader(const FNode& file) {
     file.ReadContent();
-    return DeserializeFragmentShader(file.DisposeContent());
+    auto rv = DeserializeFragmentShader(file.DisposeContent());
+    if (!rv.erred) {
+        rv.deserializedShader.Name = file.Name();
+    }
+    return rv;
 }
 ShaderDeserializationResult DeserializeFragmentShader(const std::string_view data) {
     ShaderDeserializationResult rv;
@@ -248,7 +259,11 @@ ShaderDeserializationResult DeserializeFragmentShader(const std::string_view dat
 
 ShaderDeserializationResult DeserializeComputeShader(const FNode& file) {
     file.ReadContent();
-    return DeserializeComputeShader(file.DisposeContent());
+    auto rv = DeserializeComputeShader(file.DisposeContent());
+    if (!rv.erred) {
+        rv.deserializedShader.Name = file.Name();
+    }
+    return rv;
 }
 ShaderDeserializationResult DeserializeComputeShader(const std::string_view data) {
     ShaderDeserializationResult rv;

@@ -659,7 +659,7 @@ void Observer::ShaderDisplay::SetRenderTarget(const AssetHandle shaderAsset) {
         ShaderAsset = shaderAsset;
         if (ShaderAsset->HasDeserializedData() && !ShaderAsset->HasErrorMessages()) {
             const auto& shader = ShaderAsset->DataAs<Shader>();
-            TextEditor.SetText(shader.sourceCode);
+            TextEditor.SetText(shader.SourceCode);
         }
     }
 }

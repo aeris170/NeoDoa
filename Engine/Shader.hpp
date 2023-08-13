@@ -6,6 +6,8 @@
 
 #include <GL/glew.h>
 
+#include <Engine/UUID.hpp>
+
 struct Shader {
     enum class Type {
         VERTEX,
@@ -22,10 +24,10 @@ struct Shader {
     };
 
     GLuint ID;
-    Type type;
-    std::string name;
-    std::string sourceCode;
-    std::vector<Uniform> uniforms;
+    Type Type;
+    std::string Name;
+    std::string SourceCode;
+    std::vector<Uniform> Uniforms;
 
     std::string Serialize() const;
     static Shader Deserialize(const std::string_view data);
