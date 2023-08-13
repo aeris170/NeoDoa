@@ -45,6 +45,7 @@ bool Assets::IsTessellationEvaluationShaderFile(const FNode& file) { return file
 bool Assets::IsGeometryShaderFile(const FNode& file) { return file.ext == GEOMETRY_SHADER_EXT; }
 bool Assets::IsFragmentShaderFile(const FNode& file) { return file.ext == FRAGMENT_SHADER_EXT; }
 bool Assets::IsComputeShaderFile(const FNode & file) { return file.ext == COMPUTE_SHADER_EXT; }
+bool Assets::IsShaderProgramFile(const FNode& file) { return file.ext == SHADER_PROGRAM_EXT; }
 bool Assets::IsComponentDefinitionFile(const FNode& file) { return file.ext == COMP_EXT; }
 
 Assets::Assets(FNode&& root) noexcept :
@@ -121,6 +122,7 @@ const Assets::UUIDCollection& Assets::TextureAssetIDs() const { return textureAs
 const Assets::UUIDCollection& Assets::ComponentDefinitionAssetIDs() const { return componentDefinitionAssets; }
 const Assets::UUIDCollection& Assets::ModelAssetIDs() const { return modelAssets; }
 const Assets::UUIDCollection& Assets::ShaderAssetIDs() const { return shaderAssets; }
+const Assets::UUIDCollection& Assets::ShaderProgramAssetIDs() const { return shaderProgramAssets; }
 const Assets::UUIDCollection& Assets::ShaderUniformBlockAssetIDs() const { return shaderUniformBlockAssets; }
 
 void Assets::Import(const FNode& file) { ImportFile(database, file); }
@@ -212,6 +214,9 @@ AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
         }
         if (asset.IsShader()) {
             shaderAssets.push_back(id);
+        }
+        if (asset.IsShaderProgram()) {
+            shaderProgramAssets.push_back(id);
         }
         if (asset.IsTexture()) {
             textureAssets.push_back(id);

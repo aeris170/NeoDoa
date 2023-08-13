@@ -58,6 +58,7 @@ private:
         static void RenderSceneView(const Observer& observer, AssetHandle h);
         static void RenderComponentDefinitionView(const Observer& observer, AssetHandle h);
         static void RenderShaderView(const Observer& observer, AssetHandle h);
+        static void RenderShaderProgramView(const Observer& observer, AssetHandle h);
         static void RenderTextureView(const Observer& observer, AssetHandle h);
         static void RenderTextView(const Observer& observer, AssetHandle h);
     };

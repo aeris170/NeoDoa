@@ -92,6 +92,10 @@ void MetaAssetInfoBank::TryEmplace(const FNode& file, const MetaAssetInfo& empla
                 fa_icon = _fa_icon;
                 svg_icon_key = _svg_icon_key;
             }
+        } else if (handle->IsShaderProgram()) {
+            const auto& [_fa_icon, _svg_icon_key] = FileIcons::ShaderProgramIcons[0];
+            fa_icon = _fa_icon;
+            svg_icon_key = _svg_icon_key;
         } else if (handle->IsTexture()) {
             const auto& [_fa_icon, _svg_icon_key] = FileIcons::TextureIcons[0];
             fa_icon = _fa_icon;

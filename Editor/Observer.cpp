@@ -191,6 +191,10 @@ void Observer::DisplayTargetRenderer::RenderIconChangePopup(const FNode& file, M
             auto& items = FileIcons::ShaderIcons;
             begin = &items.front();
             end = &items.back() + 1;
+        } else if (Assets::IsShaderProgramFile(file)) {
+            auto& items = FileIcons::ShaderProgramIcons;
+            begin = &items.front();
+            end = &items.back() + 1;
         } else if (Assets::IsTextureFile(file)) {
             auto& items = FileIcons::TextureIcons;
             begin = &items.front();
@@ -261,6 +265,8 @@ void Observer::DisplayTargetRenderer::RenderAssetView(const Observer& observer, 
         RenderComponentDefinitionView(observer, h);
     } else if (h->IsShader()) {
         RenderShaderView(observer, h);
+    } else if (h->IsShaderProgram()) {
+        RenderShaderProgramView(observer, h);
     } else if (h->IsTexture()) {
         RenderTextureView(observer, h);
     } else {
@@ -342,6 +348,10 @@ void Observer::DisplayTargetRenderer::RenderShaderView(const Observer& observer,
         ImGui::PopTextWrapPos();
         ImGui::EndTooltip();
     }
+}
+void Observer::DisplayTargetRenderer::RenderShaderProgramView(const Observer& observer, AssetHandle h) {
+    assert(h->IsShaderProgram());
+    // TODO shader program view - implement after shader program serializer is complete!
 }
 void Observer::DisplayTargetRenderer::RenderTextureView(const Observer& observer, AssetHandle h) {
     assert(h->IsTexture());

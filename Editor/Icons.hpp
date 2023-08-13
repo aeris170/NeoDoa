@@ -204,6 +204,11 @@ namespace FileIcons {
         std::pair{ FRAGMENT_SHADER_ICON,  "circle-f" },
         std::pair{ COMPUTE_SHADER_ICON,   "circle-c" }
     };
+    inline constexpr const char SHADER_PROGRAM_ICON[]{ ICON_FA_TRIANGLE };
+    inline std::array<ElementType, 1> ShaderProgramIcons{
+        std::pair{ SHADER_PROGRAM_ICON, "triangle" }
+    };
+
 
     inline constexpr const char FILE_ICON[]                    { ICON_FA_FILE                    };
     inline constexpr const char FILE_ICON_MULTIPLE[]           { ICON_FA_FILES                   };

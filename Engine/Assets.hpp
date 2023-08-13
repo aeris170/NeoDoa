@@ -45,6 +45,7 @@ struct Assets {
     inline static std::string GEOMETRY_SHADER_EXT{ ".geom" };
     inline static std::string FRAGMENT_SHADER_EXT{ ".frag" };
     inline static std::string COMPUTE_SHADER_EXT{ ".comp" };
+    inline static std::string SHADER_PROGRAM_EXT{ ".prog" };
     inline static std::string COMP_EXT{ ".ncd" };
     inline static std::string ID_EXT{ ".id" };
 
@@ -60,6 +61,7 @@ struct Assets {
     static bool IsGeometryShaderFile(const FNode& file);
     static bool IsFragmentShaderFile(const FNode& file);
     static bool IsComputeShaderFile(const FNode& file);
+    static bool IsShaderProgramFile(const FNode& file);
     static bool IsComponentDefinitionFile(const FNode& file);
 
     explicit Assets(FNode&& root) noexcept;
@@ -108,6 +110,7 @@ struct Assets {
     const UUIDCollection& ComponentDefinitionAssetIDs() const;
     const UUIDCollection& ModelAssetIDs() const;
     const UUIDCollection& ShaderAssetIDs() const;
+    const UUIDCollection& ShaderProgramAssetIDs() const;
     const UUIDCollection& ShaderUniformBlockAssetIDs() const;
 
     void Import(const FNode& file);
@@ -130,6 +133,7 @@ private:
     UUIDCollection componentDefinitionAssets{};
     UUIDCollection modelAssets{};
     UUIDCollection shaderAssets{};
+    UUIDCollection shaderProgramAssets{};
     UUIDCollection shaderUniformBlockAssets{};
 
     AssetHandle ImportFile(AssetDatabase& database, const FNode& file);

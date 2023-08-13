@@ -62,6 +62,7 @@ struct Asset final : ObserverPattern::Observable {
     bool IsModel() const;
     bool IsMaterial() const;
     bool IsShader() const;
+    bool IsShaderProgram() const;
 
     bool HasInfoMessages() const;
     const std::vector<std::any>& InfoMessages() const;

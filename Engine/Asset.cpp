@@ -6,6 +6,7 @@
 #include "SceneSerializer.hpp"
 #include "ComponentDeserializer.hpp"
 #include "ShaderDeserializer.hpp"
+#include "ShaderProgramDeserializer.hpp"
 #include "TextureDeserializer.hpp"
 #include "TextureSerializer.hpp"
 
@@ -121,6 +122,13 @@ void Asset::Deserialize() {
         }
         data = std::move(result.deserializedShader);
     }
+    if (IsShaderProgram()) {
+        ShaderProgramDeserializationResult result = DeserializeShaderProgram(*file);
+        for (auto& message : result.errors) {
+            errorList.emplace_back(std::move(message));
+        }
+        data = std::move(result.deserializedShaderProgram);
+    }
     if (IsTexture()) {
         data = DeserializeTexture(*file);
     }
@@ -155,6 +163,7 @@ bool Asset::IsTexture() const { return Assets::IsTextureFile(*file); }
 bool Asset::IsModel() const { return Assets::IsModelFile(*file); }
 bool Asset::IsMaterial() const { return Assets::IsMaterialFile(*file); }
 bool Asset::IsShader() const { return Assets::IsShaderFile(*file); }
+bool Asset::IsShaderProgram() const { return Assets::IsShaderProgramFile(*file); }
 
 bool Asset::HasInfoMessages() const { return !infoList.empty(); }
 const std::vector<std::any>& Asset::InfoMessages() const { return infoList; }
