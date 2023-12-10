@@ -9,7 +9,10 @@ GUI::GUI(const CorePtr& core) noexcept :
     CORE(core),
     window(core->Window()) {
     FileDialog::Initialize();
-    window->SetTitle(defaultWindowName);
+
+    std::string title = defaultWindowName;
+    title.append(" - [NO OPEN PROJECT]");
+    window->SetTitle(title);
 
     Events.OnAssetOpened  += std::bind_front(&GUI::OnAssetOpened , this);
     Events.OnSceneOpened  += std::bind_front(&GUI::OnSceneOpened , this);
@@ -170,8 +173,9 @@ void GUI::OpenProjectFromDisk(const std::string& path) {
     metaInfo.LoadFromDisk(*CORE->LoadedProject(), *CORE->Assets());
 
     std::string title = defaultWindowName;
-    title.append(" - ");
+    title.append(" - [");
     title.append(CORE->LoadedProject()->Name());
+    title.append("]");
     window->SetTitle(title);
 
     /* CORE->LoadProject may load start-up scene (if it exists), we need to trap open scene */
@@ -185,6 +189,10 @@ void GUI::OpenProjectFromDisk(const std::string& path) {
 void GUI::CloseProject() {
     obs.ResetDisplayTarget();
     CORE->UnloadProject();
+
+    std::string title = defaultWindowName;
+    title.append(" - [NO OPEN PROJECT]");
+    window->SetTitle(title);
 }
 
 void GUI::CreateNewScene(std::string_view relativePath, std::string_view name) {
