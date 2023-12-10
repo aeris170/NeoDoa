@@ -22,7 +22,34 @@
 #include <Editor/GameViewport.hpp>
 #include <Editor/SceneSettings.hpp>
 
+#include <Editor/NewProjectModal.hpp>
+
 struct GUI {
+
+    struct Events {
+        Event<void(Assets&)>     OnReimport      {};
+        Event<void(AssetHandle)> OnAssetCreated  {};
+        Event<void(AssetHandle)> OnAssetMoved    {};
+        Event<void(AssetHandle)> OnAssetDeleted  {};
+        Event<void(AssetHandle)> OnAssetOpened   {};
+
+        Event<void(Scene&)> OnSceneOpened        {};
+        Event<void()>       OnSceneClosed        {};
+
+        Event<void(Entity)> OnEntityCreated      {};
+        Event<void(Entity)> OnEntityDeleted      {};
+
+        struct SceneHierarchy {
+            Event<void(Entity)> OnEntitySelected{};
+            Event<void()>       OnEntityDeselected{};
+        } SceneHierarchy{};
+
+        struct AssetManager {
+            Event<void(AssetHandle)> OnAssetFocused{};
+            Event<void(FNode&)>      OnFolderFocused{};
+            Event<void()>            OnFocusLost{};
+        } AssetManager{};
+    } Events{};
 
     static constexpr auto SCENE_HIERARCHY_TITLE{ "Scene Hierarchy" };
     static constexpr auto OBSERVER_TITLE{ "Observer" };
@@ -89,11 +116,13 @@ struct GUI {
     void CloseProject();
 
     void CreateNewScene(std::string_view relativePath, std::string_view name);
+    void SaveScene() const;
+    void CloseScene();
 
     bool HasOpenProject() const;
     Project& GetOpenProject() const;
     bool HasOpenScene() const;
-    Scene& GetOpenScene() const;
+    Scene& GetOpenScene();
 
     ImGuiIO* IO() const;
     ImFont* GetFont() const;
@@ -118,6 +147,10 @@ struct GUI {
     MetaAssetInfo& GetMetaInfoOf(const FNode& file);
     void ReloadMetaInfo();
 
+    //- Modals -//
+    NewProjectModal npm{ *this };
+    void ShowNewProjectModal() const;
+
 private:
     ImGuiIO* io{ nullptr };
     ImFont* font{ nullptr };
@@ -127,4 +160,15 @@ private:
 
     // TODO REMOVE ME WHEN IMGUI IMPLEMENTS THIS WORKAROUND AS API FUNC.
     void ExecuteDockBuilderFocusWorkAround();
+
+    // -- //
+    // Open Scene
+    UUID sceneUUID{ UUID::Empty() };
+    std::optional<Scene> scene{};
+    void OnAssetOpened(AssetHandle asset);
+    void OnSceneOpened(Scene& scene);
+    void OnSceneClosed();
+    void OnReimport(Assets& assets);
+    void OnAssetDeleted(AssetHandle asset);
+    // -- //
 };

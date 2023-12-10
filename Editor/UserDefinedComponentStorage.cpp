@@ -18,11 +18,11 @@ ComponentInstance* UserDefinedComponentStorage::AttachComponent(UUID component) 
     }
     if (!handle->IsComponentDefinition()) {
         DOA_LOG_ERROR("Something went wrong! Tried to instantiate a non-component!");
-        return &components.try_emplace(handle->File().Name(), component, InstantiationError::NON_DEFITION_INSTANTIATION).first->second;
+        return &components.try_emplace(handle->File().Name().data(), component, InstantiationError::NON_DEFITION_INSTANTIATION).first->second;
     }
     if (!handle->HasDeserializedData()) {
         DOA_LOG_ERROR("Something went wrong! Tried to instantiate a non-deserialized component!");
-        return &components.try_emplace(handle->File().Name(), component, InstantiationError::DEFINITION_NOT_DESERIALIZED).first->second;
+        return &components.try_emplace(handle->File().Name().data(), component, InstantiationError::DEFINITION_NOT_DESERIALIZED).first->second;
     }
     const Component& cmp = handle->DataAs<Component>();
     if (handle->HasErrorMessages()) {
@@ -39,11 +39,11 @@ ComponentInstance* UserDefinedComponentStorage::AttachComponentWithData(UUID com
     }
     if (!handle->IsComponentDefinition()) {
         DOA_LOG_ERROR("Something went wrong! Tried to instantiate a non-component!");
-        return &components.try_emplace(handle->File().Name(), component, InstantiationError::NON_DEFITION_INSTANTIATION).first->second;
+        return &components.try_emplace(handle->File().Name().data(), component, InstantiationError::NON_DEFITION_INSTANTIATION).first->second;
     }
     if (!handle->HasDeserializedData()) {
         DOA_LOG_ERROR("Something went wrong! Tried to instantiate a non-deserialized component!");
-        return &components.try_emplace(handle->File().Name(), component, InstantiationError::DEFINITION_NOT_DESERIALIZED).first->second;
+        return &components.try_emplace(handle->File().Name().data(), component, InstantiationError::DEFINITION_NOT_DESERIALIZED).first->second;
     }
     const Component& cmp = handle->DataAs<Component>();
     if (handle->HasErrorMessages()) {

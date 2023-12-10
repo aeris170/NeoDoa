@@ -5,8 +5,9 @@
 #include <imgui.h>
 #include <ImGuizmo.h>
 
-#include <glm\glm.hpp>
+#include <glm/glm.hpp>
 
+#include <Engine/Entity.hpp>
 #include <Engine/Resolution.hpp>
 
 struct Scene;
@@ -28,5 +29,11 @@ struct Gizmos {
 
 private:
     std::reference_wrapper<SceneViewport> sv;
+
+    // -- //
+    Entity selectedEntity{ NULL_ENTT };
+    void OnEntitySelected(Entity entity);
+    void OnEntityDeselected();
+    void OnEntityDeleted(Entity entity);
 };
 

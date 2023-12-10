@@ -271,7 +271,7 @@ void ComponentUI::RenderUserDefinedComponentStorage(const Observer& observer, co
                     member.Reset();
                 }
             }
-            if (ImGui::MenuItem(ObserverIcons::ContextMenu::DETACH_COMPONENT_ICON, "Detach Component")) {
+            if (ImGui::MenuItem(cat(ObserverIcons::ContextMenu::DETACH_COMPONENT_ICON, "Detach Component"))) {
                 removee = instance.ComponentAssetID();
             }
             ImGui::EndPopup();

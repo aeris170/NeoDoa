@@ -32,11 +32,12 @@ private:
 struct Assets {
 
     using UUIDCollection = std::vector<UUID>;
-    using AssetFileDatabase = entt::dense_map<const FNode*, UUID>;
 
     inline static std::string SCENE_EXT{ ".scn" };
     inline static std::string SCRIPT_EXT{ ".scrpt" };
-    inline static std::string TEXTURE_EXT{ ".png" };
+    inline static std::string TEXTURE_EXT_PNG{ ".png" };
+    inline static std::string TEXTURE_EXT_JPG{ ".jpg" };
+    inline static std::string TEXTURE_EXT_JPEG{ ".jpeg" };
     inline static std::string MODEL_EXT{ ".mdl" };
     inline static std::string MATERIAL_EXT{ ".mat" };
     inline static std::string VERTEX_SHADER_EXT{ ".vert" };
@@ -64,7 +65,7 @@ struct Assets {
     static bool IsShaderProgramFile(const FNode& file);
     static bool IsComponentDefinitionFile(const FNode& file);
 
-    explicit Assets(FNode&& root) noexcept;
+    explicit Assets(const Project& project) noexcept;
     ~Assets() = default;
     Assets(const Assets&) = delete;
     Assets(Assets&&) = default;
@@ -94,6 +95,7 @@ struct Assets {
         */
         return nullptr;
     }
+    void SaveAsset(const AssetHandle asset);
     void MoveAsset(const AssetHandle asset, FNode& targetParentFolder);
     void DeleteAsset(const AssetHandle asset);
 
@@ -113,14 +115,20 @@ struct Assets {
     const UUIDCollection& ShaderProgramAssetIDs() const;
     const UUIDCollection& ShaderUniformBlockAssetIDs() const;
 
-    void Import(const FNode& file);
+    AssetHandle Import(const FNode& file);
     void ReimportAll();
 
     void EnsureDeserialization();
 
 private:
 
+#if _DEBUG
+    using AssetDatabase = std::unordered_map<UUID, Asset>;
+    using AssetFileDatabase = std::unordered_map<const FNode*, UUID>;
+#elif _NDEBUG
     using AssetDatabase = entt::dense_map<UUID, Asset>;
+    using AssetFileDatabase = entt::dense_map<const FNode*, UUID>;
+#endif
 
     AssetDatabase database{};
     AssetFileDatabase files{};
@@ -140,5 +148,5 @@ private:
     void ImportAllFiles(AssetDatabase& database, const FNode& root);
     void Deserialize(const UUIDCollection& assets);
 
-    void BuildFileNodeTree(FNode& root);
+    void BuildFileNodeTree(const Project& project, FNode& root);
 };

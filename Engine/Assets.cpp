@@ -28,7 +28,7 @@ void AssetHandle::Reset() { _asset = nullptr; }
 
 bool Assets::IsSceneFile(const FNode& file) { return file.ext == SCENE_EXT; }
 bool Assets::IsScriptFile(const FNode& file) { return file.ext == SCRIPT_EXT; }
-bool Assets::IsTextureFile(const FNode& file) { return file.ext == TEXTURE_EXT; }
+bool Assets::IsTextureFile(const FNode& file) { return file.ext == TEXTURE_EXT_PNG || file.ext == TEXTURE_EXT_JPG || file.ext == TEXTURE_EXT_JPEG; }
 bool Assets::IsModelFile(const FNode& file) { return file.ext == MODEL_EXT; }
 bool Assets::IsMaterialFile(const FNode& file) { return file.ext == MATERIAL_EXT; }
 bool Assets::IsShaderFile(const FNode& file) {
@@ -48,26 +48,30 @@ bool Assets::IsComputeShaderFile(const FNode & file) { return file.ext == COMPUT
 bool Assets::IsShaderProgramFile(const FNode& file) { return file.ext == SHADER_PROGRAM_EXT; }
 bool Assets::IsComponentDefinitionFile(const FNode& file) { return file.ext == COMP_EXT; }
 
-Assets::Assets(FNode&& root) noexcept :
-    _root(std::move(root)) {
-    BuildFileNodeTree(_root);
+Assets::Assets(const Project& project) noexcept :
+    _root({ &project, nullptr, "", "", "", true }) {
+    BuildFileNodeTree(project, _root);
     ImportAllFiles(database, _root);
 }
 
 FNode& Assets::CreateFolder(FNode& parentFolder, const std::string_view folderName) {
     FNode& rv = *parentFolder.CreateChildFolder({ parentFolder.owner, &parentFolder, std::string(folderName) });
-    ReimportAll();
+    ReimportAll(); /* folder structure is mutated, must reimport to re-build! */
     return rv;
 }
 void Assets::MoveFolder(FNode& folder, FNode& targetParentFolder) {
     folder.MoveUnder(targetParentFolder);
-    ReimportAll();
+    ReimportAll(); /* folder structure is mutated, must reimport to re-build! */
 }
 void Assets::DeleteFolder(FNode& folder) {
     folder.Delete();
-    ReimportAll();
+    ReimportAll(); /* folder structure is mutated, must reimport to re-build! */
 }
 
+void Assets::SaveAsset(const AssetHandle asset) {
+    if (!asset.HasValue()) { return; }
+    asset->Serialize();
+}
 void Assets::MoveAsset(const AssetHandle asset, FNode& targetParentFolder) {
     if (!asset.HasValue()) { return; }
     asset->File().MoveUnder(targetParentFolder);
@@ -83,6 +87,8 @@ void Assets::DeleteAsset(const AssetHandle asset) {
     database.erase(id);
     std::erase(sceneAssets, id);
     std::erase(componentDefinitionAssets, id);
+    std::erase(shaderAssets, id);
+    std::erase(shaderProgramAssets, id);
     std::erase(textureAssets, id);
 
     //ReimportAll();
@@ -99,7 +105,7 @@ AssetHandle Assets::FindAsset(UUID uuid) const {
     return { const_cast<Asset*>(&database.at(uuid)) };
 }
 AssetHandle Assets::FindAssetAt(const FNode& file) const {
-    for (auto [uuid, asset] : database) {
+    for (auto& [uuid, asset] : database) {
         if (asset.File() == file) {
             /*
             * casting away const is safe here
@@ -125,24 +131,27 @@ const Assets::UUIDCollection& Assets::ShaderAssetIDs() const { return shaderAsse
 const Assets::UUIDCollection& Assets::ShaderProgramAssetIDs() const { return shaderProgramAssets; }
 const Assets::UUIDCollection& Assets::ShaderUniformBlockAssetIDs() const { return shaderUniformBlockAssets; }
 
-void Assets::Import(const FNode& file) { ImportFile(database, file); }
+AssetHandle Assets::Import(const FNode& file) { return ImportFile(database, file); }
 void Assets::ReimportAll() {
     database.clear();
     sceneAssets.clear();
-    textureAssets.clear();
     componentDefinitionAssets.clear();
+    shaderAssets.clear();
+    shaderProgramAssets.clear();
+    textureAssets.clear();
 
-    _root = FNode({ Core::GetCore()->LoadedProject().get(), nullptr, "", "", "", true });
-    BuildFileNodeTree(_root);
+    _root.children.clear();
+    BuildFileNodeTree(*_root.OwningProject(), _root);
     ImportAllFiles(database, _root);
     EnsureDeserialization();
 }
-
+// donkey donk
 void Assets::EnsureDeserialization() {
     Deserialize(componentDefinitionAssets);
     Deserialize(sceneAssets);
     Deserialize(textureAssets);
     Deserialize(shaderAssets);
+    Deserialize(shaderProgramAssets);
 }
 
 AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
@@ -179,6 +188,15 @@ AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
         printer.PushText(UUID());
         printer.CloseElement();
         printer.CloseElement();
+
+        auto& siblings = file.parent->children;
+        std::unique_ptr<FNode> id = std::make_unique<FNode>(FNodeCreationParams{ file.owner, file.parent, file.fullName, ".id" });
+        auto pos = std::ranges::find_if(siblings, [&file](auto& ptr) {
+            return ptr.get() == &file;
+        });
+        assert(pos != siblings.end());
+        pos++;
+        siblings.insert(pos, std::move(id));
 
         doc.Parse(printer.CStr());
         doc.SaveFile(importData.AbsolutePath().string().c_str());
@@ -241,32 +259,32 @@ void Assets::Deserialize(const UUIDCollection& assets) {
     }
 }
 
-void Assets::BuildFileNodeTree(FNode& root) {
-    auto ws = Core::GetCore()->LoadedProject()->Workspace();
+void Assets::BuildFileNodeTree(const Project& project, FNode& root) {
+    auto ws = project.Workspace();
     std::filesystem::current_path(ws);
     auto it = std::filesystem::directory_iterator(ws / root.Path());
     for (const auto& entry : it) {
         if(entry.is_directory()) {
-            root.children.emplace_back(FNodeCreationParams{
+            root.children.push_back(std::make_unique<FNode>(FNodeCreationParams{
                 .owner = root.owner,
                 .parent = &root,
                 .name = entry.path().filename().replace_extension().string(),
                 .isDirectory = true,
-            });
+            }));
         } else {
-            root.children.emplace_back(FNodeCreationParams{
+            root.children.push_back(std::make_unique<FNode>(FNodeCreationParams{
                 .owner = root.owner,
                 .parent = &root,
                 .name = entry.path().filename().replace_extension().string(),
                 .ext = entry.path().extension().string(),
                 .isDirectory = false,
-            });
+            }));
         }
     }
     // DON'T merge this loop with the above.
-    for (auto& child : root.children) {
-        if (child.IsDirectory()) {
-            BuildFileNodeTree(child);
+    for (const auto& child : root.children) {
+        if (child->IsDirectory()) {
+            BuildFileNodeTree(project, *child);
         }
     }
 }

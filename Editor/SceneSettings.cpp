@@ -7,19 +7,23 @@
 SceneSettings::SceneSettings(GUI& gui) noexcept :
     gui(gui) {}
 
-bool  SceneSettings::Begin(Scene* scene) {
-    GUI& gui = this->gui;
-    ImGui::PushID(gui.SCENE_SETTINGS_TITLE);
+bool  SceneSettings::Begin() {
+    const GUI& gui = this->gui;
+    ImGui::PushID(GUI::SCENE_SETTINGS_TITLE);
     std::string title(WindowIcons::SCENE_SETTINGS_WINDOW_ICON);
-    title.append(gui.SCENE_SETTINGS_TITLE);
-    title.append(gui.SCENE_SETTINGS_ID);
+    title.append(GUI::SCENE_SETTINGS_TITLE);
+    title.append(GUI::SCENE_SETTINGS_ID);
     bool visible = ImGui::Begin(title.c_str());
     ImGui::PushFont(gui.GetFont());
 
     return visible;
 }
 
-void SceneSettings::Render(Scene& scene) {
+void SceneSettings::Render() {
+    GUI& gui = this->gui;
+    if (!gui.HasOpenScene()) { return; }
+    Scene& scene = gui.GetOpenScene();
+
     DrawStats(scene);
     ImGui::Separator();
     DrawSettings(scene);
@@ -39,7 +43,8 @@ void SceneSettings::DrawStats(Scene& scene) const {
     ImGui::Text("Draw Calls: %d", stats.drawCalls);
     ImGui::Text("Vertices: %d", stats.vertices);
     ImGui::Text("Indices: %d", stats.indices);
-    ImGui::Text("Editor average %.3f ms/frame (%.1f FPS)", 1000.0f / gui.IO()->Framerate, gui.IO()->Framerate);
+    auto fps = gui.IO()->Framerate;
+    ImGui::Text("Editor average %.3f ms/frame (%.1f FPS)", 1000.0f / fps, fps);
     ImGui::ColorEdit3("Clear Color", &scene.ClearColor.r);
     ImGui::ColorEdit3("Selection Outline Color", &scene.SelectionOutlineColor.r);
 

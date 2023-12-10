@@ -13,6 +13,7 @@ target_link_libraries(Engine PUBLIC stb_impl)
 
 find_package(assimp CONFIG REQUIRED)
 find_package(EnTT CONFIG REQUIRED)
+find_package(eventpp CONFIG REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
@@ -22,6 +23,7 @@ find_package(tinyxml2 CONFIG REQUIRED)
 target_link_libraries(Engine PUBLIC assimp::assimp)
 target_link_libraries(Engine PUBLIC imgui::imgui)
 target_link_libraries(Engine PUBLIC EnTT::EnTT)
+target_link_libraries(Engine PUBLIC eventpp::eventpp)
 target_link_libraries(Engine PUBLIC GLEW::GLEW)
 target_link_libraries(Engine PUBLIC glfw)
 target_link_libraries(Engine PUBLIC glm::glm)
@@ -58,6 +60,8 @@ set(GROUP_LIST
     "Asset/Shader/Shader.hpp"
 	"Asset/Shader/Serialize/ShaderDeserializer.cpp"
     "Asset/Shader/Serialize/ShaderDeserializer.hpp"
+	"Asset/Shader/Serialize/ShaderProgramSerializer.cpp"
+    "Asset/Shader/Serialize/ShaderProgramSerializer.hpp"
 	"Asset/Shader/Serialize/ShaderProgramDeserializer.cpp"
     "Asset/Shader/Serialize/ShaderProgramDeserializer.hpp"
     "Asset/Texture/Texture.cpp"
@@ -74,6 +78,8 @@ set(GROUP_LIST
     "Core/Window.cpp"
     "Core/Window.hpp"
     "Core/TypeSystem.hpp"
+	
+	"Event/Event.hpp"
 	
 	"OpenGL/OpenGLCommon.hpp"
 	"OpenGL/Buffer.cpp"

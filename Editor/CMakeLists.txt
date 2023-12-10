@@ -71,6 +71,8 @@ set(GROUP_LIST
 	"UI/GUI/GameViewport/GameViewport.hpp"
 	"UI/GUI/MenuBar/MenuBar.cpp"
 	"UI/GUI/MenuBar/MenuBar.hpp"
+	"UI/GUI/Modals/NewProjectModal.cpp"
+	"UI/GUI/Modals/NewProjectModal.hpp"
 	"UI/GUI/Observer/Observer.cpp"
 	"UI/GUI/Observer/Observer.hpp"
 	"UI/GUI/SceneHierarchy/SceneHierarchy.cpp"

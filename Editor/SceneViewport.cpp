@@ -17,7 +17,7 @@ SceneViewport::SceneViewport(GUI& gui) noexcept :
     gui(gui),
     gizmos(*this) {}
 
-bool SceneViewport::Begin(Scene* scene) {
+bool SceneViewport::Begin() {
     GUI& gui = this->gui;
 
     ImGui::PushID(GUI::SCENE_VIEWPORT_TITLE);
@@ -27,13 +27,16 @@ bool SceneViewport::Begin(Scene* scene) {
     bool visible = ImGui::Begin(title.c_str());
 
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
-    DrawViewportSettings(scene);
+    DrawViewportSettings(gui.HasOpenScene());
 
     return visible;
 }
 
-void SceneViewport::Render(Scene& scene) {
+void SceneViewport::Render() {
     GUI& gui = this->gui;
+    if (!gui.HasOpenScene()) { return; }
+    Scene& scene = gui.GetOpenScene();
+
     viewportSize = { static_cast<int>(ImGui::GetContentRegionAvail().x), static_cast<int>(ImGui::GetContentRegionAvail().y) };
     viewportPosition = {
         ImGui::GetWindowPos().x + ImGui::GetCursorPos().x,
@@ -59,7 +62,7 @@ void SceneViewport::End() {
     ImGui::PopID();
 }
 
-void SceneViewport::DrawViewportSettings(Scene* scene) {
+void SceneViewport::DrawViewportSettings(bool hasScene) {
     GUI& gui = this->gui;
     ImFont* font = gui.GetFontBold();
     ImGui::PushFont(font);
@@ -131,7 +134,7 @@ void SceneViewport::DrawViewportSettings(Scene* scene) {
     ImGui::Dummy({ ImGui::GetContentRegionAvail().x - buttonSize.x, buttonSize.y });
     ImGui::SameLine();
 
-    if (!scene) {
+    if (!hasScene) {
         ImGui::BeginDisabled();
     }
     if (gui.CORE->IsPlaying()) {
@@ -141,7 +144,7 @@ void SceneViewport::DrawViewportSettings(Scene* scene) {
     } else if (ImGui::Button(SceneViewportIcons::PLAY_ICON, buttonSize)) {
         gui.CORE->SetPlaying(true);
     }
-    if (!scene) {
+    if (!hasScene) {
         ImGui::EndDisabled();
     }
 
@@ -184,6 +187,8 @@ void SceneViewport::HandleMouseControls(Scene& scene) {
         if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
             // TODO select object, mouse pick
             // glReadPixels(x, y, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+            // gui.Events.OnEntitySelected(entity);
+            // gui.Events.OnEntityDeselected();
         }
     }
 

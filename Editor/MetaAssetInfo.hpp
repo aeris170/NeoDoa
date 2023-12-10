@@ -39,7 +39,7 @@ struct MetaAssetInfoBank {
     DataStructure::const_iterator end() const;
 
     void SaveToDisk(const std::filesystem::path& path) const;
-    void LoadFromDisk(const Project& owner);
+    void LoadFromDisk(const Project& owner, const Assets& assets);
 
 private:
     void TryEmplace(const FNode& file, const MetaAssetInfo& emplaceThisIfAbsent);

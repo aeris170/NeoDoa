@@ -4,10 +4,12 @@
 
 #include <imgui.h>
 
+#include <Engine/Scene.hpp>
+#include <Engine/Event.hpp>
 #include <Engine/Entity.hpp>
+#include <Engine/Assets.hpp>
 
 struct GUI;
-struct Scene;
 
 struct SceneHierarchy {
 
@@ -18,20 +20,21 @@ struct SceneHierarchy {
 
     std::reference_wrapper<GUI> gui;
 
-    Entity selectedEntity{ NULL_ENTT };
-    Entity highlightedEntity{ NULL_ENTT };
-    Entity deletedEntity{ NULL_ENTT };
-
     explicit SceneHierarchy(GUI& gui) noexcept;
 
     bool Begin();
-    void Render(Scene& scene);
+    void Render();
     void End();
 
 private:
-    void RenderEntityNode(Scene& scene, const Entity entity);
-    void RenderContextMenu(Scene& scene, const Entity entity);
+    Entity highlightedEntity{ NULL_ENTT };
+    Entity deletedEntity{ NULL_ENTT };
 
-    void SetSelectedEntity(Entity entt);
-    void ResetSelectedEntity();
+    void RenderEntityNode(const Entity entity);
+    void RenderContextMenu(const Entity entity);
+
+    Entity selectedEntity{ NULL_ENTT };
+    void OnEntitySelected(Entity entity);
+    void OnEntityDeselected();
+    void OnEntityDeleted(Entity entity);
 };

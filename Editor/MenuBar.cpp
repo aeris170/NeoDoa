@@ -9,7 +9,6 @@
 
 MenuBar::MenuBar(GUI& owner) :
     gui(owner),
-	newProjectModal(*this),
 	openProjectModal(*this),
     aboutSection(*this) {}
 
@@ -35,7 +34,7 @@ void MenuBar::Render() {
     }
 
     // due to how imgui works, these must be outside the begin/end menubar :(
-	newProjectModal.Render();
+	//newProjectModal.Render();
 	openProjectModal.Render();
     aboutSection.RenderAboutPopup();
 }
@@ -45,7 +44,7 @@ void MenuBar::End() {}
 void MenuBar::RenderProjectSubMenu() {
     GUI& gui = this->gui;
     if (ImGui::MenuItem("New Project", "Ctrl+Shift+N")) {
-		newProjectModal.modal_active = true;
+		gui.ShowNewProjectModal();
     }
     if (ImGui::MenuItem("Open Project...", "Ctrl+Shift+O")) {
 		openProjectModal.modal_active = true;
@@ -72,89 +71,28 @@ void MenuBar::RenderSceneSubMenu() {
         auto& assets = gui.CORE->Assets();
         for (auto& uuid : assets->SceneAssetIDs()) {
             AssetHandle sceneAsset = assets->FindAsset(uuid);
-            if (ImGui::MenuItem(sceneAsset.Value().File().Name().c_str(), nullptr, nullptr)) {
+            if (ImGui::MenuItem(sceneAsset.Value().File().Name().data(), nullptr, nullptr)) {
                 gui.CORE->LoadedProject()->OpenScene(uuid);
+				gui.Events.OnSceneOpened(gui.CORE->LoadedProject()->GetOpenScene());
             }
         }
         ImGui::EndMenu();
     }
     ImGui::Separator();
-    if (ImGui::MenuItem("Save Scene", "Ctrl+S", nullptr, gui.HasOpenProject())) {
-        if (gui.HasOpenScene()) {
-            gui.CORE->LoadedProject()->SaveOpenSceneToDisk();
-        }
+    if (ImGui::MenuItem("Save Scene", "Ctrl+S", nullptr, gui.HasOpenScene())) {
+        gui.CORE->LoadedProject()->SaveOpenSceneToDisk();
     }
+	ImGui::Separator();
+	if (ImGui::MenuItem("Close Scene", "Ctrl+W", nullptr, gui.HasOpenScene())) {
+		gui.CORE->LoadedProject()->CloseScene();
+		gui.Events.OnSceneClosed();
+	}
 }
 
 void MenuBar::RenderHelpSubMenu() {
     if (ImGui::MenuItem(AboutSection::ABOUT_BUTTON_TEXT)) {
         aboutSection.ab = true;
     }
-}
-
-// Inner struct: NewProjectModal
-MenuBar::NewProjectModal::NewProjectModal(MenuBar& owner) :
-	mb(owner) {}
-
-void MenuBar::NewProjectModal::Render() {
-	GUI& gui = mb.get().gui;
-
-	ImGui::PushID("new_project_modal");
-
-	if (modal_active) {
-		ImGui::OpenPopup(MODAL_TITLE_TEXT);
-		modal_open = true;
-	}
-
-	ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-	ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-
-	if (ImGui::BeginPopupModal(MODAL_TITLE_TEXT, &modal_open, ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::Text(MODAL_CONTENT_TEXT);
-		ImGui::Separator();
-
-		const ImGuiStyle& style = ImGui::GetStyle();
-
-		float size = (MODAL_BUTTONS_SIZE.x + style.ItemSpacing.x) * 2.0f;
-		float avail = ImGui::GetWindowSize().x;
-
-		float offset = (avail - size) * 0.5f;
-		if (offset > 0.0f)
-			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
-		/*
-		if (ImGui::Button(MODAL_YES_BUTTON_TEXT, MODAL_BUTTONS_SIZE)) {
-			const char* path = tinyfd_selectFolderDialog("Select a folder for New Project", "");
-			if (path) {
-				const char* name = nullptr;
-				bool badName = true;
-				while (badName) {
-					name = tinyfd_inputBox("Enter a name for the New Project", "Enter a name for the New Project", "New Project");
-					badName = name == nullptr || std::string(name).empty();
-					if (badName) {
-						tinyfd_messageBox("Warning", "Projects cannot be unnamed.", "ok", "warning", 1);
-					}
-				}
-				gui.CloseProject();
-				gui.CreateNewProject(path, name);
-				gui.SaveProjectToDisk();
-				DOA_LOG_INFO("Succesfully created a new project named %s at %s", name, name);
-			}
-
-			ImGui::CloseCurrentPopup();
-			modal_active = false;
-		}
-		*/
-		ImGui::SetItemDefaultFocus();
-		ImGui::SameLine();
-		if (ImGui::Button(MODAL_NO_BUTTON_TEXT, MODAL_BUTTONS_SIZE)) {
-			ImGui::CloseCurrentPopup();
-			modal_active = false;
-		}
-		ImGui::EndPopup();
-	} else {
-		modal_active = false;
-	}
-	ImGui::PopID();
 }
 
 // Inner struct: OpenProjectModal

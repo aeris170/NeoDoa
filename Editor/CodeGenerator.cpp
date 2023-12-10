@@ -7,6 +7,43 @@ std::string CodeGenerator::GenerateComponentDeclaration(std::string_view compone
     return std::format("class {} : Component {{\n\n}};", componentName);
 }
 
+std::string CodeGenerator::GenerateVertexShaderCode() {
+    return R"(// This is a vertex shader. See https://www.khronos.org/opengl/wiki/Vertex_Shader for further info
+// Declares minimum OpenGL version as 4.6, feel free to adjust to your needs.
+#version 460 core
+
+// Vertex Attribs
+
+// Output Vars
+
+// Uniforms
+
+void main() {
+    gl_Position = vec4(0, 0, 0, 1);
+}
+)";
+}
+
+std::string CodeGenerator::GenerateTessellationControlShaderCode() {
+    return {};
+}
+
+std::string CodeGenerator::GenerateTessellationEvaluationShaderCode() {
+    return {};
+}
+
+std::string CodeGenerator::GenerateGeometryShaderCode() {
+    return {};
+}
+
+std::string CodeGenerator::GenerateFragmentShaderCode() {
+    return {};
+}
+
+std::string CodeGenerator::GenerateComputeShaderCode() {
+    return {};
+}
+
 std::string CodeGenerator::GenerateSystemDeclaration(std::string_view systemName) {
     std::string s = R"(#pragma once
 

@@ -40,11 +40,11 @@ struct ShaderProgram {
     GLuint ID;
     std::string Name;
 
-    UUID VertexShader{ UUID::Empty() };
-    UUID TessellationControlShader{ UUID::Empty() };
+    UUID VertexShader                { UUID::Empty() };
+    UUID TessellationControlShader   { UUID::Empty() };
     UUID TessellationEvaluationShader{ UUID::Empty() };
-    UUID GeometryShader{ UUID::Empty() };
-    UUID FragmentShader{ UUID::Empty() };
+    UUID GeometryShader              { UUID::Empty() };
+    UUID FragmentShader              { UUID::Empty() };
 
     bool IsComplete() const;
     bool HasVertexShader() const;

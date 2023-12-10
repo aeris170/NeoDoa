@@ -22,8 +22,6 @@ struct Component;
 struct AssetHandle;
 
 #define DISPLAYABLE Entity, FNode*
-template<typename T>
-concept DisplayableInObserver = concepts::IsAnyOf<T, DISPLAYABLE>;
 using DisplayTarget = std::variant<std::monostate, DISPLAYABLE>;
 #undef DISPLAYABLE
 
@@ -33,12 +31,12 @@ struct Observer {
 
     explicit Observer(GUI& gui) noexcept;
 
-    bool Begin(Scene* scene);
-    void Render(Scene& scene);
+    bool Begin();
+    void Render();
     void End();
 
-    template<DisplayableInObserver T>
-    void SetDisplayTarget(T target) { displayTarget = target; }
+    void SetDisplayTarget(Entity entity);
+    void SetDisplayTarget(FNode& file);
     void ResetDisplayTarget();
 
 private:
@@ -72,7 +70,7 @@ private:
 
         static void Init();
 
-        static void SetRenderTarget(const AssetHandle componentDefAsset);
+        static void SetDisplayTarget(const AssetHandle componentDefAsset);
 
         static void RenderMessagesTable();
         static void RenderFields();
@@ -87,7 +85,7 @@ private:
 
         static void Init();
 
-        static void SetRenderTarget(const AssetHandle shaderAsset);
+        static void SetDisplayTarget(const AssetHandle shaderAsset);
 
         static void RenderMessagesTable();
         static void RenderFields();
@@ -97,5 +95,51 @@ private:
         static inline AssetHandle ShaderAsset{};
         static inline TextEditor TextEditor{};
     };
+
+    struct ShaderProgramDisplay {
+
+        static void Init();
+
+        static void SetDisplayTarget(Assets& assets, const AssetHandle shaderProgramAsset);
+
+        static void RenderMessagesTable();
+        static void RenderShaders();
+
+    private:
+        static constexpr ImVec4 NOT_SET_MANDATORY_COLOR{ 1, 0, 0, 1 };
+        static constexpr ImVec4 NOT_SET_OPTIONAL_COLOR{ 1, 1, 0, 1 };
+        static constexpr ImVec4 SET_COLOR{ 0, 1, 0, 1 };
+        static constexpr std::string_view NOT_SET_MANDATORY_TEXT{ "NOT SET - MANDATORY!" };
+        static constexpr std::string_view NOT_SET_OPTIONAL_TEXT{ "NOT SET - OPTIONAL!" };
+
+        static inline Assets* assets{ nullptr };
+        static inline AssetHandle ShaderProgramAsset{};
+        static inline std::string VertexShaderText;
+        static inline std::string TessCtrlShaderText;
+        static inline std::string TessEvalShaderText;
+        static inline std::string GeometryShaderText;
+        static inline std::string FragmentShaderText;
+
+        static void Begin(std::string_view label);
+        static void RenderVertexShader(ShaderProgram& program);
+        static void RenderTessCtrlShader(ShaderProgram& program);
+        static void RenderTessEvalShader(ShaderProgram& program);
+        static void RenderGeometryShader(ShaderProgram& program);
+        static void RenderFragmentShader(ShaderProgram& program);
+        static void End();
+    };
+
+    std::string renderTargetTitleText;
+    Scene* currentScene;
+
+    void OnReimport(Assets& assets);
+    void OnAssetDeleted(AssetHandle asset);
+    void OnAssetFocused(AssetHandle asset);
+    void OnFolderFocused(FNode& folder);
+    void OnFocusLost();
+    void OnSceneOpened(Scene& scene);
+    void OnSceneClosed();
+    void OnEntitySelected(Entity entity);
+    void OnEntityDeselected();
 
 };

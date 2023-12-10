@@ -217,7 +217,7 @@ std::unique_ptr<FrameBuffer>& Core::FrameBuffer() { return offscreenBuffer; }
 void Core::CreateAndLoadProject(std::string_view workspace, std::string_view name) {
     UnloadProject();
     project = std::make_unique<Project>(std::string(workspace), std::string(name));
-    assets = std::make_unique<struct Assets>(FNode{ { project.get(), nullptr, "", "", "", true } });
+    assets = std::make_unique<struct Assets>(*(project.get()));
     assets->EnsureDeserialization();
 }
 void Core::LoadProject(const std::string& path) {
@@ -225,7 +225,7 @@ void Core::LoadProject(const std::string& path) {
 
     FNode file({ .name = path });
     project = std::make_unique<Project>(DeserializeProject(&file));
-    assets = std::make_unique<struct Assets>(FNode{{ project.get(), nullptr, "", "", "", true }});
+    assets = std::make_unique<struct Assets>(*project.get());
     assets->EnsureDeserialization();
     project->OpenStartupScene();
 }

@@ -7,11 +7,14 @@
 #include <Editor/GUI.hpp>
 
 Gizmos::Gizmos(SceneViewport& sv) noexcept :
-    sv(sv) {}
+    sv(sv) {
+    sv.gui.get().Events.SceneHierarchy.OnEntitySelected   += std::bind_front(&Gizmos::OnEntitySelected  , this);
+    sv.gui.get().Events.SceneHierarchy.OnEntityDeselected += std::bind_front(&Gizmos::OnEntityDeselected, this);
+    sv.gui.get().Events.OnEntityDeleted                   += std::bind_front(&Gizmos::OnEntityDeleted   , this);
+}
 
 void Gizmos::Render(Scene& scene) {
-    GUI& gui = sv.get().gui;
-    if (gui.sh.selectedEntity == NULL_ENTT) { return; }
+    if (selectedEntity == NULL_ENTT) { return; }
     if (!settings.enabled) { return; }
 
     ImGuizmo::SetDrawlist();
@@ -33,10 +36,10 @@ void Gizmos::Render(Scene& scene) {
     );
 
     // Entity transform
-    TransformComponent& transformComponent = scene.GetComponent<TransformComponent>(gui.sh.selectedEntity);
+    TransformComponent& transformComponent = scene.GetComponent<TransformComponent>(selectedEntity);
     glm::mat4 matrix = transformComponent.GetWorldMatrix();
 
-    bool snap = gui.CORE->Input()->IsKeyPressed(KEY_LEFT_CONTROL);
+    bool snap = sv.get().gui.get().CORE->Input()->IsKeyPressed(KEY_LEFT_CONTROL);
     float snapValue = 0.5f;
     if (settings.type == ImGuizmo::OPERATION::ROTATE) { snapValue = 5.0f; }
 
@@ -57,5 +60,17 @@ void Gizmos::Render(Scene& scene) {
         transformComponent.SetWorldTranslation(translation);
         transformComponent.SetWorldRotation(rotation);
         transformComponent.SetLocalScale(scale);
+    }
+}
+
+void Gizmos::OnEntitySelected(Entity entity) {
+    selectedEntity = entity;
+}
+void Gizmos::OnEntityDeselected() {
+    selectedEntity = NULL_ENTT;
+}
+void Gizmos::OnEntityDeleted(Entity entity) {
+    if (selectedEntity == entity) {
+        selectedEntity = NULL_ENTT;
     }
 }

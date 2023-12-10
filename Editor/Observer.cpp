@@ -18,6 +18,7 @@
 #include <Engine/CameraComponent.hpp>
 #include <Engine/ShaderDeserializer.hpp>
 #include <Engine/ComponentDeserializer.hpp>
+#include <Engine/ShaderProgramSerializer.hpp>
 
 #include <Editor/GUI.hpp>
 #include <Editor/Icons.hpp>
@@ -30,35 +31,33 @@ Observer::Observer(GUI& gui) noexcept :
     gui(gui) {
     ComponentDefinitionDisplay::Init();
     ShaderDisplay::Init();
+    ShaderProgramDisplay::Init();
+
+    gui.Events.OnReimport                        += std::bind_front(&Observer::OnReimport,         this);
+    gui.Events.OnAssetDeleted                    += std::bind_front(&Observer::OnAssetDeleted,     this);
+    gui.Events.AssetManager.OnAssetFocused       += std::bind_front(&Observer::OnAssetFocused,     this);
+    gui.Events.AssetManager.OnFolderFocused      += std::bind_front(&Observer::OnFolderFocused,    this);
+    gui.Events.AssetManager.OnFocusLost          += std::bind_front(&Observer::OnFocusLost,        this);
+    gui.Events.OnSceneOpened                     += std::bind_front(&Observer::OnSceneOpened,      this);
+    gui.Events.OnSceneClosed                     += std::bind_front(&Observer::OnSceneClosed,      this);
+    gui.Events.SceneHierarchy.OnEntitySelected   += std::bind_front(&Observer::OnEntitySelected,   this);
+    gui.Events.SceneHierarchy.OnEntityDeselected += std::bind_front(&Observer::OnEntityDeselected, this);
 }
 
-bool Observer::Begin(Scene* scene) {
-    GUI& gui = this->gui;
+bool Observer::Begin() {
     ImGui::PushID(GUI::OBSERVER_TITLE);
     std::string title(WindowIcons::OBSERVER_WINDOW_ICON);
     title.append(GUI::OBSERVER_TITLE);
-    std::visit(overloaded::lambda {
-        [](std::monostate) { /* skip */ },
-        [&scene, &title](Entity entt) {
-            if (scene && entt != NULL_ENTT) {
-                title.append(" - ");
-                title.append(scene->GetComponent<IDComponent>(entt).GetTag());
-            }
-        },
-        [&title](FNode* file) {
-            title.append(" - ");
-            title.append(file->Name());
-        }
-    }, displayTarget);
-
+    title.append(renderTargetTitleText);
     title.append(GUI::OBSERVER_ID);
     bool visible = ImGui::Begin(title.c_str());
 
     return visible;
 }
 
-void Observer::Render(Scene& scene) {
-    DisplayTargetRenderer::Render(*this, scene);
+void Observer::Render() {
+    if (!currentScene) { return; }
+    DisplayTargetRenderer::Render(*this, *currentScene);
 }
 
 void Observer::End() {
@@ -66,7 +65,20 @@ void Observer::End() {
     ImGui::PopID();
 }
 
-void Observer::ResetDisplayTarget() { displayTarget = std::monostate{}; }
+void Observer::SetDisplayTarget(Entity entity) {
+    static std::string hypen(" - ");
+    displayTarget = entity;
+    renderTargetTitleText = hypen + currentScene->GetComponent<IDComponent>(entity).GetTagRef();
+}
+void Observer::SetDisplayTarget(FNode& file) {
+    static std::string hypen(" - ");
+    displayTarget = &file;
+    renderTargetTitleText = hypen + file.Name().data();
+}
+void Observer::ResetDisplayTarget() {
+    displayTarget = std::monostate{};
+    renderTargetTitleText = "";
+}
 
 // Inner-struct DisplayTargetRenderer
 void Observer::DisplayTargetRenderer::Render(Observer& observer, Scene& scene) {
@@ -74,8 +86,8 @@ void Observer::DisplayTargetRenderer::Render(Observer& observer, Scene& scene) {
         [](std::monostate) {
             HandleTargetWhenEmpty();
         },
-        [&observer, &scene](Entity) {
-            HandleTargetWhenEntity(observer, scene, observer.gui.get().sh.selectedEntity);
+        [&observer, &scene](Entity entity) {
+            HandleTargetWhenEntity(observer, scene, entity);
         },
         [&observer](FNode* file) {
             HandleTargetWhenFile(observer, *file);
@@ -126,7 +138,7 @@ void Observer::DisplayTargetRenderer::HandleTargetWhenEntity(const Observer& obs
     }
 }
 void Observer::DisplayTargetRenderer::HandleTargetWhenFile(const Observer& observer, FNode& file) {
-    GUI& gui = observer.gui.get();
+    GUI& gui = observer.gui;
 
     static const ImVec2 iconSize{ 60.0f, 60.0f };
     ImGui::Columns(2);
@@ -148,7 +160,7 @@ void Observer::DisplayTargetRenderer::HandleTargetWhenFile(const Observer& obser
     ImGui::SameLine();
     ImGui::NextColumn();
 
-    ImGui::Text(file.Name().c_str());
+    ImGui::Text(file.Name().data());
 
     ImGui::PopFont();
     ImGui::PushFont(gui.GetFont());
@@ -228,7 +240,7 @@ void Observer::DisplayTargetRenderer::RenderIconChangePopup(const FNode& file, M
 
 void Observer::DisplayTargetRenderer::RenderFolderView(const Observer& observer, FNode& folder) {
     assert(folder.IsDirectory());
-    GUI& gui = observer.gui.get();
+    const GUI& gui = observer.gui;
 
     ImGuiTableFlags flags = ImGuiTableFlags_RowBg |
         ImGuiTableFlags_Borders |
@@ -250,7 +262,7 @@ void Observer::DisplayTargetRenderer::RenderFolderView(const Observer& observer,
             ImGui::TableSetColumnIndex(0);
             ImGui::Image(gui.FindIconForFileType(child, TextureSize::SMALL), { 16.0f, 16.0f });
             ImGui::TableSetColumnIndex(1);
-            ImGui::Text(child.FullName().c_str());
+            ImGui::Text(child.FullName().data());
             ImGui::TableSetColumnIndex(2);
             std::string size = FormatBytes(static_cast<float>(child.Size()));
             ImGui::Text(size.c_str());
@@ -285,7 +297,7 @@ void Observer::DisplayTargetRenderer::RenderSceneView(const Observer& observer, 
 void Observer::DisplayTargetRenderer::RenderComponentDefinitionView(const Observer& observer, AssetHandle h) {
     assert(h->IsComponentDefinition());
 
-    ComponentDefinitionDisplay::SetRenderTarget(h);
+    ComponentDefinitionDisplay::SetDisplayTarget(h);
     ComponentDefinitionDisplay::RenderMessagesTable();
 
     if (h->HasDeserializedData()) {
@@ -319,7 +331,7 @@ void Observer::DisplayTargetRenderer::RenderComponentDefinitionView(const Observ
 void Observer::DisplayTargetRenderer::RenderShaderView(const Observer& observer, AssetHandle h) {
     assert(h->IsShader());
 
-    ShaderDisplay::SetRenderTarget(h);
+    ShaderDisplay::SetDisplayTarget(h);
     ShaderDisplay::RenderMessagesTable();
 
     if (h->HasDeserializedData()) {
@@ -344,14 +356,39 @@ void Observer::DisplayTargetRenderer::RenderShaderView(const Observer& observer,
     if (ImGui::IsItemHovered()) {
         ImGui::BeginTooltip();
         ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-        ImGui::TextUnformatted("Forces deserialization on this component definition. All data in RAM is purged, and new data is read from disk. This operation will cause re-instantiation of user defined components without loss of data.");
+        ImGui::TextUnformatted("Forces deserialization on this shader. All data in VRAM is purged, and new data is allocated.");
         ImGui::PopTextWrapPos();
         ImGui::EndTooltip();
     }
 }
 void Observer::DisplayTargetRenderer::RenderShaderProgramView(const Observer& observer, AssetHandle h) {
     assert(h->IsShaderProgram());
-    // TODO shader program view - implement after shader program serializer is complete!
+
+    ShaderProgramDisplay::SetDisplayTarget(*observer.gui.get().CORE->Assets(), h);
+    ShaderProgramDisplay::RenderMessagesTable();
+    ImGui::Separator();
+    if (h->HasDeserializedData()) {
+        ShaderProgramDisplay::RenderShaders();
+    } else {
+        ImGui::Text("Shader Program is not deserialized...");
+    }
+
+    static int extraPadding = 16;
+    float lineHeight = ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2;
+    if (ImGui::GetContentRegionAvail().y > 34.0f) {
+        ImGui::SetCursorPosY(ImGui::GetWindowHeight() - lineHeight - extraPadding);
+    }
+
+    if (ImGui::Button("Refresh", { ImGui::GetContentRegionAvail().x, 0 })) {
+        h->ForceDeserialize();
+    }
+    if (ImGui::IsItemHovered()) {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted("Forces deserialization on this shader program. All data in VRAM is purged, and new data is allocated.");
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
 }
 void Observer::DisplayTargetRenderer::RenderTextureView(const Observer& observer, AssetHandle h) {
     assert(h->IsTexture());
@@ -537,7 +574,7 @@ void Observer::ComponentDefinitionDisplay::Init() {
     TextEditor.SetLanguageDefinition(TextEditor::LanguageDefinition::AngelScript());
 }
 
-void Observer::ComponentDefinitionDisplay::SetRenderTarget(const AssetHandle componentDefAsset) {
+void Observer::ComponentDefinitionDisplay::SetDisplayTarget(const AssetHandle componentDefAsset) {
     assert(componentDefAsset->IsComponentDefinition());
     if (ComponentDefAsset != componentDefAsset) {
         ComponentDefAsset = componentDefAsset;
@@ -663,7 +700,7 @@ void Observer::ShaderDisplay::Init() {
     TextEditor.SetLanguageDefinition(TextEditor::LanguageDefinition::GLSL());
 }
 
-void Observer::ShaderDisplay::SetRenderTarget(const AssetHandle shaderAsset) {
+void Observer::ShaderDisplay::SetDisplayTarget(const AssetHandle shaderAsset) {
     assert(shaderAsset->IsShader());
     if (ShaderAsset != shaderAsset) {
         ShaderAsset = shaderAsset;
@@ -775,4 +812,447 @@ void Observer::ShaderDisplay::RenderSourceCode() {
     TextEditor.Render("###ObserverShaderSourceCodeViewer", false, { 0.0f, -32.0f });
 
     ImGui::EndTable();
+}
+
+// Inner-struct ShaderProgramDisplay
+void Observer::ShaderProgramDisplay::Init() {
+    VertexShaderText = std::string(128, 0);
+    TessCtrlShaderText = std::string(128, 0);
+    TessEvalShaderText = std::string(128, 0);
+    GeometryShaderText = std::string(128, 0);
+    FragmentShaderText = std::string(128, 0);
+}
+void Observer::ShaderProgramDisplay::SetDisplayTarget(Assets& assets, const AssetHandle shaderProgramAsset) {
+    Observer::ShaderProgramDisplay::assets = &assets;
+    assert(shaderProgramAsset->IsShaderProgram() && shaderProgramAsset.HasValue());
+    if (ShaderProgramAsset != shaderProgramAsset) {
+        ShaderProgramAsset = shaderProgramAsset;
+        const ShaderProgram& program = ShaderProgramAsset->DataAs<ShaderProgram>();
+
+        if (program.HasVertexShader()) {
+            UUID uuid = program.VertexShader;
+            VertexShaderText = std::format("{} (UUID: {})", assets.FindAsset(uuid)->File().Name(), std::to_string(uuid));
+        } else {
+            VertexShaderText = NOT_SET_MANDATORY_TEXT;
+        }
+
+        if (program.HasTessellationControlShader()) {
+            UUID uuid = program.TessellationControlShader;
+            TessCtrlShaderText = std::format("{} (UUID: {})", assets.FindAsset(uuid)->File().Name(), std::to_string(uuid));
+        } else {
+            TessCtrlShaderText = NOT_SET_OPTIONAL_TEXT;
+        }
+
+        if (program.HasTessellationEvaluationShader()) {
+            UUID uuid = program.TessellationEvaluationShader;
+            TessEvalShaderText = std::format("{} (UUID: {})", assets.FindAsset(uuid)->File().Name(), std::to_string(uuid));
+        } else {
+            TessEvalShaderText = NOT_SET_OPTIONAL_TEXT;
+        }
+
+        if (program.HasGeometryShader()) {
+            UUID uuid = program.GeometryShader;
+            GeometryShaderText = std::format("{} (UUID: {})", assets.FindAsset(uuid)->File().Name(), std::to_string(uuid));
+        } else {
+            GeometryShaderText = NOT_SET_OPTIONAL_TEXT;
+        }
+
+        if (program.HasFragmentShader()) {
+            UUID uuid = program.FragmentShader;
+            FragmentShaderText = std::format("{} (UUID: {})", assets.FindAsset(uuid)->File().Name(), std::to_string(uuid));
+        } else {
+            FragmentShaderText = NOT_SET_MANDATORY_TEXT;
+        }
+    }
+}
+
+void Observer::ShaderProgramDisplay::RenderMessagesTable() {
+    assert(ShaderProgramAsset.HasValue());
+    if (!ShaderProgramAsset->HasErrorMessages() &&
+        !ShaderProgramAsset->HasWarningMessages() &&
+        !ShaderProgramAsset->HasInfoMessages()) {
+        return;
+    }
+
+    ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders;
+
+    ImGui::BeginTable("linker_logs", 2, flags);
+
+    ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, 30);
+    ImGui::TableSetupColumn("Linker Logs", ImGuiTableColumnFlags_WidthStretch);
+    ImGui::TableHeadersRow();
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
+
+    ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::ERROR_COLOR);
+    for (auto& message : ShaderProgramAsset->ErrorMessages()) {
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+
+        float r = BeginTableColumnCenterText(ComponentDefinitionViewIcons::ERROR_ICON);
+        ImGui::Text(ComponentDefinitionViewIcons::ERROR_ICON);
+        EndTableColumnCenterText(r);
+
+        ImGui::TableSetColumnIndex(1);
+
+        const std::string& m{ std::any_cast<const std::string&>(message) };
+        ImGui::TextWrapped(m.c_str());
+    }
+    ImGui::PopStyleColor();
+
+    ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::WARNING_COLOR);
+    for (auto& message : ShaderProgramAsset->WarningMessages()) {
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+
+        float r = BeginTableColumnCenterText(ComponentDefinitionViewIcons::WARNING_ICON);
+        ImGui::Text(ComponentDefinitionViewIcons::WARNING_ICON);
+        EndTableColumnCenterText(r);
+
+        ImGui::TableSetColumnIndex(1);
+
+        const std::string& m{ std::any_cast<const std::string&>(message) };
+        ImGui::TextWrapped(m.c_str());
+    }
+    ImGui::PopStyleColor();
+
+    ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::INFO_COLOR);
+    for (auto& message : ShaderProgramAsset->InfoMessages()) {
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+
+        float r = BeginTableColumnCenterText(ComponentDefinitionViewIcons::INFO_ICON);
+        ImGui::Text(ComponentDefinitionViewIcons::INFO_ICON);
+        EndTableColumnCenterText(r);
+
+        ImGui::TableSetColumnIndex(1);
+
+        const std::string& m{ std::any_cast<const std::string&>(message) };
+        ImGui::TextWrapped(m.c_str());
+    }
+    ImGui::PopStyleColor();
+
+    ImGui::PopStyleVar();
+    ImGui::EndTable();
+}
+void Observer::ShaderProgramDisplay::RenderShaders() {
+    ShaderProgram& program = ShaderProgramAsset->DataAs<ShaderProgram>();
+    RenderVertexShader(program);
+    RenderTessCtrlShader(program);
+    RenderTessEvalShader(program);
+    RenderGeometryShader(program);
+    RenderFragmentShader(program);
+}
+
+void Observer::ShaderProgramDisplay::Begin(std::string_view label) {
+    float w = ImGui::GetContentRegionAvail().x;
+
+    ImGui::PushID(label.data());
+    ImGui::Columns(2, nullptr, false);
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { ImGui::GetStyle().ItemSpacing.x, 0 });
+    ImGui::SetColumnWidth(0, 240);
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f + 3);
+    ImGui::TextDisabled(label.data());
+    ImGui::NextColumn();
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f);
+
+    float buttonWidth;
+    {
+        ImGuiIO& io = ImGui::GetIO();
+        auto boldFont = io.Fonts->Fonts[1];
+        buttonWidth = boldFont->FontSize + ImGui::GetStyle().FramePadding.y * 2.0f;
+    }
+
+    ImGui::PushItemWidth(w - 240 - buttonWidth);
+    ImGuiIO& io = ImGui::GetIO();
+    auto font = io.Fonts->Fonts[0];
+    ImGui::PushFont(font);
+}
+void Observer::ShaderProgramDisplay::RenderVertexShader(ShaderProgram& program) {
+    ImGui::BeginDisabled();
+    if (program.HasVertexShader()) {
+        ImGui::PushStyleColor(ImGuiCol_TextDisabled, SET_COLOR);
+    } else {
+        ImGui::PushStyleColor(ImGuiCol_TextDisabled, NOT_SET_MANDATORY_COLOR);
+    }
+    Begin("Vertex Shader");
+    ImGui::InputText("###vertex_shader_text", VertexShaderText.data(), VertexShaderText.capacity(), ImGuiInputTextFlags_ReadOnly);
+    if (ImGui::BeginDragDropTarget()) {
+        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DND_DEMO_CELL")) {
+            UUID data = *(const UUID*) payload->Data;
+            AssetHandle handle = assets->FindAsset(data);
+            assert(handle.HasValue());
+            if (handle->IsShader()) {
+                if (handle->DataAs<Shader>().Type == Shader::Type::VERTEX) {
+                    program.VertexShader = data;
+                    ShaderProgramAsset->Serialize();
+                    ShaderProgramAsset->ForceDeserialize();
+                    VertexShaderText = std::format("{} (UUID: {})", assets->FindAsset(data)->File().Name(), std::to_string(data));
+                }
+            }
+        }
+        ImGui::EndDragDropTarget();
+    }
+    ImGui::PopStyleColor();
+    ImGui::EndDisabled();
+
+    ImGui::SameLine();
+    ImGuiIO& io = ImGui::GetIO();
+    auto boldFont = io.Fonts->Fonts[1];
+    ImGui::PushFont(boldFont);
+    float lineHeight = boldFont->FontSize + ImGui::GetStyle().FramePadding.y * 2.0f;
+    ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
+
+    ImGui::PushStyleColor(ImGuiCol_Button, { .80f, .10f, .15f, 1 });
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { .80f, .10f, .15f, 1 });
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, { .94f, .51f, .55f, 1 });
+    if (ImGui::Button("X", buttonSize)) {
+        program.VertexShader = 0;
+        ShaderProgramAsset->Serialize();
+        ShaderProgramAsset->ForceDeserialize();
+        VertexShaderText = NOT_SET_MANDATORY_TEXT;
+    }
+    ImGui::PopStyleColor(3);
+    ImGui::PopFont();
+
+    End();
+}
+void Observer::ShaderProgramDisplay::RenderTessCtrlShader(ShaderProgram& program) {
+    ImGui::BeginDisabled();
+    if (program.HasTessellationControlShader()) {
+        ImGui::PushStyleColor(ImGuiCol_TextDisabled, SET_COLOR);
+    } else {
+        ImGui::PushStyleColor(ImGuiCol_TextDisabled, NOT_SET_OPTIONAL_COLOR);
+    }
+    Begin("Tessellation Control Shader");
+    ImGui::InputText("###tess_ctrl_shader_text", TessCtrlShaderText.data(), TessCtrlShaderText.capacity(), ImGuiInputTextFlags_ReadOnly);
+    if (ImGui::BeginDragDropTarget()) {
+        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DND_DEMO_CELL")) {
+            UUID data = *(const UUID*) payload->Data;
+            AssetHandle handle = assets->FindAsset(data);
+            assert(handle.HasValue());
+            if (handle->IsShader()) {
+                if (handle->DataAs<Shader>().Type == Shader::Type::TESS_CTRL) {
+                    program.TessellationControlShader = data;
+                    ShaderProgramAsset->Serialize();
+                    ShaderProgramAsset->ForceDeserialize();
+                    TessCtrlShaderText = std::format("{} (UUID: {})", assets->FindAsset(data)->File().Name(), std::to_string(data));
+                }
+            }
+        }
+        ImGui::EndDragDropTarget();
+    }
+    ImGui::PopStyleColor();
+    ImGui::EndDisabled();
+
+    ImGui::SameLine();
+    ImGuiIO& io = ImGui::GetIO();
+    auto boldFont = io.Fonts->Fonts[1];
+    ImGui::PushFont(boldFont);
+    float lineHeight = boldFont->FontSize + ImGui::GetStyle().FramePadding.y * 2.0f;
+    ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
+
+    ImGui::PushStyleColor(ImGuiCol_Button, { .80f, .10f, .15f, 1 });
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { .80f, .10f, .15f, 1 });
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, { .94f, .51f, .55f, 1 });
+    if (ImGui::Button("X", buttonSize)) {
+        program.TessellationControlShader = 0;
+        ShaderProgramAsset->Serialize();
+        ShaderProgramAsset->ForceDeserialize();
+        TessCtrlShaderText = NOT_SET_OPTIONAL_TEXT;
+    }
+    ImGui::PopStyleColor(3);
+    ImGui::PopFont();
+
+    End();
+}
+void Observer::ShaderProgramDisplay::RenderTessEvalShader(ShaderProgram& program) {
+    ImGui::BeginDisabled();
+    if (program.HasTessellationEvaluationShader()) {
+        ImGui::PushStyleColor(ImGuiCol_TextDisabled, SET_COLOR);
+    } else {
+        ImGui::PushStyleColor(ImGuiCol_TextDisabled, NOT_SET_OPTIONAL_COLOR);
+    }
+    Begin("Tessellation Evaluation Shader");
+    ImGui::InputText("###tess_eval_shader_text", TessEvalShaderText.data(), TessEvalShaderText.capacity(), ImGuiInputTextFlags_ReadOnly);
+    if (ImGui::BeginDragDropTarget()) {
+        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DND_DEMO_CELL")) {
+            UUID data = *(const UUID*) payload->Data;
+            AssetHandle handle = assets->FindAsset(data);
+            assert(handle.HasValue());
+            if (handle->IsShader()) {
+                if (handle->DataAs<Shader>().Type == Shader::Type::TESS_EVAL) {
+                    program.TessellationEvaluationShader = data;
+                    ShaderProgramAsset->Serialize();
+                    ShaderProgramAsset->ForceDeserialize();
+                    TessEvalShaderText = std::format("{} (UUID: {})", assets->FindAsset(data)->File().Name(), std::to_string(data));
+                }
+            }
+        }
+        ImGui::EndDragDropTarget();
+    }
+    ImGui::PopStyleColor();
+    ImGui::EndDisabled();
+
+    ImGui::SameLine();
+    ImGuiIO& io = ImGui::GetIO();
+    auto boldFont = io.Fonts->Fonts[1];
+    ImGui::PushFont(boldFont);
+    float lineHeight = boldFont->FontSize + ImGui::GetStyle().FramePadding.y * 2.0f;
+    ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
+
+    ImGui::PushStyleColor(ImGuiCol_Button, { .80f, .10f, .15f, 1 });
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { .80f, .10f, .15f, 1 });
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, { .94f, .51f, .55f, 1 });
+    if (ImGui::Button("X", buttonSize)) {
+        program.TessellationEvaluationShader = 0;
+        ShaderProgramAsset->Serialize();
+        ShaderProgramAsset->ForceDeserialize();
+        TessEvalShaderText = NOT_SET_OPTIONAL_TEXT;
+    }
+    ImGui::PopStyleColor(3);
+    ImGui::PopFont();
+
+    End();
+}
+void Observer::ShaderProgramDisplay::RenderGeometryShader(ShaderProgram& program) {
+    ImGui::BeginDisabled();
+    if (program.HasGeometryShader()) {
+        ImGui::PushStyleColor(ImGuiCol_TextDisabled, SET_COLOR);
+    } else {
+        ImGui::PushStyleColor(ImGuiCol_TextDisabled, NOT_SET_OPTIONAL_COLOR);
+    }
+    Begin("Geometry Shader");
+    ImGui::InputText("###tess_eval_shader_text", GeometryShaderText.data(), GeometryShaderText.capacity(), ImGuiInputTextFlags_ReadOnly);
+    if (ImGui::BeginDragDropTarget()) {
+        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DND_DEMO_CELL")) {
+            UUID data = *(const UUID*) payload->Data;
+            AssetHandle handle = assets->FindAsset(data);
+            assert(handle.HasValue());
+            if (handle->IsShader()) {
+                if (handle->DataAs<Shader>().Type == Shader::Type::GEOMETRY) {
+                    program.GeometryShader = data;
+                    ShaderProgramAsset->Serialize();
+                    ShaderProgramAsset->ForceDeserialize();
+                    GeometryShaderText = std::format("{} (UUID: {})", assets->FindAsset(data)->File().Name(), std::to_string(data));
+                }
+            }
+        }
+        ImGui::EndDragDropTarget();
+    }
+    ImGui::PopStyleColor();
+    ImGui::EndDisabled();
+
+    ImGui::SameLine();
+    ImGuiIO& io = ImGui::GetIO();
+    auto boldFont = io.Fonts->Fonts[1];
+    ImGui::PushFont(boldFont);
+    float lineHeight = boldFont->FontSize + ImGui::GetStyle().FramePadding.y * 2.0f;
+    ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
+
+    ImGui::PushStyleColor(ImGuiCol_Button, { .80f, .10f, .15f, 1 });
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { .80f, .10f, .15f, 1 });
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, { .94f, .51f, .55f, 1 });
+    if (ImGui::Button("X", buttonSize)) {
+        program.GeometryShader = 0;
+        ShaderProgramAsset->Serialize();
+        ShaderProgramAsset->ForceDeserialize();
+        GeometryShaderText = NOT_SET_OPTIONAL_TEXT;
+    }
+    ImGui::PopStyleColor(3);
+    ImGui::PopFont();
+
+    End();
+}
+void Observer::ShaderProgramDisplay::RenderFragmentShader(ShaderProgram& program) {
+    ImGui::BeginDisabled();
+    if (program.HasFragmentShader()) {
+        ImGui::PushStyleColor(ImGuiCol_TextDisabled, SET_COLOR);
+    } else {
+        ImGui::PushStyleColor(ImGuiCol_TextDisabled, NOT_SET_MANDATORY_COLOR);
+    }
+    Begin("Fragment Shader");
+    ImGui::InputText("###fragment_shader_text", FragmentShaderText.data(), FragmentShaderText.capacity(), ImGuiInputTextFlags_ReadOnly);
+    if (ImGui::BeginDragDropTarget()) {
+        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DND_DEMO_CELL")) {
+            UUID data = *(const UUID*) payload->Data;
+            AssetHandle handle = assets->FindAsset(data);
+            assert(handle.HasValue());
+            if (handle->IsShader()) {
+                if (handle->DataAs<Shader>().Type == Shader::Type::FRAGMENT) {
+                    program.FragmentShader = data;
+                    ShaderProgramAsset->Serialize();
+                    ShaderProgramAsset->ForceDeserialize();
+                    FragmentShaderText = std::format("{} (UUID: {})", assets->FindAsset(data)->File().Name(), std::to_string(data));
+                }
+            }
+        }
+        ImGui::EndDragDropTarget();
+    }
+    ImGui::PopStyleColor();
+    ImGui::EndDisabled();
+
+    ImGui::SameLine();
+    ImGuiIO& io = ImGui::GetIO();
+    auto boldFont = io.Fonts->Fonts[1];
+    ImGui::PushFont(boldFont);
+    float lineHeight = boldFont->FontSize + ImGui::GetStyle().FramePadding.y * 2.0f;
+    ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
+
+    ImGui::PushStyleColor(ImGuiCol_Button, { .80f, .10f, .15f, 1 });
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { .80f, .10f, .15f, 1 });
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, { .94f, .51f, .55f, 1 });
+    if (ImGui::Button("X", buttonSize)) {
+        program.FragmentShader = 0;
+        ShaderProgramAsset->Serialize();
+        ShaderProgramAsset->ForceDeserialize();
+        FragmentShaderText = NOT_SET_MANDATORY_TEXT;
+    }
+    ImGui::PopStyleColor(3);
+    ImGui::PopFont();
+
+    End();
+}
+void Observer::ShaderProgramDisplay::End() {
+    ImGui::PopFont();
+    ImGui::PopStyleVar(2);
+    ImGui::Columns(1);
+    ImGui::PopItemWidth();
+    ImGui::PopID();
+}
+
+void Observer::OnReimport(Assets& assets) {
+    if (!std::holds_alternative<FNode*>(displayTarget)) { return; }
+    //TODO
+}
+void Observer::OnAssetDeleted(AssetHandle asset) {
+    if (std::holds_alternative<FNode*>(displayTarget) &&
+        &asset->File() == std::get<FNode*>(displayTarget)) {
+        ResetDisplayTarget();
+    }
+}
+void Observer::OnAssetFocused(AssetHandle asset) {
+    SetDisplayTarget(asset->File());
+}
+void Observer::OnFolderFocused(FNode& folder) {
+    SetDisplayTarget(folder);
+}
+void Observer::OnFocusLost() {
+    ResetDisplayTarget();
+}
+void Observer::OnSceneOpened(Scene& scene) {
+    currentScene = &scene;
+}
+void Observer::OnSceneClosed() {
+    if (std::holds_alternative<Entity>(displayTarget)) {
+        ResetDisplayTarget();
+    }
+}
+void Observer::OnEntitySelected(Entity entity) {
+    SetDisplayTarget(entity);
+}
+void Observer::OnEntityDeselected() {
+    if (std::holds_alternative<Entity>(displayTarget)) {
+        ResetDisplayTarget();
+    }
 }

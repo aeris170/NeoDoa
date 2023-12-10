@@ -190,13 +190,15 @@ namespace FileIcons {
         std::pair{ COMPONENT_ICON, "gear" }
     };
 
+    inline constexpr const char SHADER_ICON[]           { ICON_FA_CIRCLE_S };
     inline constexpr const char VERTEX_SHADER_ICON[]    { ICON_FA_CIRCLE_V };
     inline constexpr const char TESS_CTRL_SHADER_ICON[] { ICON_FA_CIRCLE_T };
     inline constexpr const char TESS_EVAL_SHADER_ICON[] { ICON_FA_SQUARE_T };
     inline constexpr const char GEOMETRY_SHADER_ICON[]  { ICON_FA_CIRCLE_G };
     inline constexpr const char FRAGMENT_SHADER_ICON[]  { ICON_FA_CIRCLE_F };
     inline constexpr const char COMPUTE_SHADER_ICON[]   { ICON_FA_CIRCLE_C };
-    inline std::array<ElementType, 6> ShaderIcons{
+    inline std::array<ElementType, 7> ShaderIcons{
+        std::pair{ SHADER_ICON,           "circle-s" },
         std::pair{ VERTEX_SHADER_ICON,    "circle-v" },
         std::pair{ TESS_CTRL_SHADER_ICON, "circle-t" },
         std::pair{ TESS_EVAL_SHADER_ICON, "square-t" },

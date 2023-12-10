@@ -64,56 +64,56 @@ void ShaderProgramDeserializer::Shaders::DefaultDeserialize(tinyxml2::XMLElement
     node = shadersNode.FirstChildElement("vertex-shader");
     if (node == nullptr) {
         spdr.erred = true;
-        spdr.errors.emplace_back(std::format("Can't find node {} in program file.", std::quoted("vertex-shader")));
+        spdr.errors.emplace_back(std::format("Can't find node \"{}-shader\" in program file.", "vertex"));
     }
     DeserializeVertexShader(*node, spdr);
 
     node = shadersNode.FirstChildElement("tess-ctrl-shader");
     if (node == nullptr) {
         spdr.erred = true;
-        spdr.errors.emplace_back(std::format("Can't find node {} in program file.", std::quoted("tess-ctrl-shader")));
+        spdr.errors.emplace_back(std::format("Can't find node \"{}-shader\" in program file.", "tess-ctrl"));
     }
     DeserializeTessellationControlShader(*node, spdr);
 
     node = shadersNode.FirstChildElement("tess-eval-shader");
     if (node == nullptr) {
         spdr.erred = true;
-        spdr.errors.emplace_back(std::format("Can't find node {} in program file.", std::quoted("tess-eval-shader")));
+        spdr.errors.emplace_back(std::format("Can't find node \"{}-shader\" in program file.", "tess-eval"));
     }
     DeserializeTessellationEvaluationShader(*node, spdr);
 
     node = shadersNode.FirstChildElement("geometry-shader");
     if (node == nullptr) {
         spdr.erred = true;
-        spdr.errors.emplace_back(std::format("Can't find node {} in program file.", std::quoted("geometry-shader")));
+        spdr.errors.emplace_back(std::format("Can't find node \"{}-shader\" in program file.", "geometry"));
     }
     DeserializeGeometryShader(*node, spdr);
 
     node = shadersNode.FirstChildElement("fragment-shader");
     if (node == nullptr) {
         spdr.erred = true;
-        spdr.errors.emplace_back(std::format("Can't find node {} in program file.", std::quoted("fragment-shader")));
+        spdr.errors.emplace_back(std::format("Can't find node \"{}-shader\" in program file.", "fragment"));
     }
     DeserializeFragmentShader(*node, spdr);
     //DeserializeVertexShader(shadersNode.FirstChildElement("compute-shader"), program);
 }
 void ShaderProgramDeserializer::Shaders::DefaultDeserializeVertexShader(tinyxml2::XMLElement& vertexShaderNode, ShaderProgramDeserializationResult& spdr) {
-    spdr.deserializedShaderProgram.VertexShader = static_cast<UUID>(vertexShaderNode.Int64Attribute("uuid", UUID::Empty()));
+    spdr.deserializedShaderProgram.VertexShader = static_cast<UUID>(vertexShaderNode.Unsigned64Attribute("uuid", UUID::Empty()));
 }
 void ShaderProgramDeserializer::Shaders::DefaultDeserializeTessellationControlShader(tinyxml2::XMLElement& tessCtrlShaderNode, ShaderProgramDeserializationResult& spdr) {
-    spdr.deserializedShaderProgram.TessellationControlShader = static_cast<UUID>(tessCtrlShaderNode.Int64Attribute("uuid", UUID::Empty()));
+    spdr.deserializedShaderProgram.TessellationControlShader = static_cast<UUID>(tessCtrlShaderNode.Unsigned64Attribute("uuid", UUID::Empty()));
 }
 void ShaderProgramDeserializer::Shaders::DefaultDeserializeTessellationEvaluationShader(tinyxml2::XMLElement& tessEvalShaderNode, ShaderProgramDeserializationResult& spdr) {
-    spdr.deserializedShaderProgram.TessellationEvaluationShader = static_cast<UUID>(tessEvalShaderNode.Int64Attribute("uuid", UUID::Empty()));
+    spdr.deserializedShaderProgram.TessellationEvaluationShader = static_cast<UUID>(tessEvalShaderNode.Unsigned64Attribute("uuid", UUID::Empty()));
 }
 void ShaderProgramDeserializer::Shaders::DefaultDeserializeGeometryShader(tinyxml2::XMLElement& geometryShaderNode, ShaderProgramDeserializationResult& spdr) {
-    spdr.deserializedShaderProgram.GeometryShader = static_cast<UUID>(geometryShaderNode.Int64Attribute("uuid", UUID::Empty()));
+    spdr.deserializedShaderProgram.GeometryShader = static_cast<UUID>(geometryShaderNode.Unsigned64Attribute("uuid", UUID::Empty()));
 }
 void ShaderProgramDeserializer::Shaders::DefaultDeserializeFragmentShader(tinyxml2::XMLElement& fragmentShaderNode, ShaderProgramDeserializationResult& spdr) {
-    spdr.deserializedShaderProgram.FragmentShader = static_cast<UUID>(fragmentShaderNode.Int64Attribute("uuid", UUID::Empty()));
+    spdr.deserializedShaderProgram.FragmentShader = static_cast<UUID>(fragmentShaderNode.Unsigned64Attribute("uuid", UUID::Empty()));
 }
 void ShaderProgramDeserializer::Shaders::DefaultDeserializeComputeShader(tinyxml2::XMLElement& computeShaderNode, ShaderProgramDeserializationResult& spdr) {
-    //program.vertexShader = computeShaderNode.FindAttribute("id")->Int64Value();
+    //program.vertexShader = computeShaderNode.FindAttribute("id")->Unsigned64Attribute();
 }
 
 void ShaderProgramDeserializer::Linking::DefaultLink(ShaderProgramDeserializationResult& spdr) {
@@ -147,6 +147,10 @@ void ShaderProgramDeserializer::Linking::DefaultOpenGLLink(ShaderProgramDeserial
     if (!fragmentShaderAsset.HasValue()) {
         spdr.erred = true;
         spdr.errors.emplace_back("Can't link program, program references a non-existant fragment shader, has your shader successfully deserialized?");
+    }
+    if (!vertexShaderAsset.HasValue() || !fragmentShaderAsset.HasValue()) {
+        spdr.errors.emplace_back("Please fix errors before continuing.");
+        return;
     }
     const Shader& vertexShader = vertexShaderAsset->DataAs<Shader>();
     glAttachShader(ID, vertexShader.ID);

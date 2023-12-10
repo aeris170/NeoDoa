@@ -9,10 +9,13 @@ CodeEditor::CodeEditor(GUI& gui) noexcept :
     gui(gui) {
     tabs.reserve(10);
     emptyTab.textEditor.SetReadOnlyEnabled(true);
+    gui.Events.OnReimport     += std::bind_front(&CodeEditor::OnReimport,     this);
+    gui.Events.OnAssetDeleted += std::bind_front(&CodeEditor::OnAssetDeleted, this);
+    gui.Events.OnAssetOpened  += std::bind_front(&CodeEditor::OnAssetOpened,  this);
 }
 
 bool CodeEditor::Begin() {
-    GUI& gui = this->gui;
+    const GUI& gui = this->gui;
 
     ImGui::PushID(GUI::CODE_EDITOR_TITLE);
     std::string title(WindowIcons::CODE_EDITOR_WINDOW_ICON);
@@ -23,7 +26,7 @@ bool CodeEditor::Begin() {
     return visible;
 }
 void CodeEditor::Render() {
-    GUI& gui = this->gui;
+    const GUI& gui = this->gui;
     RenderMenuBar();
 
     ImGuiTabBarFlags tabBarFlags = ImGuiTabBarFlags_AutoSelectNewTabs |
@@ -68,13 +71,6 @@ void CodeEditor::End() {
     if (removedTabIndex != -1) {
         tabs.erase(tabs.begin() + removedTabIndex);
         removedTabIndex = -1;
-    }
-}
-
-void CodeEditor::CloseTabAt(int index) {
-    removedTabIndex = index;
-    if (removedTabIndex <= selectedTabIndex) {
-        selectedTabIndex = std::max(0, selectedTabIndex--);
     }
 }
 
@@ -191,9 +187,39 @@ void CodeEditor::AddTab(AssetHandle assetHandle) {
     selectedTabIndex++;
 }
 
+void CodeEditor::CloseTabAt(int index) {
+    removedTabIndex = index;
+    if (removedTabIndex <= selectedTabIndex) {
+        selectedTabIndex = std::max(0, selectedTabIndex--);
+    }
+}
+
 void CodeEditor::SaveAllChanges() {
     for (auto& tab : tabs) {
         tab.SaveChanges();
+    }
+}
+
+void CodeEditor::OnReimport(Assets& assets) {
+    for (auto& tab : tabs) {
+        tab.currentAsset = assets.FindAsset(tab.currentAssetID);
+    }
+}
+void CodeEditor::OnAssetDeleted(AssetHandle handle) {
+    for (int i = 0; i < tabs.size(); i++) {
+        if (tabs[i].currentAsset == handle) {
+            CloseTabAt(i);
+            return;
+        }
+    }
+}
+void CodeEditor::OnAssetOpened(AssetHandle handle) {
+    assert(handle.HasValue());
+
+    auto& file = handle->File();
+    if (Assets::IsComponentDefinitionFile(file) ||
+        Assets::IsShaderFile(file)) {
+        AddTab(handle);
     }
 }
 

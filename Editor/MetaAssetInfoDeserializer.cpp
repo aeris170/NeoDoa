@@ -11,7 +11,6 @@
 #include <Engine/Assets.hpp>
 
 #include <Editor/Icons.hpp>
-#include <Editor/MetaAssetInfo.hpp>
 
 static const char* FindIconInIcons(const char* icon);
 
@@ -35,19 +34,20 @@ MetaAssetInfo DeserializeMetaAssetInfo(const std::string& data) {
     };
 }
 
-MetaAssetInfoBank DeserializeMetaAssetInfoBank(const FNode& file) {
+MetaAssetInfoBankDeserializationResult DeserializeMetaAssetInfoBank(const FNode& file) {
     file.ReadContent();
     return DeserializeMetaAssetInfoBank(file.DisposeContent());
 }
-MetaAssetInfoBank DeserializeMetaAssetInfoBank(const std::string& data) {
+MetaAssetInfoBankDeserializationResult DeserializeMetaAssetInfoBank(const std::string& data) {
     tinyxml2::XMLDocument doc;
     tinyxml2::XMLError err = doc.Parse(data.c_str());
     if (err != tinyxml2::XML_SUCCESS) {
-        DOA_LOG_WARNING("Couldn't deserialize meta asset info bank! All custom set icons are, sadly, gone. You must re-apply your custom asset icons.\n\n%s", data);
-        return {};
+        DOA_LOG_WARNING("Couldn't deserialize meta asset info bank! All custom set icons are, sadly, gone. You must re-apply your custom asset icons. %s", data);
+        return { true, {} };
     }
 
-    MetaAssetInfoBank bank{};
+    MetaAssetInfoBankDeserializationResult rv;
+    MetaAssetInfoBank& bank = rv.bank;
 
     auto* bankElement = doc.RootElement();
     for (auto* infoElem = bankElement->FirstChildElement(); infoElem != nullptr; infoElem = infoElem->NextSiblingElement()) {
@@ -57,7 +57,7 @@ MetaAssetInfoBank DeserializeMetaAssetInfoBank(const std::string& data) {
         bank.Emplace(std::move(info));
     }
 
-    return bank;
+    return rv;
 };
 
 static const char* FindIconInIcons(const char* icon) {

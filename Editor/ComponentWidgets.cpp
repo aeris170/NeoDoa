@@ -218,7 +218,7 @@ bool StringWidget(const std::string& label, std::string& value) {
     if (ImGui::InputText(ss.str().c_str(), buf, 128, ImGuiInputTextFlags_EnterReturnsTrue)) {
         rv = true;
         value = std::string(buf);
-    };
+    }
     EndWidget();
     return rv;
 }

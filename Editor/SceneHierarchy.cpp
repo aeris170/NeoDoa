@@ -18,10 +18,13 @@
 #include <Editor/UserDefinedComponentStorage.hpp>
 
 SceneHierarchy::SceneHierarchy(GUI& gui) noexcept :
-    gui(gui) {}
+    gui(gui) {
+    gui.Events.SceneHierarchy.OnEntitySelected   += std::bind_front(&SceneHierarchy::OnEntitySelected  , this);
+    gui.Events.SceneHierarchy.OnEntityDeselected += std::bind_front(&SceneHierarchy::OnEntityDeselected, this);
+    gui.Events.OnEntityDeleted                   += std::bind_front(&SceneHierarchy::OnEntityDeleted   , this);
+}
 
 bool SceneHierarchy::Begin() {
-    GUI& gui = this->gui;
     ImGui::PushID(GUI::SCENE_HIERARCHY_TITLE);
     std::string title(WindowIcons::SCENE_HIERARCHY_WINDOW_ICON);
     title.append(GUI::SCENE_HIERARCHY_TITLE);
@@ -31,8 +34,11 @@ bool SceneHierarchy::Begin() {
     return visible;
 }
 
-void SceneHierarchy::Render(Scene& scene) {
+void SceneHierarchy::Render() {
     GUI& gui = this->gui;
+    if (!gui.HasOpenScene()) { return; }
+    Scene& scene = gui.GetOpenScene();
+
     if (ImGui::BeginDragDropTarget()) {
         auto* payload = ImGui::AcceptDragDropPayload("SELECTED_ENTT");
         if (payload != nullptr) {
@@ -81,31 +87,29 @@ void SceneHierarchy::Render(Scene& scene) {
         // render entities with no parent (parent == NULL_ENTT);
         auto view = scene.GetRegistry().view<IDComponent>(entt::exclude<ChildComponent>);
         for (auto& entt : view) {
-            RenderEntityNode(scene, entt);
+            RenderEntityNode(entt);
         }
     }
 
     if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered()) {
-        ResetSelectedEntity();
+        gui.Events.SceneHierarchy.OnEntityDeselected();
     }
 
     if (ImGui::BeginPopupContextWindow(0, ImGuiMouseButton_Right | ImGuiPopupFlags_NoOpenOverItems)) {
         if (ImGui::MenuItem(cat(SceneHierarchyIcons::ContextMenu::CREATE_NEW_ENTITY_ICON, "Create New Entity"))) {
-            scene.CreateEntity();
+            gui.Events.OnEntityCreated(scene.CreateEntity());
         }
         ImGui::Separator();
         if (ImGui::MenuItem(cat(SceneHierarchyIcons::ContextMenu::CLOSE_SCENE_ICON, "Close Scene"))) {
             gui.CORE->LoadedProject()->CloseScene();
+            gui.Events.OnSceneClosed();
         }
         ImGui::EndPopup();
     }
 
     if (deletedEntity != NULL_ENTT) {
         scene.DeleteEntity(deletedEntity);
-        if (selectedEntity == deletedEntity) {
-            ResetSelectedEntity();
-        }
-        deletedEntity = NULL_ENTT;
+        gui.Events.OnEntityDeleted(deletedEntity);
     }
 }
 
@@ -114,8 +118,11 @@ void SceneHierarchy::End() {
     ImGui::PopID();
 }
 
-void SceneHierarchy::RenderEntityNode(Scene& scene, const Entity entity) {
+void SceneHierarchy::RenderEntityNode(const Entity entity) {
     GUI& gui = this->gui;
+    if (!gui.HasOpenScene()) { return; }
+    Scene& scene = gui.GetOpenScene();
+
     const IDComponent& id = scene.GetComponent<IDComponent>(entity);
 
     std::string title;
@@ -229,9 +236,9 @@ void SceneHierarchy::RenderEntityNode(Scene& scene, const Entity entity) {
     }
 
     if (ImGui::IsItemHovered(ImGuiHoveredFlags_None) && ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
-        SetSelectedEntity(entity);
+        gui.Events.SceneHierarchy.OnEntitySelected(entity);
     }
-    RenderContextMenu(scene, entity);
+    RenderContextMenu(entity);
 
     if (opened) {
         if (scene.HasComponent<ParentComponent>(entity)) {
@@ -239,7 +246,7 @@ void SceneHierarchy::RenderEntityNode(Scene& scene, const Entity entity) {
             const std::vector<Entity>& children = parent.GetChildren();
 
             for (auto& entt : children) {
-                RenderEntityNode(scene, entt);
+                RenderEntityNode(entt);
             }
         }
 
@@ -248,8 +255,10 @@ void SceneHierarchy::RenderEntityNode(Scene& scene, const Entity entity) {
         }
     }
 }
-void SceneHierarchy::RenderContextMenu(Scene& scene, const Entity entity) {
+void SceneHierarchy::RenderContextMenu(const Entity entity) {
     GUI& gui = this->gui;
+    if (!gui.HasOpenScene()) { return; }
+    Scene& scene = gui.GetOpenScene();
 
     if (ImGui::BeginPopupContextItem(0, ImGuiPopupFlags_MouseButtonRight)) {
         if (ImGui::BeginMenu(cat(SceneHierarchyIcons::ContextMenu::ATTACH_COMPONENT_ICON, "Attach Component"))) {
@@ -295,13 +304,15 @@ void SceneHierarchy::RenderContextMenu(Scene& scene, const Entity entity) {
     }
 }
 
-void SceneHierarchy::SetSelectedEntity(Entity entt) {
-    GUI& gui = this->gui;
-    selectedEntity = entt;
-    gui.obs.SetDisplayTarget(selectedEntity);
+void SceneHierarchy::OnEntitySelected(Entity entity) {
+    selectedEntity = entity;
 }
-void SceneHierarchy::ResetSelectedEntity() {
-    GUI& gui = this->gui;
+void SceneHierarchy::OnEntityDeselected() {
     selectedEntity = NULL_ENTT;
-    gui.obs.ResetDisplayTarget();
+}
+void SceneHierarchy::OnEntityDeleted(Entity entity) {
+    if (selectedEntity == entity) {
+        selectedEntity = NULL_ENTT;
+    }
+    deletedEntity = NULL_ENTT;
 }

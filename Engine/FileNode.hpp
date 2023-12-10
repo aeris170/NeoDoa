@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <filesystem>
+#include <type_traits>
 
 struct Project;
 struct FNode;
@@ -17,34 +18,64 @@ struct FNodeCreationParams {
 };
 
 struct FNode {
+    struct ChildrenList {
+        template <typename T>
+        struct Iterator {
+            using iterator_category = std::forward_iterator_tag;
+            using difference_type = std::ptrdiff_t;
+            using value_type = T;
+            using ptr = value_type*;
+            using ref = value_type&;
+            using smart = const std::unique_ptr<std::remove_const_t<T>>;
+
+            Iterator(smart* ptr) : _ptr(ptr) {}
+
+            ref operator*() const { return *(_ptr->get()); }
+            ptr operator->() { return _ptr->get(); }
+            Iterator<T>& operator++() { _ptr++; return *this; }
+            Iterator<T> operator++(int) { Iterator tmp = *this; ++(*this); return tmp; }
+            friend bool operator==(const Iterator<T>& a, const Iterator<T>& b) = default;
+
+        private:
+            smart* _ptr;
+        };
+
+        ChildrenList(std::vector<std::unique_ptr<FNode>>& children) noexcept;
+
+        Iterator<FNode> begin();
+        Iterator<FNode> end();
+
+    private:
+        std::vector<std::unique_ptr<FNode>>& children;
+    };
 
     FNode(const FNodeCreationParams& params) noexcept;
     FNode(FNodeCreationParams&& params) noexcept;
 
     ~FNode() noexcept = default;
     FNode(const FNode& other) noexcept = delete;
-    FNode(FNode&& other) noexcept;
+    FNode(FNode&& other) noexcept = delete;
     FNode& operator=(const FNode& other) = delete;
-    FNode& operator=(FNode&& other) noexcept;
+    FNode& operator=(FNode&& other) noexcept = delete;
     bool operator==(const FNode& other) const noexcept;
 
     std::filesystem::path Path() const;
     std::filesystem::path AbsolutePath() const;
     std::filesystem::path FolderPath() const;
 
-    std::string Name();
+    std::string_view Name();
     const std::string& Name() const;
     void ChangeName(std::string_view name);
     void ChangeName(const std::string& name);
     void ChangeName(std::string&& name);
 
-    std::string Extension();
+    std::string_view Extension();
     const std::string& Extension() const;
     void ChangeExtension(std::string_view extension);
     void ChangeExtension(const std::string& extension);
     void ChangeExtension(std::string&& extension);
 
-    std::string FullName();
+    std::string_view FullName();
     const std::string& FullName() const;
 
     std::string_view Content() const;
@@ -72,16 +103,14 @@ struct FNode {
     bool HasParentNode() const;
     FNode* ParentNode() const;
 
-    std::vector<FNode>& Children();
-    const std::vector<FNode>& Children() const;
-    auto begin();
-    auto end();
+    ChildrenList Children();
+    ChildrenList Children() const;
 
     static FNode HollowCopy(const FNode& other);
 
     FNode* CreateChildFile(FNodeCreationParams&& params);
     FNode* CreateChildFolder(FNodeCreationParams&& params);
-    bool DeleteChildNode(FNode* child);
+    bool DeleteChildNode(FNode& child);
     FNode& FindChild(const std::filesystem::path& path);
 
 private:
@@ -95,15 +124,10 @@ private:
 
     bool isDirectory{ false };
 
-    std::vector<FNode> children{};
+    /* FNode guarantees references are never invalid unless DeleteChildNode is called therefore the unique_ptr's */
+    /* are used here to prevent FNode objects from sliding around on deletions/reallocations of vector. */
+    std::vector<std::unique_ptr<FNode>> children{};
 
     friend struct Asset;
     friend struct Assets;
-
-    inline void __onMove(FNode* parent) {
-        for (auto& child : children) {
-            child.parent = parent;
-            child.__onMove(&child);
-        }
-    }
 };

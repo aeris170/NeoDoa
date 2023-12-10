@@ -25,6 +25,7 @@ struct CodeEditor {
     private:
         void Render();
 
+        UUID currentAssetID{};
         AssetHandle currentAsset{};
         std::string unsavedText{};
         TextEditor textEditor{};
@@ -43,8 +44,6 @@ struct CodeEditor {
     void Render();
     void End();
 
-    void AddTab(AssetHandle assetHandle);
-
     void SaveAllChanges();
 
 private:
@@ -58,7 +57,12 @@ private:
 
     int removedTabIndex{ -1 };
 
+    void AddTab(AssetHandle assetHandle);
     void CloseTabAt(int index);
 
     void RenderMenuBar();
+
+    void OnReimport(Assets& assets);
+    void OnAssetDeleted(AssetHandle handle);
+    void OnAssetOpened(AssetHandle handle);
 };

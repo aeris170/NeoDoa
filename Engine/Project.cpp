@@ -32,25 +32,23 @@ void Project::OpenScene(UUID sceneID) {
     }
 
     sceneAsset->ForceDeserialize();
-    openScene = &sceneAsset->DataAs<Scene>();
     openSceneID = sceneAsset->ID();
 }
 void Project::CloseScene() {
     UUID id = openSceneID;
 
-    openScene = nullptr;
     openSceneID = UUID::Empty();
 
     AssetHandle openScene = Core::GetCore()->Assets()->FindAsset(id);
     if (!openScene.HasValue()) { return; }
     openScene->DeleteDeserializedData();
 }
-bool Project::HasOpenScene() const { return openScene != nullptr; }
-Scene& Project::GetOpenScene() { return *openScene; }
+bool Project::HasOpenScene() const { return openSceneID != UUID::Empty(); }
+Scene& Project::GetOpenScene() { return Core::GetCore()->Assets()->FindAsset(openSceneID)->DataAs<Scene>(); }
 UUID Project::GetOpenSceneID() const { return openSceneID; }
 
 void Project::SaveOpenSceneToDisk() {
-    if (!openScene) return;
+    if (!HasOpenScene()) return;
 
     AssetHandle openScene = Core::GetCore()->Assets()->FindAsset(openSceneID);
     openScene->Serialize();

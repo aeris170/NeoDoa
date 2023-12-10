@@ -6,8 +6,9 @@
 #include <imgui.h>
 #include <ImGuizmo.h>
 
+#include <Engine/Scene.hpp>
+
 struct GUI;
-struct Scene;
 
 struct SceneSettings {
 
@@ -15,12 +16,11 @@ struct SceneSettings {
 
     explicit SceneSettings(GUI& gui) noexcept;
 
-    bool Begin(Scene* scene);
-    void Render(Scene& scene);
+    bool Begin();
+    void Render();
     void End();
 
 private:
-
     void DrawStats(Scene& scene) const;
     void DrawSettings(Scene& scene);
 };

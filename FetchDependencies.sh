@@ -25,6 +25,9 @@ echo "Installing ImGui"
 echo "Installing EnTT"
 ./vcpkg install entt --triplet $platform
 
+echo "Istalling Eventpp"
+./vcpkg install eventpp --triplet $platform
+
 echo "Installing GLEW"
 ./vcpkg install glew --triplet $platform
 

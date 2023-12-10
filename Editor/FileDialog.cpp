@@ -494,7 +494,8 @@ bool FileDialog::IsDone(const std::string& key)
 
 	if (isMe && m_isOpen) {
 		if (!m_calledOpenPopup) {
-			ImGui::SetNextWindowSize(ImVec2(600, 400), ImGuiCond_FirstUseEver);
+			static auto size = ImVec2(ImGui::GetIO().DisplaySize.x, ImGui::GetIO().DisplaySize.y) / 2;
+			ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);
 			ImGui::OpenPopup(m_currentTitle.c_str());
 			m_calledOpenPopup = true;
 		}
@@ -1198,12 +1199,25 @@ void FileDialog::m_renderPopups()
 {
 	bool openAreYouSureDlg = false, openNewFileDlg = false, openNewDirectoryDlg = false;
 	if (ImGui::BeginPopupContextItem("##dir_context")) {
-		if (ImGui::Selectable("New file"))
-			openNewFileDlg = true;
-		if (ImGui::Selectable("New directory"))
-			openNewDirectoryDlg = true;
-		if (m_selectedFileItem != -1 && ImGui::Selectable("Delete"))
-			openAreYouSureDlg = true;
+		if (ImGui::Selectable("Refresh")) {
+			m_setDirectory(m_currentDirectory, false); // refresh
+		}
+		ImGui::Separator();
+		if (ImGui::BeginMenu("New")) {
+			if (ImGui::Selectable("File")) {
+				openNewFileDlg = true;
+			}
+			if (ImGui::Selectable("Folder")) {
+				openNewDirectoryDlg = true;
+			}
+			ImGui::EndMenu();
+		}
+		if (m_selectedFileItem != -1) {
+			ImGui::Separator();
+			if (ImGui::Selectable("Delete")) {
+				openAreYouSureDlg = true;
+			}
+		}
 		ImGui::EndPopup();
 	}
 	if (openAreYouSureDlg)
@@ -1211,31 +1225,54 @@ void FileDialog::m_renderPopups()
 	if (openNewFileDlg)
 		ImGui::OpenPopup("Enter file name##newfile");
 	if (openNewDirectoryDlg)
-		ImGui::OpenPopup("Enter directory name##newdir");
-	if (ImGui::BeginPopupModal("Are you sure?##delete")) {
+		ImGui::OpenPopup("Enter folder name##newdir");
+	if (ImGui::BeginPopupModal("Are you sure?##delete", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
 		if (m_selectedFileItem >= static_cast<int>(m_content.size()) || m_content.size() == 0)
 			ImGui::CloseCurrentPopup();
 		else {
 			const FileData& data = m_content[m_selectedFileItem];
-			ImGui::TextWrapped("Are you sure you want to delete %s?", data.Path.filename().string().c_str());
-			if (ImGui::Button("Yes")) {
+			ImGui::Text("Are you sure you want to delete %s?", data.Path.filename().string().c_str());
+
+			ImGui::Separator();
+
+			const ImGuiStyle& style = ImGui::GetStyle();
+			ImVec2 buttonSize{ 120, 0 };
+			float size = (buttonSize.x + style.ItemSpacing.x) * 2.0f;
+			float avail = ImGui::GetWindowSize().x;
+			float offset = (avail - size) * 0.5f;
+			if (offset > 0.0f) {
+				ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
+			}
+
+			if (ImGui::Button("Yes", buttonSize)) {
 				std::error_code ec;
 				std::filesystem::remove_all(data.Path, ec);
 				m_setDirectory(m_currentDirectory, false); // refresh
 				ImGui::CloseCurrentPopup();
 			}
+			ImGui::SetItemDefaultFocus();
 			ImGui::SameLine();
-			if (ImGui::Button("No"))
+			if (ImGui::Button("No", buttonSize)) {
 				ImGui::CloseCurrentPopup();
+			}
 		}
 		ImGui::EndPopup();
 	}
-	if (ImGui::BeginPopupModal("Enter file name##newfile")) {
-		ImGui::PushItemWidth(250.0f);
-		ImGui::InputText("##newfilename", m_newEntryBuffer, 1024); // TODO: remove hardcoded literals
-		ImGui::PopItemWidth();
+	if (ImGui::BeginPopupModal("Enter file name##newfile", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+		ImGui::InputTextWithHint("##newfilename", "File Name", m_newEntryBuffer, 1024, ImGuiInputTextFlags_EnterReturnsTrue); // TODO: remove hardcoded literals
 
-		if (ImGui::Button("OK")) {
+		ImGui::Separator();
+
+		const ImGuiStyle& style = ImGui::GetStyle();
+		ImVec2 buttonSize{ 120, 0 };
+		float size = (buttonSize.x + style.ItemSpacing.x) * 2.0f;
+		float avail = ImGui::GetWindowSize().x;
+		float offset = (avail - size) * 0.5f;
+		if (offset > 0.0f) {
+			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
+		}
+
+		if (ImGui::Button("OK", buttonSize)) {
 			std::ofstream out((m_currentDirectory / std::string(m_newEntryBuffer)).string());
 			out << "";
 			out.close();
@@ -1245,27 +1282,40 @@ void FileDialog::m_renderPopups()
 
 			ImGui::CloseCurrentPopup();
 		}
+		ImGui::SetItemDefaultFocus();
 		ImGui::SameLine();
-		if (ImGui::Button("Cancel")) {
+		if (ImGui::Button("Cancel", buttonSize)) {
 			m_newEntryBuffer[0] = 0;
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::EndPopup();
 	}
-	if (ImGui::BeginPopupModal("Enter directory name##newdir")) {
-		ImGui::PushItemWidth(250.0f);
-		ImGui::InputText("##newfilename", m_newEntryBuffer, 1024); // TODO: remove hardcoded literals
-		ImGui::PopItemWidth();
+	if (ImGui::BeginPopupModal("Enter folder name##newdir", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+		ImGui::InputTextWithHint("##newfilename", "Folder Name", m_newEntryBuffer, 1024); // TODO: remove hardcoded literals
 
-		if (ImGui::Button("OK")) {
+		ImGui::Separator();
+
+		const ImGuiStyle& style = ImGui::GetStyle();
+		ImVec2 buttonSize{ 120, 0 };
+		float size = (buttonSize.x + style.ItemSpacing.x) * 2.0f;
+		float avail = ImGui::GetWindowSize().x;
+		float offset = (avail - size) * 0.5f;
+		if (offset > 0.0f) {
+			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
+		}
+
+		if (ImGui::Button("OK", buttonSize)) {
 			std::error_code ec;
-			std::filesystem::create_directory(m_currentDirectory / std::string(m_newEntryBuffer), ec);
+			std::filesystem::path newDirectory = m_currentDirectory / std::string(m_newEntryBuffer);
+			std::filesystem::create_directory(newDirectory, ec);
 			m_setDirectory(m_currentDirectory, false); // refresh
+			m_select(newDirectory);
 			m_newEntryBuffer[0] = 0;
 			ImGui::CloseCurrentPopup();
 		}
+		ImGui::SetItemDefaultFocus();
 		ImGui::SameLine();
-		if (ImGui::Button("Cancel")) {
+		if (ImGui::Button("Cancel", buttonSize)) {
 			ImGui::CloseCurrentPopup();
 			m_newEntryBuffer[0] = 0;
 		}

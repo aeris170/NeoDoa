@@ -10,6 +10,12 @@ GUI::GUI(const CorePtr& core) noexcept :
     window(core->Window()) {
     FileDialog::Initialize();
     window->SetTitle(defaultWindowName);
+
+    Events.OnAssetOpened  += std::bind_front(&GUI::OnAssetOpened , this);
+    Events.OnSceneOpened  += std::bind_front(&GUI::OnSceneOpened , this);
+    Events.OnSceneClosed  += std::bind_front(&GUI::OnSceneClosed , this);
+    Events.OnReimport     += std::bind_front(&GUI::OnReimport    , this);
+    Events.OnAssetDeleted += std::bind_front(&GUI::OnAssetDeleted, this);
 }
 
 void GUI::Prepare() {
@@ -97,17 +103,12 @@ void GUI::operator() (float delta) {
     am.End();
 
     if (sh.Begin()) {
-        if (HasOpenScene()) {
-            sh.Render(GetOpenScene());
-        }
+        sh.Render();
     }
     sh.End();
 
-    Scene* scenePtr = HasOpenProject() && HasOpenScene() ? &GetOpenScene() : nullptr;
-    if (obs.Begin(scenePtr)) {
-        if (HasOpenScene()) {
-            obs.Render(GetOpenScene());
-        }
+    if (obs.Begin()) {
+        obs.Render();
     }
     obs.End();
 
@@ -121,10 +122,8 @@ void GUI::operator() (float delta) {
     }
     con.End();
 
-    if (sv.Begin(scenePtr)) {
-        if (HasOpenScene()) {
-            sv.Render(GetOpenScene());
-        }
+    if (sv.Begin()) {
+        sv.Render();
     }
     sv.End();
 
@@ -133,12 +132,12 @@ void GUI::operator() (float delta) {
     }
     gv.End();
 
-    if (ss.Begin(scenePtr)) {
-        if (HasOpenScene()) {
-            ss.Render(GetOpenScene());
-        }
+    if (ss.Begin()) {
+        ss.Render();
     }
     ss.End();
+
+    npm.Render();
 
     End();
 }
@@ -168,12 +167,19 @@ void GUI::SaveProjectToDisk() {
 
 void GUI::OpenProjectFromDisk(const std::string& path) {
     CORE->LoadProject(path);
-    metaInfo.LoadFromDisk(*CORE->LoadedProject());
+    metaInfo.LoadFromDisk(*CORE->LoadedProject(), *CORE->Assets());
 
     std::string title = defaultWindowName;
     title.append(" - ");
     title.append(CORE->LoadedProject()->Name());
     window->SetTitle(title);
+
+    /* CORE->LoadProject may load start-up scene (if it exists), we need to trap open scene */
+    if (HasOpenScene()) {
+        auto& proj = CORE->LoadedProject();
+        Events.OnSceneOpened(proj->GetOpenScene());
+        sceneUUID = proj->GetOpenSceneID();
+    }
 }
 
 void GUI::CloseProject() {
@@ -182,20 +188,37 @@ void GUI::CloseProject() {
 }
 
 void GUI::CreateNewScene(std::string_view relativePath, std::string_view name) {
+    if (!HasOpenProject()) { return; }
     // TODO
     /*
-    if (!HasOpenProject()) { return; }
     FNode* file = openProject->Assets().CreateNewSceneFileNode(relativePath, name);
     if (!HasOpenScene()) {
         openProject->OpenScene(file);
     }
     */
 }
+void GUI::SaveScene() const {
+    if (sceneUUID == UUID::Empty()) { return; }
+
+    AssetHandle handle = CORE->Assets()->FindAsset(sceneUUID);
+    if (handle.HasValue()) {
+        assert(handle->IsScene());
+        Scene& sceneData = handle->DataAs<Scene>();
+        sceneData = Scene::Copy(scene.value());
+        handle->Serialize();
+    } else {
+        // TODO
+        // Original asset is deleted while the scene was open, prompt user to save it to a new file.
+    }
+}
+void GUI::CloseScene() {
+
+}
 
 bool GUI::HasOpenProject() const { return CORE->HasLoadedProject(); }
 Project& GUI::GetOpenProject() const { return *CORE->LoadedProject().get(); }
-bool GUI::HasOpenScene() const { return HasOpenProject() && CORE->LoadedProject()->HasOpenScene(); }
-Scene& GUI::GetOpenScene() const { return CORE->LoadedProject()->GetOpenScene(); }
+bool GUI::HasOpenScene() const { return sceneUUID != UUID::Empty(); }
+Scene& GUI::GetOpenScene() { return scene.value(); }
 
 ImGuiIO* GUI::IO() const { return io; }
 ImFont* GUI::GetFont() const { return font; }
@@ -242,7 +265,9 @@ void* GUI::FindIconForFileType(const FNode& file, TextureSize size) const {
 void* GUI::FindIconByName(const std::string_view key, TextureSize size) const { return SVGPathway::Get(std::string(key), TextureStyle::PADDED, size).TextureIDRaw(); }
 
 MetaAssetInfo& GUI::GetMetaInfoOf(const FNode& file) { return metaInfo.GetMetaInfoOf(file); }
-void GUI::ReloadMetaInfo() { return metaInfo.LoadFromDisk(*CORE->LoadedProject()); }
+void GUI::ReloadMetaInfo() { metaInfo.LoadFromDisk(*CORE->LoadedProject(), *CORE->Assets()); }
+
+void GUI::ShowNewProjectModal() const { npm.Show(); }
 
 // TODO REMOVE ME WHEN IMGUI IMPLEMENTS THIS WORKAROUND AS API FUNC.
 void GUI::ExecuteDockBuilderFocusWorkAround() {
@@ -259,3 +284,35 @@ void GUI::ExecuteDockBuilderFocusWorkAround() {
     }
     i++;
 }
+
+// -- //
+// Open Scene
+void GUI::OnAssetOpened(AssetHandle asset) {
+    assert(asset.HasValue());
+    if (asset->IsScene()) {
+        sceneUUID = asset->ID();
+    }
+}
+void GUI::OnSceneOpened(Scene& scene) {
+    this->scene = Scene::Copy(scene);
+}
+void GUI::OnSceneClosed() {
+    scene = std::nullopt;
+}
+void GUI::OnReimport(Assets& assets) {
+    if (sceneUUID == UUID::Empty()) { return; }
+
+    AssetHandle currentSceneHandle = assets.FindAsset(sceneUUID);
+    if (!currentSceneHandle.HasValue()) {
+        sceneUUID = {};
+        scene = std::nullopt;
+    }
+}
+void GUI::OnAssetDeleted(AssetHandle asset) {
+    assert(asset.HasValue());
+    if (asset->ID() == sceneUUID) {
+        sceneUUID = {};
+        scene = std::nullopt;
+    }
+}
+// -- //

@@ -1,4 +1,4 @@
-#include "FileNode.hpp"
+﻿#include "FileNode.hpp"
 
 #include <fstream>
 #include <cassert>
@@ -7,6 +7,10 @@
 #include "Core.hpp"
 #include "Assets.hpp"
 #include "Project.hpp"
+
+FNode::ChildrenList::ChildrenList(std::vector<std::unique_ptr<FNode>>& children) noexcept : children(children) {}
+FNode::ChildrenList::Iterator<FNode> FNode::ChildrenList::begin() { return { std::to_address(children.begin()) }; }
+FNode::ChildrenList::Iterator<FNode> FNode::ChildrenList::end()   { return { std::to_address(children.end())   }; }
 
 FNode::FNode(const FNodeCreationParams& params) noexcept :
     owner(params.owner),
@@ -24,29 +28,6 @@ FNode::FNode(FNodeCreationParams&& params) noexcept :
     fullName(name + ext),
     content(std::move(params.content)),
     isDirectory(params.isDirectory) {}
-FNode::FNode(FNode&& other) noexcept :
-    owner(std::exchange(other.owner, nullptr)),
-    parent(std::exchange(other.parent, nullptr)),
-    name(std::move(other.name)),
-    ext(std::move(other.ext)),
-    fullName(std::move(other.fullName)),
-    content(std::move(other.content)),
-    isDirectory(std::exchange(other.isDirectory, false)),
-    children(std::move(other.children)) {
-    __onMove(this);
-}
-FNode& FNode::operator=(FNode&& other) noexcept {
-    owner = std::exchange(other.owner, nullptr);
-    parent = std::exchange(other.parent, nullptr);
-    name = std::move(other.name);
-    ext = std::move(other.ext);
-    fullName = std::move(other.fullName);
-    content = std::move(other.content);
-    isDirectory = std::exchange(other.isDirectory, false);
-    children = std::move(other.children);
-    __onMove(this);
-    return *this;
-}
 bool FNode::operator==(const FNode& other) const noexcept { return this->Path() == other.Path(); }
 
 std::filesystem::path FNode::Path() const {
@@ -86,7 +67,7 @@ std::filesystem::path FNode::FolderPath() const {
     }
 }
 
-std::string FNode::Name() { return name; }
+std::string_view FNode::Name() { return name; }
 const std::string& FNode::Name() const { return name; }
 void FNode::ChangeName(std::string_view name) { ChangeName(std::string(name)); }
 void FNode::ChangeName(const std::string& name) { ChangeName(std::string(name)); }
@@ -102,7 +83,7 @@ void FNode::ChangeName(std::string&& name) {
     }
 }
 
-std::string FNode::Extension() { return ext; }
+std::string_view FNode::Extension() { return ext; }
 const std::string& FNode::Extension() const { return ext; }
 void FNode::ChangeExtension(std::string_view extension) { ChangeExtension(std::string(extension)); }
 void FNode::ChangeExtension(const std::string& extension) { ChangeExtension(std::string(extension)); }
@@ -124,7 +105,7 @@ void FNode::ChangeExtension(std::string&& extension) {
     }
 }
 
-std::string FNode::FullName() { return fullName; }
+std::string_view FNode::FullName() { return fullName; }
 const std::string& FNode::FullName() const { return fullName; }
 
 std::string_view FNode::Content() const { return content; }
@@ -184,12 +165,15 @@ void FNode::MoveUnder(FNode& directory) {
         DOA_LOG_ERROR("\tnode must be a directory");
         return;
     }
-    auto found = std::ranges::find(parent->children, *this);
-    if (found != parent->children.end()) {
-        found = parent->children.erase(found);
-    }
+    std::unique_ptr<FNode> me{ nullptr };
+    assert(parent); // all (moveable) files must have a parent - the exception being the root, root is immovable!
+    auto found = std::ranges::find_if(parent->children, [this](const auto& ptr) { return ptr.get() == this; });
+    assert(found != parent->children.end()); // error! must be inside parent.children!!
+    me = std::move(*found);
+    parent->children.erase(found);
+
     parent = &directory;
-    parent->children.emplace_back(std::move(*this));
+    parent->children.push_back(std::move(me));
 
     if (owner) {
         std::filesystem::current_path(owner->Workspace());
@@ -199,7 +183,7 @@ void FNode::MoveUnder(FNode& directory) {
 void FNode::Delete() {
     if (parent == nullptr) { return; }
 
-    parent->DeleteChildNode(this);
+    parent->DeleteChildNode(*this);
 }
 
 uintmax_t FNode::Size() const { return std::filesystem::file_size(AbsolutePath()); }
@@ -211,15 +195,21 @@ bool FNode::HasOwningProject() const { return OwningProject() != nullptr; }
 const Project* FNode::OwningProject() const { return owner; }
 
 bool FNode::HasRootNode() const { return RootNode() != nullptr; }
-FNode* FNode::RootNode() const { return owner ? &Core::GetCore()->Assets()->Root() : nullptr; }
+FNode* FNode::RootNode() const {
+    FNode* p { parent  };
+    FNode* rv{ nullptr };
+    while (p) {
+        rv = p;
+        p = p->parent;
+    }
+    return rv;
+}
 
 bool FNode::HasParentNode() const { return ParentNode() != nullptr; }
 FNode* FNode::ParentNode() const { return parent; }
 
-std::vector<FNode>& FNode::Children() { return children; }
-const std::vector<FNode>& FNode::Children() const { return children; }
-auto FNode::begin() { return children.begin(); }
-auto FNode::end() { return children.end(); }
+FNode::ChildrenList FNode::Children() { return children; }
+FNode::ChildrenList FNode::Children() const { return const_cast<decltype(children)&>(children); }
 
 FNode FNode::HollowCopy(const FNode& other) {
     return { { other.OwningProject(), other.ParentNode(), other.Name(), other.Extension(), "", other.IsDirectory() } };
@@ -246,7 +236,7 @@ FNode* FNode::CreateChildFile(FNodeCreationParams&& params) {
         do {
             found = false;
             for (const auto& child : children) {
-                if (child.IsFile() && child.name == params.name) {
+                if (child->IsFile() && child->name == params.name) {
                     found = true;
                     break;
                 }
@@ -269,7 +259,9 @@ FNode* FNode::CreateChildFile(FNodeCreationParams&& params) {
     file.flush();
     file.close();
 
-    return &children.emplace_back(std::move(params));
+    // push a new unique_ptr into the vector and return it
+    children.push_back(std::make_unique<FNode>(params));
+    return children.back().get();
 }
 FNode* FNode::CreateChildFolder(FNodeCreationParams&& params) {
     if (!owner) {
@@ -293,7 +285,7 @@ FNode* FNode::CreateChildFolder(FNodeCreationParams&& params) {
         do {
             found = false;
             for (const auto& child : children) {
-                if (child.IsDirectory() && child.name == params.name) {
+                if (child->IsDirectory() && child->name == params.name) {
                     found = true;
                     break;
                 }
@@ -313,35 +305,34 @@ FNode* FNode::CreateChildFolder(FNodeCreationParams&& params) {
     std::filesystem::current_path(owner->Workspace());
     bool success = std::filesystem::create_directory(params.parent->Path() / params.name);
     if (success) {
-        return &children.emplace_back(std::move(params));
+        // push a new unique_ptr into the vector and return it
+        children.push_back(std::make_unique<FNode>(params));
+        return children.back().get();
     } else {
         return nullptr;
     }
 
 }
-bool FNode::DeleteChildNode(FNode* child) {
+bool FNode::DeleteChildNode(FNode& child) {
     if (!owner) {
         DOA_LOG_ERROR("FNode::DeleteChildNode not supported for non-owned nodes, node must have a valid owning project!");
         return false;
     }
-    if (child == nullptr) {
-        DOA_LOG_ERROR("FNode::DeleteChildNode child must not be nullptr!");
-        return false;
-    }
 
-    if (this != child->parent) {
+    if (this != child.parent) {
         return false;
     }
-    auto pos = std::ranges::find(children, *child);
-    assert(pos != children.end()); /* Something is wrong, child has this as parent but this does not have child as a child! */
+    assert(std::ranges::find_if(children, [&child](auto& ptr) { return *(ptr.get()) == child; }) != children.end()); /* Something is wrong, child has this as parent but this does not have child as a child! */
 
     std::filesystem::current_path(owner->Workspace());
-    std::filesystem::remove_all(child->Path());
-    child->ext += ".id";
-    child->fullName += ".id";
-    std::filesystem::remove_all(child->Path());
+    std::filesystem::remove_all(child.Path());
+    child.ext += ".id"; // TODO NO NO NO HANDLE THIS IN Assets!!!!!
+    child.fullName += ".id";
+    std::filesystem::remove_all(child.Path());
 
-    children.erase(pos);
+    std::erase_if(children, [&child](auto& ptr) {
+        return ptr->FullName() == child.FullName();
+    });
 
     return true;
 }
@@ -349,11 +340,9 @@ FNode& FNode::FindChild(const std::filesystem::path& path) {
     auto itr = path.begin();
     FNode* search{ this };
     do {
-        auto result = std::ranges::find_if(search->children, [&itr](const FNode& element) { return element.FullName() == itr->string(); });
+        auto result = std::ranges::find_if(search->children, [&itr](const auto& element) { return element->FullName() == itr->string(); });
         if (result != search->children.end()) {
-            /* ps: explicit call to operator*() is redundant but &*result */
-            /* looked weird as hell so I decided to write it this way */
-            search = &(result.operator*());
+            search = result->get();
             ++itr;
         } else {
             break;

@@ -7,6 +7,7 @@
 #include "ComponentDeserializer.hpp"
 #include "ShaderDeserializer.hpp"
 #include "ShaderProgramDeserializer.hpp"
+#include "ShaderProgramSerializer.hpp"
 #include "TextureDeserializer.hpp"
 #include "TextureSerializer.hpp"
 
@@ -62,6 +63,12 @@ void Asset::Serialize() {
     /*
     * TODO others
     */
+    if (IsShaderProgram()) {
+        std::string serializedData;
+        serializedData = SerializeShaderProgram(DataAs<ShaderProgram>());
+        file->ModifyContent(std::move(serializedData));
+        file->DisposeContent();
+    }
 }
 
 void Asset::Deserialize() {
@@ -124,8 +131,12 @@ void Asset::Deserialize() {
     }
     if (IsShaderProgram()) {
         ShaderProgramDeserializationResult result = DeserializeShaderProgram(*file);
-        for (auto& message : result.errors) {
-            errorList.emplace_back(std::move(message));
+        if (result.erred) {
+            for (auto& message : result.errors) {
+                errorList.emplace_back(std::move(message));
+            }
+        } else {
+            infoList.emplace_back(std::string("Shader Program is complete and ready for use."));
         }
         data = std::move(result.deserializedShaderProgram);
     }

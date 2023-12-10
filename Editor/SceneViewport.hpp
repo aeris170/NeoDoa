@@ -7,12 +7,12 @@
 #include <imgui.h>
 #include <ImGuizmo.h>
 
+#include <Engine/Scene.hpp>
 #include <Engine/Resolution.hpp>
 
 #include <Editor/Gizmos.hpp>
 
 struct GUI;
-struct Scene;
 
 struct SceneViewport {
 
@@ -23,15 +23,15 @@ struct SceneViewport {
 
     explicit SceneViewport(GUI& gui) noexcept;
 
-    bool Begin(Scene* scene);
-    void Render(Scene& scene);
+    bool Begin();
+    void Render();
     void End();
 
 private:
     glm::vec2 viewportPosition{};
     Resolution viewportSize{};
 
-    void DrawViewportSettings(Scene* scene);
+    void DrawViewportSettings(bool hasScene);
     void DrawCubeControl(Scene& scene);
 
     struct Controls {

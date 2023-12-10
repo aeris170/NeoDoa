@@ -41,6 +41,5 @@ private:
     std::filesystem::path workspace;
     std::string name;
     UUID startupSceneID{ UUID::Empty() };
-    Scene* openScene{ nullptr };
     UUID openSceneID{ UUID::Empty() };
 };
