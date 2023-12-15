@@ -78,22 +78,17 @@ struct Assets {
 
     template<AssetType T, typename ...Args>
     AssetHandle CreateAssetAt(FNode& folderPath, const std::string_view fileName, Args&& ...args) {
-        /*
-        std::filesystem::current_path(project->Workspace());
-        FNode* folder = _root.FindChildAt(relativePath.parent_path());
-        if (folder == null) return std::nullopt;
-        FNode* newAssetFile = folder->CreateChildFileFor(folder,
-            {
-                folder->owner,
-                folder,
-                relativePath.stem(),
-                relativePath.extension(),
-                T(std::forward<Args>(args)...).Serialize()
-            }
-        );
-        ImportFile(database, *newAssetFile);
-        */
-        return nullptr;
+        std::filesystem::path p = fileName;
+        const FNode* newAssetFile = folderPath.CreateChildFile({
+            folderPath.owner,
+            &folderPath,
+            p.stem().string(),
+            p.extension().string(),
+            T(std::forward<Args>(args)...).Serialize()
+        });
+        AssetHandle rv = ImportFile(database, *newAssetFile);
+        rv->ForceDeserialize();
+        return rv;
     }
     void SaveAsset(const AssetHandle asset);
     void MoveAsset(const AssetHandle asset, FNode& targetParentFolder);
