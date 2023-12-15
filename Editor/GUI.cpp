@@ -205,6 +205,15 @@ void GUI::CreateNewScene(std::string_view relativePath, std::string_view name) {
     }
     */
 }
+void GUI::OpenScene(AssetHandle sceneHandle) {
+    assert(HasOpenProject());
+    assert(sceneHandle.HasValue());
+    assert(sceneHandle->IsScene());
+
+    GetOpenProject().OpenScene(sceneHandle->ID());
+    Events.OnAssetOpened(sceneHandle);
+    Events.OnSceneOpened(GetOpenProject().GetOpenScene());
+}
 void GUI::SaveScene() const {
     if (sceneUUID == UUID::Empty()) { return; }
 

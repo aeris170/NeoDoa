@@ -449,8 +449,7 @@ void AssetManager::OpenFileAtFileNode(FNode& file) {
 
         gui.Events.OnAssetOpened(handle);
         if (Assets::IsSceneFile(file)) {
-            gui.CORE->LoadedProject()->OpenScene(handle->ID());
-            gui.Events.OnSceneOpened(gui.CORE->LoadedProject()->GetOpenScene());
+            gui.OpenScene(handle);
         } else if (Assets::IsComponentDefinitionFile(file)) {
             //gui.ce.AddTab(handle);
         } else if (Assets::IsShaderFile(file)) {

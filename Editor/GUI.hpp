@@ -116,6 +116,7 @@ struct GUI {
     void CloseProject();
 
     void CreateNewScene(std::string_view relativePath, std::string_view name);
+    void OpenScene(AssetHandle sceneHandle);
     void SaveScene() const;
     void CloseScene();
 
