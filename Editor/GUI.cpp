@@ -152,12 +152,17 @@ void GUI::End() {
 
 void GUI::CreateNewProject(std::string_view workspace, std::string_view name) {
     CORE->CreateAndLoadProject(workspace, name);
+    Project& project = GetOpenProject();
     metaInfo.Clear();
-    metaInfo.SaveToDisk(CORE->LoadedProject()->Workspace());
+    metaInfo.SaveToDisk(project.Workspace());
+    AssetHandle handle = CORE->Assets()->CreateAssetAt<Scene>(CORE->Assets()->Root(), "Sample Scene.scn", std::string("Sample Scene"));
+    assert(handle.HasValue());
+    project.SetStartupScene(handle->ID());
+    OpenScene(handle);
 
     std::string title = defaultWindowName;
     title.append(" - ");
-    title.append(CORE->LoadedProject()->Name());
+    title.append(project.Name());
     window->SetTitle(title);
 }
 
