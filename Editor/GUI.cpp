@@ -167,27 +167,29 @@ void GUI::CreateNewProject(std::string_view workspace, std::string_view name) {
 }
 
 void GUI::SaveProjectToDisk() {
-    if (CORE->HasLoadedProject()) {
+    if (HasOpenProject()) {
         CORE->SaveLoadedProjectToDisk();
-        metaInfo.SaveToDisk(CORE->LoadedProject()->Workspace());
+        metaInfo.SaveToDisk(GetOpenProject().Workspace());
     }
 }
 
 void GUI::OpenProjectFromDisk(const std::string& path) {
     CORE->LoadProject(path);
-    metaInfo.LoadFromDisk(*CORE->LoadedProject(), *CORE->Assets());
+    assert(HasOpenProject());
+
+    Project& project = GetOpenProject();
+    metaInfo.LoadFromDisk(project, *CORE->Assets());
 
     std::string title = defaultWindowName;
     title.append(" - [");
-    title.append(CORE->LoadedProject()->Name());
+    title.append(project.Name());
     title.append("]");
     window->SetTitle(title);
 
     /* CORE->LoadProject may load start-up scene (if it exists), we need to trap open scene */
     if (HasOpenScene()) {
-        auto& proj = CORE->LoadedProject();
-        Events.OnSceneOpened(proj->GetOpenScene());
-        sceneUUID = proj->GetOpenSceneID();
+        Events.OnSceneOpened(project.GetOpenScene());
+        sceneUUID = project.GetOpenSceneID();
     }
 }
 
@@ -234,7 +236,7 @@ void GUI::SaveScene() const {
     }
 }
 void GUI::CloseScene() {
-
+    Events.OnSceneClosed();
 }
 
 bool GUI::HasOpenProject() const { return CORE->HasLoadedProject(); }
@@ -319,6 +321,7 @@ void GUI::OnSceneOpened(Scene& scene) {
     this->scene = Scene::Copy(scene);
 }
 void GUI::OnSceneClosed() {
+    sceneUUID = UUID::Empty();
     scene = std::nullopt;
 }
 void GUI::OnReimport(Assets& assets) {
@@ -326,7 +329,7 @@ void GUI::OnReimport(Assets& assets) {
 
     AssetHandle currentSceneHandle = assets.FindAsset(sceneUUID);
     if (!currentSceneHandle.HasValue()) {
-        sceneUUID = {};
+        sceneUUID = UUID::Empty();
         scene = std::nullopt;
     }
 }
