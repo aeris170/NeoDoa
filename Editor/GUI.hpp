@@ -153,8 +153,6 @@ struct GUI {
     void ReloadMetaInfo();
 
     //- Modals -//
-    NewProjectModal npm{ *this };
-    OpenProjectModal opm{ *this };
     void ShowNewProjectModal() const;
     void ShowOpenProjectModal() const;
 
@@ -164,6 +162,10 @@ private:
     ImFont* fontBold{ nullptr };
 
     MetaAssetInfoBank metaInfo{};
+
+    //- Modals -//
+    NewProjectModal npm{ *this };
+    OpenProjectModal opm{ *this };
 
     // TODO REMOVE ME WHEN IMGUI IMPLEMENTS THIS WORKAROUND AS API FUNC.
     void ExecuteDockBuilderFocusWorkAround();
