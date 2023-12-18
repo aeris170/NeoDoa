@@ -21,7 +21,7 @@ AssetManager::AssetManager(GUI& gui) noexcept :
 }
 
 bool AssetManager::Begin() {
-    GUI& gui = this->gui;
+    const GUI& gui = this->gui;
     ImGui::PushID(GUI::ASSET_MANAGER_TITLE);
     std::string title(WindowIcons::ASSET_MANAGER_WINDOW_ICON);
     title.append(GUI::ASSET_MANAGER_TITLE);
@@ -134,7 +134,7 @@ void AssetManager::RenderTreeViewRecursive(FNode& current) {
         SetCurrentFolder(&current);
     }
     if (expanded) {
-        for (auto& child : children) {
+        for (const auto& child : children) {
             RenderTreeViewRecursive(child);
         }
         ImGui::TreePop();
