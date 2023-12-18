@@ -199,6 +199,8 @@ void GUI::OpenProjectFromDisk(const std::string& path) {
 }
 
 void GUI::CloseProject() {
+    Events.OnProjectUnloaded();
+
     obs.ResetDisplayTarget();
     CloseScene();
     CORE->UnloadProject();
@@ -206,8 +208,6 @@ void GUI::CloseProject() {
     std::string title = defaultWindowName;
     title.append(" - [NO OPEN PROJECT]");
     window->SetTitle(title);
-
-    Events.OnProjectUnloaded();
 }
 
 void GUI::CreateNewScene(std::string_view relativePath, std::string_view name) {
