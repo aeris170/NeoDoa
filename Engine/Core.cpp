@@ -234,6 +234,7 @@ std::unique_ptr<Project>& Core::LoadedProject() { return project; }
 void Core::UnloadProject() {
     playing = false;
     project.reset();
+    assets.reset();
 }
 void Core::SaveLoadedProjectToDisk() const {
     tinyxml2::XMLDocument doc;

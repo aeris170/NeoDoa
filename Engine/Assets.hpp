@@ -33,6 +33,7 @@ struct Assets {
 
     using UUIDCollection = std::vector<UUID>;
 
+    inline static std::string PROJ_EXT{ ".doa" };
     inline static std::string SCENE_EXT{ ".scn" };
     inline static std::string SCRIPT_EXT{ ".scrpt" };
     inline static std::string TEXTURE_EXT_PNG{ ".png" };
@@ -68,9 +69,9 @@ struct Assets {
     explicit Assets(const Project& project) noexcept;
     ~Assets() = default;
     Assets(const Assets&) = delete;
-    Assets(Assets&&) = default;
+    Assets(Assets&&) = delete;
     Assets& operator=(const Assets&) = delete;
-    Assets& operator=(Assets&&) = default;
+    Assets& operator=(Assets&&) = delete;
 
     FNode& CreateFolder(FNode& parentFolder, const std::string_view folderName);
     void MoveFolder(FNode& folder, FNode& targetParentFolder);

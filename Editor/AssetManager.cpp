@@ -15,7 +15,10 @@
 #include "CodeGenerator.hpp"
 
 AssetManager::AssetManager(GUI& gui) noexcept :
-    gui(gui) {}
+    gui(gui) {
+    gui.Events.OnProjectLoaded   += std::bind_front(&AssetManager::OnProjectLoaded  , this);
+    gui.Events.OnProjectUnloaded += std::bind_front(&AssetManager::OnProjectUnloaded, this);
+}
 
 bool AssetManager::Begin() {
     GUI& gui = this->gui;
@@ -24,19 +27,6 @@ bool AssetManager::Begin() {
     title.append(GUI::ASSET_MANAGER_TITLE);
     title.append(GUI::ASSET_MANAGER_ID);
     bool visible = ImGui::Begin(title.c_str(), nullptr, ImGuiWindowFlags_MenuBar);
-
-    hasContent = gui.HasOpenProject();
-    if (hasContent) {
-        assets = gui.CORE->Assets().get();
-        root = &assets->Root();
-        if (currentFolder == nullptr) {
-            SetCurrentFolder(root);
-        }
-    } else {
-        assets = nullptr;
-        root = nullptr;
-        SetCurrentFolder(root);
-    }
     return visible;
 }
 
@@ -731,4 +721,17 @@ void AssetManager::NewShaderProgramModal::Render() {
         modal_active = false;
     }
     ImGui::PopID();
+}
+
+void AssetManager::OnProjectLoaded(Project& project) {
+    hasContent = true;
+    assets = gui.get().CORE->Assets().get();
+    root = &assets->Root();
+    SetCurrentFolder(root);
+}
+void AssetManager::OnProjectUnloaded() {
+    hasContent = false;
+    assets = nullptr;
+    root = nullptr;
+    SetCurrentFolder(root);
 }

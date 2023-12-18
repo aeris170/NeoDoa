@@ -164,6 +164,8 @@ void GUI::CreateNewProject(std::string_view workspace, std::string_view name) {
     title.append(" - ");
     title.append(project.Name());
     window->SetTitle(title);
+
+    Events.OnProjectLoaded(project);
 }
 
 void GUI::SaveProjectToDisk() {
@@ -187,19 +189,24 @@ void GUI::OpenProjectFromDisk(const std::string& path) {
     window->SetTitle(title);
 
     /* CORE->LoadProject may load start-up scene (if it exists), we need to trap open scene */
-    if (HasOpenScene()) {
+    if (project.HasOpenScene()) {
         Events.OnSceneOpened(project.GetOpenScene());
         sceneUUID = project.GetOpenSceneID();
     }
+
+    Events.OnProjectLoaded(project);
 }
 
 void GUI::CloseProject() {
     obs.ResetDisplayTarget();
+    CloseScene();
     CORE->UnloadProject();
 
     std::string title = defaultWindowName;
     title.append(" - [NO OPEN PROJECT]");
     window->SetTitle(title);
+
+    Events.OnProjectUnloaded();
 }
 
 void GUI::CreateNewScene(std::string_view relativePath, std::string_view name) {

@@ -167,6 +167,7 @@ AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
         eg. Scene depends on ComponentDefinition or Material depends on Program, Program depends on Shader etc.)
         * Step 8: Separate imported asset to its own subcategory
     */
+    if (file.ext == PROJ_EXT) { return nullptr; }
     if (file.IsDirectory()) { return nullptr; }
     if (file.ext == ID_EXT) { return nullptr; }
     // Step 1

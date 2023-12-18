@@ -11,6 +11,7 @@
 struct GUI;
 struct Assets;
 struct FNode;
+struct Project;
 
 struct AssetManager {
 
@@ -146,5 +147,8 @@ private:
 
     void SetSelectedNode(FNode* node);
     void SetCurrentFolder(FNode* folder);
+
+    void OnProjectLoaded(Project& project);
+    void OnProjectUnloaded();
 };
 

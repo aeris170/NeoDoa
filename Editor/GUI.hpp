@@ -27,27 +27,30 @@
 struct GUI {
 
     struct Events {
-        Event<void(Assets&)>     OnReimport      {};
-        Event<void(AssetHandle)> OnAssetCreated  {};
-        Event<void(AssetHandle)> OnAssetMoved    {};
-        Event<void(AssetHandle)> OnAssetDeleted  {};
-        Event<void(AssetHandle)> OnAssetOpened   {};
+        Event<void(Project&)>    OnProjectLoaded  {};
+        Event<void()>            OnProjectUnloaded{};
 
-        Event<void(Scene&)> OnSceneOpened        {};
-        Event<void()>       OnSceneClosed        {};
+        Event<void(Assets&)>     OnReimport    {};
+        Event<void(AssetHandle)> OnAssetCreated{};
+        Event<void(AssetHandle)> OnAssetMoved  {};
+        Event<void(AssetHandle)> OnAssetDeleted{};
+        Event<void(AssetHandle)> OnAssetOpened {};
 
-        Event<void(Entity)> OnEntityCreated      {};
-        Event<void(Entity)> OnEntityDeleted      {};
+        Event<void(Scene&)> OnSceneOpened{};
+        Event<void()>       OnSceneClosed{};
+
+        Event<void(Entity)> OnEntityCreated{};
+        Event<void(Entity)> OnEntityDeleted{};
 
         struct SceneHierarchy {
-            Event<void(Entity)> OnEntitySelected{};
+            Event<void(Entity)> OnEntitySelected  {};
             Event<void()>       OnEntityDeselected{};
         } SceneHierarchy{};
 
         struct AssetManager {
-            Event<void(AssetHandle)> OnAssetFocused{};
+            Event<void(AssetHandle)> OnAssetFocused {};
             Event<void(FNode&)>      OnFolderFocused{};
-            Event<void()>            OnFocusLost{};
+            Event<void()>            OnFocusLost    {};
         } AssetManager{};
     } Events{};
 
