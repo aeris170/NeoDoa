@@ -23,6 +23,7 @@
 #include <Editor/SceneSettings.hpp>
 
 #include <Editor/NewProjectModal.hpp>
+#include <Editor/OpenProjectModal.hpp>
 
 struct GUI {
 
@@ -153,7 +154,9 @@ struct GUI {
 
     //- Modals -//
     NewProjectModal npm{ *this };
+    OpenProjectModal opm{ *this };
     void ShowNewProjectModal() const;
+    void ShowOpenProjectModal() const;
 
 private:
     ImGuiIO* io{ nullptr };

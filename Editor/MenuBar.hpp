@@ -23,22 +23,6 @@ struct MenuBar {
 
 private:
 
-    struct OpenProjectModal {
-
-        static constexpr auto MODAL_TITLE_TEXT{ "Warning!" };
-        static constexpr auto MODAL_CONTENT_TEXT{ "You may have unsaved changes.\n\nAre you sure you want to open another project?\n" };
-        static constexpr auto MODAL_YES_BUTTON_TEXT{ "Yes" };
-        static constexpr auto MODAL_NO_BUTTON_TEXT{ "No" };
-        inline static const ImVec2 MODAL_BUTTONS_SIZE{ 120, 0 };
-
-        std::reference_wrapper<MenuBar> mb;
-
-        bool modal_active{ false }, modal_open{ true };
-        explicit OpenProjectModal(MenuBar& owner);
-
-        void Render();
-    } openProjectModal;
-
     struct AboutSection {
 
         static constexpr auto ABOUT_BUTTON_TEXT{ "About" };

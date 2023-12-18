@@ -9,7 +9,6 @@
 
 MenuBar::MenuBar(GUI& owner) :
     gui(owner),
-	openProjectModal(*this),
     aboutSection(*this) {}
 
 bool MenuBar::Begin() { return true; }
@@ -34,8 +33,6 @@ void MenuBar::Render() {
     }
 
     // due to how imgui works, these must be outside the begin/end menubar :(
-	//newProjectModal.Render();
-	openProjectModal.Render();
     aboutSection.RenderAboutPopup();
 }
 
@@ -47,7 +44,7 @@ void MenuBar::RenderProjectSubMenu() {
 		gui.ShowNewProjectModal();
     }
     if (ImGui::MenuItem("Open Project...", "Ctrl+Shift+O")) {
-		openProjectModal.modal_active = true;
+		gui.ShowOpenProjectModal();
     }
     ImGui::Separator();
     if (ImGui::MenuItem("Save Project", "Ctrl+Shift+S", nullptr, gui.HasOpenProject())) {
@@ -93,63 +90,6 @@ void MenuBar::RenderHelpSubMenu() {
     if (ImGui::MenuItem(AboutSection::ABOUT_BUTTON_TEXT)) {
         aboutSection.ab = true;
     }
-}
-
-// Inner struct: OpenProjectModal
-MenuBar::OpenProjectModal::OpenProjectModal(MenuBar& owner) :
-	mb(owner) {}
-
-void MenuBar::OpenProjectModal::Render() {
-	GUI& gui = mb.get().gui;
-
-	ImGui::PushID("open_project_modal");
-
-	if (modal_active) {
-		ImGui::OpenPopup(MODAL_TITLE_TEXT);
-		modal_open = true;
-	}
-
-	ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-	ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-
-	if (ImGui::BeginPopupModal(MODAL_TITLE_TEXT, &modal_open,  ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::Text(MODAL_CONTENT_TEXT);
-		ImGui::Separator();
-
-		const ImGuiStyle& style = ImGui::GetStyle();
-
-		float size = (MODAL_BUTTONS_SIZE.x + style.ItemSpacing.x) * 2.0f;
-		float avail = ImGui::GetWindowSize().x;
-
-		float offset = (avail - size) * 0.5f;
-		if (offset > 0.0f)
-			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
-
-		if (ImGui::Button(MODAL_YES_BUTTON_TEXT, MODAL_BUTTONS_SIZE)) {
-			FileDialog::Instance().Open("ProjectOpenDialog", "Select Project File", "NeoDoa Project Files (*.doa){.doa},.*");
-			ImGui::CloseCurrentPopup();
-			modal_active = false;
-		}
-		ImGui::SetItemDefaultFocus();
-		ImGui::SameLine();
-		if (ImGui::Button(MODAL_NO_BUTTON_TEXT, MODAL_BUTTONS_SIZE)) {
-			ImGui::CloseCurrentPopup();
-			modal_active = false;
-		}
-		ImGui::EndPopup();
-	} else {
-		modal_active = false;
-	}
-
-	if (FileDialog::Instance().IsDone("ProjectOpenDialog")) {
-		if (FileDialog::Instance().HasResult()) {
-			std::string path = FileDialog::Instance().GetResult().string();
-			gui.CloseProject();
-			gui.OpenProjectFromDisk(path);
-		}
-		FileDialog::Instance().Close();
-	}
-	ImGui::PopID();
 }
 
 // Inner struct: About Section

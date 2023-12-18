@@ -141,6 +141,7 @@ void GUI::operator() (float delta) {
     ss.End();
 
     npm.Render();
+    opm.Render();
 
     End();
 }
@@ -299,6 +300,7 @@ MetaAssetInfo& GUI::GetMetaInfoOf(const FNode& file) { return metaInfo.GetMetaIn
 void GUI::ReloadMetaInfo() { metaInfo.LoadFromDisk(*CORE->LoadedProject(), *CORE->Assets()); }
 
 void GUI::ShowNewProjectModal() const { npm.Show(); }
+void GUI::ShowOpenProjectModal() const { opm.Show(); }
 
 // TODO REMOVE ME WHEN IMGUI IMPLEMENTS THIS WORKAROUND AS API FUNC.
 void GUI::ExecuteDockBuilderFocusWorkAround() {
