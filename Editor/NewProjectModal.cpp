@@ -71,17 +71,13 @@ void NewProjectModal::RenderWarningDialog() {
 	ImGui::Text(WARNING_TEXT);
 	ImGui::Separator();
 
-	const ImGuiStyle& style = ImGui::GetStyle();
-
-	float size = (MODAL_BUTTONS_SIZE.x + style.ItemSpacing.x) * 2.0f;
-	float avail = ImGui::GetWindowSize().x;
-
-	float offset = (avail - size) * 0.5f;
-	if (offset > 0.0f) {
-		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
+	if (ImGui::Button(CONT_NO_SAVE_BUTTON_TEXT, MODAL_BIG_BUTTONS_SIZE)) {
+		stage = Stage::FolderSelection;
 	}
 
-	if (ImGui::Button(YES_BUTTON_TEXT, MODAL_BUTTONS_SIZE)) {
+	ImGui::SameLine();
+	if (ImGui::Button(CONT_SAVE_BUTTON_TEXT, MODAL_BUTTONS_SIZE)) {
+		gui.get().SaveProjectToDisk();
 		stage = Stage::FolderSelection;
 	}
 
@@ -138,18 +134,7 @@ void NewProjectModal::RenderNameSelectionDialog() {
 		ImGui::PopStyleColor();
 		ImGui::PopStyleVar();
 	}
-
 	ImGui::Separator();
-
-	const ImGuiStyle& style = ImGui::GetStyle();
-
-	float size = (MODAL_BUTTONS_SIZE.x + style.ItemSpacing.x) * 2.0f;
-	float avail = ImGui::GetWindowSize().x;
-
-	float offset = (avail - size) * 0.5f;
-	if (offset > 0.0f) {
-		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
-	}
 
 	if (ImGui::Button(OK_BUTTON_TEXT, MODAL_BUTTONS_SIZE)) {
 		create = true;
@@ -177,16 +162,6 @@ void NewProjectModal::RenderConfirmationDialog() {
 	ImGui::NewLine();
 	ImGui::Text("Continue and create project?");
 	ImGui::Separator();
-
-	const ImGuiStyle& style = ImGui::GetStyle();
-
-	float size = (MODAL_BUTTONS_SIZE.x + style.ItemSpacing.x) * 2.0f;
-	float avail = ImGui::GetWindowSize().x;
-
-	float offset = (avail - size) * 0.5f;
-	if (offset > 0.0f) {
-		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
-	}
 
 	if (ImGui::Button(YES_BUTTON_TEXT, MODAL_BUTTONS_SIZE)) {
 		GUI& gui = this->gui.get();

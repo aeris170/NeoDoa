@@ -9,17 +9,6 @@ struct GUI;
 
 struct OpenProjectModal {
 
-    static constexpr auto WARNING_TITLE_TEXT{ "Warning!" };
-    static constexpr auto WARNING_TEXT{ "You have unsaved changes.\n\nAre you sure you want to open another project?\n" };
-    static constexpr auto YES_BUTTON_TEXT{ "Yes" };
-    static constexpr auto NO_BUTTON_TEXT{ "No" };
-    static constexpr auto OK_BUTTON_TEXT{ "OK" };
-    static constexpr auto CANCEL_BUTTON_TEXT{ "Cancel" };
-
-    static constexpr auto TITLE_TEXT{ "Open Project" };
-
-    inline static const ImVec2 MODAL_BUTTONS_SIZE{ 120, 0 };
-
     explicit OpenProjectModal(GUI& gui) noexcept;
 
     void Show() const;
@@ -52,4 +41,16 @@ private:
     void RenderConfirmationDialog();
 
     friend struct GUI;
+
+    static constexpr auto WARNING_TITLE_TEXT{ "Warning!" };
+    static constexpr auto WARNING_TEXT{ "You have unsaved changes.\n\nAre you sure you want to open another project?\n" };
+    static constexpr auto CONT_NO_SAVE_BUTTON_TEXT{ "Continue without saving" };
+    static constexpr auto CONT_SAVE_BUTTON_TEXT{ "Save & Continue" };
+    static constexpr auto YES_BUTTON_TEXT{ "Yes" };
+    static constexpr auto NO_BUTTON_TEXT{ "No" };
+
+    static constexpr auto TITLE_TEXT{ "Open Project" };
+
+    inline static const ImVec2 MODAL_BIG_BUTTONS_SIZE{ 240, 0 };
+    inline static const ImVec2 MODAL_BUTTONS_SIZE{ 120, 0 };
 };
