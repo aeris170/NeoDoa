@@ -102,6 +102,8 @@ endforeach()
 
 if(MSVC)
  target_compile_options(Editor PRIVATE "/MP")
+ target_link_options(Editor PRIVATE $<$<CONFIG:Debug>:/INCREMENTAL>)
+ target_compile_options(Editor PRIVATE $<$<CONFIG:Debug>:/ZI>)
 endif()
 
 copy_folder_post_build(Images)
