@@ -174,6 +174,9 @@ void GUI::SaveProjectToDisk() {
         CORE->SaveLoadedProjectToDisk();
         metaInfo.SaveToDisk(GetOpenProject().Workspace());
     }
+    if (HasOpenScene()) {
+        SaveScene();
+    }
 }
 
 void GUI::OpenProjectFromDisk(const std::string& path) {
