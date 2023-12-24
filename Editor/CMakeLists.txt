@@ -75,6 +75,8 @@ set(GROUP_LIST
 	"UI/GUI/Modals/NewProjectModal.hpp"
 	"UI/GUI/Modals/OpenProjectModal.cpp"
 	"UI/GUI/Modals/OpenProjectModal.hpp"
+	"UI/GUI/Modals/NewComponentAssetModal.cpp"
+	"UI/GUI/Modals/NewComponentAssetModal.hpp"
 	"UI/GUI/Observer/Observer.cpp"
 	"UI/GUI/Observer/Observer.hpp"
 	"UI/GUI/SceneHierarchy/SceneHierarchy.cpp"

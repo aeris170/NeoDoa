@@ -359,7 +359,7 @@ void AssetManager::RenderContextMenu() {
             ImGui::Separator();
             static constexpr auto component = cat(FileIcons::COMPONENT_ICON, " ", "Component");
             if (ImGui::MenuItem(component.c)) {
-                newComponentModal.Activate(currentFolder, [&assets](const FNode& file) { assets.Import(file)->Deserialize(); });
+                gui.ShowNewComponentAssetModal(*currentFolder);
             }
             static constexpr auto shader = cat(FileIcons::SHADER_ICON, " ", "Shader");
             if (ImGui::BeginMenu(shader.c)) {
@@ -496,65 +496,6 @@ bool AssetManager::FileFilter::CheckVisibility(const FNode& file) const {
     if (file.FullName().find(SearchQuery.data()) == std::string::npos) { return false; }
 
     return true;
-}
-
-// Inner struct: NewComponentModal
-void AssetManager::NewComponentModal::Activate(FNode* currentFolder, OnCreateNewComponent callback) {
-    this->currentFolder = currentFolder;
-    this->callback = callback;
-    memset(compName, '\0', sizeof(compName));
-    strcpy(compName, "MyComponent");
-    modal_active = true;
-}
-
-void AssetManager::NewComponentModal::Render() {
-    if (!currentFolder) { return; }
-
-    ImGui::PushID("new_component_modal");
-
-    if (modal_active) {
-        ImGui::OpenPopup(MODAL_TITLE_TEXT);
-        modal_open = true;
-    }
-
-    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-
-    if (ImGui::BeginPopupModal(MODAL_TITLE_TEXT, &modal_open, ImGuiWindowFlags_AlwaysAutoResize)) {
-        ImGui::Text(MODAL_CONTENT_TEXT);
-        ImGui::Separator();
-
-        ImGuiInputTextFlags flags = ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_CharsNoBlank | ImGuiInputTextFlags_EnterReturnsTrue;
-        ImGui::InputTextWithHint("##componentname", "MyComponent", compName, sizeof(compName), flags);
-
-        const ImGuiStyle& style = ImGui::GetStyle();
-
-        float size = MODAL_BUTTON_SIZE.x + style.ItemSpacing.x;
-        float avail = ImGui::GetWindowSize().x;
-
-        float offset = (avail - size) * 0.5f;
-        if (offset > 0.0f)
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
-
-        if (ImGui::Button(MODAL_BUTTON_TEXT, MODAL_BUTTON_SIZE)) {
-            // check if name is empty
-            if (compName[0] != '\0') {
-
-                const FNode* file = currentFolder->CreateChildFile(FNodeCreationParams{
-                    .name = compName,
-                    .ext = Assets::COMP_EXT,
-                    .content = CodeGenerator::GenerateComponentDeclaration(compName)
-                });
-                if (callback) { callback(*file); }
-                ImGui::CloseCurrentPopup();
-                modal_active = false;
-            }
-        }
-        ImGui::EndPopup();
-    } else {
-        modal_active = false;
-    }
-    ImGui::PopID();
 }
 
 // Inner struct: NewShaderModal

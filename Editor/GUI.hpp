@@ -24,6 +24,7 @@
 
 #include <Editor/NewProjectModal.hpp>
 #include <Editor/OpenProjectModal.hpp>
+#include <Editor/NewComponentAssetModal.hpp>
 
 struct GUI {
 
@@ -155,6 +156,7 @@ struct GUI {
     //- Modals -//
     void ShowNewProjectModal() const;
     void ShowOpenProjectModal() const;
+    void ShowNewComponentAssetModal(FNode& currentFolder) const;
 
 private:
     ImGuiIO* io{ nullptr };
@@ -166,6 +168,7 @@ private:
     //- Modals -//
     NewProjectModal npm{ *this };
     OpenProjectModal opm{ *this };
+    NewComponentAssetModal ncam{ *this };
 
     // TODO REMOVE ME WHEN IMGUI IMPLEMENTS THIS WORKAROUND AS API FUNC.
     void ExecuteDockBuilderFocusWorkAround();

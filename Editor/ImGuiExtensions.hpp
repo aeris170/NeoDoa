@@ -17,3 +17,5 @@ void EndTableColumnCenterText(float returnValueOfBegin);
 void ImRotateStart();
 ImVec2 ImRotationCenter();
 void ImRotateEnd(float rad = 0, ImVec2 center = ImRotationCenter());
+
+void FocusNextItem();

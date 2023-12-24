@@ -142,6 +142,7 @@ void GUI::operator() (float delta) {
 
     npm.Render();
     opm.Render();
+    ncam.Render();
 
     End();
 }
@@ -304,6 +305,7 @@ void GUI::ReloadMetaInfo() { metaInfo.LoadFromDisk(*CORE->LoadedProject(), *CORE
 
 void GUI::ShowNewProjectModal() const { npm.Show(); }
 void GUI::ShowOpenProjectModal() const { opm.Show(); }
+void GUI::ShowNewComponentAssetModal(FNode& currentFolder) const { ncam.Show(currentFolder); }
 
 // TODO REMOVE ME WHEN IMGUI IMPLEMENTS THIS WORKAROUND AS API FUNC.
 void GUI::ExecuteDockBuilderFocusWorkAround() {

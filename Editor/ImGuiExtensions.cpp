@@ -76,3 +76,10 @@ void ImRotateEnd(float rad, ImVec2 center) {
 		buf[i].pos = { bufpos.x - center.x, bufpos.y - center.y };
 	}
 }
+
+void FocusNextItem() {
+	// https://github.com/ocornut/imgui/issues/455
+	if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && !ImGui::IsAnyItemActive() && !ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+		ImGui::SetKeyboardFocusHere(0);
+	}
+}
