@@ -66,7 +66,6 @@ void NewProjectModal::Render() {
 	}
 	ImGui::PopID();
 }
-
 void NewProjectModal::RenderWarningDialog() {
 	ImGui::Text(WARNING_TEXT);
 	ImGui::Separator();
