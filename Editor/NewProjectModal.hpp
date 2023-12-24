@@ -16,7 +16,6 @@ struct NewProjectModal {
     void Hide() const;
 
 private:
-
     std::reference_wrapper<GUI> gui;
     mutable bool isModalActive{ false };
     mutable bool isModalOpen{ true };
