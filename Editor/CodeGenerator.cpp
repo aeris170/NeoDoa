@@ -69,10 +69,10 @@ std::string CodeGenerator::GenerateBehaviorDeclaration(std::string_view behavior
 struct )"; s.append(behaviorName); s.append(R"( : public BehaviorComponent {
 
     // Init is called once before the first execute
-    virtual void Init() override ;
+    virtual void Init() override {}
 
     // Execute is called every frame
-    virtual void Execute(float deltaTime) override ;
+    virtual void Execute(float deltaTime) override {}
 };
 )");
     return s;
