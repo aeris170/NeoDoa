@@ -91,14 +91,14 @@ void ImGuiRender(float delta) {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    for (auto& command : commands) {
+    for (const auto& command : commands) {
         command(delta);
     }
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-    ImGuiIO& io = ImGui::GetIO();
+    const ImGuiIO& io = ImGui::GetIO();
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
         GLFWwindow* backup_current_context = glfwGetCurrentContext();
         ImGui::UpdatePlatformWindows();
