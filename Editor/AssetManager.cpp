@@ -61,9 +61,6 @@ void AssetManager::Render() {
         }
         deletedNode = nullptr;
     }
-
-    newShaderModal.Render();
-    newShaderProgramModal.Render();
 }
 
 void AssetManager::End() {
@@ -364,60 +361,39 @@ void AssetManager::RenderContextMenu() {
             if (ImGui::BeginMenu(shader.c)) {
                 static constexpr auto vertexShader = cat(FileIcons::VERTEX_SHADER_ICON, " ", "Vertex Shader");
                 if (ImGui::MenuItem(vertexShader.c)) {
-                    newShaderModal.Activate(
-                        currentFolder,
-                        Shader::Type::Vertex,
-                        [&assets](const FNode& file) { assets.Import(file)->Deserialize(); }
-                    );
+                    gui.ShowNewVertexShaderAssetModal(*currentFolder);
                 }
                 constexpr auto tessCtrlShader = cat(FileIcons::TESS_CTRL_SHADER_ICON, " ", "Tessellation Control Shader");
                 if (ImGui::MenuItem(tessCtrlShader.c)) {
-                    newShaderModal.Activate(
-                        currentFolder,
-                        Shader::Type::TessellationControl,
-                        [&assets](const FNode& file) { assets.Import(file)->Deserialize(); }
-                    );
+                    gui.ShowNewTessellationControlShaderAssetModal(*currentFolder);
                 }
                 constexpr auto tessEvalShader = cat(FileIcons::TESS_EVAL_SHADER_ICON, " ", "Tessellation Evaluation Shader");
                 if (ImGui::MenuItem(tessEvalShader.c)) {
-                    newShaderModal.Activate(
-                        currentFolder,
-                        Shader::Type::TessellationEvaluation,
-                        [&assets](const FNode& file) { assets.Import(file)->Deserialize(); }
-                    );
+                    gui.ShowNewTessellationEvaluationShaderAssetModal(*currentFolder);
                 }
                 constexpr auto geometryShader = cat(FileIcons::GEOMETRY_SHADER_ICON, " ", "Geometry Shader");
                 if (ImGui::MenuItem(geometryShader.c)) {
-                    newShaderModal.Activate(
-                        currentFolder,
-                        Shader::Type::Geometry,
-                        [&assets](const FNode& file) { assets.Import(file)->Deserialize(); }
-                    );
+                    gui.ShowNewGeometryShaderAssetModal(*currentFolder);
                 }
                 constexpr auto fragmentShader = cat(FileIcons::FRAGMENT_SHADER_ICON, " ", "Fragment Shader");
                 if (ImGui::MenuItem(fragmentShader.c)) {
-                    newShaderModal.Activate(
-                        currentFolder,
-                        Shader::Type::Fragment,
-                        [&assets](const FNode& file) { assets.Import(file)->Deserialize(); }
-                    );
+                    gui.ShowNewFragmentShaderAssetModal(*currentFolder);
                 }
                 constexpr auto computeShader = cat(FileIcons::COMPUTE_SHADER_ICON, " ", "Compute Shader");
                 if (ImGui::MenuItem(computeShader.c)) {
+                    /*
                     newShaderModal.Activate(
                         currentFolder,
                         Shader::Type::Compute,
                         [&assets](const FNode& file) { assets.Import(file)->Deserialize(); }
                     );
+                    */
                 }
                 ImGui::EndMenu();
             }
             static constexpr auto shaderProgram = cat(FileIcons::SHADER_PROGRAM_ICON, " ", "Shader Program");
             if (ImGui::MenuItem(shaderProgram.c)) {
-                newShaderProgramModal.Activate(
-                    currentFolder,
-                    [&assets](const FNode& file) { assets.Import(file)->Deserialize(); }
-                );
+                gui.ShowNewShaderProgramAssetModal(*currentFolder);
             }
 
             ImGui::EndMenu();
@@ -495,172 +471,6 @@ bool AssetManager::FileFilter::CheckVisibility(const FNode& file) const {
     if (file.FullName().find(SearchQuery.data()) == std::string::npos) { return false; }
 
     return true;
-}
-
-// Inner struct: NewShaderModal
-void AssetManager::NewShaderModal::Activate(FNode* currentFolder, enum class Shader::Type shaderType, OnCreateNewShader callback) {
-    this->currentFolder = currentFolder;
-    this->shaderType = shaderType;
-    this->callback = callback;
-    memset(shaderName, '\0', sizeof(shaderName));
-    strcpy(shaderName, "MyShader");
-    modal_active = true;
-}
-
-void AssetManager::NewShaderModal::Render() {
-    if (!currentFolder) { return; }
-
-    ImGui::PushID("new_shader_modal");
-
-    if (modal_active) {
-        ImGui::OpenPopup(SelectModalTitle(shaderType));
-        modal_open = true;
-    }
-
-    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-
-    if (ImGui::BeginPopupModal(SelectModalTitle(shaderType), &modal_open, ImGuiWindowFlags_AlwaysAutoResize)) {
-        ImGui::Text(SelectModalContent(shaderType));
-        ImGui::Separator();
-
-        ImGuiInputTextFlags flags = ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_CharsNoBlank | ImGuiInputTextFlags_EnterReturnsTrue;
-        ImGui::InputTextWithHint("##componentname", "MyComponent", shaderName, sizeof(shaderName), flags);
-
-        const ImGuiStyle& style = ImGui::GetStyle();
-
-        float size = MODAL_BUTTON_SIZE.x + style.ItemSpacing.x;
-        float avail = ImGui::GetWindowSize().x;
-
-        float offset = (avail - size) * 0.5f;
-        if (offset > 0.0f)
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
-
-        if (ImGui::Button(MODAL_BUTTON_TEXT, MODAL_BUTTON_SIZE)) {
-            // check if name is empty
-            if (shaderName[0] != '\0') {
-                std::string ext, content;
-                switch (shaderType) {
-                case Shader::Type::Vertex:
-                    ext = Assets::VERTEX_SHADER_EXT;
-                    content = CodeGenerator::GenerateVertexShaderCode();
-                    break;
-                case Shader::Type::TessellationControl:
-                    ext = Assets::TESS_CTRL_SHADER_EXT;
-                    content = CodeGenerator::GenerateTessellationControlShaderCode();
-                    break;
-                case Shader::Type::TessellationEvaluation:
-                    ext = Assets::TESS_EVAL_SHADER_EXT;
-                    content = CodeGenerator::GenerateTessellationEvaluationShaderCode();
-                    break;
-                case Shader::Type::Geometry:
-                    ext = Assets::GEOMETRY_SHADER_EXT;
-                    content = CodeGenerator::GenerateGeometryShaderCode();
-                    break;
-                case Shader::Type::Fragment:
-                    ext = Assets::FRAGMENT_SHADER_EXT;
-                    content = CodeGenerator::GenerateFragmentShaderCode();
-                    break;
-                case Shader::Type::Compute:
-                    ext = Assets::COMPUTE_SHADER_EXT;
-                    content = CodeGenerator::GenerateComputeShaderCode();
-                    break;
-                }
-                const FNode* file = currentFolder->CreateChildFile(FNodeCreationParams{
-                    .name = shaderName,
-                    .ext = std::move(ext),
-                    .content = std::move(content)
-                });
-                if (callback) { callback(*file); }
-                ImGui::CloseCurrentPopup();
-                modal_active = false;
-            }
-        }
-        ImGui::EndPopup();
-    } else {
-        modal_active = false;
-    }
-    ImGui::PopID();
-}
-
-const char* const& AssetManager::NewShaderModal::SelectModalTitle(enum class Shader::Type shaderType) {
-    switch (shaderType) {
-    case Shader::Type::Vertex:    return VERTEX_SHADER_MODAL_TITLE_TEXT;
-    case Shader::Type::TessellationControl: return TESS_CTRL_SHADER_MODAL_TITLE_TEXT;
-    case Shader::Type::TessellationEvaluation: return TESS_EVAL_SHADER_MODAL_TITLE_TEXT;
-    case Shader::Type::Geometry:  return GEOMETRY_SHADER_MODAL_TITLE_TEXT;
-    case Shader::Type::Fragment:  return FRAGMENT_SHADER_MODAL_TITLE_TEXT;
-    case Shader::Type::Compute:   return COMPUTE_SHADER_MODAL_TITLE_TEXT;
-    }
-}
-const char* const& AssetManager::NewShaderModal::SelectModalContent(enum class Shader::Type shaderType) {
-    switch (shaderType) {
-    case Shader::Type::Vertex:    return VERTEX_SHADER_MODAL_CONTENT_TEXT;
-    case Shader::Type::TessellationControl: return TESS_CTRL_SHADER_MODAL_CONTENT_TEXT;
-    case Shader::Type::TessellationEvaluation: return TESS_EVAL_SHADER_MODAL_CONTENT_TEXT;
-    case Shader::Type::Geometry:  return GEOMETRY_SHADER_MODAL_CONTENT_TEXT;
-    case Shader::Type::Fragment:  return FRAGMENT_SHADER_MODAL_CONTENT_TEXT;
-    case Shader::Type::Compute:   return COMPUTE_SHADER_MODAL_CONTENT_TEXT;
-    }
-}
-
-// Inner struct: NewShaderProgramModal
-void AssetManager::NewShaderProgramModal::Activate(FNode* currentFolder, OnCreateNewProgram callback) {
-    this->currentFolder = currentFolder;
-    this->callback = callback;
-    memset(programName, '\0', sizeof(programName));
-    strcpy(programName, "MyProgram");
-    modal_active = true;
-}
-
-void AssetManager::NewShaderProgramModal::Render() {
-    if (!currentFolder) { return; }
-
-    ImGui::PushID("new_shader_program_modal");
-
-    if (modal_active) {
-        ImGui::OpenPopup(SHADER_PROGRAM_MODAL_TITLE_TEXT);
-        modal_open = true;
-    }
-
-    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-
-    if (ImGui::BeginPopupModal(SHADER_PROGRAM_MODAL_TITLE_TEXT, &modal_open, ImGuiWindowFlags_AlwaysAutoResize)) {
-        ImGui::Text(SHADER_PROGRAM_MODAL_CONTENT_TEXT);
-        ImGui::Separator();
-
-        ImGuiInputTextFlags flags = ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_CharsNoBlank | ImGuiInputTextFlags_EnterReturnsTrue;
-        ImGui::InputTextWithHint("##componentname", "MyProgram", programName, sizeof(programName), flags);
-
-        const ImGuiStyle& style = ImGui::GetStyle();
-
-        float size = MODAL_BUTTON_SIZE.x + style.ItemSpacing.x;
-        float avail = ImGui::GetWindowSize().x;
-
-        float offset = (avail - size) * 0.5f;
-        if (offset > 0.0f)
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
-
-        if (ImGui::Button(MODAL_BUTTON_TEXT, MODAL_BUTTON_SIZE)) {
-            // check if name is empty
-            if (programName[0] != '\0') {
-                ShaderProgram p{};
-                const FNode* file = currentFolder->CreateChildFile(FNodeCreationParams{
-                    .name = programName,
-                    .ext = Assets::SHADER_PROGRAM_EXT,
-                    .content = p.Serialize()
-                });
-                if (callback) { callback(*file); }
-                ImGui::CloseCurrentPopup();
-                modal_active = false;
-            }
-        }
-        ImGui::EndPopup();
-    } else {
-        modal_active = false;
-    }
-    ImGui::PopID();
 }
 
 void AssetManager::OnProjectLoaded(Project& project) {

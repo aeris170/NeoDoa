@@ -77,15 +77,15 @@ struct Assets {
     void MoveFolder(FNode& folder, FNode& targetParentFolder);
     void DeleteFolder(FNode& folder);
 
-    template<AssetType T, typename ...Args>
-    AssetHandle CreateAssetAt(FNode& folderPath, const std::string_view fileName, Args&& ...args) {
+    template<AssetType T>
+    AssetHandle CreateAssetAt(FNode& folderPath, const std::string_view fileName, const std::string_view serializedData) {
         std::filesystem::path p = fileName;
         const FNode* newAssetFile = folderPath.CreateChildFile({
             folderPath.owner,
             &folderPath,
             p.stem().string(),
             p.extension().string(),
-            T(std::forward<Args>(args)...).Serialize()
+            std::string(serializedData)
         });
         AssetHandle rv = ImportFile(database, *newAssetFile);
         rv->ForceDeserialize();

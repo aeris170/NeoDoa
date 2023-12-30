@@ -24,7 +24,7 @@
 
 #include <Editor/NewProjectModal.hpp>
 #include <Editor/OpenProjectModal.hpp>
-#include <Editor/NewComponentAssetModal.hpp>
+#include <Editor/NewAssetModal.hpp>
 
 struct GUI {
 
@@ -157,6 +157,12 @@ struct GUI {
     void ShowNewProjectModal() const;
     void ShowOpenProjectModal() const;
     void ShowNewComponentAssetModal(FNode& currentFolder) const;
+    void ShowNewVertexShaderAssetModal(FNode& currentFolder) const;
+    void ShowNewTessellationControlShaderAssetModal(FNode& currentFolder) const;
+    void ShowNewTessellationEvaluationShaderAssetModal(FNode& currentFolder) const;
+    void ShowNewGeometryShaderAssetModal(FNode& currentFolder) const;
+    void ShowNewFragmentShaderAssetModal(FNode& currentFolder) const;
+    void ShowNewShaderProgramAssetModal(FNode& currentFolder) const;
 
 private:
     ImGuiIO* io{ nullptr };
@@ -168,7 +174,7 @@ private:
     //- Modals -//
     NewProjectModal npm{ *this };
     OpenProjectModal opm{ *this };
-    NewComponentAssetModal ncam{ *this };
+    NewAssetModal nam{ *this };
 
     // TODO REMOVE ME WHEN IMGUI IMPLEMENTS THIS WORKAROUND AS API FUNC.
     void ExecuteDockBuilderFocusWorkAround();

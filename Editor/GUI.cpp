@@ -142,7 +142,7 @@ void GUI::operator() (float delta) {
 
     npm.Render();
     opm.Render();
-    ncam.Render();
+    nam.Render();
 
     End();
 }
@@ -303,9 +303,15 @@ void* GUI::FindIconByName(const std::string_view key, TextureSize size) const { 
 MetaAssetInfo& GUI::GetMetaInfoOf(const FNode& file) { return metaInfo.GetMetaInfoOf(file); }
 void GUI::ReloadMetaInfo() { metaInfo.LoadFromDisk(*CORE->LoadedProject(), *CORE->Assets()); }
 
-void GUI::ShowNewProjectModal() const { npm.Show(); }
-void GUI::ShowOpenProjectModal() const { opm.Show(); }
-void GUI::ShowNewComponentAssetModal(FNode& currentFolder) const { ncam.Show(currentFolder); }
+void GUI::ShowNewProjectModal() const                                               { npm.Show();                                                       }
+void GUI::ShowOpenProjectModal() const                                              { opm.Show();                                                       }
+void GUI::ShowNewComponentAssetModal(FNode& currentFolder) const                    { nam.ShowComponentCreationModal(currentFolder);                    }
+void GUI::ShowNewVertexShaderAssetModal(FNode& currentFolder) const                 { nam.ShowVertexShaderCreationModal(currentFolder);                 }
+void GUI::ShowNewTessellationControlShaderAssetModal(FNode& currentFolder) const    { nam.ShowTessellationControlShaderCreationModal(currentFolder);    }
+void GUI::ShowNewTessellationEvaluationShaderAssetModal(FNode& currentFolder) const { nam.ShowTessellationEvaluationShaderCreationModal(currentFolder); }
+void GUI::ShowNewGeometryShaderAssetModal(FNode& currentFolder) const               { nam.ShowGeometryShaderCreationModal(currentFolder);               }
+void GUI::ShowNewFragmentShaderAssetModal(FNode& currentFolder) const               { nam.ShowFragmentShaderCreationModal(currentFolder);               }
+void GUI::ShowNewShaderProgramAssetModal(FNode& currentFolder) const                { nam.ShowShaderProgramCreationModal(currentFolder);                }
 
 // TODO REMOVE ME WHEN IMGUI IMPLEMENTS THIS WORKAROUND AS API FUNC.
 void GUI::ExecuteDockBuilderFocusWorkAround() {
