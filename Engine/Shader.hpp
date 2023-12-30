@@ -10,17 +10,17 @@
 
 struct Shader {
     enum class Type {
-        VERTEX,
-        TESS_CTRL,
-        TESS_EVAL,
-        GEOMETRY,
-        FRAGMENT,
-        COMPUTE
+        Vertex,
+        TessellationControl,
+        TessellationEvaluation,
+        Geometry,
+        Fragment,
+        Compute
     };
 
     struct Uniform {
-        std::string typeName;
-        std::string name;
+        std::string TypeName;
+        std::string Name;
     };
 
     GLuint ID;

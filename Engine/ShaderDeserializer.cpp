@@ -69,7 +69,7 @@ ShaderDeserializationResult DeserializeVertexShader(const std::string_view data)
     if (!success) {
         rv.messages.emplace_back(0, ShaderCompilerMessageType::ERROR, "Vertex Shader compilation failed!");
     } else {
-        rv.deserializedShader = { v, Shader::Type::VERTEX, "", source, {} };
+        rv.deserializedShader = { v, Shader::Type::Vertex, "", source, {} };
     }
 
     GLint bufferLength;
@@ -111,7 +111,7 @@ ShaderDeserializationResult DeserializeTessellationControlShader(const std::stri
     if (!success) {
         rv.messages.emplace_back(0, ShaderCompilerMessageType::ERROR, "Tessellation Control Shader compilation failed!");
     } else {
-        rv.deserializedShader = { tc, Shader::Type::TESS_CTRL, "", source, {} };
+        rv.deserializedShader = { tc, Shader::Type::TessellationControl, "", source, {} };
     }
 
     GLint bufferLength;
@@ -153,7 +153,7 @@ ShaderDeserializationResult DeserializeTessellationEvaluationShader(const std::s
     if (!success) {
         rv.messages.emplace_back(0, ShaderCompilerMessageType::ERROR, "Tessellation Evaluation Shader compilation failed!");
     } else {
-        rv.deserializedShader = { te, Shader::Type::TESS_EVAL, "", source, {} };
+        rv.deserializedShader = { te, Shader::Type::TessellationEvaluation, "", source, {} };
     }
 
     GLint bufferLength;
@@ -195,7 +195,7 @@ ShaderDeserializationResult DeserializeGeometryShader(const std::string_view dat
     if (!success) {
         rv.messages.emplace_back(0, ShaderCompilerMessageType::ERROR, "Geometry Shader compilation failed!");
     } else {
-        rv.deserializedShader = { g, Shader::Type::GEOMETRY, "", source, {} };
+        rv.deserializedShader = { g, Shader::Type::Geometry, "", source, {} };
     }
 
     GLint bufferLength;
@@ -237,7 +237,7 @@ ShaderDeserializationResult DeserializeFragmentShader(const std::string_view dat
     if (!success) {
         rv.messages.emplace_back(0, ShaderCompilerMessageType::ERROR, "Fragment Shader compilation failed!");
     } else {
-        rv.deserializedShader = { f, Shader::Type::FRAGMENT, "", source, {} };
+        rv.deserializedShader = { f, Shader::Type::Fragment, "", source, {} };
     }
 
     GLint bufferLength;
@@ -279,7 +279,7 @@ ShaderDeserializationResult DeserializeComputeShader(const std::string_view data
     if (!success) {
         rv.messages.emplace_back(0, ShaderCompilerMessageType::ERROR, "Compute Shader compilation failed!");
     } else {
-        rv.deserializedShader = { c, Shader::Type::COMPUTE, "", source, {} };
+        rv.deserializedShader = { c, Shader::Type::Compute, "", source, {} };
     }
 
     GLint bufferLength;

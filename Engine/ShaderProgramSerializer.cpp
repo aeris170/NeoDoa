@@ -14,7 +14,7 @@ void ShaderProgramSerializer::DefaultHeaderComment(tinyxml2::XMLPrinter& printer
     printer.PushComment("WARNING!! This file is not for editing! Don't!");
 }
 void ShaderProgramSerializer::DefaultSerialize(tinyxml2::XMLPrinter& printer, const ShaderProgram& program) {
-    printer.OpenElement("scene");
+    printer.OpenElement("program");
     {
         ProgramConfig::Serialize(printer, program);
         Shaders::Serialize(printer, program);

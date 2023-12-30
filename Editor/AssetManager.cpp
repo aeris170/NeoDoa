@@ -62,7 +62,6 @@ void AssetManager::Render() {
         deletedNode = nullptr;
     }
 
-    newComponentModal.Render();
     newShaderModal.Render();
     newShaderProgramModal.Render();
 }
@@ -367,7 +366,7 @@ void AssetManager::RenderContextMenu() {
                 if (ImGui::MenuItem(vertexShader.c)) {
                     newShaderModal.Activate(
                         currentFolder,
-                        Shader::Type::VERTEX,
+                        Shader::Type::Vertex,
                         [&assets](const FNode& file) { assets.Import(file)->Deserialize(); }
                     );
                 }
@@ -375,7 +374,7 @@ void AssetManager::RenderContextMenu() {
                 if (ImGui::MenuItem(tessCtrlShader.c)) {
                     newShaderModal.Activate(
                         currentFolder,
-                        Shader::Type::TESS_CTRL,
+                        Shader::Type::TessellationControl,
                         [&assets](const FNode& file) { assets.Import(file)->Deserialize(); }
                     );
                 }
@@ -383,7 +382,7 @@ void AssetManager::RenderContextMenu() {
                 if (ImGui::MenuItem(tessEvalShader.c)) {
                     newShaderModal.Activate(
                         currentFolder,
-                        Shader::Type::TESS_EVAL,
+                        Shader::Type::TessellationEvaluation,
                         [&assets](const FNode& file) { assets.Import(file)->Deserialize(); }
                     );
                 }
@@ -391,7 +390,7 @@ void AssetManager::RenderContextMenu() {
                 if (ImGui::MenuItem(geometryShader.c)) {
                     newShaderModal.Activate(
                         currentFolder,
-                        Shader::Type::GEOMETRY,
+                        Shader::Type::Geometry,
                         [&assets](const FNode& file) { assets.Import(file)->Deserialize(); }
                     );
                 }
@@ -399,7 +398,7 @@ void AssetManager::RenderContextMenu() {
                 if (ImGui::MenuItem(fragmentShader.c)) {
                     newShaderModal.Activate(
                         currentFolder,
-                        Shader::Type::FRAGMENT,
+                        Shader::Type::Fragment,
                         [&assets](const FNode& file) { assets.Import(file)->Deserialize(); }
                     );
                 }
@@ -407,7 +406,7 @@ void AssetManager::RenderContextMenu() {
                 if (ImGui::MenuItem(computeShader.c)) {
                     newShaderModal.Activate(
                         currentFolder,
-                        Shader::Type::COMPUTE,
+                        Shader::Type::Compute,
                         [&assets](const FNode& file) { assets.Import(file)->Deserialize(); }
                     );
                 }
@@ -542,27 +541,27 @@ void AssetManager::NewShaderModal::Render() {
             if (shaderName[0] != '\0') {
                 std::string ext, content;
                 switch (shaderType) {
-                case Shader::Type::VERTEX:
+                case Shader::Type::Vertex:
                     ext = Assets::VERTEX_SHADER_EXT;
                     content = CodeGenerator::GenerateVertexShaderCode();
                     break;
-                case Shader::Type::TESS_CTRL:
+                case Shader::Type::TessellationControl:
                     ext = Assets::TESS_CTRL_SHADER_EXT;
                     content = CodeGenerator::GenerateTessellationControlShaderCode();
                     break;
-                case Shader::Type::TESS_EVAL:
+                case Shader::Type::TessellationEvaluation:
                     ext = Assets::TESS_EVAL_SHADER_EXT;
                     content = CodeGenerator::GenerateTessellationEvaluationShaderCode();
                     break;
-                case Shader::Type::GEOMETRY:
+                case Shader::Type::Geometry:
                     ext = Assets::GEOMETRY_SHADER_EXT;
                     content = CodeGenerator::GenerateGeometryShaderCode();
                     break;
-                case Shader::Type::FRAGMENT:
+                case Shader::Type::Fragment:
                     ext = Assets::FRAGMENT_SHADER_EXT;
                     content = CodeGenerator::GenerateFragmentShaderCode();
                     break;
-                case Shader::Type::COMPUTE:
+                case Shader::Type::Compute:
                     ext = Assets::COMPUTE_SHADER_EXT;
                     content = CodeGenerator::GenerateComputeShaderCode();
                     break;
@@ -586,22 +585,22 @@ void AssetManager::NewShaderModal::Render() {
 
 const char* const& AssetManager::NewShaderModal::SelectModalTitle(enum class Shader::Type shaderType) {
     switch (shaderType) {
-    case Shader::Type::VERTEX:    return VERTEX_SHADER_MODAL_TITLE_TEXT;
-    case Shader::Type::TESS_CTRL: return TESS_CTRL_SHADER_MODAL_TITLE_TEXT;
-    case Shader::Type::TESS_EVAL: return TESS_EVAL_SHADER_MODAL_TITLE_TEXT;
-    case Shader::Type::GEOMETRY:  return GEOMETRY_SHADER_MODAL_TITLE_TEXT;
-    case Shader::Type::FRAGMENT:  return FRAGMENT_SHADER_MODAL_TITLE_TEXT;
-    case Shader::Type::COMPUTE:   return COMPUTE_SHADER_MODAL_TITLE_TEXT;
+    case Shader::Type::Vertex:    return VERTEX_SHADER_MODAL_TITLE_TEXT;
+    case Shader::Type::TessellationControl: return TESS_CTRL_SHADER_MODAL_TITLE_TEXT;
+    case Shader::Type::TessellationEvaluation: return TESS_EVAL_SHADER_MODAL_TITLE_TEXT;
+    case Shader::Type::Geometry:  return GEOMETRY_SHADER_MODAL_TITLE_TEXT;
+    case Shader::Type::Fragment:  return FRAGMENT_SHADER_MODAL_TITLE_TEXT;
+    case Shader::Type::Compute:   return COMPUTE_SHADER_MODAL_TITLE_TEXT;
     }
 }
 const char* const& AssetManager::NewShaderModal::SelectModalContent(enum class Shader::Type shaderType) {
     switch (shaderType) {
-    case Shader::Type::VERTEX:    return VERTEX_SHADER_MODAL_CONTENT_TEXT;
-    case Shader::Type::TESS_CTRL: return TESS_CTRL_SHADER_MODAL_CONTENT_TEXT;
-    case Shader::Type::TESS_EVAL: return TESS_EVAL_SHADER_MODAL_CONTENT_TEXT;
-    case Shader::Type::GEOMETRY:  return GEOMETRY_SHADER_MODAL_CONTENT_TEXT;
-    case Shader::Type::FRAGMENT:  return FRAGMENT_SHADER_MODAL_CONTENT_TEXT;
-    case Shader::Type::COMPUTE:   return COMPUTE_SHADER_MODAL_CONTENT_TEXT;
+    case Shader::Type::Vertex:    return VERTEX_SHADER_MODAL_CONTENT_TEXT;
+    case Shader::Type::TessellationControl: return TESS_CTRL_SHADER_MODAL_CONTENT_TEXT;
+    case Shader::Type::TessellationEvaluation: return TESS_EVAL_SHADER_MODAL_CONTENT_TEXT;
+    case Shader::Type::Geometry:  return GEOMETRY_SHADER_MODAL_CONTENT_TEXT;
+    case Shader::Type::Fragment:  return FRAGMENT_SHADER_MODAL_CONTENT_TEXT;
+    case Shader::Type::Compute:   return COMPUTE_SHADER_MODAL_CONTENT_TEXT;
     }
 }
 

@@ -983,7 +983,7 @@ void Observer::ShaderProgramDisplay::RenderVertexShader(ShaderProgram& program) 
             AssetHandle handle = assets->FindAsset(data);
             assert(handle.HasValue());
             if (handle->IsShader()) {
-                if (handle->DataAs<Shader>().Type == Shader::Type::VERTEX) {
+                if (handle->DataAs<Shader>().Type == Shader::Type::Vertex) {
                     program.VertexShader = data;
                     ShaderProgramAsset->Serialize();
                     ShaderProgramAsset->ForceDeserialize();
@@ -1032,7 +1032,7 @@ void Observer::ShaderProgramDisplay::RenderTessCtrlShader(ShaderProgram& program
             AssetHandle handle = assets->FindAsset(data);
             assert(handle.HasValue());
             if (handle->IsShader()) {
-                if (handle->DataAs<Shader>().Type == Shader::Type::TESS_CTRL) {
+                if (handle->DataAs<Shader>().Type == Shader::Type::TessellationControl) {
                     program.TessellationControlShader = data;
                     ShaderProgramAsset->Serialize();
                     ShaderProgramAsset->ForceDeserialize();
@@ -1081,7 +1081,7 @@ void Observer::ShaderProgramDisplay::RenderTessEvalShader(ShaderProgram& program
             AssetHandle handle = assets->FindAsset(data);
             assert(handle.HasValue());
             if (handle->IsShader()) {
-                if (handle->DataAs<Shader>().Type == Shader::Type::TESS_EVAL) {
+                if (handle->DataAs<Shader>().Type == Shader::Type::TessellationEvaluation) {
                     program.TessellationEvaluationShader = data;
                     ShaderProgramAsset->Serialize();
                     ShaderProgramAsset->ForceDeserialize();
@@ -1123,14 +1123,14 @@ void Observer::ShaderProgramDisplay::RenderGeometryShader(ShaderProgram& program
         ImGui::PushStyleColor(ImGuiCol_TextDisabled, NOT_SET_OPTIONAL_COLOR);
     }
     Begin("Geometry Shader");
-    ImGui::InputText("###tess_eval_shader_text", GeometryShaderText.data(), GeometryShaderText.capacity(), ImGuiInputTextFlags_ReadOnly);
+    ImGui::InputText("###geometry_text", GeometryShaderText.data(), GeometryShaderText.capacity(), ImGuiInputTextFlags_ReadOnly);
     if (ImGui::BeginDragDropTarget()) {
         if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DND_DEMO_CELL")) {
             UUID data = *(const UUID*) payload->Data;
             AssetHandle handle = assets->FindAsset(data);
             assert(handle.HasValue());
             if (handle->IsShader()) {
-                if (handle->DataAs<Shader>().Type == Shader::Type::GEOMETRY) {
+                if (handle->DataAs<Shader>().Type == Shader::Type::Geometry) {
                     program.GeometryShader = data;
                     ShaderProgramAsset->Serialize();
                     ShaderProgramAsset->ForceDeserialize();
@@ -1179,7 +1179,7 @@ void Observer::ShaderProgramDisplay::RenderFragmentShader(ShaderProgram& program
             AssetHandle handle = assets->FindAsset(data);
             assert(handle.HasValue());
             if (handle->IsShader()) {
-                if (handle->DataAs<Shader>().Type == Shader::Type::FRAGMENT) {
+                if (handle->DataAs<Shader>().Type == Shader::Type::Fragment) {
                     program.FragmentShader = data;
                     ShaderProgramAsset->Serialize();
                     ShaderProgramAsset->ForceDeserialize();
