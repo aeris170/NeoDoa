@@ -305,6 +305,7 @@ void GUI::ReloadMetaInfo() { metaInfo.LoadFromDisk(*CORE->LoadedProject(), *CORE
 
 void GUI::ShowNewProjectModal() const                                               { npm.Show();                                                       }
 void GUI::ShowOpenProjectModal() const                                              { opm.Show();                                                       }
+void GUI::ShowNewSceneAssetModal(FNode& currentFolder) const                        { nam.ShowSceneCreationModal(currentFolder);                        }
 void GUI::ShowNewComponentAssetModal(FNode& currentFolder) const                    { nam.ShowComponentCreationModal(currentFolder);                    }
 void GUI::ShowNewVertexShaderAssetModal(FNode& currentFolder) const                 { nam.ShowVertexShaderCreationModal(currentFolder);                 }
 void GUI::ShowNewTessellationControlShaderAssetModal(FNode& currentFolder) const    { nam.ShowTessellationControlShaderCreationModal(currentFolder);    }

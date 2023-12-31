@@ -353,6 +353,10 @@ void AssetManager::RenderContextMenu() {
                 //gui.Events.OnAssetCreated(handle);
             }
             ImGui::Separator();
+            static constexpr auto scene = cat(FileIcons::SCENE_ICON, " ", "Scene");
+            if (ImGui::MenuItem(scene.c)) {
+                gui.ShowNewSceneAssetModal(*currentFolder);
+            }
             static constexpr auto component = cat(FileIcons::COMPONENT_ICON, " ", "Component");
             if (ImGui::MenuItem(component.c)) {
                 gui.ShowNewComponentAssetModal(*currentFolder);

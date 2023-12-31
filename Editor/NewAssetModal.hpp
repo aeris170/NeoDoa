@@ -15,6 +15,7 @@ struct NewAssetModal {
 
     explicit NewAssetModal(GUI& gui) noexcept;
 
+    void ShowSceneCreationModal(FNode& currentFolder) const;
     void ShowComponentCreationModal(FNode& currentFolder) const;
     void ShowVertexShaderCreationModal(FNode& currentFolder) const;
     void ShowTessellationControlShaderCreationModal(FNode& currentFolder) const;

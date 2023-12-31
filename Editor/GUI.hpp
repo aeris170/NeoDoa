@@ -156,6 +156,7 @@ struct GUI {
     //- Modals -//
     void ShowNewProjectModal() const;
     void ShowOpenProjectModal() const;
+    void ShowNewSceneAssetModal(FNode& currentFolder) const;
     void ShowNewComponentAssetModal(FNode& currentFolder) const;
     void ShowNewVertexShaderAssetModal(FNode& currentFolder) const;
     void ShowNewTessellationControlShaderAssetModal(FNode& currentFolder) const;

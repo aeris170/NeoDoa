@@ -13,6 +13,10 @@
 NewAssetModal::NewAssetModal(GUI& gui) noexcept :
 	gui(gui) {};
 
+void NewAssetModal::ShowSceneCreationModal(FNode& currentFolder) const {
+	/* cast-away const - this modal is never created const */
+	const_cast<NewAssetModal*>(this)->Reset(currentFolder, NewAssetData::AssetType::Scene);
+}
 void NewAssetModal::ShowComponentCreationModal(FNode& currentFolder) const {
 	/* cast-away const - this modal is never created const */
 	const_cast<NewAssetModal*>(this)->Reset(currentFolder, NewAssetData::AssetType::Component);
@@ -294,12 +298,16 @@ void NewAssetModal::CreateAsset() {
 	}
 }
 void NewAssetModal::CreateSceneAsset() {
-
+	const GUI& gui = this->gui.get();
+	Scene temporary(newAssetData.name);
+	const auto data = temporary.Serialize();
+	gui.CORE->Assets()->CreateAssetAt<Scene>(*newAssetData.currentFolder, newAssetData.nameWithExtension, data);
+	DOA_LOG_INFO("Succesfully created a new scene asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
 }
 void NewAssetModal::CreateComponentAsset() {
 	const GUI& gui = this->gui.get();
 	const auto sourceCode = CodeGenerator::GenerateComponentDeclaration(newAssetData.name);
-	gui.CORE->Assets()->CreateAssetAt<Component>(*newAssetData.currentFolder, newAssetData.name, sourceCode);
+	gui.CORE->Assets()->CreateAssetAt<Component>(*newAssetData.currentFolder, newAssetData.nameWithExtension, sourceCode);
 	DOA_LOG_INFO("Succesfully created a new component asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
 }
 void NewAssetModal::CreateVertexShaderAsset() {
