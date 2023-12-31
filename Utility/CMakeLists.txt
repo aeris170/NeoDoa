@@ -8,8 +8,10 @@ add_library(Utility STATIC)
 target_include_directories(Utility PUBLIC ..)
 
 find_package(EnTT CONFIG REQUIRED)
+find_package(ICU REQUIRED COMPONENTS uc dt i18n)
 
 target_link_libraries(Utility PUBLIC EnTT::EnTT)
+target_link_libraries(Utility PUBLIC ICU::uc ICU::dt ICU::i18n)
 
 set(GROUP_LIST
     "ConstexprConcat.hpp"

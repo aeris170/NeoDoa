@@ -37,6 +37,9 @@ echo "Installing GLFW"
 echo "Installing GLM"
 ./vcpkg install glm --triplet $platform
 
+echo "Installing ICU"
+./vcpkg install icu --triplet $platform
+
 echo "Installing LunaSVG"
 ./vcpkg install lunasvg --triplet $platform
 
