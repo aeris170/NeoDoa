@@ -38,7 +38,6 @@ Observer::Observer(GUI& gui) noexcept :
     gui.Events.AssetManager.OnAssetFocused       += std::bind_front(&Observer::OnAssetFocused,     this);
     gui.Events.AssetManager.OnFolderFocused      += std::bind_front(&Observer::OnFolderFocused,    this);
     gui.Events.AssetManager.OnFocusLost          += std::bind_front(&Observer::OnFocusLost,        this);
-    gui.Events.OnSceneOpened                     += std::bind_front(&Observer::OnSceneOpened,      this);
     gui.Events.OnSceneClosed                     += std::bind_front(&Observer::OnSceneClosed,      this);
     gui.Events.SceneHierarchy.OnEntitySelected   += std::bind_front(&Observer::OnEntitySelected,   this);
     gui.Events.SceneHierarchy.OnEntityDeselected += std::bind_front(&Observer::OnEntityDeselected, this);
@@ -56,8 +55,9 @@ bool Observer::Begin() {
 }
 
 void Observer::Render() {
-    if (!currentScene) { return; }
-    DisplayTargetRenderer::Render(*this, *currentScene);
+    GUI& gui = this->gui;
+    if (!gui.HasOpenScene()) { return; }
+    DisplayTargetRenderer::Render(*this, gui.GetOpenScene());
 }
 
 void Observer::End() {
@@ -68,7 +68,7 @@ void Observer::End() {
 void Observer::SetDisplayTarget(Entity entity) {
     static std::string hypen(" - ");
     displayTarget = entity;
-    renderTargetTitleText = hypen + currentScene->GetComponent<IDComponent>(entity).GetTagRef();
+    renderTargetTitleText = hypen + gui.get().GetOpenScene().GetComponent<IDComponent>(entity).GetTagRef();
 }
 void Observer::SetDisplayTarget(FNode& file) {
     static std::string hypen(" - ");
@@ -1239,9 +1239,6 @@ void Observer::OnFolderFocused(FNode& folder) {
 }
 void Observer::OnFocusLost() {
     ResetDisplayTarget();
-}
-void Observer::OnSceneOpened(Scene& scene) {
-    currentScene = &scene;
 }
 void Observer::OnSceneClosed() {
     if (std::holds_alternative<Entity>(displayTarget)) {

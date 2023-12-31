@@ -130,14 +130,12 @@ private:
     };
 
     std::string renderTargetTitleText;
-    Scene* currentScene;
 
     void OnReimport(Assets& assets);
     void OnAssetDeleted(AssetHandle asset);
     void OnAssetFocused(AssetHandle asset);
     void OnFolderFocused(FNode& folder);
     void OnFocusLost();
-    void OnSceneOpened(Scene& scene);
     void OnSceneClosed();
     void OnEntitySelected(Entity entity);
     void OnEntityDeselected();
