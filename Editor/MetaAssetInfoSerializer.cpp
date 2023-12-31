@@ -2,7 +2,7 @@
 
 #include <tinyxml2.h>
 
-#include <nameof.hpp>
+#include <Utility/NameOf.hpp>
 
 #include "MetaAssetInfo.hpp"
 

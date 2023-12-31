@@ -3,8 +3,8 @@
 #include <utility>
 #include <unordered_map>
 
-#include <Utility/nameof.hpp>
-#include <Utility/string_map.hpp>
+#include <Utility/NameOf.hpp>
+#include <Utility/StringMap.hpp>
 
 #include <Engine/FontAwesome.hpp>
 

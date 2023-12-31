@@ -4,21 +4,41 @@ project(Utility LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-set(SOURCE_LIST
-    "constexpr_concat.hpp"
-    "defer.hpp"
+add_library(Utility STATIC)
+target_include_directories(Utility PUBLIC ..)
+
+find_package(EnTT CONFIG REQUIRED)
+
+target_link_libraries(Utility PUBLIC EnTT::EnTT)
+
+set(GROUP_LIST
+    "ConstexprConcat.hpp"
+    "FormatBytes.cpp"
     "FormatBytes.hpp"
-    "nameof.hpp"
+    "NameOf.cpp"
+    "NameOf.hpp"
+    "ObserverPattern.cpp"
     "ObserverPattern.hpp"
-    "prettify.hpp"
-    "split.hpp"
-    "string_map.hpp"
+    "Prettify.cpp"
+    "Prettify.hpp"
+	"Split.cpp"
+    "Split.hpp"
+	"StringMap.cpp"
+    "StringMap.hpp"
     "TemplateUtilities.hpp"
-    "trim.hpp"
+	"Trim.cpp"
+    "Trim.hpp"
 )
 
-add_library(Utility INTERFACE ${SOURCE_LIST})
-target_include_directories(Utility INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
-target_compile_features(Utility INTERFACE cxx_std_23)
+foreach(source IN LISTS GROUP_LIST)
+    get_filename_component(source_path "${source}" PATH)
+    get_filename_component(source_name "${source}" NAME)
+    string(REPLACE "/" "\\" source_path_msvc "${source_path}")
+    source_group("${source_path_msvc}" FILES "${source_name}")
+    target_sources(Utility PRIVATE "${source_name}")
+endforeach()
 
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_LIST})
+
+if(MSVC)
+ target_compile_options(Utility PRIVATE "/MP")
+endif()

@@ -6,7 +6,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <Utility/string_map.hpp>
+#include <Utility/StringMap.hpp>
 
 #include <Engine/Vertex.hpp>
 

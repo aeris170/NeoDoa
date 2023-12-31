@@ -5,7 +5,7 @@
 #include <filesystem>
 #include <string_view>
 
-#include <Utility/string_map.hpp>
+#include <Utility/StringMap.hpp>
 
 #include <Engine/Color.hpp>
 #include <Engine/Texture.hpp>

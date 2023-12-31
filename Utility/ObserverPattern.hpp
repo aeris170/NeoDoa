@@ -21,27 +21,21 @@ namespace ObserverPattern {
     private:
         friend struct Observable;
     };
-    inline Observer::~Observer() {}
 
     struct Observable {
 
         virtual ~Observable() = 0;
 
-        inline void AddObserver(Observer& o) { observers.push_back(&o); }
-        inline void RemoveObserver(Observer& o) { observers.erase(std::remove(observers.begin(), observers.end(), &o), observers.end()); }
-        inline void RemoveAllObservers() { observers.clear(); }
+        void AddObserver(Observer& o);
+        void RemoveObserver(Observer& o);
+        void RemoveAllObservers();
 
     protected:
-        inline virtual void NotifyObservers(Notification message) {
-            for (auto observer : observers) {
-                observer->OnNotify(this, message);
-            }
-        }
+        virtual void NotifyObservers(Notification message);
 
     private:
         std::vector<Observer*> observers;
     };
-    inline Observable::~Observable() {}
 }
 
 #ifdef _DEBUG

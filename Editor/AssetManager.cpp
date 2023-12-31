@@ -7,7 +7,7 @@
 #include <Engine/Texture.hpp>
 #include <Engine/ShaderProgramSerializer.hpp>
 
-#include <Utility/constexpr_concat.hpp>
+#include <Utility/ConstexprConcat.hpp>
 
 #include "GUI.hpp"
 #include "Icons.hpp"

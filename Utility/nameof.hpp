@@ -34,20 +34,6 @@
 #define nameof(x) _nameof(#x)
 #define nameof_c(x) _nameof(#x).c_str()
 
-#include <regex>
 #include <string>
-#include <stdexcept>
 
-namespace detail {
-    inline std::regex regex("^&?([_a-zA-Z]\\w*(->|\\.|::))*([_a-zA-Z]\\w*)$");
-}
-
-inline std::string _nameof(const std::string& x) {
-    std::smatch match;
-    if (std::regex_match(x, match, detail::regex)) {
-        if (match.size() == 4) {
-            return match[3];
-        }
-    }
-    throw std::logic_error("A bad expression x in nameof(x). The expression is \"" + x + "\".");
-}
+std::string _nameof(const std::string& x);

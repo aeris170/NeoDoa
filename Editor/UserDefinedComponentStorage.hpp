@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Utility/string_map.hpp>
+#include <Utility/StringMap.hpp>
 
 #include <Engine/Core.hpp>
 #include <Engine/Entity.hpp>

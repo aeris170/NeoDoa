@@ -3,31 +3,13 @@
 #include <string>
 
 // trim from left
-inline std::string& ltrim(std::string& s, const char* t = " \t\n\r\f\v") {
-    s.erase(0, s.find_first_not_of(t));
-    return s;
-}
-
+std::string& ltrim(std::string& s, const char* t = " \t\n\r\f\v");
 // trim from right
-inline std::string& rtrim(std::string& s, const char* t = " \t\n\r\f\v") {
-    s.erase(s.find_last_not_of(t) + 1);
-    return s;
-}
-
+std::string& rtrim(std::string& s, const char* t = " \t\n\r\f\v");
 // trim from left & right
-inline std::string& trim(std::string& s, const char* t = " \t\n\r\f\v") {
-    return ltrim(rtrim(s, t), t);
-}
+std::string& trim(std::string& s, const char* t = " \t\n\r\f\v");
 
 // copying versions
-inline std::string ltrim_copy(std::string s, const char* t = " \t\n\r\f\v") {
-    return ltrim(s, t);
-}
-
-inline std::string rtrim_copy(std::string s, const char* t = " \t\n\r\f\v") {
-    return rtrim(s, t);
-}
-
-inline std::string trim_copy(std::string s, const char* t = " \t\n\r\f\v") {
-    return trim(s, t);
-}
+std::string ltrim_copy(std::string s, const char* t = " \t\n\r\f\v");
+std::string rtrim_copy(std::string s, const char* t = " \t\n\r\f\v");
+std::string trim_copy(std::string s, const char* t = " \t\n\r\f\v");

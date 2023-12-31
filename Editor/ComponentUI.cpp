@@ -2,9 +2,9 @@
 
 #include <unordered_map>
 
-#include <Utility/nameof.hpp>
-#include <Utility/prettify.hpp>
-#include <Utility/constexpr_concat.hpp>
+#include <Utility/NameOf.hpp>
+#include <Utility/Prettify.hpp>
+#include <Utility/ConstexprConcat.hpp>
 
 #include <Engine/Scene.hpp>
 #include <Engine/IDComponent.hpp>
