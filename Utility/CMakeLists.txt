@@ -14,6 +14,8 @@ target_link_libraries(Utility PUBLIC EnTT::EnTT)
 target_link_libraries(Utility PUBLIC ICU::uc ICU::dt ICU::i18n)
 
 set(GROUP_LIST
+    "CheckSubstring.cpp"
+    "CheckSubstring.hpp"
     "ConstexprConcat.hpp"
     "FormatBytes.cpp"
     "FormatBytes.hpp"
