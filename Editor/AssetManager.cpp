@@ -7,6 +7,7 @@
 #include <Engine/Texture.hpp>
 #include <Engine/ShaderProgramSerializer.hpp>
 
+#include <Utility/CheckSubstring.hpp>
 #include <Utility/ConstexprConcat.hpp>
 
 #include "GUI.hpp"
@@ -89,8 +90,8 @@ void AssetManager::RenderMenuBar() {
             ICON_FA_MAGNIFYING_GLASS "  Search an asset...",
             fileFilter.SearchQuery.data(), fileFilter.SearchQuery.size(),
             ImGuiInputTextFlags_AutoSelectAll |
-            ImGuiInputTextFlags_EnterReturnsTrue |
-            ImGuiInputTextFlags_EscapeClearsAll
+            ImGuiInputTextFlags_EscapeClearsAll |
+            ImGuiInputTextFlags_EnterReturnsTrue
         );
         ImGui::EndMenuBar();
     }
@@ -212,122 +213,171 @@ void AssetManager::RenderSelectedFolderContent() {
         currentFolderContentSettings.itemPadding = currentFolderContentSettings.thumbnailSize / 4;
     }
 
-    if (currentFolderContentSettings.viewMode == CurrentFolderContentSettings::ViewMode::Icons) {
-        float cell = currentFolderContentSettings.thumbnailSize + currentFolderContentSettings.itemPadding;
-        float width = ImGui::GetContentRegionAvail().x;
-        currentFolderContentSettings.minWidth = cell;
-
-        int columns = static_cast<int>(width / cell);
-        if (columns < 1) return;
-
-        bool visible = ImGui::BeginTable("currentFolder", columns);
-        if (!visible) return;
-
-        int i = 0;
-        ImGui::TableNextRow();
-        for (auto& child : currentFolder->Children()) {
-            visible = fileFilter.CheckVisibility(child);
-            if (!visible) { continue; }
-
-            ImGui::PushID(i);
-
-            if (i % columns == 0) {
-                ImGui::TableNextRow();
-            }
-            ImGui::TableSetColumnIndex(i++ % columns);
-
-            void* icon = gui.GetMetaInfoOf(child).GetSVGIcon();
-
-            ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
-            ImGui::ImageButton(icon, { currentFolderContentSettings.thumbnailSize, currentFolderContentSettings.thumbnailSize });
-            if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
-                assert(assets->IsAssetExistsAt(child));
-                dragDropAssetID = assets->FindAssetAt(child)->ID();
-                ImGui::SetDragDropPayload("DND_DEMO_CELL", &dragDropAssetID, sizeof(UUID));
-
-                ImGui::Text(child.FullName().data());
-                ImGui::EndDragDropSource();
-            }
-            if (ImGui::BeginPopupContextItem()) {
-
-                if (ImGui::MenuItem("Delete")) {
-                    deletedNode = &child;
-                    ImGui::Separator();
-                }
-
-                ImGui::EndPopup();
-            }
-
-            if (ImGui::IsItemHovered()) {
-                static bool mouseClick{ false };
-                if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-                    OpenFileAtFileNode(child);
-                } else if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-                    mouseClick = true;
-                }
-                if (mouseClick && ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
-                    SetSelectedNode(&child);
-                    mouseClick = false;
-                }
-            }
-            ImGui::PopStyleColor();
-
-            std::string fileName{ child.Name() };
-
-            float textHeight = ImGui::GetTextLineHeight();
-            auto textSize = ImGui::CalcTextSize(fileName.c_str(), nullptr, true, currentFolderContentSettings.thumbnailSize);
-            bool shouldShorten = textSize.y / textHeight > currentFolderContentSettings.maxTextLine;
-            if (shouldShorten) {
-                auto begin = fileName.begin();
-                auto end = --fileName.end();
-                std::string shortened;
-                do {
-                    shortened = std::string(begin, end + 1);
-                    shortened.append("...");
-                    textSize = ImGui::CalcTextSize(shortened.c_str(), nullptr, true, currentFolderContentSettings.thumbnailSize);
-                    do {
-                        --end;
-                    } while (end[0] == ' ');
-                } while (textSize.y / textHeight > currentFolderContentSettings.maxTextLine);
-                fileName = shortened;
-            }
-
-            ImGui::PushClipRect(ImGui::GetItemRectMin(), { ImGui::GetItemRectMax().x, ImGui::GetItemRectMax().y + (currentFolderContentSettings.maxTextLine + 0.5f) * textHeight }, true);
-            ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + currentFolderContentSettings.thumbnailSize);
-            ImGui::PushFont(gui.GetFontBold());
-            ImGui::TextUnformatted(fileName.c_str());
-            ImGui::PopFont();
-            ImGui::PopTextWrapPos();
-            ImGui::PopClipRect();
-
-            ImGui::PopID();
-        }
-
-        ImGui::EndTable();
-    } else if (currentFolderContentSettings.viewMode == CurrentFolderContentSettings::ViewMode::List) {
+    if (fileFilter.HasSearchQuery()) {
         DrawRowsBackground(30); /* display bg for 30 items - more than enough for foreseeable future resolutions */
-        for (auto& child : currentFolder->Children()) {
-            bool visible = fileFilter.CheckVisibility(child);
-            if (!visible) { continue; }
+        for (auto id : assets->AllAssetsIDs()) {
+            AssetHandle handle = assets->FindAsset(id);
+            assert(handle.HasValue());
 
-            void* icon = gui.GetMetaInfoOf(child).GetSVGIcon();
+            std::string_view fileName = handle->File().FullName();
+            int searchQueryStartIndex = FindSubstringIndexIgnoreCase(fileName.data(), fileFilter.SearchQuery.data());
+            if (searchQueryStartIndex >= 0) {
+                // Draw Icon
+                float iconSize = ImGui::GetTextLineHeight();
+                void* icon = gui.GetMetaInfoOf(handle->File()).GetSVGIcon();
+                ImVec2 start = ImGui::GetWindowPos() + ImGui::GetCursorPos();
+                ImVec2 end = { start.x + iconSize, start.y + iconSize };
 
-            if (ImGui::TreeNodeEx(child.Name().data(), ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf)) {
+                ImGui::GetWindowDrawList()->AddImage(icon, start, end);
+                // Draw Icon
+                ImGui::SetCursorPosX(ImGui::GetCursorPosX() + iconSize + ImGui::GetStyle().ItemSpacing.x);
+                // Draw Selectable Text
+                const char* beforeMatch = fileName.data();
+                const char* match = fileName.data() + searchQueryStartIndex;
+                const char* afterMatch = fileName.data() + searchQueryStartIndex + std::strlen(fileFilter.SearchQuery.data());
+
+                ImVec2 beforeMatchSize = ImGui::CalcTextSize(beforeMatch, match);
+                ImVec2 matchSize = ImGui::CalcTextSize(match, afterMatch);
+
+                start = ImGui::GetWindowPos() + ImGui::GetCursorPos();
+                start = { start.x + beforeMatchSize.x, start.y };
+                end = { start.x + matchSize.x, start.y + matchSize.y };
+
+                ImGui::GetWindowDrawList()->AddRectFilled(start, end, ImGui::ColorConvertFloat4ToU32(ImGui::GetStyleColorVec4(ImGuiCol_CheckMark)));
+
+                ImGui::PushStyleColor(ImGuiCol_Header, ImVec4{ 0, 0, 0, 0 });
+                bool b;
+                if (ImGui::Selectable(fileName.data(), &b, ImGuiSelectableFlags_AllowDoubleClick | ImGuiSelectableFlags_SpanAvailWidth)) {
+                    if (ImGui::IsItemHovered()) {
+                        if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+                            OpenFileAtFileNode(handle->File());
+                        } else if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+                            SetSelectedNode(&handle->File());
+                        }
+                    }
+                }
+                ImGui::PopStyleColor();
+                // Draw Selectable Text
+            }
+        }
+    } else {
+        if (currentFolderContentSettings.viewMode == CurrentFolderContentSettings::ViewMode::Icons) {
+            float cell = currentFolderContentSettings.thumbnailSize + currentFolderContentSettings.itemPadding;
+            float width = ImGui::GetContentRegionAvail().x;
+            currentFolderContentSettings.minWidth = cell;
+
+            int columns = static_cast<int>(width / cell);
+            if (columns < 1) return;
+
+            bool visible = ImGui::BeginTable("currentFolder", columns);
+            if (!visible) return;
+
+            int i = 0;
+            ImGui::TableNextRow();
+            for (auto& child : currentFolder->Children()) {
+                bool visible = fileFilter.CheckVisibility(child);
+                if (!visible) { continue; }
+
+                ImGui::PushID(i);
+
+                if (i % columns == 0) {
+                    ImGui::TableNextRow();
+                }
+                ImGui::TableSetColumnIndex(i++ % columns);
+
+                void* icon = gui.GetMetaInfoOf(child).GetSVGIcon();
+
+                ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
+                ImGui::ImageButton(icon, { currentFolderContentSettings.thumbnailSize, currentFolderContentSettings.thumbnailSize });
+                if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
+                    assert(assets->IsAssetExistsAt(child));
+                    dragDropAssetID = assets->FindAssetAt(child)->ID();
+                    ImGui::SetDragDropPayload("DND_DEMO_CELL", &dragDropAssetID, sizeof(UUID));
+
+                    ImGui::Text(child.FullName().data());
+                    ImGui::EndDragDropSource();
+                }
+                if (ImGui::BeginPopupContextItem()) {
+
+                    if (ImGui::MenuItem("Delete")) {
+                        deletedNode = &child;
+                        ImGui::Separator();
+                    }
+
+                    ImGui::EndPopup();
+                }
+
                 if (ImGui::IsItemHovered()) {
+                    static bool mouseClick{ false };
                     if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
                         OpenFileAtFileNode(child);
                     } else if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+                        mouseClick = true;
+                    }
+                    if (mouseClick && ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
                         SetSelectedNode(&child);
+                        mouseClick = false;
                     }
                 }
+                ImGui::PopStyleColor();
 
-                ImGui::TreePop();
+                std::string fileName{ child.Name() };
+
+                float textHeight = ImGui::GetTextLineHeight();
+                auto textSize = ImGui::CalcTextSize(fileName.c_str(), nullptr, true, currentFolderContentSettings.thumbnailSize);
+                bool shouldShorten = textSize.y / textHeight > currentFolderContentSettings.maxTextLine;
+                if (shouldShorten) {
+                    auto begin = fileName.begin();
+                    auto end = --fileName.end();
+                    std::string shortened;
+                    do {
+                        shortened = std::string(begin, end + 1);
+                        shortened.append("...");
+                        textSize = ImGui::CalcTextSize(shortened.c_str(), nullptr, true, currentFolderContentSettings.thumbnailSize);
+                        do {
+                            --end;
+                        } while (end[0] == ' ');
+                    } while (textSize.y / textHeight > currentFolderContentSettings.maxTextLine);
+                    fileName = shortened;
+                }
+
+                ImGui::PushClipRect(ImGui::GetItemRectMin(), { ImGui::GetItemRectMax().x, ImGui::GetItemRectMax().y + (currentFolderContentSettings.maxTextLine + 0.5f) * textHeight }, true);
+                ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + currentFolderContentSettings.thumbnailSize);
+                ImGui::PushFont(gui.GetFontBold());
+                ImGui::TextUnformatted(fileName.c_str());
+                ImGui::PopFont();
+                ImGui::PopTextWrapPos();
+                ImGui::PopClipRect();
+
+                ImGui::PopID();
             }
 
-            float textHeight = ImGui::GetTextLineHeight();
-            ImVec2 min = ImGui::GetItemRectMin();
-            ImVec2 max = { min.x + textHeight, min.y + textHeight };
-            ImGui::GetWindowDrawList()->AddImage(icon, min, max);
+            ImGui::EndTable();
+        } else if (currentFolderContentSettings.viewMode == CurrentFolderContentSettings::ViewMode::List) {
+            DrawRowsBackground(30); /* display bg for 30 items - more than enough for foreseeable future resolutions */
+            for (auto& child : currentFolder->Children()) {
+                bool visible = fileFilter.CheckVisibility(child);
+                if (!visible) { continue; }
+
+                void* icon = gui.GetMetaInfoOf(child).GetSVGIcon();
+
+                if (ImGui::TreeNodeEx(child.Name().data(), ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf)) {
+                    if (ImGui::IsItemHovered()) {
+                        if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+                            OpenFileAtFileNode(child);
+                        } else if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+                            SetSelectedNode(&child);
+                        }
+                    }
+
+                    ImGui::TreePop();
+                }
+
+                float textHeight = ImGui::GetTextLineHeight();
+                ImVec2 min = ImGui::GetItemRectMin();
+                ImVec2 max = { min.x + textHeight, min.y + textHeight };
+                ImGui::GetWindowDrawList()->AddImage(icon, min, max);
+            }
         }
     }
 }
