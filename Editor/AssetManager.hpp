@@ -59,6 +59,7 @@ private:
     struct FileFilter {
         std::reference_wrapper<AssetManager> Owner;
         std::array<char, 32> SearchQuery{};
+        bool HasSearchQuery() const;
         bool CheckVisibility(const FNode& file) const;
     } fileFilter{ *this };
 

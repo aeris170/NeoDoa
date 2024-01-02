@@ -165,7 +165,7 @@ void AssetManager::RenderSelectedFolderContent() {
     std::string title(AssetManagerIcons::SELECTED_FOLDER_CONTENT_TITLE_ICON);
     title.append(SELECTED_FOLDER_CONTENT_TITLE_TEXT);
     if (currentFolder != nullptr) {
-        if (fileFilter.SearchQuery[0] == '\0') {
+        if (!fileFilter.HasSearchQuery()) {
             title.append(" - ROOT: ");
             title.append(currentFolder->Path().string());
         } else {
@@ -461,6 +461,9 @@ void AssetManager::SetCurrentFolder(FNode* folder) {
 }
 
 // Inner struct: FileFilter
+bool AssetManager::FileFilter::HasSearchQuery() const {
+    return SearchQuery[0] != '\0';
+}
 bool AssetManager::FileFilter::CheckVisibility(const FNode& file) const {
     if (!file.IsDirectory() && !Owner.get().assets->IsAssetExistsAt(file)) { return false; }
     if (file.Extension() == ".id") { return false; }
@@ -469,10 +472,10 @@ bool AssetManager::FileFilter::CheckVisibility(const FNode& file) const {
     if (file.FullName() == "imgui.ini") { return false; }
 
     /* if query is empty, there is no query, hence no search is needed, all is shown */
-    if (SearchQuery[0] == '\0') { return true; }
+    if (!HasSearchQuery()) { return true; }
 
     /* query is not present in the string, as whole, thus search failed, hide this file */
-    if (file.FullName().find(SearchQuery.data()) == std::string::npos) { return false; }
+    if (!CheckSubstringIgnoreCase(file.FullName(), SearchQuery.data())) { return false; }
 
     return true;
 }
