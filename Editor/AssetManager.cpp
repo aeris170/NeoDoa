@@ -85,6 +85,7 @@ void AssetManager::RenderMenuBar() {
         static constexpr int searchBarWidth{ 270 };
         ImGui::PushItemWidth(searchBarWidth);
         ImGui::SameLine(ImGui::GetWindowContentRegionMax().x - searchBarWidth);
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12);
         ImGui::InputTextWithHint(
             "",
             ICON_FA_MAGNIFYING_GLASS "  Search an asset...",
@@ -93,6 +94,7 @@ void AssetManager::RenderMenuBar() {
             ImGuiInputTextFlags_EscapeClearsAll |
             ImGuiInputTextFlags_EnterReturnsTrue
         );
+        ImGui::PopStyleVar();
         ImGui::EndMenuBar();
     }
 }
