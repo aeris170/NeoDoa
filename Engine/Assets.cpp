@@ -85,6 +85,7 @@ void Assets::DeleteAsset(const AssetHandle asset) {
 
     UUID id = asset->ID();
     database.erase(id);
+    std::erase(allAssets, id);
     std::erase(sceneAssets, id);
     std::erase(componentDefinitionAssets, id);
     std::erase(shaderAssets, id);
@@ -122,6 +123,7 @@ bool Assets::IsAssetExistsAt(const FNode& file) const { return files.contains(&f
 FNode& Assets::Root() { return _root; }
 const FNode& Assets::Root() const { return _root; }
 
+const Assets::UUIDCollection& Assets::AllAssetsIDs() const { return allAssets; }
 const Assets::UUIDCollection& Assets::SceneAssetIDs() const { return sceneAssets; }
 const Assets::UUIDCollection& Assets::ScriptAssetIDs() const { return scriptAssets; }
 const Assets::UUIDCollection& Assets::TextureAssetIDs() const { return textureAssets; }
@@ -134,6 +136,7 @@ const Assets::UUIDCollection& Assets::ShaderUniformBlockAssetIDs() const { retur
 AssetHandle Assets::Import(const FNode& file) { return ImportFile(database, file); }
 void Assets::ReimportAll() {
     database.clear();
+    allAssets.clear();
     sceneAssets.clear();
     componentDefinitionAssets.clear();
     shaderAssets.clear();
@@ -165,7 +168,7 @@ AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
         * ------- Step 7: Call the importer to import the content to the memory
         (this is no longer the case, as we have dependencies between assets
         eg. Scene depends on ComponentDefinition or Material depends on Program, Program depends on Shader etc.)
-        * Step 8: Separate imported asset to its own subcategory
+        * Step 8: Separate imported asset to its own subcategory (and put it into allAssets list)
     */
     if (file.ext == PROJ_EXT) { return nullptr; }
     if (file.IsDirectory()) { return nullptr; }
@@ -225,6 +228,7 @@ AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
         // asset.Deserialize();
 
         // Step 8
+        allAssets.push_back(id);
         if (asset.IsScene()) {
             sceneAssets.push_back(id);
         }

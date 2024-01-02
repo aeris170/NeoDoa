@@ -102,6 +102,7 @@ struct Assets {
     FNode& Root();
     const FNode& Root() const;
 
+    const UUIDCollection& AllAssetsIDs() const;
     const UUIDCollection& SceneAssetIDs() const;
     const UUIDCollection& ScriptAssetIDs() const;
     const UUIDCollection& TextureAssetIDs() const;
@@ -131,6 +132,7 @@ private:
 
     FNode _root;
 
+    UUIDCollection allAssets{};
     UUIDCollection sceneAssets{};
     UUIDCollection scriptAssets{};
     UUIDCollection textureAssets{};
