@@ -37,7 +37,7 @@ bool Splitter(bool split_vertically, float thickness, float* size1, float* size2
     ImVec2 itemSize(CalcItemSize(split_vertically ? ImVec2(thickness, splitter_long_axis_size) : ImVec2(splitter_long_axis_size, thickness), 0.0f, 0.0f));
     ImRect bb;
     bb.Min = ImVec2(window->DC.CursorPos.x + size.x, window->DC.CursorPos.y + size.y);
-    bb.Max = ImVec2(bb.Min.x + itemSize.x, bb.Min.y + itemSize.y);
+    bb.Max = ImVec2(bb.Min.x + itemSize.x, bb.Min.y + itemSize.y + 1); // +1 because ImGui's return value of itemSize.y is off by one
 
     // Draw splitter control (the thingy in the middle)
     const auto& style = ImGui::GetStyle();
