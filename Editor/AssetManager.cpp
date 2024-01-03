@@ -220,15 +220,16 @@ void AssetManager::RenderSelectedFolderContent() {
         for (auto id : assets->AllAssetsIDs()) {
             AssetHandle handle = assets->FindAsset(id);
             assert(handle.HasValue());
+            FNode& file = handle->File();
             bool visible = fileFilter.CheckVisibility(file);
             if (!visible) { continue; }
 
-            std::string_view fileName = handle->File().FullName();
+            std::string_view fileName = file.FullName();
             int searchQueryStartIndex = FindSubstringIndexIgnoreCase(fileName.data(), fileFilter.SearchQuery.data());
             if (searchQueryStartIndex >= 0) {
                 // Draw Icon
                 float iconSize = ImGui::GetTextLineHeight();
-                void* icon = gui.GetMetaInfoOf(handle->File()).GetSVGIcon();
+                void* icon = gui.GetMetaInfoOf(file).GetSVGIcon();
                 ImVec2 start = ImGui::GetWindowPos() + ImGui::GetCursorPos();
                 ImVec2 end = { start.x + iconSize, start.y + iconSize };
 
@@ -254,9 +255,9 @@ void AssetManager::RenderSelectedFolderContent() {
                 if (ImGui::Selectable(fileName.data(), &b, ImGuiSelectableFlags_AllowDoubleClick | ImGuiSelectableFlags_SpanAvailWidth)) {
                     if (ImGui::IsItemHovered()) {
                         if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-                            OpenFileAtFileNode(handle->File());
+                            OpenFileAtFileNode(file);
                         } else if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-                            SetSelectedNode(&handle->File());
+                            SetSelectedNode(&file);
                         }
                     }
                 }
