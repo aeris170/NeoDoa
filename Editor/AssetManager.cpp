@@ -220,6 +220,8 @@ void AssetManager::RenderSelectedFolderContent() {
         for (auto id : assets->AllAssetsIDs()) {
             AssetHandle handle = assets->FindAsset(id);
             assert(handle.HasValue());
+            bool visible = fileFilter.CheckVisibility(file);
+            if (!visible) { continue; }
 
             std::string_view fileName = handle->File().FullName();
             int searchQueryStartIndex = FindSubstringIndexIgnoreCase(fileName.data(), fileFilter.SearchQuery.data());
