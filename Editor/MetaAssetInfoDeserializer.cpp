@@ -1,10 +1,10 @@
-#include "MetaAssetInfoDeserializer.hpp"
+#include <Editor/MetaAssetInfoDeserializer.hpp>
 
 #include <cstring>
 
 #include <tinyxml2.h>
 
-#include <Utility/nameof.hpp>
+#include <Utility/NameOf.hpp>
 
 #include <Engine/Log.hpp>
 #include <Engine/Core.hpp>

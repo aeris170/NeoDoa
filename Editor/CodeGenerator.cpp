@@ -1,4 +1,4 @@
-#include "CodeGenerator.hpp"
+#include <Editor/CodeGenerator.hpp>
 
 #include <format>
 #include <sstream>

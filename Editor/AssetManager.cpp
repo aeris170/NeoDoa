@@ -1,4 +1,4 @@
-#include "AssetManager.hpp"
+#include <Editor/AssetManager.hpp>
 
 #include <algorithm>
 #include <imgui_internal.h>
@@ -10,10 +10,10 @@
 #include <Utility/CheckSubstring.hpp>
 #include <Utility/ConstexprConcat.hpp>
 
-#include "GUI.hpp"
-#include "Icons.hpp"
-#include "ImGuiExtensions.hpp"
-#include "CodeGenerator.hpp"
+#include <Editor/GUI.hpp>
+#include <Editor/Icons.hpp>
+#include <Editor/ImGuiExtensions.hpp>
+#include <Editor/CodeGenerator.hpp>
 
 AssetManager::AssetManager(GUI& gui) noexcept :
     gui(gui) {

@@ -1,6 +1,6 @@
-#include "UserDefinedComponentStorageSerializer.hpp"
+#include <Editor/UserDefinedComponentStorageSerializer.hpp>
 
-#include "UserDefinedComponentStorage.hpp"
+#include <Editor/UserDefinedComponentStorage.hpp>
 
 void SerializeUserDefinedComponentStorage(tinyxml2::XMLPrinter& printer, const Scene& scene, Entity entity) {
     if (!scene.HasComponent<UserDefinedComponentStorage>(entity)) { return; }

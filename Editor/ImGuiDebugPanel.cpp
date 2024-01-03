@@ -1,6 +1,6 @@
 #if _DEBUG
 
-#include "TextEditor.hpp"
+#include <Editor/TextEditor.hpp>
 
 void TextEditor::ImGuiDebugPanel(const std::string& panelName)
 {

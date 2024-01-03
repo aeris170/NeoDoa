@@ -1,4 +1,4 @@
-#include "ComponentInstance.hpp"
+#include <Editor/ComponentInstance.hpp>
 
 ComponentInstance::Field::Field(const std::string& typeName, const std::string& name, const std::any& value) noexcept :
     typeName(typeName),

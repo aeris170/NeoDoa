@@ -1,4 +1,4 @@
-#include "ComponentWidgets.hpp"
+#include <Editor/ComponentWidgets.hpp>
 
 #include <imgui.h>
 #include <imgui_internal.h>

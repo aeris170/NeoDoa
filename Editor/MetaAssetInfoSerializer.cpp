@@ -1,10 +1,10 @@
-#include "MetaAssetInfoSerializer.hpp"
+#include <Editor/MetaAssetInfoSerializer.hpp>
 
 #include <tinyxml2.h>
 
 #include <Utility/NameOf.hpp>
 
-#include "MetaAssetInfo.hpp"
+#include <Editor/MetaAssetInfo.hpp>
 
 std::string SerializeMetaAssetInfo(const MetaAssetInfo& info) {
     tinyxml2::XMLPrinter printer;

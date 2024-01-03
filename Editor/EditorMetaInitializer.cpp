@@ -1,4 +1,4 @@
-#include "EditorMetaInitializer.hpp"
+#include <Editor/EditorMetaInitializer.hpp>
 
 #include <Engine/SceneSerializer.hpp>
 #include <Engine/SceneDeserializer.hpp>

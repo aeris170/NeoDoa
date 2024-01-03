@@ -1,4 +1,4 @@
-#include "OutlineAttachment.hpp"
+#include <Editor/OutlineAttachment.hpp>
 
 OutlineAttachment::OutlineAttachment(std::shared_ptr<GUI> gui) noexcept :
     gui(gui),

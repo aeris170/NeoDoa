@@ -1,9 +1,9 @@
-#include "Console.hpp"
+#include <Editor/Console.hpp>
 
-#include "GUI.hpp"
-#include "Icons.hpp"
-#include "Colors.hpp"
-#include "ImGuiExtensions.hpp"
+#include <Editor/GUI.hpp>
+#include <Editor/Icons.hpp>
+#include <Editor/Colors.hpp>
+#include <Editor/ImGuiExtensions.hpp>
 
 Console::Console(GUI& gui) noexcept :
     gui(gui) {}

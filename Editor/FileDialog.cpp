@@ -1,4 +1,4 @@
-#include "FileDialog.hpp"
+#include <Editor/FileDialog.hpp>
 
 #include <fstream>
 #include <sys/stat.h>

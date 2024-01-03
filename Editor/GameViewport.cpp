@@ -1,9 +1,9 @@
-#include "GameViewport.hpp"
+#include <Editor/GameViewport.hpp>
 
 #include <imgui.h>
 
-#include "GUI.hpp"
-#include "Icons.hpp"
+#include <Editor/GUI.hpp>
+#include <Editor/Icons.hpp>
 
 GameViewport::GameViewport(GUI& gui) noexcept :
     gui(gui) {}
