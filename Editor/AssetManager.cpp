@@ -217,12 +217,14 @@ void AssetManager::RenderSelectedFolderContent() {
 
     if (fileFilter.HasSearchQuery()) {
         DrawRowsBackground(30); /* display bg for 30 items - more than enough for foreseeable future resolutions */
+        bool empty = true;
         for (auto id : assets->AllAssetsIDs()) {
             AssetHandle handle = assets->FindAsset(id);
             assert(handle.HasValue());
             FNode& file = handle->File();
             bool visible = fileFilter.CheckVisibility(file);
             if (!visible) { continue; }
+            empty = false;
 
             std::string_view fileName = file.FullName();
             int searchQueryStartIndex = FindSubstringIndexIgnoreCase(fileName.data(), fileFilter.SearchQuery.data());
@@ -264,6 +266,9 @@ void AssetManager::RenderSelectedFolderContent() {
                 ImGui::PopStyleColor();
                 // Draw Selectable Text
             }
+        }
+        if (empty) {
+            ImGui::Text("No result.");
         }
     } else {
         if (currentFolderContentSettings.viewMode == CurrentFolderContentSettings::ViewMode::Icons) {
