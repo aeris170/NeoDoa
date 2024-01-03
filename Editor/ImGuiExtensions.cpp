@@ -32,12 +32,32 @@ bool Splitter(bool split_vertically, float thickness, float* size1, float* size2
 
     ImGuiID id = window->GetID("##Splitter");
 
+    // Calc bounding-box
     ImVec2 size(split_vertically ? ImVec2(*size1, 0.0f) : ImVec2(0.0f, *size1));
     ImVec2 itemSize(CalcItemSize(split_vertically ? ImVec2(thickness, splitter_long_axis_size) : ImVec2(splitter_long_axis_size, thickness), 0.0f, 0.0f));
     ImRect bb;
     bb.Min = ImVec2(window->DC.CursorPos.x + size.x, window->DC.CursorPos.y + size.y);
     bb.Max = ImVec2(bb.Min.x + itemSize.x, bb.Min.y + itemSize.y);
-    return SplitterBehavior(bb, id, split_vertically ? ImGuiAxis_X : ImGuiAxis_Y, size1, size2, min_size1, min_size2, 0.0f);
+
+    // Draw splitter control (the thingy in the middle)
+    const auto& style = ImGui::GetStyle();
+    ImGui::PushStyleColor(ImGuiCol_Separator, style.Colors[ImGuiCol_ScrollbarGrab]);
+    ImGui::PushStyleColor(ImGuiCol_SeparatorActive, style.Colors[ImGuiCol_ScrollbarGrabActive]);
+    ImGui::PushStyleColor(ImGuiCol_SeparatorHovered, style.Colors[ImGuiCol_ScrollbarGrabHovered]);
+    bool rv = SplitterBehavior(bb, id, split_vertically ? ImGuiAxis_X : ImGuiAxis_Y, size1, size2, min_size1, min_size2, 0.0f);
+    ImGui::PopStyleColor(3);
+
+    // Draw 3 dots to signify it is moveable!
+    ImVec2 center1{ (bb.Min.x + bb.Max.x) / 2, (bb.Min.y + bb.Max.y) / 2 };
+    ImVec2 center2{ center1.x, center1.y - thickness };
+    ImVec2 center3{ center1.x, center1.y + thickness };
+    float radius = (bb.Max.x - bb.Min.x) / 4;
+    auto color = ColorConvertFloat4ToU32({ 1.0f, 1.0f, 1.0f, 1.0f });
+    ImGui::GetWindowDrawList()->AddCircleFilled(center1, radius, color);
+    ImGui::GetWindowDrawList()->AddCircleFilled(center2, radius, color);
+    ImGui::GetWindowDrawList()->AddCircleFilled(center3, radius, color);
+
+    return rv;
 }
 
 float BeginTableColumnCenterText(std::string_view text) {
