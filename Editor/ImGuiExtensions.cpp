@@ -44,7 +44,7 @@ bool Splitter(bool split_vertically, float thickness, float* size1, float* size2
     ImGui::PushStyleColor(ImGuiCol_Separator, style.Colors[ImGuiCol_ScrollbarGrab]);
     ImGui::PushStyleColor(ImGuiCol_SeparatorActive, style.Colors[ImGuiCol_ScrollbarGrabActive]);
     ImGui::PushStyleColor(ImGuiCol_SeparatorHovered, style.Colors[ImGuiCol_ScrollbarGrabHovered]);
-    bool rv = SplitterBehavior(bb, id, split_vertically ? ImGuiAxis_X : ImGuiAxis_Y, size1, size2, min_size1, min_size2, 0.0f);
+    bool rv = SplitterBehavior(bb, id, split_vertically ? ImGuiAxis_X : ImGuiAxis_Y, size1, size2, min_size1, min_size2);
     ImGui::PopStyleColor(3);
 
     // Draw 3 dots to signify it is moveable!
