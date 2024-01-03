@@ -2,7 +2,7 @@
 
 #include <algorithm>
 #include <imgui_internal.h>
-#include <submodules/detector/detector.hpp>
+#include <Submodules/detector/detector.hpp>
 
 #include <Engine/Texture.hpp>
 #include <Engine/ShaderProgramSerializer.hpp>
