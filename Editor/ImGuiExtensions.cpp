@@ -15,7 +15,7 @@ void DrawRowsBackground(int row_count, ImVec4 col_even, ImVec4 col_odd) {
 	int row_display_end;
 	ImGui::CalcListClipping(row_count, line_height, &row_display_start, &row_display_end);
 	for (int row_n = row_display_start; row_n < row_display_end; row_n++) {
-		ImVec4& col = (row_n & 1) ? col_odd : col_even;
+		const ImVec4& col = (row_n & 1) ? col_odd : col_even;
 		if (col.w == 0) {
 			continue;
 		}
