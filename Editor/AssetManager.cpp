@@ -69,6 +69,8 @@ void AssetManager::End() {
     ImGui::PopID();
 }
 
+FNode* AssetManager::GetCurrentFolder() { return currentFolder; }
+
 void AssetManager::RenderMenuBar() {
     GUI& gui = this->gui;
 

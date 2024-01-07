@@ -8,7 +8,7 @@
 #include <Editor/CodeGenerator.hpp>
 #include <Editor/ImGuiExtensions.hpp>
 
-#include <Utility/trim.hpp>
+#include <Utility/Trim.hpp>
 
 NewAssetModal::NewAssetModal(GUI& gui) noexcept :
 	gui(gui) {};
@@ -180,10 +180,10 @@ void NewAssetModal::RenderNameSelectionDialog() {
 
 	if (create) {
 		newAssetData.name = buf.data();
-		newAssetData.nameWithExtension = newAssetData.name;
 		trim(newAssetData.name);
 		if (!newAssetData.name.empty()) {
-			ValidateFilenameExtension();
+			// sanitize extension from name
+			newAssetData.name = std::filesystem::path(newAssetData.name).stem().string();
 			stage = Stage::Confirmation;
 		} else {
 			badName = true;
@@ -206,59 +206,6 @@ void NewAssetModal::RenderConfirmationDialog() {
 	ImGui::SameLine();
 	if (ImGui::Button(NO_BUTTON_TEXT, MODAL_BUTTONS_SIZE)) {
 		Hide();
-	}
-}
-
-void NewAssetModal::ValidateFilenameExtension() {
-	const std::filesystem::path filePath = newAssetData.nameWithExtension;
-	switch (newAssetData.type) {
-		using enum NewAssetData::AssetType;
-	case Scene:
-		if (filePath.extension() != Assets::SCENE_EXT) {
-			newAssetData.nameWithExtension.append(Assets::SCENE_EXT);
-		}
-		break;
-	case Component:
-		if (filePath.extension() != Assets::COMP_EXT) {
-			newAssetData.nameWithExtension.append(Assets::COMP_EXT);
-		}
-		break;
-	case VertexShader:
-		if (filePath.extension() != Assets::VERTEX_SHADER_EXT) {
-			newAssetData.nameWithExtension.append(Assets::VERTEX_SHADER_EXT);
-		}
-		break;
-	case TessellationControlShader:
-		if (filePath.extension() != Assets::TESS_CTRL_SHADER_EXT) {
-			newAssetData.nameWithExtension.append(Assets::TESS_CTRL_SHADER_EXT);
-		}
-		break;
-	case TessellationEvaluationShader:
-		if (filePath.extension() != Assets::TESS_EVAL_SHADER_EXT) {
-			newAssetData.nameWithExtension.append(Assets::TESS_EVAL_SHADER_EXT);
-		}
-		break;
-	case GeometryShader:
-		if (filePath.extension() != Assets::GEOMETRY_SHADER_EXT) {
-			newAssetData.nameWithExtension.append(Assets::GEOMETRY_SHADER_EXT);
-		}
-		break;
-	case FragmentShader:
-		if (filePath.extension() != Assets::FRAGMENT_SHADER_EXT) {
-			newAssetData.nameWithExtension.append(Assets::FRAGMENT_SHADER_EXT);
-		}
-		break;
-	case ShaderProgram:
-		if (filePath.extension() != Assets::SHADER_PROGRAM_EXT) {
-			newAssetData.nameWithExtension.append(Assets::SHADER_PROGRAM_EXT);
-		}
-		break;
-	case Texture:
-		break;
-	case Model:
-		break;
-	default:
-		assert(false); // invalid enum
 	}
 }
 
@@ -298,52 +245,49 @@ void NewAssetModal::CreateAsset() {
 	}
 }
 void NewAssetModal::CreateSceneAsset() {
-	const GUI& gui = this->gui.get();
-	Scene temporary(newAssetData.name);
-	const auto data = temporary.Serialize();
-	gui.CORE->Assets()->CreateAssetAt<Scene>(*newAssetData.currentFolder, newAssetData.nameWithExtension, data);
-	DOA_LOG_INFO("Succesfully created a new scene asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
+	GUI& gui = this->gui.get();
+	gui.CreateNewScene(*newAssetData.currentFolder, newAssetData.name);
 }
 void NewAssetModal::CreateComponentAsset() {
 	const GUI& gui = this->gui.get();
 	const auto sourceCode = CodeGenerator::GenerateComponentDeclaration(newAssetData.name);
-	gui.CORE->Assets()->CreateAssetAt<Component>(*newAssetData.currentFolder, newAssetData.nameWithExtension, sourceCode);
+	gui.CORE->Assets()->CreateAssetAt<Component>(*newAssetData.currentFolder, newAssetData.name + Assets::COMP_EXT, sourceCode);
 	DOA_LOG_INFO("Succesfully created a new component asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
 }
 void NewAssetModal::CreateVertexShaderAsset() {
 	const GUI& gui = this->gui.get();
 	const auto sourceCode = CodeGenerator::GenerateVertexShaderCode();
-	gui.CORE->Assets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.nameWithExtension, sourceCode);
+	gui.CORE->Assets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.name + Assets::VERTEX_SHADER_EXT, sourceCode);
 	DOA_LOG_INFO("Succesfully created a new vertex shader asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
 }
 void NewAssetModal::CreateTessellationControlAsset() {
 	const GUI& gui = this->gui.get();
 	const auto sourceCode = CodeGenerator::GenerateTessellationControlShaderCode();
-	gui.CORE->Assets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.nameWithExtension, sourceCode);
+	gui.CORE->Assets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.name + Assets::TESS_CTRL_SHADER_EXT, sourceCode);
 	DOA_LOG_INFO("Succesfully created a new tessellation control shader asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
 }
 void NewAssetModal::CreateTessellationEvaluationAsset() {
 	const GUI& gui = this->gui.get();
 	const auto sourceCode = CodeGenerator::GenerateTessellationEvaluationShaderCode();
-	gui.CORE->Assets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.nameWithExtension, sourceCode);
+	gui.CORE->Assets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.name + Assets::TESS_EVAL_SHADER_EXT, sourceCode);
 	DOA_LOG_INFO("Succesfully created a new tessellation evaluation shader asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
 }
 void NewAssetModal::CreateGeometryShaderAsset() {
 	const GUI& gui = this->gui.get();
 	const auto sourceCode = CodeGenerator::GenerateGeometryShaderCode();
-	gui.CORE->Assets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.nameWithExtension, sourceCode);
+	gui.CORE->Assets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.name + Assets::GEOMETRY_SHADER_EXT, sourceCode);
 	DOA_LOG_INFO("Succesfully created a new geometry shader asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
 }
 void NewAssetModal::CreateFragmentShaderAsset() {
 	const GUI& gui = this->gui.get();
 	const auto sourceCode = CodeGenerator::GenerateFragmentShaderCode();
-	gui.CORE->Assets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.nameWithExtension, sourceCode);
+	gui.CORE->Assets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.name + Assets::FRAGMENT_SHADER_EXT, sourceCode);
 	DOA_LOG_INFO("Succesfully created a new fragment shader asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
 }
 void NewAssetModal::CreateShaderProgramAsset() {
 	const GUI& gui = this->gui.get();
 	ShaderProgram temporary{ .Name = newAssetData.name };
 	const auto data = temporary.Serialize();
-	gui.CORE->Assets()->CreateAssetAt<ShaderProgram>(*newAssetData.currentFolder, newAssetData.nameWithExtension, data);
+	gui.CORE->Assets()->CreateAssetAt<ShaderProgram>(*newAssetData.currentFolder, newAssetData.name + Assets::SHADER_PROGRAM_EXT, data);
 	DOA_LOG_INFO("Succesfully created a new shader program asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
 }

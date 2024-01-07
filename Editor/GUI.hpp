@@ -97,16 +97,6 @@ struct GUI {
     std::string defaultWindowName{ "NeoDoa Editor" };
     bool dockspaceOpen{ true };
 
-    MenuBar mb{ *this };
-    SceneHierarchy sh{ *this };
-    Observer obs{ *this };
-    CodeEditor ce{ *this };
-    AssetManager am{ *this };
-    Console con{ *this };
-    SceneViewport sv{ *this };
-    GameViewport gv{ *this };
-    SceneSettings ss{ *this };
-
     float delta{ 0 };
 
     explicit GUI(const CorePtr& core) noexcept;
@@ -120,7 +110,7 @@ struct GUI {
     void OpenProjectFromDisk(const std::string& path);
     void CloseProject();
 
-    void CreateNewScene(std::string_view relativePath, std::string_view name);
+    void CreateNewScene(FNode& folder, std::string_view name);
     void OpenScene(AssetHandle sceneHandle);
     void SaveScene() const;
     void CloseScene();
@@ -129,6 +119,25 @@ struct GUI {
     Project& GetOpenProject() const;
     bool HasOpenScene() const;
     Scene& GetOpenScene();
+
+    MenuBar& GetMenuBar();
+    SceneHierarchy& GetSceneHierarchy();
+    Observer& GetObserver();
+    CodeEditor& GetCodeEditor();
+    AssetManager& GetAssetManager();
+    Console& GetConsole();
+    SceneViewport& GetSceneViewport();
+    GameViewport& GetGameViewport();
+    SceneSettings& GetSceneSettings();
+    const MenuBar& GetMenuBar() const;
+    const SceneHierarchy& GetSceneHierarchy() const;
+    const Observer& GetObserver() const;
+    const CodeEditor& GetCodeEditor() const;
+    const AssetManager& GetAssetManager() const;
+    const Console& GetConsole() const;
+    const SceneViewport& GetSceneViewport() const;
+    const GameViewport& GetGameViewport() const;
+    const SceneSettings& GetSceneSettings() const;
 
     ImGuiIO* IO() const;
     ImFont* GetFont() const;
@@ -166,6 +175,16 @@ struct GUI {
     void ShowNewShaderProgramAssetModal(FNode& currentFolder) const;
 
 private:
+    MenuBar mb{ *this };
+    SceneHierarchy sh{ *this };
+    Observer obs{ *this };
+    CodeEditor ce{ *this };
+    AssetManager am{ *this };
+    Console con{ *this };
+    SceneViewport sv{ *this };
+    GameViewport gv{ *this };
+    SceneSettings ss{ *this };
+
     ImGuiIO* io{ nullptr };
     ImFont* font{ nullptr };
     ImFont* fontBold{ nullptr };

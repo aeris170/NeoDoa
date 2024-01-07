@@ -57,15 +57,12 @@ private:
         FNode* currentFolder{ nullptr };
         std::string path;
         std::string name;
-        std::string nameWithExtension;
     } newAssetData;
 
     void Reset(FNode& currentFolder, NewAssetData::AssetType typeOfAssetToCreate);
     void Render();
     void RenderNameSelectionDialog();
     void RenderConfirmationDialog();
-
-    void ValidateFilenameExtension();
 
     void CreateAsset();
     void CreateSceneAsset();

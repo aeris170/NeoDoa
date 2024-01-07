@@ -214,15 +214,16 @@ void GUI::CloseProject() {
     window->SetTitle(title);
 }
 
-void GUI::CreateNewScene(std::string_view relativePath, std::string_view name) {
+void GUI::CreateNewScene(FNode& folder, std::string_view name) {
     if (!HasOpenProject()) { return; }
-    // TODO
-    /*
-    FNode* file = openProject->Assets().CreateNewSceneFileNode(relativePath, name);
+
+    const Scene temporary(name); const auto data = temporary.Serialize();
+    AssetHandle handle = CORE->Assets()->CreateAssetAt<Scene>(folder, std::string(name) + Assets::SCENE_EXT, data);
+    assert(handle.HasValue());
+    DOA_LOG_INFO("Succesfully created a new scene asset named %s at %s", name.data(), folder.Path().c_str());
     if (!HasOpenScene()) {
-        openProject->OpenScene(file);
+        OpenScene(handle);
     }
-    */
 }
 void GUI::OpenScene(AssetHandle sceneHandle) {
     assert(HasOpenProject());
@@ -255,6 +256,25 @@ bool GUI::HasOpenProject() const { return CORE->HasLoadedProject(); }
 Project& GUI::GetOpenProject() const { return *CORE->LoadedProject().get(); }
 bool GUI::HasOpenScene() const { return sceneUUID != UUID::Empty(); }
 Scene& GUI::GetOpenScene() { return scene.value(); }
+
+MenuBar& GUI::GetMenuBar()                           { return mb;  }
+SceneHierarchy& GUI::GetSceneHierarchy()             { return sh;  }
+Observer& GUI::GetObserver()                         { return obs; }
+CodeEditor& GUI::GetCodeEditor()                     { return ce;  }
+AssetManager& GUI::GetAssetManager()                 { return am;  }
+Console& GUI::GetConsole()                           { return con; }
+SceneViewport& GUI::GetSceneViewport()               { return sv;  }
+GameViewport& GUI::GetGameViewport()                 { return gv;  }
+SceneSettings& GUI::GetSceneSettings()               { return ss;  }
+const MenuBar& GUI::GetMenuBar() const               { return mb;  }
+const SceneHierarchy& GUI::GetSceneHierarchy() const { return sh;  }
+const Observer& GUI::GetObserver() const             { return obs; }
+const CodeEditor& GUI::GetCodeEditor() const         { return ce;  }
+const AssetManager& GUI::GetAssetManager() const     { return am;  }
+const Console& GUI::GetConsole() const               { return con; }
+const SceneViewport& GUI::GetSceneViewport() const   { return sv;  }
+const GameViewport& GUI::GetGameViewport() const     { return gv;  }
+const SceneSettings& GUI::GetSceneSettings() const   { return ss;  }
 
 ImGuiIO* GUI::IO() const { return io; }
 ImFont* GUI::GetFont() const { return font; }

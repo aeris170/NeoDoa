@@ -62,28 +62,28 @@ void MenuBar::RenderProjectSubMenu() {
 void MenuBar::RenderSceneSubMenu() {
     GUI& gui = this->gui;
     if (ImGui::MenuItem("New Scene", "Ctrl+N", nullptr, gui.HasOpenProject())) {
-        gui.CreateNewScene("", "New Scene");
+        FNode* currentFolder = gui.GetAssetManager().GetCurrentFolder();
+        assert(currentFolder != nullptr);
+        gui.ShowNewSceneAssetModal(*currentFolder);
     }
     if (ImGui::BeginMenu("Open Scene...", gui.HasOpenProject())) {
-        auto& assets = gui.CORE->Assets();
-        for (auto& uuid : assets->SceneAssetIDs()) {
+        const auto& assets = gui.CORE->Assets();
+        for (const auto& uuid : assets->SceneAssetIDs()) {
             AssetHandle sceneAsset = assets->FindAsset(uuid);
             if (ImGui::MenuItem(sceneAsset.Value().File().Name().data(), nullptr, nullptr)) {
-                gui.CORE->LoadedProject()->OpenScene(uuid);
-				gui.Events.OnSceneOpened(gui.CORE->LoadedProject()->GetOpenScene());
+                gui.OpenScene(sceneAsset);
             }
         }
         ImGui::EndMenu();
     }
     ImGui::Separator();
     if (ImGui::MenuItem("Save Scene", "Ctrl+S", nullptr, gui.HasOpenScene())) {
-        gui.CORE->LoadedProject()->SaveOpenSceneToDisk();
+        gui.SaveScene();
     }
-	ImGui::Separator();
-	if (ImGui::MenuItem("Close Scene", "Ctrl+W", nullptr, gui.HasOpenScene())) {
-		gui.CORE->LoadedProject()->CloseScene();
-		gui.Events.OnSceneClosed();
-	}
+    ImGui::Separator();
+    if (ImGui::MenuItem("Close Scene", "Ctrl+W", nullptr, gui.HasOpenScene())) {
+        gui.CloseScene();
+    }
 }
 
 void MenuBar::RenderHelpSubMenu() {

@@ -26,6 +26,8 @@ struct AssetManager {
     void Render();
     void End();
 
+    FNode* GetCurrentFolder();
+
 private:
     bool hasContent{ false };
     Assets* assets{ nullptr };
