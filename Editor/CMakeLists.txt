@@ -54,6 +54,8 @@ set(GROUP_LIST
     "UI/Extensions/ImGuiExtensions.hpp"
     "UI/Extensions/FileDialog/FileDialog.cpp"
     "UI/Extensions/FileDialog/FileDialog.hpp"
+    "UI/Extensions/Shortcuts/KeyboardShortcutHandler.cpp"
+    "UI/Extensions/Shortcuts/KeyboardShortcutHandler.hpp"
     "UI/Extensions/TextEditor/TextEditor.cpp"
     "UI/Extensions/TextEditor/TextEditor.hpp"
     "UI/Extensions/TextEditor/LanguageDefinitions.cpp"

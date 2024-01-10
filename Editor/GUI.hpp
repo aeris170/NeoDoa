@@ -56,6 +56,19 @@ struct GUI {
         } AssetManager{};
     } Events{};
 
+    struct Shortcuts {
+        static constexpr auto NewProjectShortcut{ "Ctrl+Shift+N" };
+        static constexpr auto OpenProjectShortcut{ "Ctrl+Shift+O" };
+        static constexpr auto SaveProjectShortcut{ "Ctrl+Shift+S" };
+        static constexpr auto CloseProjectShortcut{ "Ctrl+Shift+W" };
+
+        static constexpr auto ExitProgramShortcut{ "Alt+F4" };
+
+        static constexpr auto NewSceneShortcut{ "Ctrl+N" };
+        static constexpr auto SaveSceneShortcut{ "Ctrl+S" };
+        static constexpr auto CloseSceneShortcut{ "Ctrl+W" };
+    };
+
     static constexpr auto SCENE_HIERARCHY_TITLE{ "Scene Hierarchy" };
     static constexpr auto OBSERVER_TITLE{ "Observer" };
     static constexpr auto CODE_EDITOR_TITLE{ "Code Editor" };
@@ -195,6 +208,9 @@ private:
     NewProjectModal npm{ *this };
     OpenProjectModal opm{ *this };
     NewAssetModal nam{ *this };
+
+    //- Shortcuts -//
+    KeyboardShortcutHandler shortcutHandler{};
 
     // TODO REMOVE ME WHEN IMGUI IMPLEMENTS THIS WORKAROUND AS API FUNC.
     void ExecuteDockBuilderFocusWorkAround();

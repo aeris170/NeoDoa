@@ -19,6 +19,15 @@ GUI::GUI(const CorePtr& core) noexcept :
     Events.OnSceneClosed  += std::bind_front(&GUI::OnSceneClosed , this);
     Events.OnReimport     += std::bind_front(&GUI::OnReimport    , this);
     Events.OnAssetDeleted += std::bind_front(&GUI::OnAssetDeleted, this);
+
+    shortcutHandler.RegisterShortcut(Shortcuts::NewProjectShortcut,   [this]() { ShowNewProjectModal();  }, ImGuiInputFlags_RouteGlobalLow);
+    shortcutHandler.RegisterShortcut(Shortcuts::OpenProjectShortcut,  [this]() { ShowOpenProjectModal(); }, ImGuiInputFlags_RouteGlobalLow);
+    shortcutHandler.RegisterShortcut(Shortcuts::SaveProjectShortcut,  [this]() { SaveProjectToDisk();    }, ImGuiInputFlags_RouteGlobalLow);
+    shortcutHandler.RegisterShortcut(Shortcuts::CloseProjectShortcut, [this]() { CloseProject();         }, ImGuiInputFlags_RouteGlobalLow);
+
+    shortcutHandler.RegisterShortcut(Shortcuts::NewSceneShortcut,   [this]() { ShowNewSceneAssetModal(*am.GetCurrentFolder()); }, ImGuiInputFlags_RouteGlobalLow);
+    shortcutHandler.RegisterShortcut(Shortcuts::SaveSceneShortcut,  [this]() { SaveScene();  }, ImGuiInputFlags_RouteGlobalLow);
+    shortcutHandler.RegisterShortcut(Shortcuts::CloseSceneShortcut, [this]() { CloseScene(); }, ImGuiInputFlags_RouteGlobalLow);
 }
 
 void GUI::Prepare() {
@@ -143,6 +152,8 @@ void GUI::operator() (float delta) {
     npm.Render();
     opm.Render();
     nam.Render();
+
+    shortcutHandler.CheckShortcuts();
 
     End();
 }

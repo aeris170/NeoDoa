@@ -40,28 +40,28 @@ void MenuBar::End() {}
 
 void MenuBar::RenderProjectSubMenu() {
     GUI& gui = this->gui;
-    if (ImGui::MenuItem("New Project", "Ctrl+Shift+N")) {
+    if (ImGui::MenuItem("New Project", GUI::Shortcuts::NewProjectShortcut)) {
 		gui.ShowNewProjectModal();
     }
-    if (ImGui::MenuItem("Open Project...", "Ctrl+Shift+O")) {
+    if (ImGui::MenuItem("Open Project...", GUI::Shortcuts::OpenProjectShortcut)) {
 		gui.ShowOpenProjectModal();
     }
     ImGui::Separator();
-    if (ImGui::MenuItem("Save Project", "Ctrl+Shift+S", nullptr, gui.HasOpenProject())) {
+    if (ImGui::MenuItem("Save Project", GUI::Shortcuts::SaveProjectShortcut, nullptr, gui.HasOpenProject())) {
         gui.SaveProjectToDisk();
     }
-    if (ImGui::MenuItem("Close Project", "Ctrl+Shift+S", nullptr, gui.HasOpenProject())) {
+    if (ImGui::MenuItem("Close Project", GUI::Shortcuts::CloseProjectShortcut, nullptr, gui.HasOpenProject())) {
         gui.CloseProject();
     }
     ImGui::Separator();
-    if (ImGui::MenuItem("Exit", "Alt+F4")) {
+    if (ImGui::MenuItem("Exit", GUI::Shortcuts::ExitProgramShortcut)) {
         gui.CORE->Stop();
     }
 }
 
 void MenuBar::RenderSceneSubMenu() {
     GUI& gui = this->gui;
-    if (ImGui::MenuItem("New Scene", "Ctrl+N", nullptr, gui.HasOpenProject())) {
+    if (ImGui::MenuItem("New Scene", GUI::Shortcuts::NewSceneShortcut, nullptr, gui.HasOpenProject())) {
         FNode* currentFolder = gui.GetAssetManager().GetCurrentFolder();
         assert(currentFolder != nullptr);
         gui.ShowNewSceneAssetModal(*currentFolder);
@@ -77,11 +77,11 @@ void MenuBar::RenderSceneSubMenu() {
         ImGui::EndMenu();
     }
     ImGui::Separator();
-    if (ImGui::MenuItem("Save Scene", "Ctrl+S", nullptr, gui.HasOpenScene())) {
+    if (ImGui::MenuItem("Save Scene", GUI::Shortcuts::SaveSceneShortcut, nullptr, gui.HasOpenScene())) {
         gui.SaveScene();
     }
     ImGui::Separator();
-    if (ImGui::MenuItem("Close Scene", "Ctrl+W", nullptr, gui.HasOpenScene())) {
+    if (ImGui::MenuItem("Close Scene", GUI::Shortcuts::CloseSceneShortcut, nullptr, gui.HasOpenScene())) {
         gui.CloseScene();
     }
 }

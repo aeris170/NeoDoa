@@ -8,6 +8,7 @@
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h> // for imGui::GetCurrentWindow()
+#include <imgui_internal.h>
 
 // TODO
 // - multiline comments vs single-line: latter is blocking start of a ML
@@ -718,6 +719,10 @@ void TextEditor::HandleKeyboardInputs(bool aParentIsFocused) {
 		auto ctrl = io.KeyCtrl;
 		auto shift = io.KeyShift;
 		auto super = io.KeySuper;
+		if (alt) { ImGui::SetItemKeyOwner(ImGuiMod_Alt, ImGuiInputFlags_LockUntilRelease); }
+		if (ctrl) { ImGui::SetItemKeyOwner(ImGuiMod_Ctrl, ImGuiInputFlags_LockUntilRelease); }
+		if (shift) { ImGui::SetItemKeyOwner(ImGuiMod_Shift, ImGuiInputFlags_LockUntilRelease); }
+		if (super) { ImGui::SetItemKeyOwner(ImGuiMod_Super, ImGuiInputFlags_LockUntilRelease); }
 
 		auto isShortcut = (isOSX ? (super && !ctrl) : (ctrl && !super)) && !alt && !shift;
 		auto isShiftShortcut = (isOSX ? (super && !ctrl) : (ctrl && !super)) && shift && !alt;
@@ -811,6 +816,9 @@ void TextEditor::HandleMouseInputs() {
 	auto shift = io.KeyShift;
 	auto ctrl = io.ConfigMacOSXBehaviors ? io.KeySuper : io.KeyCtrl;
 	auto alt = io.ConfigMacOSXBehaviors ? io.KeyCtrl : io.KeyAlt;
+	if (alt) { ImGui::SetItemKeyOwner(ImGuiMod_Alt, ImGuiInputFlags_LockUntilRelease); }
+	if (ctrl) { ImGui::SetItemKeyOwner(ImGuiMod_Ctrl, ImGuiInputFlags_LockUntilRelease); }
+	if (shift) { ImGui::SetItemKeyOwner(ImGuiMod_Shift, ImGuiInputFlags_LockUntilRelease); }
 
 	/*
 	Pan with middle mouse button
