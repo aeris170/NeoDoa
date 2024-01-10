@@ -11,6 +11,7 @@
 #include <Editor/SVGPathway.hpp>
 #include <Editor/FileDialog.hpp>
 #include <Editor/MetaAssetInfo.hpp>
+#include <Editor/KeyboardShortcutHandler.hpp>
 
 #include <Editor/MenuBar.hpp>
 #include <Editor/SceneHierarchy.hpp>
