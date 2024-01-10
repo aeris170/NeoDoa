@@ -308,7 +308,7 @@ void* GUI::FindIconForFileType(const FNode& file, TextureSize size) const {
     assert(HasOpenProject());
 
     if (file.IsDirectory()) { return GetFolderIcon(size); }
-    if (file.Extension() == ".doa") { return GetProjectIcon(size); } /* TODO FIX THIS SHITTY EXTENSION CHECK */
+    if (file.Extension() == Assets::PROJ_EXT) { return GetProjectIcon(size); } /* TODO FIX THIS SHITTY EXTENSION CHECK */
 
     assert(CORE->Assets()->IsAssetExistsAt(file));
     AssetHandle asset = CORE->Assets()->FindAssetAt(file);
