@@ -39,6 +39,7 @@ Observer::Observer(GUI& gui) noexcept :
     gui.Events.AssetManager.OnFolderFocused      += std::bind_front(&Observer::OnFolderFocused,    this);
     gui.Events.AssetManager.OnFocusLost          += std::bind_front(&Observer::OnFocusLost,        this);
     gui.Events.OnSceneClosed                     += std::bind_front(&Observer::OnSceneClosed,      this);
+    gui.Events.OnEntityDeleted                   += std::bind_front(&Observer::OnEntityDeleted,    this);
     gui.Events.SceneHierarchy.OnEntitySelected   += std::bind_front(&Observer::OnEntitySelected,   this);
     gui.Events.SceneHierarchy.OnEntityDeselected += std::bind_front(&Observer::OnEntityDeselected, this);
 }
@@ -1243,6 +1244,13 @@ void Observer::OnFocusLost() {
 void Observer::OnSceneClosed() {
     if (std::holds_alternative<Entity>(displayTarget)) {
         ResetDisplayTarget();
+    }
+}
+void Observer::OnEntityDeleted(Entity entity) {
+    if (std::holds_alternative<Entity>(displayTarget)) {
+        if (entity == std::get<Entity>(displayTarget)) {
+            ResetDisplayTarget();
+        }
     }
 }
 void Observer::OnEntitySelected(Entity entity) {

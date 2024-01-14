@@ -4,6 +4,8 @@
 
 #include <imgui.h>
 
+#include <Utility/UndoRedoStack.hpp>
+
 #include <Engine/Core.hpp>
 #include <Engine/Project.hpp>
 #include <Engine/ImGuiRenderCommand.hpp>
@@ -64,6 +66,9 @@ struct GUI {
         static constexpr auto CloseProjectShortcut{ "Ctrl+Shift+W" };
 
         static constexpr auto ExitProgramShortcut{ "Alt+F4" };
+
+        static constexpr auto UndoShortcut{ "Ctrl+Z" };
+        static constexpr auto RedoShortcut{ "Ctrl+Y" };
 
         static constexpr auto NewSceneShortcut{ "Ctrl+N" };
         static constexpr auto SaveSceneShortcut{ "Ctrl+S" };
@@ -188,6 +193,17 @@ struct GUI {
     void ShowNewFragmentShaderAssetModal(FNode& currentFolder) const;
     void ShowNewShaderProgramAssetModal(FNode& currentFolder) const;
 
+    //- Undo/Redo History -//
+    UndoRedoStack& GetCommandHistory() noexcept;
+    template<typename T, typename ...Args> requires(std::is_base_of_v<ICommand, T>)
+    void ExecuteCommand(Args&&... args) noexcept {
+        history.Do(std::make_unique<T>(*this, std::forward<Args>(args)...));
+    }
+    void UndoLastCommand() noexcept;
+    void RedoLastCommand() noexcept;
+    bool CanUndoLastCommand() const noexcept;
+    bool CanRedoLastCommand() const noexcept;
+
 private:
     MenuBar mb{ *this };
     SceneHierarchy sh{ *this };
@@ -212,6 +228,9 @@ private:
 
     //- Shortcuts -//
     KeyboardShortcutHandler shortcutHandler{};
+
+    //- Undo/Redo History -//
+    UndoRedoStack history{};
 
     // TODO REMOVE ME WHEN IMGUI IMPLEMENTS THIS WORKAROUND AS API FUNC.
     void ExecuteDockBuilderFocusWorkAround();

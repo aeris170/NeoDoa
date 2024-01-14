@@ -25,6 +25,9 @@ GUI::GUI(const CorePtr& core) noexcept :
     shortcutHandler.RegisterShortcut(Shortcuts::SaveProjectShortcut,  [this]() { SaveProjectToDisk();    }, ImGuiInputFlags_RouteGlobalLow);
     shortcutHandler.RegisterShortcut(Shortcuts::CloseProjectShortcut, [this]() { CloseProject();         }, ImGuiInputFlags_RouteGlobalLow);
 
+    shortcutHandler.RegisterShortcut(Shortcuts::UndoShortcut, [this]() { UndoLastCommand(); }, ImGuiInputFlags_RouteGlobalLow);
+    shortcutHandler.RegisterShortcut(Shortcuts::RedoShortcut, [this]() { RedoLastCommand(); }, ImGuiInputFlags_RouteGlobalLow);
+
     shortcutHandler.RegisterShortcut(Shortcuts::NewSceneShortcut,   [this]() { ShowNewSceneAssetModal(*am.GetCurrentFolder()); }, ImGuiInputFlags_RouteGlobalLow);
     shortcutHandler.RegisterShortcut(Shortcuts::SaveSceneShortcut,  [this]() { SaveScene();  }, ImGuiInputFlags_RouteGlobalLow);
     shortcutHandler.RegisterShortcut(Shortcuts::CloseSceneShortcut, [this]() { CloseScene(); }, ImGuiInputFlags_RouteGlobalLow);
@@ -344,6 +347,18 @@ void GUI::ShowNewTessellationEvaluationShaderAssetModal(FNode& currentFolder) co
 void GUI::ShowNewGeometryShaderAssetModal(FNode& currentFolder) const               { nam.ShowGeometryShaderCreationModal(currentFolder);               }
 void GUI::ShowNewFragmentShaderAssetModal(FNode& currentFolder) const               { nam.ShowFragmentShaderCreationModal(currentFolder);               }
 void GUI::ShowNewShaderProgramAssetModal(FNode& currentFolder) const                { nam.ShowShaderProgramCreationModal(currentFolder);                }
+
+UndoRedoStack& GUI::GetCommandHistory() noexcept { return history; }
+void GUI::UndoLastCommand() noexcept {
+    if (!history.CanUndo()) { return; }
+    history.Undo();
+}
+void GUI::RedoLastCommand() noexcept {
+    if (!history.CanRedo()) { return; }
+    history.Redo();
+}
+bool GUI::CanUndoLastCommand() const noexcept { return history.CanUndo(); }
+bool GUI::CanRedoLastCommand() const noexcept { return history.CanRedo(); }
 
 // TODO REMOVE ME WHEN IMGUI IMPLEMENTS THIS WORKAROUND AS API FUNC.
 void GUI::ExecuteDockBuilderFocusWorkAround() {

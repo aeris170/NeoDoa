@@ -32,6 +32,8 @@ set(GROUP_LIST
     "TemplateUtilities.hpp"
 	"Trim.cpp"
     "Trim.hpp"
+	"UndoRedoStack.cpp"
+	"UndoRedoStack.hpp"
 )
 
 foreach(source IN LISTS GROUP_LIST)

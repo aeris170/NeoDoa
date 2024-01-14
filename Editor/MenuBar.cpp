@@ -5,7 +5,9 @@
 #include <Engine/Angel.hpp>
 
 #include <Editor/GUI.hpp>
+#include <Editor/GUICommand.hpp>
 #include <Editor/ImGuiExtensions.hpp>
+#include <Editor/Icons.hpp>
 
 MenuBar::MenuBar(GUI& owner) :
     gui(owner),
@@ -19,6 +21,10 @@ void MenuBar::Render() {
     if (ImGui::BeginMenuBar()) {
         if (ImGui::BeginMenu("Project")) {
             RenderProjectSubMenu();
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Edit")) {
+            RenderEditSubMenu();
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Scene")) {
@@ -56,6 +62,28 @@ void MenuBar::RenderProjectSubMenu() {
     ImGui::Separator();
     if (ImGui::MenuItem("Exit", GUI::Shortcuts::ExitProgramShortcut)) {
         gui.CORE->Stop();
+    }
+}
+
+void MenuBar::RenderEditSubMenu() {
+    GUI& gui = this->gui;
+
+    std::string undoText = ICON_FA_ARROW_ROTATE_LEFT " Undo";
+    if (gui.CanUndoLastCommand()) {
+        undoText += " - ";
+        undoText += dynamic_cast<const GUICommand&>(gui.GetCommandHistory().PeekUndoStack()).GetDescription();
+    }
+    if (ImGui::MenuItem(undoText.c_str(), GUI::Shortcuts::UndoShortcut, nullptr, gui.CanUndoLastCommand())) {
+        gui.UndoLastCommand();
+    }
+
+    std::string redoText = ICON_FA_ARROW_ROTATE_RIGHT " Redo";
+    if (gui.CanRedoLastCommand()) {
+        redoText += " - ";
+        redoText += dynamic_cast<const GUICommand&>(gui.GetCommandHistory().PeekRedoStack()).GetDescription();
+    }
+    if (ImGui::MenuItem(redoText.c_str(), GUI::Shortcuts::RedoShortcut, nullptr, gui.CanRedoLastCommand())) {
+        gui.RedoLastCommand();
     }
 }
 

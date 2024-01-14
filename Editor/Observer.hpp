@@ -137,6 +137,7 @@ private:
     void OnFolderFocused(FNode& folder);
     void OnFocusLost();
     void OnSceneClosed();
+    void OnEntityDeleted(Entity entity);
     void OnEntitySelected(Entity entity);
     void OnEntityDeselected();
 

@@ -17,6 +17,9 @@
 #include <Editor/Icons.hpp>
 #include <Editor/UserDefinedComponentStorage.hpp>
 
+#include <Editor/AddEntityCommand.hpp>
+#include <Editor/RemoveEntityCommand.hpp>
+
 SceneHierarchy::SceneHierarchy(GUI& gui) noexcept :
     gui(gui) {
     gui.Events.SceneHierarchy.OnEntitySelected   += std::bind_front(&SceneHierarchy::OnEntitySelected  , this);
@@ -97,7 +100,7 @@ void SceneHierarchy::Render() {
 
     if (ImGui::BeginPopupContextWindow(0, ImGuiMouseButton_Right | ImGuiPopupFlags_NoOpenOverItems)) {
         if (ImGui::MenuItem(cat(SceneHierarchyIcons::ContextMenu::CREATE_NEW_ENTITY_ICON, "Create New Entity"))) {
-            gui.Events.OnEntityCreated(scene.CreateEntity());
+            gui.ExecuteCommand<AddEntityCommand>();
         }
         ImGui::Separator();
         if (ImGui::MenuItem(cat(SceneHierarchyIcons::ContextMenu::CLOSE_SCENE_ICON, "Close Scene"))) {
@@ -108,8 +111,7 @@ void SceneHierarchy::Render() {
     }
 
     if (deletedEntity != NULL_ENTT) {
-        scene.DeleteEntity(deletedEntity);
-        gui.Events.OnEntityDeleted(deletedEntity);
+        gui.ExecuteCommand<RemoveEntityCommand>(deletedEntity);
     }
 }
 

@@ -44,6 +44,7 @@ private:
     } aboutSection;
 
     void RenderProjectSubMenu();
+    void RenderEditSubMenu();
     void RenderSceneSubMenu();
     void RenderHelpSubMenu();
 
