@@ -2,14 +2,16 @@
 
 #include <string_view>
 
+struct GUI;
+
 struct IDComponent;
 namespace IDComponentUI {
-    void Render(const IDComponent& idComponent);
+    void Render(GUI& gui, const IDComponent& idComponent);
 };
 
 struct TransformComponent;
 namespace TransformComponentUI {
-    void Render(const TransformComponent& transformComponent);
+    void Render(GUI& gui, const TransformComponent& transformComponent);
 }
 
 struct ParentComponent;

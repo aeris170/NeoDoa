@@ -19,47 +19,56 @@
 #include <Editor/ComponentWidgets.hpp>
 #include <Editor/UserDefinedComponentStorage.hpp>
 
-void IDComponentUI::Render(const IDComponent& idComponent) {
+#include <Editor/RenameEntityCommand.hpp>
+#include <Editor/TranslateEntityCommand.hpp>
+#include <Editor/RotateEntityCommand.hpp>
+#include <Editor/ScaleEntityCommand.hpp>
+
+void IDComponentUI::Render(GUI& gui, const IDComponent& idComponent) {
     static unordered_string_map<std::string> UINames = {
         { nameof(IDComponent::entity), Prettify(nameof(IDComponent::entity)) },
         { nameof(IDComponent::tag), Prettify(nameof(IDComponent::tag)) }
     };
 
-    IDComponent& id = const_cast<IDComponent&>(idComponent);
     UneditableEntityWidget(UINames[nameof_c(IDComponent::entity)], idComponent.GetEntity());
-    StringWidget(UINames[nameof_c(IDComponent::tag)], id.GetTagRef());
+    std::string newName = std::string(idComponent.GetTag());
+    if (StringWidget(UINames[nameof_c(IDComponent::tag)], newName)) {
+        gui.ExecuteCommand<RenameEntityCommand>(idComponent.GetEntity(), newName);
+    }
 }
 
-void TransformComponentUI::Render(const TransformComponent& transformComponent) {
+void TransformComponentUI::Render(GUI& gui, const TransformComponent& transformComponent) {
     static unordered_string_map<std::string> UINames = {
         { nameof(TransformComponent::localTranslation), Prettify(nameof(TransformComponent::localTranslation)) },
         { nameof(TransformComponent::localRotation), Prettify(nameof(TransformComponent::localRotation)) },
         { nameof(TransformComponent::localScale), Prettify(nameof(TransformComponent::localScale)) }
     };
 
-    TransformComponent& transform = const_cast<TransformComponent&>(transformComponent);
     // translation
     {
-        glm::vec3 translation = transform.GetLocalTranslation();
-        FancyVector3Widget(UINames[nameof(TransformComponent::localTranslation)], translation);
-        transform.SetLocalTranslation(translation);
+        glm::vec3 translation = transformComponent.GetLocalTranslation();
+        if (FancyVector3Widget(UINames[nameof(TransformComponent::localTranslation)], translation)) {
+            gui.ExecuteCommand<TranslateEntityCommand>(transformComponent.GetEntity(), translation);
+        }
     }
     // rotation
     {
-        glm::quat quat = transform.GetLocalRotation();
+        glm::quat quat = transformComponent.GetLocalRotation();
         glm::vec3 eulersDeg(glm::degrees(glm::eulerAngles(quat)));
         glm::vec3 old(eulersDeg);
-        FancyVector3Widget(UINames[nameof(TransformComponent::localRotation)], eulersDeg);
-        quat = quat * glm::quat(glm::radians(eulersDeg - old));
-        transform.SetLocalRotation(quat);
+        if (FancyVector3Widget(UINames[nameof(TransformComponent::localRotation)], eulersDeg)) {
+            quat = quat * glm::quat(glm::radians(eulersDeg - old));
+            gui.ExecuteCommand<RotateEntityCommand>(transformComponent.GetEntity(), quat);
+        }
     }
     // scale
     {
-        glm::vec3 scale = transform.GetLocalScale();
+        glm::vec3 scale = transformComponent.GetLocalScale();
         FancyVectorWidgetSettings<display::XYZ> settings;
         settings.resetTo = 1.0f;
-        FancyVector3Widget(UINames[nameof(TransformComponent::localScale)], scale, settings);
-        transform.SetLocalScale(scale);
+        if (FancyVector3Widget(UINames[nameof(TransformComponent::localScale)], scale, settings)) {
+            gui.ExecuteCommand<ScaleEntityCommand>(transformComponent.GetEntity(), scale);
+        }
     }
 }
 
@@ -204,14 +213,14 @@ bool ComponentUI::Begin(const Observer& observer, std::string_view componentType
 void ComponentUI::RenderIDComponent(const Observer& observer, const IDComponent& idComponent) {
     bool show = ComponentUI::Begin(observer, nameof(IDComponent));
     if (show) {
-        IDComponentUI::Render(idComponent);
+        IDComponentUI::Render(observer.gui, idComponent);
     }
     ComponentUI::End(show);
 }
 void ComponentUI::RenderTransformComponent(const Observer& observer, const TransformComponent& transformComponent) {
     bool show = ComponentUI::Begin(observer, nameof(TransformComponent));
     if (show) {
-        TransformComponentUI::Render(transformComponent);
+        TransformComponentUI::Render(observer.gui, transformComponent);
     }
     ComponentUI::End(show);
 }

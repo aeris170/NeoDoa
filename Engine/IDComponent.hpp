@@ -24,7 +24,6 @@ public:
     std::string_view GetTag() const;
     std::string& GetTagRef();
     void SetTag(std::string tag);
-    void SetTag(const std::string& tag);
     void SetTag(std::string&& tag);
 
     friend void SerializeIDComponent(tinyxml2::XMLPrinter& printer, const IDComponent& id);

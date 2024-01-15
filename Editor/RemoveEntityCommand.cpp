@@ -1,9 +1,11 @@
 #include <Editor/RemoveEntityCommand.hpp>
 
-#include <Editor/GUI.hpp>
+#include <format>
 
 #include <Engine/SceneSerializer.hpp>
 #include <Engine/SceneDeserializer.hpp>
+
+#include <Editor/GUI.hpp>
 
 RemoveEntityCommand::RemoveEntityCommand(GUI& gui, Entity entity) noexcept :
     GUICommand(gui),
@@ -18,8 +20,7 @@ void RemoveEntityCommand::Execute() noexcept {
     gui.GetOpenScene().DeleteEntity(removedEntity);
     gui.Events.OnEntityDeleted(removedEntity);
 
-    description = "Remove Entity with ID: ";
-    description += std::to_string(EntityTo<uint32_t>(removedEntity));
+    description = std::format("Remove Entity with ID: {}", std::to_string(EntityTo<uint32_t>(removedEntity)));
 }
 void RemoveEntityCommand::UnExecute() noexcept {
     assert(!gui.GetOpenScene().ContainsEntity(removedEntity));

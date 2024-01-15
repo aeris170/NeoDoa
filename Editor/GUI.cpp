@@ -247,6 +247,8 @@ void GUI::OpenScene(AssetHandle sceneHandle) {
     GetOpenProject().OpenScene(sceneHandle->ID());
     Events.OnAssetOpened(sceneHandle);
     Events.OnSceneOpened(GetOpenProject().GetOpenScene());
+
+    history.Clear();
 }
 void GUI::SaveScene() const {
     if (sceneUUID == UUID::Empty()) { return; }
@@ -264,6 +266,8 @@ void GUI::SaveScene() const {
 }
 void GUI::CloseScene() {
     Events.OnSceneClosed();
+
+    history.Clear();
 }
 
 bool GUI::HasOpenProject() const { return CORE->HasLoadedProject(); }
