@@ -44,7 +44,7 @@ private:
     DisplayTarget displayTarget;
 
     struct DisplayTargetRenderer {
-        static void Render(Observer& observer, Scene& scene);
+        static void Render(Observer& observer);
     private:
         static void HandleTargetWhenEmpty();
         static void HandleTargetWhenEntity(const Observer& observer, Scene& scene, const Entity entt);

@@ -54,8 +54,7 @@ bool Observer::Begin() {
 
 void Observer::Render() {
     GUI& gui = this->gui;
-    if (!gui.HasOpenScene()) { return; }
-    DisplayTargetRenderer::Render(*this, gui.GetOpenScene());
+    DisplayTargetRenderer::Render(*this);
 }
 
 void Observer::End() {
@@ -79,12 +78,16 @@ void Observer::ResetDisplayTarget() {
 }
 
 // Inner-struct DisplayTargetRenderer
-void Observer::DisplayTargetRenderer::Render(Observer& observer, Scene& scene) {
+void Observer::DisplayTargetRenderer::Render(Observer& observer) {
     std::visit(overloaded::lambda {
         [](std::monostate) {
             HandleTargetWhenEmpty();
         },
-        [&observer, &scene](Entity entity) {
+        [&observer](Entity entity) {
+            GUI& gui = observer.gui.get();
+            if (!gui.HasOpenScene()) { assert(false); }
+
+            Scene& scene = gui.GetOpenScene();
             HandleTargetWhenEntity(observer, scene, entity);
         },
         [&observer](FNode* file) {
