@@ -15,6 +15,9 @@ chmod +x bootstrap-vcpkg.sh
 echo "Installing AngelScript"
 ./vcpkg install angelscript[addons] --triplet $platform --recurse
 
+echo "Installing argparse"
+./vcpkg install argparse --triplet $platform
+
 echo "Installing Assimp"
 ./vcpkg install assimp --triplet $platform
 

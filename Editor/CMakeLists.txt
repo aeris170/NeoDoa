@@ -14,8 +14,10 @@ find_path(LUNASVG_INCLUDE_DIR lunasvg.h)
 target_include_directories(Editor PRIVATE ${LUNASVG_INCLUDE_DIR})
 find_library(LUNASVG_LIBRARY lunasvg)
 
+find_package(argparse CONFIG REQUIRED)
 find_package(imguizmo CONFIG REQUIRED)
 
+target_link_libraries(Editor PUBLIC argparse::argparse)
 target_link_libraries(Editor PUBLIC imguizmo::imguizmo)
 target_link_libraries(Editor PUBLIC ${LUNASVG_LIBRARY})
 
