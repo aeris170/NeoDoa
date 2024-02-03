@@ -22,7 +22,6 @@ static void message_callback(GLenum source, GLenum type, GLuint id, GLenum sever
 const CorePtr& Core::CreateCore(Resolution resolution, const char* title, bool isFullscreen, const char* windowIcon, bool renderOffscreen) {
 #pragma region GLFW and Core/Window/Input Initialization
     glfwInit();
-    glfwWindowHint(GLFW_MAXIMIZED, GL_TRUE);
     _this = CorePtr(new Core, DeleteCore);
     _this->window = Window::CreateWindow(resolution, title, isFullscreen, windowIcon);
     _this->input = CreateInput();
