@@ -313,6 +313,26 @@ FNode* FNode::CreateChildFolder(FNodeCreationParams&& params) {
     }
 
 }
+FNode* FNode::CreateChildFileIfNotExists(FNodeCreationParams&& params) {
+    auto found = std::ranges::find_if(children, [&params](const auto& ptr) {
+        return !ptr->isDirectory && ptr->name == params.name && ptr->ext == params.ext;
+    });
+    if (found != children.end()) {
+        return nullptr;
+    }
+
+    return CreateChildFile(std::move(params));
+}
+FNode* FNode::CreateChildFolderIfNotExists(FNodeCreationParams&& params) {
+    auto found = std::ranges::find_if(children, [&params](const auto& ptr) {
+        return ptr->isDirectory && ptr->name == params.name;
+    });
+    if (found != children.end()) {
+        return nullptr;
+    }
+
+    return CreateChildFolder(std::move(params));
+}
 bool FNode::DeleteChildNode(FNode& child) {
     if (!owner) {
         DOA_LOG_ERROR("FNode::DeleteChildNode not supported for non-owned nodes, node must have a valid owning project!");

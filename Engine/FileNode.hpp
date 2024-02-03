@@ -110,6 +110,8 @@ struct FNode {
 
     FNode* CreateChildFile(FNodeCreationParams&& params);
     FNode* CreateChildFolder(FNodeCreationParams&& params);
+    FNode* CreateChildFileIfNotExists(FNodeCreationParams&& params);
+    FNode* CreateChildFolderIfNotExists(FNodeCreationParams&& params);
     bool DeleteChildNode(FNode& child);
     FNode& FindChild(const std::filesystem::path& path);
 
