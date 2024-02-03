@@ -3,6 +3,7 @@
 #include <string>
 
 #include <Engine/UUID.hpp>
+#include <Engine/Assets.hpp>
 #include <Engine/FileNode.hpp>
 
 #include <Editor/SVGPathway.hpp>
@@ -23,6 +24,10 @@ struct MetaAssetInfoBank {
 #else
     using DataStructure = entt::dense_map<const FNode*, MetaAssetInfo>;
 #endif
+
+    static void SaveToDisk(const MetaAssetInfoBank& bank, const FNode& editorMetaFolder) noexcept;
+    static void LoadFromDisk(MetaAssetInfoBank& bank, FNode& editorMetaFolder) noexcept;
+
     MetaAssetInfoBank() noexcept = default;
     MetaAssetInfoBank(const MetaAssetInfoBank& other) noexcept = default;
     MetaAssetInfoBank(MetaAssetInfoBank&& other) noexcept = default;
@@ -33,18 +38,17 @@ struct MetaAssetInfoBank {
     void Emplace(MetaAssetInfo&& emplacee);
     MetaAssetInfo& GetMetaInfoOf(const FNode& file, const MetaAssetInfo& emplaceThisIfAbsent = {});
 
-    DataStructure::iterator begin();
-    DataStructure::iterator end();
-    DataStructure::const_iterator begin() const;
-    DataStructure::const_iterator end() const;
-
-    void SaveToDisk(const std::filesystem::path& path) const;
-    void LoadFromDisk(const Project& owner, const Assets& assets);
+    DataStructure::iterator begin() noexcept;
+    DataStructure::iterator end() noexcept;
+    DataStructure::const_iterator begin() const noexcept;
+    DataStructure::const_iterator end() const noexcept;
 
 private:
+
+    static constexpr auto BankFileName{ "metaAssetInfoBank" };
+
     void TryEmplace(const FNode& file, const MetaAssetInfo& emplaceThisIfAbsent);
 
-    MetaAssetInfo bankInfo;
     DataStructure metaInfo;
 };
 

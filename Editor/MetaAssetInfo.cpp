@@ -12,47 +12,48 @@
 
 void* MetaAssetInfo::GetSVGIcon(TextureStyle style) const { return SVGPathway::Get(svg_icon_key, style).TextureIDRaw(); }
 
+void MetaAssetInfoBank::SaveToDisk(const MetaAssetInfoBank& bank, const FNode& editorMetaFolder) noexcept {
+    tinyxml2::XMLDocument doc;
+    doc.Parse(SerializeMetaAssetInfoBank(bank).c_str());
+    doc.SaveFile((editorMetaFolder.AbsolutePath() / BankFileName).string().c_str());
+}
+void MetaAssetInfoBank::LoadFromDisk(MetaAssetInfoBank& bank, FNode& editorMetaFolder) noexcept {
+    auto bankFile = editorMetaFolder.CreateChildFileIfNotExists({
+        .name = BankFileName,
+    });
+    if (!bankFile) {
+        bankFile = &editorMetaFolder.FindChild(BankFileName);
+    }
+
+    bank.Clear();
+    auto result = DeserializeMetaAssetInfoBank(*bankFile);
+    if (!result.erred) {
+        bank = std::move(result.bank);
+    } else {
+        static auto& Core = Core::GetCore();
+        const auto& assets = Core->Assets();
+        for (const auto& assetID : assets->AllAssetsIDs()) {
+            AssetHandle handle = assets->FindAsset(assetID);
+            assert(handle.HasValue());
+            bank.TryEmplace(handle->File(), {});
+        }
+        SaveToDisk(bank, editorMetaFolder);
+    }
+}
+
 void MetaAssetInfoBank::Clear() {
     metaInfo.clear();
 }
 void MetaAssetInfoBank::Emplace(MetaAssetInfo&& emplacee) { metaInfo.try_emplace(emplacee.file, std::move(emplacee)); }
 MetaAssetInfo& MetaAssetInfoBank::GetMetaInfoOf(const FNode& file, const MetaAssetInfo& emplaceThisIfAbsent) {
-    if (bankInfo.file == &file) { return bankInfo; }
     TryEmplace(file, emplaceThisIfAbsent);
     return metaInfo[&file];
 }
 
-MetaAssetInfoBank::DataStructure::iterator MetaAssetInfoBank::begin() { return metaInfo.begin(); }
-MetaAssetInfoBank::DataStructure::iterator MetaAssetInfoBank::end() { return metaInfo.end(); }
-MetaAssetInfoBank::DataStructure::const_iterator MetaAssetInfoBank::begin() const { return metaInfo.begin(); }
-MetaAssetInfoBank::DataStructure::const_iterator MetaAssetInfoBank::end() const { return metaInfo.end(); }
-
-void MetaAssetInfoBank::SaveToDisk(const std::filesystem::path& path) const {
-    tinyxml2::XMLDocument doc;
-    doc.Parse(SerializeMetaAssetInfoBank(*this).c_str());
-    doc.SaveFile((path / "metaAssetInfo.bank").string().c_str());
-}
-
-void MetaAssetInfoBank::LoadFromDisk(const Project& owner, const Assets& assets) {
-    FNode f{ {
-        .owner = &owner,
-        .name = (owner.Workspace() / "metaAssetInfo").string(),
-        .ext = ".bank"
-    } };
-    auto result = DeserializeMetaAssetInfoBank(f);
-
-    if (!result.erred) {
-        *this = std::move(result.bank);
-    } else {
-        const FNode& root = assets.Root();
-        for (const FNode& child : root.Children()) {
-            if(assets.FindAssetAt(child).HasValue()) {
-                GetMetaInfoOf(child);
-            }
-        }
-        SaveToDisk(owner.Workspace());
-    }
-}
+MetaAssetInfoBank::DataStructure::iterator MetaAssetInfoBank::begin() noexcept { return metaInfo.begin(); }
+MetaAssetInfoBank::DataStructure::iterator MetaAssetInfoBank::end() noexcept { return metaInfo.end(); }
+MetaAssetInfoBank::DataStructure::const_iterator MetaAssetInfoBank::begin() const noexcept { return metaInfo.begin(); }
+MetaAssetInfoBank::DataStructure::const_iterator MetaAssetInfoBank::end() const noexcept { return metaInfo.end(); }
 
 void MetaAssetInfoBank::TryEmplace(const FNode& file, const MetaAssetInfo& emplaceThisIfAbsent) {
     const char* fa_icon{ nullptr };

@@ -180,8 +180,6 @@ void GUI::End() {
 void GUI::CreateNewProject(std::string_view workspace, std::string_view name) {
     CORE->CreateAndLoadProject(workspace, name);
     Project& project = GetOpenProject();
-    metaInfo.Clear();
-    metaInfo.SaveToDisk(project.Workspace());
     AssetHandle handle = CORE->Assets()->CreateAssetAt<Scene>(CORE->Assets()->Root(), "Sample Scene.scn", std::string("Sample Scene"));
     assert(handle.HasValue());
     project.SetStartupScene(handle->ID());
@@ -196,12 +194,12 @@ void GUI::CreateNewProject(std::string_view workspace, std::string_view name) {
 }
 
 void GUI::SaveProjectToDisk() {
-    if (HasOpenProject()) {
-        CORE->SaveLoadedProjectToDisk();
-        metaInfo.SaveToDisk(GetOpenProject().Workspace());
-    }
     if (HasOpenScene()) {
         SaveScene();
+    }
+    if (HasOpenProject()) {
+        CORE->SaveLoadedProjectToDisk();
+        Events.OnProjectSaved(GetOpenProject());
     }
 }
 
@@ -209,8 +207,8 @@ void GUI::OpenProjectFromDisk(const std::string& path) {
     CORE->LoadProject(path);
     assert(HasOpenProject());
 
+    Assets& assets = *CORE->Assets();
     Project& project = GetOpenProject();
-    metaInfo.LoadFromDisk(project, *CORE->Assets());
 
     std::string title = defaultWindowName;
     title.append(" - [");
@@ -353,8 +351,7 @@ void* GUI::FindIconForFileType(const FNode& file, TextureSize size) const {
 }
 void* GUI::FindIconByName(const std::string_view key, TextureSize size) const { return SVGPathway::Get(std::string(key), TextureStyle::PADDED, size).TextureIDRaw(); }
 
-MetaAssetInfo& GUI::GetMetaInfoOf(const FNode& file) { return metaInfo.GetMetaInfoOf(file); }
-void GUI::ReloadMetaInfo() { metaInfo.LoadFromDisk(*CORE->LoadedProject(), *CORE->Assets()); }
+MetaAssetInfo& GUI::GetMetaInfoOf(const FNode& file) { return meta.GetMetaAssetInfoBank().GetMetaInfoOf(file); }
 
 void GUI::ShowNewProjectModal() const                                               { npm.Show();                                                       }
 void GUI::ShowOpenProjectModal() const                                              { opm.Show();                                                       }

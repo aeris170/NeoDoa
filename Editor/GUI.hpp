@@ -11,6 +11,7 @@
 #include <Engine/Project.hpp>
 #include <Engine/ImGuiRenderCommand.hpp>
 
+#include <Editor/EditorMeta.hpp>
 #include <Editor/SVGPathway.hpp>
 #include <Editor/FileDialog.hpp>
 #include <Editor/MetaAssetInfo.hpp>
@@ -36,6 +37,7 @@ struct GUI {
 
     struct Events {
         Event<void(Project&)>    OnProjectLoaded  {};
+        Event<void(Project&)>    OnProjectSaved   {};
         Event<void()>            OnProjectUnloaded{};
 
         Event<void(Assets&)>     OnReimport    {};
@@ -168,7 +170,6 @@ struct GUI {
     void* FindIconByName(const std::string_view key, TextureSize size = TextureSize::MEDIUM) const;
 
     MetaAssetInfo& GetMetaInfoOf(const FNode& file);
-    void ReloadMetaInfo();
 
     //- Modals -//
     void ShowNewProjectModal() const;
@@ -194,6 +195,9 @@ struct GUI {
     bool CanRedoLastCommand() const noexcept;
 
 private:
+    //- Editor Meta -//
+    EditorMeta meta{ *this };
+
     MenuBar mb{ *this };
     SceneHierarchy sh{ *this };
     Observer obs{ *this };
@@ -209,8 +213,6 @@ private:
     ImGuiIO* io{ nullptr };
     ImFont* font{ nullptr };
     ImFont* fontBold{ nullptr };
-
-    MetaAssetInfoBank metaInfo{};
 
     //- Modals -//
     NewProjectModal npm{ *this };
