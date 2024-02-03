@@ -17,11 +17,30 @@ void Window::SetTitle(std::string&& title) {
     glfwSetWindowTitle(_glfwWindow, _title.c_str());
 }
 
-PlatformWindow* Window::GetPlatformWindow() { return _glfwWindow; }
+void Window::SetDecorated(bool isDecorated) const {
+    glfwHideWindow(_glfwWindow);
+    glfwSetWindowAttrib(_glfwWindow, GLFW_DECORATED, isDecorated ? GLFW_TRUE : GLFW_FALSE);
+    glfwShowWindow(_glfwWindow);
+}
 
-void Window::DisableCursor() { glfwSetInputMode(_glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED); }
-void Window::HideCursor() { glfwSetInputMode(_glfwWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN); }
-void Window::EnableCursor() { glfwSetInputMode(_glfwWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL); }
+PlatformWindow* Window::GetPlatformWindow() const { return _glfwWindow; }
+PlatformUI* Window::GetPlatformUI() const { return _imGuiContext; }
+
+void Window::DisableCursor() const { glfwSetInputMode(_glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED); }
+void Window::HideCursor() const { glfwSetInputMode(_glfwWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN); }
+void Window::EnableCursor() const { glfwSetInputMode(_glfwWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL); }
+
+void Window::Minimize() const { glfwIconifyWindow(_glfwWindow); }
+void Window::Maximize() const { glfwMaximizeWindow(_glfwWindow); };
+
+glm::vec2 Window::GetPosition() const {
+    int xpos, ypos;
+    glfwGetWindowPos(_glfwWindow, &xpos, &ypos);
+    return { xpos, ypos };
+}
+void Window::SetPosition(glm::vec2 pos) const {
+    glfwSetWindowPos(_glfwWindow, pos.x, pos.y);
+}
 //-----------------------------------------------------------------
 
 WindowPtr Window::CreateWindow(Resolution resolution, const char* title, bool isFullscreen, const char* windowIcon) {
@@ -41,42 +60,6 @@ WindowPtr Window::CreateWindow(Resolution resolution, const char* title, bool is
     rv->_glfwWindow = glfwCreateWindow(rv->_resolution.Width, rv->_resolution.Height, title, isFullscreen ? glfwGetPrimaryMonitor() : nullptr, nullptr);
     glfwGetWindowSize(rv->_glfwWindow, &rv->_contentResolution.Width, &rv->_contentResolution.Height);
 
-#pragma region Window Icon Initialization
-    GLFWimage img[6];
-    std::string str;
-    str.reserve(256);
-    str.append(windowIcon);
-    str.append("-16_x_16.png");
-    img[0].pixels = stbi_load(str.c_str(), &img[0].width, &img[0].height, 0, 4);
-    str.resize(0);
-    str.append(windowIcon);
-    str.append("-32_x_32.png");
-    img[1].pixels = stbi_load(str.c_str(), &img[1].width, &img[1].height, 0, 4);
-    str.resize(0);
-    str.append(windowIcon);
-    str.append("-48_x_48.png");
-    img[2].pixels = stbi_load(str.c_str(), &img[2].width, &img[2].height, 0, 4);
-    str.resize(0);
-    str.append(windowIcon);
-    str.append("-64_x_64.png");
-    img[3].pixels = stbi_load(str.c_str(), &img[3].width, &img[3].height, 0, 4);
-    str.resize(0);
-    str.append(windowIcon);
-    str.append("-128_x_128.png");
-    img[4].pixels = stbi_load(str.c_str(), &img[4].width, &img[4].height, 0, 4);
-    str.resize(0);
-    str.append(windowIcon);
-    str.append("-256_x_256.png");
-    img[5].pixels = stbi_load(str.c_str(), &img[5].width, &img[5].height, 0, 4);
-    glfwSetWindowIcon(rv->_glfwWindow, 6, img);
-    stbi_image_free(img[0].pixels);
-    stbi_image_free(img[1].pixels);
-    stbi_image_free(img[2].pixels);
-    stbi_image_free(img[3].pixels);
-    stbi_image_free(img[4].pixels);
-    stbi_image_free(img[5].pixels);
-#pragma endregion
-
     glfwMakeContextCurrent(rv->_glfwWindow);
     //glfwSwapInterval(0); // TODO VSYNC
 
@@ -88,6 +71,48 @@ WindowPtr Window::CreateWindow(Resolution resolution, const char* title, bool is
 
     rv->_imGuiContext = ImGuiInit(rv->_glfwWindow);
     ImGui::SetCurrentContext(rv->_imGuiContext);
+
+#pragma region Window Icon Initialization
+    if (windowIcon) {
+        std::vector<GLFWimage> windowIcons{};
+        windowIcons.resize(6);
+
+        std::string str;
+        str.reserve(256);
+
+        str.append(windowIcon);
+        str.append("-16_x_16.png");
+        windowIcons[0].pixels = stbi_load(str.c_str(), &windowIcons[0].width, &windowIcons[0].height, 0, 4);
+
+        str.resize(0);
+        str.append(windowIcon);
+        str.append("-32_x_32.png");
+        windowIcons[1].pixels = stbi_load(str.c_str(), &windowIcons[1].width, &windowIcons[1].height, 0, 4);
+
+        str.resize(0);
+        str.append(windowIcon);
+        str.append("-48_x_48.png");
+        windowIcons[2].pixels = stbi_load(str.c_str(), &windowIcons[2].width, &windowIcons[2].height, 0, 4);
+
+        str.resize(0);
+        str.append(windowIcon);
+        str.append("-64_x_64.png");
+        windowIcons[3].pixels = stbi_load(str.c_str(), &windowIcons[3].width, &windowIcons[3].height, 0, 4);
+
+        str.resize(0);
+        str.append(windowIcon);
+        str.append("-128_x_128.png");
+        windowIcons[4].pixels = stbi_load(str.c_str(), &windowIcons[4].width, &windowIcons[4].height, 0, 4);
+
+        str.resize(0);
+        str.append(windowIcon);
+        str.append("-256_x_256.png");
+        windowIcons[5].pixels = stbi_load(str.c_str(), &windowIcons[5].width, &windowIcons[5].height, 0, 4);
+
+        glfwSetWindowIcon(rv->_glfwWindow, windowIcons.size(), windowIcons.data());
+        ImGuiSetUpWindowIcons(std::move(windowIcons));
+    }
+#pragma endregion
 
     return rv;
 }

@@ -3,6 +3,8 @@
 #include <memory>
 #include <string>
 
+#include <glm/glm.hpp>
+
 #include "TypedefsAndConstants.hpp"
 #include "Resolution.hpp"
 
@@ -13,6 +15,7 @@ struct ImGuiContext;
 
 using WindowPtr = std::unique_ptr<Window, std::function<void(Window*)>>;
 using PlatformWindow = GLFWwindow;
+using PlatformUI = ImGuiContext;
 
 struct Window {
 
@@ -23,11 +26,20 @@ struct Window {
     void SetTitle(const std::string& title);
     void SetTitle(std::string&& title);
 
-    PlatformWindow* GetPlatformWindow();
+    void SetDecorated(bool isDecorated) const;
 
-    void DisableCursor();
-    void HideCursor();
-    void EnableCursor();
+    PlatformWindow* GetPlatformWindow() const;
+    PlatformUI* GetPlatformUI() const;
+
+    void DisableCursor() const;
+    void HideCursor() const;
+    void EnableCursor() const;
+
+    void Minimize() const;
+    void Maximize() const;
+
+    glm::vec2 GetPosition() const;
+    void SetPosition(glm::vec2 pos) const;
 
 private:
     Resolution _resolution{};

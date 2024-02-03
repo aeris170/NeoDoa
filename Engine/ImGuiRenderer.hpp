@@ -41,6 +41,7 @@ inline const ImWchar ICONS_RANGES_TURKISH[] = {
 };
 
 ImGuiContext* ImGuiInit(GLFWwindow* window);
+void ImGuiSetUpWindowIcons(std::vector<GLFWimage>&& icons);
 
 void ImGuiRender(float delta);
 void ImGuiAddRenderCommand(ImGuiFunction function);

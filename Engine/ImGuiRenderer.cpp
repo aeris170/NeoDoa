@@ -2,14 +2,23 @@
 
 #include <vector>
 
+#include <GLFW/glfw3.h>
+
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-#include "FontAwesome.hpp"
+#include <stb_image.h>
+
+#include <Engine/Window.hpp>
+#include <Engine/FontAwesome.hpp>
 
 static std::vector<ImGuiFunction> commands;
 static ImGuiContext* context;
+
+//- Data in-use for modifying newly created ImGui window icons -//
+void (*ImGuiPlatformCreateWindow)(ImGuiViewport* vp);
+std::vector<GLFWimage> ImGuiWindowIcons{};
 
 ImGuiContext* ImGuiInit(GLFWwindow* window) {
     if (context != nullptr) { return context; }
@@ -24,6 +33,8 @@ ImGuiContext* ImGuiInit(GLFWwindow* window) {
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+
+    io.ConfigWindowsMoveFromTitleBarOnly = true;
 
     // merge in icons from Font Awesome
     static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
@@ -85,6 +96,15 @@ ImGuiContext* ImGuiInit(GLFWwindow* window) {
 
     return context;
 }
+void ImGuiSetUpWindowIcons(std::vector<GLFWimage>&& icons) {
+    ImGuiPlatformCreateWindow = ImGui::GetPlatformIO().Platform_CreateWindow;
+    ImGuiWindowIcons = std::move(icons);
+    ImGui::GetPlatformIO().Platform_CreateWindow = [](ImGuiViewport* viewport) {
+        ImGuiPlatformCreateWindow(viewport);
+        PlatformWindow* platformWindow = reinterpret_cast<PlatformWindow*>(viewport->PlatformHandle);
+        glfwSetWindowIcon(platformWindow, ImGuiWindowIcons.size(), ImGuiWindowIcons.data());
+    };
+}
 
 void ImGuiRender(float delta) {
     ImGui_ImplOpenGL3_NewFrame();
@@ -115,4 +135,7 @@ void ImGuiClean() {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
+    for (auto& icon : ImGuiWindowIcons) {
+        stbi_image_free(icon.pixels);
+    }
 }
