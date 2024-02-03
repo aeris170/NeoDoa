@@ -223,7 +223,12 @@ void Core::LoadProject(const std::string& path) {
     UnloadProject();
 
     FNode file({ .name = path });
-    project = std::make_unique<Project>(DeserializeProject(&file));
+    auto pdr = DeserializeProject(&file);
+    if (pdr.erred) {
+        DOA_LOG_FATAL("Could not deserialize project @%s", path.c_str());
+        std::exit(1);
+    }
+    project = std::make_unique<Project>(std::move(pdr.project));
     assets = std::make_unique<struct Assets>(*project.get());
     assets->EnsureDeserialization();
     project->OpenStartupScene();
