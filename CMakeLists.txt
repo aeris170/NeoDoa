@@ -33,6 +33,7 @@ add_subdirectory(Submodules/stb_impl)
 add_subdirectory(Utility)
 add_subdirectory(Engine)
 add_subdirectory(Editor)
+add_subdirectory(Launcher)
 
 set_target_properties(angelscript_addons_impl PROPERTIES FOLDER Submodules)
 set_target_properties(detector PROPERTIES FOLDER Submodules)
@@ -42,3 +43,4 @@ set_target_properties(imgInspect PROPERTIES FOLDER Submodules)
 set_target_properties(stb_impl PROPERTIES FOLDER Submodules)
 
 set_target_properties(Editor PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>)
+set_target_properties(Launcher PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>)
