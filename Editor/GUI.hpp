@@ -26,6 +26,7 @@
 #include <Editor/GameViewport.hpp>
 #include <Editor/SceneSettings.hpp>
 #include <Editor/UndoRedoHistory.hpp>
+#include <Editor/SceneViewportCameraSettings.hpp>
 
 #include <Editor/NewProjectModal.hpp>
 #include <Editor/OpenProjectModal.hpp>
@@ -133,6 +134,7 @@ struct GUI {
     GameViewport& GetGameViewport();
     SceneSettings& GetSceneSettings();
     UndoRedoHistory& GetUndoRedoHistory();
+    SceneViewportCameraSettings& GetSceneViewportCameraSettings();
     const MenuBar& GetMenuBar() const;
     const SceneHierarchy& GetSceneHierarchy() const;
     const Observer& GetObserver() const;
@@ -143,6 +145,7 @@ struct GUI {
     const GameViewport& GetGameViewport() const;
     const SceneSettings& GetSceneSettings() const;
     const UndoRedoHistory& GetUndoRedoHistory() const;
+    const SceneViewportCameraSettings& GetSceneViewportCameraSettings() const;
 
     ImGuiIO* IO() const;
     ImFont* GetFont() const;
@@ -201,6 +204,7 @@ private:
     GameViewport gv{ *this };
     SceneSettings ss{ *this };
     UndoRedoHistory urh{ *this };
+    SceneViewportCameraSettings svcs{ *this };
 
     ImGuiIO* io{ nullptr };
     ImFont* font{ nullptr };

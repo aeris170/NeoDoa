@@ -160,6 +160,11 @@ void GUI::operator() (float delta) {
         urh.End();
     }
 
+    if (svcs.Begin()) {
+        svcs.Render();
+        svcs.End();
+    }
+
     nam.Render();
 
     shortcutHandler.CheckShortcuts();
@@ -302,6 +307,7 @@ const SceneViewport& GUI::GetSceneViewport() const                             {
 const GameViewport& GUI::GetGameViewport() const                               { return gv;   }
 const SceneSettings& GUI::GetSceneSettings() const                             { return ss;   }
 const UndoRedoHistory& GUI::GetUndoRedoHistory() const                         { return urh;  }
+const SceneViewportCameraSettings& GUI::GetSceneViewportCameraSettings() const { return svcs; }
 
 ImGuiIO* GUI::IO() const { return io; }
 ImFont* GUI::GetFont() const { return font; }

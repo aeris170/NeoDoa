@@ -14,9 +14,20 @@
 #include <Editor/Icons.hpp>
 #include <Editor/Strings.hpp>
 
+void SceneViewport::ViewportCamera::SwitchToOrtho() { activeCamera = &ortho; }
+void SceneViewport::ViewportCamera::SwitchToPerspective() { activeCamera = &perspective; }
+
+ACamera& SceneViewport::ViewportCamera::GetActiveCamera() { return *activeCamera; }
+OrthoCamera& SceneViewport::ViewportCamera::GetOrthoCamera() { return ortho; }
+PerspectiveCamera& SceneViewport::ViewportCamera::GetPerspectiveCamera() { return perspective; }
+
+bool SceneViewport::ViewportCamera::IsOrtho() const { return activeCamera == &ortho; }
+bool SceneViewport::ViewportCamera::IsPerspective() const { return activeCamera == &perspective; }
+
 SceneViewport::SceneViewport(GUI& gui) noexcept :
     gui(gui),
     gizmos(*this) {}
+
 
 bool SceneViewport::Begin() {
     GUI& gui = this->gui;
@@ -35,14 +46,15 @@ void SceneViewport::Render() {
     if (!gui.HasOpenScene()) { return; }
     Scene& scene = gui.GetOpenScene();
 
-    viewportSize = { static_cast<int>(ImGui::GetContentRegionAvail().x), static_cast<int>(ImGui::GetContentRegionAvail().y) };
     viewportPosition = {
         ImGui::GetWindowPos().x + ImGui::GetCursorPos().x,
         ImGui::GetWindowPos().y + ImGui::GetCursorPos().y
     };
+    ReallocBufferIfNeeded({ static_cast<int>(ImGui::GetContentRegionAvail().x), static_cast<int>(ImGui::GetContentRegionAvail().y) });
+    RenderSceneToBuffer(scene);
 
     ImVec2 size{ static_cast<float>(viewportSize.Width), static_cast<float>(viewportSize.Height) };
-    ImGui::Image(reinterpret_cast<void*>(gui.CORE->FrameBuffer()->GetColorAttachment()), size, { 0, 1 }, { 1, 0 });
+    ImGui::Image(reinterpret_cast<void*>(viewportFramebuffer->GetColorAttachment()), size, { 0, 1 }, { 1, 0 });
 
     ImGui::PushClipRect({ viewportPosition.x, viewportPosition.y }, { viewportPosition.x + size.x, viewportPosition.y + size.y }, false);
     gizmos.settings.viewportSize = viewportSize;
@@ -50,14 +62,27 @@ void SceneViewport::Render() {
     gizmos.Render(scene);
     ImGui::PopClipRect();
 
-    DrawCubeControl(scene);
-    HandleMouseControls(scene);
+    DrawCubeControl();
+    HandleMouseControls();
 }
 
 void SceneViewport::End() {
     ImGui::PopStyleVar();
     ImGui::End();
     ImGui::PopID();
+}
+
+SceneViewport::ViewportCamera& SceneViewport::GetViewportCamera() { return viewportCamera; }
+
+void SceneViewport::ReallocBufferIfNeeded(Resolution size) {
+    if (viewportSize == size) { return; }
+    viewportSize = size;
+    viewportFramebuffer = std::move(FrameBufferBuilder().SetResolution(size).AddColorAttachment(OpenGL::RGB8).BuildUnique());
+}
+void SceneViewport::RenderSceneToBuffer(Scene& scene) {
+    viewportFramebuffer->Bind();
+    scene.Update(gui.get().delta);
+    scene.Render();
 }
 
 void SceneViewport::DrawViewportSettings(bool hasScene) {
@@ -129,6 +154,27 @@ void SceneViewport::DrawViewportSettings(bool hasScene) {
         ImGui::SameLine();
     }
 
+    ImGui::Dummy({ buttonSize.x * 2, buttonSize.y });
+    ImGui::SameLine();
+
+    ImGui::BeginDisabled(!gui.HasOpenScene());
+    if (ImGui::Button(WindowStrings::SceneViewportCameraSettingsWindowTitle)) {
+        gui.GetSceneViewportCameraSettings().Show();
+    }
+    ImGui::SameLine();
+
+    if (viewportCamera.IsOrtho()) {
+        if (ImGui::Button("2D")) {
+            viewportCamera.SwitchToPerspective();
+        }
+    } else {
+        if (ImGui::Button("3D")) {
+            viewportCamera.SwitchToOrtho();
+        }
+    }
+    ImGui::EndDisabled();
+    ImGui::SameLine();
+
     ImGui::Dummy({ ImGui::GetContentRegionAvail().x - buttonSize.x, buttonSize.y });
     ImGui::SameLine();
 
@@ -150,8 +196,8 @@ void SceneViewport::DrawViewportSettings(bool hasScene) {
     ImGui::PopFont();
 }
 
-void SceneViewport::DrawCubeControl(Scene& scene) {
-    auto& camera = scene.GetActiveCamera();
+void SceneViewport::DrawCubeControl() {
+    auto& camera = viewportCamera.GetActiveCamera();
     camera.UpdateView();
     glm::mat4 view = camera._viewMatrix;
     ImGuizmo::SetDrawlist();
@@ -165,9 +211,9 @@ void SceneViewport::DrawCubeControl(Scene& scene) {
     controls.pitch = glm::degrees(asin(camera.forward.y));
 }
 
-void SceneViewport::HandleMouseControls(Scene& scene) {
+void SceneViewport::HandleMouseControls() {
     GUI& gui = this->gui;
-    auto& camera = scene.GetActiveCamera();
+    auto& camera = viewportCamera.GetActiveCamera();
     glm::vec3& eye = camera.eye;
     glm::vec3& forward = camera.forward;
     glm::vec3& up = camera.up;
@@ -178,7 +224,9 @@ void SceneViewport::HandleMouseControls(Scene& scene) {
         zoom = std::max(1.f, zoom);
         if (ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
             controls.rightClicked = true;
-            gui.window->DisableCursor();
+            ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);
+            //gui.window->SetMouseCursor(Window::Cursors::Hand);
+            //gui.window->HideCursor();
         } else {
             controls.rightClicked = false;
         }
@@ -193,16 +241,18 @@ void SceneViewport::HandleMouseControls(Scene& scene) {
     if (!ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
         controls.rightClicked = false;
         controls.prevDelta = { 0, 0 };
-        gui.window->EnableCursor();
+        //gui.window->EnableCursor();
+        //gui.window->SetMouseCursor(Window::Cursors::Normal);
+        ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);
     }
 
     if (controls.rightClicked) {
         ImVec2 v = ImGui::GetMouseDragDelta(ImGuiMouseButton_Right);
         ImVec2 delta = { (v.x - controls.prevDelta.x) / 30 * controls.sensitivity, (controls.prevDelta.y - v.y) / 30 * controls.sensitivity };
-        if (scene.IsOrtho()) {
+        if (viewportCamera.IsOrtho()) {
             eye.x -= delta.x; // want the movement of the camera to be the inverse of mouse. like
             eye.y -= delta.y; // how your phone's touch screen works. drag right, cam goes left.
-        } else if (scene.IsPerspective()) {
+        } else if (viewportCamera.IsPerspective()) {
             glm::vec3 right = glm::normalize(glm::cross(forward, up)) * (controls.cameraSpeed * gui.delta);
             glm::vec3 fwd = glm::normalize(forward) * (controls.cameraSpeed * gui.delta);
             if (gui.CORE->Input()->IsKeyPressed(KEY_W)) {

@@ -103,6 +103,8 @@ set(GROUP_LIST
 	"UI/GUI/SceneSettings/SceneSettings.hpp"
 	"UI/GUI/SceneViewport/SceneViewport.cpp"
 	"UI/GUI/SceneViewport/SceneViewport.hpp"
+	"UI/GUI/SceneViewport/SceneViewportCameraSettings.cpp"
+	"UI/GUI/SceneViewport/SceneViewportCameraSettings.hpp"
 	"UI/GUI/SceneViewport/Gizmos/Gizmos.cpp"
 	"UI/GUI/SceneViewport/Gizmos/Gizmos.hpp"
 	

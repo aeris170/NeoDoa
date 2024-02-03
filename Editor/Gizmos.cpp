@@ -16,15 +16,16 @@ Gizmos::Gizmos(SceneViewport& sv) noexcept :
 void Gizmos::Render(Scene& scene) {
     if (selectedEntity == NULL_ENTT) { return; }
     if (!settings.enabled) { return; }
+    SceneViewport& sv = this->sv.get();
 
     ImGuizmo::SetDrawlist();
-    if (scene.IsPerspective()) {
+    if (sv.GetViewportCamera().IsPerspective()) {
         ImGuizmo::SetOrthographic(false);
-        scene.GetPerspective()._aspect = settings.viewportSize.Aspect();
-    } else if (scene.IsOrtho()) {
+        sv.GetViewportCamera().GetPerspectiveCamera()._aspect = settings.viewportSize.Aspect();
+    } else if (sv.GetViewportCamera().IsOrtho()) {
         ImGuizmo::SetOrthographic(true);
     }
-    const auto& camera = scene.GetActiveCamera();
+    const auto& camera = sv.GetViewportCamera().GetActiveCamera();
     glm::mat4 proj = camera._projectionMatrix;
     glm::mat4 view = camera._viewMatrix;
 
@@ -39,7 +40,7 @@ void Gizmos::Render(Scene& scene) {
     TransformComponent& transformComponent = scene.GetComponent<TransformComponent>(selectedEntity);
     glm::mat4 matrix = transformComponent.GetWorldMatrix();
 
-    bool snap = sv.get().gui.get().CORE->Input()->IsKeyPressed(KEY_LEFT_CONTROL);
+    bool snap = sv.gui.get().CORE->Input()->IsKeyPressed(KEY_LEFT_CONTROL);
     float snapValue = 0.5f;
     if (settings.type == ImGuizmo::OPERATION::ROTATE) { snapValue = 5.0f; }
 

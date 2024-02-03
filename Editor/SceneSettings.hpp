@@ -22,5 +22,4 @@ struct SceneSettings {
 
 private:
     void DrawStats(Scene& scene) const;
-    void DrawSettings(Scene& scene);
 };
