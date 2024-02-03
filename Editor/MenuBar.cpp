@@ -1,21 +1,24 @@
 #include <Editor/MenuBar.hpp>
 
+#include <Utility/ConstexprConcat.hpp>
+
 #include <Engine/Core.hpp>
 #include <Engine/Log.hpp>
 #include <Engine/Angel.hpp>
 
 #include <Editor/GUI.hpp>
+#include <Editor/Icons.hpp>
+#include <Editor/Strings.hpp>
 #include <Editor/GUICommand.hpp>
 #include <Editor/ImGuiExtensions.hpp>
-#include <Editor/Icons.hpp>
 
-MenuBar::MenuBar(GUI& owner) :
+MenuBar::MenuBar(GUI& owner) noexcept :
     gui(owner),
     aboutSection(*this) {}
 
-bool MenuBar::Begin() { return true; }
+bool MenuBar::Begin() noexcept { return true; }
 
-void MenuBar::Render() {
+void MenuBar::Render() noexcept {
 	GUI& gui = this->gui;
 
     if (ImGui::BeginMenuBar()) {
@@ -42,15 +45,15 @@ void MenuBar::Render() {
     aboutSection.RenderAboutPopup();
 }
 
-void MenuBar::End() {}
+void MenuBar::End() noexcept {}
 
-void MenuBar::RenderProjectSubMenu() {
+void MenuBar::RenderProjectSubMenu() noexcept {
     GUI& gui = this->gui;
     if (ImGui::MenuItem("New Project", GUI::Shortcuts::NewProjectShortcut)) {
-		gui.ShowNewProjectModal();
+		//gui.ShowNewProjectModal();
     }
     if (ImGui::MenuItem("Open Project...", GUI::Shortcuts::OpenProjectShortcut)) {
-		gui.ShowOpenProjectModal();
+		//gui.ShowOpenProjectModal();
     }
     ImGui::Separator();
     if (ImGui::MenuItem("Save Project", GUI::Shortcuts::SaveProjectShortcut, nullptr, gui.HasOpenProject())) {
@@ -65,7 +68,7 @@ void MenuBar::RenderProjectSubMenu() {
     }
 }
 
-void MenuBar::RenderEditSubMenu() {
+void MenuBar::RenderEditSubMenu() noexcept {
     GUI& gui = this->gui;
 
     std::string undoText = ICON_FA_ARROW_ROTATE_LEFT " Undo";
@@ -85,9 +88,15 @@ void MenuBar::RenderEditSubMenu() {
     if (ImGui::MenuItem(redoText.c_str(), GUI::Shortcuts::RedoShortcut, nullptr, gui.CanRedoLastCommand())) {
         gui.RedoLastCommand();
     }
+
+	ImGui::Separator();
+
+	if (ImGui::MenuItem(WindowStrings::UndoRedoHistoryWindowTitle)) {
+		gui.GetUndoRedoHistory().Show();
+	}
 }
 
-void MenuBar::RenderSceneSubMenu() {
+void MenuBar::RenderSceneSubMenu() noexcept {
     GUI& gui = this->gui;
     if (ImGui::MenuItem("New Scene", GUI::Shortcuts::NewSceneShortcut, nullptr, gui.HasOpenProject())) {
         FNode* currentFolder = gui.GetAssetManager().GetCurrentFolder();
@@ -114,14 +123,14 @@ void MenuBar::RenderSceneSubMenu() {
     }
 }
 
-void MenuBar::RenderHelpSubMenu() {
+void MenuBar::RenderHelpSubMenu() noexcept {
     if (ImGui::MenuItem(AboutSection::ABOUT_BUTTON_TEXT)) {
         aboutSection.ab = true;
     }
 }
 
 // Inner struct: About Section
-MenuBar::AboutSection::AboutSection(MenuBar& owner) :
+MenuBar::AboutSection::AboutSection(MenuBar& owner) noexcept :
     mb(owner),
     neodoaBanner(Texture::CreateTexture("!!neodoa_banner!!", "Images/social.png")),
     licences({
@@ -545,7 +554,7 @@ MenuBar::AboutSection::AboutSection(MenuBar& owner) :
 	to use this software free of charge, with or without modifications. Have fun : )" }
              }) {}
 
-void MenuBar::AboutSection::RenderAboutPopup() {
+void MenuBar::AboutSection::RenderAboutPopup() noexcept {
     GUI& gui = mb.get().gui;
     if (ab) {
         ImGui::OpenPopup(ABOUT_POPUP_TITLE_TEXT);
@@ -582,7 +591,7 @@ void MenuBar::AboutSection::RenderAboutPopup() {
     }
 }
 
-void MenuBar::AboutSection::RenderLicenceNotices() {
+void MenuBar::AboutSection::RenderLicenceNotices() noexcept {
     GUI& gui = mb.get().gui;
     for (auto& [name, licence] : licences) {
         ImGui::PushFont(gui.GetFont());

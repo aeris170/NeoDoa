@@ -4,6 +4,7 @@
 
 #include <imgui.h>
 
+#include <Utility/ConstexprConcat.hpp>
 #include <Utility/UndoRedoStack.hpp>
 
 #include <Engine/Core.hpp>
@@ -24,6 +25,7 @@
 #include <Editor/SceneViewport.hpp>
 #include <Editor/GameViewport.hpp>
 #include <Editor/SceneSettings.hpp>
+#include <Editor/UndoRedoHistory.hpp>
 
 #include <Editor/NewProjectModal.hpp>
 #include <Editor/OpenProjectModal.hpp>
@@ -130,6 +132,7 @@ struct GUI {
     SceneViewport& GetSceneViewport();
     GameViewport& GetGameViewport();
     SceneSettings& GetSceneSettings();
+    UndoRedoHistory& GetUndoRedoHistory();
     const MenuBar& GetMenuBar() const;
     const SceneHierarchy& GetSceneHierarchy() const;
     const Observer& GetObserver() const;
@@ -139,6 +142,7 @@ struct GUI {
     const SceneViewport& GetSceneViewport() const;
     const GameViewport& GetGameViewport() const;
     const SceneSettings& GetSceneSettings() const;
+    const UndoRedoHistory& GetUndoRedoHistory() const;
 
     ImGuiIO* IO() const;
     ImFont* GetFont() const;
@@ -196,6 +200,7 @@ private:
     SceneViewport sv{ *this };
     GameViewport gv{ *this };
     SceneSettings ss{ *this };
+    UndoRedoHistory urh{ *this };
 
     ImGuiIO* io{ nullptr };
     ImFont* font{ nullptr };

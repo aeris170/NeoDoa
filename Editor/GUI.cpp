@@ -155,6 +155,11 @@ void GUI::operator() (float delta) {
 
     npm.Render();
     opm.Render();
+    if (urh.Begin()) {
+        urh.Render();
+        urh.End();
+    }
+
     nam.Render();
 
     shortcutHandler.CheckShortcuts();
@@ -276,24 +281,27 @@ Project& GUI::GetOpenProject() const { return *CORE->LoadedProject().get(); }
 bool GUI::HasOpenScene() const { return sceneUUID != UUID::Empty(); }
 Scene& GUI::GetOpenScene() { return scene.value(); }
 
-MenuBar& GUI::GetMenuBar()                           { return mb;  }
-SceneHierarchy& GUI::GetSceneHierarchy()             { return sh;  }
-Observer& GUI::GetObserver()                         { return obs; }
-CodeEditor& GUI::GetCodeEditor()                     { return ce;  }
-AssetManager& GUI::GetAssetManager()                 { return am;  }
-Console& GUI::GetConsole()                           { return con; }
-SceneViewport& GUI::GetSceneViewport()               { return sv;  }
-GameViewport& GUI::GetGameViewport()                 { return gv;  }
-SceneSettings& GUI::GetSceneSettings()               { return ss;  }
-const MenuBar& GUI::GetMenuBar() const               { return mb;  }
-const SceneHierarchy& GUI::GetSceneHierarchy() const { return sh;  }
-const Observer& GUI::GetObserver() const             { return obs; }
-const CodeEditor& GUI::GetCodeEditor() const         { return ce;  }
-const AssetManager& GUI::GetAssetManager() const     { return am;  }
-const Console& GUI::GetConsole() const               { return con; }
-const SceneViewport& GUI::GetSceneViewport() const   { return sv;  }
-const GameViewport& GUI::GetGameViewport() const     { return gv;  }
-const SceneSettings& GUI::GetSceneSettings() const   { return ss;  }
+MenuBar& GUI::GetMenuBar()                                                     { return mb;   }
+SceneHierarchy& GUI::GetSceneHierarchy()                                       { return sh;   }
+Observer& GUI::GetObserver()                                                   { return obs;  }
+CodeEditor& GUI::GetCodeEditor()                                               { return ce;   }
+AssetManager& GUI::GetAssetManager()                                           { return am;   }
+Console& GUI::GetConsole()                                                     { return con;  }
+SceneViewport& GUI::GetSceneViewport()                                         { return sv;   }
+GameViewport& GUI::GetGameViewport()                                           { return gv;   }
+SceneSettings& GUI::GetSceneSettings()                                         { return ss;   }
+UndoRedoHistory& GUI::GetUndoRedoHistory()                                     { return urh;  }
+SceneViewportCameraSettings& GUI::GetSceneViewportCameraSettings()             { return svcs; }
+const MenuBar& GUI::GetMenuBar() const                                         { return mb;   }
+const SceneHierarchy& GUI::GetSceneHierarchy() const                           { return sh;   }
+const Observer& GUI::GetObserver() const                                       { return obs;  }
+const CodeEditor& GUI::GetCodeEditor() const                                   { return ce;   }
+const AssetManager& GUI::GetAssetManager() const                               { return am;   }
+const Console& GUI::GetConsole() const                                         { return con;  }
+const SceneViewport& GUI::GetSceneViewport() const                             { return sv;   }
+const GameViewport& GUI::GetGameViewport() const                               { return gv;   }
+const SceneSettings& GUI::GetSceneSettings() const                             { return ss;   }
+const UndoRedoHistory& GUI::GetUndoRedoHistory() const                         { return urh;  }
 
 ImGuiIO* GUI::IO() const { return io; }
 ImFont* GUI::GetFont() const { return font; }
@@ -369,13 +377,13 @@ bool GUI::CanRedoLastCommand() const noexcept { return history.CanRedo(); }
 void GUI::ExecuteDockBuilderFocusWorkAround() {
     static int i = -1;
     if (i == 0) {
-        auto asset = ImGui::FindWindowByName(ASSET_MANAGER_ID);
+        auto asset = ImGui::FindWindowByName(WindowStrings::AssetManagerWindowTitleID);
         ImGui::FocusWindow(asset);
 
-        auto obs = ImGui::FindWindowByName(OBSERVER_ID);
+        auto obs = ImGui::FindWindowByName(WindowStrings::ObserverWindowTitleID);
         ImGui::FocusWindow(obs);
 
-        auto viewport = ImGui::FindWindowByName(SCENE_VIEWPORT_ID);
+        auto viewport = ImGui::FindWindowByName(WindowStrings::SceneViewportWindowTitleID);
         ImGui::FocusWindow(viewport);
     }
     i++;

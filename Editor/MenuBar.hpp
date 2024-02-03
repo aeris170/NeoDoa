@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <functional>
 
 #include <imgui.h>
 
@@ -15,11 +16,11 @@ struct MenuBar {
 
     std::reference_wrapper<GUI> gui;
 
-    explicit MenuBar(GUI& owner);
+    explicit MenuBar(GUI& owner) noexcept;
 
-    bool Begin();
-    void Render();
-    void End();
+    bool Begin() noexcept;
+    void Render() noexcept;
+    void End() noexcept;
 
 private:
 
@@ -37,16 +38,16 @@ private:
         std::vector<std::tuple<std::string, std::string>> licences;
 
         bool ab{ false }, ab_open{ true }, lib_open{ true };
-        explicit AboutSection(MenuBar& owner);
+        explicit AboutSection(MenuBar& owner) noexcept;
 
-        void RenderAboutPopup();
-        void RenderLicenceNotices();
+        void RenderAboutPopup() noexcept;
+        void RenderLicenceNotices() noexcept;
     } aboutSection;
 
-    void RenderProjectSubMenu();
-    void RenderEditSubMenu();
-    void RenderSceneSubMenu();
-    void RenderHelpSubMenu();
+    void RenderProjectSubMenu() noexcept;
+    void RenderEditSubMenu() noexcept;
+    void RenderSceneSubMenu() noexcept;
+    void RenderHelpSubMenu() noexcept;
 
 };
 

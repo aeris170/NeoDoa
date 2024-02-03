@@ -91,6 +91,8 @@ set(GROUP_LIST
 	"UI/GUI/Modals/NewProjectModal.hpp"
 	"UI/GUI/Modals/OpenProjectModal.cpp"
 	"UI/GUI/Modals/OpenProjectModal.hpp"
+	"UI/GUI/MenuBar/UndoRedoHistory.cpp"
+	"UI/GUI/MenuBar/UndoRedoHistory.hpp"
 	"UI/GUI/Modals/NewAssetModal.cpp"
 	"UI/GUI/Modals/NewAssetModal.hpp"
 	"UI/GUI/Observer/Observer.cpp"
