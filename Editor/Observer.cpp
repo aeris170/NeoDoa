@@ -6,8 +6,8 @@
 #include <imgui.h>
 #include <imgInspect.h>
 
-#include <Utility/nameof.hpp>
-#include <Utility/prettify.hpp>
+#include <Utility/NameOf.hpp>
+#include <Utility/Prettify.hpp>
 #include <Utility/FormatBytes.hpp>
 
 #include <Engine/Scene.hpp>
@@ -23,6 +23,7 @@
 #include <Editor/GUI.hpp>
 #include <Editor/Icons.hpp>
 #include <Editor/Colors.hpp>
+#include <Editor/Strings.hpp>
 #include <Editor/ComponentUI.hpp>
 #include <Editor/ImGuiExtensions.hpp>
 #include <Editor/UserDefinedComponentStorage.hpp>
@@ -45,12 +46,8 @@ Observer::Observer(GUI& gui) noexcept :
 }
 
 bool Observer::Begin() {
-    ImGui::PushID(GUI::OBSERVER_TITLE);
-    std::string title(WindowIcons::OBSERVER_WINDOW_ICON);
-    title.append(GUI::OBSERVER_TITLE);
-    title.append(renderTargetTitleText);
-    title.append(GUI::OBSERVER_ID);
-    bool visible = ImGui::Begin(title.c_str());
+    ImGui::PushID(WindowStrings::ObserverWindowName);
+    bool visible = ImGui::Begin(WindowStrings::ObserverWindowTitleID);
 
     return visible;
 }

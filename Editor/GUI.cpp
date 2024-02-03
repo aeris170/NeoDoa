@@ -4,6 +4,7 @@
 #include <imgui_internal.h>
 
 #include <Editor/Icons.hpp>
+#include <Editor/Strings.hpp>
 
 GUI::GUI(const CorePtr& core) noexcept :
     CORE(core),
@@ -82,17 +83,17 @@ void GUI::Prepare() {
             ImGuiID rightDown;
             ImGuiID rightUp = ImGui::DockBuilderSplitNode(right, ImGuiDir_Up, 0.65f, nullptr, &rightDown);
 
-            ImGui::DockBuilderDockWindow(SCENE_HIERARCHY_ID, left);
+            ImGui::DockBuilderDockWindow(WindowStrings::SceneHierarchyWindowTitleID, left);
 
-            ImGui::DockBuilderDockWindow(SCENE_VIEWPORT_ID, center);
-            ImGui::DockBuilderDockWindow(GAME_VIEWPORT_ID, center);
+            ImGui::DockBuilderDockWindow(WindowStrings::SceneViewportWindowTitleID, center);
+            ImGui::DockBuilderDockWindow(WindowStrings::GameViewportWindowTitleID, center);
 
-            ImGui::DockBuilderDockWindow(OBSERVER_ID, rightUp);
-            ImGui::DockBuilderDockWindow(SCENE_SETTINGS_ID, rightUp);
-            ImGui::DockBuilderDockWindow(CODE_EDITOR_ID, rightUp);
+            ImGui::DockBuilderDockWindow(WindowStrings::ObserverWindowTitleID, rightUp);
+            ImGui::DockBuilderDockWindow(WindowStrings::SceneSettingsWindowTitleID, rightUp);
+            ImGui::DockBuilderDockWindow(WindowStrings::CodeEditorWindowTitleID, rightUp);
 
-            ImGui::DockBuilderDockWindow(ASSET_MANAGER_ID, rightDown);
-            ImGui::DockBuilderDockWindow(CONSOLE_ID, rightDown);
+            ImGui::DockBuilderDockWindow(WindowStrings::AssetManagerWindowTitleID, rightDown);
+            ImGui::DockBuilderDockWindow(WindowStrings::ConsoleWindowTitleID, rightDown);
 
             ImGui::DockBuilderFinish(dockspace_id);
         }

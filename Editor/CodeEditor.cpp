@@ -4,6 +4,7 @@
 
 #include <Editor/GUI.hpp>
 #include <Editor/Icons.hpp>
+#include <Editor/Strings.hpp>
 
 CodeEditor::CodeEditor(GUI& gui) noexcept :
     gui(gui) {
@@ -17,11 +18,8 @@ CodeEditor::CodeEditor(GUI& gui) noexcept :
 bool CodeEditor::Begin() {
     const GUI& gui = this->gui;
 
-    ImGui::PushID(GUI::CODE_EDITOR_TITLE);
-    std::string title(WindowIcons::CODE_EDITOR_WINDOW_ICON);
-    title.append(GUI::CODE_EDITOR_TITLE);
-    title.append(GUI::CODE_EDITOR_ID);
-    bool visible = ImGui::Begin(title.c_str(), nullptr, ImGuiWindowFlags_MenuBar);
+    ImGui::PushID(WindowStrings::CodeEditorWindowName);
+    bool visible = ImGui::Begin(WindowStrings::CodeEditorWindowTitleID, nullptr, ImGuiWindowFlags_MenuBar);
 
     return visible;
 }

@@ -2,6 +2,7 @@
 
 #include <Editor/GUI.hpp>
 #include <Editor/Icons.hpp>
+#include <Editor/Strings.hpp>
 #include <Editor/ComponentWidgets.hpp>
 
 SceneSettings::SceneSettings(GUI& gui) noexcept :
@@ -9,11 +10,8 @@ SceneSettings::SceneSettings(GUI& gui) noexcept :
 
 bool  SceneSettings::Begin() {
     const GUI& gui = this->gui;
-    ImGui::PushID(GUI::SCENE_SETTINGS_TITLE);
-    std::string title(WindowIcons::SCENE_SETTINGS_WINDOW_ICON);
-    title.append(GUI::SCENE_SETTINGS_TITLE);
-    title.append(GUI::SCENE_SETTINGS_ID);
-    bool visible = ImGui::Begin(title.c_str());
+    ImGui::PushID(WindowStrings::SceneSettingsWindowName);
+    bool visible = ImGui::Begin(WindowStrings::SceneSettingsWindowTitleID);
     ImGui::PushFont(gui.GetFont());
 
     return visible;

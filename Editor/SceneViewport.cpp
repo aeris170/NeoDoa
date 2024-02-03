@@ -12,6 +12,7 @@
 
 #include <Editor/GUI.hpp>
 #include <Editor/Icons.hpp>
+#include <Editor/Strings.hpp>
 
 SceneViewport::SceneViewport(GUI& gui) noexcept :
     gui(gui),
@@ -20,11 +21,8 @@ SceneViewport::SceneViewport(GUI& gui) noexcept :
 bool SceneViewport::Begin() {
     GUI& gui = this->gui;
 
-    ImGui::PushID(GUI::SCENE_VIEWPORT_TITLE);
-    std::string title(WindowIcons::SCENE_VIEWPORT_WINDOW_ICON);
-    title.append(GUI::SCENE_VIEWPORT_TITLE);
-    title.append(GUI::SCENE_VIEWPORT_ID);
-    bool visible = ImGui::Begin(title.c_str());
+    ImGui::PushID(WindowStrings::SceneViewportWindowName);
+    bool visible = ImGui::Begin(WindowStrings::SceneViewportWindowTitleID);
 
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
     DrawViewportSettings(gui.HasOpenScene());

@@ -4,16 +4,14 @@
 
 #include <Editor/GUI.hpp>
 #include <Editor/Icons.hpp>
+#include <Editor/Strings.hpp>
 
 GameViewport::GameViewport(GUI& gui) noexcept :
     gui(gui) {}
 
 bool GameViewport::Begin() {
-    ImGui::PushID(GUI::GAME_VIEWPORT_TITLE);
-    std::string title(WindowIcons::GAME_VIEWPORT_WINDOW_ICON);
-    title.append(GUI::GAME_VIEWPORT_TITLE);
-    title.append(GUI::GAME_VIEWPORT_ID);
-    bool visible = ImGui::Begin(title.c_str());
+    ImGui::PushID(WindowStrings::GameViewportWindowName);
+    bool visible = ImGui::Begin(WindowStrings::GameViewportWindowTitleID);
 
     return visible;
 }

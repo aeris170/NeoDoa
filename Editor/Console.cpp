@@ -3,17 +3,15 @@
 #include <Editor/GUI.hpp>
 #include <Editor/Icons.hpp>
 #include <Editor/Colors.hpp>
+#include <Editor/Strings.hpp>
 #include <Editor/ImGuiExtensions.hpp>
 
 Console::Console(GUI& gui) noexcept :
     gui(gui) {}
 
 bool Console::Begin() {
-    ImGui::PushID(GUI::CONSOLE_TITLE);
-    std::string title(WindowIcons::CONSOLE_WINDOW_ICON);
-    title.append(GUI::CONSOLE_TITLE);
-    title.append(GUI::CONSOLE_ID);
-    bool visible = ImGui::Begin(title.c_str());
+    ImGui::PushID(WindowStrings::ConsoleWindowName);
+    bool visible = ImGui::Begin(WindowStrings::ConsoleWindowTitleID);
     ImGui::SetWindowFontScale(0.9f);
 
     return visible;

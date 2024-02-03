@@ -107,6 +107,8 @@ set(GROUP_LIST
 	"UI/Icons/Icons.hpp"
 	"UI/Icons/SVGPathway.cpp"
 	"UI/Icons/SVGPathway.hpp"
+	
+	"UI/Strings/Strings.hpp"
 )
 
 foreach(source IN LISTS GROUP_LIST)
@@ -116,7 +118,6 @@ foreach(source IN LISTS GROUP_LIST)
     source_group("${source_path_msvc}" FILES "${source_name}")
     target_sources(Editor PRIVATE "${source_name}")
 endforeach()
-
 
 if(MSVC)
  target_compile_options(Editor PRIVATE "/MP")

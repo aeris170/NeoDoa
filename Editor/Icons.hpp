@@ -11,14 +11,16 @@
 #include <Editor/ComponentInstance.hpp>
 
 namespace WindowIcons {
-    inline constexpr const char SCENE_HIERARCHY_WINDOW_ICON[]{ ICON_FA_CUBES_STACKED " " };
-    inline constexpr const char OBSERVER_WINDOW_ICON[]{ ICON_FA_EYE " " };
-    inline constexpr const char CODE_EDITOR_WINDOW_ICON[]{ ICON_FA_FILE_CODE " " };
-    inline constexpr const char CONSOLE_WINDOW_ICON[]{ ICON_FA_CODE " " };
-    inline constexpr const char ASSET_MANAGER_WINDOW_ICON[]{ ICON_FA_CUBES " " };
-    inline constexpr const char SCENE_VIEWPORT_WINDOW_ICON[]{ ICON_FA_DISPLAY " " };
-    inline constexpr const char GAME_VIEWPORT_WINDOW_ICON[]{ ICON_FA_ALIEN_8BIT " " };
-    inline constexpr const char SCENE_SETTINGS_WINDOW_ICON[]{ ICON_FA_SLIDERS " " };
+    inline constexpr const char SCENE_HIERARCHY_WINDOW_ICON[]               { ICON_FA_CUBES_STACKED };
+    inline constexpr const char OBSERVER_WINDOW_ICON[]                      { ICON_FA_EYE           };
+    inline constexpr const char CODE_EDITOR_WINDOW_ICON[]                   { ICON_FA_FILE_CODE     };
+    inline constexpr const char CONSOLE_WINDOW_ICON[]                       { ICON_FA_CODE          };
+    inline constexpr const char ASSET_MANAGER_WINDOW_ICON[]                 { ICON_FA_CUBES         };
+    inline constexpr const char SCENE_VIEWPORT_WINDOW_ICON[]                { ICON_FA_DISPLAY       };
+    inline constexpr const char GAME_VIEWPORT_WINDOW_ICON[]                 { ICON_FA_ALIEN_8BIT    };
+    inline constexpr const char SCENE_SETTINGS_WINDOW_ICON[]                { ICON_FA_SLIDERS       };
+    inline constexpr const char UNDO_REDO_HISTORY_WINDOW_ICON[]             { ICON_FA_LAYER_GROUP   };
+    inline constexpr const char SCENE_VIEWPORT_CAMERA_SETTINGS_WINDOW_ICON[]{ ICON_FA_CAMERA_MOVIE  };
 }
 
 namespace SceneHierarchyIcons {

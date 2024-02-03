@@ -15,6 +15,7 @@
 
 #include <Editor/GUI.hpp>
 #include <Editor/Icons.hpp>
+#include <Editor/Strings.hpp>
 #include <Editor/UserDefinedComponentStorage.hpp>
 
 #include <Editor/AddEntityCommand.hpp>
@@ -28,11 +29,8 @@ SceneHierarchy::SceneHierarchy(GUI& gui) noexcept :
 }
 
 bool SceneHierarchy::Begin() {
-    ImGui::PushID(GUI::SCENE_HIERARCHY_TITLE);
-    std::string title(WindowIcons::SCENE_HIERARCHY_WINDOW_ICON);
-    title.append(GUI::SCENE_HIERARCHY_TITLE);
-    title.append(GUI::SCENE_HIERARCHY_ID);
-    bool visible = ImGui::Begin(title.c_str());
+    ImGui::PushID(WindowStrings::SceneHierarchyWindowName);
+    bool visible = ImGui::Begin(WindowStrings::SceneHierarchyWindowTitleID);
 
     return visible;
 }

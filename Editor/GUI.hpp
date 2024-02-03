@@ -75,24 +75,6 @@ struct GUI {
         static constexpr auto CloseSceneShortcut{ "Ctrl+W" };
     };
 
-    static constexpr auto SCENE_HIERARCHY_TITLE{ "Scene Hierarchy" };
-    static constexpr auto OBSERVER_TITLE{ "Observer" };
-    static constexpr auto CODE_EDITOR_TITLE{ "Code Editor" };
-    static constexpr auto CONSOLE_TITLE{ "Console" };
-    static constexpr auto ASSET_MANAGER_TITLE{ "Asset Manager" };
-    static constexpr auto SCENE_VIEWPORT_TITLE{ "Scene Viewport" };
-    static constexpr auto GAME_VIEWPORT_TITLE{ "Game Viewport" };
-    static constexpr auto SCENE_SETTINGS_TITLE{ "Scene Stats/Settings" };
-
-    static constexpr auto SCENE_HIERARCHY_ID{ "###Scene Hierarchy" };
-    static constexpr auto OBSERVER_ID{ "###Observer" };
-    static constexpr auto CODE_EDITOR_ID{ "###Code Editor" };
-    static constexpr auto CONSOLE_ID{ "###Console" };
-    static constexpr auto ASSET_MANAGER_ID{ "###Asset Manager" };
-    static constexpr auto SCENE_VIEWPORT_ID{ "###Scene Viewport" };
-    static constexpr auto GAME_VIEWPORT_ID{ "###Game Viewport" };
-    static constexpr auto SCENE_SETTINGS_ID{ "###Scene Stats/Settings" };
-
     static constexpr auto FOLDER_ICON_KEY{ "folder-open" };
     static constexpr auto PROJECT_ICON_KEY{ "neodoa" };
     static constexpr auto SCENE_ICON_KEY{ "cubes-stacked" };

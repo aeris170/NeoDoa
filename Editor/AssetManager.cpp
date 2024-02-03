@@ -12,6 +12,7 @@
 
 #include <Editor/GUI.hpp>
 #include <Editor/Icons.hpp>
+#include <Editor/Strings.hpp>
 #include <Editor/ImGuiExtensions.hpp>
 #include <Editor/CodeGenerator.hpp>
 
@@ -23,11 +24,9 @@ AssetManager::AssetManager(GUI& gui) noexcept :
 
 bool AssetManager::Begin() {
     const GUI& gui = this->gui;
-    ImGui::PushID(GUI::ASSET_MANAGER_TITLE);
-    std::string title(WindowIcons::ASSET_MANAGER_WINDOW_ICON);
-    title.append(GUI::ASSET_MANAGER_TITLE);
-    title.append(GUI::ASSET_MANAGER_ID);
-    bool visible = ImGui::Begin(title.c_str(), nullptr, ImGuiWindowFlags_MenuBar);
+    ImGui::PushID(WindowStrings::AssetManagerWindowName);
+    bool visible = ImGui::Begin(WindowStrings::AssetManagerWindowTitleID, nullptr, ImGuiWindowFlags_MenuBar);
+
     return visible;
 }
 
@@ -405,7 +404,7 @@ void AssetManager::RenderContextMenu() {
         if (ImGui::BeginMenu("Create")) {
             // TODO MODAL
             static constexpr auto folder = cat(FileIcons::DIRECTORY_ICON_OPEN, " ", "Folder");
-            if (ImGui::MenuItem(folder.c)) {
+            if (ImGui::MenuItem(folder)) {
                 currentFolder->CreateChildFolder(FNodeCreationParams{
                     currentFolder->OwningProject(),
                     currentFolder,
@@ -531,7 +530,7 @@ bool AssetManager::FileFilter::CheckVisibility(const FNode& file) const {
     if (!file.IsDirectory() && !Owner.get().assets->IsAssetExistsAt(file)) { return false; }
     if (file.Extension() == ".id") { return false; }
     if (file.Extension() == ".doa") { return false; }
-    if (file.FullName() == "metaAssetInfo.bank") { return false; }
+    if (file.FullName().starts_with('.')) { return false; }
     if (file.FullName() == "imgui.ini") { return false; }
 
     /* if query is empty, there is no query, hence no search is needed, all is shown */
