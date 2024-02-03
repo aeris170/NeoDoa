@@ -9,7 +9,6 @@
 GUI::GUI(const CorePtr& core) noexcept :
     CORE(core),
     window(core->Window()) {
-    FileDialog::Initialize();
 
     std::string title = defaultWindowName;
     title.append(" - [NO OPEN PROJECT]");
@@ -21,8 +20,8 @@ GUI::GUI(const CorePtr& core) noexcept :
     Events.OnReimport     += std::bind_front(&GUI::OnReimport    , this);
     Events.OnAssetDeleted += std::bind_front(&GUI::OnAssetDeleted, this);
 
-    shortcutHandler.RegisterShortcut(Shortcuts::NewProjectShortcut,   [this]() { ShowNewProjectModal();  }, ImGuiInputFlags_RouteGlobalLow);
-    shortcutHandler.RegisterShortcut(Shortcuts::OpenProjectShortcut,  [this]() { ShowOpenProjectModal(); }, ImGuiInputFlags_RouteGlobalLow);
+    //shortcutHandler.RegisterShortcut(Shortcuts::NewProjectShortcut,   [this]() { ShowNewProjectModal();  }, ImGuiInputFlags_RouteGlobalLow);
+    //shortcutHandler.RegisterShortcut(Shortcuts::OpenProjectShortcut,  [this]() { ShowOpenProjectModal(); }, ImGuiInputFlags_RouteGlobalLow);
     shortcutHandler.RegisterShortcut(Shortcuts::SaveProjectShortcut,  [this]() { SaveProjectToDisk();    }, ImGuiInputFlags_RouteGlobalLow);
     shortcutHandler.RegisterShortcut(Shortcuts::CloseProjectShortcut, [this]() { CloseProject();         }, ImGuiInputFlags_RouteGlobalLow);
 
@@ -153,8 +152,6 @@ void GUI::operator() (float delta) {
     }
     ss.End();
 
-    npm.Render();
-    opm.Render();
     if (urh.Begin()) {
         urh.Render();
         urh.End();
@@ -353,8 +350,6 @@ void* GUI::FindIconByName(const std::string_view key, TextureSize size) const { 
 
 MetaAssetInfo& GUI::GetMetaInfoOf(const FNode& file) { return meta.GetMetaAssetInfoBank().GetMetaInfoOf(file); }
 
-void GUI::ShowNewProjectModal() const                                               { npm.Show();                                                       }
-void GUI::ShowOpenProjectModal() const                                              { opm.Show();                                                       }
 void GUI::ShowNewSceneAssetModal(FNode& currentFolder) const                        { nam.ShowSceneCreationModal(currentFolder);                        }
 void GUI::ShowNewComponentAssetModal(FNode& currentFolder) const                    { nam.ShowComponentCreationModal(currentFolder);                    }
 void GUI::ShowNewVertexShaderAssetModal(FNode& currentFolder) const                 { nam.ShowVertexShaderCreationModal(currentFolder);                 }

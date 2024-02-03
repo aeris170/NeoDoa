@@ -13,7 +13,6 @@
 
 #include <Editor/EditorMeta.hpp>
 #include <Editor/SVGPathway.hpp>
-#include <Editor/FileDialog.hpp>
 #include <Editor/MetaAssetInfo.hpp>
 #include <Editor/KeyboardShortcutHandler.hpp>
 
@@ -29,8 +28,6 @@
 #include <Editor/UndoRedoHistory.hpp>
 #include <Editor/SceneViewportCameraSettings.hpp>
 
-#include <Editor/NewProjectModal.hpp>
-#include <Editor/OpenProjectModal.hpp>
 #include <Editor/NewAssetModal.hpp>
 
 struct GUI {
@@ -172,8 +169,6 @@ struct GUI {
     MetaAssetInfo& GetMetaInfoOf(const FNode& file);
 
     //- Modals -//
-    void ShowNewProjectModal() const;
-    void ShowOpenProjectModal() const;
     void ShowNewSceneAssetModal(FNode& currentFolder) const;
     void ShowNewComponentAssetModal(FNode& currentFolder) const;
     void ShowNewVertexShaderAssetModal(FNode& currentFolder) const;
@@ -215,8 +210,6 @@ private:
     ImFont* fontBold{ nullptr };
 
     //- Modals -//
-    NewProjectModal npm{ *this };
-    OpenProjectModal opm{ *this };
     NewAssetModal nam{ *this };
 
     //- Shortcuts -//
