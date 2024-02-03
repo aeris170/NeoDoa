@@ -22,7 +22,7 @@ using CoreDeleter = std::function<void(Core*)>;
 using CorePtr = std::unique_ptr<Core, CoreDeleter>;
 
 struct Core {
-    static const CorePtr& CreateCore(Resolution resolution, const char* title, bool isFullscreen, const char* windowIcon = nullptr, bool renderOffscreen = false);
+    static const CorePtr& CreateCore(Resolution resolution, const char* title, bool isFullscreen = false, const char* windowIcon = nullptr, bool renderOffscreen = false);
     static const CorePtr& GetCore();
     static void DestroyCore();
 
