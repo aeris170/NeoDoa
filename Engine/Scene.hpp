@@ -24,27 +24,6 @@ struct Scene {
     explicit Scene(std::string_view name = "New Scene") noexcept;
     explicit Scene(std::string&& name) noexcept;
 
-    bool IsOrtho() const;
-    bool IsPerspective() const;
-
-    void SwitchToOrtho();
-    void SwitchToPerspective();
-
-    void SetOrtho(float left, float right, float bottom, float top, float near, float far);
-    void SetPerpective(float fov, float aspect, float near, float far);
-
-    void SetOrthoCamera(OrthoCamera&& ortho);
-    void SetPerspectiveCamera(PerspectiveCamera&& perspective);
-
-    OrthoCamera& GetOrtho();
-    const OrthoCamera& GetOrtho() const;
-
-    PerspectiveCamera& GetPerspective();
-    const PerspectiveCamera& GetPerspective() const;
-
-    ACamera& GetActiveCamera();
-    const ACamera& GetActiveCamera() const;
-
     Renderer::Stats GetRendererStats() const;
 
     // E - Entity
@@ -119,21 +98,16 @@ struct Scene {
 
     static Scene Copy(const Scene& scene);
 
+    void Update(float delta);
+    void Render();
+
 private:
     Renderer _renderer;
     OutlineRenderer _outlineRenderer;
 
-    OrthoCamera _oc{ OrthoCamera(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f) };
-    bool _usingOrthoCamera{ true }; // default camera is orthographic
-    PerspectiveCamera _pc{ PerspectiveCamera(110.0f, 19.0f / 9.0f, 0.001f, 1000.0f) };
-    bool _usingPerspectiveCamera{ false };
-
     Registry _registry;
     std::vector<Entity> _entities;
     std::vector<entt::poly<System>> _systems;
-
-    void Update(float delta);
-    void Render();
 
     friend struct Core;
 };

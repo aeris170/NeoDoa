@@ -30,49 +30,6 @@ Scene::Scene(std::string_view name) noexcept :
 Scene::Scene(std::string&& name) noexcept :
     Name(std::move(name)) {}
 
-bool Scene::IsOrtho() const { return _usingOrthoCamera; }
-bool Scene::IsPerspective() const { return _usingPerspectiveCamera; }
-
-void Scene::SwitchToOrtho() {
-    _usingOrthoCamera = true;
-    _usingPerspectiveCamera = false;
-}
-void Scene::SwitchToPerspective() {
-    _usingPerspectiveCamera = true;
-    _usingOrthoCamera = false;
-}
-
-void Scene::SetOrtho(float left, float right, float bottom, float top, float near, float far) { _oc.Set(left, right, bottom, top, near, far); }
-void Scene::SetPerpective(float fov, float aspect, float near, float far) { _pc.Set(fov, aspect, near, far); }
-
-void Scene::SetOrthoCamera(OrthoCamera&& ortho) { _oc = std::move(ortho); }
-void Scene::SetPerspectiveCamera(PerspectiveCamera&& perspective) { _pc = std::move(perspective); }
-
-OrthoCamera& Scene::GetOrtho() { return _oc; }
-const OrthoCamera& Scene::GetOrtho() const { return _oc; }
-
-PerspectiveCamera& Scene::GetPerspective() { return _pc; }
-const PerspectiveCamera& Scene::GetPerspective() const { return _pc; }
-
-ACamera& Scene::GetActiveCamera() {
-    if (IsOrtho()) {
-        return _oc;
-    } else if (IsPerspective()) {
-        return _pc;
-    }
-    assert(false); // no camera?
-    throw 1;
-}
-const ACamera& Scene::GetActiveCamera() const {
-    if (IsOrtho()) {
-        return _oc;
-    } else if (IsPerspective()) {
-        return _pc;
-    }
-    assert(false); // no camera?
-    throw 1;
-}
-
 Renderer::Stats Scene::GetRendererStats() const { return _renderer.stats; }
 
 Entity Scene::CreateEntity(std::string name, uint32_t desiredID) {
@@ -124,10 +81,10 @@ void Scene::Update(float deltaTime) {
     }
 }
 void Scene::Render() {
-    auto& cam = GetActiveCamera();
-    cam.UpdateView();
-    cam.UpdateProjection();
-    cam.UpdateViewProjection();
+    //auto& cam = GetActiveCamera();
+    //cam.UpdateView();
+    //cam.UpdateProjection();
+    //cam.UpdateViewProjection();
 
     _registry.view<OrthoCameraComponent>().each([](Entity entt, OrthoCameraComponent& camera) {
         if (!camera.IsActiveAndRendering()) { return; }

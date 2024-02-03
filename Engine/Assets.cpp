@@ -198,7 +198,7 @@ AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
         auto pos = std::ranges::find_if(siblings, [&file](auto& ptr) {
             return ptr.get() == &file;
         });
-        assert(pos != siblings.end());
+        assert(pos != siblings.end()); // File you are attemping to import is not registered as a children of it's parent. Did you correctly call FNode::CreateChildFileFor?
         pos++;
         siblings.insert(pos, std::move(id));
 

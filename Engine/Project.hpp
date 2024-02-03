@@ -5,7 +5,7 @@
 #include <optional>
 #include <filesystem>
 
-#include "UUID.hpp"
+#include <Engine/UUID.hpp>
 
 struct FNode;
 struct Scene;
@@ -38,8 +38,12 @@ struct Project {
     void SaveOpenSceneToDisk();
 
 private:
+    Project() noexcept = default;
+
     std::filesystem::path workspace;
     std::string name;
     UUID startupSceneID{ UUID::Empty() };
     UUID openSceneID{ UUID::Empty() };
+
+    friend struct ProjectDeserializationResult;
 };

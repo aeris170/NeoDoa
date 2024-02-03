@@ -1,19 +1,27 @@
-#include "ProjectDeserializer.hpp"
+#include <Engine/ProjectDeserializer.hpp>
 
 #include <tinyxml2.h>
 
-#include "FileNode.hpp"
-#include "Project.hpp"
+#include <Engine/FileNode.hpp>
 
-Project DeserializeProject(const FNode* file) {
+ProjectDeserializationResult DeserializeProject(const FNode* file) {
+    ProjectDeserializationResult result;
+
     tinyxml2::XMLDocument doc;
     tinyxml2::XMLError err = doc.LoadFile(file->Path().string().c_str());
+    if (err != tinyxml2::XML_SUCCESS) { result.erred = true; return result; }
 
     tinyxml2::XMLElement* rootNode = doc.RootElement();
+    if (!rootNode) { result.erred = true; return result; }
 
-    std::string name = rootNode->FirstChildElement("name")->GetText();
-    UUID startupID = rootNode->FirstChildElement("startup")->Unsigned64Text(UUID::Empty());
+    tinyxml2::XMLElement* nameElement = rootNode->FirstChildElement("name");
+    if (!nameElement) { result.erred = true; return result; }
+    std::string name = nameElement->GetText();
 
-    // TODO
-    return { file->FolderPath(), name, startupID };
+    tinyxml2::XMLElement* startupElement = rootNode->FirstChildElement("startup");
+    if (!startupElement) { result.erred = true; return result; }
+    UUID startupID = startupElement->Unsigned64Text(UUID::Empty());
+
+    result.project = { file->FolderPath(), name, startupID };
+    return result;
 }

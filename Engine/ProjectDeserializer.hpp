@@ -1,6 +1,12 @@
 #pragma once
 
-struct FNode;
-struct Project;
+#include <Engine/Project.hpp>
 
-Project DeserializeProject(const FNode* file);
+struct FNode;
+
+struct ProjectDeserializationResult {
+    bool erred{ false };
+    Project project{};
+};
+
+ProjectDeserializationResult DeserializeProject(const FNode* file);

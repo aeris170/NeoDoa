@@ -62,45 +62,45 @@ void SceneDeserializer::SceneConfig::DefaultDeserializeSelectionOutlineColor(tin
 }
 
 void SceneDeserializer::SceneConfig::Cameras::DefaultDeserialize(tinyxml2::XMLElement& camerasNode, Scene& scene) {
-    DeserializeActiveCamera(*camerasNode.FirstChildElement("activeCamera"), scene);
-    DeserializeOrthoCamera(*camerasNode.FirstChildElement("orthoCamera"), scene);
-    DeserializePerspectiveCamera(*camerasNode.FirstChildElement("perspectiveCamera"), scene);
+    //DeserializeActiveCamera(*camerasNode.FirstChildElement("activeCamera"), scene);
+    //DeserializeOrthoCamera(*camerasNode.FirstChildElement("orthoCamera"), scene);
+    //DeserializePerspectiveCamera(*camerasNode.FirstChildElement("perspectiveCamera"), scene);
 }
 void SceneDeserializer::SceneConfig::Cameras::DefaultDeserializeActiveCamera(tinyxml2::XMLElement& activeCameraNode, Scene& scene) {
-    std::string activeCamType = activeCameraNode.Attribute("type");
+    //std::string activeCamType = activeCameraNode.Attribute("type");
 
-    if (activeCamType == "ortho") {
-        scene.SwitchToOrtho();
-    } else if (activeCamType == "perspective") {
-        scene.SwitchToPerspective();
-    }
-    ACamera& activeCamera = scene.GetActiveCamera();
+    //if (activeCamType == "ortho") {
+    //    scene.SwitchToOrtho();
+    //} else if (activeCamType == "perspective") {
+    //    scene.SwitchToPerspective();
+    //}
+    //ACamera& activeCamera = scene.GetActiveCamera();
 
-    {
-        const tinyxml2::XMLElement* eye = activeCameraNode.FirstChildElement("eye");
-        activeCamera.eye = { eye->FloatAttribute("x"), eye->FloatAttribute("y"), eye->FloatAttribute("z") };
-    }
-    {
-        const tinyxml2::XMLElement* forward = activeCameraNode.FirstChildElement("forward");
-        activeCamera.forward = { forward->FloatAttribute("x"), forward->FloatAttribute("y"), forward->FloatAttribute("z") };
-    }
-    {
-        const tinyxml2::XMLElement* up = activeCameraNode.FirstChildElement("up");
-        activeCamera.up = { up->FloatAttribute("x"), up->FloatAttribute("y"), up->FloatAttribute("z") };
-    }
-    {
-        const tinyxml2::XMLElement* zoom = activeCameraNode.FirstChildElement("zoom");
-        activeCamera.zoom = { zoom->FloatAttribute("value") };
-    }
+    //{
+    //    const tinyxml2::XMLElement* eye = activeCameraNode.FirstChildElement("eye");
+    //    activeCamera.eye = { eye->FloatAttribute("x"), eye->FloatAttribute("y"), eye->FloatAttribute("z") };
+    //}
+    //{
+    //    const tinyxml2::XMLElement* forward = activeCameraNode.FirstChildElement("forward");
+    //    activeCamera.forward = { forward->FloatAttribute("x"), forward->FloatAttribute("y"), forward->FloatAttribute("z") };
+    //}
+    //{
+    //    const tinyxml2::XMLElement* up = activeCameraNode.FirstChildElement("up");
+    //    activeCamera.up = { up->FloatAttribute("x"), up->FloatAttribute("y"), up->FloatAttribute("z") };
+    //}
+    //{
+    //    const tinyxml2::XMLElement* zoom = activeCameraNode.FirstChildElement("zoom");
+    //    activeCamera.zoom = { zoom->FloatAttribute("value") };
+    //}
 }
 void SceneDeserializer::SceneConfig::Cameras::DefaultDeserializeOrthoCamera(tinyxml2::XMLElement& orthoCameraNode, Scene& scene) {
-    scene.SetOrtho(orthoCameraNode.FloatAttribute("left"),   orthoCameraNode.FloatAttribute("right"),
+    /*scene.SetOrtho(orthoCameraNode.FloatAttribute("left"),   orthoCameraNode.FloatAttribute("right"),
                    orthoCameraNode.FloatAttribute("bottom"), orthoCameraNode.FloatAttribute("top"),
-                   orthoCameraNode.FloatAttribute("near"),   orthoCameraNode.FloatAttribute("far"));
+                   orthoCameraNode.FloatAttribute("near"),   orthoCameraNode.FloatAttribute("far"));*/
 }
 void SceneDeserializer::SceneConfig::Cameras::DefaultDeserializePerspectiveCamera(tinyxml2::XMLElement& perspectiveCameraNode, Scene& scene) {
-    scene.SetPerpective(perspectiveCameraNode.FloatAttribute("fov"),  perspectiveCameraNode.FloatAttribute("aspect"),
-                        perspectiveCameraNode.FloatAttribute("near"), perspectiveCameraNode.FloatAttribute("far"));
+    /*scene.SetPerpective(perspectiveCameraNode.FloatAttribute("fov"),  perspectiveCameraNode.FloatAttribute("aspect"),
+                        perspectiveCameraNode.FloatAttribute("near"), perspectiveCameraNode.FloatAttribute("far"));*/
 }
 
 void SceneDeserializer::Entities::DefaultDeserialize(tinyxml2::XMLElement& entitiesNode, Scene& scene) {

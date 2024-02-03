@@ -58,50 +58,50 @@ void SceneSerializer::SceneConfig::DefaultSerializeSelectionOutlineColor(tinyxml
 }
 
 void SceneSerializer::SceneConfig::Cameras::DefaultSerialize(tinyxml2::XMLPrinter& printer, const Scene& scene) {
-    printer.OpenElement("cameras");
+    /*printer.OpenElement("cameras");
     {
         SerializeActiveCamera(printer, scene);
         SerializeOrthoCamera(printer, scene.GetOrtho());
         SerializePerspectiveCamera(printer, scene.GetPerspective());
     }
-    printer.CloseElement();
+    printer.CloseElement();*/
 }
 void SceneSerializer::SceneConfig::Cameras::DefaultSerializeActiveCamera(tinyxml2::XMLPrinter& printer, const Scene& scene) {
-    printer.OpenElement("activeCamera");
-    {
-        if (scene.IsOrtho()) {
-            printer.PushAttribute("type", "ortho");
-        } else if (scene.IsPerspective()) {
-            printer.PushAttribute("type", "perspective");
-        } else {
-            assert(false); /* no camera? */
-            throw 1;
-        }
+    //printer.OpenElement("activeCamera");
+    //{
+    //    if (scene.IsOrtho()) {
+    //        printer.PushAttribute("type", "ortho");
+    //    } else if (scene.IsPerspective()) {
+    //        printer.PushAttribute("type", "perspective");
+    //    } else {
+    //        assert(false); /* no camera? */
+    //        throw 1;
+    //    }
 
-        const ACamera& activeCamera = scene.GetActiveCamera();
-        printer.OpenElement("eye");
-        printer.PushAttribute("x", activeCamera.eye.x);
-        printer.PushAttribute("y", activeCamera.eye.y);
-        printer.PushAttribute("z", activeCamera.eye.z);
-        printer.CloseElement();
+    //    const ACamera& activeCamera = scene.GetActiveCamera();
+    //    printer.OpenElement("eye");
+    //    printer.PushAttribute("x", activeCamera.eye.x);
+    //    printer.PushAttribute("y", activeCamera.eye.y);
+    //    printer.PushAttribute("z", activeCamera.eye.z);
+    //    printer.CloseElement();
 
-        printer.OpenElement("forward");
-        printer.PushAttribute("x", activeCamera.forward.x);
-        printer.PushAttribute("y", activeCamera.forward.y);
-        printer.PushAttribute("z", activeCamera.forward.z);
-        printer.CloseElement();
+    //    printer.OpenElement("forward");
+    //    printer.PushAttribute("x", activeCamera.forward.x);
+    //    printer.PushAttribute("y", activeCamera.forward.y);
+    //    printer.PushAttribute("z", activeCamera.forward.z);
+    //    printer.CloseElement();
 
-        printer.OpenElement("up");
-        printer.PushAttribute("x", activeCamera.up.x);
-        printer.PushAttribute("y", activeCamera.up.y);
-        printer.PushAttribute("z", activeCamera.up.z);
-        printer.CloseElement();
+    //    printer.OpenElement("up");
+    //    printer.PushAttribute("x", activeCamera.up.x);
+    //    printer.PushAttribute("y", activeCamera.up.y);
+    //    printer.PushAttribute("z", activeCamera.up.z);
+    //    printer.CloseElement();
 
-        printer.OpenElement("zoom");
-        printer.PushAttribute("value", activeCamera.zoom);
-        printer.CloseElement();
-    }
-    printer.CloseElement();
+    //    printer.OpenElement("zoom");
+    //    printer.PushAttribute("value", activeCamera.zoom);
+    //    printer.CloseElement();
+    //}
+    //printer.CloseElement();
 }
 void SceneSerializer::SceneConfig::Cameras::DefaultSerializeOrthoCamera(tinyxml2::XMLPrinter& printer, const OrthoCamera& camera) {
     printer.OpenElement("orthoCamera");
