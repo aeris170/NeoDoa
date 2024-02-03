@@ -52,3 +52,107 @@ const ICommand& UndoRedoStack::PeekRedoStack() const noexcept {
 }
 void UndoRedoStack::PopUndoStack() noexcept { undoStack.pop_back(); }
 void UndoRedoStack::PopRedoStack() noexcept { redoStack.pop_back(); }
+
+// Iterators API:
+UndoRedoStack::Iterator::~Iterator() noexcept {};
+
+// UndoStackIterator
+UndoRedoStack::UndoStackIterator::UndoStackIterator(const UndoRedoStack& stack) noexcept :
+    stack(stack) {}
+
+bool UndoRedoStack::UndoStackIterator::HasNext() const noexcept {
+    return currentIndex < stack.undoStack.size() && !stack.undoStack.empty();
+}
+UndoRedoStack::Iterator::Element UndoRedoStack::UndoStackIterator::Next() noexcept {
+    assert(HasNext());
+
+    const UndoRedoStack::Command* uptr = &stack.undoStack[currentIndex];
+    currentIndex++;
+    return { *uptr->get(), ElementSource };
+}
+// UndoStackIterator
+// UndoStackReverseIterator
+UndoRedoStack::UndoStackReverseIterator::UndoStackReverseIterator(const UndoRedoStack& stack) noexcept :
+    currentIndex(stack.undoStack.size() - 1),
+    stack(stack) {}
+
+bool UndoRedoStack::UndoStackReverseIterator::HasNext() const noexcept {
+    return currentIndex >= 0 && !stack.undoStack.empty();
+}
+UndoRedoStack::Iterator::Element UndoRedoStack::UndoStackReverseIterator::Next() noexcept {
+    assert(HasNext());
+
+    const UndoRedoStack::Command* uptr = &stack.undoStack[currentIndex];
+    currentIndex--;
+    return { *uptr->get(), ElementSource };
+}
+// UndoStackReverseIterator
+// RedoStackIterator
+UndoRedoStack::RedoStackIterator::RedoStackIterator(const UndoRedoStack& stack) noexcept :
+    stack(stack) {}
+
+bool UndoRedoStack::RedoStackIterator::HasNext() const noexcept {
+    return currentIndex < stack.redoStack.size() && !stack.redoStack.empty();
+}
+UndoRedoStack::Iterator::Element UndoRedoStack::RedoStackIterator::Next() noexcept {
+    assert(HasNext());
+
+    const UndoRedoStack::Command* uptr = &stack.redoStack[currentIndex];
+    currentIndex++;
+    return { *uptr->get(), ElementSource };
+}
+// RedoStackIterator
+// RedoStackReverseIterator
+UndoRedoStack::RedoStackReverseIterator::RedoStackReverseIterator(const UndoRedoStack& stack) noexcept :
+    currentIndex(stack.redoStack.size() - 1),
+    stack(stack) {}
+
+bool UndoRedoStack::RedoStackReverseIterator::HasNext() const noexcept {
+    return currentIndex >= 0 && !stack.redoStack.empty();
+}
+UndoRedoStack::Iterator::Element UndoRedoStack::RedoStackReverseIterator::Next() noexcept {
+    assert(HasNext());
+
+    const UndoRedoStack::Command* uptr = &stack.redoStack[currentIndex];
+    currentIndex--;
+    return { *uptr->get(), ElementSource };
+}
+// RedoStackReverseIterator
+// UndoRedoStackIterator
+UndoRedoStack::UndoRedoStackIterator::UndoRedoStackIterator(const UndoRedoStack& stack) noexcept {
+    iterators[0] = std::make_unique<UndoStackIterator>(stack);
+    iterators[1] = std::make_unique<RedoStackReverseIterator>(stack);
+    while (!iterators[currentIndex]->HasNext()) { currentIndex++; }
+}
+
+bool UndoRedoStack::UndoRedoStackIterator::HasNext() const noexcept {
+    return currentIndex < iterators.size();
+}
+UndoRedoStack::Iterator::Element UndoRedoStack::UndoRedoStackIterator::Next() noexcept {
+    assert(HasNext()); // Don't call Next() before checking HasNext()
+
+    const auto& it = iterators[currentIndex];
+    Element element = it->Next();
+    while (!iterators[currentIndex]->HasNext()) { currentIndex++; }
+    return element;
+}
+// UndoRedoStackIterator
+// UndoRedoStackReverseIterator
+UndoRedoStack::UndoRedoStackReverseIterator::UndoRedoStackReverseIterator(const UndoRedoStack& stack) noexcept {
+    iterators[0] = std::make_unique<RedoStackIterator>(stack);
+    iterators[1] = std::make_unique<UndoStackReverseIterator>(stack);
+    while (!iterators[currentIndex]->HasNext()) { currentIndex++; }
+}
+
+bool UndoRedoStack::UndoRedoStackReverseIterator::HasNext() const noexcept {
+    return currentIndex < iterators.size();
+}
+UndoRedoStack::Iterator::Element UndoRedoStack::UndoRedoStackReverseIterator::Next() noexcept {
+    assert(HasNext()); // Don't call Next() before checking HasNext()
+
+    const auto& it = iterators[currentIndex];
+    Element element = it->Next();
+    while (!iterators[currentIndex]->HasNext()) { currentIndex++; }
+    return element;
+}
+// UndoRedoStackReverseIterator

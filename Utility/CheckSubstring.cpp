@@ -17,7 +17,7 @@ bool CheckSubstring(const std::string_view text, const std::string_view query) {
     UErrorCode status = U_ZERO_ERROR;
     icu::RuleBasedCollator* collator = static_cast<icu::RuleBasedCollator*>(
         icu::Collator::createInstance(icu::Locale::getEnglish(), status)
-        );
+    );
     //collator->setStrength(icu::Collator::ECollationStrength::PRIMARY);
     collator->setAttribute(UColAttribute::UCOL_NORMALIZATION_MODE, UColAttributeValue::UCOL_ON, status);
 
@@ -56,7 +56,7 @@ int FindSubstringIndex(const std::string_view text, const std::string_view query
     UErrorCode status = U_ZERO_ERROR;
     icu::RuleBasedCollator* collator = static_cast<icu::RuleBasedCollator*>(
         icu::Collator::createInstance(icu::Locale::getEnglish(), status)
-        );
+    );
     //collator->setStrength(icu::Collator::ECollationStrength::PRIMARY);
     collator->setAttribute(UColAttribute::UCOL_NORMALIZATION_MODE, UColAttributeValue::UCOL_ON, status);
 
@@ -75,7 +75,7 @@ int FindSubstringIndexIgnoreCase(const std::string_view text, const std::string_
     UErrorCode status = U_ZERO_ERROR;
     icu::RuleBasedCollator* collator = static_cast<icu::RuleBasedCollator*>(
         icu::Collator::createInstance(icu::Locale::getEnglish(), status)
-        );
+    );
     collator->setStrength(icu::Collator::ECollationStrength::PRIMARY);
     collator->setAttribute(UColAttribute::UCOL_NORMALIZATION_MODE, UColAttributeValue::UCOL_ON, status);
 

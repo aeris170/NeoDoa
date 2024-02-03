@@ -1,13 +1,12 @@
 #pragma once
 
-#include <initializer_list>
-
+// https://stackoverflow.com/a/65440575/9451867
 // we cannot return a char array from a function, therefore we need a wrapper
 template <unsigned N>
 struct String {
     char c[N];
 
-    inline operator const char*() { return c; }
+    inline operator const char*() const { return c; }
 };
 
 template<unsigned ...Len>
