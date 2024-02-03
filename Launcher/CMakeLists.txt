@@ -11,21 +11,21 @@ target_link_libraries(Launcher PUBLIC Engine)
 set(GROUP_LIST
     "main.cpp"
 	
-	"GUI.cpp"
-	"GUI.hpp"
+    "GUI.cpp"
+    "GUI.hpp"
 	
-	"ProjectData/ProjectData.cpp"
-	"ProjectData/ProjectData.hpp"
+    "ProjectData/ProjectData.cpp"
+    "ProjectData/ProjectData.hpp"
 	
-	"FileDialog.cpp"
-	"FileDialog.hpp"
+    "FileDialog.cpp"
+    "FileDialog.hpp"
 	
-	"Modals/ErrorModal.cpp"
-	"Modals/ErrorModal.hpp"
-	"Modals/ImportProjectModal.cpp"
-	"Modals/ImportProjectModal.hpp"
-	"Modals/NewProjectModal.cpp"
-	"Modals/NewProjectModal.hpp"
+    "Modals/ErrorModal.cpp"
+    "Modals/ErrorModal.hpp"
+    "Modals/ImportProjectModal.cpp"
+    "Modals/ImportProjectModal.hpp"
+    "Modals/NewProjectModal.cpp"
+    "Modals/NewProjectModal.hpp"
 )
 
 foreach(source IN LISTS GROUP_LIST)
