@@ -1,14 +1,15 @@
 #pragma once
 
 #include <string>
-#include <filesystem>
 #include <cstdlib>
+#include <filesystem>
+#include <unordered_map>
 
 #include <entt/entt.hpp>
 
-#include "UUID.hpp"
-#include "Asset.hpp"
-#include "FileNode.hpp"
+#include <Engine/UUID.hpp>
+#include <Engine/Asset.hpp>
+#include <Engine/FileNode.hpp>
 
 struct AssetHandle {
 
@@ -122,7 +123,7 @@ private:
 #if _DEBUG
     using AssetDatabase = std::unordered_map<UUID, Asset>;
     using AssetFileDatabase = std::unordered_map<const FNode*, UUID>;
-#elif _NDEBUG
+#elif _NDEBUG || NDEBUG
     using AssetDatabase = entt::dense_map<UUID, Asset>;
     using AssetFileDatabase = entt::dense_map<const FNode*, UUID>;
 #endif

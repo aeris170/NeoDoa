@@ -106,7 +106,7 @@ AssetHandle Assets::FindAsset(UUID uuid) const {
     return { const_cast<Asset*>(&database.at(uuid)) };
 }
 AssetHandle Assets::FindAssetAt(const FNode& file) const {
-    for (auto& [uuid, asset] : database) {
+    for (const auto& [uuid, asset] : database) {
         if (asset.File() == file) {
             /*
             * casting away const is safe here
