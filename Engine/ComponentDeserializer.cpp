@@ -4,13 +4,12 @@
 #include <vector>
 #include <sstream>
 
-#include <Utility/split.hpp>
+#include <Utility/Split.hpp>
 
-#include "Core.hpp"
-#include "Angel.hpp"
-#include "Log.hpp"
-
-#include "FileNode.hpp"
+#include <Engine/Log.hpp>
+#include <Engine/Core.hpp>
+#include <Engine/Angel.hpp>
+#include <Engine/FileNode.hpp>
 
 #ifdef NO_ANGEL_SCRIPT
 
