@@ -119,10 +119,10 @@ defaults to `https`, only `https` and `ssh` are accepted.
 
 Examples:
 ```sh
-FetchDependencies.sh                  # Fetch packages for x64-windows using https
-FetchDependencies.sh x64-windows ssh  # Fetch packages for x64-windows using ssh (must have an ssh key set-up)
-FetchDependencies.sh x64-linux        # Fetch packages for x64-linux   using https (doesn't work on our test systems)
-FetchDependencies.sh x64-linux ssh    # Fetch packages for x64-linux   using ssh (must have an ssh key set-up)
+sh FetchDependencies.sh                  # Fetch packages for x64-windows using https
+sh FetchDependencies.sh x64-windows ssh  # Fetch packages for x64-windows using ssh (must have an ssh key set-up)
+sh FetchDependencies.sh x64-linux        # Fetch packages for x64-linux   using https (doesn't work on our test systems)
+sh FetchDependencies.sh x64-linux ssh    # Fetch packages for x64-linux   using ssh (must have an ssh key set-up)
 ```
 
 You should see no errors when this scripts completes. If you do, please create an issue [here](https://github.com/aeris170/NeoDoa/issues).
