@@ -2,6 +2,8 @@
 
 #include <typeinfo>
 
+#include <Engine/Log.hpp>
+
 UserDefinedComponentStorage::UserDefinedComponentStorage(Entity owner) noexcept :
     owner(owner) {}
 

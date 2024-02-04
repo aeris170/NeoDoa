@@ -9,7 +9,7 @@
 
 #include <tinyxml2.h>
 
-#include "Entity.hpp"
+#include <Engine/Entity.hpp>
 
 struct Scene;
 struct FNode;

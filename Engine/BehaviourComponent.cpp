@@ -1,9 +1,10 @@
 #include "BehaviourComponent.hpp"
 
 
-BehaviourComponent::BehaviourComponent(std::weak_ptr<Scene> scene, Entity entity) noexcept :
-    _scene(scene),
+BehaviourComponent::BehaviourComponent(Scene& scene, Entity entity) noexcept :
+    scene(&scene),
     entity(entity) {};
+BehaviourComponent::~BehaviourComponent() {}
 
 void BehaviourComponent::Init() {}
 

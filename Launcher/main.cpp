@@ -1,3 +1,4 @@
+#include <Engine/Log.hpp>
 #include <Engine/Core.hpp>
 #include <Engine/ImGuiRenderer.hpp>
 

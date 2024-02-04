@@ -1,8 +1,7 @@
 #pragma once
 
-#include "BehaviourComponent.hpp"
-#include "Registry.hpp"
-#include "Entity.hpp"
+#include <Engine/Entity.hpp>
+#include <Engine/Registry.hpp>
 
 struct System : entt::type_list<void(Registry& reg), void(Registry&, float)> {
     template<typename Base>
@@ -18,17 +17,6 @@ struct System : entt::type_list<void(Registry& reg), void(Registry&, float)> {
 
 struct BehaviourSystem {
 
-    void Init(Registry& reg) {
-        auto view = reg.view<BehaviourComponent>();
-        for (auto entity : view) {
-            view.get<BehaviourComponent>(entity).Init();
-        }
-    }
-
-    void Execute(Registry& reg, float deltaTime) {
-        auto view = reg.view<BehaviourComponent>();
-        for (auto entity : view) {
-            view.get<BehaviourComponent>(entity).Execute(deltaTime);
-        }
-    }
+    void Init(Registry& reg) noexcept;
+    void Execute(Registry& reg, float deltaTime) noexcept;
 };

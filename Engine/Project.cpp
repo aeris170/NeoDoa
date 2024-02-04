@@ -1,8 +1,9 @@
-#include "Project.hpp"
+#include <Engine/Project.hpp>
 
-#include "Core.hpp"
-#include "Scene.hpp"
-#include "Assets.hpp"
+#include <Engine/Log.hpp>
+#include <Engine/Core.hpp>
+#include <Engine/Scene.hpp>
+#include <Engine/Assets.hpp>
 
 Project::Project(const std::filesystem::path& workspace, const std::string& name, UUID startupSceneID) noexcept :
     workspace(workspace),
