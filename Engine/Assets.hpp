@@ -120,12 +120,14 @@ struct Assets {
 
 private:
 
-#if _DEBUG
+#if DEBUG
     using AssetDatabase = std::unordered_map<UUID, Asset>;
     using AssetFileDatabase = std::unordered_map<const FNode*, UUID>;
-#elif _NDEBUG || NDEBUG
+#elif NDEBUG
     using AssetDatabase = entt::dense_map<UUID, Asset>;
     using AssetFileDatabase = entt::dense_map<const FNode*, UUID>;
+#else
+#error "Neither DEBUG nor NDEBUG are defined!"
 #endif
 
     AssetDatabase database{};

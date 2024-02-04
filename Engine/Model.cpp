@@ -17,7 +17,7 @@
 Model::Model(std::string_view path) noexcept {
     std::cout << "Creating model from disk: " << path << std::endl;
 
-#if defined(_DEBUG)
+#if defined(DEBUG)
     Assimp::DefaultLogger::create("", Assimp::Logger::VERBOSE, aiDefaultLogStream_STDOUT);
 #else
     Assimp::DefaultLogger::create("", Assimp::Logger::NORMAL, aiDefaultLogStream_STDOUT);

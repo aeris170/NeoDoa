@@ -21,6 +21,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
 project(NeoDoa)
 
+add_compile_options("$<$<CONFIG:DEBUG>:-DDEBUG>")
+add_compile_options("$<$<CONFIG:DEBUG>:-D_DEBUG>")
+add_compile_options("$<$<CONFIG:RELEASE>:-DNDEBUG>")
+add_compile_options("$<$<CONFIG:RELEASE>:-D_NDEBUG>")
 add_compile_definitions(ASSIMP_BUILD_ZLIB=ON)
 add_compile_definitions(IMGUI_DEFINE_MATH_OPERATORS)
 

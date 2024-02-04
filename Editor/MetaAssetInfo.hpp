@@ -19,7 +19,7 @@ struct MetaAssetInfo {
 };
 
 struct MetaAssetInfoBank {
-#ifdef _DEBUG
+#ifdef DEBUG
     using DataStructure = std::unordered_map<const FNode*, MetaAssetInfo>;
 #else
     using DataStructure = entt::dense_map<const FNode*, MetaAssetInfo>;
@@ -52,7 +52,7 @@ private:
     DataStructure metaInfo;
 };
 
-#if _DEBUG
+#if DEBUG
 #include <type_traits>
 static_assert(std::is_default_constructible_v<MetaAssetInfo>);
 static_assert(std::is_copy_constructible_v<MetaAssetInfo>);

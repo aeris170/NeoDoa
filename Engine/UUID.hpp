@@ -34,7 +34,7 @@ namespace std {
     };
 }
 
-#ifdef _DEBUG
+#ifdef DEBUG
 #include <type_traits>
 static_assert(std::is_copy_constructible_v<UUID>);
 static_assert(std::is_copy_assignable_v<UUID>);

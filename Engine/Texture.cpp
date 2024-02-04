@@ -20,7 +20,7 @@ Texture Texture::CreateTexture(std::string_view name, const char* path, TextureT
         return Empty();
     }
 
-#ifdef _DEBUG
+#ifdef DEBUG
     Texture::FACTORY_FLAG = true;
     Texture rv{ name, static_cast<size_t>(width), static_cast<size_t>(height), pixelData, transparency };
     Texture::FACTORY_FLAG = false;
@@ -40,7 +40,7 @@ Texture Texture::CreateTexture(std::string_view name, const unsigned char* data,
         return Empty();
     }
 
-#ifdef _DEBUG
+#ifdef DEBUG
     Texture::FACTORY_FLAG = true;
     Texture rv{ name, static_cast<size_t>(width), static_cast<size_t>(height), pixelData, transparency };
     Texture::FACTORY_FLAG = false;
@@ -58,7 +58,7 @@ Texture Texture::CreateTextureRaw(std::string_view name, const unsigned char* pi
         DOA_LOG_WARNING("Couldn't load %s from raw pointer to memory! Pointer is nullptr", name.data());
         return Empty();
     }
-#ifdef _DEBUG
+#ifdef DEBUG
     Texture::FACTORY_FLAG = true;
     Texture rv{ name, width, height, pixelData, transparency };
     Texture::FACTORY_FLAG = false;

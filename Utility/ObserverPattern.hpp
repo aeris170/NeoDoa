@@ -38,7 +38,7 @@ namespace ObserverPattern {
     };
 }
 
-#ifdef _DEBUG
+#ifdef DEBUG
 #include <type_traits>
 static_assert(std::is_abstract_v<ObserverPattern::Observer>);
 static_assert(std::is_copy_assignable_v<ObserverPattern::Observer>);

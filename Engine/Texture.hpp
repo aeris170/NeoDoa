@@ -26,7 +26,7 @@ enum class TextureTransparency {
 struct Texture {
 
     static Texture Empty() noexcept {
-#ifdef _DEBUG
+#ifdef DEBUG
         Texture::FACTORY_FLAG = true; return {}; Texture::FACTORY_FLAG = false;
 #else
         return {};
@@ -66,7 +66,7 @@ struct Texture {
     static Texture Copy(const Texture& texture);
 
 private:
-#ifdef _DEBUG
+#ifdef DEBUG
     static inline bool FACTORY_FLAG{ false };
 #endif
 

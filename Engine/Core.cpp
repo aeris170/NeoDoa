@@ -188,7 +188,7 @@ const CorePtr& Core::CreateCore(Resolution resolution, const char* title, bool i
 #pragma endregion
 
 #pragma region KHR_debug
-#ifdef _DEBUG
+#ifdef DEBUG
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback(message_callback, nullptr);

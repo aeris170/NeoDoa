@@ -49,7 +49,7 @@ WindowPtr Window::CreateWindow(Resolution resolution, const char* title, bool is
     rv->_title = title;
     rv->_isFullscreen = isFullscreen;
 
-#ifdef _DEBUG
+#ifdef DEBUG
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE); //TODO add support
 #endif
 

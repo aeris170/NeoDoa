@@ -38,7 +38,7 @@ struct Log {
     static void Clear();
 };
 
-#ifdef _DEBUG
+#ifdef DEBUG
 #define DOA_LOG_TRACE(fmt, ...)			Log::SaveMessage(LogSource::NEO_DOA, LogSeverity::TRACE, fmt, __VA_ARGS__);		Log::Print(LogSource::NEO_DOA, LogSeverity::TRACE, fmt, __VA_ARGS__)
 #define DOA_LOG_INFO(fmt, ...)			Log::SaveMessage(LogSource::NEO_DOA, LogSeverity::INFO, fmt, __VA_ARGS__);		Log::Print(LogSource::NEO_DOA, LogSeverity::INFO, fmt, __VA_ARGS__)
 #define DOA_LOG_WARNING(fmt, ...)		Log::SaveMessage(LogSource::NEO_DOA, LogSeverity::WARNING, fmt, __VA_ARGS__);	Log::Print(LogSource::NEO_DOA, LogSeverity::WARNING, fmt, __VA_ARGS__)
