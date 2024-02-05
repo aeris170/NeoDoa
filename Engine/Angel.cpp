@@ -21,15 +21,15 @@
 
 #include <imgui.h>
 
-#include <Utility/prettify.hpp>
+#include <Utility/Prettify.hpp>
 
-#include "Input.hpp"
-#include "TypedefsAndConstants.hpp"
-#include "Log.hpp"
-#include "Scene.hpp"
-#include "Model.hpp"
-#include "Shader.hpp"
-#include "Color.hpp"
+#include <Engine/Input.hpp>
+#include <Engine/TypedefsAndConstants.hpp>
+#include <Engine/Log.hpp>
+#include <Engine/Scene.hpp>
+#include <Engine/Model.hpp>
+#include <Engine/Shader.hpp>
+#include <Engine/Color.hpp>
 
 static void logTrace(const std::string& in) { CLI_LOG_TRACE("%s", in.c_str()); }
 static void logTrace(int in) { CLI_LOG_TRACE("%d", in); }

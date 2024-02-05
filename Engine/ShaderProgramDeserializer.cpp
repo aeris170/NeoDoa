@@ -5,11 +5,11 @@
 #include <format>
 #include <string>
 
+#include <Utility/Trim.hpp>
+
 #include <Engine/Log.hpp>
 #include <Engine/Core.hpp>
 #include <Engine/FileNode.hpp>
-
-#include <Utility/trim.hpp>
 
 static std::vector<std::string> SplitLinkerMessages(const std::string& messages) {
     static const std::regex regex{ "\n(?!\\s)" };

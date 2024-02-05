@@ -3,15 +3,15 @@
 #include <format>
 #include <string>
 #include <vector>
-#include <string_view>
 #include <sstream>
-#include <iostream>
 #include <numeric>
+#include <iostream>
+#include <string_view>
 
 #include <tinyxml2.h>
 #include <lunasvg.h>
 
-#include <Utility/split.hpp>
+#include <Utility/Split.hpp>
 
 #include <Engine/Log.hpp>
 

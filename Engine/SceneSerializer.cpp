@@ -1,13 +1,13 @@
 #include "SceneSerializer.hpp"
 
-#include <Utility/nameof.hpp>
+#include <Utility/NameOf.hpp>
 
-#include "Scene.hpp"
-#include "IDComponent.hpp"
-#include "TransformComponent.hpp"
-#include "ParentComponent.hpp"
-#include "ChildComponent.hpp"
-#include "CameraComponent.hpp"
+#include <Engine/Scene.hpp>
+#include <Engine/IDComponent.hpp>
+#include <Engine/TransformComponent.hpp>
+#include <Engine/ParentComponent.hpp>
+#include <Engine/ChildComponent.hpp>
+#include <Engine/CameraComponent.hpp>
 
 std::string SerializeScene(const Scene& scene) {
     tinyxml2::XMLPrinter printer;

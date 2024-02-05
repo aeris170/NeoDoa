@@ -1,9 +1,9 @@
 #include <Launcher/NewProjectModal.hpp>
 
+#include <Utility/Trim.hpp>
+
 #include <Launcher/GUI.hpp>
 #include <Launcher/FileDialog.hpp>
-
-#include <Utility/trim.hpp>
 
 NewProjectModal::NewProjectModal(GUI& gui) noexcept :
 	gui(gui) {};

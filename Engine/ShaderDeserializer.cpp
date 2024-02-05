@@ -4,7 +4,7 @@
 #include <vector>
 #include <cassert>
 
-#include <Utility/trim.hpp>
+#include <Utility/Trim.hpp>
 
 #include <Engine/FileNode.hpp>
 
