@@ -31,7 +31,23 @@ private:
     void OnProjectSaved(const Project& project) noexcept;
     void OnProjectUnloaded() noexcept;
 
-    template <Platform platform>
-    friend void CreateHiddenMetaDataFolderIfNotExists(EditorMeta& meta, FNode& root) noexcept;
-};
+    template<Platform platform = GetCurrentPlatform()>
+    void CreateHiddenMetaDataFolderIfNotExists(FNode& root) noexcept {
+        FNode* folder = root.CreateChildFolderIfNotExists({
+            .name = EditorMeta::MetaFolderName
+        });
+        if (folder == nullptr) {
+            editorMetaFolder = &root.FindChild(std::filesystem::path(EditorMeta::MetaFolderName));
+        } else {
+            editorMetaFolder = folder;
+        }
 
+        if constexpr (platform == Platform::Windows) {
+            CreateHiddenDataFolder_HandleWindows();
+        }
+    }
+
+#ifdef _WIN64
+    void CreateHiddenDataFolder_HandleWindows() noexcept;
+#endif
+};

@@ -30,28 +30,6 @@ MetaAssetInfoBank& EditorMeta::GetMetaAssetInfoBank() const noexcept {
     return *metaAssetInfoBank;
 }
 
-#ifdef _WIN64
-// Do not move this include! Windows.h defined a lot of junk and it seeps into other .h files, causing lots of bizarre errors.
-// Exclude rarely-used stuff from Windows headers and in this case prevent compiler errors from redefinition of UUID
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-#endif
-template<Platform platform = GetCurrentPlatform()>
-void CreateHiddenMetaDataFolderIfNotExists(EditorMeta& meta, FNode& root) noexcept {
-    FNode* folder = root.CreateChildFolderIfNotExists({
-        .name = EditorMeta::MetaFolderName
-    });
-    if (folder == nullptr) {
-        meta.editorMetaFolder = &root.FindChild(std::filesystem::path(EditorMeta::MetaFolderName));
-    } else {
-        meta.editorMetaFolder = folder;
-    }
-
-    if constexpr (platform == Platform::Windows) {
-        auto path = meta.editorMetaFolder->AbsolutePath().string();
-        SetFileAttributes(path.c_str(), FILE_ATTRIBUTE_HIDDEN);
-    }
-}
 void EditorMeta::CreateMetaAssetInfoBank() noexcept {
     metaAssetInfoBank = std::make_unique<MetaAssetInfoBank>();
     MetaAssetInfoBank::LoadFromDisk(*metaAssetInfoBank.get(), *editorMetaFolder);
@@ -60,7 +38,7 @@ void EditorMeta::CreateMetaAssetInfoBank() noexcept {
 void EditorMeta::OnProjectLoaded(const Project& project) noexcept {
     static const auto& Core = Core::GetCore();
     const auto& assets = Core->GetAssets();
-    CreateHiddenMetaDataFolderIfNotExists(*this, assets->Root());
+    CreateHiddenMetaDataFolderIfNotExists(assets->Root());
     CreateMetaAssetInfoBank();
 }
 void EditorMeta::OnProjectSaved(const Project& project) noexcept {
@@ -70,3 +48,14 @@ void EditorMeta::OnProjectUnloaded() noexcept {
     editorMetaFolder = nullptr;
     metaAssetInfoBank = nullptr;
 }
+
+#ifdef _WIN64
+// Do not move this include! Windows.h defined a lot of junk and it seeps into other .h files, causing lots of bizarre errors.
+// Exclude rarely-used stuff from Windows headers and in this case prevent compiler errors from redefinition of UUID
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+void EditorMeta::CreateHiddenDataFolder_HandleWindows() noexcept {
+    auto path = editorMetaFolder->AbsolutePath().string();
+    SetFileAttributes(path.c_str(), FILE_ATTRIBUTE_HIDDEN);
+}
+#endif
