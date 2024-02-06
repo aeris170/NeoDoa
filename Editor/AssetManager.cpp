@@ -179,7 +179,7 @@ void AssetManager::RenderSelectedFolderContent() {
         }
     }
     ImGui::PushFont(gui.GetFontBold());
-    ImGui::Text(title.c_str());
+    ImGui::TextUnformatted(title.c_str());
     ImGui::PopFont();
     if (currentFolder == nullptr) return;
     if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
@@ -192,7 +192,10 @@ void AssetManager::RenderSelectedFolderContent() {
             cmd = "nautilus --browser "; // linux not supported
         }
         cmd.append(currentFolder->AbsolutePath().string());
-        std::system(cmd.c_str());
+        auto sys = std::system(cmd.c_str());
+        if (sys == -1) {
+            DOA_LOG_WARNING("[Asset Manager] A call to std::system returned -1.");
+        }
     }
 
     ImGui::NewLine();
@@ -256,7 +259,7 @@ void AssetManager::RenderSelectedFolderContent() {
 
                 ImGui::PushStyleColor(ImGuiCol_Header, ImVec4{ 0, 0, 0, 0 });
                 bool b;
-                if (ImGui::Selectable(fileName.data(), &b, ImGuiSelectableFlags_AllowDoubleClick | ImGuiSelectableFlags_SpanAvailWidth)) {
+                if (ImGui::Selectable(fileName.data(), &b, ImGuiSelectableFlags_AllowDoubleClick)) {
                     if (ImGui::IsItemHovered()) {
                         if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
                             OpenFileAtFileNode(file);
@@ -306,7 +309,7 @@ void AssetManager::RenderSelectedFolderContent() {
                     dragDropAssetID = assets->FindAssetAt(child)->ID();
                     ImGui::SetDragDropPayload("DND_DEMO_CELL", &dragDropAssetID, sizeof(UUID));
 
-                    ImGui::Text(child.FullName().data());
+                    ImGui::TextUnformatted(child.FullName().data());
                     ImGui::EndDragDropSource();
                 }
                 if (ImGui::BeginPopupContextItem()) {

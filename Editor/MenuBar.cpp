@@ -595,11 +595,11 @@ void MenuBar::AboutSection::RenderLicenceNotices() noexcept {
     GUI& gui = mb.get().gui;
     for (auto& [name, licence] : licences) {
         ImGui::PushFont(gui.GetFont());
-        ImGui::TextColored({ 0.7f, 0.7f, 0.7f, 1.0f }, name.c_str());
+        ImGui::TextColored({ 0.7f, 0.7f, 0.7f, 1.0f }, "%s", name.c_str());
         ImGui::PopFont();
         auto title = (std::string("License###") + name);
         if (ImGui::CollapsingHeader(title.c_str(), ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick)) {
-            ImGui::Text(licence.c_str());
+            ImGui::TextUnformatted(licence.c_str());
         }
     }
 }

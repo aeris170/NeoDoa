@@ -161,15 +161,15 @@ void Observer::DisplayTargetRenderer::HandleTargetWhenFile(const Observer& obser
     ImGui::SameLine();
     ImGui::NextColumn();
 
-    ImGui::Text(file.Name().data());
+    ImGui::TextUnformatted(file.Name().data());
 
     ImGui::PopFont();
     ImGui::PushFont(gui.GetFont());
 
     std::string path = file.Path().string();
-    ImGui::Text(std::string("Path: ROOT").append(sizeof(char), static_cast<char>(std::filesystem::path::preferred_separator)).append(path).c_str());
+    ImGui::TextUnformatted(std::string("Path: ROOT").append(sizeof(char), static_cast<char>(std::filesystem::path::preferred_separator)).append(path).c_str());
     std::string absolutePath = file.AbsolutePath().string();
-    ImGui::Text(std::string("Absolute Path: ").append(absolutePath).c_str());
+    ImGui::TextUnformatted(std::string("Absolute Path: ").append(absolutePath).c_str());
 
     ImGui::PopFont();
 
@@ -263,10 +263,10 @@ void Observer::DisplayTargetRenderer::RenderFolderView(const Observer& observer,
             ImGui::TableSetColumnIndex(0);
             ImGui::Image(gui.FindIconForFileType(child, TextureSize::SMALL), { 16.0f, 16.0f });
             ImGui::TableSetColumnIndex(1);
-            ImGui::Text(child.FullName().data());
+            ImGui::TextUnformatted(child.FullName().data());
             ImGui::TableSetColumnIndex(2);
             std::string size = FormatBytes(static_cast<float>(child.Size()));
-            ImGui::Text(size.c_str());
+            ImGui::TextUnformatted(size.c_str());
         }
         ImGui::EndTable();
     }
@@ -507,25 +507,25 @@ void Observer::SceneDisplay::RenderEntities(const Observer& observer, Scene& sce
                 std::string nameWithIcon{};
 
                 nameWithIcon = ComponentIcons::FindIconByComponentName(nameof(IDComponent)) + nameof(IDComponent);
-                ImGui::Text(nameWithIcon.c_str());
+                ImGui::TextUnformatted(nameWithIcon.c_str());
 
                 nameWithIcon = ComponentIcons::FindIconByComponentName(nameof(TransformComponent)) + nameof(TransformComponent);
-                ImGui::Text(nameWithIcon.c_str());
+                ImGui::TextUnformatted(nameWithIcon.c_str());
                 if (scene.HasComponent<ParentComponent>(entt)) {
                     nameWithIcon = ComponentIcons::FindIconByComponentName(nameof(ParentComponent)) + nameof(ParentComponent);
-                    ImGui::Text(nameWithIcon.c_str());
+                    ImGui::TextUnformatted(nameWithIcon.c_str());
                 }
                 if (scene.HasComponent<ChildComponent>(entt)) {
                     nameWithIcon = ComponentIcons::FindIconByComponentName(nameof(ChildComponent)) + nameof(ChildComponent);
-                    ImGui::Text(nameWithIcon.c_str());
+                    ImGui::TextUnformatted(nameWithIcon.c_str());
                 }
                 if (scene.HasComponent<OrthoCameraComponent>(entt)) {
                     nameWithIcon = ComponentIcons::FindIconByComponentName(nameof(OrthoCameraComponent)) + nameof(OrthoCameraComponent);
-                    ImGui::Text(nameWithIcon.c_str());
+                    ImGui::TextUnformatted(nameWithIcon.c_str());
                 }
                 if (scene.HasComponent<PerspectiveCameraComponent>(entt)) {
                     nameWithIcon = ComponentIcons::FindIconByComponentName(nameof(PerspectiveCameraComponent)) + nameof(PerspectiveCameraComponent);
-                    ImGui::Text(nameWithIcon.c_str());
+                    ImGui::TextUnformatted(nameWithIcon.c_str());
                 }
                 if (scene.HasComponent<UserDefinedComponentStorage>(entt)) {
                     auto& udcs{ scene.GetComponent<UserDefinedComponentStorage>(entt) };
@@ -533,14 +533,14 @@ void Observer::SceneDisplay::RenderEntities(const Observer& observer, Scene& sce
                         if (!instance.HasError()) {
                             AssetHandle cmpAsset{ gui.CORE->GetAssets()->FindAsset(instance.ComponentAssetID()) };
                             nameWithIcon = ComponentIcons::FindIconByComponentName(name) + name;
-                            ImGui::Text(nameWithIcon.c_str());
+                            ImGui::TextUnformatted(nameWithIcon.c_str());
                         } else {
                             ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 0.5f, 0.1f, 1.0f });
 
                             nameWithIcon = ComponentIcons::FindIconForInstantiationError(instance.GetError()) + name;
-                            ImGui::Text(nameWithIcon.c_str());
+                            ImGui::TextUnformatted(nameWithIcon.c_str());
                             if (ImGui::IsItemHovered()) {
-                                ImGui::SetTooltip(instance.ErrorString().data());
+                                ImGui::SetTooltip("%s", instance.ErrorString().data());
                             }
 
                             ImGui::PopStyleColor();
@@ -615,7 +615,7 @@ void Observer::ComponentDefinitionDisplay::RenderMessagesTable() {
         ImGui::TableSetColumnIndex(1);
 
         const ComponentCompilerMessage& m{ std::any_cast<const ComponentCompilerMessage&>(message) };
-        ImGui::TextWrapped(m.message.c_str());
+        ImGui::TextWrapped("%s", m.message.c_str());
     }
     ImGui::PopStyleColor();
 
@@ -631,7 +631,7 @@ void Observer::ComponentDefinitionDisplay::RenderMessagesTable() {
         ImGui::TableSetColumnIndex(1);
 
         const ComponentCompilerMessage& m{ std::any_cast<const ComponentCompilerMessage&>(message) };
-        ImGui::TextWrapped(m.message.c_str());
+        ImGui::TextWrapped("%s", m.message.c_str());
     }
     ImGui::PopStyleColor();
 
@@ -647,7 +647,7 @@ void Observer::ComponentDefinitionDisplay::RenderMessagesTable() {
         ImGui::TableSetColumnIndex(1);
 
         const ComponentCompilerMessage& m{ std::any_cast<const ComponentCompilerMessage&>(message) };
-        ImGui::TextWrapped(m.message.c_str());
+        ImGui::TextWrapped("%s", m.message.c_str());
     }
     ImGui::PopStyleColor();
 
@@ -670,9 +670,9 @@ void Observer::ComponentDefinitionDisplay::RenderFields() {
             for (auto& field : componentDef.fields) {
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);
-                ImGui::Text(field.name.c_str());
+                ImGui::TextUnformatted(field.name.c_str());
                 ImGui::TableSetColumnIndex(1);
-                ImGui::Text(field.typeName.c_str());
+                ImGui::TextUnformatted(field.typeName.c_str());
             }
             ImGui::EndTable();
         }
@@ -741,7 +741,7 @@ void Observer::ShaderDisplay::RenderMessagesTable() {
         ImGui::TableSetColumnIndex(1);
 
         const ShaderCompilerMessage& m{ std::any_cast<const ShaderCompilerMessage&>(message) };
-        ImGui::TextWrapped(m.shortMessage.c_str());
+        ImGui::TextWrapped("%s", m.shortMessage.c_str());
     }
     ImGui::PopStyleColor();
 
@@ -757,7 +757,7 @@ void Observer::ShaderDisplay::RenderMessagesTable() {
         ImGui::TableSetColumnIndex(1);
 
         const ShaderCompilerMessage& m{ std::any_cast<const ShaderCompilerMessage&>(message) };
-        ImGui::TextWrapped(m.shortMessage.c_str());
+        ImGui::TextWrapped("%s", m.shortMessage.c_str());
     }
     ImGui::PopStyleColor();
 
@@ -773,7 +773,7 @@ void Observer::ShaderDisplay::RenderMessagesTable() {
         ImGui::TableSetColumnIndex(1);
 
         const ShaderCompilerMessage& m{ std::any_cast<const ShaderCompilerMessage&>(message) };
-        ImGui::TextWrapped(m.shortMessage.c_str());
+        ImGui::TextWrapped("%s", m.shortMessage.c_str());
     }
     ImGui::PopStyleColor();
 
@@ -896,7 +896,7 @@ void Observer::ShaderProgramDisplay::RenderMessagesTable() {
         ImGui::TableSetColumnIndex(1);
 
         const std::string& m{ std::any_cast<const std::string&>(message) };
-        ImGui::TextWrapped(m.c_str());
+        ImGui::TextWrapped("%s", m.c_str());
     }
     ImGui::PopStyleColor();
 
@@ -912,7 +912,7 @@ void Observer::ShaderProgramDisplay::RenderMessagesTable() {
         ImGui::TableSetColumnIndex(1);
 
         const std::string& m{ std::any_cast<const std::string&>(message) };
-        ImGui::TextWrapped(m.c_str());
+        ImGui::TextWrapped("%s", m.c_str());
     }
     ImGui::PopStyleColor();
 
@@ -928,7 +928,7 @@ void Observer::ShaderProgramDisplay::RenderMessagesTable() {
         ImGui::TableSetColumnIndex(1);
 
         const std::string& m{ std::any_cast<const std::string&>(message) };
-        ImGui::TextWrapped(m.c_str());
+        ImGui::TextWrapped("%s", m.c_str());
     }
     ImGui::PopStyleColor();
 
@@ -952,7 +952,7 @@ void Observer::ShaderProgramDisplay::Begin(std::string_view label) {
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { ImGui::GetStyle().ItemSpacing.x, 0 });
     ImGui::SetColumnWidth(0, 240);
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f + 3);
-    ImGui::TextDisabled(label.data());
+    ImGui::TextDisabled("%s", label.data());
     ImGui::NextColumn();
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f);

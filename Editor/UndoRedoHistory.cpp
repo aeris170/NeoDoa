@@ -31,7 +31,7 @@ void UndoRedoHistory::Render() noexcept {
         const GUICommand* guiCommand = dynamic_cast<GUICommand*>(&command);
         if (!guiCommand) { continue; }
 
-        ImGui::Text(guiCommand->GetDescription().data());
+        ImGui::TextUnformatted(guiCommand->GetDescription().data());
     }
     ImGui::EndDisabled();
 
@@ -70,7 +70,7 @@ void UndoRedoHistory::Render() noexcept {
         const GUICommand* guiCommand = dynamic_cast<GUICommand*>(&command);
         if (!guiCommand) { continue; }
 
-        ImGui::Text(guiCommand->GetDescription().data());
+        ImGui::TextUnformatted(guiCommand->GetDescription().data());
     }
 }
 

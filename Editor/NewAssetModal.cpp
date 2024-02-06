@@ -191,10 +191,10 @@ void NewAssetModal::RenderNameSelectionDialog() {
 	}
 }
 void NewAssetModal::RenderConfirmationDialog() {
-	ImGui::Text(("Name: " + newAssetData.name).c_str());
-	ImGui::Text(("Path: " + newAssetData.path).c_str());
+	ImGui::TextUnformatted(("Name: " + newAssetData.name).c_str());
+	ImGui::TextUnformatted(("Path: " + newAssetData.path).c_str());
 	ImGui::NewLine();
-	ImGui::Text(confirmText.c_str());
+	ImGui::TextUnformatted(confirmText.c_str());
 	ImGui::Separator();
 
 	if (ImGui::Button(YES_BUTTON_TEXT, MODAL_BUTTONS_SIZE)) {

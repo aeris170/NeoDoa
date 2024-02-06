@@ -96,7 +96,7 @@ void SceneHierarchy::Render() {
         gui.Events.SceneHierarchy.OnEntityDeselected();
     }
 
-    if (ImGui::BeginPopupContextWindow(0, ImGuiMouseButton_Right | ImGuiPopupFlags_NoOpenOverItems)) {
+    if (ImGui::BeginPopupContextWindow(0, ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems)) {
         if (ImGui::MenuItem(cat(SceneHierarchyIcons::ContextMenu::CREATE_NEW_ENTITY_ICON, "Create New Entity"))) {
             gui.ExecuteCommand<AddEntityCommand>();
         }
@@ -185,7 +185,7 @@ void SceneHierarchy::RenderEntityNode(const Entity entity) {
         ImGui::SetDragDropPayload("SELECTED_ENTT", &entity, sizeof(Entity));
         std::string txt;
         txt.append("DragDrop - ").append(id.GetTag());
-        ImGui::Text(txt.c_str());
+        ImGui::TextUnformatted(txt.c_str());
         ImGui::EndDragDropSource();
     }
 

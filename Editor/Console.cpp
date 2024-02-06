@@ -251,18 +251,18 @@ void Console::RenderMessageLog() {
             ImGui::PushFont(gui.GetFontBold());
 
             float r = BeginTableColumnCenterText(icon);
-            ImGui::Text(icon);
+            ImGui::TextUnformatted(icon);
             EndTableColumnCenterText(r);
             if (ImGui::IsItemHovered()) {
                 ImGui::BeginTooltip();
-                ImGui::Text(tooltipMessage);
+                ImGui::TextUnformatted(tooltipMessage);
                 ImGui::EndTooltip();
             }
             ImGui::PopFont();
 
             ImGui::TableSetColumnIndex(1);
             ImGui::PushFont(gui.GetFontBold());
-            ImGui::Text(message._message.c_str());
+            ImGui::TextUnformatted(message._message.c_str());
             ImGui::PopFont();
 
             ImGui::PopStyleColor();
