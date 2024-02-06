@@ -3,19 +3,19 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
-bool FancyVector1Widget(const std::string& label, glm::vec1& vec, FancyVectorWidgetSettings<display::X> settings) {
+bool FancyVector1Widget(const std::string& label, glm::vec1& vec, FancyVectorWidgetSettings<Display::X> settings) {
     return FancyVectorWidget(label, &vec.x, settings);
 }
 
-bool FancyVector2Widget(const std::string& label, glm::vec2& vec, FancyVectorWidgetSettings<display::XY> settings) {
+bool FancyVector2Widget(const std::string& label, glm::vec2& vec, FancyVectorWidgetSettings<Display::XY> settings) {
     return FancyVectorWidget(label, &vec.x, settings);
 }
 
-bool FancyVector3Widget(const std::string& label, glm::vec3& vec, FancyVectorWidgetSettings<display::XYZ> settings) {
+bool FancyVector3Widget(const std::string& label, glm::vec3& vec, FancyVectorWidgetSettings<Display::XYZ> settings) {
     return FancyVectorWidget(label, &vec.x, settings);
 }
 
-bool FancyVector4Widget(const std::string& label, glm::vec4& vec, FancyVectorWidgetSettings<display::XYZW> settings) {
+bool FancyVector4Widget(const std::string& label, glm::vec4& vec, FancyVectorWidgetSettings<Display::XYZW> settings) {
     return FancyVectorWidget(label, &vec.x, settings);
 }
 
@@ -266,7 +266,7 @@ bool ColorWidget(const std::string& label, Color& value) {
 
 bool ResolutionWidget(const std::string& label, Resolution& resolution) {
     glm::vec2 res{ resolution.Width, resolution.Height };
-    FancyVectorWidgetSettings<display::XY> settingsFBO;
+    FancyVectorWidgetSettings<Display::XY> settingsFBO;
     settingsFBO.resetEnabled = false;
     settingsFBO.speed = 1;
     settingsFBO.min = 128;
@@ -288,14 +288,14 @@ bool OrthoCameraWidget(OrthoCamera& cameraData) {
     glm::vec2 leftRight{ cameraData._left, cameraData._right };
     glm::vec1 bottom{ cameraData._bottom };
 
-    FancyVectorWidgetSettings<display::X> settingsOrthoTop;
+    FancyVectorWidgetSettings<Display::X> settingsOrthoTop;
     settingsOrthoTop.resetTo = 1;
     settingsOrthoTop.displayLabelOverride[0] = "T";
     settingsOrthoTop.displayLabelColorOverride[0] = Color(0.10f, 0.53f, 0.26f);
     settingsOrthoTop.displayLabelHoverColorOverride[0] = settingsOrthoTop.displayLabelColorOverride[0].Lighten(0.45f);
     settingsOrthoTop.componentFieldWidth /= 2;
 
-    FancyVectorWidgetSettings<display::XY> settingsOrthoLeftRight;
+    FancyVectorWidgetSettings<Display::XY> settingsOrthoLeftRight;
     settingsOrthoLeftRight.resetAllToSame = false;
     settingsOrthoLeftRight.resetTos[0] = -1;
     settingsOrthoLeftRight.resetTos[1] = 1;
@@ -306,7 +306,7 @@ bool OrthoCameraWidget(OrthoCamera& cameraData) {
     settingsOrthoLeftRight.displayLabelHoverColorOverride[0] = settingsOrthoLeftRight.displayLabelColorOverride[0].Lighten(0.45f);
     settingsOrthoLeftRight.displayLabelHoverColorOverride[1] = settingsOrthoLeftRight.displayLabelColorOverride[1].Lighten(0.45f);
 
-    FancyVectorWidgetSettings<display::X> settingsOrthoBottom;
+    FancyVectorWidgetSettings<Display::X> settingsOrthoBottom;
     settingsOrthoBottom.resetTo = -1;
     settingsOrthoBottom.displayLabelOverride[0] = "B";
     settingsOrthoBottom.displayLabelColorOverride[0] = Color(0.10f, 0.53f, 0.26f);
@@ -330,7 +330,7 @@ bool PerspectiveCameraWidget(PerspectiveCamera& cameraData) {
     glm::vec1 fov{ cameraData._fov };
     glm::vec1 aspect{ cameraData._aspect };
 
-    FancyVectorWidgetSettings<display::X> fovSettings;
+    FancyVectorWidgetSettings<Display::X> fovSettings;
     auto a = fovSettings.displayLabelColorOverride[0].Lighten(0.5);
     fovSettings.resetTo = 110;
     fovSettings.min = 30;
@@ -339,7 +339,7 @@ bool PerspectiveCameraWidget(PerspectiveCamera& cameraData) {
     fovSettings.displayLabelColorOverride[0] = Color(0.23f, 0.23f, 0.13f);
     fovSettings.displayLabelHoverColorOverride[0] = fovSettings.displayLabelColorOverride[0].Lighten(0.35f);
 
-    FancyVectorWidgetSettings<display::X> aspectSettings;
+    FancyVectorWidgetSettings<Display::X> aspectSettings;
     aspectSettings.disabled = true;
     aspectSettings.displayLabelOverride[0] = "A";
     aspectSettings.displayLabelColorOverride[0] = Color(0.211f, 0.121f, 0.439f);
@@ -619,7 +619,7 @@ bool ImGui::NeoDoaColorPickerPopup(const char* label, float col[4], ImGuiColorEd
         ImGuiColorEditFlags sub_flags_to_forward = ImGuiColorEditFlags_DataTypeMask_ | ImGuiColorEditFlags_InputMask_ | ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_NoOptions | ImGuiColorEditFlags_NoSmallPreview | ImGuiColorEditFlags_AlphaPreview | ImGuiColorEditFlags_AlphaPreviewHalf;
         ImGuiColorEditFlags sub_flags = (flags & sub_flags_to_forward) | ImGuiColorEditFlags_NoPicker;
         if (flags & ImGuiColorEditFlags_DisplayRGB || (flags & ImGuiColorEditFlags_DisplayMask_) == 0) {
-            FancyVectorWidgetSettings<display::XYZW> settings;
+            FancyVectorWidgetSettings<Display::XYZW> settings;
             settings.fmt = "%g";
             settings.speed = 1.0f;
             settings.min = 0.0f;
@@ -642,13 +642,13 @@ bool ImGui::NeoDoaColorPickerPopup(const char* label, float col[4], ImGuiColorEd
                 static_cast<float>(IM_F32_TO_INT8_UNBOUND(col[3]))
             };
 
-            value_changed |= FancyVectorPiece<display::XYZW>(settings, 0, denorm);
+            value_changed |= FancyVectorPiece<Display::XYZW>(settings, 0, denorm);
             SameLine();
-            value_changed |= FancyVectorPiece<display::XYZW>(settings, 1, denorm);
+            value_changed |= FancyVectorPiece<Display::XYZW>(settings, 1, denorm);
             SameLine();
-            value_changed |= FancyVectorPiece<display::XYZW>(settings, 2, denorm);
+            value_changed |= FancyVectorPiece<Display::XYZW>(settings, 2, denorm);
             SameLine();
-            value_changed |= FancyVectorPiece<display::XYZW>(settings, 3, denorm);
+            value_changed |= FancyVectorPiece<Display::XYZW>(settings, 3, denorm);
 
             if (value_changed) {
                 // FIXME: Hackily differentiating using the DragInt (ActiveId != 0 && !ActiveIdAllowOverlap) vs. using the InputText or DropTarget.
@@ -662,7 +662,7 @@ bool ImGui::NeoDoaColorPickerPopup(const char* label, float col[4], ImGuiColorEd
             }
         }
         if (flags & ImGuiColorEditFlags_DisplayHSV || (flags & ImGuiColorEditFlags_DisplayMask_) == 0) {
-            FancyVectorWidgetSettings<display::XYZW> settings;
+            FancyVectorWidgetSettings<Display::XYZW> settings;
             settings.fmt = "%g";
             settings.speed = 1.0f;
             settings.min = 0.0f;

@@ -9,18 +9,18 @@
 
 inline constexpr int compFieldWidth = 300; // must be divisible by both 3 and 4 (and 1 and 2, but you know... MaThS...) (x,y,z,w)
 
-enum class display {
+enum class Display {
     X = 1, XY = 2, XYZ = 3, XYZW = 4
 };
 
-template<display dsp>
+template<Display dsp>
 struct FancyVectorWidgetSettings {
     bool disabled{ false };
     bool resetEnabled{ true };
     bool resetAllToSame{ true };
     float resetTo{ 0.0f };
     std::array<float, static_cast<size_t>(dsp)> resetTos{};
-    display display{ dsp };
+    Display display{ dsp };
     float speed{ 0.1f };
     float min{ 0.0f };
     float max{ 0.0f };
@@ -40,7 +40,7 @@ struct FancyVectorWidgetSettings {
         displayLabelID[0] = "###X";
         scaleY[0] = 1;
 
-        if constexpr (dsp == display::XY) {
+        if constexpr (dsp == Display::XY) {
             displayLabelOverride[1] = "Y";
             displayLabelColorOverride[1] = Color(0.20f, 0.70f, 0.20f);
             displayLabelHoverColorOverride[1] = Color(0.57f, 0.87f, 0.57f);
@@ -48,7 +48,7 @@ struct FancyVectorWidgetSettings {
             scaleY[1] = 1;
         }
 
-        if constexpr (dsp == display::XYZ) {
+        if constexpr (dsp == Display::XYZ) {
             displayLabelOverride[1] = "Y";
             displayLabelColorOverride[1] = Color(0.20f, 0.70f, 0.20f);
             displayLabelHoverColorOverride[1] = Color(0.57f, 0.87f, 0.57f);
@@ -62,7 +62,7 @@ struct FancyVectorWidgetSettings {
             scaleY[2] = 1;
         }
 
-        if constexpr (dsp == display::XYZW) {
+        if constexpr (dsp == Display::XYZW) {
             displayLabelOverride[1] = "Y";
             displayLabelColorOverride[1] = Color(0.20f, 0.70f, 0.20f);
             displayLabelHoverColorOverride[1] = Color(0.57f, 0.87f, 0.57f);
@@ -83,17 +83,17 @@ struct FancyVectorWidgetSettings {
         }
     }
 };
-inline constexpr FancyVectorWidgetSettings<display::X> defaultFancyVectorSettingsX;
-inline constexpr FancyVectorWidgetSettings<display::XY> defaultFancyVectorSettingsXY;
-inline constexpr FancyVectorWidgetSettings<display::XYZ> defaultFancyVectorSettingsXYZ;
-inline constexpr FancyVectorWidgetSettings<display::XYZW> defaultFancyVectorSettingsXYZW;
+inline constexpr FancyVectorWidgetSettings<Display::X> defaultFancyVectorSettingsX;
+inline constexpr FancyVectorWidgetSettings<Display::XY> defaultFancyVectorSettingsXY;
+inline constexpr FancyVectorWidgetSettings<Display::XYZ> defaultFancyVectorSettingsXYZ;
+inline constexpr FancyVectorWidgetSettings<Display::XYZW> defaultFancyVectorSettingsXYZW;
 
-bool FancyVector1Widget(const std::string& label, glm::vec1& vec, FancyVectorWidgetSettings<display::X> settings = defaultFancyVectorSettingsX);
-bool FancyVector2Widget(const std::string& label, glm::vec2& vec, FancyVectorWidgetSettings<display::XY> settings = defaultFancyVectorSettingsXY);
-bool FancyVector3Widget(const std::string& label, glm::vec3& vec, FancyVectorWidgetSettings<display::XYZ> settings = defaultFancyVectorSettingsXYZ);
-bool FancyVector4Widget(const std::string& label, glm::vec4& vec, FancyVectorWidgetSettings<display::XYZW> settings = defaultFancyVectorSettingsXYZW);
+bool FancyVector1Widget(const std::string& label, glm::vec1& vec, FancyVectorWidgetSettings<Display::X> settings = defaultFancyVectorSettingsX);
+bool FancyVector2Widget(const std::string& label, glm::vec2& vec, FancyVectorWidgetSettings<Display::XY> settings = defaultFancyVectorSettingsXY);
+bool FancyVector3Widget(const std::string& label, glm::vec3& vec, FancyVectorWidgetSettings<Display::XYZ> settings = defaultFancyVectorSettingsXYZ);
+bool FancyVector4Widget(const std::string& label, glm::vec4& vec, FancyVectorWidgetSettings<Display::XYZW> settings = defaultFancyVectorSettingsXYZW);
 
-template<display dsp>
+template<Display dsp>
 bool FancyVectorPiece(FancyVectorWidgetSettings<dsp>& settings, size_t idx, float* vec, ImFont* buttonFont = nullptr, ImVec2 buttonSize = { 0, 0 }) {
     bool rv{ false };
 
@@ -153,7 +153,7 @@ bool FancyVectorPiece(FancyVectorWidgetSettings<dsp>& settings, size_t idx, floa
     return rv;
 }
 
-template<display dsp>
+template<Display dsp>
 bool FancyVectorWidget(const std::string& label, float* vec, FancyVectorWidgetSettings<dsp> settings = defaultFancyVectorSettingsXYZW) {
     bool rv{ false };
 
@@ -182,17 +182,17 @@ bool FancyVectorWidget(const std::string& label, float* vec, FancyVectorWidgetSe
     ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
 
     rv |= FancyVectorPiece(settings, 0, vec, boldFont, buttonSize);
-    if constexpr (dsp == display::XY) {
+    if constexpr (dsp == Display::XY) {
         ImGui::SameLine();
         rv |= FancyVectorPiece(settings, 1, vec, boldFont, buttonSize);
     }
-    if constexpr (dsp == display::XYZ) {
+    if constexpr (dsp == Display::XYZ) {
         ImGui::SameLine();
         rv |= FancyVectorPiece(settings, 1, vec, boldFont, buttonSize);
         ImGui::SameLine();
         rv |= FancyVectorPiece(settings, 2, vec, boldFont, buttonSize);
     }
-    if constexpr (dsp == display::XYZW) {
+    if constexpr (dsp == Display::XYZW) {
         ImGui::SameLine();
         rv |= FancyVectorPiece(settings, 1, vec, boldFont, buttonSize);
         ImGui::SameLine();

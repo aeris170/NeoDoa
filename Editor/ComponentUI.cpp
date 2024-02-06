@@ -64,7 +64,7 @@ void TransformComponentUI::Render(GUI& gui, const TransformComponent& transformC
     // scale
     {
         glm::vec3 scale = transformComponent.GetLocalScale();
-        FancyVectorWidgetSettings<display::XYZ> settings;
+        FancyVectorWidgetSettings<Display::XYZ> settings;
         settings.resetTo = 1.0f;
         if (FancyVector3Widget(UINames[nameof(TransformComponent::localScale)], scale, settings)) {
             gui.ExecuteCommand<ScaleEntityCommand>(transformComponent.GetEntity(), scale);
