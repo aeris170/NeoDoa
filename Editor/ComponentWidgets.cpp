@@ -27,7 +27,7 @@ void detail::BeginWidget(const std::string& label) {
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { ImGui::GetStyle().ItemSpacing.x, 0 });
     ImGui::SetColumnWidth(0, w - compFieldWidth);
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f + 3);
-    ImGui::Text(label.c_str());
+    ImGui::Text("%s", label.c_str());
     ImGui::NextColumn();
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f);
@@ -94,7 +94,7 @@ bool EntityWidget(const std::string& label, Entity& value) {
 void UneditableEntityWidget(const std::string& label, const Entity value) {
     BeginWidget(label);
     int val = EntityTo<int>(value);
-    ImGui::Text(std::to_string(val).c_str());
+    ImGui::Text("%s", std::to_string(val).c_str());
     EndWidget();
 }
 
@@ -212,12 +212,12 @@ bool StringWidget(const std::string& label, std::string& value) {
     BeginWidget(label);
     std::stringstream ss;
     ss << "##" << label;
-    char buf[128]{ 0 };
-    strcpy_s(buf, value.c_str());
+    std::array<char, 128> buf{};
+    std::copy(value.begin(), value.end(), buf.begin());
     bool rv{ false };
-    if (ImGui::InputText(ss.str().c_str(), buf, 128, ImGuiInputTextFlags_EnterReturnsTrue)) {
+    if (ImGui::InputText(ss.str().c_str(), buf.data(), 128, ImGuiInputTextFlags_EnterReturnsTrue)) {
         rv = true;
-        value = std::string(buf);
+        value = std::string(buf.data());
     }
     EndWidget();
     return rv;
@@ -225,7 +225,7 @@ bool StringWidget(const std::string& label, std::string& value) {
 
 void UneditableStringWidget(const std::string& label, const std::string& value) {
     BeginWidget(label);
-    ImGui::Text(value.c_str());
+    ImGui::Text("%s", value.c_str());
     EndWidget();
 }
 
@@ -364,7 +364,7 @@ void Header(const std::string& label) {
     auto boldFont = io.Fonts->Fonts[1];
     ImGui::PushFont(boldFont);
 
-    ImGui::Text(label.c_str());
+    ImGui::Text("%s", label.c_str());
     ImGui::Separator();
 
     ImGui::PopFont();

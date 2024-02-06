@@ -268,7 +268,7 @@ void ComponentUI::RenderUserDefinedComponentStorage(const Observer& observer, co
             ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 0.5f, 0.1f, 1.0f });
             ImGui::CollapsingHeader(titleWithIcon.c_str(), ImGuiTreeNodeFlags_Leaf);
             if (ImGui::IsItemHovered()) {
-                ImGui::SetTooltip(instance.ErrorString().data());
+                ImGui::SetTooltip("%s", instance.ErrorString().data());
             }
             ImGui::PopStyleColor();
         }

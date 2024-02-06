@@ -170,7 +170,7 @@ bool FancyVectorWidget(const std::string& label, float* vec, FancyVectorWidgetSe
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { ImGui::GetStyle().ItemSpacing.x, 0 });
     ImGui::SetColumnWidth(0, w - compFieldWidth);
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f);
-    ImGui::Text(label.c_str());
+    ImGui::Text("%s", label.c_str());
     ImGui::NextColumn();
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f);
@@ -267,7 +267,7 @@ template<typename T>
 void UneditableArrayWidget(const std::string& label, const std::vector<T>& array) {
     BeginWidget(label);
     for (int i = 0; i < array.size(); i++) {
-        ImGui::Text(std::to_string(array[i]).c_str());
+        ImGui::Text("%s", std::to_string(array[i]).c_str());
     }
     EndWidget();
 }

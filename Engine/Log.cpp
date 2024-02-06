@@ -77,7 +77,7 @@ void Log::Print(LogSource src, LogSeverity sev, const char* fmt, ...) {
         type = GL "[DIRECTX]:" RESET " ";
         break;
     default:
-        type = "??!";
+        type = "??";
         break;
     }
 

@@ -1,7 +1,5 @@
 #include <Editor/EditorMeta.hpp>
 
-#include <Submodules/detector/detector.hpp>
-
 #include <Engine/FileNode.hpp>
 #include <Engine/SceneSerializer.hpp>
 #include <Engine/SceneDeserializer.hpp>
@@ -50,12 +48,22 @@ void EditorMeta::OnProjectUnloaded() noexcept {
 }
 
 #ifdef _WIN64
-// Do not move this include! Windows.h defined a lot of junk and it seeps into other .h files, causing lots of bizarre errors.
+// Do not move this include! Windows.h defines a lot of junk and it seeps into other .h files, causing lots of bizarre errors.
 // Exclude rarely-used stuff from Windows headers and in this case prevent compiler errors from redefinition of UUID
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
-void EditorMeta::CreateHiddenDataFolder_HandleWindows() noexcept {
+#endif
+void EditorMeta::CreateHiddenMetaDataFolderIfNotExists(FNode& root) noexcept {
+    FNode* folder = root.CreateChildFolderIfNotExists({
+        .name = EditorMeta::MetaFolderName
+    });
+    if (folder == nullptr) {
+        editorMetaFolder = &root.FindChild(std::filesystem::path(EditorMeta::MetaFolderName));
+    } else {
+        editorMetaFolder = folder;
+    }
+#ifdef _WIN64
     auto path = editorMetaFolder->AbsolutePath().string();
     SetFileAttributes(path.c_str(), FILE_ATTRIBUTE_HIDDEN);
-}
 #endif
+}

@@ -87,4 +87,5 @@ static const char* FindIconInIcons(const char* icon) {
         }
     }
     assert(false); // Icon not found, icon must be found!
+    return nullptr;
 }
