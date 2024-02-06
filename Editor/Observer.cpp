@@ -568,11 +568,11 @@ void Observer::SceneDisplay::RenderSystems(const Observer& observer, const Scene
 
 // Inner-struct ComponentDefinitionDisplay
 void Observer::ComponentDefinitionDisplay::Init() {
-    TextEditor.SetColorizerEnable(true);
-    TextEditor.SetReadOnlyEnabled(true);
-    TextEditor.SetShowWhitespaces(false);
-    TextEditor.SetText(std::string(10, ' '));
-    TextEditor.SetLanguageDefinition(TextEditor::LanguageDefinition::AngelScript());
+    TextEditorInstance.SetColorizerEnable(true);
+    TextEditorInstance.SetReadOnlyEnabled(true);
+    TextEditorInstance.SetShowWhitespaces(false);
+    TextEditorInstance.SetText(std::string(10, ' '));
+    TextEditorInstance.SetLanguageDefinition(TextEditor::LanguageDefinition::AngelScript());
 }
 
 void Observer::ComponentDefinitionDisplay::SetDisplayTarget(const AssetHandle componentDefAsset) {
@@ -581,7 +581,7 @@ void Observer::ComponentDefinitionDisplay::SetDisplayTarget(const AssetHandle co
         ComponentDefAsset = componentDefAsset;
         if (ComponentDefAsset->HasDeserializedData() && !ComponentDefAsset->HasErrorMessages()) {
             const auto& componentDef = ComponentDefAsset->DataAs<Component>();
-            TextEditor.SetText(componentDef.declaration);
+            TextEditorInstance.SetText(componentDef.declaration);
         }
     }
 }
@@ -687,7 +687,7 @@ void Observer::ComponentDefinitionDisplay::RenderSourceCode() {
     ImGui::TableNextRow();
     ImGui::TableSetColumnIndex(0);
 
-    TextEditor.Render("###ObserverComponentDefSourceCodeViewer", false, { 0.0f, -32.0f });
+    TextEditorInstance.Render("###ObserverComponentDefSourceCodeViewer", false, { 0.0f, -32.0f });
 
     ImGui::EndTable();
 }

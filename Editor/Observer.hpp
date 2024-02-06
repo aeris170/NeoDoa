@@ -78,7 +78,7 @@ private:
 
     private:
         static inline AssetHandle ComponentDefAsset{};
-        static inline TextEditor TextEditor{};
+        static inline TextEditor TextEditorInstance{};
     };
 
     struct ShaderDisplay {
