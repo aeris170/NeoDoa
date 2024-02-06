@@ -83,6 +83,7 @@ void SceneViewport::RenderSceneToBuffer(Scene& scene) {
     viewportFramebuffer->Bind();
     scene.Update(gui.get().delta);
     scene.Render();
+    FrameBuffer::BackBuffer().Bind();
 }
 
 void SceneViewport::DrawViewportSettings(bool hasScene) {
