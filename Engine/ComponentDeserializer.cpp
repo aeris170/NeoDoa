@@ -120,7 +120,7 @@ static void CompilationMessageCallback(const asSMessageInfo* msg, void* param) {
 }
 
 ComponentDeserializationResult DeserializeComponent(const FNode& file) {
-    static const auto& angel{ Core::GetCore()->Angel() };
+    static const auto& angel{ Core::GetCore()->GetAngel() };
     static auto& scriptEngine = angel->ScriptEngine();
     static auto& scriptBuilder = angel->ScriptBuilder();
     ComponentDeserializationResult rv{};
@@ -278,7 +278,7 @@ ComponentDeserializationResult DeserializeComponent(const FNode& file) {
 }
 
 ComponentDeserializationResult DeserializeComponent(const std::string_view data) {
-    static const auto& angel{ Core::GetCore()->Angel() };
+    static const auto& angel{ Core::GetCore()->GetAngel() };
     static auto& scriptEngine = angel->ScriptEngine();
     static auto& scriptBuilder = angel->ScriptBuilder();
 

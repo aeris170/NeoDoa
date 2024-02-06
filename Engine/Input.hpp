@@ -1,33 +1,37 @@
 #pragma once
 
+#include <array>
 #include <memory>
 
 #include "TypedefsAndConstants.hpp"
 
-struct Mouse {
-    double PosX, PosY, ScrollX, ScrollY;
-    int Buttons[MOUSE_BUTTON_LAST];
-};
-
-struct Keyboard {
-    int Keys[KEY_LAST];
-};
-
 struct Input {
-    Mouse Mouse;
-    Keyboard Keyboard;
+    int IsKeyPressed(int key) const noexcept;
+    int IsKeyTyped(int key) const noexcept;
+    int IsKeyReleased(int key) const noexcept;
 
-    int IsKeyPressed(int key);
-    int IsKeyTyped(int key);
-    int IsKeyReleased(int key);
+    int IsMouseButtonPressed(int button) const noexcept;
+    int IsMouseButtonReleased(int button) const noexcept;
 
-    int IsMouseButtonPressed(int button);
-    int IsMouseButtonReleased(int button);
+    double GetMouseX() const noexcept;
+    double GetMouseY() const noexcept;
+    double GetMouseScrollX() const noexcept;
+    double GetMouseScrollY() const noexcept;
 
-    double GetMouseX();
-    double GetMouseY();
-    double GetMouseScrollX();
-    double GetMouseScrollY();
+private:
+    struct Mouse {
+        double PosX, PosY, ScrollX, ScrollY;
+        std::array<int, MOUSE_BUTTON_LAST> Buttons;
+    };
+
+    struct Keyboard {
+        std::array<int, KEY_LAST> Keys;
+    };
+
+    Mouse mouse;
+    Keyboard keyboard;
+
+    friend struct Window;
 };
 
 std::unique_ptr<Input> CreateInput();

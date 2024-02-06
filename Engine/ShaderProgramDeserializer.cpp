@@ -135,7 +135,7 @@ void ShaderProgramDeserializer::Linking::DefaultOpenGLLink(ShaderProgramDeserial
     GLuint ID = glCreateProgram();
     std::array<GLuint, 5> attachedShaders{};
 
-    const Assets& assets = *Core::GetCore()->Assets().get();
+    const Assets& assets = *Core::GetCore()->GetAssets().get();
 
     // attach mandatory shaders - vertex and fragment
     AssetHandle vertexShaderAsset = assets.FindAsset(program.VertexShader);

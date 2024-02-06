@@ -104,7 +104,7 @@ void MenuBar::RenderSceneSubMenu() noexcept {
         gui.ShowNewSceneAssetModal(*currentFolder);
     }
     if (ImGui::BeginMenu("Open Scene...", gui.HasOpenProject())) {
-        const auto& assets = gui.CORE->Assets();
+        const auto& assets = gui.CORE->GetAssets();
         for (const auto& uuid : assets->SceneAssetIDs()) {
             AssetHandle sceneAsset = assets->FindAsset(uuid);
             if (ImGui::MenuItem(sceneAsset.Value().File().Name().data(), nullptr, nullptr)) {

@@ -1,5 +1,7 @@
 #include <Engine/VertexArray.hpp>
 
+#include <utility>
+
 VertexArray::VertexArray() noexcept { AllocateGPU(); }
 VertexArray::~VertexArray() noexcept { DeallocateGPU(); }
 VertexArray::VertexArray(const VertexArray& other) noexcept : VertexArray() {

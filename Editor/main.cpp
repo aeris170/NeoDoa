@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
 
     DOA_LOG_INFO("Allocating %d bytes...", sizeof(Core));
     const CorePtr& core = Core::CreateCore({ 2000, 2000 }, "NeoDoa Editor", false, "Images/neodoalogo", true);
-    core->Window()->Maximize();
+    core->GetWindow()->Maximize();
     ImGui::GetIO().IniFilename = NULL;
     DOA_LOG_INFO("Core dynamically allocated!");
 

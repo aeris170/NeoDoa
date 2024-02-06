@@ -27,7 +27,7 @@ MetaAssetInfo DeserializeMetaAssetInfo(const std::string& data) {
 
     const auto* rootElement = doc.RootElement();
     return {
-        &Core::GetCore()->Assets()->Root().FindChild(rootElement->FindAttribute(nameof_c(MetaAssetInfo::file))->Value()),
+        &Core::GetCore()->GetAssets()->Root().FindChild(rootElement->FindAttribute(nameof_c(MetaAssetInfo::file))->Value()),
         rootElement->FindAttribute(nameof_c(MetaAssetInfo::icon_index))->IntValue(),
         FindIconInIcons(rootElement->FindAttribute(nameof_c(MetaAssetInfo::fa_icon))->Value()),
         rootElement->FindAttribute(nameof_c(MetaAssetInfo::svg_icon_key))->Value()

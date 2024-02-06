@@ -30,10 +30,10 @@ struct Core {
     void SetPlaying(bool playing);
     bool IsPlaying() const;
 
-    std::unique_ptr<Angel>& Angel();
-    WindowPtr& Window();
-    std::unique_ptr<Input>& Input();
-    std::unique_ptr<FrameBuffer>& FrameBuffer();
+    std::unique_ptr<Angel>& GetAngel();
+    WindowPtr& GetWindow();
+    std::unique_ptr<Input>& GetInput();
+    std::unique_ptr<FrameBuffer>& GetFrameBuffer();
 
     void CreateAndLoadProject(std::string_view workspace, std::string_view name);
     void LoadProject(const std::string& path);
@@ -43,7 +43,7 @@ struct Core {
     void SaveLoadedProjectToDisk() const;
     bool HasLoadedProject();
 
-    std::unique_ptr<Assets>& Assets();
+    std::unique_ptr<Assets>& GetAssets();
 
     void Start();
     void Stop();
@@ -54,12 +54,12 @@ private:
     bool running{ false };
     bool playing{ false };
 
-    std::unique_ptr<struct Angel> angel{ nullptr };
+    std::unique_ptr<Angel> angel{ nullptr };
     WindowPtr window{ nullptr };
-    std::unique_ptr<struct Input> input{ nullptr };
-    std::unique_ptr<struct FrameBuffer> offscreenBuffer{ nullptr };
+    std::unique_ptr<Input> input{ nullptr };
+    std::unique_ptr<FrameBuffer> offscreenBuffer{ nullptr };
     std::unique_ptr<Project> project{ nullptr };
-    std::unique_ptr<struct Assets> assets{ nullptr };
+    std::unique_ptr<Assets> assets{ nullptr };
 
     Core() = default;
     ~Core() = default;

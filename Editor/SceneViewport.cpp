@@ -255,16 +255,16 @@ void SceneViewport::HandleMouseControls() {
         } else if (viewportCamera.IsPerspective()) {
             glm::vec3 right = glm::normalize(glm::cross(forward, up)) * (controls.cameraSpeed * gui.delta);
             glm::vec3 fwd = glm::normalize(forward) * (controls.cameraSpeed * gui.delta);
-            if (gui.CORE->Input()->IsKeyPressed(KEY_W)) {
+            if (gui.CORE->GetInput()->IsKeyPressed(KEY_W)) {
                 eye += fwd;
             }
-            if (gui.CORE->Input()->IsKeyPressed(KEY_A)) {
+            if (gui.CORE->GetInput()->IsKeyPressed(KEY_A)) {
                 eye -= right;
             }
-            if (gui.CORE->Input()->IsKeyPressed(KEY_S)) {
+            if (gui.CORE->GetInput()->IsKeyPressed(KEY_S)) {
                 eye -= fwd;
             }
-            if (gui.CORE->Input()->IsKeyPressed(KEY_D)) {
+            if (gui.CORE->GetInput()->IsKeyPressed(KEY_D)) {
                 eye += right;
             }
             controls.yaw += delta.x;

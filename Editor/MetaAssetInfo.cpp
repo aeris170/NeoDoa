@@ -31,7 +31,7 @@ void MetaAssetInfoBank::LoadFromDisk(MetaAssetInfoBank& bank, FNode& editorMetaF
         bank = std::move(result.bank);
     } else {
         static auto& Core = Core::GetCore();
-        const auto& assets = Core->Assets();
+        const auto& assets = Core->GetAssets();
         for (const auto& assetID : assets->AllAssetsIDs()) {
             AssetHandle handle = assets->FindAsset(assetID);
             assert(handle.HasValue());
@@ -64,7 +64,7 @@ void MetaAssetInfoBank::TryEmplace(const FNode& file, const MetaAssetInfo& empla
         fa_icon = _fa_icon;
         svg_icon_key = _svg_icon_key;
     } else {
-        AssetHandle handle = Core::GetCore()->Assets()->FindAssetAt(file);
+        AssetHandle handle = Core::GetCore()->GetAssets()->FindAssetAt(file);
         assert(handle.HasValue());
         if (handle->IsScene()) {
             const auto& [_fa_icon, _svg_icon_key] = FileIcons::SceneIcons[0];

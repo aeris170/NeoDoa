@@ -16,7 +16,7 @@
 
 GUI::GUI(const CorePtr& core) noexcept :
     Core(core),
-    window(core->Window()) {
+    window(core->GetWindow()) {
     // Disable imgui.ini file - we don't really need to save/load imgui
     // as we dock/position everything when the program starts, leaving
     // imgui.ini obsolete.

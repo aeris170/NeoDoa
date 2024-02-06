@@ -13,7 +13,7 @@ unordered_string_map<ComponentInstance>& UserDefinedComponentStorage::Components
 const unordered_string_map<ComponentInstance>& UserDefinedComponentStorage::Components() const { return components; }
 
 ComponentInstance* UserDefinedComponentStorage::AttachComponent(UUID component) {
-    AssetHandle handle{ Core::GetCore()->Assets()->FindAsset(component) };
+    AssetHandle handle{ Core::GetCore()->GetAssets()->FindAsset(component) };
     if (!handle.HasValue()) {
         DOA_LOG_ERROR("Something went wrong! Tried to instantiate a component but definition is missing!");
         return &components.try_emplace(component.AsString(), component, InstantiationError::DEFINITION_MISSING).first->second;
@@ -34,7 +34,7 @@ ComponentInstance* UserDefinedComponentStorage::AttachComponent(UUID component) 
     return &components.try_emplace(cmp.name, handle).first->second;
 }
 ComponentInstance* UserDefinedComponentStorage::AttachComponentWithData(UUID component, std::vector<ComponentInstance::Field>&& data) {
-    AssetHandle handle{ Core::GetCore()->Assets()->FindAsset(component) };
+    AssetHandle handle{ Core::GetCore()->GetAssets()->FindAsset(component) };
     if (!handle.HasValue()) {
         DOA_LOG_ERROR("Something went wrong! Tried to instantiate a component but definition is missing!");
         return &components.try_emplace(component.AsString(), component, InstantiationError::DEFINITION_MISSING).first->second;

@@ -209,9 +209,10 @@ bool Core::IsRunning() const { return running; }
 bool Core::IsPlaying() const { return playing; }
 void Core::SetPlaying(bool playing) { this->playing = playing; }
 
-std::unique_ptr<Angel>& Core::Angel() { return angel; }WindowPtr& Core::Window() { return window; }
-std::unique_ptr<Input>& Core::Input() { return input; }
-std::unique_ptr<FrameBuffer>& Core::FrameBuffer() { return offscreenBuffer; }
+std::unique_ptr<Angel>& Core::GetAngel() { return angel; }
+WindowPtr& Core::GetWindow() { return window; }
+std::unique_ptr<Input>& Core::GetInput() { return input; }
+std::unique_ptr<FrameBuffer>& Core::GetFrameBuffer() { return offscreenBuffer; }
 
 void Core::CreateAndLoadProject(std::string_view workspace, std::string_view name) {
     UnloadProject();
@@ -247,7 +248,7 @@ void Core::SaveLoadedProjectToDisk() const {
 }
 bool Core::HasLoadedProject() { return project != nullptr; }
 
-std::unique_ptr<Assets>& Core::Assets() { return assets; }
+std::unique_ptr<Assets>& Core::GetAssets() { return assets; }
 
 void Core::Start() {
     static bool renderingOffscreen = offscreenBuffer != nullptr;

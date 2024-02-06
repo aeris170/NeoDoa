@@ -156,7 +156,7 @@ void PerspectiveCameraComponentUI::Render(const PerspectiveCameraComponent& pers
 
 void UserDefinedComponentStorageUI::RenderComponentInstance(const ComponentInstance& componentInstance) {
     ComponentInstance& instance = const_cast<ComponentInstance&>(componentInstance);
-    AssetHandle cmpAsset{ Core::GetCore()->Assets()->FindAsset(instance.ComponentAssetID()) };
+    AssetHandle cmpAsset{ Core::GetCore()->GetAssets()->FindAsset(instance.ComponentAssetID()) };
     const auto& component{ cmpAsset->DataAs<Component>() };
     if (!cmpAsset.HasValue() || cmpAsset->HasErrorMessages()) { return; }
     for (int i = 0; i < component.fields.size(); i++) {

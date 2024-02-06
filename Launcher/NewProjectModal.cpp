@@ -118,7 +118,7 @@ void NewProjectModal::RenderConfirmationDialog() {
 
 		Core->CreateAndLoadProject(newProjectData.path, newProjectData.name);
 		Project& project = *Core->LoadedProject().get();
-		AssetHandle handle = Core->Assets()->CreateAssetAt<Scene>(Core->Assets()->Root(), "Sample Scene.scn", std::string("Sample Scene"));
+		AssetHandle handle = Core->GetAssets()->CreateAssetAt<Scene>(Core->GetAssets()->Root(), "Sample Scene.scn", std::string("Sample Scene"));
 
 		Core->SaveLoadedProjectToDisk();
 		gui.InsertProjectData({ true, false, newProjectData.name, newProjectData.path, {} });

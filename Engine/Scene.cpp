@@ -64,7 +64,7 @@ void Scene::DeleteEntity(Entity entt) {
 }
 
 bool Scene::ContainsEntity(Entity entt) const { return _registry.valid(entt); }
-size_t Scene::EntityCount() const { return _registry.alive(); }
+size_t Scene::EntityCount() const { return _registry.storage<entt::entity>()->free_list(); }
 const std::vector<Entity>& Scene::GetAllEntites() const { return _entities; }
 
 Registry& Scene::GetRegistry() { return _registry; }

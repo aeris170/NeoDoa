@@ -21,7 +21,7 @@ void Project::SetStartupScene(UUID sceneID) { startupSceneID = sceneID; }
 void Project::OpenScene(UUID sceneID) {
     if (sceneID == UUID::Empty()) { return; }
 
-    AssetHandle sceneAsset = Core::GetCore()->Assets()->FindAsset(sceneID);
+    AssetHandle sceneAsset = Core::GetCore()->GetAssets()->FindAsset(sceneID);
 
     if (!sceneAsset.HasValue()) {
         DOA_LOG_ERROR("Cannot open scene! Asset with id %ul not found!", sceneID);
@@ -40,18 +40,18 @@ void Project::CloseScene() {
 
     openSceneID = UUID::Empty();
 
-    AssetHandle openScene = Core::GetCore()->Assets()->FindAsset(id);
+    AssetHandle openScene = Core::GetCore()->GetAssets()->FindAsset(id);
     if (!openScene.HasValue()) { return; }
     openScene->DeleteDeserializedData();
 }
 bool Project::HasOpenScene() const { return openSceneID != UUID::Empty(); }
-Scene& Project::GetOpenScene() { return Core::GetCore()->Assets()->FindAsset(openSceneID)->DataAs<Scene>(); }
+Scene& Project::GetOpenScene() { return Core::GetCore()->GetAssets()->FindAsset(openSceneID)->DataAs<Scene>(); }
 UUID Project::GetOpenSceneID() const { return openSceneID; }
 
 void Project::SaveOpenSceneToDisk() {
     if (!HasOpenScene()) return;
 
-    AssetHandle openScene = Core::GetCore()->Assets()->FindAsset(openSceneID);
+    AssetHandle openScene = Core::GetCore()->GetAssets()->FindAsset(openSceneID);
     openScene->Serialize();
     OpenScene(openScene->ID());
 }

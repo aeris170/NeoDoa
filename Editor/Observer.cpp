@@ -179,7 +179,7 @@ void Observer::DisplayTargetRenderer::HandleTargetWhenFile(const Observer& obser
     if (file.IsDirectory()) {
         RenderFolderView(observer, file);
     } else {
-        AssetHandle h = gui.CORE->Assets()->FindAssetAt(file);
+        AssetHandle h = gui.CORE->GetAssets()->FindAssetAt(file);
         if (h.HasValue()) {
             RenderAssetView(observer, h);
         }
@@ -257,7 +257,7 @@ void Observer::DisplayTargetRenderer::RenderFolderView(const Observer& observer,
         ImGui::TableHeadersRow();
 
         for (auto& child : folder.Children()) {
-            if (!child.IsDirectory() && !gui.CORE->Assets()->IsAssetExistsAt(child)) { continue; }
+            if (!child.IsDirectory() && !gui.CORE->GetAssets()->IsAssetExistsAt(child)) { continue; }
 
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
@@ -365,7 +365,7 @@ void Observer::DisplayTargetRenderer::RenderShaderView(const Observer& observer,
 void Observer::DisplayTargetRenderer::RenderShaderProgramView(const Observer& observer, AssetHandle h) {
     assert(h->IsShaderProgram());
 
-    ShaderProgramDisplay::SetDisplayTarget(*observer.gui.get().CORE->Assets(), h);
+    ShaderProgramDisplay::SetDisplayTarget(*observer.gui.get().CORE->GetAssets(), h);
     ShaderProgramDisplay::RenderMessagesTable();
     ImGui::Separator();
     if (h->HasDeserializedData()) {
@@ -531,7 +531,7 @@ void Observer::SceneDisplay::RenderEntities(const Observer& observer, Scene& sce
                     auto& udcs{ scene.GetComponent<UserDefinedComponentStorage>(entt) };
                     for (const auto& [name, instance] : udcs.Components()) {
                         if (!instance.HasError()) {
-                            AssetHandle cmpAsset{ gui.CORE->Assets()->FindAsset(instance.ComponentAssetID()) };
+                            AssetHandle cmpAsset{ gui.CORE->GetAssets()->FindAsset(instance.ComponentAssetID()) };
                             nameWithIcon = ComponentIcons::FindIconByComponentName(name) + name;
                             ImGui::Text(nameWithIcon.c_str());
                         } else {

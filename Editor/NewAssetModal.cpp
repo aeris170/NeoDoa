@@ -251,43 +251,43 @@ void NewAssetModal::CreateSceneAsset() {
 void NewAssetModal::CreateComponentAsset() {
 	const GUI& gui = this->gui.get();
 	const auto sourceCode = CodeGenerator::GenerateComponentDeclaration(newAssetData.name);
-	gui.CORE->Assets()->CreateAssetAt<Component>(*newAssetData.currentFolder, newAssetData.name + Assets::COMP_EXT, sourceCode);
+	gui.CORE->GetAssets()->CreateAssetAt<Component>(*newAssetData.currentFolder, newAssetData.name + Assets::COMP_EXT, sourceCode);
 	DOA_LOG_INFO("Succesfully created a new component asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
 }
 void NewAssetModal::CreateVertexShaderAsset() {
 	const GUI& gui = this->gui.get();
 	const auto sourceCode = CodeGenerator::GenerateVertexShaderCode();
-	gui.CORE->Assets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.name + Assets::VERTEX_SHADER_EXT, sourceCode);
+	gui.CORE->GetAssets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.name + Assets::VERTEX_SHADER_EXT, sourceCode);
 	DOA_LOG_INFO("Succesfully created a new vertex shader asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
 }
 void NewAssetModal::CreateTessellationControlAsset() {
 	const GUI& gui = this->gui.get();
 	const auto sourceCode = CodeGenerator::GenerateTessellationControlShaderCode();
-	gui.CORE->Assets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.name + Assets::TESS_CTRL_SHADER_EXT, sourceCode);
+	gui.CORE->GetAssets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.name + Assets::TESS_CTRL_SHADER_EXT, sourceCode);
 	DOA_LOG_INFO("Succesfully created a new tessellation control shader asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
 }
 void NewAssetModal::CreateTessellationEvaluationAsset() {
 	const GUI& gui = this->gui.get();
 	const auto sourceCode = CodeGenerator::GenerateTessellationEvaluationShaderCode();
-	gui.CORE->Assets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.name + Assets::TESS_EVAL_SHADER_EXT, sourceCode);
+	gui.CORE->GetAssets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.name + Assets::TESS_EVAL_SHADER_EXT, sourceCode);
 	DOA_LOG_INFO("Succesfully created a new tessellation evaluation shader asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
 }
 void NewAssetModal::CreateGeometryShaderAsset() {
 	const GUI& gui = this->gui.get();
 	const auto sourceCode = CodeGenerator::GenerateGeometryShaderCode();
-	gui.CORE->Assets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.name + Assets::GEOMETRY_SHADER_EXT, sourceCode);
+	gui.CORE->GetAssets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.name + Assets::GEOMETRY_SHADER_EXT, sourceCode);
 	DOA_LOG_INFO("Succesfully created a new geometry shader asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
 }
 void NewAssetModal::CreateFragmentShaderAsset() {
 	const GUI& gui = this->gui.get();
 	const auto sourceCode = CodeGenerator::GenerateFragmentShaderCode();
-	gui.CORE->Assets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.name + Assets::FRAGMENT_SHADER_EXT, sourceCode);
+	gui.CORE->GetAssets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.name + Assets::FRAGMENT_SHADER_EXT, sourceCode);
 	DOA_LOG_INFO("Succesfully created a new fragment shader asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
 }
 void NewAssetModal::CreateShaderProgramAsset() {
 	const GUI& gui = this->gui.get();
 	ShaderProgram temporary{ .Name = newAssetData.name };
 	const auto data = temporary.Serialize();
-	gui.CORE->Assets()->CreateAssetAt<ShaderProgram>(*newAssetData.currentFolder, newAssetData.name + Assets::SHADER_PROGRAM_EXT, data);
+	gui.CORE->GetAssets()->CreateAssetAt<ShaderProgram>(*newAssetData.currentFolder, newAssetData.name + Assets::SHADER_PROGRAM_EXT, data);
 	DOA_LOG_INFO("Succesfully created a new shader program asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
 }

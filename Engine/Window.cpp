@@ -126,29 +126,29 @@ void Window::DeleteWindow(Window* window) {
 }
 
 void Window::glfwWindowOnResize(GLFWwindow* window, int width, int height) {
-    static auto& Window = Core::GetCore()->Window();
+    static auto& Window = Core::GetCore()->GetWindow();
     Window->_resolution = { width, height };
     glfwGetWindowSize(Window->_glfwWindow, &Window->_contentResolution.Width, &Window->_contentResolution.Height);
 }
 
 void Window::glfwWindowOnKeyStateChange(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    static auto& input = Core::GetCore()->Input();
-    input->Keyboard.Keys[key] = action;
+    static auto& input = Core::GetCore()->GetInput();
+    input->keyboard.Keys[key] = action;
 }
 
 void Window::glfwWindowOnMouseButtonStateChange(GLFWwindow* window, int button, int action, int mods) {
-    static auto& input = Core::GetCore()->Input();
-    input->Mouse.Buttons[button] = action;
+    static auto& input = Core::GetCore()->GetInput();
+    input->mouse.Buttons[button] = action;
 }
 
 void Window::glfwWindowOnMouseMove(GLFWwindow* window, double xpos, double ypos) {
-    static auto& input = Core::GetCore()->Input();
-    input->Mouse.PosX = xpos;
-    input->Mouse.PosY = ypos;
+    static auto& input = Core::GetCore()->GetInput();
+    input->mouse.PosX = xpos;
+    input->mouse.PosY = ypos;
 }
 
 void Window::glfwWindowOnMouseScroll(GLFWwindow* window, double xoffset, double yoffset) {
-    static auto& input = Core::GetCore()->Input();
-    input->Mouse.ScrollX = xoffset;
-    input->Mouse.ScrollY = yoffset;
+    static auto& input = Core::GetCore()->GetInput();
+    input->mouse.ScrollX = xoffset;
+    input->mouse.ScrollY = yoffset;
 }

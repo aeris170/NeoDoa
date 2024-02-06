@@ -21,9 +21,9 @@ struct EditorMeta {
 private:
     static constexpr auto MetaFolderName{ ".metadata" };
 
-    std::reference_wrapper<GUI> EditorGUI;
-    FNode* EditorMetaFolder{ nullptr };
-    std::unique_ptr<MetaAssetInfoBank> MetaAssetInfoBank{ nullptr };
+    std::reference_wrapper<GUI> editorGUI;
+    FNode* editorMetaFolder{ nullptr };
+    std::unique_ptr<MetaAssetInfoBank> metaAssetInfoBank{ nullptr };
 
     void CreateMetaAssetInfoBank() noexcept;
 

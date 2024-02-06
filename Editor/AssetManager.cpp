@@ -396,7 +396,7 @@ void AssetManager::RenderSelectedFolderContent() {
 
 void AssetManager::RenderContextMenu() {
     GUI& gui = this->gui.get();
-    Assets& assets = *gui.CORE->Assets();
+    Assets& assets = *gui.CORE->GetAssets();
 
     bool isDisabled = !hasContent;
     if (isDisabled) { ImGui::BeginDisabled(); }
@@ -544,7 +544,7 @@ bool AssetManager::FileFilter::CheckVisibility(const FNode& file) const {
 
 void AssetManager::OnProjectLoaded(Project& project) {
     hasContent = true;
-    assets = gui.get().CORE->Assets().get();
+    assets = gui.get().CORE->GetAssets().get();
     root = &assets->Root();
     SetCurrentFolder(root);
 }

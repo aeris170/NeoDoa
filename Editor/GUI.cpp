@@ -8,7 +8,7 @@
 
 GUI::GUI(const CorePtr& core) noexcept :
     CORE(core),
-    window(core->Window()) {
+    window(core->GetWindow()) {
 
     std::string title = defaultWindowName;
     title.append(" - [NO OPEN PROJECT]");
@@ -177,7 +177,7 @@ void GUI::End() {
 void GUI::CreateNewProject(std::string_view workspace, std::string_view name) {
     CORE->CreateAndLoadProject(workspace, name);
     Project& project = GetOpenProject();
-    AssetHandle handle = CORE->Assets()->CreateAssetAt<Scene>(CORE->Assets()->Root(), "Sample Scene.scn", std::string("Sample Scene"));
+    AssetHandle handle = CORE->GetAssets()->CreateAssetAt<Scene>(CORE->GetAssets()->Root(), "Sample Scene.scn", std::string("Sample Scene"));
     assert(handle.HasValue());
     project.SetStartupScene(handle->ID());
     OpenScene(handle);
@@ -204,7 +204,7 @@ void GUI::OpenProjectFromDisk(const std::string& path) {
     CORE->LoadProject(path);
     assert(HasOpenProject());
 
-    Assets& assets = *CORE->Assets();
+    Assets& assets = *CORE->GetAssets();
     Project& project = GetOpenProject();
 
     std::string title = defaultWindowName;
@@ -238,7 +238,7 @@ void GUI::CreateNewScene(FNode& folder, std::string_view name) {
     if (!HasOpenProject()) { return; }
 
     const Scene temporary(name); const auto data = temporary.Serialize();
-    AssetHandle handle = CORE->Assets()->CreateAssetAt<Scene>(folder, std::string(name) + Assets::SCENE_EXT, data);
+    AssetHandle handle = CORE->GetAssets()->CreateAssetAt<Scene>(folder, std::string(name) + Assets::SCENE_EXT, data);
     assert(handle.HasValue());
     DOA_LOG_INFO("Succesfully created a new scene asset named %s at %s", name.data(), folder.Path().c_str());
     if (!HasOpenScene()) {
@@ -259,7 +259,7 @@ void GUI::OpenScene(AssetHandle sceneHandle) {
 void GUI::SaveScene() const {
     if (sceneUUID == UUID::Empty()) { return; }
 
-    AssetHandle handle = CORE->Assets()->FindAsset(sceneUUID);
+    AssetHandle handle = CORE->GetAssets()->FindAsset(sceneUUID);
     if (handle.HasValue()) {
         assert(handle->IsScene());
         Scene& sceneData = handle->DataAs<Scene>();
@@ -327,8 +327,8 @@ void* GUI::FindIconForFileType(const FNode& file, TextureSize size) const {
     if (file.IsDirectory()) { return GetFolderIcon(size); }
     if (file.Extension() == Assets::PROJ_EXT) { return GetProjectIcon(size); } /* TODO FIX THIS SHITTY EXTENSION CHECK */
 
-    assert(CORE->Assets()->IsAssetExistsAt(file));
-    AssetHandle asset = CORE->Assets()->FindAssetAt(file);
+    assert(CORE->GetAssets()->IsAssetExistsAt(file));
+    AssetHandle asset = CORE->GetAssets()->FindAssetAt(file);
 
     if (asset->IsScene())                                              { return GetSceneIcon(size);                        }
     if (asset->IsComponentDefinition())                                { return GetComponentIcon(size);                    }

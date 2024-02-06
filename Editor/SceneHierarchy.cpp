@@ -276,7 +276,7 @@ void SceneHierarchy::RenderContextMenu(const Entity entity) {
                 scene.EmplaceComponent<UserDefinedComponentStorage>(entity);
             }
             UserDefinedComponentStorage& storage = scene.GetComponent<UserDefinedComponentStorage>(entity);
-            auto& assets{ gui.CORE->Assets() };
+            auto& assets{ gui.CORE->GetAssets() };
             for (auto cmpid : assets->ComponentDefinitionAssetIDs()) {
                 AssetHandle handle = assets->FindAsset(cmpid);
                 if (!handle->HasDeserializedData()) { continue; }

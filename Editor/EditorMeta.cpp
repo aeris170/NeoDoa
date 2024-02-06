@@ -11,7 +11,7 @@
 #include <Editor/UserDefinedComponentStorageDeserializer.hpp>
 
 EditorMeta::EditorMeta(GUI& gui) noexcept :
-    EditorGUI(gui) {
+    editorGUI(gui) {
     SceneSerializer::Entities::SerializeUserDefinedComponents = SerializeUserDefinedComponentStorage;
     SceneDeserializer::Entities::DeserializeUserDefinedComponents = DeserializeUserDefinedComponentStorage;
 
@@ -20,14 +20,14 @@ EditorMeta::EditorMeta(GUI& gui) noexcept :
     gui.Events.OnProjectUnloaded += std::bind_front(&EditorMeta::OnProjectUnloaded, this);
 }
 
-GUI& EditorMeta::GetEditorGUI() const noexcept { return EditorGUI; }
+GUI& EditorMeta::GetEditorGUI() const noexcept { return editorGUI; }
 FNode& EditorMeta::GetEditorMetaFolder() const noexcept {
-    assert(EditorMetaFolder); // Oops, was about to d-ref a nullptr! Good thing I crashed it before.
-    return *EditorMetaFolder;
+    assert(editorMetaFolder); // Oops, was about to d-ref a nullptr! Good thing I crashed it before.
+    return *editorMetaFolder;
 }
 MetaAssetInfoBank& EditorMeta::GetMetaAssetInfoBank() const noexcept {
-    assert(MetaAssetInfoBank); // Oops, was about to d-ref a nullptr! Good thing I crashed it before.
-    return *MetaAssetInfoBank;
+    assert(metaAssetInfoBank); // Oops, was about to d-ref a nullptr! Good thing I crashed it before.
+    return *metaAssetInfoBank;
 }
 
 #ifdef _WIN64
@@ -42,31 +42,31 @@ void CreateHiddenMetaDataFolderIfNotExists(EditorMeta& meta, FNode& root) noexce
         .name = EditorMeta::MetaFolderName
     });
     if (folder == nullptr) {
-        meta.EditorMetaFolder = &root.FindChild(std::filesystem::path(EditorMeta::MetaFolderName));
+        meta.editorMetaFolder = &root.FindChild(std::filesystem::path(EditorMeta::MetaFolderName));
     } else {
-        meta.EditorMetaFolder = folder;
+        meta.editorMetaFolder = folder;
     }
 
     if constexpr (platform == Platform::Windows) {
-        auto path = meta.EditorMetaFolder->AbsolutePath().string();
+        auto path = meta.editorMetaFolder->AbsolutePath().string();
         SetFileAttributes(path.c_str(), FILE_ATTRIBUTE_HIDDEN);
     }
 }
 void EditorMeta::CreateMetaAssetInfoBank() noexcept {
-    MetaAssetInfoBank = std::make_unique<struct MetaAssetInfoBank>();
-    MetaAssetInfoBank::LoadFromDisk(*MetaAssetInfoBank.get(), *EditorMetaFolder);
+    metaAssetInfoBank = std::make_unique<MetaAssetInfoBank>();
+    MetaAssetInfoBank::LoadFromDisk(*metaAssetInfoBank.get(), *editorMetaFolder);
 }
 
 void EditorMeta::OnProjectLoaded(const Project& project) noexcept {
     static const auto& Core = Core::GetCore();
-    const auto& assets = Core->Assets();
+    const auto& assets = Core->GetAssets();
     CreateHiddenMetaDataFolderIfNotExists(*this, assets->Root());
     CreateMetaAssetInfoBank();
 }
 void EditorMeta::OnProjectSaved(const Project& project) noexcept {
-    MetaAssetInfoBank::SaveToDisk(*MetaAssetInfoBank.get(), *EditorMetaFolder);
+    MetaAssetInfoBank::SaveToDisk(*metaAssetInfoBank.get(), *editorMetaFolder);
 }
 void EditorMeta::OnProjectUnloaded() noexcept {
-    EditorMetaFolder = nullptr;
-    MetaAssetInfoBank = nullptr;
+    editorMetaFolder = nullptr;
+    metaAssetInfoBank = nullptr;
 }

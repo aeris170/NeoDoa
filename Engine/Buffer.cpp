@@ -1,5 +1,7 @@
 #include <Engine/Buffer.hpp>
 
+#include <utility>
+
 Buffer::Buffer(const OpenGL::BufferData& data) noexcept :
     data(data) {
     AllocateGPU();

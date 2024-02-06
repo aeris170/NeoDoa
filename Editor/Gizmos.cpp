@@ -40,7 +40,7 @@ void Gizmos::Render(Scene& scene) {
     TransformComponent& transformComponent = scene.GetComponent<TransformComponent>(selectedEntity);
     glm::mat4 matrix = transformComponent.GetWorldMatrix();
 
-    bool snap = sv.gui.get().CORE->Input()->IsKeyPressed(KEY_LEFT_CONTROL);
+    bool snap = sv.gui.get().CORE->GetInput()->IsKeyPressed(KEY_LEFT_CONTROL);
     float snapValue = 0.5f;
     if (settings.type == ImGuizmo::OPERATION::ROTATE) { snapValue = 5.0f; }
 
