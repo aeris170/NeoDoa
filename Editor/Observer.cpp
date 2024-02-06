@@ -694,11 +694,11 @@ void Observer::ComponentDefinitionDisplay::RenderSourceCode() {
 
 // Inner-struct ShaderDisplay
 void Observer::ShaderDisplay::Init() {
-    TextEditor.SetColorizerEnable(true);
-    TextEditor.SetReadOnlyEnabled(true);
-    TextEditor.SetShowWhitespaces(false);
-    TextEditor.SetText(std::string(10, ' '));
-    TextEditor.SetLanguageDefinition(TextEditor::LanguageDefinition::GLSL());
+    TextEditorInstance.SetColorizerEnable(true);
+    TextEditorInstance.SetReadOnlyEnabled(true);
+    TextEditorInstance.SetShowWhitespaces(false);
+    TextEditorInstance.SetText(std::string(10, ' '));
+    TextEditorInstance.SetLanguageDefinition(TextEditor::LanguageDefinition::GLSL());
 }
 
 void Observer::ShaderDisplay::SetDisplayTarget(const AssetHandle shaderAsset) {
@@ -707,7 +707,7 @@ void Observer::ShaderDisplay::SetDisplayTarget(const AssetHandle shaderAsset) {
         ShaderAsset = shaderAsset;
         if (ShaderAsset->HasDeserializedData() && !ShaderAsset->HasErrorMessages()) {
             const auto& shader = ShaderAsset->DataAs<Shader>();
-            TextEditor.SetText(shader.SourceCode);
+            TextEditorInstance.SetText(shader.SourceCode);
         }
     }
 }
@@ -810,7 +810,7 @@ void Observer::ShaderDisplay::RenderSourceCode() {
     ImGui::TableNextRow();
     ImGui::TableSetColumnIndex(0);
 
-    TextEditor.Render("###ObserverShaderSourceCodeViewer", false, { 0.0f, -32.0f });
+    TextEditorInstance.Render("###ObserverShaderSourceCodeViewer", false, { 0.0f, -32.0f });
 
     ImGui::EndTable();
 }

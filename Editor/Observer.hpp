@@ -93,7 +93,7 @@ private:
 
     private:
         static inline AssetHandle ShaderAsset{};
-        static inline TextEditor TextEditor{};
+        static inline TextEditor TextEditorInstance{};
     };
 
     struct ShaderProgramDisplay {
