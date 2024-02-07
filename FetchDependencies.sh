@@ -5,9 +5,25 @@ else
 	platform=$1
 fi
 
-mkdir vcpkg
-git clone https://github.com/Microsoft/vcpkg.git
+if [ -z "$2" ]; then
+    echo "No clonemode supplied, defaulting to https"
+	clonemode="https"
+else
+	clonemode=$2
+fi
+
+mkdir -p vcpkg
+if [ "$clonemode" = "https" ]; then
+    git clone https://github.com/Microsoft/vcpkg.git
+elif [ "$clonemode" = "ssh" ]; then
+    git clone git@github.com:microsoft/vcpkg.git
+else
+	echo '\033[0;31mIncorrect clonemode! Expected https or ssh got something else!'
+	exit
+fi
+
 cd vcpkg
+git pull
 chmod +x bootstrap-vcpkg.sh
 ./bootstrap-vcpkg.sh
 ./vcpkg integrate install
@@ -51,6 +67,8 @@ echo "Installing STB"
 
 echo "Installing TinyXML2"
 ./vcpkg install tinyxml2 --triplet $platform
+
+./vcpkg upgrade
 
 ./vcpkg integrate install
 read -rsp $'Press any key to continue...\n' -n1 key
