@@ -34,7 +34,7 @@ public:
 			return reinterpret_cast<void*>(tex);
 		};
 		Instance().DeleteTexture = [](void* tex) {
-			TEX texID = reinterpret_cast<TEX>(tex);
+			TEX texID = static_cast<TEX>(reinterpret_cast<uint64_t>(tex));
 			glDeleteTextures(1, &texID);
 		};
 	}
