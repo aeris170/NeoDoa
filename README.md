@@ -131,18 +131,30 @@ You should see no errors when this scripts completes. If you do, please create a
 
 Building the makefile (or Visual Studio Project) CMake should be done with the commands below:
 
+For Windows:
 ```sh
 mkdir build
 cd build
 cmake ..
 ```
+For Linux:
+```sh
+mkdir build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Release .. # Debug or Release
+```
 
 #### OR
 
-There is also the helper script [`cmake.sh`](https://github.com/aeris170/NeoDoa/blob/master/cmake.sh) to execute the commands above.
+There are also the helper scripts [`cmake.sh`](https://github.com/aeris170/NeoDoa/blob/master/cmake.sh) to execute the commands above.
 
+For Windows:
 ```sh
 sh cmake.sh
+```
+For Linux:
+```sh
+sh cmakeLinuxDebug.sh # OR sh cmakeLinuxRelease.sh
 ```
 
 #### 5. Building!
