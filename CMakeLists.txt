@@ -27,6 +27,7 @@ add_compile_options("$<$<CONFIG:RELEASE>:-DNDEBUG>")
 add_compile_options("$<$<CONFIG:RELEASE>:-D_NDEBUG>")
 add_compile_definitions(ASSIMP_BUILD_ZLIB=ON)
 add_compile_definitions(IMGUI_DEFINE_MATH_OPERATORS)
+add_compile_definitions(GLM_ENABLE_EXPERIMENTAL)
 
 add_subdirectory(Submodules/angelscript_addons_impl)
 add_subdirectory(Submodules/detector)
