@@ -19,6 +19,7 @@ find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 find_package(tinyxml2 CONFIG REQUIRED)
+find_package(ICU REQUIRED COMPONENTS uc dt i18n)
 
 target_link_libraries(Engine PUBLIC assimp::assimp)
 target_link_libraries(Engine PUBLIC imgui::imgui)
@@ -29,6 +30,7 @@ target_link_libraries(Engine PUBLIC glfw)
 target_link_libraries(Engine PUBLIC glm::glm)
 target_link_libraries(Engine PUBLIC tinyxml2::tinyxml2)
 target_link_libraries(Engine PUBLIC IconFontCppHeaders)
+target_link_libraries(Engine PUBLIC ICU::uc ICU::dt ICU::i18n)
 
 set(GROUP_LIST
     "NeoDoa.hpp"
