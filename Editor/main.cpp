@@ -24,9 +24,9 @@ int main(int argc, char* argv[]) {
     } catch (const std::exception& err) {
         DOA_LOG_FATAL("FATAL ERROR: %s\n", err.what());
         std::cerr << program << std::endl;
-        //std::exit(1);
+        std::exit(1);
     }
-    //std::string path = program.get("project_path");
+    std::string path = program.get("project_path");
     //- Parse Command Line Arguments -//
 
     DOA_LOG_INFO("Allocating %d bytes...", sizeof(Core));
@@ -43,8 +43,7 @@ int main(int argc, char* argv[]) {
     DOA_LOG_INFO("Allocating %d bytes...", sizeof(GUI));
     std::shared_ptr<GUI> gui_ptr = std::make_shared<GUI>(core);
     DOA_LOG_INFO("GUI dynamically allocated!");
-    gui_ptr->OpenProjectFromDisk("C:\\NeoDoaTestProjects\\DD\\ne bilim knk.doa");
-    //gui_ptr->OpenProjectFromDisk(path);
+    gui_ptr->OpenProjectFromDisk(path);
     ImGuiAddRenderCommand([gui = gui_ptr](float delta) { gui->operator()(delta); });
 
     core->CreateAttachment<OutlineAttachment>(gui_ptr);
