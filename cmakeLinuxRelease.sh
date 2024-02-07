@@ -1,4 +1,4 @@
-mkdir build
+mkdir -p build
 cd build
-cmake -DCMAKE_CXX_FLAGS="-fpermissive" -DCMAKE_BUILD_TYPE=RELEASE ..
+cmake -DCMAKE_BUILD_TYPE=RELEASE ..
 read -p "Press enter to continue"
