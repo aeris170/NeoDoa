@@ -29,7 +29,7 @@ void ErrorModal::Render() {
 	ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
 
 	if (ImGui::BeginPopupModal(title, &isModalOpen, ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::Text(errorText.c_str());
+		ImGui::TextUnformatted(errorText.c_str());
 
 		ImGui::Separator();
 

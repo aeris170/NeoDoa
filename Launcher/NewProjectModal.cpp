@@ -106,10 +106,10 @@ void NewProjectModal::RenderNameSelectionDialog() {
 	}
 }
 void NewProjectModal::RenderConfirmationDialog() {
-	ImGui::Text(("Name: " + newProjectData.name).c_str());
-	ImGui::Text(("Path: " + newProjectData.path).c_str());
+	ImGui::Text("Name: %s", newProjectData.name.c_str());
+	ImGui::Text("Path: %s", newProjectData.path.c_str());
 	ImGui::NewLine();
-	ImGui::Text("Continue and create project?");
+	ImGui::TextUnformatted("Continue and create project?");
 	ImGui::Separator();
 
 	if (ImGui::Button(YES_BUTTON_TEXT, MODAL_BUTTONS_SIZE)) {

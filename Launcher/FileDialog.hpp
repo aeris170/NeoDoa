@@ -31,10 +31,10 @@ public:
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, (fmt == 0) ? GL_BGRA : GL_RGBA, GL_UNSIGNED_BYTE, data);
 			glGenerateMipmap(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, 0);
-			return (void*) tex;
+			return reinterpret_cast<void*>(tex);
 		};
 		Instance().DeleteTexture = [](void* tex) {
-			TEX texID = (TEX) tex;
+			TEX texID = reinterpret_cast<TEX>(tex);
 			glDeleteTextures(1, &texID);
 		};
 	}

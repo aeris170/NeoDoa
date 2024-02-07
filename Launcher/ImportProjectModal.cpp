@@ -70,10 +70,10 @@ void ImportProjectModal::RenderSelectionDialog() {
 	}
 }
 void ImportProjectModal::RenderConfirmationDialog() {
-	ImGui::Text(("Name: " + importProjectData.name).c_str());
-	ImGui::Text(("Path: " + importProjectData.path).c_str());
+	ImGui::Text("Name: %s", importProjectData.name.c_str());
+	ImGui::Text("Path: %s", importProjectData.path.c_str());
 	ImGui::NewLine();
-	ImGui::Text("Continue and open project?");
+	ImGui::TextUnformatted("Continue and open project?");
 	ImGui::Separator();
 
 	if (ImGui::Button(YES_BUTTON_TEXT, MODAL_BUTTONS_SIZE)) {
