@@ -789,16 +789,16 @@ void* FileDialog::m_getIcon(const std::filesystem::path& path)
 
 	// light theme - load default icons
 	if ((wndBg.x + wndBg.y + wndBg.z) / 3.0f > 0.5f) {
-		uint8_t* data = (uint8_t*)ifd::GetDefaultFileIcon();
+		uint8_t* data = (uint8_t*)GetDefaultFileIcon();
 		if (iconID == 0)
-			data = (uint8_t*)ifd::GetDefaultFolderIcon();
+			data = (uint8_t*)GetDefaultFolderIcon();
 		m_icons[pathU8] = this->CreateTexture(data, IFD_DEFAULT_ICON_SIZE, IFD_DEFAULT_ICON_SIZE, 0);
 	}
 	// dark theme - invert the colors
 	else {
-		uint8_t* data = (uint8_t*)ifd::GetDefaultFileIcon();
+		uint8_t* data = (uint8_t*)GetDefaultFileIcon();
 		if (iconID == 0)
-			data = (uint8_t*)ifd::GetDefaultFolderIcon();
+			data = (uint8_t*)GetDefaultFolderIcon();
 
 		uint8_t* invData = (uint8_t*)malloc(IFD_DEFAULT_ICON_SIZE * IFD_DEFAULT_ICON_SIZE * 4);
 		for (int y = 0; y < 32; y++) {

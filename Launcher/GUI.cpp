@@ -330,19 +330,19 @@ void GUI::RenderProjectData(ProjectData& data) noexcept {
     ImGui::TableNextColumn();
     ImGui::AlignTextToFramePadding();
     if (data.IsValid) {
-        ImGui::TextColored(ProjectsTableCheckColor, ProjectsTableCheckIcon);
+        ImGui::TextColored(ProjectsTableCheckColor, "%s", ProjectsTableCheckIcon);
     } else {
-        ImGui::TextColored(ProjectsTableCrossColor, ProjectsTableCrossIcon);
+        ImGui::TextColored(ProjectsTableCrossColor, "%s", ProjectsTableCrossIcon);
     }
 
     ImGui::TableNextColumn();
-    ImGui::Text(data.Name.c_str());
+    ImGui::TextUnformatted(data.Name.c_str());
 
     ImGui::TableNextColumn();
-    ImGui::Text(data.AbsolutePath.c_str());
+    ImGui::TextUnformatted(data.AbsolutePath.c_str());
 
     ImGui::TableNextColumn();
-    ImGui::Text(data.LastOpened.c_str());
+    ImGui::TextUnformatted(data.LastOpened.c_str());
 
     ImGui::TableNextColumn();
     if (data.IsValid) {
@@ -365,7 +365,10 @@ void GUI::RenderProjectData(ProjectData& data) noexcept {
                     exe = "./Editor";
                 }
                 std::string command = std::string(exe).append(1, ' ').append(data.AbsolutePath).append(1, static_cast<char>(std::filesystem::path::preferred_separator)).append(data.Name).append(Assets::PROJ_EXT);
-                std::system(command.c_str());
+                auto sys = std::system(command.c_str());
+                if (sys == -1) {
+                    DOA_LOG_WARNING("[Launcher::GUI] A call to std::system returned -1.");
+                }
             } else {
                 errorModal.Show(std::format(ErrorCannotOpenProject, data.Name));
                 data.IsValid = false;
