@@ -31,7 +31,13 @@ struct SVGPathway {
     static const Texture& Get(const std::string& key, const TextureStyle style = TextureStyle::NONE, const TextureSize size = TextureSize::MEDIUM);
 
 private:
-    using TexturePack = std::array<Texture, static_cast<size_t>(TextureSize::SIZE_COUNT)>;
+    struct TexturePack {
+        Texture SmallTexture;
+        Texture MediumTexture;
+        Texture LargeTexture;
+
+        Texture& operator[](size_t index) noexcept;
+    };
 
     static inline std::filesystem::path directory;
     static inline Color color;

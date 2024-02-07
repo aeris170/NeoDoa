@@ -189,3 +189,13 @@ void SVGPathway::Load(std::string_view key) {
         }
     }
 }
+
+Texture& SVGPathway::TexturePack::operator[](size_t index) noexcept {
+    assert(index >= 0 && index < 3);
+    switch(index){
+        case 0: return SmallTexture;
+        case 1: return MediumTexture;
+        case 2: return LargeTexture;
+    }
+    std::abort();
+}
