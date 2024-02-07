@@ -35,5 +35,4 @@ Platform consteval GetCurrentPlatform() noexcept {
 			"Unsupported platform."
 		);
 	}
-    static_assert();
 }
