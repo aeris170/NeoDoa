@@ -6,14 +6,12 @@
 2. Keep PR simple and focused - one PR per feature.
 3. Make a Pull Request.
 4. Check back if any revisions are requested.
-5. ???
-6. Profit :)
 
 #### Tips
 
 Feel free to contribute bug fixes or documentation fixes as pull request.
 
-If you are looking for ideas what to work on, head to [Issues](https://github.com/aeris170/neodoa/issues) and checkout out open tickets or start a conversation. It is best to start conversation if you are going to make major changes to the engine or add significant features to get advice on how to approach it.
+If you are looking for ideas what to work on, head to [Issues](https://github.com/aeris170/NeoDoa/issues) and checkout out open tickets or start a conversation. It is best to start conversation if you are going to make major changes to the engine or add significant features to get advice on how to approach it.
 
 Try to keep PR focused on a single feature, small PR's are easier to review and will get merged faster. If your PR is too large, we'll want it get broken down to chunks of small features.
 
@@ -79,14 +77,10 @@ else { then2(); }
 ### Keep empty function/struct bodies one line
 
 ```cpp
-struct A {}
+struct A {} // demonstration only, we shouldn't have empty structs
 
 void Foo() {}
 ```
-
-### Use tabs for indentation
-
-This is pretty much self explanatory.
 
 ### Remove all trailing white spaces and ending line
 
@@ -132,7 +126,7 @@ for (;;)
 if (false) {}
 int b[5] { 8, 20, 25, 9, 14 };
 int a[10];
-glm::vec3 *vector{ 1, 1, 1 };
+glm::vec3 vector{ 1, 1, 1 };
 ```
 
 ### Define variables where they are first needed in a function
@@ -153,12 +147,12 @@ void foo() {
 
 ### Adopt the "early-return" policy
 
-When checking for nullness, or parameter correctness, exit functions early.
+When checking for nullness, or parameter correctness, exit functions early. Be a never-nester.
 
 ```cpp
 // Don't do this
 void SomeFunc(int* x) {
-    if(x != nullptr) { 
+    if (x != nullptr) { 
         /*
         *  Logic
         */
@@ -168,8 +162,8 @@ void SomeFunc(int* x) {
 
 ```cpp
 // Do this
-void IncrementIfNotZero(int x) {
-    if(x == nullptr) { return; }
+void SomeFunc(int* x) {
+    if (x == nullptr) { return; }
     
     /*
     *  Logic
@@ -179,7 +173,7 @@ void IncrementIfNotZero(int x) {
 
 ## Naming and Structure
 
-Namespaces, classes (use struct keyword), private members (see below), and global variables are banned.  Global functions are preferred instead of dodgy Factory pattern implementations.
+Namespaces, global variables are banned. Global functions are preferred over where appropriate.
 
 ### Capitalization
 
@@ -195,10 +189,7 @@ struct Sample {
 // Member variable names are camelCase.
 struct IntArray {
 
-    int* arrayOfInts;	
-	
-    // If however, the member should be private (read-only, from outside the class), an '_' character is appended to its name.
-    int _size;
+    int* arrayOfInts;
 };
 
 // Member functions names are PascalCase
@@ -206,8 +197,8 @@ struct Foo {
     void Bar();
 };
 
-// Constant names are ALL_CAPITALS, separated by underscores.
-constexpr int THIS_IS_A_CONSTANT_NUMBER = 5;
+// Constant names are PascalCase, separated by underscores.
+constexpr int ThisIsAConstant = 5;
 ```
 
 ### Acronyms, if variable, should not be upper-case, otherwise they must be upper-case.
@@ -220,30 +211,15 @@ int GetID() { ... }; // not "GetId()"
 CRUD *c = new CRUD(); // not "Crud";
 ```
 
-### Cache the 'this' reference as '\_this' when implementing the singleton pattern.
-
-```cpp
-class Singleton {
-	static Singleton* _this;
-	
-	Singleton() {
-		if(_this) throw "This is a singleton!" // not so thread-safe but ¯\_(ツ)_/¯
-		
-		_this = this;
-	}
-};
-```
-
 ## Privacy
 
-### DON'T make member variables private unless you have a good reason to do so, instead mark them as "read-only"
+### If there are no good reasons for encapsulation, then there shouldn't be any encapsulation.
 
-If a member should be private and **trivial** getters and setters are to be provided, we say "fuck that" and make it public (and maybe const).
-Append an '\_' character in front of the member's name if you do this to signify the nature of the member. Members that have an '\_' character in front of their names are to be
-considered read-only from outside of the class. "Private" (read-only) variables with setters are oxymoron, and are to be used with caution.
+If a member should be private and **trivial** getters and setters are to be provided; we don't do that here. "private" variables with setters are oxymoron and cause confusion, and are to be used with caution.
+
 ```cpp
 // DON'T
-class Point2D { // this is pointless to do and verbose
+class Point2D { // this is pointless to do and verbose with no good reason
     int GetX() const;
     void SetX(int x);
     int GetY() const;
@@ -253,32 +229,55 @@ private:
     int y;
 };
 ```
-or
+
 ```cpp
 // DO
 struct Point2D {
     int x; 
-    // or int _x; 
-    // or even better, const int x;
     int y;
 };
 ```
 
-## Namespaces and Classes
+## Namespaces and Classes/Structs
 
-Again, namespaces are banned. End of the story :)
-For classes, there is no strong opinion but they are frowned upon anyways.
+Users of NeoDoa should not have to browse functionality namespace by namespace. Therefore, namespaces are banned. Any and all functionality of NeoDoa should be declared and defined in the global namespace. Usage of `detail` namespaces to hide implementation details are allowed, but should be kept to a minimum.
+
+For the `class` keyword, developers should favor the `struct` keyword and put the public API to the top of the `struct`.
+
+```cpp
+// DON'T
+class Something { // class - implicitly private members. usage of public: is mandatory
+public:
+    void DoWork(); 
+    void DoWork2();
+private:
+    int data;
+    int data2;
+};
+```
+
+```cpp
+// DO
+struct Something { // struct - implicitly public members. usage of public: is redundant
+    void DoWork(); 
+    void DoWork2();
+private:
+    int data;
+    int data2;
+};
+```
 
 ### Don't define member functions in the header, unless you have to
 
-If a member function is to be defined in the header, you better have a good reason to do so.
+If a member function is to be defined in the header, there must be a good reason to do so.
+
+Template functions are an example of a good reason.
+
+Functions marked `inline` are an example of a bad reason. They have no positive benefits. They increase compile times.
 
 ```cpp
 // hpp file
 struct Example {
-
-    bool foo;
-
     void DoStuff(); // good
 
     inline void DoMoreStuff() { // go to the cpp file please...
