@@ -129,9 +129,9 @@ You should see no errors when this scripts completes. If you do, please create a
 
 #### 4. Building with CMake
 
-Building the makefile (or Visual Studio Project) CMake should be done with the commands below:
+Building the makefile (or the Visual Studio Project) should be done with the commands below:
 
-For Windows:
+For Windows (Visual Studio Project):
 ```sh
 mkdir build
 cd build
@@ -148,7 +148,7 @@ cmake -DCMAKE_BUILD_TYPE=Release .. # Debug or Release
 
 There are also the helper scripts [`cmake.sh`](https://github.com/aeris170/NeoDoa/blob/master/cmake.sh) to execute the commands above.
 
-For Windows:
+For Windows (Visual Studio Project):
 ```sh
 sh cmake.sh
 ```
@@ -162,12 +162,13 @@ sh cmakeLinuxDebug.sh # OR sh cmakeLinuxRelease.sh
 If you built to a makefile, what's left is calling `make`
 
 ```sh
-make
+cd build
+make # make -jX    |for X threaded compilation
 ```
 
 ---
 
-If you build to Visual Studio Project, boot up a Visual Studio of your choosing and press F5.
+If you built to a Visual Studio Project, boot up a Visual Studio instance and press F5.
 
 ## Contributing
 
