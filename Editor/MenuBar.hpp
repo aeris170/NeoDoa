@@ -44,9 +44,9 @@ private:
         void RenderLicenceNotices() noexcept;
     } aboutSection;
 
-    void RenderProjectSubMenu() noexcept;
+    void RenderFileSubMenu() noexcept;
     void RenderEditSubMenu() noexcept;
-    void RenderSceneSubMenu() noexcept;
+    void RenderAssetsSubMenu() noexcept;
     void RenderHelpSubMenu() noexcept;
 
 };

@@ -22,16 +22,16 @@ void MenuBar::Render() noexcept {
 	GUI& gui = this->gui;
 
     if (ImGui::BeginMenuBar()) {
-        if (ImGui::BeginMenu("Project")) {
-            RenderProjectSubMenu();
+        if (ImGui::BeginMenu("File")) {
+            RenderFileSubMenu();
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Edit")) {
             RenderEditSubMenu();
             ImGui::EndMenu();
         }
-        if (ImGui::BeginMenu("Scene")) {
-            RenderSceneSubMenu();
+        if (ImGui::BeginMenu("Assets")) {
+            RenderAssetsSubMenu();
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Help")) {
@@ -47,15 +47,33 @@ void MenuBar::Render() noexcept {
 
 void MenuBar::End() noexcept {}
 
-void MenuBar::RenderProjectSubMenu() noexcept {
+void MenuBar::RenderFileSubMenu() noexcept {
     GUI& gui = this->gui;
+	if (ImGui::MenuItem("New Scene", GUI::Shortcuts::NewSceneShortcut, nullptr, gui.HasOpenProject())) {
+		FNode* currentFolder = gui.GetAssetManager().GetCurrentFolder();
+		assert(currentFolder != nullptr);
+		gui.ShowNewSceneAssetModal(*currentFolder);
+	}
+	if (ImGui::BeginMenu("Open Scene...", gui.HasOpenProject())) {
+		const auto& assets = gui.CORE->GetAssets();
+		for (const auto& uuid : assets->SceneAssetIDs()) {
+			AssetHandle sceneAsset = assets->FindAsset(uuid);
+			if (ImGui::MenuItem(sceneAsset.Value().File().Name().data(), nullptr, nullptr)) {
+				gui.OpenScene(sceneAsset);
+			}
+		}
+		ImGui::EndMenu();
+	}
+	if (ImGui::MenuItem("Save Scene", GUI::Shortcuts::SaveSceneShortcut, nullptr, gui.HasOpenScene())) {
+		gui.SaveScene();
+	}
+	ImGui::Separator();
     if (ImGui::MenuItem("New Project", GUI::Shortcuts::NewProjectShortcut)) {
 		//gui.ShowNewProjectModal();
     }
     if (ImGui::MenuItem("Open Project...", GUI::Shortcuts::OpenProjectShortcut)) {
 		//gui.ShowOpenProjectModal();
     }
-    ImGui::Separator();
     if (ImGui::MenuItem("Save Project", GUI::Shortcuts::SaveProjectShortcut, nullptr, gui.HasOpenProject())) {
         gui.SaveProjectToDisk();
     }
@@ -96,31 +114,8 @@ void MenuBar::RenderEditSubMenu() noexcept {
 	}
 }
 
-void MenuBar::RenderSceneSubMenu() noexcept {
+void MenuBar::RenderAssetsSubMenu() noexcept {
     GUI& gui = this->gui;
-    if (ImGui::MenuItem("New Scene", GUI::Shortcuts::NewSceneShortcut, nullptr, gui.HasOpenProject())) {
-        FNode* currentFolder = gui.GetAssetManager().GetCurrentFolder();
-        assert(currentFolder != nullptr);
-        gui.ShowNewSceneAssetModal(*currentFolder);
-    }
-    if (ImGui::BeginMenu("Open Scene...", gui.HasOpenProject())) {
-        const auto& assets = gui.CORE->GetAssets();
-        for (const auto& uuid : assets->SceneAssetIDs()) {
-            AssetHandle sceneAsset = assets->FindAsset(uuid);
-            if (ImGui::MenuItem(sceneAsset.Value().File().Name().data(), nullptr, nullptr)) {
-                gui.OpenScene(sceneAsset);
-            }
-        }
-        ImGui::EndMenu();
-    }
-    ImGui::Separator();
-    if (ImGui::MenuItem("Save Scene", GUI::Shortcuts::SaveSceneShortcut, nullptr, gui.HasOpenScene())) {
-        gui.SaveScene();
-    }
-    ImGui::Separator();
-    if (ImGui::MenuItem("Close Scene", GUI::Shortcuts::CloseSceneShortcut, nullptr, gui.HasOpenScene())) {
-        gui.CloseScene();
-    }
 }
 
 void MenuBar::RenderHelpSubMenu() noexcept {
