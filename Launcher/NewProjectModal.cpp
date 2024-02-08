@@ -116,12 +116,17 @@ void NewProjectModal::RenderConfirmationDialog() {
 		static const auto& Core = Core::GetCore();
 		GUI& gui = this->gui.get();
 
+		auto cwd{ std::filesystem::current_path() };
+
 		Core->CreateAndLoadProject(newProjectData.path, newProjectData.name);
 		Project& project = *Core->LoadedProject().get();
-		AssetHandle handle = Core->GetAssets()->CreateAssetAt<Scene>(Core->GetAssets()->Root(), "Sample Scene.scn", std::string("Sample Scene"));
-
+		AssetHandle handle = Core->GetAssets()->CreateAssetAt<Scene>(Core->GetAssets()->Root(), "Sample Scene.scn", Scene("Sample Scene").Serialize());
+		project.SetStartupScene(handle->ID());
 		Core->SaveLoadedProjectToDisk();
+
+		std::filesystem::current_path(cwd);
 		gui.InsertProjectData({ true, false, newProjectData.name, newProjectData.path, {} });
+
 		Hide();
 	}
 
