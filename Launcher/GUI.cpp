@@ -365,9 +365,9 @@ void GUI::RenderProjectData(ProjectData& data) noexcept {
 
                 const char* exe;
                 if constexpr (detect::is_windows_v) {
-                    exe = "Editor.exe";
+                    exe = "start Editor.exe";
                 } else if constexpr (detect::is_linux_v) {
-                    exe = "./Editor";
+                    exe = "./Editor &";
                 }
                 std::string command = std::string(exe).append(1, ' ').append(data.AbsolutePath).append(1, static_cast<char>(std::filesystem::path::preferred_separator)).append(data.Name).append(Assets::PROJ_EXT);
                 auto sys = std::system(command.c_str());
