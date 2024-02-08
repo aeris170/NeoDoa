@@ -135,6 +135,11 @@ void GUI::InsertProjectData(ProjectData&& projectData) noexcept {
         projectDataCollection.emplace_back(std::move(projectData));
         isCollectionDirty = true;
         SaveProjectDataCollectionToDisk();
+    } else if (!search->IsValid) {
+        search->IsValid = true;
+        search->LastOpened = "";
+        isCollectionDirty = true;
+        SaveProjectDataCollectionToDisk();
     } else {
         errorModal.Show(std::format(ErrorImportingAlreadyImportedProject, search->IsValid ? " and ready to launch." : "."));
     }
