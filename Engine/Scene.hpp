@@ -22,7 +22,6 @@ struct Scene {
     Color SelectionOutlineColor{ 0.68f, 0.49f, 0 };
 
     explicit Scene(std::string_view name = "New Scene") noexcept;
-    explicit Scene(std::string&& name) noexcept;
 
     Renderer::Stats GetRendererStats() const;
 

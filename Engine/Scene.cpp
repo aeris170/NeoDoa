@@ -27,8 +27,6 @@ Scene& Scene::GetLoadedScene() {
 
 Scene::Scene(std::string_view name) noexcept :
     Name(name) {}
-Scene::Scene(std::string&& name) noexcept :
-    Name(std::move(name)) {}
 
 Renderer::Stats Scene::GetRendererStats() const { return _renderer.stats; }
 
