@@ -59,6 +59,9 @@ void ImportProjectModal::RenderSelectionDialog() noexcept {
 			assert(!FileDialog::Instance().GetResult().string().empty());
 			std::filesystem::path path{ FileDialog::Instance().GetResult() };
 			importProjectData.path = path.parent_path().string();
+			if (!importProjectData.path.ends_with(static_cast<char>(std::filesystem::path::preferred_separator))) {
+				importProjectData.path.append(1, static_cast<char>(std::filesystem::path::preferred_separator));
+			}
 			importProjectData.name = path.stem().string();
 			importProjectData.fullPath = path.string();
 			stage = Stage::Confirmation;
