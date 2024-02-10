@@ -5,6 +5,7 @@
 #include <imgui.h>
 
 #include <Utility/ConstexprConcat.hpp>
+#include <Utility/SimpleSocket.hpp>
 #include <Utility/UndoRedoStack.hpp>
 
 #include <Engine/Core.hpp>
@@ -217,6 +218,11 @@ private:
 
     //- Undo/Redo History -//
     UndoRedoStack history{};
+
+    //- Sockets -//
+    std::string projectPath;
+    ClientSocket request{ "tcp://localhost:5555", SocketType::Pull };
+    ClientSocket reply{ "tcp://localhost:5556", SocketType::Push };
 
     // TODO REMOVE ME WHEN IMGUI IMPLEMENTS THIS WORKAROUND AS API FUNC.
     void ExecuteDockBuilderFocusWorkAround();

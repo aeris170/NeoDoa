@@ -5,6 +5,8 @@
 
 #include <tinyxml2.h>
 
+#include <Utility/SimpleSocket.hpp>
+
 #include <Engine/Core.hpp>
 #include <Engine/Texture.hpp>
 #include <Engine/FileNode.hpp>
@@ -59,17 +61,24 @@ private:
     void RenderButtons() noexcept;
     void RenderProjectsTable() noexcept;
     void RenderProjectData(ProjectData& data) noexcept;
-    void RenderProjectDataContextMenu(ProjectData& data) noexcept;
+    void RenderProjectDataContextMenu(const ProjectData& data) noexcept;
 
     void SaveProjectDataCollectionToDisk() noexcept;
 
     void SortCollectionByFavourite() noexcept;
     void SortCollectionBySpec(const ImGuiTableColumnSortSpecs& spec) noexcept;
 
+    //- Sockets -//
+    ServerSocket request{ "tcp://*:5555", SocketType::Push };
+    ServerSocket reply{ "tcp://*:5556", SocketType::Pull };
+    bool IsProjectAlreadyOpen(const ProjectData& project) noexcept;
+    //- Sockets -//
+
     //- Error Modal Text Constants -//
     static constexpr std::string_view ErrorReadingProjectData{ "An error occured while reading projects data.\nPlease re-import your existing projects.\n\n" };
     static constexpr std::string_view ErrorImportingAlreadyImportedProject{ "The project you are trying to import is already imported{}" };
     static constexpr std::string_view ErrorCannotOpenProject{ "Project {} couldn't be opened. It is either corrupted or moved." };
+    static constexpr std::string_view ErrorProjectAlreadyOpen{ "Project {} is already open." };
     //- Error Modal Text Constants -//
 
     //- Title Bar Constants -//

@@ -11,6 +11,7 @@
 #include <Submodules/detector/detector.hpp>
 
 #include <Utility/StringTransform.hpp>
+#include <Utility/Trim.hpp>
 
 #include <Launcher/FileDialog.hpp>
 
@@ -359,20 +360,24 @@ void GUI::RenderProjectData(ProjectData& data) noexcept {
                     return elem.Name == data.Name && elem.AbsolutePath == data.AbsolutePath && elem.LastOpened == data.LastOpened;
                 });
                 assert(search != projectDataCollection.end());
-                search->LastOpened = std::format("{:%Y-%m-%d %X}", time);
-                isCollectionDirty = true;
-                SaveProjectDataCollectionToDisk();
+                if (!IsProjectAlreadyOpen(*search)) {
+                    search->LastOpened = std::format("{:%Y-%m-%d %X}", time);
+                    isCollectionDirty = true;
+                    SaveProjectDataCollectionToDisk();
 
-                const char* exe;
-                if constexpr (detect::is_windows_v) {
-                    exe = "start Editor.exe";
-                } else if constexpr (detect::is_linux_v) {
-                    exe = "./Editor &";
-                }
-                std::string command = std::string(exe).append(1, ' ').append(data.AbsolutePath).append(1, static_cast<char>(std::filesystem::path::preferred_separator)).append(data.Name).append(Assets::PROJ_EXT);
-                auto sys = std::system(command.c_str());
-                if (sys == -1) {
-                    DOA_LOG_WARNING("[Launcher::GUI] A call to std::system returned -1.");
+                    const char* exe;
+                    if constexpr (detect::is_windows_v) {
+                        exe = "start Editor.exe";
+                    } else if constexpr (detect::is_linux_v) {
+                        exe = "./Editor &";
+                    }
+                    std::string command = std::string(exe).append(1, ' ').append(data.AbsolutePath).append(data.Name).append(Assets::PROJ_EXT);
+                    auto sys = std::system(command.c_str());
+                    if (sys == -1) {
+                        DOA_LOG_WARNING("[Launcher::GUI] A call to std::system returned -1.");
+                    }
+                } else {
+                    errorModal.Show(std::format(ErrorProjectAlreadyOpen, data.Name));
                 }
             } else {
                 errorModal.Show(std::format(ErrorCannotOpenProject, data.Name));
@@ -469,4 +474,30 @@ void GUI::SortCollectionBySpec(const ImGuiTableColumnSortSpecs& spec) noexcept {
                 : cmp >= 0;
         });
     }
+}
+
+bool GUI::IsProjectAlreadyOpen(const ProjectData& project) noexcept {
+    using namespace std::chrono_literals;
+    auto maxRequestReplies{ projectDataCollection.size() };
+
+    for (int i = 0; i < maxRequestReplies; i++) {
+        request.Send("request_project_path", SendFlag::DontWait);
+    }
+
+    std::this_thread::sleep_for(150ms); // wait for replies to be sent.
+
+    std::vector<std::string> openProjects{};
+    for (int i = 0; i < maxRequestReplies; i++) {
+        auto path = reply.Receive(ReceiveFlag::DontWait);
+        if (path == "") { continue; }
+
+        std::string s = std::string(path);
+        openProjects.push_back(trim(s));
+    }
+
+    std::string absolutePath = std::string(project.AbsolutePath).append(project.Name).append(Assets::PROJ_EXT);
+    auto search = std::ranges::find_if(openProjects, [&absolutePath](auto& elem) {
+        return elem == absolutePath;
+    });
+    return search != openProjects.end();
 }

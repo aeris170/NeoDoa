@@ -172,6 +172,11 @@ void GUI::operator() (float delta) {
 void GUI::End() {
     ImGui::End();
     ExecuteDockBuilderFocusWorkAround();
+
+    std::string_view message = request.Receive(ReceiveFlag::DontWait);
+    if (message == "request_project_path") {
+        reply.Send(projectPath);
+    }
 }
 
 void GUI::CreateNewProject(std::string_view workspace, std::string_view name) {
@@ -218,6 +223,8 @@ void GUI::OpenProjectFromDisk(const std::string& path) {
         Events.OnSceneOpened(project.GetOpenScene());
         sceneUUID = project.GetOpenSceneID();
     }
+
+    projectPath = path;
 
     Events.OnProjectLoaded(project);
 }
