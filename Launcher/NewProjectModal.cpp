@@ -8,7 +8,7 @@
 NewProjectModal::NewProjectModal(GUI& gui) noexcept :
 	gui(gui) {};
 
-void NewProjectModal::Show() const {
+void NewProjectModal::Show() const noexcept {
 	isModalActive = true;
 	stage = Stage::FolderSelection;
 	isFileDialogOpen = false;
@@ -16,13 +16,13 @@ void NewProjectModal::Show() const {
 	std::memset(buf.data(), '\0', buf.size());
 	badName = false;
 }
-
-void NewProjectModal::Hide() const {
+void NewProjectModal::Hide() const noexcept {
 	ImGui::CloseCurrentPopup();
 	isModalActive = false;
 }
+bool NewProjectModal::IsVisible() const noexcept { return isModalOpen; }
 
-void NewProjectModal::Render() {
+void NewProjectModal::Render() noexcept {
 	ImGui::PushID("new_project_modal");
 
 	static constexpr const char* title = TITLE_TEXT;
@@ -54,7 +54,7 @@ void NewProjectModal::Render() {
 	}
 	ImGui::PopID();
 }
-void NewProjectModal::RenderFolderSelectionDialog() {
+void NewProjectModal::RenderFolderSelectionDialog() noexcept {
 	if (!isFileDialogOpen) {
 		FileDialog::Instance().Open("NewProjectFolderSelectionDialog", "Select Project Root Folder", "");
 		isFileDialogOpen = true;
@@ -70,7 +70,7 @@ void NewProjectModal::RenderFolderSelectionDialog() {
 		FileDialog::Instance().Close();
 	}
 }
-void NewProjectModal::RenderNameSelectionDialog() {
+void NewProjectModal::RenderNameSelectionDialog() noexcept {
 	bool create = false;
 	if (badName) {
 		ImGui::PushStyleColor(ImGuiCol_Border, { 1.0f, 0.0f, 0.0f, 1.0f });
@@ -105,7 +105,7 @@ void NewProjectModal::RenderNameSelectionDialog() {
 		}
 	}
 }
-void NewProjectModal::RenderConfirmationDialog() {
+void NewProjectModal::RenderConfirmationDialog() noexcept {
 	ImGui::Text("Name: %s", newProjectData.name.c_str());
 	ImGui::Text("Path: %s", newProjectData.path.c_str());
 	ImGui::NewLine();

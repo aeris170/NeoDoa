@@ -8,18 +8,18 @@
 ImportProjectModal::ImportProjectModal(GUI& gui) noexcept :
 	gui(gui) {};
 
-void ImportProjectModal::Show() const {
+void ImportProjectModal::Show() const noexcept {
 	isModalActive = true;
 	stage = Stage::Selection;
 	isFileDialogOpen = false;
 }
-
-void ImportProjectModal::Hide() const {
+void ImportProjectModal::Hide() const noexcept {
 	ImGui::CloseCurrentPopup();
 	isModalActive = false;
 }
+bool ImportProjectModal::IsVisible() const noexcept { return isModalOpen; }
 
-void ImportProjectModal::Render() {
+void ImportProjectModal::Render() noexcept {
 	ImGui::PushID("open_project_modal");
 
 	static constexpr const char* title = TITLE_TEXT;
@@ -49,8 +49,7 @@ void ImportProjectModal::Render() {
 	}
 	ImGui::PopID();
 }
-
-void ImportProjectModal::RenderSelectionDialog() {
+void ImportProjectModal::RenderSelectionDialog() noexcept {
 	if (!isFileDialogOpen) {
 		FileDialog::Instance().Open("ImportProjectSelectionDialog", "Select Project File", "NeoDoa Project Files (*.doa){.doa},.*");
 		isFileDialogOpen = true;
@@ -69,7 +68,7 @@ void ImportProjectModal::RenderSelectionDialog() {
 		FileDialog::Instance().Close();
 	}
 }
-void ImportProjectModal::RenderConfirmationDialog() {
+void ImportProjectModal::RenderConfirmationDialog() noexcept {
 	ImGui::Text("Name: %s", importProjectData.name.c_str());
 	ImGui::Text("Path: %s", importProjectData.path.c_str());
 	ImGui::NewLine();

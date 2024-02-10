@@ -12,8 +12,9 @@ struct NewProjectModal {
 
     explicit NewProjectModal(GUI& gui) noexcept;
 
-    void Show() const;
-    void Hide() const;
+    void Show() const noexcept;
+    void Hide() const noexcept;
+    bool IsVisible() const noexcept;
 
 private:
     std::reference_wrapper<GUI> gui;
@@ -37,10 +38,10 @@ private:
     mutable std::array<char, 128> buf;
     mutable bool badName;
 
-    void Render();
-    void RenderFolderSelectionDialog();
-    void RenderNameSelectionDialog();
-    void RenderConfirmationDialog();
+    void Render() noexcept;
+    void RenderFolderSelectionDialog() noexcept;
+    void RenderNameSelectionDialog() noexcept;
+    void RenderConfirmationDialog() noexcept;
 
     friend struct GUI;
 

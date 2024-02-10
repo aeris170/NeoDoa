@@ -11,8 +11,9 @@ struct ImportProjectModal {
 
     explicit ImportProjectModal(GUI& gui) noexcept;
 
-    void Show() const;
-    void Hide() const;
+    void Show() const noexcept;
+    void Hide() const noexcept;
+    bool IsVisible() const noexcept;
 
 private:
 
@@ -34,9 +35,9 @@ private:
         std::string fullPath; /* path + directory separator + name */
     } importProjectData;
 
-    void Render();
-    void RenderSelectionDialog();
-    void RenderConfirmationDialog();
+    void Render() noexcept;
+    void RenderSelectionDialog() noexcept;
+    void RenderConfirmationDialog() noexcept;
 
     friend struct GUI;
 

@@ -11,8 +11,9 @@ struct ErrorModal {
 
     explicit ErrorModal(GUI& gui) noexcept;
 
-    void Show(std::string_view errorText) const;
-    void Hide() const;
+    void Show(std::string_view errorText) const noexcept;
+    void Hide() const noexcept;
+    bool IsVisible() const noexcept;
 
 private:
     std::reference_wrapper<GUI> gui;
@@ -20,7 +21,7 @@ private:
     mutable bool isModalOpen{ true };
     mutable std::string errorText{};
 
-    void Render();
+    void Render() noexcept;
 
     friend struct GUI;
 

@@ -5,17 +5,17 @@
 ErrorModal::ErrorModal(GUI& gui) noexcept :
 	gui(gui) {};
 
-void ErrorModal::Show(std::string_view errorText) const {
+void ErrorModal::Show(std::string_view errorText) const noexcept {
 	isModalActive = true;
 	this->errorText = errorText;
 }
-
-void ErrorModal::Hide() const {
+void ErrorModal::Hide() const noexcept {
 	ImGui::CloseCurrentPopup();
 	isModalActive = false;
 }
+bool ErrorModal::IsVisible() const noexcept { return isModalOpen; }
 
-void ErrorModal::Render() {
+void ErrorModal::Render() noexcept {
 	ImGui::PushID("error_modal");
 
 	static constexpr const char* title = TITLE_TEXT;
