@@ -9,9 +9,11 @@ target_include_directories(Utility PUBLIC ..)
 
 find_package(EnTT CONFIG REQUIRED)
 find_package(ICU REQUIRED COMPONENTS uc dt i18n)
+find_package(cppzmq CONFIG REQUIRED)
 
 target_link_libraries(Utility PUBLIC EnTT::EnTT)
 target_link_libraries(Utility PUBLIC ICU::uc ICU::dt ICU::i18n)
+target_link_libraries(Utility PUBLIC cppzmq cppzmq-static)
 
 set(GROUP_LIST
     "CheckSubstring.cpp"
@@ -27,6 +29,8 @@ set(GROUP_LIST
     "Platform.hpp"
     "Prettify.cpp"
     "Prettify.hpp"
+    "SimpleSocket.cpp"
+    "SimpleSocket.hpp"
     "Split.cpp"
     "Split.hpp"
     "StringMap.cpp"

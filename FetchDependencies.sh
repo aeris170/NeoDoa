@@ -68,6 +68,9 @@ echo "Installing STB"
 echo "Installing TinyXML2"
 ./vcpkg install tinyxml2 --triplet $platform
 
+echo "Installing ZeroMQ (cppzmp)"
+./vcpkg install cppzmq --triplet $platform
+
 ./vcpkg upgrade
 
 ./vcpkg integrate install

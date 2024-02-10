@@ -16,9 +16,11 @@ find_library(LUNASVG_LIBRARY lunasvg)
 
 find_package(argparse CONFIG REQUIRED)
 find_package(imguizmo CONFIG REQUIRED)
+find_package(cppzmq CONFIG REQUIRED)
 
 target_link_libraries(Editor PUBLIC argparse::argparse)
 target_link_libraries(Editor PUBLIC imguizmo::imguizmo)
+target_link_libraries(Editor PUBLIC cppzmq cppzmq-static)
 target_link_libraries(Editor PUBLIC ${LUNASVG_LIBRARY})
 
 set(GROUP_LIST

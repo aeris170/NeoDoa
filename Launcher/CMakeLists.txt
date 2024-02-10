@@ -8,6 +8,10 @@ add_executable(Launcher)
 
 target_link_libraries(Launcher PUBLIC Engine)
 
+find_package(cppzmq CONFIG REQUIRED)
+
+target_link_libraries(Launcher PUBLIC cppzmq cppzmq-static)
+
 set(GROUP_LIST
     "main.cpp"
 	
