@@ -1,22 +1,41 @@
-# NeoDoa Public Licence
+# SOFTWARE LICENSE AGREEMENT
+This Software License Agreement ("Agreement") is made and entered into as of 2024-02-10 ("Effective Date") by and between Doğa Oruç, a private person, having its principal place of business in Türkiye ("Licensor"), and Licensee, either a private person, a registered company, or a partnership, having its principal place of business anywhere ("Licensee").
 
-> Copyright(C)[2021][Doga Oruc]
+WHEREAS, the Licensor owns certain software that it desires to license to the Licensee;
 
-> NeoDoa Public Licence
-> TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+WHEREAS, Licensee desires to use such software under the terms and conditions set forth herein.
 
-1. Do whatever you like with the original work, just don't be a dick.
+NOW, THEREFORE, in consideration of the mutual promises contained herein and for other good and valuable consideration, the parties agree as follows:
 
-   Being a dick includes - but is not limited to - the following instances:
+## 1. Definition of Software:
+The term "Software" refers to the **NeoDoa**, including any updates, modifications, or associated documentation provided by the Licensor.
 
- 1a. Outright copyright infringement - Don't just copy this and change the name.
- 1b. Selling the unmodified original with no work done what - so - ever, that's REALLY being a dick.
- 1c. Modifying the original work to contain hidden harmful content. That would make you a PROPER dick.
+## 2. Grant of License:
+Subject to the terms and conditions of this Agreement, the Licensor grants the Licensee a non-exclusive, non-transferable license to use the Software. To apply, reach out to the Licensor.
 
-2. If you become rich through modifications, related works / services, or supporting the original work,
-share the love. Only a dick would make loads off this work and not buy the original work's
-creator(s) a pint.
+## 3. Derivative Works:
+All modifications and derivative works must be submitted as Pull Requests to the [official **NeoDoa** GitHub repository](https://github.com/aeris170/NeoDoa). Without supervision from the Licensor, no modifications or derivative works are allowed.
 
-3. Software is provided with no warranty. Asking for help won't make you a dick, but asking someone to
-write your code for you makes you a DONKEY dick. If you happen to solve your problem before any help arrives,
-you would submit the fix back to regain your status of non-dick.
+## 4. Commercial Use:
+Commercial use is permitted on an application basis. To apply for commercial use, reach out to the Licensor.
+
+## 5. Attribution:
+Licensee is required to provide attribution to Licensor in the form of a fade in/out **NeoDoa** social logo staying on the screen no shorter than 5 seconds (skippable with keypresses) first thing at the start of their program.
+
+## 6. Intellectual Property Rights:
+All intellectual property rights in the Software shall remain the property of the Licensor. The Licensee does not acquire any rights to the Software except for the limited use rights specified in this Agreement.
+
+## 7. Warranty and Liability:
+The Software is provided "as is" without warranty of any kind. Licensor shall not be liable for any damages arising out of or related to the use or inability to use the Software.
+
+## 8. Termination:
+This Agreement shall terminate automatically if the Licensee breaches any of its terms and conditions. Upon termination, Licensee must cease all use of the Software and destroy all copies.
+
+## 9. Governing Law:
+This Agreement shall be governed by and construed under the laws of Türkiye.
+
+IN WITNESS WHEREOF, the parties have executed this Software License Agreement as of the Effective Date.
+
+Licensor: Doğa Oruç
+
+Licensee: Licensee
