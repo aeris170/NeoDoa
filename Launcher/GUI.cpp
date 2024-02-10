@@ -390,7 +390,7 @@ void GUI::RenderProjectData(ProjectData& data) noexcept {
         }
     }
 }
-void GUI::RenderProjectDataContextMenu(ProjectData& data) noexcept {
+void GUI::RenderProjectDataContextMenu(const ProjectData& data) noexcept {
     if (ImGui::BeginPopup(ProjectsTableContextMenuID)) {
         if (ImGui::MenuItem(ProjectsTableContextMenuDeleteButtonText)) {
             auto search = std::ranges::find_if(projectDataCollection, [&data](auto& elem) {
