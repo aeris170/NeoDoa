@@ -1,1 +1,0 @@
-sudo apt-get install pkg-config libxinerama-dev libxcursor-dev xorg xorg-dev libglu1-mesa libglu1-mesa-dev libxmu-dev libxi-dev libgl-dev
