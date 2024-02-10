@@ -384,8 +384,10 @@ void GUI::RenderProjectData(ProjectData& data) noexcept {
     ImGui::PopID();
     max = ImGui::GetCursorScreenPos();
     if (ImGui::IsMouseReleased(ImGuiMouseButton_Right) && ImGui::IsMouseHoveringRect(min, max, false)) {
-        ImGui::OpenPopup(ProjectsTableContextMenuID);
-        contextOwner = data;
+        if (!errorModal.IsVisible() && !newProjectModal.IsVisible() && !importProjectModal.IsVisible()) {
+            ImGui::OpenPopup(ProjectsTableContextMenuID);
+            contextOwner = data;
+        }
     }
 }
 void GUI::RenderProjectDataContextMenu(ProjectData& data) noexcept {
