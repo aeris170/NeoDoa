@@ -17,14 +17,14 @@
 
 GUI::GUI(const CorePtr& core) noexcept :
     Core(core),
-    window(core->GetWindow()) {
+    Window(core->GetWindow()) {
     // Disable imgui.ini file - we don't really need to save/load imgui
     // as we dock/position everything when the program starts, leaving
     // imgui.ini obsolete.
     ImGui::GetIO().IniFilename = nullptr;
     FileDialog::Initialize();
 
-    window->SetTitle("NeoDoa Launcher");
+    Window->SetTitle("NeoDoa Launcher");
 
     projectDataFile = std::make_unique<FNode>(FNodeCreationParams {
         .name = "projects"
@@ -165,7 +165,7 @@ void GUI::RenderCustomTitleBar() noexcept {
     static glm::vec2 windowPos{};
     static bool dragging{ false };
     if (ImGui::IsMouseHoveringRect(p0, p1) && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-        windowPos = window->GetPosition();
+        windowPos = Window->GetPosition();
         dragging = true;
     }
     if (dragging && !ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
@@ -173,7 +173,7 @@ void GUI::RenderCustomTitleBar() noexcept {
     }
     if (dragging && ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
         auto drag = ImGui::GetMouseDragDelta();
-        window->SetPosition(windowPos + glm::vec2{ drag.x, drag.y });
+        Window->SetPosition(windowPos + glm::vec2{ drag.x, drag.y });
     }
 #pragma endregion
 
@@ -209,7 +209,7 @@ void GUI::RenderCustomTitleBar() noexcept {
     auto buttonHoverColor = ImGui::GetStyle().Colors[ImGuiCol_ButtonHovered];
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, { buttonHoverColor.x, buttonHoverColor.y, buttonHoverColor.z, 0.6f });
     if (ImGui::Button(ICON_FA_DASH, TitleBarButtonSize)) {
-        window->Minimize();
+        Window->Minimize();
     }
     ImGui::SameLine();
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() - TitleBarInternalPadding.y);
@@ -226,23 +226,23 @@ void GUI::RenderCustomTitleBar() noexcept {
 void GUI::RenderButtons() noexcept {
     ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1);
     ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8);
-    ImGui::Dummy({ ImGui::GetContentRegionAvail().x - 64 - 64 - 64 - 4 * ImGui::GetStyle().ItemSpacing.x - ProjectsTablePadding.x, 1 });
+    ImGui::Dummy({ ImGui::GetContentRegionAvail().x - 3 * ButtonsSize.x - 4 * ImGui::GetStyle().ItemSpacing.x - ProjectsTablePadding.x, 1 });
     ImGui::SameLine();
-    if (ImGui::Button(ICON_FA_ROTATE, { 64, 32 })) {
+    if (ImGui::Button(RefreshButtonText, ButtonsSize)) {
         for (auto& data : projectDataCollection) {
             data.IsValid = CheckProjectValidity(data);
         }
     }
     ImGui::SameLine();
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
-    draw_list->AddLine(ImGui::GetCursorScreenPos(), ImGui::GetCursorScreenPos() + ImVec2{ 0, 32 }, ImGui::ColorConvertFloat4ToU32(ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]), 1);
-    ImGui::Dummy({ 0, 48 });
+    draw_list->AddLine(ImGui::GetCursorScreenPos(), ImGui::GetCursorScreenPos() + ImVec2{ 0, ButtonsSize.y }, ImGui::ColorConvertFloat4ToU32(ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]), 1);
+    ImGui::Dummy({ 0, ButtonsSize.y * 1.5f });
     ImGui::SameLine();
-    if (ImGui::Button(ICON_FA_PLUS_LARGE, { 64, 32 })) {
+    if (ImGui::Button(CreateButtonText, ButtonsSize)) {
         newProjectModal.Show();
     }
     ImGui::SameLine();
-    if (ImGui::Button(ICON_FA_FOLDER_OPEN, { 64, 32 })) {
+    if (ImGui::Button(ImportButtonText, ButtonsSize)) {
         importProjectModal.Show();
     }
     ImGui::PopStyleVar(2);

@@ -21,7 +21,7 @@
 struct GUI {
 
     const CorePtr& Core;
-    const WindowPtr& window;
+    const WindowPtr& Window;
 
     explicit GUI(const CorePtr& core) noexcept;
 
@@ -90,9 +90,12 @@ private:
     inline static ImVec4 TitleBarTextColor3{ 1.0f, 1.0f, 1.0f, 1.0f };
     //- Title Bar Constants -//
 
-    //-  -//
-
-    //-  -//
+    //- Buttons Constants -//
+    inline static ImVec2 ButtonsSize{ 64, 32 };
+    inline static const char* RefreshButtonText{ ICON_FA_ROTATE };
+    inline static const char* CreateButtonText{ ICON_FA_PLUS_LARGE };
+    inline static const char* ImportButtonText{ ICON_FA_FOLDER_OPEN };
+    //- Buttons Constants -//
 
     //- Projects Table Constants -//
     inline static ImVec2 ProjectsTablePadding{ 12, 6 };
