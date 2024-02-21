@@ -132,8 +132,8 @@ void Asset::Deserialize() {
     if (IsShaderProgram()) {
         ShaderProgramDeserializationResult result = DeserializeShaderProgram(*file);
         if (result.erred) {
-            for (auto& message : result.errors) {
-                errorList.emplace_back(std::move(message));
+            for (auto& error : result.errors) {
+                errorList.emplace_back(std::move(error));
             }
         } else {
             infoList.emplace_back(std::string("Shader Program is complete and ready for use."));

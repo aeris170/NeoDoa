@@ -9,7 +9,7 @@
 #include <Engine/UUID.hpp>
 
 struct Shader {
-    enum class Type {
+    enum class ShaderType {
         Vertex,
         TessellationControl,
         TessellationEvaluation,
@@ -24,7 +24,7 @@ struct Shader {
     };
 
     GLuint ID;
-    Type Type;
+    ShaderType Type;
     std::string Name;
     std::string SourceCode;
     std::vector<Uniform> Uniforms;
@@ -32,11 +32,10 @@ struct Shader {
     std::string Serialize() const;
     static Shader Deserialize(const std::string_view data);
 
-    static Shader Copy(const Shader& component);
+    static Shader Copy(const Shader& shader);
 };
 
 struct ShaderProgram {
-
     GLuint ID;
     std::string Name;
 
@@ -53,10 +52,8 @@ struct ShaderProgram {
     bool HasGeometryShader() const;
     bool HasFragmentShader() const;
 
-    std::vector<Shader::Uniform> Uniforms;
-
     std::string Serialize() const;
     static ShaderProgram Deserialize(const std::string_view data);
 
-    static ShaderProgram Copy(const ShaderProgram& component);
+    static ShaderProgram Copy(const ShaderProgram& program);
 };

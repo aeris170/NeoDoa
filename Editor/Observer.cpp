@@ -574,7 +574,6 @@ void Observer::ComponentDefinitionDisplay::Init() {
     TextEditorInstance.SetText(std::string(10, ' '));
     TextEditorInstance.SetLanguageDefinition(TextEditor::LanguageDefinition::AngelScript());
 }
-
 void Observer::ComponentDefinitionDisplay::SetDisplayTarget(const AssetHandle componentDefAsset) {
     assert(componentDefAsset->IsComponentDefinition());
     if (ComponentDefAsset != componentDefAsset) {
@@ -587,7 +586,6 @@ void Observer::ComponentDefinitionDisplay::SetDisplayTarget(const AssetHandle co
 }
 
 void Observer::ComponentDefinitionDisplay::RenderMessagesTable() {
-    assert(ComponentDefAsset.HasValue());
     if(!ComponentDefAsset->HasErrorMessages() &&
         !ComponentDefAsset->HasWarningMessages() &&
         !ComponentDefAsset->HasInfoMessages()) {
@@ -700,7 +698,6 @@ void Observer::ShaderDisplay::Init() {
     TextEditorInstance.SetText(std::string(10, ' '));
     TextEditorInstance.SetLanguageDefinition(TextEditor::LanguageDefinition::GLSL());
 }
-
 void Observer::ShaderDisplay::SetDisplayTarget(const AssetHandle shaderAsset) {
     assert(shaderAsset->IsShader());
     if (ShaderAsset != shaderAsset) {
@@ -713,7 +710,6 @@ void Observer::ShaderDisplay::SetDisplayTarget(const AssetHandle shaderAsset) {
 }
 
 void Observer::ShaderDisplay::RenderMessagesTable() {
-    assert(ShaderAsset.HasValue());
     if (!ShaderAsset->HasErrorMessages() &&
         !ShaderAsset->HasWarningMessages() &&
         !ShaderAsset->HasInfoMessages()) {
@@ -825,7 +821,7 @@ void Observer::ShaderProgramDisplay::Init() {
 }
 void Observer::ShaderProgramDisplay::SetDisplayTarget(Assets& assets, const AssetHandle shaderProgramAsset) {
     Observer::ShaderProgramDisplay::assets = &assets;
-    assert(shaderProgramAsset->IsShaderProgram() && shaderProgramAsset.HasValue());
+    assert(shaderProgramAsset->IsShaderProgram());
     if (ShaderProgramAsset != shaderProgramAsset) {
         ShaderProgramAsset = shaderProgramAsset;
         const ShaderProgram& program = ShaderProgramAsset->DataAs<ShaderProgram>();
@@ -868,7 +864,6 @@ void Observer::ShaderProgramDisplay::SetDisplayTarget(Assets& assets, const Asse
 }
 
 void Observer::ShaderProgramDisplay::RenderMessagesTable() {
-    assert(ShaderProgramAsset.HasValue());
     if (!ShaderProgramAsset->HasErrorMessages() &&
         !ShaderProgramAsset->HasWarningMessages() &&
         !ShaderProgramAsset->HasInfoMessages()) {
@@ -984,7 +979,6 @@ void Observer::ShaderProgramDisplay::RenderVertexShader(ShaderProgram& program) 
             AssetHandle handle = assets->FindAsset(data);
             assert(handle.HasValue());
             if (handle->IsShader()) {
-                if (handle->DataAs<Shader>().Type == Shader::Type::Vertex) {
                     program.VertexShader = data;
                     ShaderProgramAsset->Serialize();
                     ShaderProgramAsset->ForceDeserialize();
@@ -1033,7 +1027,7 @@ void Observer::ShaderProgramDisplay::RenderTessCtrlShader(ShaderProgram& program
             AssetHandle handle = assets->FindAsset(data);
             assert(handle.HasValue());
             if (handle->IsShader()) {
-                if (handle->DataAs<Shader>().Type == Shader::Type::TessellationControl) {
+                if (handle->DataAs<Shader>().Type == Shader::ShaderType::TessellationControl) {
                     program.TessellationControlShader = data;
                     ShaderProgramAsset->Serialize();
                     ShaderProgramAsset->ForceDeserialize();
@@ -1082,7 +1076,7 @@ void Observer::ShaderProgramDisplay::RenderTessEvalShader(ShaderProgram& program
             AssetHandle handle = assets->FindAsset(data);
             assert(handle.HasValue());
             if (handle->IsShader()) {
-                if (handle->DataAs<Shader>().Type == Shader::Type::TessellationEvaluation) {
+                if (handle->DataAs<Shader>().Type == Shader::ShaderType::TessellationEvaluation) {
                     program.TessellationEvaluationShader = data;
                     ShaderProgramAsset->Serialize();
                     ShaderProgramAsset->ForceDeserialize();
@@ -1131,7 +1125,7 @@ void Observer::ShaderProgramDisplay::RenderGeometryShader(ShaderProgram& program
             AssetHandle handle = assets->FindAsset(data);
             assert(handle.HasValue());
             if (handle->IsShader()) {
-                if (handle->DataAs<Shader>().Type == Shader::Type::Geometry) {
+                if (handle->DataAs<Shader>().Type == Shader::ShaderType::Geometry) {
                     program.GeometryShader = data;
                     ShaderProgramAsset->Serialize();
                     ShaderProgramAsset->ForceDeserialize();
@@ -1180,7 +1174,7 @@ void Observer::ShaderProgramDisplay::RenderFragmentShader(ShaderProgram& program
             AssetHandle handle = assets->FindAsset(data);
             assert(handle.HasValue());
             if (handle->IsShader()) {
-                if (handle->DataAs<Shader>().Type == Shader::Type::Fragment) {
+                if (handle->DataAs<Shader>().Type == Shader::ShaderType::Fragment) {
                     program.FragmentShader = data;
                     ShaderProgramAsset->Serialize();
                     ShaderProgramAsset->ForceDeserialize();

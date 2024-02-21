@@ -67,9 +67,7 @@ private:
     };
 
     struct ComponentDefinitionDisplay {
-
         static void Init();
-
         static void SetDisplayTarget(const AssetHandle componentDefAsset);
 
         static void RenderMessagesTable();
@@ -82,9 +80,7 @@ private:
     };
 
     struct ShaderDisplay {
-
         static void Init();
-
         static void SetDisplayTarget(const AssetHandle shaderAsset);
 
         static void RenderMessagesTable();
@@ -97,9 +93,7 @@ private:
     };
 
     struct ShaderProgramDisplay {
-
         static void Init();
-
         static void SetDisplayTarget(Assets& assets, const AssetHandle shaderProgramAsset);
 
         static void RenderMessagesTable();

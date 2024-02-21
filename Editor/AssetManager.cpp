@@ -419,37 +419,37 @@ void AssetManager::RenderContextMenu() {
             }
             ImGui::Separator();
             static constexpr auto scene = cat(FileIcons::SCENE_ICON, " ", "Scene");
-            if (ImGui::MenuItem(scene.c)) {
+            if (ImGui::MenuItem(scene)) {
                 gui.ShowNewSceneAssetModal(*currentFolder);
             }
             static constexpr auto component = cat(FileIcons::COMPONENT_ICON, " ", "Component");
-            if (ImGui::MenuItem(component.c)) {
+            if (ImGui::MenuItem(component)) {
                 gui.ShowNewComponentAssetModal(*currentFolder);
             }
             static constexpr auto shader = cat(FileIcons::SHADER_ICON, " ", "Shader");
-            if (ImGui::BeginMenu(shader.c)) {
+            if (ImGui::BeginMenu(shader)) {
                 static constexpr auto vertexShader = cat(FileIcons::VERTEX_SHADER_ICON, " ", "Vertex Shader");
-                if (ImGui::MenuItem(vertexShader.c)) {
+                if (ImGui::MenuItem(vertexShader)) {
                     gui.ShowNewVertexShaderAssetModal(*currentFolder);
                 }
                 constexpr auto tessCtrlShader = cat(FileIcons::TESS_CTRL_SHADER_ICON, " ", "Tessellation Control Shader");
-                if (ImGui::MenuItem(tessCtrlShader.c)) {
+                if (ImGui::MenuItem(tessCtrlShader)) {
                     gui.ShowNewTessellationControlShaderAssetModal(*currentFolder);
                 }
                 constexpr auto tessEvalShader = cat(FileIcons::TESS_EVAL_SHADER_ICON, " ", "Tessellation Evaluation Shader");
-                if (ImGui::MenuItem(tessEvalShader.c)) {
+                if (ImGui::MenuItem(tessEvalShader)) {
                     gui.ShowNewTessellationEvaluationShaderAssetModal(*currentFolder);
                 }
                 constexpr auto geometryShader = cat(FileIcons::GEOMETRY_SHADER_ICON, " ", "Geometry Shader");
-                if (ImGui::MenuItem(geometryShader.c)) {
+                if (ImGui::MenuItem(geometryShader)) {
                     gui.ShowNewGeometryShaderAssetModal(*currentFolder);
                 }
                 constexpr auto fragmentShader = cat(FileIcons::FRAGMENT_SHADER_ICON, " ", "Fragment Shader");
-                if (ImGui::MenuItem(fragmentShader.c)) {
+                if (ImGui::MenuItem(fragmentShader)) {
                     gui.ShowNewFragmentShaderAssetModal(*currentFolder);
                 }
                 constexpr auto computeShader = cat(FileIcons::COMPUTE_SHADER_ICON, " ", "Compute Shader");
-                if (ImGui::MenuItem(computeShader.c)) {
+                if (ImGui::MenuItem(computeShader)) {
                     /*
                     newShaderModal.Activate(
                         currentFolder,
@@ -461,7 +461,7 @@ void AssetManager::RenderContextMenu() {
                 ImGui::EndMenu();
             }
             static constexpr auto shaderProgram = cat(FileIcons::SHADER_PROGRAM_ICON, " ", "Shader Program");
-            if (ImGui::MenuItem(shaderProgram.c)) {
+            if (ImGui::MenuItem(shaderProgram)) {
                 gui.ShowNewShaderProgramAssetModal(*currentFolder);
             }
 

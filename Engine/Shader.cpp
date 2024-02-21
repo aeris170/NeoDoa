@@ -8,7 +8,29 @@
 
 std::string Shader::Serialize() const { return SourceCode; }
 Shader Shader::Deserialize(const std::string_view data) {
+    auto result = DeserializeVertexShader(data);
+    if (!result.erred) { return result.deserializedShader; }
+
+    result = DeserializeFragmentShader(data);
+    if (!result.erred) { return result.deserializedShader; }
+
+    result = DeserializeTessellationControlShader(data);
+    if (!result.erred) { return result.deserializedShader; }
+
+    result = DeserializeTessellationEvaluationShader(data);
+    if (!result.erred) { return result.deserializedShader; }
+
+    result = DeserializeGeometryShader(data);
+    if (!result.erred) { return result.deserializedShader; }
+
+    result = DeserializeComputeShader(data);
+    if (!result.erred) { return result.deserializedShader; }
+
     return {}; // TODO return shader
+}
+
+Shader Shader::Copy(const Shader& shader) {
+    return shader.Deserialize(shader.Serialize());
 }
 
 bool ShaderProgram::IsComplete() const                      { return HasVertexShader() && HasFragmentShader();      }
