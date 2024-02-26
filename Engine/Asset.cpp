@@ -8,6 +8,8 @@
 #include <Engine/ShaderDeserializer.hpp>
 #include <Engine/ShaderProgramSerializer.hpp>
 #include <Engine/ShaderProgramDeserializer.hpp>
+#include <Engine/MaterialSerializer.hpp>
+#include <Engine/MaterialDeserializer.hpp>
 #include <Engine/TextureSerializer.hpp>
 #include <Engine/TextureDeserializer.hpp>
 
@@ -66,6 +68,12 @@ void Asset::Serialize() {
     if (IsShaderProgram()) {
         std::string serializedData;
         serializedData = SerializeShaderProgram(DataAs<ShaderProgram>());
+        file->ModifyContent(std::move(serializedData));
+        file->DisposeContent();
+    }
+    if (IsMaterial()) {
+        std::string serializedData;
+        serializedData = SerializeMaterial(DataAs<Material>());
         file->ModifyContent(std::move(serializedData));
         file->DisposeContent();
     }
@@ -140,6 +148,15 @@ void Asset::Deserialize() {
         }
         data = std::move(result.deserializedShaderProgram);
     }
+    if (IsMaterial()) {
+        MaterialDeserializationResult result = DeserializeMaterial(*file);
+        if (result.erred) {
+            for (auto& error : result.errors) {
+                errorList.emplace_back(std::move(error));
+            }
+        }
+        data = std::move(result.deserializedMaterial);
+    }
     if (IsTexture()) {
         data = DeserializeTexture(*file);
     }
@@ -172,9 +189,10 @@ bool Asset::IsComponentDefinition() const { return Assets::IsComponentDefinition
 bool Asset::IsScript() const { return Assets::IsScriptFile(*file); }
 bool Asset::IsTexture() const { return Assets::IsTextureFile(*file); }
 bool Asset::IsModel() const { return Assets::IsModelFile(*file); }
-bool Asset::IsMaterial() const { return Assets::IsMaterialFile(*file); }
 bool Asset::IsShader() const { return Assets::IsShaderFile(*file); }
 bool Asset::IsShaderProgram() const { return Assets::IsShaderProgramFile(*file); }
+bool Asset::IsMaterial() const { return Assets::IsMaterialFile(*file); }
+
 
 bool Asset::HasInfoMessages() const { return !infoList.empty(); }
 const std::vector<std::any>& Asset::InfoMessages() const { return infoList; }
