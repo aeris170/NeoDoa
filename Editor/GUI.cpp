@@ -365,6 +365,7 @@ void GUI::ShowNewTessellationEvaluationShaderAssetModal(FNode& currentFolder) co
 void GUI::ShowNewGeometryShaderAssetModal(FNode& currentFolder) const               { nam.ShowGeometryShaderCreationModal(currentFolder);               }
 void GUI::ShowNewFragmentShaderAssetModal(FNode& currentFolder) const               { nam.ShowFragmentShaderCreationModal(currentFolder);               }
 void GUI::ShowNewShaderProgramAssetModal(FNode& currentFolder) const                { nam.ShowShaderProgramCreationModal(currentFolder);                }
+void GUI::ShowNewMaterialAssetModal(FNode& currentFolder) const                     { nam.ShowMaterialCreationModal(currentFolder);                     }
 
 UndoRedoStack& GUI::GetCommandHistory() noexcept { return history; }
 void GUI::UndoLastCommand() noexcept {

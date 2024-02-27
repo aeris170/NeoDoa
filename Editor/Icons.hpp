@@ -213,6 +213,10 @@ namespace FileIcons {
         std::pair{ SHADER_PROGRAM_ICON, "triangle" }
     };
 
+    inline constexpr const char MATERIAL_ICON[]{ ICON_FA_CIRCLE };
+    inline std::array<ElementType, 1> MaterialIcons{
+        std::pair{ MATERIAL_ICON, "circle" }
+    };
 
     inline constexpr const char FILE_ICON[]                    { ICON_FA_FILE                    };
     inline constexpr const char FILE_ICON_MULTIPLE[]           { ICON_FA_FILES                   };

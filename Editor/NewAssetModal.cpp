@@ -45,6 +45,9 @@ void NewAssetModal::ShowShaderProgramCreationModal(FNode& currentFolder) const {
 	/* cast-away const - this modal is never created const */
 	const_cast<NewAssetModal*>(this)->Reset(currentFolder, NewAssetData::AssetType::ShaderProgram);
 }
+void NewAssetModal::ShowMaterialCreationModal(FNode& currentFolder) const {
+	const_cast<NewAssetModal*>(this)->Reset(currentFolder, NewAssetData::AssetType::Material);
+}
 
 void NewAssetModal::Hide() const {
 	ImGui::CloseCurrentPopup();
@@ -71,6 +74,7 @@ void NewAssetModal::Reset(FNode& currentFolder, NewAssetData::AssetType typeOfAs
 	static auto defGeometryShaderName = "MyGeometryShader";               assert(std::strlen(defGeometryShaderName) < buf.size());
 	static auto defFragmentShaderName = "MyFragmentShader";               assert(std::strlen(defFragmentShaderName) < buf.size());
 	static auto defShaderProgramName  = "MyShaderProgram";                assert(std::strlen(defShaderProgramName)  < buf.size());
+	static auto defMaterialName       = "MyMaterial";                     assert(std::strlen(defMaterialName)       < buf.size());
 	switch(typeOfAssetToCreate) {
 		using enum NewAssetData::AssetType;
 	case Scene:
@@ -112,6 +116,11 @@ void NewAssetModal::Reset(FNode& currentFolder, NewAssetData::AssetType typeOfAs
 		std::strcpy(buf.data(), defShaderProgramName);
 		titleText = std::format(TITLE_TEXT, "Shader Program");
 		confirmText = std::format(CONFIRM_TEXT, "a Shader Program");
+		break;
+	case Material:
+		std::strcpy(buf.data(), defMaterialName);
+		titleText = std::format(TITLE_TEXT, "Material");
+		confirmText = std::format(CONFIRM_TEXT, "a Material");
 		break;
 	case Texture:
 		break;
@@ -236,6 +245,9 @@ void NewAssetModal::CreateAsset() {
 	case ShaderProgram:
 		CreateShaderProgramAsset();
 		break;
+	case Material:
+		CreateMaterialAsset();
+		break;
 	case Texture:
 		break;
 	case Model:
@@ -290,4 +302,11 @@ void NewAssetModal::CreateShaderProgramAsset() {
 	const auto data = temporary.Serialize();
 	gui.CORE->GetAssets()->CreateAssetAt<ShaderProgram>(*newAssetData.currentFolder, newAssetData.name + Assets::SHADER_PROGRAM_EXT, data);
 	DOA_LOG_INFO("Succesfully created a new shader program asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
+}
+void NewAssetModal::CreateMaterialAsset() {
+	const GUI& gui = this->gui.get();
+	Material temporary{ newAssetData.name };
+	const auto data = temporary.Serialize();
+	gui.CORE->GetAssets()->CreateAssetAt<ShaderProgram>(*newAssetData.currentFolder, newAssetData.name + Assets::MATERIAL_EXT, data);
+	DOA_LOG_INFO("Succesfully created a material asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
 }

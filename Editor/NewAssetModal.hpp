@@ -23,6 +23,7 @@ struct NewAssetModal {
     void ShowGeometryShaderCreationModal(FNode& currentFolder) const;
     void ShowFragmentShaderCreationModal(FNode& currentFolder) const;
     void ShowShaderProgramCreationModal(FNode& currentFolder) const;
+    void ShowMaterialCreationModal(FNode& currentFolder) const;
 
     void Hide() const;
 private:
@@ -51,6 +52,7 @@ private:
             GeometryShader,
             FragmentShader,
             ShaderProgram,
+            Material,
             Texture,
             Model
         } type;
@@ -73,6 +75,7 @@ private:
     void CreateGeometryShaderAsset();
     void CreateFragmentShaderAsset();
     void CreateShaderProgramAsset();
+    void CreateMaterialAsset();
 
     friend struct GUI;
 

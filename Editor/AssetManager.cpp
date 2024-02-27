@@ -464,6 +464,10 @@ void AssetManager::RenderContextMenu() {
             if (ImGui::MenuItem(shaderProgram)) {
                 gui.ShowNewShaderProgramAssetModal(*currentFolder);
             }
+            static constexpr auto material = cat(FileIcons::MATERIAL_ICON, " ", "Material");
+            if (ImGui::MenuItem(material)) {
+                gui.ShowNewMaterialAssetModal(*currentFolder);
+            }
 
             ImGui::EndMenu();
         }

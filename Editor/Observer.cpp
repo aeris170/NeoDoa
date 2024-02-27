@@ -208,6 +208,10 @@ void Observer::DisplayTargetRenderer::RenderIconChangePopup(const FNode& file, M
             auto& items = FileIcons::ShaderProgramIcons;
             begin = &items.front();
             end = &items.back() + 1;
+        } else if (Assets::IsMaterialFile(file)) {
+            auto& items = FileIcons::MaterialIcons;
+            begin = &items.front();
+            end = &items.back() + 1;
         } else if (Assets::IsTextureFile(file)) {
             auto& items = FileIcons::TextureIcons;
             begin = &items.front();
@@ -280,6 +284,8 @@ void Observer::DisplayTargetRenderer::RenderAssetView(const Observer& observer, 
         RenderShaderView(observer, h);
     } else if (h->IsShaderProgram()) {
         RenderShaderProgramView(observer, h);
+    } else if (h->IsMaterial()) {
+        RenderMaterialView(observer, h);
     } else if (h->IsTexture()) {
         RenderTextureView(observer, h);
     } else {
@@ -387,6 +393,37 @@ void Observer::DisplayTargetRenderer::RenderShaderProgramView(const Observer& ob
         ImGui::BeginTooltip();
         ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
         ImGui::TextUnformatted("Forces deserialization on this shader program. All data in VRAM is purged, and new data is allocated.");
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
+}
+void Observer::DisplayTargetRenderer::RenderMaterialView(const Observer& observer, AssetHandle h) {
+    assert(h->IsMaterial());
+
+    MaterialDisplay::SetDisplayTarget(*observer.gui.get().CORE->GetAssets(), h);
+    MaterialDisplay::RenderMessagesTable();
+    ImGui::Separator();
+    if (h->HasDeserializedData()) {
+        MaterialDisplay::RenderProgramCombo();
+        ImGui::Separator();
+        MaterialDisplay::RenderShaderUniforms();
+    } else {
+        ImGui::Text("Material is not deserialized...");
+    }
+
+    static int extraPadding = 16;
+    float lineHeight = ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2;
+    if (ImGui::GetContentRegionAvail().y > 34.0f) {
+        ImGui::SetCursorPosY(ImGui::GetWindowHeight() - lineHeight - extraPadding);
+    }
+
+    if (ImGui::Button("Refresh", { ImGui::GetContentRegionAvail().x, 0 })) {
+        h->ForceDeserialize();
+    }
+    if (ImGui::IsItemHovered()) {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted("Forces deserialization on material. All data in RAM is purged, and new data is allocated.");
         ImGui::PopTextWrapPos();
         ImGui::EndTooltip();
     }
@@ -979,6 +1016,7 @@ void Observer::ShaderProgramDisplay::RenderVertexShader(ShaderProgram& program) 
             AssetHandle handle = assets->FindAsset(data);
             assert(handle.HasValue());
             if (handle->IsShader()) {
+                if (handle->DataAs<Shader>().Type == Shader::ShaderType::Vertex) {
                     program.VertexShader = data;
                     ShaderProgramAsset->Serialize();
                     ShaderProgramAsset->ForceDeserialize();
@@ -1214,6 +1252,128 @@ void Observer::ShaderProgramDisplay::End() {
     ImGui::Columns(1);
     ImGui::PopItemWidth();
     ImGui::PopID();
+}
+
+void Observer::MaterialDisplay::Init() {}
+void Observer::MaterialDisplay::SetDisplayTarget(Assets& assets, const AssetHandle materialAsset) {
+    Observer::MaterialDisplay::assets = &assets;
+    assert(materialAsset->IsMaterial());
+    if (MaterialAsset != materialAsset) {
+        MaterialAsset = materialAsset;
+    }
+}
+
+void Observer::MaterialDisplay::RenderMessagesTable() {
+    assert(MaterialAsset.HasValue());
+    if (!MaterialAsset->HasErrorMessages() &&
+        !MaterialAsset->HasWarningMessages() &&
+        !MaterialAsset->HasInfoMessages()) {
+        return;
+    }
+
+    ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders;
+
+    ImGui::BeginTable("compiler_logs", 2, flags);
+
+    ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, 30);
+    ImGui::TableSetupColumn("Material Logs", ImGuiTableColumnFlags_WidthStretch);
+    ImGui::TableHeadersRow();
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
+
+    ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::ERROR_COLOR);
+    for (auto& message : MaterialAsset->ErrorMessages()) {
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+
+        float r = BeginTableColumnCenterText(ComponentDefinitionViewIcons::ERROR_ICON);
+        ImGui::Text(ComponentDefinitionViewIcons::ERROR_ICON);
+        EndTableColumnCenterText(r);
+
+        ImGui::TableSetColumnIndex(1);
+
+        const std::string& m{ std::any_cast<const std::string&>(message) };
+        ImGui::TextWrapped("%s", m.c_str());
+    }
+    ImGui::PopStyleColor();
+
+    ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::WARNING_COLOR);
+    for (auto& message : MaterialAsset->WarningMessages()) {
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+
+        float r = BeginTableColumnCenterText(ComponentDefinitionViewIcons::WARNING_ICON);
+        ImGui::Text(ComponentDefinitionViewIcons::WARNING_ICON);
+        EndTableColumnCenterText(r);
+
+        ImGui::TableSetColumnIndex(1);
+
+        const std::string& m{ std::any_cast<const std::string&>(message) };
+        ImGui::TextWrapped("%s", m.c_str());
+    }
+    ImGui::PopStyleColor();
+
+    ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::INFO_COLOR);
+    for (auto& message : MaterialAsset->InfoMessages()) {
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+
+        float r = BeginTableColumnCenterText(ComponentDefinitionViewIcons::INFO_ICON);
+        ImGui::Text(ComponentDefinitionViewIcons::INFO_ICON);
+        EndTableColumnCenterText(r);
+
+        ImGui::TableSetColumnIndex(1);
+
+        const std::string& m{ std::any_cast<const std::string&>(message) };
+        ImGui::TextWrapped("%s", m.c_str());
+    }
+    ImGui::PopStyleColor();
+
+    ImGui::PopStyleVar();
+    ImGui::EndTable();
+}
+void Observer::MaterialDisplay::RenderProgramCombo() {
+    const auto& programs = assets->ShaderProgramAssetIDs();
+    Material& material = MaterialAsset->DataAs<Material>();
+
+    std::string comboPreviewString;
+    AssetHandle programHandle = assets->FindAsset(material.ShaderProgram);
+    if (programHandle.HasValue()) {
+        const ShaderProgram& programInUse = programHandle->DataAs<ShaderProgram>();
+        comboPreviewString = programInUse.Name;
+    } else {
+        comboPreviewString = "<NO SHADER PROGRAM SELECTED>";
+    }
+
+    if (ImGui::BeginCombo("program_combo", comboPreviewString.c_str(), 0)) {
+        for (const auto& program : programs) {
+            AssetHandle programAsset = assets->FindAsset(program);
+            assert(programAsset.HasValue());
+
+            const bool isSelected = (material.ShaderProgram == programAsset->ID());
+            if (ImGui::Selectable(programAsset->DataAs<ShaderProgram>().Name.c_str(), isSelected)) {
+                material.ShaderProgram = program;
+                MaterialAsset->Serialize();
+                MaterialAsset->ForceDeserialize();
+;           }
+            // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+            if (isSelected) {
+                ImGui::SetItemDefaultFocus();
+            }
+        }
+        ImGui::EndCombo();
+    }
+}
+void Observer::MaterialDisplay::RenderShaderUniforms() {
+    Material& material = MaterialAsset->DataAs<Material>();
+    if (material.ShaderProgram == UUID::Empty()) { return; }
+
+    AssetHandle programHandle = assets->FindAsset(material.ShaderProgram);
+    if (!programHandle.HasValue()) {
+        ImGui::TextUnformatted("Shader program is broken");
+        return;
+    }
+
+
 }
 
 void Observer::OnReimport(Assets& assets) {

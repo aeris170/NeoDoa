@@ -57,6 +57,7 @@ private:
         static void RenderComponentDefinitionView(const Observer& observer, AssetHandle h);
         static void RenderShaderView(const Observer& observer, AssetHandle h);
         static void RenderShaderProgramView(const Observer& observer, AssetHandle h);
+        static void RenderMaterialView(const Observer& observer, AssetHandle h);
         static void RenderTextureView(const Observer& observer, AssetHandle h);
         static void RenderTextView(const Observer& observer, AssetHandle h);
     };
@@ -120,6 +121,23 @@ private:
         static void RenderTessEvalShader(ShaderProgram& program);
         static void RenderGeometryShader(ShaderProgram& program);
         static void RenderFragmentShader(ShaderProgram& program);
+        static void End();
+    };
+
+    struct MaterialDisplay {
+        static void Init();
+        static void SetDisplayTarget(Assets& assets, const AssetHandle materialAsset);
+
+        static void RenderMessagesTable();
+        static void RenderProgramCombo();
+        static void RenderShaderUniforms();
+
+    private:
+        static inline Assets* assets{ nullptr };
+        static inline AssetHandle MaterialAsset{};
+
+        static void Begin(std::string_view label);
+        static void Render(Material& material);
         static void End();
     };
 

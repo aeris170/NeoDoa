@@ -178,6 +178,7 @@ struct GUI {
     void ShowNewGeometryShaderAssetModal(FNode& currentFolder) const;
     void ShowNewFragmentShaderAssetModal(FNode& currentFolder) const;
     void ShowNewShaderProgramAssetModal(FNode& currentFolder) const;
+    void ShowNewMaterialAssetModal(FNode& currentFolder) const;
 
     //- Undo/Redo History -//
     UndoRedoStack& GetCommandHistory() noexcept;
