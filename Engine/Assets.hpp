@@ -41,7 +41,6 @@ struct Assets {
     inline static std::string TEXTURE_EXT_JPG{ ".jpg" };
     inline static std::string TEXTURE_EXT_JPEG{ ".jpeg" };
     inline static std::string MODEL_EXT{ ".mdl" };
-    inline static std::string MATERIAL_EXT{ ".mat" };
     inline static std::string VERTEX_SHADER_EXT{ ".vert" };
     inline static std::string TESS_CTRL_SHADER_EXT{ ".tesc" };
     inline static std::string TESS_EVAL_SHADER_EXT{ ".tese" };
@@ -49,6 +48,7 @@ struct Assets {
     inline static std::string FRAGMENT_SHADER_EXT{ ".frag" };
     inline static std::string COMPUTE_SHADER_EXT{ ".comp" };
     inline static std::string SHADER_PROGRAM_EXT{ ".prog" };
+    inline static std::string MATERIAL_EXT{ ".mat" };
     inline static std::string COMP_EXT{ ".ncd" };
     inline static std::string ID_EXT{ ".id" };
 
@@ -56,7 +56,6 @@ struct Assets {
     static bool IsScriptFile(const FNode& file);
     static bool IsTextureFile(const FNode& file);
     static bool IsModelFile(const FNode& file);
-    static bool IsMaterialFile(const FNode& file);
     static bool IsShaderFile(const FNode& file);
     static bool IsVertexShaderFile(const FNode& file);
     static bool IsTessellationControlShaderFile(const FNode& file);
@@ -65,6 +64,7 @@ struct Assets {
     static bool IsFragmentShaderFile(const FNode& file);
     static bool IsComputeShaderFile(const FNode& file);
     static bool IsShaderProgramFile(const FNode& file);
+    static bool IsMaterialFile(const FNode& file);
     static bool IsComponentDefinitionFile(const FNode& file);
 
     explicit Assets(const Project& project) noexcept;
@@ -111,7 +111,7 @@ struct Assets {
     const UUIDCollection& ModelAssetIDs() const;
     const UUIDCollection& ShaderAssetIDs() const;
     const UUIDCollection& ShaderProgramAssetIDs() const;
-    const UUIDCollection& ShaderUniformBlockAssetIDs() const;
+    const UUIDCollection& MaterialAssetIDs() const;
 
     AssetHandle Import(const FNode& file);
     void ReimportAll();
@@ -143,7 +143,7 @@ private:
     UUIDCollection modelAssets{};
     UUIDCollection shaderAssets{};
     UUIDCollection shaderProgramAssets{};
-    UUIDCollection shaderUniformBlockAssets{};
+    UUIDCollection materialAssets{};
 
     AssetHandle ImportFile(AssetDatabase& database, const FNode& file);
     void ImportAllFiles(AssetDatabase& database, const FNode& root);

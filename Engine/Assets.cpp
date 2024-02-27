@@ -30,7 +30,6 @@ bool Assets::IsSceneFile(const FNode& file) { return file.ext == SCENE_EXT; }
 bool Assets::IsScriptFile(const FNode& file) { return file.ext == SCRIPT_EXT; }
 bool Assets::IsTextureFile(const FNode& file) { return file.ext == TEXTURE_EXT_PNG || file.ext == TEXTURE_EXT_JPG || file.ext == TEXTURE_EXT_JPEG; }
 bool Assets::IsModelFile(const FNode& file) { return file.ext == MODEL_EXT; }
-bool Assets::IsMaterialFile(const FNode& file) { return file.ext == MATERIAL_EXT; }
 bool Assets::IsShaderFile(const FNode& file) {
     return  IsVertexShaderFile(file) ||
             IsTessellationControlShaderFile(file) ||
@@ -46,6 +45,7 @@ bool Assets::IsGeometryShaderFile(const FNode& file) { return file.ext == GEOMET
 bool Assets::IsFragmentShaderFile(const FNode& file) { return file.ext == FRAGMENT_SHADER_EXT; }
 bool Assets::IsComputeShaderFile(const FNode & file) { return file.ext == COMPUTE_SHADER_EXT; }
 bool Assets::IsShaderProgramFile(const FNode& file) { return file.ext == SHADER_PROGRAM_EXT; }
+bool Assets::IsMaterialFile(const FNode& file) { return file.ext == MATERIAL_EXT; }
 bool Assets::IsComponentDefinitionFile(const FNode& file) { return file.ext == COMP_EXT; }
 
 Assets::Assets(const Project& project) noexcept :
@@ -90,6 +90,7 @@ void Assets::DeleteAsset(const AssetHandle asset) {
     std::erase(componentDefinitionAssets, id);
     std::erase(shaderAssets, id);
     std::erase(shaderProgramAssets, id);
+    std::erase(materialAssets, id);
     std::erase(textureAssets, id);
 
     //ReimportAll();
@@ -131,7 +132,7 @@ const Assets::UUIDCollection& Assets::ComponentDefinitionAssetIDs() const { retu
 const Assets::UUIDCollection& Assets::ModelAssetIDs() const { return modelAssets; }
 const Assets::UUIDCollection& Assets::ShaderAssetIDs() const { return shaderAssets; }
 const Assets::UUIDCollection& Assets::ShaderProgramAssetIDs() const { return shaderProgramAssets; }
-const Assets::UUIDCollection& Assets::ShaderUniformBlockAssetIDs() const { return shaderUniformBlockAssets; }
+const Assets::UUIDCollection& Assets::MaterialAssetIDs() const { return materialAssets; }
 
 AssetHandle Assets::Import(const FNode& file) { return ImportFile(database, file); }
 void Assets::ReimportAll() {
@@ -141,6 +142,7 @@ void Assets::ReimportAll() {
     componentDefinitionAssets.clear();
     shaderAssets.clear();
     shaderProgramAssets.clear();
+    materialAssets.clear();
     textureAssets.clear();
 
     _root.children.clear();
@@ -155,6 +157,7 @@ void Assets::EnsureDeserialization() {
     Deserialize(textureAssets);
     Deserialize(shaderAssets);
     Deserialize(shaderProgramAssets);
+    Deserialize(materialAssets);
 }
 
 AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
@@ -241,6 +244,9 @@ AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
         if (asset.IsShaderProgram()) {
             shaderProgramAssets.push_back(id);
         }
+        if (asset.IsMaterial()) {
+            materialAssets.push_back(id);
+        }
         if (asset.IsTexture()) {
             textureAssets.push_back(id);
         }
@@ -253,7 +259,7 @@ AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
 }
 void Assets::ImportAllFiles(AssetDatabase& database, const FNode& root) {
     ImportFile(database, root);
-    for (auto& child : root.Children()) {
+    for (const auto& child : root.Children()) {
         ImportAllFiles(database, child);
     }
 }
