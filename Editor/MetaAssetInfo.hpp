@@ -15,7 +15,7 @@ struct MetaAssetInfo {
     const char* fa_icon{ nullptr }; /* from IconsFontAwesome6Pro.h */
     std::string svg_icon_key{}; /* for SVGPathway::Get */
 
-    void* GetSVGIcon(TextureStyle style = TextureStyle::PADDED) const;
+    void* GetSVGIcon(TextureSize size = TextureSize::MEDIUM, TextureStyle style = TextureStyle::PADDED) const;
 };
 
 struct MetaAssetInfoBank {

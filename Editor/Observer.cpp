@@ -245,7 +245,7 @@ void Observer::DisplayTargetRenderer::RenderIconChangePopup(const FNode& file, M
 
 void Observer::DisplayTargetRenderer::RenderFolderView(const Observer& observer, FNode& folder) {
     assert(folder.IsDirectory());
-    const GUI& gui = observer.gui;
+    GUI& gui = observer.gui;
 
     ImGuiTableFlags flags = ImGuiTableFlags_RowBg |
         ImGuiTableFlags_Borders |
@@ -265,7 +265,7 @@ void Observer::DisplayTargetRenderer::RenderFolderView(const Observer& observer,
 
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
-            ImGui::Image(gui.FindIconForFileType(child, TextureSize::SMALL), { 16.0f, 16.0f });
+            ImGui::Image(gui.GetMetaInfoOf(child).GetSVGIcon(TextureSize::SMALL), { 16.0f, 16.0f });
             ImGui::TableSetColumnIndex(1);
             ImGui::TextUnformatted(child.FullName().data());
             ImGui::TableSetColumnIndex(2);

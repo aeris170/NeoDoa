@@ -10,7 +10,7 @@
 #include <Editor/MetaAssetInfoSerializer.hpp>
 #include <Editor/MetaAssetInfoDeserializer.hpp>
 
-void* MetaAssetInfo::GetSVGIcon(TextureStyle style) const { return SVGPathway::Get(svg_icon_key, style).TextureIDRaw(); }
+void* MetaAssetInfo::GetSVGIcon(TextureSize size, TextureStyle style) const { return SVGPathway::Get(svg_icon_key, style, size).TextureIDRaw(); }
 
 void MetaAssetInfoBank::SaveToDisk(const MetaAssetInfoBank& bank, const FNode& editorMetaFolder) noexcept {
     tinyxml2::XMLDocument doc;
