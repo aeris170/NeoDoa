@@ -56,61 +56,72 @@ MetaAssetInfoBank::DataStructure::const_iterator MetaAssetInfoBank::begin() cons
 MetaAssetInfoBank::DataStructure::const_iterator MetaAssetInfoBank::end() const noexcept { return metaInfo.end(); }
 
 void MetaAssetInfoBank::TryEmplace(const FNode& file, const MetaAssetInfo& emplaceThisIfAbsent) {
+    int icon_index{ 0 };
     const char* fa_icon{ nullptr };
     std::string svg_icon_key{};
 
     if (file.IsDirectory()) {
-        const auto& [_fa_icon, _svg_icon_key] = FileIcons::DirectoryIcons[0];
+        const auto& [_fa_icon, _svg_icon_key] = FileIcons::DirectoryIcons[icon_index];
         fa_icon = _fa_icon;
         svg_icon_key = _svg_icon_key;
     } else {
         AssetHandle handle = Core::GetCore()->GetAssets()->FindAssetAt(file);
         assert(handle.HasValue());
         if (handle->IsScene()) {
-            const auto& [_fa_icon, _svg_icon_key] = FileIcons::SceneIcons[0];
+            const auto& [_fa_icon, _svg_icon_key] = FileIcons::SceneIcons[icon_index];
             fa_icon = _fa_icon;
             svg_icon_key = _svg_icon_key;
         } else if (handle->IsComponentDefinition()) {
-            const auto& [_fa_icon, _svg_icon_key] = FileIcons::ComponentIcons[0];
+            const auto& [_fa_icon, _svg_icon_key] = FileIcons::ComponentIcons[icon_index];
             fa_icon = _fa_icon;
             svg_icon_key = _svg_icon_key;
         } else if (handle->IsShader()) {
             if (Assets::IsVertexShaderFile(handle->File())) {
-                const auto& [_fa_icon, _svg_icon_key] = FileIcons::ShaderIcons[1];
+                icon_index = 1;
+                const auto& [_fa_icon, _svg_icon_key] = FileIcons::ShaderIcons[icon_index];
                 fa_icon = _fa_icon;
                 svg_icon_key = _svg_icon_key;
             }
             if (Assets::IsTessellationControlShaderFile(handle->File())) {
-                const auto& [_fa_icon, _svg_icon_key] = FileIcons::ShaderIcons[2];
+                icon_index = 2;
+                const auto& [_fa_icon, _svg_icon_key] = FileIcons::ShaderIcons[icon_index];
                 fa_icon = _fa_icon;
                 svg_icon_key = _svg_icon_key;
             }
             if (Assets::IsTessellationEvaluationShaderFile(handle->File())) {
-                const auto& [_fa_icon, _svg_icon_key] = FileIcons::ShaderIcons[3];
+                icon_index = 3;
+                const auto& [_fa_icon, _svg_icon_key] = FileIcons::ShaderIcons[icon_index];
                 fa_icon = _fa_icon;
                 svg_icon_key = _svg_icon_key;
             }
             if (Assets::IsGeometryShaderFile(handle->File())) {
-                const auto& [_fa_icon, _svg_icon_key] = FileIcons::ShaderIcons[4];
+                icon_index = 4;
+                const auto& [_fa_icon, _svg_icon_key] = FileIcons::ShaderIcons[icon_index];
                 fa_icon = _fa_icon;
                 svg_icon_key = _svg_icon_key;
             }
             if (Assets::IsFragmentShaderFile(handle->File())) {
-                const auto& [_fa_icon, _svg_icon_key] = FileIcons::ShaderIcons[5];
+                icon_index = 5;
+                const auto& [_fa_icon, _svg_icon_key] = FileIcons::ShaderIcons[icon_index];
                 fa_icon = _fa_icon;
                 svg_icon_key = _svg_icon_key;
             }
             if (Assets::IsComputeShaderFile(handle->File())) {
-                const auto& [_fa_icon, _svg_icon_key] = FileIcons::ShaderIcons[6];
+                icon_index = 6;
+                const auto& [_fa_icon, _svg_icon_key] = FileIcons::ShaderIcons[icon_index];
                 fa_icon = _fa_icon;
                 svg_icon_key = _svg_icon_key;
             }
         } else if (handle->IsShaderProgram()) {
-            const auto& [_fa_icon, _svg_icon_key] = FileIcons::ShaderProgramIcons[0];
+            const auto& [_fa_icon, _svg_icon_key] = FileIcons::ShaderProgramIcons[icon_index];
+            fa_icon = _fa_icon;
+            svg_icon_key = _svg_icon_key;
+        } else if (handle->IsMaterial()) {
+            const auto& [_fa_icon, _svg_icon_key] = FileIcons::MaterialIcons[icon_index];
             fa_icon = _fa_icon;
             svg_icon_key = _svg_icon_key;
         } else if (handle->IsTexture()) {
-            const auto& [_fa_icon, _svg_icon_key] = FileIcons::TextureIcons[0];
+            const auto& [_fa_icon, _svg_icon_key] = FileIcons::TextureIcons[icon_index];
             fa_icon = _fa_icon;
             svg_icon_key = _svg_icon_key;
         } else {
@@ -121,7 +132,7 @@ void MetaAssetInfoBank::TryEmplace(const FNode& file, const MetaAssetInfo& empla
 
     MetaAssetInfo emplaceThisIfAbsentCopy = emplaceThisIfAbsent;
     emplaceThisIfAbsentCopy.file = &file;
-    emplaceThisIfAbsentCopy.icon_index = 0;
+    emplaceThisIfAbsentCopy.icon_index = icon_index;
     emplaceThisIfAbsentCopy.fa_icon = fa_icon;
     emplaceThisIfAbsentCopy.svg_icon_key = std::move(svg_icon_key);
     metaInfo.try_emplace(&file, emplaceThisIfAbsentCopy);
