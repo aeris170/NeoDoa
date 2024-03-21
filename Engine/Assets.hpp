@@ -10,6 +10,7 @@
 #include <Utility/AdjacencyList.hpp>
 #include <Utility/ObserverPattern.hpp>
 
+#include <Engine/Log.hpp>
 #include <Engine/UUID.hpp>
 #include <Engine/Asset.hpp>
 #include <Engine/FileNode.hpp>
@@ -161,4 +162,18 @@ private:
     void Deserialize(const UUIDCollection& assets);
 
     void BuildFileNodeTree(const Project& project, FNode& root);
+    void ReBuildDependencyGraph() noexcept;
+
+    template<AssetType T>
+    void PerformPostDeserializationAction(T& asset) noexcept {}
 };
+
+// Material Post Serialiation Helpers
+namespace MaterialPostDeserialization {
+    size_t TypeNameToVariantIndex(std::string_view typeName) noexcept;
+    void InsertUniform(Material::Uniforms& uniforms, int location, const UniformValue& uniform) noexcept;
+    void EmplaceUniform(Material::Uniforms& uniforms, int location, std::string_view name, std::string_view typeName, int arraySize = 1) noexcept;
+}
+
+template <>
+void Assets::PerformPostDeserializationAction<Material>(Material& asset) noexcept;

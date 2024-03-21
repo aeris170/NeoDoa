@@ -162,6 +162,16 @@ void Assets::EnsureDeserialization() {
 
     ReBuildDependencyGraph();
 
+    for (auto& [_, asset] : database) {
+        if (asset.IsScene())               { PerformPostDeserializationAction(asset.DataAs<Scene>());         }
+        if (asset.IsComponentDefinition()) { PerformPostDeserializationAction(asset.DataAs<Component>());     }
+        if (asset.IsShader())              { PerformPostDeserializationAction(asset.DataAs<Shader>());        }
+        if (asset.IsShaderProgram())       { PerformPostDeserializationAction(asset.DataAs<ShaderProgram>()); }
+        if (asset.IsMaterial())            { PerformPostDeserializationAction(asset.DataAs<Material>());      }
+        if (asset.IsTexture())             { PerformPostDeserializationAction(asset.DataAs<Texture>());       }
+    }
+}
+
 void Assets::TryRegisterDependencyBetween(UUID dependent, UUID dependency) noexcept {
     if (dependencyGraph.HasVertex(dependent) && !dependencyGraph.HasEdge(dependent, dependency)) {
         dependencyGraph.AddEdge(dependent, dependency);
@@ -377,4 +387,225 @@ void Assets::ReBuildDependencyGraph() noexcept {
         }
         if (asset.IsTexture()) {}
     }
+}
+
+size_t MaterialPostDeserialization::TypeNameToVariantIndex(std::string_view typeName) noexcept {
+    // TODO refactor this to remove the magic numbers, see https://stackoverflow.com/questions/52303316/get-index-by-type-in-stdvariant
+    if (typeName == "float")     { return 0uLL; }
+    else if (typeName == "vec2") { return 1uLL; }
+    else if (typeName == "vec3") { return 2uLL; }
+    else if (typeName == "vec4") { return 3uLL; }
+
+    //else if (typeName == "double") {}
+    //else if (typeName == "dvec2")  {}
+    //else if (typeName == "dvec3")  {}
+    //else if (typeName == "dvec4")  {}
+
+    else if (typeName == "int")   { return 4uLL; }
+    else if (typeName == "ivec2") { return 5uLL; }
+    else if (typeName == "ivec3") { return 6uLL; }
+    else if (typeName == "ivec4") { return 7uLL; }
+
+    else if (typeName == "unsigned int") { return 8uLL; }
+    else if (typeName == "uvec2")        { return 9uLL; }
+    else if (typeName == "uvec3")        { return 10uLL; }
+    else if (typeName == "uvec4")        { return 11uLL; }
+
+    else if (typeName == "bool")  { return 4uLL; }
+    else if (typeName == "bvec2") { return 5uLL; }
+    else if (typeName == "bvec3") { return 6uLL; }
+    else if (typeName == "bvec4") { return 7uLL; }
+
+    else if (typeName == "mat2")   { return 12uLL; }
+    else if (typeName == "mat3")   { return 13uLL; }
+    else if (typeName == "mat4")   { return 14uLL; }
+    else if (typeName == "mat2x3") { return 15uLL; }
+    else if (typeName == "mat2x4") { return 16uLL; }
+    else if (typeName == "mat3x2") { return 17uLL; }
+    else if (typeName == "mat3x4") { return 18uLL; }
+    else if (typeName == "mat4x2") { return 19uLL; }
+    else if (typeName == "mat4x3") { return 20uLL; }
+    else { return -1uLL; } // =)
+}
+void MaterialPostDeserialization::InsertUniform(Material::Uniforms& uniforms, int location, const UniformValue& uniform) noexcept {
+    if (const Uniform1f* ptr = std::get_if<Uniform1f>(&uniform.Value))      { uniforms.Set(location, uniform.Name, *ptr); }
+    else if (const Uniform2f* ptr = std::get_if<Uniform2f>(&uniform.Value)) { uniforms.Set(location, uniform.Name, *ptr); }
+    else if (const Uniform3f* ptr = std::get_if<Uniform3f>(&uniform.Value)) { uniforms.Set(location, uniform.Name, *ptr); }
+    else if (const Uniform4f* ptr = std::get_if<Uniform4f>(&uniform.Value)) { uniforms.Set(location, uniform.Name, *ptr); }
+
+    else if (const Uniform1i* ptr = std::get_if<Uniform1i>(&uniform.Value)) { uniforms.Set(location, uniform.Name, *ptr); }
+    else if (const Uniform2i* ptr = std::get_if<Uniform2i>(&uniform.Value)) { uniforms.Set(location, uniform.Name, *ptr); }
+    else if (const Uniform3i* ptr = std::get_if<Uniform3i>(&uniform.Value)) { uniforms.Set(location, uniform.Name, *ptr); }
+    else if (const Uniform4i* ptr = std::get_if<Uniform4i>(&uniform.Value)) { uniforms.Set(location, uniform.Name, *ptr); }
+
+    else if (const Uniform1ui* ptr = std::get_if<Uniform1ui>(&uniform.Value)) { uniforms.Set(location, uniform.Name, *ptr); }
+    else if (const Uniform2ui* ptr = std::get_if<Uniform2ui>(&uniform.Value)) { uniforms.Set(location, uniform.Name, *ptr); }
+    else if (const Uniform3ui* ptr = std::get_if<Uniform3ui>(&uniform.Value)) { uniforms.Set(location, uniform.Name, *ptr); }
+    else if (const Uniform4ui* ptr = std::get_if<Uniform4ui>(&uniform.Value)) { uniforms.Set(location, uniform.Name, *ptr); }
+
+    else if (const UniformMatrix2f* ptr = std::get_if<UniformMatrix2f>(&uniform.Value))     { uniforms.Set(location, uniform.Name, *ptr); }
+    else if (const UniformMatrix3f* ptr = std::get_if<UniformMatrix3f>(&uniform.Value))     { uniforms.Set(location, uniform.Name, *ptr); }
+    else if (const UniformMatrix4f* ptr = std::get_if<UniformMatrix4f>(&uniform.Value))     { uniforms.Set(location, uniform.Name, *ptr); }
+    else if (const UniformMatrix2x3f* ptr = std::get_if<UniformMatrix2x3f>(&uniform.Value)) { uniforms.Set(location, uniform.Name, *ptr); }
+    else if (const UniformMatrix3x2f* ptr = std::get_if<UniformMatrix3x2f>(&uniform.Value)) { uniforms.Set(location, uniform.Name, *ptr); }
+    else if (const UniformMatrix2x4f* ptr = std::get_if<UniformMatrix2x4f>(&uniform.Value)) { uniforms.Set(location, uniform.Name, *ptr); }
+    else if (const UniformMatrix4x2f* ptr = std::get_if<UniformMatrix4x2f>(&uniform.Value)) { uniforms.Set(location, uniform.Name, *ptr); }
+    else if (const UniformMatrix3x4f* ptr = std::get_if<UniformMatrix3x4f>(&uniform.Value)) { uniforms.Set(location, uniform.Name, *ptr); }
+    else if (const UniformMatrix4x3f* ptr = std::get_if<UniformMatrix4x3f>(&uniform.Value)) { uniforms.Set(location, uniform.Name, *ptr); }
+}
+void MaterialPostDeserialization::EmplaceUniform(Material::Uniforms& uniforms, int location, std::string_view typeName, std::string_view name, int arraySize) noexcept {
+    assert(arraySize > 0);
+    if (typeName == "float") {
+        for (int i = 0; i < arraySize; i++) {
+            uniforms.Set(location + i, name, Uniform1f{});
+        }
+    } else if (typeName == "vec2") {
+        for (int i = 0; i < arraySize; i++) {
+            uniforms.Set(location, name, Uniform2f{});
+        }
+    } else if (typeName == "vec3") {
+        for (int i = 0; i < arraySize; i++) {
+            uniforms.Set(location, name, Uniform3f{});
+        }
+    } else if (typeName == "vec4") {
+        for (int i = 0; i < arraySize; i++) {
+            uniforms.Set(location, name, Uniform4f{});
+        }
+    }
+
+    else if (typeName == "double") {}
+    else if (typeName == "dvec2")  {}
+    else if (typeName == "dvec3")  {}
+    else if (typeName == "dvec4")  {}
+
+    else if (typeName == "int") {
+        for (int i = 0; i < arraySize; i++) {
+            uniforms.Set(location, name, Uniform1i{});
+        }
+    } else if (typeName == "ivec2") {
+        for (int i = 0; i < arraySize; i++) {
+            uniforms.Set(location, name, Uniform2i{});
+        }
+    } else if (typeName == "ivec3") {
+        for (int i = 0; i < arraySize; i++) {
+            uniforms.Set(location, name, Uniform3i{});
+        }
+    } else if (typeName == "ivec4") {
+        for (int i = 0; i < arraySize; i++) {
+            uniforms.Set(location, name, Uniform4i{});
+        }
+    }
+
+    else if (typeName == "unsigned int") {
+        for (int i = 0; i < arraySize; i++) {
+            uniforms.Set(location, name, Uniform1ui{});
+        }
+    } else if (typeName == "uvec2") {
+        for (int i = 0; i < arraySize; i++) {
+            uniforms.Set(location, name, Uniform2ui{});
+        }
+    } else if (typeName == "uvec3") {
+        for (int i = 0; i < arraySize; i++) {
+            uniforms.Set(location, name, Uniform3ui{});
+        }
+    } else if (typeName == "uvec4") {
+        for (int i = 0; i < arraySize; i++) {
+            uniforms.Set(location, name, Uniform4ui{});
+        }
+    }
+
+    else if (typeName == "bool") {
+        for (int i = 0; i < arraySize; i++) {
+            uniforms.Set(location, name, Uniform1i{});
+        }
+    } else if (typeName == "bvec2") {
+        for (int i = 0; i < arraySize; i++) {
+            uniforms.Set(location, name, Uniform2i{});
+        }
+    } else if (typeName == "bvec3") {
+        for (int i = 0; i < arraySize; i++) {
+            uniforms.Set(location, name, Uniform3i{});
+        }
+    } else if (typeName == "bvec4") {
+        for (int i = 0; i < arraySize; i++) {
+            uniforms.Set(location, name, Uniform4i{});
+        }
+    }
+
+    else if (typeName == "mat2")   {
+        for (int i = 0; i < arraySize; i++) {
+            uniforms.Set(location, name, UniformMatrix2f{});
+        }
+    } else if (typeName == "mat3")   {
+        for (int i = 0; i < arraySize; i++) {
+            uniforms.Set(location, name, UniformMatrix3f{});
+        }
+    } else if (typeName == "mat4")   {
+        for (int i = 0; i < arraySize; i++) {
+            uniforms.Set(location, name, UniformMatrix4f{});
+        }
+    } else if (typeName == "mat2x3") {
+        for (int i = 0; i < arraySize; i++) {
+            uniforms.Set(location, name, UniformMatrix2x3f{});
+        }
+    } else if (typeName == "mat2x4") {
+        for (int i = 0; i < arraySize; i++) {
+            uniforms.Set(location, name, UniformMatrix2x4f{});
+        }
+    } else if (typeName == "mat3x2") {
+        for (int i = 0; i < arraySize; i++) {
+            uniforms.Set(location, name, UniformMatrix3x2f{});
+        }
+    } else if (typeName == "mat3x4") {
+        for (int i = 0; i < arraySize; i++) {
+            uniforms.Set(location, name, UniformMatrix3x4f{});
+        }
+    } else if (typeName == "mat4x2") {
+        for (int i = 0; i < arraySize; i++) {
+            uniforms.Set(location, name, UniformMatrix4x2f{});
+        }
+    } else if (typeName == "mat4x3") {
+        for (int i = 0; i < arraySize; i++) {
+            uniforms.Set(location, name, UniformMatrix4x3f{});
+        }
+    } else {
+        DOA_LOG_WARNING("Uniform typename %s is either unknown or not currently supported!", typeName.data());
+    }
+}
+
+template <>
+void Assets::PerformPostDeserializationAction<Material>(Material& asset) noexcept {
+    if (!asset.HasShaderProgram()) {
+        asset.ClearAllUniforms();
+        return;
+    }
+    assert(database.contains(asset.ShaderProgram));
+
+    const ShaderProgram& program = database[asset.ShaderProgram].DataAs<ShaderProgram>();
+
+    auto&& algorithm = [](Material::Uniforms& uniforms, Shader::ShaderType group, const ShaderProgram& program) {
+        Material::Uniforms copy = std::move(uniforms);
+        uniforms.Clear();
+
+        auto& uniformList = copy.GetAll();
+
+        for (auto& uniform : program.Uniforms) {
+            if (uniform.ReferencedBy != group) { continue; }
+
+            auto search = std::ranges::find_if(uniformList, [&uniform](auto& uniformValue) {
+                return uniformValue.Name == uniform.Name && uniformValue.Value.index() == MaterialPostDeserialization::TypeNameToVariantIndex(uniform.TypeName);
+            });
+            if (search != uniformList.end()) {
+                MaterialPostDeserialization::InsertUniform(uniforms, uniform.Location, *search);
+            } else {
+                MaterialPostDeserialization::EmplaceUniform(uniforms, uniform.Location, uniform.TypeName, uniform.Name, uniform.ArraySize);
+            }
+        }
+    };
+
+    algorithm(asset.VertexUniforms, Shader::ShaderType::Vertex, program);
+    algorithm(asset.TessellationControlUniforms, Shader::ShaderType::TessellationControl, program);
+    algorithm(asset.TessellationEvaluationUniforms, Shader::ShaderType::TessellationEvaluation, program);
+    algorithm(asset.GeometryUniforms, Shader::ShaderType::Geometry, program);
+    algorithm(asset.FragmentUniforms, Shader::ShaderType::Fragment, program);
 }
