@@ -8,7 +8,7 @@ namespace concepts {
     concept IsAnyOf = (std::same_as<T, U> || ...);
 
     template<typename T>
-    concept Copyable = requires(const T & t) {
+    concept Copyable = requires(const T& t) {
         { T::Copy(t) } -> std::same_as<T>;
     };
 
