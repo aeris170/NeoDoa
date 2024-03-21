@@ -232,7 +232,6 @@ void GUI::OpenProjectFromDisk(const std::string& path) {
 void GUI::CloseProject() {
     Events.OnProjectUnloaded();
 
-    obs.ResetDisplayTarget();
     CloseScene();
     CORE->UnloadProject();
 
