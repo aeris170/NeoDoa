@@ -173,6 +173,11 @@ void GUI::End() {
     ImGui::End();
     ExecuteDockBuilderFocusWorkAround();
 
+    if (ImGui::GetIO().WantSaveIniSettings) {
+        ImGui::GetIO().WantSaveIniSettings = false;
+        meta.SaveImGuiIniSettingsToDisk();
+    }
+
     std::string_view message = request.Receive(ReceiveFlag::DontWait);
     if (message == "request_project_path") {
         reply.Send(projectPath);

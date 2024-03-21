@@ -28,6 +28,13 @@ MetaAssetInfoBank& EditorMeta::GetMetaAssetInfoBank() const noexcept {
     return *metaAssetInfoBank;
 }
 
+void EditorMeta::SaveImGuiIniSettingsToDisk() const noexcept {
+    auto current = std::filesystem::current_path();
+    std::filesystem::current_path(MetaFolderName);
+    ImGui::SaveIniSettingsToDisk(ImGuiSettingsFileName);
+    std::filesystem::current_path(current);
+}
+
 void EditorMeta::CreateMetaAssetInfoBank() noexcept {
     metaAssetInfoBank = std::make_unique<MetaAssetInfoBank>();
     MetaAssetInfoBank::LoadFromDisk(*metaAssetInfoBank.get(), *editorMetaFolder);
@@ -38,11 +45,18 @@ void EditorMeta::OnProjectLoaded(const Project& project) noexcept {
     const auto& assets = Core->GetAssets();
     CreateHiddenMetaDataFolderIfNotExists(assets->Root());
     CreateMetaAssetInfoBank();
+
+    auto current = std::filesystem::current_path();
+    std::filesystem::current_path(MetaFolderName);
+    ImGui::LoadIniSettingsFromDisk(ImGuiSettingsFileName);
+    std::filesystem::current_path(current);
 }
 void EditorMeta::OnProjectSaved(const Project& project) noexcept {
     MetaAssetInfoBank::SaveToDisk(*metaAssetInfoBank.get(), *editorMetaFolder);
 }
 void EditorMeta::OnProjectUnloaded() noexcept {
+    SaveImGuiIniSettingsToDisk();
+
     editorMetaFolder = nullptr;
     metaAssetInfoBank = nullptr;
 }
