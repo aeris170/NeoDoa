@@ -16,8 +16,11 @@ struct EditorMeta {
     FNode& GetEditorMetaFolder() const noexcept;
     MetaAssetInfoBank& GetMetaAssetInfoBank() const noexcept;
 
+    void SaveImGuiIniSettingsToDisk() const noexcept;
+
 private:
     static constexpr auto MetaFolderName{ ".metadata" };
+    static constexpr auto ImGuiSettingsFileName{ "imgui.ini" };
 
     std::reference_wrapper<GUI> editorGUI;
     FNode* editorMetaFolder{ nullptr };
