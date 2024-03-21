@@ -93,6 +93,7 @@ void Assets::DeleteAsset(const AssetHandle asset) {
     std::erase(materialAssets, id);
     std::erase(textureAssets, id);
 
+    dependencyGraph.RemoveVertex(id);
     //ReimportAll();
 }
 
@@ -158,6 +159,43 @@ void Assets::EnsureDeserialization() {
     Deserialize(shaderAssets);
     Deserialize(shaderProgramAssets);
     Deserialize(materialAssets);
+
+    ReBuildDependencyGraph();
+
+void Assets::TryRegisterDependencyBetween(UUID dependent, UUID dependency) noexcept {
+    if (dependencyGraph.HasVertex(dependent) && !dependencyGraph.HasEdge(dependent, dependency)) {
+        dependencyGraph.AddEdge(dependent, dependency);
+    }
+}
+void Assets::TryDeleteDependencyBetween(UUID dependent, UUID dependency) noexcept {
+    if (dependencyGraph.HasVertex(dependent) && dependencyGraph.HasEdge(dependent, dependency)) {
+        dependencyGraph.RemoveEdge(dependent, dependency);
+    }
+}
+
+void Assets::OnNotify(const ObserverPattern::Observable* source, ObserverPattern::Notification message) {
+    if (message == "deserialized"_hs) {
+        const Asset* asset = dynamic_cast<const Asset*>(source);
+        assert(asset); // must be non-null
+        const UUID origin = asset->ID();
+
+        if (dependencyGraph.HasVertex(origin)) {
+            auto edgeVertices = dependencyGraph.GetIncomingEdgesOf(origin);
+            while (edgeVertices.HasNext()) {
+                const UUID& dependentID = edgeVertices.Next();
+                assert(database.contains(dependentID));
+                database[dependentID].ForceDeserialize();
+
+                auto& dependent = database[dependentID];
+                if (dependent.IsScene())               { PerformPostDeserializationAction(dependent.DataAs<Scene>());         }
+                if (dependent.IsComponentDefinition()) { PerformPostDeserializationAction(dependent.DataAs<Component>());     }
+                if (dependent.IsShader())              { PerformPostDeserializationAction(dependent.DataAs<Shader>());        }
+                if (dependent.IsShaderProgram())       { PerformPostDeserializationAction(dependent.DataAs<ShaderProgram>()); }
+                if (dependent.IsMaterial())            { PerformPostDeserializationAction(dependent.DataAs<Material>());      }
+                if (dependent.IsTexture())             { PerformPostDeserializationAction(dependent.DataAs<Texture>());       }
+            }
+        }
+    }
 }
 
 AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
@@ -172,6 +210,7 @@ AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
         (this is no longer the case, as we have dependencies between assets
         eg. Scene depends on ComponentDefinition or Material depends on Program, Program depends on Shader etc.)
         * Step 8: Separate imported asset to its own subcategory (and put it into allAssets list)
+        * Step 9: Set ownself as imported asset's Observer and return
     */
     if (file.ext == PROJ_EXT) { return nullptr; }
     if (file.IsDirectory()) { return nullptr; }
@@ -251,6 +290,8 @@ AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
             textureAssets.push_back(id);
         }
 
+        asset.AddObserver(*this);
+        dependencyGraph.AddVertex(id);
         return &asset;
     } else {
         DOA_LOG_ERROR("Failed to import asset at %s do you have read/write access to the directory?", std::quoted(file.Path().c_str()));
@@ -297,5 +338,43 @@ void Assets::BuildFileNodeTree(const Project& project, FNode& root) {
         if (child->IsDirectory()) {
             BuildFileNodeTree(project, *child);
         }
+    }
+}
+void Assets::ReBuildDependencyGraph() noexcept {
+    dependencyGraph.Clear();
+    for (const auto& [id, _] : database) {
+        dependencyGraph.AddVertex(id);
+    }
+
+    for (auto& [id, asset] : database) {
+        // Some asset types have no innate dependencies.
+        if (asset.IsScene()) {}
+        if (asset.IsComponentDefinition()) {}
+        if (asset.IsShader()) {}
+        if (asset.IsShaderProgram()) {
+            const ShaderProgram& program = asset.DataAs<ShaderProgram>();
+            if (program.HasVertexShader() && dependencyGraph.HasVertex(program.VertexShader)) {
+                dependencyGraph.AddEdge(id, program.VertexShader);
+            }
+            if (program.HasTessellationControlShader() && dependencyGraph.HasVertex(program.TessellationControlShader)) {
+                dependencyGraph.AddEdge(id, program.TessellationControlShader);
+            }
+            if (program.HasTessellationEvaluationShader() && dependencyGraph.HasVertex(program.TessellationEvaluationShader)) {
+                dependencyGraph.AddEdge(id, program.TessellationEvaluationShader);
+            }
+            if (program.HasGeometryShader() && dependencyGraph.HasVertex(program.GeometryShader)) {
+                dependencyGraph.AddEdge(id, program.GeometryShader);
+            }
+            if (program.HasFragmentShader() && dependencyGraph.HasVertex(program.FragmentShader)) {
+                dependencyGraph.AddEdge(id, program.FragmentShader);
+            }
+        }
+        if (asset.IsMaterial()) {
+            const Material& material = asset.DataAs<Material>();
+            if (material.HasShaderProgram() && dependencyGraph.HasVertex(material.ShaderProgram)) {
+                dependencyGraph.AddEdge(id, material.ShaderProgram);
+            }
+        }
+        if (asset.IsTexture()) {}
     }
 }

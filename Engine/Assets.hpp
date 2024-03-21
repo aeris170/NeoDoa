@@ -7,6 +7,9 @@
 
 #include <entt/entt.hpp>
 
+#include <Utility/AdjacencyList.hpp>
+#include <Utility/ObserverPattern.hpp>
+
 #include <Engine/UUID.hpp>
 #include <Engine/Asset.hpp>
 #include <Engine/FileNode.hpp>
@@ -30,7 +33,7 @@ private:
     Asset* _asset;
 };
 
-struct Assets {
+struct Assets : ObserverPattern::Observer {
 
     using UUIDCollection = std::vector<UUID>;
 
@@ -118,6 +121,12 @@ struct Assets {
 
     void EnsureDeserialization();
 
+    void TryRegisterDependencyBetween(UUID dependent, UUID dependency) noexcept;
+    void TryDeleteDependencyBetween(UUID dependent, UUID dependency) noexcept;
+
+protected:
+    void OnNotify(const ObserverPattern::Observable* source, ObserverPattern::Notification message) final;
+
 private:
 
 #if DEBUG
@@ -144,6 +153,8 @@ private:
     UUIDCollection shaderAssets{};
     UUIDCollection shaderProgramAssets{};
     UUIDCollection materialAssets{};
+
+    AdjacencyList<UUID> dependencyGraph{};
 
     AssetHandle ImportFile(AssetDatabase& database, const FNode& file);
     void ImportAllFiles(AssetDatabase& database, const FNode& root);
