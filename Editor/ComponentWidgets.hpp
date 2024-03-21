@@ -93,9 +93,25 @@ bool FancyVector2Widget(const std::string& label, glm::vec2& vec, FancyVectorWid
 bool FancyVector3Widget(const std::string& label, glm::vec3& vec, FancyVectorWidgetSettings<Display::XYZ> settings = defaultFancyVectorSettingsXYZ);
 bool FancyVector4Widget(const std::string& label, glm::vec4& vec, FancyVectorWidgetSettings<Display::XYZW> settings = defaultFancyVectorSettingsXYZW);
 
+bool FancyVectori1Widget(const std::string& label, glm::ivec1& vec, FancyVectorWidgetSettings<Display::X> settings = defaultFancyVectorSettingsX);
+bool FancyVectori2Widget(const std::string& label, glm::ivec2& vec, FancyVectorWidgetSettings<Display::XY> settings = defaultFancyVectorSettingsXY);
+bool FancyVectori3Widget(const std::string& label, glm::ivec3& vec, FancyVectorWidgetSettings<Display::XYZ> settings = defaultFancyVectorSettingsXYZ);
+bool FancyVectori4Widget(const std::string& label, glm::ivec4& vec, FancyVectorWidgetSettings<Display::XYZW> settings = defaultFancyVectorSettingsXYZW);
+
+bool FancyVectorui1Widget(const std::string& label, glm::uvec1& vec, FancyVectorWidgetSettings<Display::X> settings = defaultFancyVectorSettingsX);
+bool FancyVectorui2Widget(const std::string& label, glm::uvec2& vec, FancyVectorWidgetSettings<Display::XY> settings = defaultFancyVectorSettingsXY);
+bool FancyVectorui3Widget(const std::string& label, glm::uvec3& vec, FancyVectorWidgetSettings<Display::XYZ> settings = defaultFancyVectorSettingsXYZ);
+bool FancyVectorui4Widget(const std::string& label, glm::uvec4& vec, FancyVectorWidgetSettings<Display::XYZW> settings = defaultFancyVectorSettingsXYZW);
+
+bool FancyVectorb1Widget(const std::string& label, glm::ivec1& vec, FancyVectorWidgetSettings<Display::X> settings = defaultFancyVectorSettingsX);
+bool FancyVectorb2Widget(const std::string& label, glm::ivec2& vec, FancyVectorWidgetSettings<Display::XY> settings = defaultFancyVectorSettingsXY);
+bool FancyVectorb3Widget(const std::string& label, glm::ivec3& vec, FancyVectorWidgetSettings<Display::XYZ> settings = defaultFancyVectorSettingsXYZ);
+bool FancyVectorb4Widget(const std::string& label, glm::ivec4& vec, FancyVectorWidgetSettings<Display::XYZW> settings = defaultFancyVectorSettingsXYZW);
+
 template<Display dsp>
 bool FancyVectorPiece(FancyVectorWidgetSettings<dsp>& settings, size_t idx, float* vec, ImFont* buttonFont = nullptr, ImVec2 buttonSize = { 0, 0 }) {
     bool rv{ false };
+    ImGui::PushID(settings.displayLabelID[idx]);
 
     if (buttonFont == nullptr) {
         buttonFont = ImGui::GetIO().Fonts->Fonts[1];
@@ -150,6 +166,7 @@ bool FancyVectorPiece(FancyVectorWidgetSettings<dsp>& settings, size_t idx, floa
     if (settings.disabled) { ImGui::EndDisabled(); }
     ImGui::PopItemWidth();
 
+    ImGui::PopID();
     return rv;
 }
 
