@@ -18,24 +18,26 @@ struct Shader {
         Compute
     };
 
-    struct Uniform {
-        std::string TypeName;
-        std::string Name;
-    };
-
     GLuint ID;
     ShaderType Type;
     std::string Name;
     std::string SourceCode;
-    std::vector<Uniform> Uniforms;
 
-    std::string Serialize() const;
-    static Shader Deserialize(const std::string_view data);
+    std::string Serialize() const noexcept;
+    static Shader Deserialize(const std::string_view data) noexcept;
 
-    static Shader Copy(const Shader& shader);
+    static Shader Copy(const Shader& shader) noexcept;
 };
 
 struct ShaderProgram {
+    struct Uniform {
+        int Location;
+        std::string TypeName;
+        std::string Name;
+        int ArraySize;
+        Shader::ShaderType ReferencedBy;
+    };
+
     GLuint ID;
     std::string Name;
 
@@ -45,15 +47,19 @@ struct ShaderProgram {
     UUID GeometryShader              { UUID::Empty() };
     UUID FragmentShader              { UUID::Empty() };
 
-    bool IsComplete() const;
-    bool HasVertexShader() const;
-    bool HasTessellationControlShader() const;
-    bool HasTessellationEvaluationShader() const;
-    bool HasGeometryShader() const;
-    bool HasFragmentShader() const;
+    std::vector<Uniform> Uniforms{};
 
-    std::string Serialize() const;
-    static ShaderProgram Deserialize(const std::string_view data);
+    bool IsComplete() const noexcept;
+    bool HasVertexShader() const noexcept;
+    bool HasTessellationControlShader() const noexcept;
+    bool HasTessellationEvaluationShader() const noexcept;
+    bool HasGeometryShader() const noexcept;
+    bool HasFragmentShader() const noexcept;
 
-    static ShaderProgram Copy(const ShaderProgram& program);
+    int GetUniformLocation(std::string_view name) const noexcept;
+
+    std::string Serialize() const noexcept;
+    static ShaderProgram Deserialize(const std::string_view data) noexcept;
+
+    static ShaderProgram Copy(const ShaderProgram& program) noexcept;
 };

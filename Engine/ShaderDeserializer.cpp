@@ -47,6 +47,22 @@ static ShaderCompilerMessage ParseCompilerMessage(const std::string& message) {
     return rv;
 }
 
+static void QueryShaderCompilerMessages(GLuint shader, std::vector<ShaderCompilerMessage>& messages) {
+    GLint bufferLength;
+    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &bufferLength);
+    if (bufferLength > 1) {
+        GLchar* logChars = new char[bufferLength + 1];
+        glGetShaderInfoLog(shader, bufferLength, NULL, logChars);
+        std::string logString{ logChars };
+        trim(logString);
+        auto logs = SplitCompilerMessages(logString);
+        for (const auto& log : logs) {
+            messages.emplace_back(ParseCompilerMessage(log));
+        }
+        delete[] logChars;
+    }
+}
+
 ShaderDeserializationResult DeserializeVertexShader(const FNode& file) {
     file.ReadContent();
     auto rv = DeserializeVertexShader(file.DisposeContent());
@@ -69,22 +85,10 @@ ShaderDeserializationResult DeserializeVertexShader(const std::string_view data)
     if (!success) {
         rv.messages.emplace_back(0, ShaderCompilerMessageType::ERROR, "Vertex Shader compilation failed!");
     } else {
-        rv.deserializedShader = { v, Shader::ShaderType::Vertex, "", source, {} };
+        rv.deserializedShader = { v, Shader::ShaderType::Vertex, "", source };
     }
 
-    GLint bufferLength;
-    glGetShaderiv(v, GL_INFO_LOG_LENGTH, &bufferLength);
-    if (bufferLength > 1) {
-        GLchar* logChars = new char[bufferLength + 1];
-        glGetShaderInfoLog(v, bufferLength, NULL, logChars);
-        std::string logString{ logChars };
-        trim(logString);
-        auto logs = SplitCompilerMessages(logString);
-        for (const auto& log : logs) {
-            rv.messages.emplace_back(ParseCompilerMessage(log));
-        }
-        delete[] logChars;
-    }
+    QueryShaderCompilerMessages(v, rv.messages);
 
     return rv;
 }
@@ -111,22 +115,11 @@ ShaderDeserializationResult DeserializeTessellationControlShader(const std::stri
     if (!success) {
         rv.messages.emplace_back(0, ShaderCompilerMessageType::ERROR, "Tessellation Control Shader compilation failed!");
     } else {
-        rv.deserializedShader = { tc, Shader::ShaderType::TessellationControl, "", source, {} };
+        rv.deserializedShader = { tc, Shader::ShaderType::TessellationControl, "", source };
     }
 
-    GLint bufferLength;
-    glGetShaderiv(tc, GL_INFO_LOG_LENGTH, &bufferLength);
-    if (bufferLength > 1) {
-        GLchar* logChars = new char[bufferLength + 1];
-        glGetShaderInfoLog(tc, bufferLength, NULL, logChars);
-        std::string logString{ logChars };
-        trim(logString);
-        auto logs = SplitCompilerMessages(logString);
-        for (const auto& log : logs) {
-            rv.messages.emplace_back(ParseCompilerMessage(log));
-        }
-        delete[] logChars;
-    }
+
+    QueryShaderCompilerMessages(tc, rv.messages);
 
     return rv;
 }
@@ -153,22 +146,11 @@ ShaderDeserializationResult DeserializeTessellationEvaluationShader(const std::s
     if (!success) {
         rv.messages.emplace_back(0, ShaderCompilerMessageType::ERROR, "Tessellation Evaluation Shader compilation failed!");
     } else {
-        rv.deserializedShader = { te, Shader::ShaderType::TessellationEvaluation, "", source, {} };
+        rv.deserializedShader = { te, Shader::ShaderType::TessellationEvaluation, "", source };
     }
 
-    GLint bufferLength;
-    glGetShaderiv(te, GL_INFO_LOG_LENGTH, &bufferLength);
-    if (bufferLength > 1) {
-        GLchar* logChars = new char[bufferLength + 1];
-        glGetShaderInfoLog(te, bufferLength, NULL, logChars);
-        std::string logString{ logChars };
-        trim(logString);
-        auto logs = SplitCompilerMessages(logString);
-        for (const auto& log : logs) {
-            rv.messages.emplace_back(ParseCompilerMessage(log));
-        }
-        delete[] logChars;
-    }
+
+    QueryShaderCompilerMessages(te, rv.messages);
 
     return rv;
 }
@@ -195,22 +177,11 @@ ShaderDeserializationResult DeserializeGeometryShader(const std::string_view dat
     if (!success) {
         rv.messages.emplace_back(0, ShaderCompilerMessageType::ERROR, "Geometry Shader compilation failed!");
     } else {
-        rv.deserializedShader = { g, Shader::ShaderType::Geometry, "", source, {} };
+        rv.deserializedShader = { g, Shader::ShaderType::Geometry, "", source };
     }
 
-    GLint bufferLength;
-    glGetShaderiv(g, GL_INFO_LOG_LENGTH, &bufferLength);
-    if (bufferLength > 1) {
-        GLchar* logChars = new char[bufferLength + 1];
-        glGetShaderInfoLog(g, bufferLength, NULL, logChars);
-        std::string logString{ logChars };
-        trim(logString);
-        auto logs = SplitCompilerMessages(logString);
-        for (const auto& log : logs) {
-            rv.messages.emplace_back(ParseCompilerMessage(log));
-        }
-        delete[] logChars;
-    }
+
+    QueryShaderCompilerMessages(g, rv.messages);
 
     return rv;
 }
@@ -237,22 +208,11 @@ ShaderDeserializationResult DeserializeFragmentShader(const std::string_view dat
     if (!success) {
         rv.messages.emplace_back(0, ShaderCompilerMessageType::ERROR, "Fragment Shader compilation failed!");
     } else {
-        rv.deserializedShader = { f, Shader::ShaderType::Fragment, "", source, {} };
+        rv.deserializedShader = { f, Shader::ShaderType::Fragment, "", source };
     }
 
-    GLint bufferLength;
-    glGetShaderiv(f, GL_INFO_LOG_LENGTH, &bufferLength);
-    if (bufferLength > 1) {
-        GLchar* logChars = new char[bufferLength + 1];
-        glGetShaderInfoLog(f, bufferLength, NULL, logChars);
-        std::string logString{ logChars };
-        trim(logString);
-        auto logs = SplitCompilerMessages(logString);
-        for (const auto& log : logs) {
-            rv.messages.emplace_back(ParseCompilerMessage(log));
-        }
-        delete[] logChars;
-    }
+
+    QueryShaderCompilerMessages(f, rv.messages);
 
     return rv;
 }
@@ -279,22 +239,11 @@ ShaderDeserializationResult DeserializeComputeShader(const std::string_view data
     if (!success) {
         rv.messages.emplace_back(0, ShaderCompilerMessageType::ERROR, "Compute Shader compilation failed!");
     } else {
-        rv.deserializedShader = { c, Shader::ShaderType::Compute, "", source, {} };
+        rv.deserializedShader = { c, Shader::ShaderType::Compute, "", source };
     }
 
-    GLint bufferLength;
-    glGetShaderiv(c, GL_INFO_LOG_LENGTH, &bufferLength);
-    if (bufferLength > 1) {
-        GLchar* logChars = new char[bufferLength + 1];
-        glGetShaderInfoLog(c, bufferLength, NULL, logChars);
-        std::string logString{ logChars };
-        trim(logString);
-        auto logs = SplitCompilerMessages(logString);
-        for (const auto& log : logs) {
-            rv.messages.emplace_back(ParseCompilerMessage(log));
-        }
-        delete[] logChars;
-    }
+
+    QueryShaderCompilerMessages(c, rv.messages);
 
     return rv;
 }
