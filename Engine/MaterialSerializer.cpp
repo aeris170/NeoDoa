@@ -56,14 +56,7 @@ void MaterialSerializer::Uniforms::DefaultSerializeVertexUniforms(tinyxml2::XMLP
     printer.OpenElement("vertex-uniforms");
     {
         for (const auto& uniform : uniforms.GetAll()) {
-            std::visit(overloaded::lambda{
-                [&printer](const UniformValue& uniformValue) {
-                    SerializeUniform(printer, uniformValue);
-                },
-                [&printer](const UniformValueVector& uniformVector) {
-                    SerializeUniformVector(printer, uniformVector);
-                },
-            }, uniform);
+            SerializeUniform(printer, uniform);
         }
     }
     printer.CloseElement();
@@ -72,14 +65,7 @@ void MaterialSerializer::Uniforms::DefaultSerializeTessellationControlUniforms(t
     printer.OpenElement("tessellation-control-uniforms");
     {
         for (const auto& uniform : uniforms.GetAll()) {
-            std::visit(overloaded::lambda{
-                [&printer](const UniformValue& uniformValue) {
-                    SerializeUniform(printer, uniformValue);
-                },
-                [&printer](const UniformValueVector& uniformVector) {
-                    SerializeUniformVector(printer, uniformVector);
-                },
-            }, uniform);
+            SerializeUniform(printer, uniform);
         }
     }
     printer.CloseElement();
@@ -88,14 +74,7 @@ void MaterialSerializer::Uniforms::DefaultSerializeTessellationEvaluationUniform
     printer.OpenElement("tessellation-evaluation-uniforms");
     {
         for (const auto& uniform : uniforms.GetAll()) {
-            std::visit(overloaded::lambda{
-                [&printer](const UniformValue& uniformValue) {
-                    SerializeUniform(printer, uniformValue);
-                },
-                [&printer](const UniformValueVector& uniformVector) {
-                    SerializeUniformVector(printer, uniformVector);
-                },
-            }, uniform);
+            SerializeUniform(printer, uniform);
         }
     }
     printer.CloseElement();
@@ -104,14 +83,7 @@ void MaterialSerializer::Uniforms::DefaultSerializeGeometryUniforms(tinyxml2::XM
     printer.OpenElement("geometry-uniforms");
     {
         for (const auto& uniform : uniforms.GetAll()) {
-            std::visit(overloaded::lambda{
-                [&printer](const UniformValue& uniformValue) {
-                    SerializeUniform(printer, uniformValue);
-                },
-                [&printer](const UniformValueVector& uniformVector) {
-                    SerializeUniformVector(printer, uniformVector);
-                },
-            }, uniform);
+            SerializeUniform(printer, uniform);
         }
     }
     printer.CloseElement();
@@ -120,14 +92,7 @@ void MaterialSerializer::Uniforms::DefaultSerializeFragmentUniforms(tinyxml2::XM
     printer.OpenElement("fragment-uniforms");
     {
         for (const auto& uniform : uniforms.GetAll()) {
-            std::visit(overloaded::lambda{
-                [&printer](const UniformValue& uniformValue) {
-                    SerializeUniform(printer, uniformValue);
-                },
-                [&printer](const UniformValueVector& uniformVector) {
-                    SerializeUniformVector(printer, uniformVector);
-                },
-            }, uniform);
+            SerializeUniform(printer, uniform);
         }
     }
     printer.CloseElement();
@@ -136,166 +101,116 @@ void MaterialSerializer::Uniforms::DefaultSerializeUniform(tinyxml2::XMLPrinter&
     printer.OpenElement("uniform");
     {
         printer.PushAttribute("location", uniform.Location);
+        printer.PushAttribute("name", uniform.Name.c_str());
         printer.PushAttribute("type", Helpers::ExtractUniformTypeString(uniform).data());
 
         std::visit(overloaded::lambda{
-            [&printer](const Uniform1f& u) { Helpers::SerializeUniform1f(printer, u); },
-            [&printer](const Uniform2f& u) { Helpers::SerializeUniform2f(printer, u); },
-            [&printer](const Uniform3f& u) { Helpers::SerializeUniform3f(printer, u); },
-            [&printer](const Uniform4f& u) { Helpers::SerializeUniform4f(printer, u); },
+            [&printer](const Uniform1f& u) {
+                Helpers::SerializeUniform1f(printer, u);
+            },
+            [&printer](const Uniform2f& u) {
+                Helpers::SerializeUniform2f(printer, u);
+            },
+            [&printer](const Uniform3f& u) {
+                Helpers::SerializeUniform3f(printer, u);
+            },
+            [&printer](const Uniform4f& u) {
+                Helpers::SerializeUniform4f(printer, u);
+            },
 
-            [&printer](const Uniform1i& u) { Helpers::SerializeUniform1i(printer, u); },
-            [&printer](const Uniform2i& u) { Helpers::SerializeUniform2i(printer, u); },
-            [&printer](const Uniform3i& u) { Helpers::SerializeUniform3i(printer, u); },
-            [&printer](const Uniform4i& u) { Helpers::SerializeUniform4i(printer, u); },
+            [&printer](const Uniform1i& u) {
+                Helpers::SerializeUniform1i(printer, u);
+            },
+            [&printer](const Uniform2i& u) {
+                Helpers::SerializeUniform2i(printer, u);
+            },
+            [&printer](const Uniform3i& u) {
+                Helpers::SerializeUniform3i(printer, u);
+            },
+            [&printer](const Uniform4i& u) {
+                Helpers::SerializeUniform4i(printer, u);
+            },
 
-            [&printer](const Uniform1ui& u) { Helpers::SerializeUniform1ui(printer, u); },
-            [&printer](const Uniform2ui& u) { Helpers::SerializeUniform2ui(printer, u); },
-            [&printer](const Uniform3ui& u) { Helpers::SerializeUniform3ui(printer, u); },
-            [&printer](const Uniform4ui& u) { Helpers::SerializeUniform4ui(printer, u); }
+            [&printer](const Uniform1ui& u) {
+                Helpers::SerializeUniform1ui(printer, u);
+            },
+            [&printer](const Uniform2ui& u) {
+                Helpers::SerializeUniform2ui(printer, u);
+            },
+            [&printer](const Uniform3ui& u) {
+                Helpers::SerializeUniform3ui(printer, u);
+            },
+            [&printer](const Uniform4ui& u) {
+                Helpers::SerializeUniform4ui(printer, u);
+            },
+
+            [&printer](const UniformMatrix2f& u) {
+                Helpers::SerializeUniformMatrix2f(printer, u);
+            },
+            [&printer](const UniformMatrix3f& u) {
+                Helpers::SerializeUniformMatrix3f(printer, u);
+            },
+            [&printer](const UniformMatrix4f& u) {
+                Helpers::SerializeUniformMatrix4f(printer, u);
+            },
+
+            [&printer](const UniformMatrix2x3f& u) {
+                Helpers::SerializeUniformMatrix2x3f(printer, u);
+            },
+            [&printer](const UniformMatrix3x2f& u) {
+                Helpers::SerializeUniformMatrix3x2f(printer, u);
+            },
+
+            [&printer](const UniformMatrix2x4f& u) {
+                Helpers::SerializeUniformMatrix2x4f(printer, u);
+            },
+            [&printer](const UniformMatrix4x2f& u) {
+                Helpers::SerializeUniformMatrix4x2f(printer, u);
+            },
+
+            [&printer](const UniformMatrix3x4f& u) {
+                Helpers::SerializeUniformMatrix3x4f(printer, u);
+            },
+            [&printer](const UniformMatrix4x3f& u) {
+                Helpers::SerializeUniformMatrix4x3f(printer, u);
+            }
         }, uniform.Value);
     }
     printer.CloseElement();
 }
-void MaterialSerializer::Uniforms::DefaultSerializeUniformVector(tinyxml2::XMLPrinter& printer, const UniformValueVector& uniformVector) noexcept {
-    printer.OpenElement("uniform-vector");
-    {
-        printer.PushAttribute("location", uniformVector.Location);
-        printer.PushAttribute("type", Helpers::ExtractUniformTypeString(uniformVector).data());
 
-        printer.OpenElement("values");
-        {
-            std::visit(overloaded::lambda {
-                [&printer](const std::vector<Uniform1f>& uv) {
-                    for (const auto& u : uv) { Helpers::SerializeUniform1f(printer, u); }
-                },
-                [&printer](const std::vector<Uniform2f>& uv) {
-                    for (const auto& u : uv) { Helpers::SerializeUniform2f(printer, u); }
-                },
-                [&printer](const std::vector<Uniform3f>& uv) {
-                    for (const auto& u : uv) { Helpers::SerializeUniform3f(printer, u); }
-                },
-                [&printer](const std::vector<Uniform4f>& uv) {
-                    for (const auto& u : uv) { Helpers::SerializeUniform4f(printer, u); }
-                },
-
-                [&printer](const std::vector<Uniform1i>& uv) {
-                    for (const auto& u : uv) { Helpers::SerializeUniform1i(printer, u); }
-                },
-                [&printer](const std::vector<Uniform2i>& uv) {
-                    for (const auto& u : uv) { Helpers::SerializeUniform2i(printer, u); }
-                },
-                [&printer](const std::vector<Uniform3i>& uv) {
-                    for (const auto& u : uv) { Helpers::SerializeUniform3i(printer, u); }
-                },
-                [&printer](const std::vector<Uniform4i>& uv) {
-                    for (const auto& u : uv) { Helpers::SerializeUniform4i(printer, u); }
-                },
-
-                [&printer](const std::vector<Uniform1ui>& uv) {
-                    for (const auto& u : uv) { Helpers::SerializeUniform1ui(printer, u); }
-                },
-                [&printer](const std::vector<Uniform2ui>& uv) {
-                    for (const auto& u : uv) { Helpers::SerializeUniform2ui(printer, u); }
-                },
-                [&printer](const std::vector<Uniform3ui>& uv) {
-                    for (const auto& u : uv) { Helpers::SerializeUniform3ui(printer, u); }
-                },
-                [&printer](const std::vector<Uniform4ui>& uv) {
-                    for (const auto& u : uv) { Helpers::SerializeUniform4ui(printer, u); }
-                },
-
-                [&printer](const std::vector<UniformMatrix2f>& uv) {
-                    for (const auto& u : uv) { Helpers::SerializeUniformMatrix2f(printer, u); }
-                },
-                [&printer](const std::vector<UniformMatrix3f>& uv) {
-                    for (const auto& u : uv) { Helpers::SerializeUniformMatrix3f(printer, u); }
-                },
-                [&printer](const std::vector<UniformMatrix4f>& uv) {
-                    for (const auto& u : uv) { Helpers::SerializeUniformMatrix4f(printer, u); }
-                },
-
-                [&printer](const std::vector<UniformMatrix2x3f>& uv) {
-                    for (const auto& u : uv) { Helpers::SerializeUniformMatrix2x3f(printer, u); }
-                },
-                [&printer](const std::vector<UniformMatrix3x2f>& uv) {
-                    for (const auto& u : uv) { Helpers::SerializeUniformMatrix3x2f(printer, u); }
-                },
-
-                [&printer](const std::vector<UniformMatrix2x4f>& uv) {
-                    for (const auto& u : uv) { Helpers::SerializeUniformMatrix2x4f(printer, u); }
-                },
-                [&printer](const std::vector<UniformMatrix4x2f>& uv) {
-                    for (const auto& u : uv) { Helpers::SerializeUniformMatrix4x2f(printer, u); }
-                },
-
-                [&printer](const std::vector<UniformMatrix3x4f>& uv) {
-                    for (const auto& u : uv) { Helpers::SerializeUniformMatrix3x4f(printer, u); }
-                },
-                [&printer](const std::vector<UniformMatrix4x3f>& uv) {
-                    for (const auto& u : uv) { Helpers::SerializeUniformMatrix4x3f(printer, u); }
-                }
-            }, uniformVector.Values);
-        }
-        printer.CloseElement();
-    }
-    printer.CloseElement();
-}
-
-std::string_view MaterialSerializer::Helpers::ExtractUniformTypeString(const UniformValue& uniform) noexcept {
-    std::string_view rv;
+std::string MaterialSerializer::Helpers::ExtractUniformTypeString(const UniformValue& uniform) noexcept {
+    std::string rv;
 
     std::visit(overloaded::lambda{
-        [&rv]([[maybe_unused]] const Uniform1f& _) { rv = nameof_c(Uniform1f); },
-        [&rv]([[maybe_unused]] const Uniform2f& _) { rv = nameof_c(Uniform2f); },
-        [&rv]([[maybe_unused]] const Uniform3f& _) { rv = nameof_c(Uniform3f); },
-        [&rv]([[maybe_unused]] const Uniform4f& _) { rv = nameof_c(Uniform4f); },
+        [&rv]([[maybe_unused]] const Uniform1f& _) { rv = nameof(Uniform1f); },
+        [&rv]([[maybe_unused]] const Uniform2f& _) { rv = nameof(Uniform2f); },
+        [&rv]([[maybe_unused]] const Uniform3f& _) { rv = nameof(Uniform3f); },
+        [&rv]([[maybe_unused]] const Uniform4f& _) { rv = nameof(Uniform4f); },
 
-        [&rv]([[maybe_unused]] const Uniform1i& _) { rv = nameof_c(Uniform1i); },
-        [&rv]([[maybe_unused]] const Uniform2i& _) { rv = nameof_c(Uniform2i); },
-        [&rv]([[maybe_unused]] const Uniform3i& _) { rv = nameof_c(Uniform3i); },
-        [&rv]([[maybe_unused]] const Uniform4i& _) { rv = nameof_c(Uniform4i); },
+        [&rv]([[maybe_unused]] const Uniform1i& _) { rv = nameof(Uniform1i); },
+        [&rv]([[maybe_unused]] const Uniform2i& _) { rv = nameof(Uniform2i); },
+        [&rv]([[maybe_unused]] const Uniform3i& _) { rv = nameof(Uniform3i); },
+        [&rv]([[maybe_unused]] const Uniform4i& _) { rv = nameof(Uniform4i); },
 
-        [&rv]([[maybe_unused]] const Uniform1ui& _) { rv = nameof_c(Uniform1ui); },
-        [&rv]([[maybe_unused]] const Uniform2ui& _) { rv = nameof_c(Uniform2ui); },
-        [&rv]([[maybe_unused]] const Uniform3ui& _) { rv = nameof_c(Uniform3ui); },
-        [&rv]([[maybe_unused]] const Uniform4ui& _) { rv = nameof_c(Uniform4ui); },
+        [&rv]([[maybe_unused]] const Uniform1ui& _) { rv = nameof(Uniform1ui); },
+        [&rv]([[maybe_unused]] const Uniform2ui& _) { rv = nameof(Uniform2ui); },
+        [&rv]([[maybe_unused]] const Uniform3ui& _) { rv = nameof(Uniform3ui); },
+        [&rv]([[maybe_unused]] const Uniform4ui& _) { rv = nameof(Uniform4ui); },
+
+        [&rv]([[maybe_unused]] const UniformMatrix2f& _) { rv = nameof(UniformMatrix2f); },
+        [&rv]([[maybe_unused]] const UniformMatrix3f& _) { rv = nameof(UniformMatrix3f); },
+        [&rv]([[maybe_unused]] const UniformMatrix4f& _) { rv = nameof(UniformMatrix4f); },
+
+        [&rv]([[maybe_unused]] const UniformMatrix2x3f& _) { rv = nameof(UniformMatrix2x3f); },
+        [&rv]([[maybe_unused]] const UniformMatrix3x2f& _) { rv = nameof(UniformMatrix3x2f); },
+
+        [&rv]([[maybe_unused]] const UniformMatrix2x4f& _) { rv = nameof(UniformMatrix2x4f); },
+        [&rv]([[maybe_unused]] const UniformMatrix4x2f& _) { rv = nameof(UniformMatrix4x2f); },
+
+        [&rv]([[maybe_unused]] const UniformMatrix3x4f& _) { rv = nameof(UniformMatrix3x4f); },
+        [&rv]([[maybe_unused]] const UniformMatrix4x3f& _) { rv = nameof(UniformMatrix4x3f); }
     }, uniform.Value);
-
-    return rv;
-}
-std::string_view MaterialSerializer::Helpers::ExtractUniformTypeString(const UniformValueVector& uniformVector) noexcept {
-    std::string_view rv;
-
-    std::visit(overloaded::lambda{
-        [&rv]([[maybe_unused]] const std::vector<Uniform1f>& _) { rv = nameof_c(Uniform1f); },
-        [&rv]([[maybe_unused]] const std::vector<Uniform2f>& _) { rv = nameof_c(Uniform2f); },
-        [&rv]([[maybe_unused]] const std::vector<Uniform3f>& _) { rv = nameof_c(Uniform3f); },
-        [&rv]([[maybe_unused]] const std::vector<Uniform4f>& _) { rv = nameof_c(Uniform4f); },
-
-        [&rv]([[maybe_unused]] const std::vector<Uniform1i>& _) { rv = nameof_c(Uniform1i); },
-        [&rv]([[maybe_unused]] const std::vector<Uniform2i>& _) { rv = nameof_c(Uniform2i); },
-        [&rv]([[maybe_unused]] const std::vector<Uniform3i>& _) { rv = nameof_c(Uniform3i); },
-        [&rv]([[maybe_unused]] const std::vector<Uniform4i>& _) { rv = nameof_c(Uniform4i); },
-
-        [&rv]([[maybe_unused]] const std::vector<Uniform1ui>& _) { rv = nameof_c(Uniform1ui); },
-        [&rv]([[maybe_unused]] const std::vector<Uniform2ui>& _) { rv = nameof_c(Uniform2ui); },
-        [&rv]([[maybe_unused]] const std::vector<Uniform3ui>& _) { rv = nameof_c(Uniform3ui); },
-        [&rv]([[maybe_unused]] const std::vector<Uniform4ui>& _) { rv = nameof_c(Uniform4ui); },
-
-        [&rv]([[maybe_unused]] const std::vector<UniformMatrix2f>& _) { rv = nameof_c(UniformMatrix2f); },
-        [&rv]([[maybe_unused]] const std::vector<UniformMatrix3f>& _) { rv = nameof_c(UniformMatrix3f); },
-        [&rv]([[maybe_unused]] const std::vector<UniformMatrix4f>& _) { rv = nameof_c(UniformMatrix4f); },
-
-        [&rv]([[maybe_unused]] const std::vector<UniformMatrix2x3f>& _) { rv = nameof_c(UniformMatrix2x3f); },
-        [&rv]([[maybe_unused]] const std::vector<UniformMatrix3x2f>& _) { rv = nameof_c(UniformMatrix3x2f); },
-
-        [&rv]([[maybe_unused]] const std::vector<UniformMatrix2x4f>& _) { rv = nameof_c(UniformMatrix2x4f); },
-        [&rv]([[maybe_unused]] const std::vector<UniformMatrix4x2f>& _) { rv = nameof_c(UniformMatrix4x2f); },
-
-        [&rv]([[maybe_unused]] const std::vector<UniformMatrix3x4f>& _) { rv = nameof_c(UniformMatrix3x4f); },
-        [&rv]([[maybe_unused]] const std::vector<UniformMatrix4x3f>& _) { rv = nameof_c(UniformMatrix4x3f); }
-    }, uniformVector.Values);
 
     return rv;
 }

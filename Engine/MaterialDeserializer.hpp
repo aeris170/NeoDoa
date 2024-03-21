@@ -37,7 +37,6 @@ namespace MaterialDeserializer {
         using DeserializeGeometryUniformsFunction               = std::function<void(tinyxml2::XMLElement& geometryUniformsElem, MaterialDeserializationResult& mdr)>;
         using DeserializeFragmentUniformsFunction               = std::function<void(tinyxml2::XMLElement& fragmentUniformsElem, MaterialDeserializationResult& mdr)>;
         using DeserializeUniformFunction                        = std::function<void(tinyxml2::XMLElement& uniformElem, MaterialDeserializationResult& mdr, Material::Uniforms& uniformsToFill)>;
-        using DeserializeUniformVectorFunction                  = std::function<void(tinyxml2::XMLElement& uniformVectorElem, MaterialDeserializationResult& mdr, Material::Uniforms& uniformsToFill)>;
     }
 
     /* --- Default Implementations --- */
@@ -55,7 +54,6 @@ namespace MaterialDeserializer {
         void DefaultDeserializeGeometryUniforms(tinyxml2::XMLElement& geometryUniformsElem, MaterialDeserializationResult& mdr) noexcept;
         void DefaultDeserializeFragmentUniforms(tinyxml2::XMLElement& fragmentUniformsElem, MaterialDeserializationResult& mdr) noexcept;
         void DefaultDeserializeUniform(tinyxml2::XMLElement& uniformElem, MaterialDeserializationResult& mdr, Material::Uniforms& uniformsToFill) noexcept;
-        void DefaultDeserializeUniformVector(tinyxml2::XMLElement& uniformVectorElem, MaterialDeserializationResult& mdr, Material::Uniforms& uniformsToFill) noexcept;
     }
 
     /* ----- Deserializer Functions ----- */
@@ -72,7 +70,6 @@ namespace MaterialDeserializer {
         inline DeserializeGeometryUniformsFunction DeserializeGeometryUniforms{ DefaultDeserializeGeometryUniforms };                                           /* Feel free to assign this your own function, if you need custom serialization */
         inline DeserializeFragmentUniformsFunction DeserializeFragmentUniforms{ DefaultDeserializeFragmentUniforms };                                           /* Feel free to assign this your own function, if you need custom serialization */
         inline DeserializeUniformFunction DeserializeUniform{ DefaultDeserializeUniform };                                                                      /* Feel free to assign this your own function, if you need custom serialization */
-        inline DeserializeUniformVectorFunction DeserializeUniformVector{ DefaultDeserializeUniformVector };                                                    /* Feel free to assign this your own function, if you need custom serialization */
     }
 }
 

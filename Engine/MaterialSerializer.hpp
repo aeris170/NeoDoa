@@ -28,8 +28,7 @@ namespace MaterialSerializer {
         using SerializeTessellationEvaluationUniformsFunction = std::function<void(tinyxml2::XMLPrinter& printer, const Material::Uniforms& uniforms)>;
         using SerializeGeometryUniformsFunction               = std::function<void(tinyxml2::XMLPrinter& printer, const Material::Uniforms& uniforms)>;
         using SerializeFragmentUniformsFunction               = std::function<void(tinyxml2::XMLPrinter& printer, const Material::Uniforms& uniforms)>;
-        using SerializeUniformFunction                        = std::function<void(tinyxml2::XMLPrinter& printer, const UniformValue& uniformValue)>;
-        using SerializeUniformVectorFunction                  = std::function<void(tinyxml2::XMLPrinter& printer, const UniformValueVector& uniformVector)>;
+        using SerializeUniformFunction                        = std::function<void(tinyxml2::XMLPrinter& printer, const UniformValue& uniform)>;
     }
 
     /* --- Default Implementations --- */
@@ -48,7 +47,6 @@ namespace MaterialSerializer {
         void DefaultSerializeGeometryUniforms(tinyxml2::XMLPrinter& printer, const Material::Uniforms& uniforms) noexcept;
         void DefaultSerializeFragmentUniforms(tinyxml2::XMLPrinter& printer, const Material::Uniforms& uniforms) noexcept;
         void DefaultSerializeUniform(tinyxml2::XMLPrinter& printer, const UniformValue& uniform) noexcept;
-        void DefaultSerializeUniformVector(tinyxml2::XMLPrinter& printer, const UniformValueVector& uniformVector) noexcept;
     }
 
     /* ----- Serializer Functions ----- */
@@ -66,14 +64,12 @@ namespace MaterialSerializer {
         inline SerializeGeometryUniformsFunction SerializeGeometryUniforms{ DefaultSerializeGeometryUniforms };                                           /* Feel free to assign this your own function, if you need custom serialization */
         inline SerializeFragmentUniformsFunction SerializeFragmentUniforms{ DefaultSerializeFragmentUniforms };                                           /* Feel free to assign this your own function, if you need custom serialization */
         inline SerializeUniformFunction SerializeUniform{ DefaultSerializeUniform };                                                                      /* Feel free to assign this your own function, if you need custom serialization */
-        inline SerializeUniformVectorFunction SerializeUniformVector{ DefaultSerializeUniformVector };                                                    /* Feel free to assign this your own function, if you need custom serialization */
     }
 }
 
 /* Some Helper functions to trivially serialize (not-so) trivial data types */
 namespace MaterialSerializer::Helpers {
-    std::string_view ExtractUniformTypeString(const UniformValue& uniform) noexcept;
-    std::string_view ExtractUniformTypeString(const UniformValueVector& uniformVector) noexcept;
+    std::string ExtractUniformTypeString(const UniformValue& uniform) noexcept;
 
     void SerializeUniform1f(tinyxml2::XMLPrinter& printer, const Uniform1f& uniformValue) noexcept;
     void SerializeUniform2f(tinyxml2::XMLPrinter& printer, const Uniform2f& uniformValue) noexcept;
