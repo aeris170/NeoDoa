@@ -17,6 +17,15 @@ namespace concepts {
         &T::Serialize;
         &T::Deserialize;
     };
+
+    // https://en.cppreference.com/w/cpp/language/constraints
+    // Declaration of the concept "Hashable", which is satisfied by any type 'T'
+    // such that for values 'a' of type 'T', the expression std::hash<T>{}(a)
+    // compiles and its result is convertible to std::size_t
+    template<typename T>
+    concept Hashable = requires(T t) {
+        { std::hash<T>{}(t) } -> std::convertible_to<std::size_t>;
+    };
 }
 
 namespace overloaded {
