@@ -16,6 +16,7 @@ target_link_libraries(Utility PUBLIC ICU::uc ICU::dt ICU::i18n)
 target_link_libraries(Utility PUBLIC cppzmq cppzmq-static)
 
 set(GROUP_LIST
+    "AdjacencyList.hpp"
     "CheckSubstring.cpp"
     "CheckSubstring.hpp"
     "ConstexprConcat.hpp"
