@@ -533,6 +533,15 @@ bool PerspectiveCameraWidget(PerspectiveCamera& cameraData) {
     return rv;
 }
 
+bool Image2DButtonWidget(const std::string& label, ImTextureID texture) {
+    BeginWidget(label);
+    std::stringstream ss;
+    ss << "##" << label;
+    bool rv = ImGui::ImageButton(label.c_str(), texture, { 64, 64 }, { 0, 1 }, { 1, 0 });
+    EndWidget();
+    return rv;
+}
+
 void Space() {
     ImGui::NewLine();
 }

@@ -111,6 +111,12 @@ namespace ObserverIcons {
         inline constexpr const char RESET_COMPONENT_DATA_ICON[]{ ICON_FA_ARROW_ROTATE_LEFT " " };
         inline constexpr const char DETACH_COMPONENT_ICON[]{ ICON_FA_TRASH " " };
     }
+
+    namespace MaterialDisplayIcons {
+        namespace ContextMenu {
+            inline constexpr const char RESET_UNIFORM_ICON[]{ ICON_FA_ARROW_ROTATE_LEFT " " };
+        }
+    }
 }
 
 namespace ComponentDefinitionViewIcons {

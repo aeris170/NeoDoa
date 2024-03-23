@@ -415,12 +415,13 @@ void GUI::OnSceneClosed() {
     scene = std::nullopt;
 }
 void GUI::OnReimport(Assets& assets) {
-    if (sceneUUID == UUID::Empty()) { return; }
-
-    AssetHandle currentSceneHandle = assets.FindAsset(sceneUUID);
-    if (!currentSceneHandle.HasValue()) {
-        sceneUUID = UUID::Empty();
-        scene = std::nullopt;
+    meta.GetMetaAssetInfoBank().Clear();
+    if (sceneUUID != UUID::Empty()) {
+        AssetHandle currentSceneHandle = assets.FindAsset(sceneUUID);
+        if (!currentSceneHandle.HasValue()) {
+            sceneUUID = UUID::Empty();
+            scene = std::nullopt;
+        }
     }
 }
 void GUI::OnAssetDeleted(AssetHandle asset) {

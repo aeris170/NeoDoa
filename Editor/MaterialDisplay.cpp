@@ -1,5 +1,9 @@
 #include <Editor/MaterialDisplay.hpp>
 
+#include <imgInspect.h>
+
+#include <Utility/ConstexprConcat.hpp>
+
 #include <Engine/Log.hpp>
 
 #include <Editor/Icons.hpp>
@@ -7,6 +11,10 @@
 #include <Editor/Observer.hpp>
 #include <Editor/ImGuiExtensions.hpp>
 #include <Editor/ComponentWidgets.hpp>
+
+static void cb(const ImDrawList* parent_list, const ImDrawCmd* cmd) {
+    glBindSampler(0, *reinterpret_cast<GLuint*>(cmd->UserCallbackData));
+}
 
 MaterialDisplay::MaterialDisplay(Observer& observer) noexcept :
     observer(observer) {}
@@ -131,6 +139,17 @@ void MaterialDisplay::RenderShaderUniforms() noexcept {
     Material& material = materialAsset->DataAs<Material>();
     if (material.ShaderProgram == UUID::Empty()) { return; }
 
+    static GLuint sampler;
+    if (sampler == 0) {
+        glGenSamplers(1, &sampler);
+        glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glSamplerParameteri(sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        glSamplerParameteri(sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    }
+
+    ImGui::GetWindowDrawList()->AddCallback(cb, &sampler);
+
     AssetHandle programHandle = assets->FindAsset(material.ShaderProgram);
     if (!programHandle.HasValue()) {
         ImGui::Text("Selected program (ID: %%llu) is non-existant!", static_cast<uint64_t>(material.ShaderProgram));
@@ -172,6 +191,8 @@ void MaterialDisplay::RenderShaderUniforms() noexcept {
         ImGui::SeparatorText(std::format("Fragment Shader - {} ({})", assets->FindAsset(program.FragmentShader)->DataAs<Shader>().Name, program.FragmentShader.AsString()).c_str());
         RenderUniformGroup(material.VertexUniforms, program, Shader::ShaderType::Fragment);
     }
+
+    textureView.Render();
 }
 
 int MaterialDisplay::CountUniformsInGroup(const ShaderProgram& program, Shader::ShaderType group) noexcept {
@@ -193,31 +214,32 @@ void MaterialDisplay::RenderUniformGroup(Material::Uniforms& uniforms, const Sha
     }
 }
 bool MaterialDisplay::RenderSingleUniform(Material::Uniforms& uniforms, const UniformValue& uniformValue, const ShaderProgram::Uniform& uniform) noexcept {
+    bool rv{ false };
     //ImGui::Text("Name: %s, Type: %s", uniform.Name.c_str(), uniform.TypeName.c_str());
 
     if (uniform.TypeName == "float") {
         Uniform1f value = std::get<Uniform1f>(uniformValue.Value);
         if (FancyVector1Widget(uniformValue.Name.c_str(), value)) {
             uniforms.Set(uniformValue.Location, uniformValue.Name, value);
-            return true;
+            rv = true;
         }
     } else if (uniform.TypeName == "vec2") {
         Uniform2f value = std::get<Uniform2f>(uniformValue.Value);
         if (FancyVector2Widget(uniformValue.Name.c_str(), value)) {
             uniforms.Set(uniformValue.Location, uniformValue.Name, value);
-            return true;
+            rv = true;
         }
     } else if (uniform.TypeName == "vec3") {
         Uniform3f value = std::get<Uniform3f>(uniformValue.Value);
         if (FancyVector3Widget(uniformValue.Name.c_str(), value)) {
             uniforms.Set(uniformValue.Location, uniformValue.Name, value);
-            return true;
+            rv = true;
         }
     } else if (uniform.TypeName == "vec4") {
         Uniform4f value = std::get<Uniform4f>(uniformValue.Value);
         if (FancyVector4Widget(uniformValue.Name.c_str(), value)) {
             uniforms.Set(uniformValue.Location, uniformValue.Name, value);
-            return true;
+            rv = true;
         }
     }
 
@@ -231,25 +253,25 @@ bool MaterialDisplay::RenderSingleUniform(Material::Uniforms& uniforms, const Un
         Uniform1i value = std::get<Uniform1i>(uniformValue.Value);
         if (FancyVectori1Widget(uniformValue.Name.c_str(), value)) {
             uniforms.Set(uniformValue.Location, uniformValue.Name, value);
-            return true;
+            rv = true;
         }
     } else if (uniform.TypeName == "ivec2") {
         Uniform2i value = std::get<Uniform2i>(uniformValue.Value);
         if (FancyVectori2Widget(uniformValue.Name.c_str(), value)) {
             uniforms.Set(uniformValue.Location, uniformValue.Name, value);
-            return true;
+            rv = true;
         }
     } else if (uniform.TypeName == "ivec3") {
         Uniform3i value = std::get<Uniform3i>(uniformValue.Value);
         if (FancyVectori3Widget(uniformValue.Name.c_str(), value)) {
             uniforms.Set(uniformValue.Location, uniformValue.Name, value);
-            return true;
+            rv = true;
         }
     } else if (uniform.TypeName == "ivec4") {
         Uniform4i value = std::get<Uniform4i>(uniformValue.Value);
         if (FancyVectori4Widget(uniformValue.Name.c_str(), value)) {
             uniforms.Set(uniformValue.Location, uniformValue.Name, value);
-            return true;
+            rv = true;
         }
     }
 
@@ -257,25 +279,25 @@ bool MaterialDisplay::RenderSingleUniform(Material::Uniforms& uniforms, const Un
         Uniform1ui value = std::get<Uniform1ui>(uniformValue.Value);
         if (FancyVectorui1Widget(uniformValue.Name.c_str(), value)) {
             uniforms.Set(uniformValue.Location, uniformValue.Name, value);
-            return true;
+            rv = true;
         }
     } else if (uniform.TypeName == "uvec2") {
         Uniform2ui value = std::get<Uniform2ui>(uniformValue.Value);
         if (FancyVectorui2Widget(uniformValue.Name.c_str(), value)) {
             uniforms.Set(uniformValue.Location, uniformValue.Name, value);
-            return true;
+            rv = true;
         }
     } else if (uniform.TypeName == "uvec3") {
         Uniform3ui value = std::get<Uniform3ui>(uniformValue.Value);
         if (FancyVectorui3Widget(uniformValue.Name.c_str(), value)) {
             uniforms.Set(uniformValue.Location, uniformValue.Name, value);
-            return true;
+            rv = true;
         }
     } else if (uniform.TypeName == "uvec4") {
         Uniform4ui value = std::get<Uniform4ui>(uniformValue.Value);
         if (FancyVectorui4Widget(uniformValue.Name.c_str(), value)) {
             uniforms.Set(uniformValue.Location, uniformValue.Name, value);
-            return true;
+            rv = true;
         }
     }
 
@@ -283,26 +305,71 @@ bool MaterialDisplay::RenderSingleUniform(Material::Uniforms& uniforms, const Un
         Uniform1i value = std::get<Uniform1i>(uniformValue.Value);
         if (FancyVectorb1Widget(uniformValue.Name.c_str(), value)) {
             uniforms.Set(uniformValue.Location, uniformValue.Name, value);
-            return true;
+            rv = true;
         }
     } else if (uniform.TypeName == "bvec2") {
         Uniform2i value = std::get<Uniform2i>(uniformValue.Value);
         if (FancyVectorb2Widget(uniformValue.Name.c_str(), value)) {
             uniforms.Set(uniformValue.Location, uniformValue.Name, value);
-            return true;
+            rv = true;
         }
     } else if (uniform.TypeName == "bvec3") {
         Uniform3i value = std::get<Uniform3i>(uniformValue.Value);
         if (FancyVectorb3Widget(uniformValue.Name.c_str(), value)) {
             uniforms.Set(uniformValue.Location, uniformValue.Name, value);
-            return true;
+            rv = true;
         }
     } else if (uniform.TypeName == "bvec4") {
         Uniform4i value = std::get<Uniform4i>(uniformValue.Value);
         if (FancyVectorb4Widget(uniformValue.Name.c_str(), value)) {
             uniforms.Set(uniformValue.Location, uniformValue.Name, value);
-            return true;
+            rv = true;
         }
+    }
+
+    else if (uniform.TypeName == "sampler1D") {
+        ImGui::TextUnformatted("Implementation pending...");
+    } else if (uniform.TypeName == "sampler2D") {
+        Uniform1i value = std::get<Uniform1i>(uniformValue.Value);
+
+        const Texture* texture{ nullptr };
+        for (const auto id : assets->TextureAssetIDs()) {
+            AssetHandle handle = assets->FindAsset(id);
+            if (!handle) { continue; }
+
+            const Texture& t = handle->DataAs<Texture>();
+            if (t.TextureID() == value[0]) {
+                texture = &t;
+            }
+        }
+        if (!texture) { texture = missingTexture; }
+
+        if (Image2DButtonWidget(uniformValue.Name.c_str(), texture->TextureIDRaw())) {
+            textureView.Show(*texture);
+        }
+        if (ImGui::BeginPopupContextItem(nullptr, ImGuiPopupFlags_MouseButtonRight)) {
+            if (ImGui::Button(cat(ObserverIcons::MaterialDisplayIcons::ContextMenu::RESET_UNIFORM_ICON, "Reset"))) {
+                uniforms.Set(uniform.Location, uniform.Name, Uniform1i{});
+                rv = true;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+        if(ImGui::BeginDragDropTarget()) {
+            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DND_DEMO_CELL")) {
+                UUID data = *(const UUID*) payload->Data;
+                AssetHandle handle = assets->FindAsset(data);
+                assert(handle.HasValue());
+                if (handle->IsTexture()) {
+                    const Texture& droppedTexture = handle->DataAs<Texture>();
+                    uniforms.Set(uniform.Location, uniform.Name, Uniform1i{ std::bit_cast<Uniform1i::value_type>(droppedTexture.TextureID()) });
+                    rv = true;
+                }
+            }
+            ImGui::EndDragDropTarget();
+        }
+    } else if (uniform.TypeName == "sampler3D") {
+        ImGui::TextUnformatted("Implementation pending...");
     }
     /*
     else if (uniform.TypeName == "mat2") {
@@ -326,5 +393,71 @@ bool MaterialDisplay::RenderSingleUniform(Material::Uniforms& uniforms, const Un
     }*/ else {
         ImGui::TextDisabled("Uniform typename %s not currently supported!", uniform.TypeName.c_str());
     }
-    return false;
+    return rv;
 }
+
+void MaterialDisplay::TextureView::Render() noexcept {
+    if (!visible) { return; }
+    ImGui::Begin(std::format("Texture View - {}", texture->Name()).c_str(), &visible);
+    /* channels */
+    static bool r{ true }, g{ true }, b{ true }, a{ true };
+    /* inspect params */
+    static bool drawInspector{ true }, drawHistogram{ false }, drawNormals{ false };
+
+    float lineHeight = ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2;
+    float totalBottomPadding = lineHeight * 2.75f;
+
+    auto [windowWidth, windowHeight] = ImGui::GetContentRegionAvail();
+    windowWidth = windowWidth - ImGui::GetStyle().FramePadding.x;
+    windowHeight = windowHeight - totalBottomPadding;
+
+    float w = static_cast<float>(texture->Width());
+    float h = static_cast<float>(texture->Height());
+    float aspect = w / h;
+
+    float maxWidth = windowWidth;
+    float maxHeight = windowHeight;
+
+    w = maxWidth;
+    h = w / aspect;
+
+    if (h > maxHeight) {
+        aspect = w / h;
+        h = maxHeight;
+        w = h * aspect;
+    }
+
+    ImGui::Image(texture->TextureIDRaw(), { w, h }, { 0, 1 }, { 1, 0 }, { (float) r, (float) g, (float) b, (float) a }, { 1, 1, 0, 1 });
+
+    if (drawInspector) {
+        ImRect rc = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+        ImVec2 mouseUVCoord = (ImGui::GetIO().MousePos - rc.Min) / rc.GetSize();
+        mouseUVCoord.y = 1.f - mouseUVCoord.y;
+        if (mouseUVCoord.x >= 0.0f &&
+            mouseUVCoord.y >= 0.0f &&
+            mouseUVCoord.x <= 1.0f &&
+            mouseUVCoord.y <= 1.0f) {
+            float w = static_cast<float>(texture->Width());
+            float h = static_cast<float>(texture->Height());
+            auto pixels = reinterpret_cast<const unsigned char*>(Texture::GetByteBufferOf(*texture));
+            ImageInspect::inspect(static_cast<int>(w), static_cast<int>(h), pixels, mouseUVCoord, { w, h }, drawNormals, drawHistogram);
+        }
+    }
+
+    ImGui::SetCursorPosY(ImGui::GetWindowHeight() - totalBottomPadding);
+    ImGui::AlignTextToFramePadding(); ImGui::Text("Channels");
+    ImGui::SameLine(); ImGui::TextColored({ 1.0f, 0.0f, 0.0f, 1.0f }, "R:"); ImGui::SameLine(); ImGui::Checkbox("##r", &r);
+    ImGui::SameLine(); ImGui::TextColored({ 0.0f, 1.0f, 0.0f, 1.0f }, "G:"); ImGui::SameLine(); ImGui::Checkbox("##g", &g);
+    ImGui::SameLine(); ImGui::TextColored({ 0.2f, 0.2f, 1.0f, 1.0f }, "B:"); ImGui::SameLine(); ImGui::Checkbox("##b", &b);
+    ImGui::SameLine(); ImGui::TextColored({ 0.5f, 0.5f, 0.5f, 1.0f }, "A:"); ImGui::SameLine(); ImGui::Checkbox("##a", &a);
+
+    ImGui::AlignTextToFramePadding(); ImGui::Text("Image Inspect:");   ImGui::SameLine(); ImGui::Checkbox("##inspect", &drawInspector);
+    ImGui::SameLine(); ImGui::Text("Normals:");    ImGui::SameLine(); ImGui::Checkbox("##normals", &drawNormals);
+    ImGui::SameLine(); ImGui::Text("Histogram:");  ImGui::SameLine(); ImGui::Checkbox("##histogram", &drawHistogram);
+    ImGui::End();
+}
+void MaterialDisplay::TextureView::Show(const Texture& texture) noexcept {
+    visible = true;
+    this->texture = &texture;
+}
+void MaterialDisplay::TextureView::Hide() noexcept { visible = false; }

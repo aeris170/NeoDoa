@@ -39,6 +39,25 @@ using UniformMatrix4x2f = glm::mat4x2;
 using UniformMatrix3x4f = glm::mat3x4;
 using UniformMatrix4x3f = glm::mat4x3;
 
+//struct UniformSampler1D {
+//    Texture1D texture;
+//    Sampler sampler;
+//    UUID textureUUID{ UUID::Empty() };
+//    UUID samplerUUID{ UUID::Empty() };
+//};
+//struct UniformSampler2D {
+//    Texture2D texture;
+//    Sampler sampler;
+//    UUID textureUUID{ UUID::Empty() };
+//    UUID samplerUUID{ UUID::Empty() };
+//};
+//struct UniformSampler3D {
+//    Texture3D texture;
+//    Sampler sampler;
+//    UUID textureUUID{ UUID::Empty() };
+//    UUID samplerUUID{ UUID::Empty() };
+//};
+
 struct UniformValue {
     static constexpr int InvalidLocation{ -1 };
 
@@ -94,6 +113,7 @@ struct Material {
 
     private:
         UniformValues values{};
+
 
         void EnsureCapacity(const size_t cap) noexcept;
 

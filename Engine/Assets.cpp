@@ -147,6 +147,7 @@ void Assets::ReimportAll() {
     textureAssets.clear();
 
     _root.children.clear();
+    dependencyGraph.Clear();
     BuildFileNodeTree(*_root.OwningProject(), _root);
     ImportAllFiles(database, _root);
     EnsureDeserialization();
@@ -568,7 +569,18 @@ void MaterialPostDeserialization::EmplaceUniform(Material::Uniforms& uniforms, i
         for (int i = 0; i < arraySize; i++) {
             uniforms.Set(location, name, UniformMatrix4x3f{});
         }
-    } else {
+    }
+
+    else if (typeName == "sampler1D") {
+        DOA_LOG_WARNING("Uniform typename %s is still waiting implementation!", typeName.data());
+    } else if (typeName == "sampler2D") {
+        for (int i = 0; i < arraySize; i++) {
+            uniforms.Set(location, name, Uniform1i{});
+        }
+    } else if (typeName == "sampler3D") {
+        DOA_LOG_WARNING("Uniform typename %s is still waiting implementation!", typeName.data());
+    }
+    else {
         DOA_LOG_WARNING("Uniform typename %s is either unknown or not currently supported!", typeName.data());
     }
 }

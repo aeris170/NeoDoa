@@ -267,6 +267,8 @@ bool OrthoCameraWidget(OrthoCamera& cameraData);
 
 bool PerspectiveCameraWidget(PerspectiveCamera& cameraData);
 
+bool Image2DButtonWidget(const std::string& label, ImTextureID texture);
+
 void Space();
 
 void Header(const std::string& label);
