@@ -25,12 +25,27 @@ enum class TextureTransparency {
 
 struct Texture {
 
-    static Texture Empty() noexcept {
+    static const Texture& Empty() noexcept {
 #ifdef DEBUG
-        Texture::FACTORY_FLAG = true; return {}; Texture::FACTORY_FLAG = false;
+        Texture::FACTORY_FLAG = true; static Texture empty{}; Texture::FACTORY_FLAG = false;
 #else
-        return {};
+        static Texture empty{};
 #endif
+        return empty;
+    };
+
+    static const Texture& Missing() noexcept {
+        static unsigned char data[] {
+            0, 255, 255, 255,   0,   0,   0, 255,
+            0,   0,   0, 255,   0, 255, 255, 255,
+        };
+        static Texture missing = Texture::CreateTextureRaw(
+            "Missing Texture",
+            data,
+            2, 2,
+            TextureTransparency::YES
+            );
+        return missing;
     };
 
     static Texture CreateTexture(std::string_view name, const char* path, TextureTransparency transparency = TextureTransparency::YES);

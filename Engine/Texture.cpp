@@ -17,7 +17,6 @@ Texture Texture::CreateTexture(std::string_view name, const char* path, TextureT
     if (pixelData == nullptr) {
         stbi_image_free(pixelData);
         DOA_LOG_WARNING("Couldn't load %s! No such file at %s!", name.data(), path);
-        return Empty();
     }
 
 #ifdef DEBUG
@@ -37,7 +36,6 @@ Texture Texture::CreateTexture(std::string_view name, const unsigned char* data,
     if (pixelData == nullptr) {
         stbi_image_free(pixelData);
         DOA_LOG_WARNING("Couldn't load %s!", name.data());
-        return Empty();
     }
 
 #ifdef DEBUG
@@ -56,7 +54,6 @@ Texture Texture::CreateTexture(std::string_view name, ByteVector data, TextureTr
 Texture Texture::CreateTextureRaw(std::string_view name, const unsigned char* pixelData, size_t width, size_t height, TextureTransparency transparency) {
     if (pixelData == nullptr) {
         DOA_LOG_WARNING("Couldn't load %s from raw pointer to memory! Pointer is nullptr", name.data());
-        return Empty();
     }
 #ifdef DEBUG
     Texture::FACTORY_FLAG = true;

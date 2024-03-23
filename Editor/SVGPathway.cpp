@@ -112,7 +112,7 @@ void SVGPathway::Load(std::string_view key) {
         );
         auto large = Texture::CreateTextureRaw("!!" + name + "_none_large!!", bitmapScaledAspect.data(), bitmapScaledAspect.width(), bitmapScaledAspect.height());
 
-        auto empty = Texture::Empty();
+        const auto& empty = Texture::Empty();
         if (small != empty && medium != empty && large != empty) {
             Textures.try_emplace(name, std::move(small), std::move(medium), std::move(large));
         }
@@ -171,7 +171,7 @@ void SVGPathway::Load(std::string_view key) {
         auto medium = paddingFunction(lunadoc, box, name, "medium", SCALE_FACTOR_MEDIUM);
         auto large = paddingFunction(lunadoc, box, name, "large", SCALE_FACTOR_LARGE);
 
-        auto empty = Texture::Empty();
+        const auto& empty = Texture::Empty();
         if (small != empty && medium != empty && large != empty) {
             TexturesPadded.try_emplace(name, std::move(small), std::move(medium), std::move(large));
         }
@@ -185,7 +185,7 @@ void SVGPathway::Load(std::string_view key) {
             /* we cannot copy (we can but why copy?), there is no "size" defined for scaled texture. if there were, it
             wouldn't make sense. "Hey SVG, pls give me A SMALL SCALED texture", what even is a SMALL SCALED texture? there is only one
             scaled texture and it is placed to the beginning of the pack. for future: ref. [1] */
-            TexturesScaled.try_emplace(name, std::move(tex), Texture::Empty(), Texture::Empty());
+            TexturesScaled.try_emplace(name, std::move(tex), Texture::Copy(Texture::Empty()), Texture::Copy(Texture::Empty()));
         }
     }
 }
