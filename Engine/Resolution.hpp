@@ -3,8 +3,8 @@
 #include <iostream>
 
 struct Resolution {
-    int Width{};
-    int Height{};
+    size_t Width{};
+    size_t Height{};
 
     bool operator==(const Resolution& other) const noexcept = default;
 

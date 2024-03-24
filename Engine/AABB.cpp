@@ -59,9 +59,9 @@ Region AABB::CalcScreenSpaceCoordinates(const AABB& aabb, const glm::mat4& model
     min = glm::clamp(min, glm::vec2(), glm::vec2(viewport[2] - 1, viewport[3] - 1));
     max = glm::clamp(max, glm::vec2(), glm::vec2(viewport[2] - 1, viewport[3] - 1));
 
-    int x = static_cast<int>(std::min(min.x, max.x));
-    int y = static_cast<int>(std::min(min.y, max.y));
-    int w = static_cast<int>(std::abs(max.x - min.x));
-    int h = static_cast<int>(std::abs(max.y - min.y));
+    size_t x = static_cast<size_t>(std::min(min.x, max.x));
+    size_t y = static_cast<size_t>(std::min(min.y, max.y));
+    size_t w = static_cast<size_t>(std::abs(max.x - min.x));
+    size_t h = static_cast<size_t>(std::abs(max.y - min.y));
     return { x, y, w, h };
 }

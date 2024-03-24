@@ -3,10 +3,10 @@
 #include <iostream>
 
 struct Region {
-    int X{};
-    int Y{};
-    int Width{};
-    int Height{};
+    size_t X{};
+    size_t Y{};
+    size_t Width{};
+    size_t Height{};
 
     bool operator==(const Region& other) const noexcept = default;
 

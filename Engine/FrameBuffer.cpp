@@ -109,12 +109,6 @@ void FrameBuffer::BindRead() const noexcept {
 }
 
 void FrameBuffer::BlitTo(const FrameBuffer& target, OpenGL::BufferBit buffers, Region source, Region destination) const noexcept {
-    if (source.X < 0 || source.Y < 0 || source.Width < 0 || source.Height < 0) {
-        source = { 0, 0, resolution.Width, resolution.Height };
-    }
-    if (destination.X < 0 || destination.Y < 0 || destination.Width < 0 || destination.Height < 0) {
-        destination = { 0, 0, target.resolution.Width, target.resolution.Height };
-    }
     glBlitNamedFramebuffer(
         frameBufferObject,
         target.frameBufferObject,

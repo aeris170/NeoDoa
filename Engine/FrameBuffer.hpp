@@ -63,7 +63,7 @@ struct FrameBuffer {
     void BindDraw() const noexcept;
     void BindRead() const noexcept;
 
-    void BlitTo(const FrameBuffer& target, OpenGL::BufferBit buffers = OpenGL::BufferBit::COLOR_BUFFER_BIT, Region source = { -1, -1, -1, -1 }, Region destination = { -1, -1, -1, -1 }) const noexcept;
+    void BlitTo(const FrameBuffer& target, OpenGL::BufferBit buffers, Region source, Region destination) const noexcept;
 
     void ClearBuffers(float r = 0.0f, float g = 0.0f, float b = 0.0f, float a = 0.0f, float depth = 1.0f, int stencil = 0) noexcept;
     void ClearColorBuffer(float r = 0.0f, float g = 0.0f, float b = 0.0f, float a = 0.0f) noexcept;

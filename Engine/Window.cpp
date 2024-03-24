@@ -58,7 +58,10 @@ WindowPtr Window::CreateWindow(Resolution resolution, const char* title, bool is
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_SAMPLES, 4);
     rv->_glfwWindow = glfwCreateWindow(rv->_resolution.Width, rv->_resolution.Height, title, isFullscreen ? glfwGetPrimaryMonitor() : nullptr, nullptr);
-    glfwGetWindowSize(rv->_glfwWindow, &rv->_contentResolution.Width, &rv->_contentResolution.Height);
+    std::array<int, 2> contentResolution;
+    glfwGetWindowSize(rv->_glfwWindow, &contentResolution[0], &contentResolution[1]);
+    rv->_contentResolution.Width = contentResolution[0];
+    rv->_contentResolution.Height = contentResolution[1];
 
     glfwMakeContextCurrent(rv->_glfwWindow);
     //glfwSwapInterval(0); // TODO VSYNC
@@ -126,29 +129,32 @@ void Window::DeleteWindow(Window* window) {
 }
 
 void Window::glfwWindowOnResize(GLFWwindow* window, int width, int height) {
-    static auto& Window = Core::GetCore()->GetWindow();
-    Window->_resolution = { width, height };
-    glfwGetWindowSize(Window->_glfwWindow, &Window->_contentResolution.Width, &Window->_contentResolution.Height);
+    static const auto& Window = Core::GetCore()->GetWindow();
+    Window->_resolution = { static_cast<size_t>(width), static_cast<size_t>(height) };
+    std::array<int, 2> contentResolution;
+    glfwGetWindowSize(Window->_glfwWindow, &contentResolution[0], &contentResolution[1]);
+    Window->_contentResolution.Width = contentResolution[0];
+    Window->_contentResolution.Height = contentResolution[1];
 }
 
 void Window::glfwWindowOnKeyStateChange(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    static auto& input = Core::GetCore()->GetInput();
+    static const auto& input = Core::GetCore()->GetInput();
     input->keyboard.Keys[key] = action;
 }
 
 void Window::glfwWindowOnMouseButtonStateChange(GLFWwindow* window, int button, int action, int mods) {
-    static auto& input = Core::GetCore()->GetInput();
+    static const auto& input = Core::GetCore()->GetInput();
     input->mouse.Buttons[button] = action;
 }
 
 void Window::glfwWindowOnMouseMove(GLFWwindow* window, double xpos, double ypos) {
-    static auto& input = Core::GetCore()->GetInput();
+    static const auto& input = Core::GetCore()->GetInput();
     input->mouse.PosX = xpos;
     input->mouse.PosY = ypos;
 }
 
 void Window::glfwWindowOnMouseScroll(GLFWwindow* window, double xoffset, double yoffset) {
-    static auto& input = Core::GetCore()->GetInput();
+    static const auto& input = Core::GetCore()->GetInput();
     input->mouse.ScrollX = xoffset;
     input->mouse.ScrollY = yoffset;
 }

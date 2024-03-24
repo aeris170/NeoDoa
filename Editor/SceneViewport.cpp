@@ -50,7 +50,7 @@ void SceneViewport::Render() {
         ImGui::GetWindowPos().x + ImGui::GetCursorPos().x,
         ImGui::GetWindowPos().y + ImGui::GetCursorPos().y
     };
-    ReallocBufferIfNeeded({ static_cast<int>(ImGui::GetContentRegionAvail().x), static_cast<int>(ImGui::GetContentRegionAvail().y) });
+    ReallocBufferIfNeeded({ static_cast<size_t>(ImGui::GetContentRegionAvail().x), static_cast<size_t>(ImGui::GetContentRegionAvail().y) });
     RenderSceneToBuffer(scene);
 
     ImVec2 size{ static_cast<float>(viewportSize.Width), static_cast<float>(viewportSize.Height) };
