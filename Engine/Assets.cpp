@@ -575,7 +575,7 @@ void MaterialPostDeserialization::EmplaceUniform(Material::Uniforms& uniforms, i
         DOA_LOG_WARNING("Uniform typename %s is still waiting implementation!", typeName.data());
     } else if (typeName == "sampler2D") {
         for (int i = 0; i < arraySize; i++) {
-            uniforms.Set(location, name, Uniform1i{});
+            uniforms.Set(location, name, UniformSampler2D{});
         }
     } else if (typeName == "sampler3D") {
         DOA_LOG_WARNING("Uniform typename %s is still waiting implementation!", typeName.data());

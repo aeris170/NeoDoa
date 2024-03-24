@@ -1,6 +1,52 @@
 #pragma once
 
 #include "TypedefsAndConstants.hpp"
+#include <Engine/Resolution.hpp>
+
+enum class BaseInternalFormat {
+    Red,
+    RG,
+    RGB,
+    RGBA,
+    DEPTH,
+    DEPTH_STENCIL
+};
+
+enum class RFormat {
+    R8,
+    R16F,
+    R32F
+};
+enum class RGFormat {
+    RG8,
+    RG16F,
+    RG32F
+};
+enum class RGBFormat {
+    RGB8,
+    SRGB8,
+    RGB16F,
+    RGB32F,
+    R11FG11FB10F
+};
+enum class RGBAFormat {
+    RGBA8,
+    RGBA12,
+    RGBA16,
+    SRGB8A8,
+    RGBA16F,
+    RGBA32F
+};
+enum class DepthFormat {
+    DEPTH16,
+    DEPTH24,
+    DEPTH32,
+    DEPTH32F
+};
+enum class DepthStencilFormat {
+    DEPTH24_STENCIL8,
+    DEPTH32F_STENCIL8
+};
 
 using ByteVector = std::vector<std::byte>;
 
@@ -9,28 +55,40 @@ enum class TextureEncoding {
 };
 
 struct EncodedTextureData {
-
-    std::string name;
-
-    ByteVector data;
-
-    bool hasTransparency;
-
-    TextureEncoding encoding;
+    std::string Name;
+    ByteVector Data;
+    bool HasTransparency;
+    TextureEncoding Encoding;
 };
 
 enum class TextureTransparency {
     YES, NO
 };
 
+struct Texture2D {
+    static Texture2D CreateTextureR(RFormat format, Resolution resolution, ByteVector data = {}) noexcept;
+    static Texture2D CreateTextureRG(RGFormat format, Resolution resolution, ByteVector data = {}) noexcept;
+    static Texture2D CreateTextureRGB(RGBFormat format, Resolution resolution, ByteVector data = {}) noexcept;
+    static Texture2D CreateTextureRGBA(RGBAFormat format, Resolution resolution, ByteVector data = {}) noexcept;
+    static Texture2D CreateTextureDepth(DepthFormat format, Resolution resolution, ByteVector data = {}) noexcept;
+    static Texture2D CreateTextureDepthStencil(DepthStencilFormat format, Resolution resolution, ByteVector data = {}) noexcept;
+
+    GLuint ID;
+    std::string Name{};
+    size_t Width{}, Height{};
+    unsigned Channels{};
+    ByteVector PixelData{};
+
+    EncodedTextureData Serialize(TextureEncoding encoding = TextureEncoding::PNG) const;
+    static Texture2D Deserialize(const EncodedTextureData& data);
+
+    static Texture2D Copy(const Texture2D& texture);
+};
+
 struct Texture {
 
     static const Texture& Empty() noexcept {
-#ifdef DEBUG
-        Texture::FACTORY_FLAG = true; static Texture empty{}; Texture::FACTORY_FLAG = false;
-#else
         static Texture empty{};
-#endif
         return empty;
     };
 
@@ -72,8 +130,8 @@ struct Texture {
     Texture(Texture&&) noexcept;
     Texture& operator=(const Texture&) = delete;
     Texture& operator=(Texture&&) noexcept;
-    bool operator==(const Texture& other) noexcept;
-    bool operator!=(const Texture& other) noexcept;
+    bool operator==(const Texture& other) const noexcept;
+    bool operator!=(const Texture& other) const noexcept;
 
     EncodedTextureData Serialize(TextureEncoding encoding = TextureEncoding::PNG) const;
     static Texture Deserialize(const EncodedTextureData& data);
@@ -81,9 +139,6 @@ struct Texture {
     static Texture Copy(const Texture& texture);
 
 private:
-#ifdef DEBUG
-    static inline bool FACTORY_FLAG{ false };
-#endif
 
     std::string _name{};
     size_t _width{ 0 }, _height{ 0 };

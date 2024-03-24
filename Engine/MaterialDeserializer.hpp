@@ -101,6 +101,8 @@ namespace MaterialDeserializer::Helpers {
         UniformMatrix3x4f,
         UniformMatrix4x3f,
 
+        UniformSampler2D,
+
         InvalidEnum
     };
     UniformType ExtractUniformType(const std::string_view typeString) noexcept;
@@ -129,4 +131,6 @@ namespace MaterialDeserializer::Helpers {
     UniformMatrix4x2f DeserializeUniformMatrix4x2f(const tinyxml2::XMLElement& elem) noexcept;
     UniformMatrix3x4f DeserializeUniformMatrix3x4f(const tinyxml2::XMLElement& elem) noexcept;
     UniformMatrix4x3f DeserializeUniformMatrix4x3f(const tinyxml2::XMLElement& elem) noexcept;
+
+    UniformSampler2D DeserializeUniformSampler2D(const tinyxml2::XMLElement& elem) noexcept;
 }

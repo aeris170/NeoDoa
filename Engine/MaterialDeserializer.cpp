@@ -210,6 +210,10 @@ void MaterialDeserializer::Uniforms::DefaultDeserializeUniform(tinyxml2::XMLElem
     case MaterialDeserializer::Helpers::UniformType::UniformMatrix4x3f:
         uniformsToFill.Set(location, name, Helpers::DeserializeUniformMatrix4x3f(valueElem));
         break;
+
+    case MaterialDeserializer::Helpers::UniformType::UniformSampler2D:
+        uniformsToFill.Set(location, name, Helpers::DeserializeUniformSampler2D(valueElem));
+        break;
     default:
         mdr.erred = true;
         mdr.errors.emplace_back(std::format("Error while deserializing material, uniform location {} has invalid enum!", location));
@@ -242,6 +246,8 @@ MaterialDeserializer::Helpers::UniformType MaterialDeserializer::Helpers::Extrac
     else if (typeString == nameof(UniformMatrix4x2f)) { return UniformType::UniformMatrix4x2f; }
     else if (typeString == nameof(UniformMatrix3x4f)) { return UniformType::UniformMatrix3x4f; }
     else if (typeString == nameof(UniformMatrix4x3f)) { return UniformType::UniformMatrix4x3f; }
+
+    else if (typeString == nameof(UniformSampler2D)) { return UniformType::UniformSampler2D; }
     else {
         // invalid enum
         DOA_LOG_ERROR("Couldn't extract uniform type. Data is corrupted.");
@@ -392,5 +398,12 @@ UniformMatrix4x3f MaterialDeserializer::Helpers::DeserializeUniformMatrix4x3f(co
         elem.FloatAttribute("index00", 0), elem.FloatAttribute("index01", 0), elem.FloatAttribute("index02", 0), elem.FloatAttribute("index03", 0),
         elem.FloatAttribute("index10", 0), elem.FloatAttribute("index11", 0), elem.FloatAttribute("index12", 0), elem.FloatAttribute("index13", 0),
         elem.FloatAttribute("index20", 0), elem.FloatAttribute("index21", 0), elem.FloatAttribute("index22", 0), elem.FloatAttribute("index23", 0),
+    };
+}
+
+UniformSampler2D MaterialDeserializer::Helpers::DeserializeUniformSampler2D(const tinyxml2::XMLElement& elem) noexcept {
+    return {
+        elem.Unsigned64Attribute("texture"),
+        elem.Unsigned64Attribute("sampler")
     };
 }

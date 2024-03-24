@@ -10,6 +10,72 @@
 #include "TextureDeserializer.hpp"
 #include "Log.hpp"
 
+static auto BaseToGL(BaseInternalFormat base) {
+    switch (base) {
+    using enum BaseInternalFormat;
+    case Red:           return GL_RED;
+    case RG:            return GL_RG;
+    case RGB:           return GL_RGB;
+    case RGBA:          return GL_RGBA;
+    case DEPTH:         return GL_DEPTH_COMPONENT;
+    case DEPTH_STENCIL: return GL_DEPTH_STENCIL;
+    }
+}
+
+static auto FormatToGL(RFormat format) {
+    switch (format) {
+    using enum RFormat;
+    case R8:           return GL_R8;
+    case R16F:         return GL_R16F;
+    case R32F:         return GL_R32F;
+    }
+}
+static auto FormatToGL(RGFormat format) {
+    switch (format) {
+    using enum RGFormat;
+    case RG8:          return GL_RG8;
+    case RG16F:        return GL_RG16F;
+    case RG32F:        return GL_RG32F;
+    }
+}
+static auto FormatToGL(RGBFormat format) {
+    switch (format) {
+    using enum RGBFormat;
+    case RGB8:         return GL_RGB8;
+    case SRGB8:        return GL_SRGB8;
+    case RGB16F:       return GL_RGB16F;
+    case RGB32F:       return GL_RGB32F;
+    case R11FG11FB10F: return GL_R11F_G11F_B10F;
+    }
+}
+static auto FormatToGL(RGBAFormat format) {
+    switch (format) {
+    using enum RGBAFormat;
+    case RGBA8:   return GL_RGBA8;
+    case RGBA12:  return GL_RGBA12;
+    case RGBA16:  return GL_RGBA16;
+    case SRGB8A8: return GL_SRGB8_ALPHA8;
+    case RGBA16F: return GL_RGBA16F;
+    case RGBA32F: return GL_RGBA32F;
+    }
+}
+static auto FormatToGL(DepthFormat format) {
+    switch (format) {
+    using enum DepthFormat;
+    case DEPTH16:  return GL_DEPTH_COMPONENT16;
+    case DEPTH24:  return GL_DEPTH_COMPONENT24;
+    case DEPTH32:  return GL_DEPTH_COMPONENT32;
+    case DEPTH32F: return GL_DEPTH_COMPONENT32F;
+    }
+}
+static auto FormatToGL(DepthStencilFormat format) {
+    switch (format) {
+    using enum DepthStencilFormat;
+    case DEPTH24_STENCIL8:  return GL_DEPTH24_STENCIL8;
+    case DEPTH32F_STENCIL8: return GL_DEPTH32F_STENCIL8;
+    }
+}
+
 Texture Texture::CreateTexture(std::string_view name, const char* path, TextureTransparency transparency) {
     stbi_set_flip_vertically_on_load(true);
     int width, height, nrChannels;
@@ -19,13 +85,8 @@ Texture Texture::CreateTexture(std::string_view name, const char* path, TextureT
         DOA_LOG_WARNING("Couldn't load %s! No such file at %s!", name.data(), path);
     }
 
-#ifdef DEBUG
-    Texture::FACTORY_FLAG = true;
     Texture rv{ name, static_cast<size_t>(width), static_cast<size_t>(height), pixelData, transparency };
-    Texture::FACTORY_FLAG = false;
-#else
-    Texture rv{ name, static_cast<size_t>(width), static_cast<size_t>(height), pixelData, transparency };
-#endif
+
     stbi_image_free(pixelData);
     return rv;
 }
@@ -38,13 +99,8 @@ Texture Texture::CreateTexture(std::string_view name, const unsigned char* data,
         DOA_LOG_WARNING("Couldn't load %s!", name.data());
     }
 
-#ifdef DEBUG
-    Texture::FACTORY_FLAG = true;
     Texture rv{ name, static_cast<size_t>(width), static_cast<size_t>(height), pixelData, transparency };
-    Texture::FACTORY_FLAG = false;
-#else
-    Texture rv{ name, static_cast<size_t>(width), static_cast<size_t>(height), pixelData, transparency };
-#endif
+
     stbi_image_free(pixelData);
     return rv;
 }
@@ -55,13 +111,9 @@ Texture Texture::CreateTextureRaw(std::string_view name, const unsigned char* pi
     if (pixelData == nullptr) {
         DOA_LOG_WARNING("Couldn't load %s from raw pointer to memory! Pointer is nullptr", name.data());
     }
-#ifdef DEBUG
-    Texture::FACTORY_FLAG = true;
+
     Texture rv{ name, width, height, pixelData, transparency };
-    Texture::FACTORY_FLAG = false;
-#else
-    Texture rv{ name, width, height, pixelData, transparency };
-#endif
+
     return rv;
 }
 
@@ -106,7 +158,7 @@ Texture& Texture::operator=(Texture&& other) noexcept {
     _pixelData = std::move(other._pixelData);
     return *this;
 }
-bool Texture::operator==(const Texture& other) noexcept {
+bool Texture::operator==(const Texture& other) const noexcept {
     if (this == &other) return true;
     /*
         note that we don't need to check _glTextureID
@@ -125,12 +177,18 @@ bool Texture::operator==(const Texture& other) noexcept {
     }
     return false;
 }
-bool Texture::operator!=(const Texture& other) noexcept { return !this->operator==(other); }
+bool Texture::operator!=(const Texture& other) const noexcept { return !this->operator==(other); }
 
 EncodedTextureData Texture::Serialize(TextureEncoding encoding) const { return SerializeTexture(*this, encoding); }
 Texture Texture::Deserialize(const EncodedTextureData& data) { return DeserializeTexture(data); }
 
-Texture Texture::Copy(const Texture& texture) { return CreateTextureRaw(texture._name, reinterpret_cast<const unsigned char*>(texture._pixelData.data()), texture._width, texture._height, texture._transparency); }
+Texture Texture::Copy(const Texture& texture) {
+    if (texture == Empty()) {
+        return {};
+    } else {
+        return CreateTextureRaw(texture._name, reinterpret_cast<const unsigned char*>(texture._pixelData.data()), texture._width, texture._height, texture._transparency);
+    }
+}
 
 //-----------------------------------------------------------------
 
@@ -141,7 +199,7 @@ Texture::Texture(std::string_view name, size_t width, size_t height, const unsig
     _height(height),
     _transparency(transparency),
     _pixelData(width * height * (transparency == TextureTransparency::YES ? static_cast<size_t>(4) : static_cast<size_t>(3))) {
-    assert(FACTORY_FLAG); /* don't call ctor directly, use CreateTexture */
+
     for (auto i = 0; i < _pixelData.size(); i++) {
         _pixelData[i] = static_cast<std::byte>(pixelData[i]);
     }
@@ -183,3 +241,197 @@ void Texture::AllocateGPU() noexcept {
 
 }
 void Texture::DeallocateGPU() noexcept { glDeleteTextures(1, &_glTextureID); }
+
+
+Texture2D Texture2D::CreateTextureR(RFormat format, Resolution resolution, ByteVector data) noexcept {
+    Texture2D rv;
+    rv.Width = resolution.Width;
+    rv.Height = resolution.Height;
+    rv.Channels = 1;
+    rv.PixelData = std::move(data);
+
+    glCreateTextures(GL_TEXTURE_2D, 1, &rv.ID);
+    glTextureStorage2D(
+        rv.ID,
+        static_cast<GLsizei>(1 + std::floor(std::log2(std::max(rv.Width, rv.Height)))),
+        FormatToGL(format),
+        static_cast<GLsizei>(rv.Width),
+        static_cast<GLsizei>(rv.Height)
+    );
+    if (!data.empty()) {
+        glTextureSubImage2D(
+            rv.ID,
+            0,
+            0,
+            0,
+            static_cast<GLsizei>(rv.Width),
+            static_cast<GLsizei>(rv.Height),
+            GL_R,
+            GL_UNSIGNED_BYTE,
+            rv.PixelData.data()
+        );
+        glGenerateTextureMipmap(rv.ID);
+    }
+
+    return rv;
+}
+Texture2D Texture2D::CreateTextureRG(RGFormat format, Resolution resolution, ByteVector data) noexcept {
+    Texture2D rv;
+    rv.Width = resolution.Width;
+    rv.Height = resolution.Height;
+    rv.Channels = 2;
+    rv.PixelData = std::move(data);
+
+    glCreateTextures(GL_TEXTURE_2D, 1, &rv.ID);
+    glTextureStorage2D(
+        rv.ID,
+        static_cast<GLsizei>(1 + std::floor(std::log2(std::max(rv.Width, rv.Height)))),
+        FormatToGL(format),
+        static_cast<GLsizei>(rv.Width),
+        static_cast<GLsizei>(rv.Height)
+    );
+    if (!data.empty()) {
+        glTextureSubImage2D(
+            rv.ID,
+            0,
+            0,
+            0,
+            static_cast<GLsizei>(rv.Width),
+            static_cast<GLsizei>(rv.Height),
+            GL_RG,
+            GL_UNSIGNED_BYTE,
+            rv.PixelData.data()
+        );
+        glGenerateTextureMipmap(rv.ID);
+    }
+
+    return rv;
+}
+Texture2D Texture2D::CreateTextureRGB(RGBFormat format, Resolution resolution, ByteVector data) noexcept {
+    Texture2D rv;
+    rv.Width = resolution.Width;
+    rv.Height = resolution.Height;
+    rv.Channels = 3;
+    rv.PixelData = std::move(data);
+
+    glCreateTextures(GL_TEXTURE_2D, 1, &rv.ID);
+    glTextureStorage2D(
+        rv.ID,
+        static_cast<GLsizei>(1 + std::floor(std::log2(std::max(rv.Width, rv.Height)))),
+        FormatToGL(format),
+        static_cast<GLsizei>(rv.Width),
+        static_cast<GLsizei>(rv.Height)
+    );
+    if (!data.empty()) {
+        glTextureSubImage2D(
+            rv.ID,
+            0,
+            0,
+            0,
+            static_cast<GLsizei>(rv.Width),
+            static_cast<GLsizei>(rv.Height),
+            GL_RGB,
+            GL_UNSIGNED_BYTE,
+            rv.PixelData.data()
+        );
+        glGenerateTextureMipmap(rv.ID);
+    }
+
+    return rv;
+}
+Texture2D Texture2D::CreateTextureRGBA(RGBAFormat format, Resolution resolution, ByteVector data) noexcept {
+    Texture2D rv;
+    rv.Width = resolution.Width;
+    rv.Height = resolution.Height;
+    rv.Channels = 4;
+    rv.PixelData = std::move(data);
+
+    glCreateTextures(GL_TEXTURE_2D, 1, &rv.ID);
+    glTextureStorage2D(
+        rv.ID,
+        static_cast<GLsizei>(1 + std::floor(std::log2(std::max(rv.Width, rv.Height)))),
+        FormatToGL(format),
+        static_cast<GLsizei>(rv.Width),
+        static_cast<GLsizei>(rv.Height)
+    );
+    if (!data.empty()) {
+        glTextureSubImage2D(
+            rv.ID,
+            0,
+            0,
+            0,
+            static_cast<GLsizei>(rv.Width),
+            static_cast<GLsizei>(rv.Height),
+            GL_RGBA,
+            GL_UNSIGNED_BYTE,
+            rv.PixelData.data()
+        );
+        glGenerateTextureMipmap(rv.ID);
+    }
+
+    return rv;
+}
+Texture2D Texture2D::CreateTextureDepth(DepthFormat format, Resolution resolution, ByteVector data) noexcept {
+    Texture2D rv;
+    rv.Width = resolution.Width;
+    rv.Height = resolution.Height;
+    rv.Channels = 2;
+    rv.PixelData = std::move(data);
+
+    glCreateTextures(GL_TEXTURE_2D, 1, &rv.ID);
+    glTextureStorage2D(
+        rv.ID,
+        static_cast<GLsizei>(1 + std::floor(std::log2(std::max(rv.Width, rv.Height)))),
+        FormatToGL(format),
+        static_cast<GLsizei>(rv.Width),
+        static_cast<GLsizei>(rv.Height)
+    );
+    if (!data.empty()) {
+        glTextureSubImage2D(
+            rv.ID,
+            0,
+            0,
+            0,
+            static_cast<GLsizei>(rv.Width),
+            static_cast<GLsizei>(rv.Height),
+            GL_DEPTH_COMPONENT,
+            GL_UNSIGNED_BYTE,
+            rv.PixelData.data()
+        );
+        glGenerateTextureMipmap(rv.ID);
+    }
+
+    return rv;
+}
+Texture2D Texture2D::CreateTextureDepthStencil(DepthStencilFormat format, Resolution resolution, ByteVector data) noexcept {
+    Texture2D rv;
+    rv.Width = resolution.Width;
+    rv.Height = resolution.Height;
+    rv.Channels = 2;
+    rv.PixelData = std::move(data);
+
+    glCreateTextures(GL_TEXTURE_2D, 1, &rv.ID);
+    glTextureStorage2D(
+        rv.ID,
+        static_cast<GLsizei>(1 + std::floor(std::log2(std::max(rv.Width, rv.Height)))),
+        FormatToGL(format),
+        static_cast<GLsizei>(rv.Width),
+        static_cast<GLsizei>(rv.Height)
+    );
+    if (!data.empty()) {
+        glTextureSubImage2D(
+            rv.ID,
+            0,
+            0,
+            0,
+            static_cast<GLsizei>(rv.Width),
+            static_cast<GLsizei>(rv.Height),
+            GL_DEPTH_STENCIL,
+            GL_UNSIGNED_BYTE,
+            rv.PixelData.data()
+        );
+        glGenerateTextureMipmap(rv.ID);
+    }
+
+    return rv;
+}

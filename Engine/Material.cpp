@@ -58,6 +58,8 @@ void Material::Uniforms::Set(int location, std::string_view name, UniformMatrix4
 void Material::Uniforms::Set(int location, std::string_view name, UniformMatrix3x4f value, bool transpose) noexcept { __NEODOA_MATERIAL_UNIFORMS_SET_IMPL }
 void Material::Uniforms::Set(int location, std::string_view name, UniformMatrix4x3f value, bool transpose) noexcept { __NEODOA_MATERIAL_UNIFORMS_SET_IMPL }
 
+void Material::Uniforms::Set(int location, std::string_view name, UniformSampler2D value) noexcept { __NEODOA_MATERIAL_UNIFORMS_SET_IMPL }
+
 void Material::Uniforms::EnsureCapacity(const size_t cap) noexcept {
     if (values.size() <= cap) {
         values.resize(cap);

@@ -403,6 +403,7 @@ void ShaderProgramDeserializer::Linking::DefaultOpenGLLink(ShaderProgramDeserial
     }
 
     for (const auto shader : attachedShaders) {
+        if (shader == 0) { continue; }
         glDetachShader(ID, shader);
     }
 }

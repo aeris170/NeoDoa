@@ -11,6 +11,7 @@
 
 #include <Engine/UUID.hpp>
 #include <Engine/Shader.hpp>
+#include <Engine/Sampler.hpp>
 
 struct AssetHandle;
 
@@ -45,12 +46,10 @@ using UniformMatrix4x3f = glm::mat4x3;
 //    UUID textureUUID{ UUID::Empty() };
 //    UUID samplerUUID{ UUID::Empty() };
 //};
-//struct UniformSampler2D {
-//    Texture2D texture;
-//    Sampler sampler;
-//    UUID textureUUID{ UUID::Empty() };
-//    UUID samplerUUID{ UUID::Empty() };
-//};
+struct UniformSampler2D {
+    UUID textureUUID{ UUID::Empty() };
+    UUID samplerUUID{ UUID::Empty() };
+};
 //struct UniformSampler3D {
 //    Texture3D texture;
 //    Sampler sampler;
@@ -70,7 +69,8 @@ struct UniformValue {
         UniformMatrix2f, UniformMatrix3f, UniformMatrix4f,
         UniformMatrix2x3f, UniformMatrix3x2f,
         UniformMatrix2x4f, UniformMatrix4x2f,
-        UniformMatrix3x4f, UniformMatrix4x3f
+        UniformMatrix3x4f, UniformMatrix4x3f,
+        UniformSampler2D
     > Value;
 };
 
@@ -111,9 +111,10 @@ struct Material {
         void Set(int location, std::string_view name, UniformMatrix3x4f value, bool transpose = false) noexcept;
         void Set(int location, std::string_view name, UniformMatrix4x3f value, bool transpose = false) noexcept;
 
+        void Set(int location, std::string_view name, UniformSampler2D value) noexcept;
+
     private:
         UniformValues values{};
-
 
         void EnsureCapacity(const size_t cap) noexcept;
 

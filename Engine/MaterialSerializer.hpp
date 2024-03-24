@@ -95,4 +95,6 @@ namespace MaterialSerializer::Helpers {
     void SerializeUniformMatrix4x2f(tinyxml2::XMLPrinter& printer, const UniformMatrix4x2f& uniformValue) noexcept;
     void SerializeUniformMatrix3x4f(tinyxml2::XMLPrinter& printer, const UniformMatrix3x4f& uniformValue) noexcept;
     void SerializeUniformMatrix4x3f(tinyxml2::XMLPrinter& printer, const UniformMatrix4x3f& uniformValue) noexcept;
+
+    void SerializeUniformSampler2D(tinyxml2::XMLPrinter& printer, const UniformSampler2D& uniformValue) noexcept;
 }

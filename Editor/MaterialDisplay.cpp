@@ -330,26 +330,22 @@ bool MaterialDisplay::RenderSingleUniform(Material::Uniforms& uniforms, const Un
     else if (uniform.TypeName == "sampler1D") {
         ImGui::TextUnformatted("Implementation pending...");
     } else if (uniform.TypeName == "sampler2D") {
-        Uniform1i value = std::get<Uniform1i>(uniformValue.Value);
+        UniformSampler2D value = std::get<UniformSampler2D>(uniformValue.Value);
 
         const Texture* texture{ nullptr };
-        for (const auto id : assets->TextureAssetIDs()) {
-            AssetHandle handle = assets->FindAsset(id);
-            if (!handle) { continue; }
-
-            const Texture& t = handle->DataAs<Texture>();
-            if (t.TextureID() == value[0]) {
-                texture = &t;
-            }
+        AssetHandle handle = assets->FindAsset(value.textureUUID);
+        if (handle && handle->IsTexture()) {
+            texture = &handle->DataAs<Texture>();
+        } else {
+            texture = missingTexture;
         }
-        if (!texture) { texture = missingTexture; }
 
         if (Image2DButtonWidget(uniformValue.Name.c_str(), texture->TextureIDRaw())) {
             textureView.Show(*texture);
         }
         if (ImGui::BeginPopupContextItem(nullptr, ImGuiPopupFlags_MouseButtonRight)) {
             if (ImGui::Button(cat(ObserverIcons::MaterialDisplayIcons::ContextMenu::RESET_UNIFORM_ICON, "Reset"))) {
-                uniforms.Set(uniform.Location, uniform.Name, Uniform1i{});
+                uniforms.Set(uniform.Location, uniform.Name, UniformSampler2D{ UUID::Empty(), value.samplerUUID });
                 rv = true;
                 ImGui::CloseCurrentPopup();
             }
@@ -361,8 +357,7 @@ bool MaterialDisplay::RenderSingleUniform(Material::Uniforms& uniforms, const Un
                 AssetHandle handle = assets->FindAsset(data);
                 assert(handle.HasValue());
                 if (handle->IsTexture()) {
-                    const Texture& droppedTexture = handle->DataAs<Texture>();
-                    uniforms.Set(uniform.Location, uniform.Name, Uniform1i{ std::bit_cast<Uniform1i::value_type>(droppedTexture.TextureID()) });
+                    uniforms.Set(uniform.Location, uniform.Name, UniformSampler2D{ data, value.samplerUUID });
                     rv = true;
                 }
             }

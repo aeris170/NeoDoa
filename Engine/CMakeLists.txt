@@ -60,6 +60,8 @@ set(GROUP_LIST
     "Asset/Model/Avatar.hpp"
     "Asset/Model/Model.cpp"
     "Asset/Model/Model.hpp"
+    "Asset/Sampler/Sampler.cpp"
+    "Asset/Sampler/Sampler.hpp"
     "Asset/Script/Angel.cpp"
     "Asset/Script/Angel.hpp"
     "Asset/Script/EnumValue.hpp"

@@ -153,26 +153,27 @@ void MaterialSerializer::Uniforms::DefaultSerializeUniform(tinyxml2::XMLPrinter&
             [&printer](const UniformMatrix4f& u) {
                 Helpers::SerializeUniformMatrix4f(printer, u);
             },
-
             [&printer](const UniformMatrix2x3f& u) {
                 Helpers::SerializeUniformMatrix2x3f(printer, u);
             },
             [&printer](const UniformMatrix3x2f& u) {
                 Helpers::SerializeUniformMatrix3x2f(printer, u);
             },
-
             [&printer](const UniformMatrix2x4f& u) {
                 Helpers::SerializeUniformMatrix2x4f(printer, u);
             },
             [&printer](const UniformMatrix4x2f& u) {
                 Helpers::SerializeUniformMatrix4x2f(printer, u);
             },
-
             [&printer](const UniformMatrix3x4f& u) {
                 Helpers::SerializeUniformMatrix3x4f(printer, u);
             },
             [&printer](const UniformMatrix4x3f& u) {
                 Helpers::SerializeUniformMatrix4x3f(printer, u);
+            },
+
+            [&printer](const UniformSampler2D& u) {
+                Helpers::SerializeUniformSampler2D(printer, u);
             }
         }, uniform.Value);
     }
@@ -201,15 +202,14 @@ std::string MaterialSerializer::Helpers::ExtractUniformTypeString(const UniformV
         [&rv]([[maybe_unused]] const UniformMatrix2f& _) { rv = nameof(UniformMatrix2f); },
         [&rv]([[maybe_unused]] const UniformMatrix3f& _) { rv = nameof(UniformMatrix3f); },
         [&rv]([[maybe_unused]] const UniformMatrix4f& _) { rv = nameof(UniformMatrix4f); },
-
         [&rv]([[maybe_unused]] const UniformMatrix2x3f& _) { rv = nameof(UniformMatrix2x3f); },
         [&rv]([[maybe_unused]] const UniformMatrix3x2f& _) { rv = nameof(UniformMatrix3x2f); },
-
         [&rv]([[maybe_unused]] const UniformMatrix2x4f& _) { rv = nameof(UniformMatrix2x4f); },
         [&rv]([[maybe_unused]] const UniformMatrix4x2f& _) { rv = nameof(UniformMatrix4x2f); },
-
         [&rv]([[maybe_unused]] const UniformMatrix3x4f& _) { rv = nameof(UniformMatrix3x4f); },
-        [&rv]([[maybe_unused]] const UniformMatrix4x3f& _) { rv = nameof(UniformMatrix4x3f); }
+        [&rv]([[maybe_unused]] const UniformMatrix4x3f& _) { rv = nameof(UniformMatrix4x3f); },
+
+        [&rv]([[maybe_unused]] const UniformSampler2D& _) { rv = nameof(UniformSampler2D); }
     }, uniform.Value);
 
     return rv;
@@ -470,6 +470,15 @@ void MaterialSerializer::Helpers::SerializeUniformMatrix4x3f(tinyxml2::XMLPrinte
         printer.PushAttribute("index21", uniformValue[2][1]);
         printer.PushAttribute("index22", uniformValue[2][2]);
         printer.PushAttribute("index23", uniformValue[2][3]);
+    }
+    printer.CloseElement();
+}
+
+void MaterialSerializer::Helpers::SerializeUniformSampler2D(tinyxml2::XMLPrinter& printer, const UniformSampler2D& uniformValue) noexcept {
+    printer.OpenElement("value");
+    {
+        printer.PushAttribute("texture", uniformValue.textureUUID);
+        printer.PushAttribute("sampler", uniformValue.samplerUUID);
     }
     printer.CloseElement();
 }
