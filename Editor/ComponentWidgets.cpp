@@ -535,9 +535,10 @@ bool PerspectiveCameraWidget(PerspectiveCamera& cameraData) {
 
 bool Image2DButtonWidget(const std::string& label, ImTextureID texture) {
     BeginWidget(label);
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x - 128 - ImGui::GetStyle().FramePadding.x);
     std::stringstream ss;
     ss << "##" << label;
-    bool rv = ImGui::ImageButton(label.c_str(), texture, { 64, 64 }, { 0, 1 }, { 1, 0 });
+    bool rv = ImGui::ImageButton(label.c_str(), texture, { 128, 128 }, { 0, 1 }, { 1, 0 });
     EndWidget();
     return rv;
 }
