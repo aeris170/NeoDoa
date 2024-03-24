@@ -231,7 +231,7 @@ private:
     // -- //
     // Open Scene
     UUID sceneUUID{ UUID::Empty() };
-    std::optional<Scene> scene{};
+    std::optional<Scene> scene{ std::nullopt };
     void OnAssetOpened(AssetHandle asset);
     void OnSceneOpened(Scene& scene);
     void OnSceneClosed();
