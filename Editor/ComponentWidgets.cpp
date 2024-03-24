@@ -458,7 +458,7 @@ bool ResolutionWidget(const std::string& label, Resolution& resolution) {
     settingsFBO.displayLabelColorOverride[1] = Color(0.66f, 0.49f, 0.65f);
 
     bool rv = FancyVector2Widget(label, res, settingsFBO);
-    resolution = { static_cast<int>(res.x), static_cast<int>(res.y) };
+    resolution = { static_cast<size_t>(res.x), static_cast<size_t>(res.y) };
 
     return rv;
 }
