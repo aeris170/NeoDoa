@@ -6,7 +6,7 @@ ICommand::~ICommand() noexcept {};
 
 bool ICommand::TryMergeWith(UndoRedoStack& history, const ICommand* command) noexcept { return false; }
 
-void UndoRedoStack::Do(std::unique_ptr<ICommand>&& command) noexcept {
+void UndoRedoStack::Do(Command&& command) noexcept {
     if (!undoStack.empty() && undoStack.back()->TryMergeWith(*this, command.get())) {
         // Can Merge, don't push command but merge it with peek and re-execute peek (instead of command)
         undoStack.back()->Execute();
