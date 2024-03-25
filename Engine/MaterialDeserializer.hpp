@@ -40,7 +40,7 @@ namespace MaterialDeserializer {
     }
 
     /* --- Default Implementations --- */
-    /* These are how NeoDoa will serialize by default. */
+    /* These are how NeoDoa will desrialize by default. */
     void DefaultDeserialize(tinyxml2::XMLElement& rootElem, MaterialDeserializationResult& mdr) noexcept;
     namespace Program {
         void DefaultDeserialize(tinyxml2::XMLElement& programElem, MaterialDeserializationResult& mdr) noexcept;
