@@ -1,22 +1,23 @@
-#include "Scene.hpp"
+#include <Engine/Scene.hpp>
 
 #include <glm/gtc/type_ptr.hpp>
 
-#include "Shader.hpp"
-#include "Model.hpp"
-#include "Renderer.hpp"
+#include <Engine/Shader.hpp>
+#include <Engine/Model.hpp>
+#include <Engine/Renderer.hpp>
 
-#include "Core.hpp"
+#include <Engine/Core.hpp>
 
-#include "Log.hpp"
-#include "Texture.hpp"
-#include "TransformComponent.hpp"
-#include "IDComponent.hpp"
-#include "ParentComponent.hpp"
-#include "CameraComponent.hpp"
-#include "Project.hpp"
-#include "SceneSerializer.hpp"
-#include "SceneDeserializer.hpp"
+#include <Engine/Log.hpp>
+#include <Engine/Texture.hpp>
+#include <Engine/TransformComponent.hpp>
+#include <Engine/IDComponent.hpp>
+#include <Engine/ParentComponent.hpp>
+#include <Engine/ChildComponent.hpp>
+#include <Engine/CameraComponent.hpp>
+#include <Engine/Project.hpp>
+#include <Engine/SceneSerializer.hpp>
+#include <Engine/SceneDeserializer.hpp>
 
 Scene& Scene::GetLoadedScene() {
     static auto& core = Core::GetCore();
@@ -51,9 +52,21 @@ Entity Scene::CreateEntity(std::string name, uint32_t desiredID) {
 
 void Scene::DeleteEntity(Entity entt) {
     if (HasComponent<ParentComponent>(entt)) {
-        auto& parent = GetComponent<ParentComponent>(entt);
+        ParentComponent& parent = GetComponent<ParentComponent>(entt);
         for (const auto& child : parent.GetChildren()) {
             DeleteEntity(child);
+        }
+    }
+
+    if (HasComponent<ChildComponent>(entt)) {
+        const ChildComponent& child = GetComponent<ChildComponent>(entt);
+        assert(HasComponent<ParentComponent>(child.GetParent()));
+        ParentComponent& parent = GetComponent<ParentComponent>(child.GetParent());
+        auto search = std::ranges::find(parent.GetChildren(), entt);
+        assert(search != parent.GetChildren().end());
+        parent.GetChildren().erase(search);
+        if (parent.GetChildren().empty()) {
+            RemoveComponent<ParentComponent>(child.GetParent());
         }
     }
 
