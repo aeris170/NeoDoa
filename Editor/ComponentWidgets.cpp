@@ -232,13 +232,11 @@ bool EnumWidget(const std::string& label, int& value, const std::vector<EnumValu
     ss << "##" << label;
 
     int selected = -1;
-    std::vector<const char*> items;
     for (int i = 0; i < values.size(); i++) {
         auto& element = values[i];
         if (element.value == value) {
             selected = i;
         }
-        items.push_back(element.prettyName.c_str());
     }
 
     bool rv{ false };

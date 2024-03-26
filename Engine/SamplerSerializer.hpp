@@ -16,6 +16,7 @@ namespace SamplerSerializer {
     /* ------- Type Definitons ------- */
     using HeaderCommentFunction = std::function<void(tinyxml2::XMLPrinter& printer, const Sampler& sampler)>;
     using SerializeFunction = std::function<void(tinyxml2::XMLPrinter& printer, const Sampler& sampler)>;
+    using SerializeNameFunction = std::function<void(tinyxml2::XMLPrinter& printer, const std::string_view name)>;
     using SerializeMinFilterFunction = std::function<void(tinyxml2::XMLPrinter& printer, const TextureMinificationMode mode)>;
     using SerializeMagFilterFunction = std::function<void(tinyxml2::XMLPrinter& printer, const TextureMagnificationMode mode)>;
     using SerializeMinLODFunction = std::function<void(tinyxml2::XMLPrinter& printer, const float minLOD)>;
@@ -34,6 +35,7 @@ namespace SamplerSerializer {
     /* These are how NeoDoa will serialize by default. */
     void DefaultHeaderComment(tinyxml2::XMLPrinter& printer, [[maybe_unused]] const Sampler& sampler) noexcept;
     void DefaultSerialize(tinyxml2::XMLPrinter& printer, const Sampler& sampler) noexcept;
+    void DefaultSerializeName(tinyxml2::XMLPrinter& printer, const std::string_view name) noexcept;
     void DefaultSerializeMinFilter(tinyxml2::XMLPrinter& printer, const TextureMinificationMode mode) noexcept;
     void DefaultSerializeMagFilter(tinyxml2::XMLPrinter& printer, const TextureMagnificationMode mode) noexcept;
     void DefaultSerializeMinLOD(tinyxml2::XMLPrinter& printer, const float minLOD) noexcept;
@@ -51,6 +53,7 @@ namespace SamplerSerializer {
     /* ----- Serializer Functions ----- */
     inline HeaderCommentFunction HeaderComment{ DefaultHeaderComment };                                  /* Feel free to assign this your own function, if you need custom serialization */
     inline SerializeFunction Serialize{ DefaultSerialize };                                              /* Feel free to assign this your own function, if you need custom serialization */
+    inline SerializeNameFunction SerializeName{ DefaultSerializeName };                                  /* Feel free to assign this your own function, if you need custom serialization */
     inline SerializeMinFilterFunction SerializeMinFilter{ DefaultSerializeMinFilter };                   /* Feel free to assign this your own function, if you need custom serialization */
     inline SerializeMagFilterFunction SerializeMagFilter{ DefaultSerializeMagFilter };                   /* Feel free to assign this your own function, if you need custom serialization */
     inline SerializeMinLODFunction SerializeMinLOD{ DefaultSerializeMinLOD };                            /* Feel free to assign this your own function, if you need custom serialization */

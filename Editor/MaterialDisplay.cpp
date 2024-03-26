@@ -332,36 +332,62 @@ bool MaterialDisplay::RenderSingleUniform(Material::Uniforms& uniforms, const Un
     } else if (uniform.TypeName == "sampler2D") {
         UniformSampler2D value = std::get<UniformSampler2D>(uniformValue.Value);
 
-        const Texture* texture{ nullptr };
-        AssetHandle handle = assets->FindAsset(value.textureUUID);
-        if (handle && handle->IsTexture()) {
-            texture = &handle->DataAs<Texture>();
-        } else {
-            texture = missingTexture;
-        }
+        { // Texture
+            const Texture* texture{ nullptr };
+            AssetHandle handle = assets->FindAsset(value.textureUUID);
+            if (handle && handle->IsTexture()) {
+                texture = &handle->DataAs<Texture>();
+            } else {
+                texture = missingTexture;
+            }
 
-        if (Image2DButtonWidget(uniformValue.Name.c_str(), texture->TextureIDRaw())) {
-            textureView.Show(*texture);
-        }
-        if (ImGui::BeginPopupContextItem(nullptr, ImGuiPopupFlags_MouseButtonRight)) {
-            if (ImGui::Button(cat(ObserverIcons::MaterialDisplayIcons::ContextMenu::RESET_UNIFORM_ICON, "Reset"))) {
-                uniforms.Set(uniform.Location, uniform.Name, UniformSampler2D{ UUID::Empty(), value.samplerUUID });
-                rv = true;
-                ImGui::CloseCurrentPopup();
+            if (Image2DButtonWidget(uniformValue.Name.c_str(), texture->TextureIDRaw())) {
+                textureView.Show(*texture);
             }
-            ImGui::EndPopup();
-        }
-        if(ImGui::BeginDragDropTarget()) {
-            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DND_DEMO_CELL")) {
-                UUID data = *(const UUID*) payload->Data;
-                AssetHandle handle = assets->FindAsset(data);
-                assert(handle.HasValue());
-                if (handle->IsTexture()) {
-                    uniforms.Set(uniform.Location, uniform.Name, UniformSampler2D{ data, value.samplerUUID });
+            if (ImGui::BeginPopupContextItem(nullptr, ImGuiPopupFlags_MouseButtonRight)) {
+                if (ImGui::Button(cat(ObserverIcons::MaterialDisplayIcons::ContextMenu::RESET_UNIFORM_ICON, "Reset"))) {
+                    uniforms.Set(uniform.Location, uniform.Name, UniformSampler2D{ UUID::Empty(), value.samplerUUID });
                     rv = true;
+                    ImGui::CloseCurrentPopup();
                 }
+                ImGui::EndPopup();
             }
-            ImGui::EndDragDropTarget();
+            if(ImGui::BeginDragDropTarget()) {
+                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DND_DEMO_CELL")) {
+                    UUID data = *(const UUID*) payload->Data;
+                    AssetHandle handle = assets->FindAsset(data);
+                    assert(handle.HasValue());
+                    if (handle->IsTexture()) {
+                        uniforms.Set(uniform.Location, uniform.Name, UniformSampler2D{ data, value.samplerUUID });
+                        rv = true;
+                    }
+                }
+                ImGui::EndDragDropTarget();
+            }
+        }
+        { // Sampler
+            ImGui::BeginDisabled();
+            std::string data;
+            AssetHandle handle = assets->FindAsset(value.samplerUUID);
+            if (handle && handle->IsSampler()) {
+                data = std::format("{} (UUID:{})", handle->DataAs<Sampler>().Name, value.samplerUUID.AsString());
+            } else {
+                data = "No Sampler assigned.";
+            }
+            UneditableStringWidget(std::format("{} Texture Sampler", uniformValue.Name), data);
+            if (ImGui::BeginDragDropTarget()) {
+                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DND_DEMO_CELL")) {
+                    UUID data = *(const UUID*) payload->Data;
+                    AssetHandle handle = assets->FindAsset(data);
+                    assert(handle.HasValue());
+                    if (handle->IsSampler()) {
+                        uniforms.Set(uniform.Location, uniform.Name, UniformSampler2D{ value.textureUUID, data });
+                        rv = true;
+                    }
+                }
+                ImGui::EndDragDropTarget();
+            }
+            ImGui::EndDisabled();
         }
     } else if (uniform.TypeName == "sampler3D") {
         ImGui::TextUnformatted("Implementation pending...");

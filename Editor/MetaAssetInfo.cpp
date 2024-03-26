@@ -120,6 +120,10 @@ void MetaAssetInfoBank::TryEmplace(const FNode& file, const MetaAssetInfo& empla
             const auto& [_fa_icon, _svg_icon_key] = FileIcons::MaterialIcons[icon_index];
             fa_icon = _fa_icon;
             svg_icon_key = _svg_icon_key;
+        } else if (handle->IsSampler()) {
+            const auto& [_fa_icon, _svg_icon_key] = FileIcons::SamplerIcons[icon_index];
+            fa_icon = _fa_icon;
+            svg_icon_key = _svg_icon_key;
         } else if (handle->IsTexture()) {
             const auto& [_fa_icon, _svg_icon_key] = FileIcons::TextureIcons[icon_index];
             fa_icon = _fa_icon;

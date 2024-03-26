@@ -12,6 +12,7 @@
 #include <Editor/ShaderDisplay.hpp>
 #include <Editor/ShaderProgramDisplay.hpp>
 #include <Editor/MaterialDisplay.hpp>
+#include <Editor/SamplerDisplay.hpp>
 
 struct Scene;
 
@@ -42,6 +43,7 @@ private:
     ShaderDisplay shaderDisplay;
     ShaderProgramDisplay shaderProgramDisplay;
     MaterialDisplay materialDisplay;
+    SamplerDisplay samplerDisplay;
 
     void HandleTargetWhenEmpty();
     void HandleTargetWhenEntity(Scene& scene, const Entity entt);
@@ -55,6 +57,7 @@ private:
     void RenderShaderView(AssetHandle h);
     void RenderShaderProgramView(AssetHandle h);
     void RenderMaterialView(AssetHandle h);
+    void RenderSamplerView(AssetHandle h);
     void RenderTextureView(AssetHandle h);
     void RenderTextView(AssetHandle h);
 

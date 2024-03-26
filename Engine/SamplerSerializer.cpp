@@ -16,6 +16,7 @@ void SamplerSerializer::DefaultHeaderComment(tinyxml2::XMLPrinter& printer, [[ma
 void SamplerSerializer::DefaultSerialize(tinyxml2::XMLPrinter& printer, const Sampler& sampler) noexcept {
     printer.OpenElement("sampler");
     {
+        SerializeName(printer, sampler.Name);
         SerializeMinFilter(printer, sampler.MinFilter);
         SerializeMagFilter(printer, sampler.MagFilter);
         SerializeMinLOD(printer, sampler.MinLOD);
@@ -31,6 +32,9 @@ void SamplerSerializer::DefaultSerialize(tinyxml2::XMLPrinter& printer, const Sa
         SerializeCubemapSeamless(printer, sampler.CubemapSeamless);
     }
     printer.CloseElement();
+}
+void SamplerSerializer::DefaultSerializeName(tinyxml2::XMLPrinter& printer, const std::string_view name) noexcept {
+    printer.PushAttribute(nameof_c(Sampler::Name), name.data());
 }
 void SamplerSerializer::DefaultSerializeMinFilter(tinyxml2::XMLPrinter& printer, const TextureMinificationMode mode) noexcept {
     printer.PushAttribute(nameof_c(Sampler::MinFilter), Helpers::ToString(mode).c_str());

@@ -17,7 +17,7 @@
 #include "Model.hpp"
 
 
-#define ASSET_TYPE Scene, Component, Shader, ShaderProgram, Material, Texture, Model
+#define ASSET_TYPE Scene, Component, Shader, ShaderProgram, Material, Texture, Sampler, Model
 template<typename T>
 concept AssetType = concepts::IsAnyOf<T, ASSET_TYPE> && concepts::Copyable<T> && concepts::Serializable<T> && std::movable<T>;
 using AssetData = std::variant<std::monostate, ASSET_TYPE>;
@@ -63,6 +63,7 @@ struct Asset final : ObserverPattern::Observable {
     bool IsShader() const;
     bool IsShaderProgram() const;
     bool IsMaterial() const;
+    bool IsSampler() const;
 
     bool HasInfoMessages() const;
     const std::vector<std::any>& InfoMessages() const;

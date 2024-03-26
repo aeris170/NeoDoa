@@ -468,7 +468,10 @@ void AssetManager::RenderContextMenu() {
             if (ImGui::MenuItem(material)) {
                 gui.ShowNewMaterialAssetModal(*currentFolder);
             }
-
+            static constexpr auto sampler = cat(FileIcons::SAMPLER_ICON, " ", "Sampler");
+            if (ImGui::MenuItem(sampler)) {
+                gui.ShowNewSamplerAssetModal(*currentFolder);
+            }
             ImGui::EndMenu();
         }
 

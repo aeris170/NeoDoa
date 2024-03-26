@@ -53,6 +53,7 @@ struct Assets : ObserverPattern::Observer {
     inline static std::string COMPUTE_SHADER_EXT{ ".comp" };
     inline static std::string SHADER_PROGRAM_EXT{ ".prog" };
     inline static std::string MATERIAL_EXT{ ".mat" };
+    inline static std::string SAMPLER_EXT{ ".smplr" };
     inline static std::string COMP_EXT{ ".ncd" };
     inline static std::string ID_EXT{ ".id" };
 
@@ -69,6 +70,7 @@ struct Assets : ObserverPattern::Observer {
     static bool IsComputeShaderFile(const FNode& file);
     static bool IsShaderProgramFile(const FNode& file);
     static bool IsMaterialFile(const FNode& file);
+    static bool IsSamplerFile(const FNode& file);
     static bool IsComponentDefinitionFile(const FNode& file);
 
     explicit Assets(const Project& project) noexcept;
@@ -116,6 +118,7 @@ struct Assets : ObserverPattern::Observer {
     const UUIDCollection& ShaderAssetIDs() const;
     const UUIDCollection& ShaderProgramAssetIDs() const;
     const UUIDCollection& MaterialAssetIDs() const;
+    const UUIDCollection& SamplerAssetIDs() const;
 
     AssetHandle Import(const FNode& file);
     void ReimportAll();
@@ -154,6 +157,7 @@ private:
     UUIDCollection shaderAssets{};
     UUIDCollection shaderProgramAssets{};
     UUIDCollection materialAssets{};
+    UUIDCollection samplerAssets{};
 
     AdjacencyList<UUID> dependencyGraph{};
 

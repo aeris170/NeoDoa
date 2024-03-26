@@ -101,6 +101,8 @@ set(GROUP_LIST
     "UI/GUI/Observer/Displays/SceneDisplay/SceneDisplay.hpp"
     "UI/GUI/Observer/Displays/ComponentDefinitionDisplay/ComponentDefinitionDisplay.cpp"
     "UI/GUI/Observer/Displays/ComponentDefinitionDisplay/ComponentDefinitionDisplay.hpp"
+    "UI/GUI/Observer/Displays/SamplerDisplay/SamplerDisplay.cpp"
+    "UI/GUI/Observer/Displays/SamplerDisplay/SamplerDisplay.hpp"
     "UI/GUI/Observer/Displays/ShaderDisplay/ShaderDisplay.cpp"
     "UI/GUI/Observer/Displays/ShaderDisplay/ShaderDisplay.hpp"
     "UI/GUI/Observer/Displays/ShaderProgramDisplay/ShaderProgramDisplay.cpp"

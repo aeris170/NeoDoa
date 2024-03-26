@@ -1,29 +1,64 @@
 #include <Engine/SamplerDeserializer.hpp>
 
-#include <Utility/NameOf.hpp>
 #include <regex>
 
+#include <Utility/NameOf.hpp>
+
+#include <Engine/Log.hpp>
+#include <Engine/FileNode.hpp>
+
+SamplerDeserializationResult DeserializeSampler(const FNode& file) noexcept {
+    file.ReadContent();
+    auto rv = DeserializeSampler(file.DisposeContent());
+    if (!rv.erred) {
+        rv.deserializedSampler.Name = file.Name();
+    }
+    return rv;
+}
+
+SamplerDeserializationResult DeserializeSampler(const std::string_view data) noexcept {
+    SamplerDeserializationResult rv;
+
+    tinyxml2::XMLDocument doc;
+    tinyxml2::XMLError err = doc.Parse(data.data());
+    if (err != tinyxml2::XML_SUCCESS) {
+        rv.erred = true;
+        rv.errors.emplace_back("Couldn't deserialize sampler!");
+        rv.errors.emplace_back("This should normally never happen. If you didn't try to edit the file manually, please submit an issue.");
+        DOA_LOG_ERROR("Couldn't deserialize sampler!\n\n%s", data);
+    } else {
+        SamplerDeserializer::Deserialize(*doc.RootElement(), rv);
+    }
+
+    return rv;
+}
+
 void SamplerDeserializer::DefaultDeserialize(tinyxml2::XMLElement& rootElem, SamplerDeserializationResult& sdr) noexcept {
-    auto* samplerElemPtr = rootElem.FirstChildElement();
-    if (!samplerElemPtr) {
-        sdr.errors.emplace_back(std::format("Error while deserializing sampler, sampler element nullptr."));
+    DeserializeName(rootElem, sdr);
+    DeserializeMinFilter(rootElem, sdr);
+    DeserializeMagFilter(rootElem, sdr);
+    DeserializeMinLOD(rootElem, sdr);
+    DeserializeMaxLOD(rootElem, sdr);
+    DeserializeLODBias(rootElem, sdr);
+    DeserializeWrapS(rootElem, sdr);
+    DeserializeWrapT(rootElem, sdr);
+    DeserializeWrapR(rootElem, sdr);
+    DeserializeBorderColor(rootElem, sdr);
+    DeserializeCompareMode(rootElem, sdr);
+    DeserializeCompareFunction(rootElem, sdr);
+    DeserializeMaxAnisotropy(rootElem, sdr);
+    DeserializeCubemapSeamless(rootElem, sdr);
+}
+void SamplerDeserializer::DefaultDeserializeName(tinyxml2::XMLElement& samplerElem, SamplerDeserializationResult& sdr) noexcept {
+    std::string attribName = nameof(Sampler::Name);
+    auto* attribPtr = samplerElem.FindAttribute(attribName.c_str());
+    if (!attribPtr) {
+        sdr.errors.emplace_back(std::format("Error while deserializing sampler, {} attrib missing.", attribName));
         sdr.erred = true;
         return;
     }
-    auto& samplerElem = *samplerElemPtr;
-    DeserializeMinFilter(samplerElem, sdr);
-    DeserializeMagFilter(samplerElem, sdr);
-    DeserializeMinLOD(samplerElem, sdr);
-    DeserializeMaxLOD(samplerElem, sdr);
-    DeserializeLODBias(samplerElem, sdr);
-    DeserializeWrapS(samplerElem, sdr);
-    DeserializeWrapT(samplerElem, sdr);
-    DeserializeWrapR(samplerElem, sdr);
-    DeserializeBorderColor(samplerElem, sdr);
-    DeserializeCompareMode(samplerElem, sdr);
-    DeserializeCompareFunction(samplerElem, sdr);
-    DeserializeMaxAnisotropy(samplerElem, sdr);
-    DeserializeCubemapSeamless(samplerElem, sdr);
+
+    sdr.deserializedSampler.Name = attribPtr->Value();
 }
 void SamplerDeserializer::DefaultDeserializeMinFilter(tinyxml2::XMLElement& samplerElem, SamplerDeserializationResult& sdr) noexcept {
     std::string attribName = nameof(Sampler::MinFilter);

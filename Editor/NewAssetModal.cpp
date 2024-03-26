@@ -46,7 +46,12 @@ void NewAssetModal::ShowShaderProgramCreationModal(FNode& currentFolder) const {
 	const_cast<NewAssetModal*>(this)->Reset(currentFolder, NewAssetData::AssetType::ShaderProgram);
 }
 void NewAssetModal::ShowMaterialCreationModal(FNode& currentFolder) const {
+	/* cast-away const - this modal is never created const */
 	const_cast<NewAssetModal*>(this)->Reset(currentFolder, NewAssetData::AssetType::Material);
+}
+void NewAssetModal::ShowSamplerCreationModal(FNode& currentFolder) const {
+	/* cast-away const - this modal is never created const */
+	const_cast<NewAssetModal*>(this)->Reset(currentFolder, NewAssetData::AssetType::Sampler);
 }
 
 void NewAssetModal::Hide() const {
@@ -75,6 +80,7 @@ void NewAssetModal::Reset(FNode& currentFolder, NewAssetData::AssetType typeOfAs
 	static auto defFragmentShaderName = "MyFragmentShader";               assert(std::strlen(defFragmentShaderName) < buf.size());
 	static auto defShaderProgramName  = "MyShaderProgram";                assert(std::strlen(defShaderProgramName)  < buf.size());
 	static auto defMaterialName       = "MyMaterial";                     assert(std::strlen(defMaterialName)       < buf.size());
+	static auto defSamplerName        = "MySampler";                      assert(std::strlen(defSamplerName)        < buf.size());
 	switch(typeOfAssetToCreate) {
 		using enum NewAssetData::AssetType;
 	case Scene:
@@ -121,6 +127,11 @@ void NewAssetModal::Reset(FNode& currentFolder, NewAssetData::AssetType typeOfAs
 		std::strcpy(buf.data(), defMaterialName);
 		titleText = std::format(TITLE_TEXT, "Material");
 		confirmText = std::format(CONFIRM_TEXT, "a Material");
+		break;
+	case Sampler:
+		std::strcpy(buf.data(), defSamplerName);
+		titleText = std::format(TITLE_TEXT, "Sampler");
+		confirmText = std::format(CONFIRM_TEXT, "a Sampler");
 		break;
 	case Texture:
 		break;
@@ -248,6 +259,9 @@ void NewAssetModal::CreateAsset() {
 	case Material:
 		CreateMaterialAsset();
 		break;
+	case Sampler:
+		CreateSamplerAsset();
+		break;
 	case Texture:
 		break;
 	case Model:
@@ -307,6 +321,13 @@ void NewAssetModal::CreateMaterialAsset() {
 	const GUI& gui = this->gui.get();
 	Material temporary{ newAssetData.name };
 	const auto data = temporary.Serialize();
-	gui.CORE->GetAssets()->CreateAssetAt<ShaderProgram>(*newAssetData.currentFolder, newAssetData.name + Assets::MATERIAL_EXT, data);
+	gui.CORE->GetAssets()->CreateAssetAt<Material>(*newAssetData.currentFolder, newAssetData.name + Assets::MATERIAL_EXT, data);
 	DOA_LOG_INFO("Succesfully created a material asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
+}
+void NewAssetModal::CreateSamplerAsset() {
+	const GUI& gui = this->gui.get();
+	Sampler temporary{ .Name = newAssetData.name };
+	const auto data = temporary.Serialize();
+	gui.CORE->GetAssets()->CreateAssetAt<Sampler>(*newAssetData.currentFolder, newAssetData.name + Assets::SAMPLER_EXT, data);
+	DOA_LOG_INFO("Succesfully created a sampler asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
 }

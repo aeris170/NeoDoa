@@ -25,6 +25,7 @@ namespace SamplerDeserializer {
 
     /* ------- Type Definitons ------- */
     using DeserializeFunction = std::function<void(tinyxml2::XMLElement& rootElem, SamplerDeserializationResult& sdr)>;
+    using DeserializeNameFunction = std::function<void(tinyxml2::XMLElement& samplerElem, SamplerDeserializationResult& sdr)>;
     using DeserializeMinFilterFunction = std::function<void(tinyxml2::XMLElement& samplerElem, SamplerDeserializationResult& sdr)>;
     using DeserializeMagFilterFunction = std::function<void(tinyxml2::XMLElement& samplerElem, SamplerDeserializationResult& sdr)>;
     using DeserializeMinLODFunction = std::function<void(tinyxml2::XMLElement& samplerElem, SamplerDeserializationResult& sdr)>;
@@ -42,6 +43,7 @@ namespace SamplerDeserializer {
     /* --- Default Implementations --- */
     /* These are how NeoDoa will desrialize by default. */
     void DefaultDeserialize(tinyxml2::XMLElement& rootElem, SamplerDeserializationResult& sdr) noexcept;
+    void DefaultDeserializeName(tinyxml2::XMLElement& samplerElem, SamplerDeserializationResult& sdr) noexcept;
     void DefaultDeserializeMinFilter(tinyxml2::XMLElement& samplerElem, SamplerDeserializationResult& sdr) noexcept;
     void DefaultDeserializeMagFilter(tinyxml2::XMLElement& samplerElem, SamplerDeserializationResult& sdr) noexcept;
     void DefaultDeserializeMinLOD(tinyxml2::XMLElement& samplerElem, SamplerDeserializationResult& sdr) noexcept;
@@ -58,6 +60,7 @@ namespace SamplerDeserializer {
 
     /* ----- Serializer Functions ----- */
     inline DeserializeFunction Deserialize{ DefaultDeserialize };                                              /* Feel free to assign this your own function, if you need custom deserialization */
+    inline DeserializeNameFunction DeserializeName{ DefaultDeserializeName };                                  /* Feel free to assign this your own function, if you need custom deserialization */
     inline DeserializeMinFilterFunction DeserializeMinFilter{ DefaultDeserializeMinFilter };                   /* Feel free to assign this your own function, if you need custom deserialization */
     inline DeserializeMagFilterFunction DeserializeMagFilter{ DefaultDeserializeMagFilter };                   /* Feel free to assign this your own function, if you need custom deserialization */
     inline DeserializeMinLODFunction DeserializeMinLOD{ DefaultDeserializeMinLOD };                            /* Feel free to assign this your own function, if you need custom deserialization */

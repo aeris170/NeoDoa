@@ -24,6 +24,7 @@ struct NewAssetModal {
     void ShowFragmentShaderCreationModal(FNode& currentFolder) const;
     void ShowShaderProgramCreationModal(FNode& currentFolder) const;
     void ShowMaterialCreationModal(FNode& currentFolder) const;
+    void ShowSamplerCreationModal(FNode& currentFolder) const;
 
     void Hide() const;
 private:
@@ -53,6 +54,7 @@ private:
             FragmentShader,
             ShaderProgram,
             Material,
+            Sampler,
             Texture,
             Model
         } type;
@@ -76,6 +78,7 @@ private:
     void CreateFragmentShaderAsset();
     void CreateShaderProgramAsset();
     void CreateMaterialAsset();
+    void CreateSamplerAsset();
 
     friend struct GUI;
 

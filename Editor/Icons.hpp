@@ -224,6 +224,11 @@ namespace FileIcons {
         std::pair{ MATERIAL_ICON, "circle" }
     };
 
+    inline constexpr const char SAMPLER_ICON[]{ ICON_FA_LOADER };
+    inline std::array<ElementType, 1> SamplerIcons{
+        std::pair{ SAMPLER_ICON, "loader" }
+    };
+
     inline constexpr const char FILE_ICON[]                    { ICON_FA_FILE                    };
     inline constexpr const char FILE_ICON_MULTIPLE[]           { ICON_FA_FILES                   };
     inline constexpr const char FILE_ICON_ARROW_DOWN[]         { ICON_FA_FILE_ARROW_DOWN         };

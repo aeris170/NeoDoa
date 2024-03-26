@@ -23,7 +23,8 @@ DisplayTargetRenderer::DisplayTargetRenderer(Observer& observer) noexcept :
     componentDefinitionDisplay(observer),
     shaderDisplay(observer),
     shaderProgramDisplay(observer),
-    materialDisplay(observer) {
+    materialDisplay(observer),
+    samplerDisplay(observer) {
     GUI& gui = observer.gui;
     gui.Events.OnProjectUnloaded                 += std::bind_front(&DisplayTargetRenderer::OnProjectUnloaded,  this);
     gui.Events.OnReimport                        += std::bind_front(&DisplayTargetRenderer::OnReimport,         this);
@@ -186,6 +187,10 @@ void DisplayTargetRenderer::RenderIconChangePopup(const FNode& file, MetaAssetIn
             auto& items = FileIcons::MaterialIcons;
             begin = &items.front();
             end = &items.back() + 1;
+        } else if (Assets::IsSamplerFile(file)) {
+            auto& items = FileIcons::SamplerIcons;
+            begin = &items.front();
+            end = &items.back() + 1;
         } else if (Assets::IsTextureFile(file)) {
             auto& items = FileIcons::TextureIcons;
             begin = &items.front();
@@ -260,6 +265,8 @@ void DisplayTargetRenderer::RenderAssetView(AssetHandle h) {
         RenderShaderProgramView(h);
     } else if (h->IsMaterial()) {
         RenderMaterialView(h);
+    } else if (h->IsSampler()) {
+        RenderSamplerView(h);
     } else if (h->IsTexture()) {
         RenderTextureView(h);
     } else {
@@ -397,6 +404,35 @@ void DisplayTargetRenderer::RenderMaterialView(AssetHandle h) {
         ImGui::BeginTooltip();
         ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
         ImGui::TextUnformatted("Forces deserialization on material. All data in RAM is purged, and new data is allocated.");
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
+}
+void DisplayTargetRenderer::RenderSamplerView(AssetHandle h) {
+    assert(h->IsSampler());
+
+    samplerDisplay.SetDisplayTarget(h);
+    samplerDisplay.RenderMessagesTable();
+    ImGui::Separator();
+    if (h->HasDeserializedData() && !h->HasErrorMessages()) {
+        samplerDisplay.RenderSamplerParameters();
+    } else {
+        ImGui::Text("Sampler is not deserialized...");
+    }
+
+    static int extraPadding = 16;
+    float lineHeight = ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2;
+    if (ImGui::GetContentRegionAvail().y > 34.0f) {
+        ImGui::SetCursorPosY(ImGui::GetWindowHeight() - lineHeight - extraPadding);
+    }
+
+    if (ImGui::Button("Refresh", { ImGui::GetContentRegionAvail().x, 0 })) {
+        h->ForceDeserialize();
+    }
+    if (ImGui::IsItemHovered()) {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted("Forces deserialization on sampler. All data in RAM is purged, and new data is allocated.");
         ImGui::PopTextWrapPos();
         ImGui::EndTooltip();
     }

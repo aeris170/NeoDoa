@@ -10,6 +10,8 @@
 #include <Engine/ShaderProgramDeserializer.hpp>
 #include <Engine/MaterialSerializer.hpp>
 #include <Engine/MaterialDeserializer.hpp>
+#include <Engine/SamplerSerializer.hpp>
+#include <Engine/SamplerDeserializer.hpp>
 #include <Engine/TextureSerializer.hpp>
 #include <Engine/TextureDeserializer.hpp>
 
@@ -74,6 +76,12 @@ void Asset::Serialize() {
     if (IsMaterial()) {
         std::string serializedData;
         serializedData = SerializeMaterial(DataAs<Material>());
+        file->ModifyContent(std::move(serializedData));
+        file->DisposeContent();
+    }
+    if (IsSampler()) {
+        std::string serializedData;
+        serializedData = SerializeSampler(DataAs<Sampler>());
         file->ModifyContent(std::move(serializedData));
         file->DisposeContent();
     }
@@ -157,6 +165,15 @@ void Asset::Deserialize() {
         }
         data = std::move(result.deserializedMaterial);
     }
+    if (IsSampler()) {
+        SamplerDeserializationResult result = DeserializeSampler(*file);
+        if (result.erred) {
+            for (auto& error : result.errors) {
+                errorList.emplace_back(std::move(error));
+            }
+        }
+        data = std::move(result.deserializedSampler);
+    }
     if (IsTexture()) {
         data = DeserializeTexture(*file);
     }
@@ -192,7 +209,7 @@ bool Asset::IsModel() const { return Assets::IsModelFile(*file); }
 bool Asset::IsShader() const { return Assets::IsShaderFile(*file); }
 bool Asset::IsShaderProgram() const { return Assets::IsShaderProgramFile(*file); }
 bool Asset::IsMaterial() const { return Assets::IsMaterialFile(*file); }
-
+bool Asset::IsSampler() const { return Assets::IsSamplerFile(*file); }
 
 bool Asset::HasInfoMessages() const { return !infoList.empty(); }
 const std::vector<std::any>& Asset::InfoMessages() const { return infoList; }

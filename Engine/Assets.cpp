@@ -46,6 +46,7 @@ bool Assets::IsFragmentShaderFile(const FNode& file) { return file.ext == FRAGME
 bool Assets::IsComputeShaderFile(const FNode & file) { return file.ext == COMPUTE_SHADER_EXT; }
 bool Assets::IsShaderProgramFile(const FNode& file) { return file.ext == SHADER_PROGRAM_EXT; }
 bool Assets::IsMaterialFile(const FNode& file) { return file.ext == MATERIAL_EXT; }
+bool Assets::IsSamplerFile(const FNode& file) { return file.ext == SAMPLER_EXT; }
 bool Assets::IsComponentDefinitionFile(const FNode& file) { return file.ext == COMP_EXT; }
 
 Assets::Assets(const Project& project) noexcept :
@@ -134,6 +135,7 @@ const Assets::UUIDCollection& Assets::ModelAssetIDs() const { return modelAssets
 const Assets::UUIDCollection& Assets::ShaderAssetIDs() const { return shaderAssets; }
 const Assets::UUIDCollection& Assets::ShaderProgramAssetIDs() const { return shaderProgramAssets; }
 const Assets::UUIDCollection& Assets::MaterialAssetIDs() const { return materialAssets; }
+const Assets::UUIDCollection& Assets::SamplerAssetIDs() const { return samplerAssets; }
 
 AssetHandle Assets::Import(const FNode& file) { return ImportFile(database, file); }
 void Assets::ReimportAll() {
@@ -144,6 +146,7 @@ void Assets::ReimportAll() {
     shaderAssets.clear();
     shaderProgramAssets.clear();
     materialAssets.clear();
+    samplerAssets.clear();
     textureAssets.clear();
 
     _root.children.clear();
@@ -157,6 +160,7 @@ void Assets::EnsureDeserialization() {
     Deserialize(componentDefinitionAssets);
     Deserialize(sceneAssets);
     Deserialize(textureAssets);
+    Deserialize(samplerAssets);
     Deserialize(shaderAssets);
     Deserialize(shaderProgramAssets);
     Deserialize(materialAssets);
@@ -169,6 +173,7 @@ void Assets::EnsureDeserialization() {
         if (asset.IsShader())              { PerformPostDeserializationAction(asset.DataAs<Shader>());        }
         if (asset.IsShaderProgram())       { PerformPostDeserializationAction(asset.DataAs<ShaderProgram>()); }
         if (asset.IsMaterial())            { PerformPostDeserializationAction(asset.DataAs<Material>());      }
+        if (asset.IsSampler())             { PerformPostDeserializationAction(asset.DataAs<Sampler>());       }
         if (asset.IsTexture())             { PerformPostDeserializationAction(asset.DataAs<Texture>());       }
     }
 }
@@ -203,6 +208,7 @@ void Assets::OnNotify(const ObserverPattern::Observable* source, ObserverPattern
                 if (dependent.IsShader())              { PerformPostDeserializationAction(dependent.DataAs<Shader>());        }
                 if (dependent.IsShaderProgram())       { PerformPostDeserializationAction(dependent.DataAs<ShaderProgram>()); }
                 if (dependent.IsMaterial())            { PerformPostDeserializationAction(dependent.DataAs<Material>());      }
+                if (dependent.IsSampler())             { PerformPostDeserializationAction(dependent.DataAs<Sampler>());       }
                 if (dependent.IsTexture())             { PerformPostDeserializationAction(dependent.DataAs<Texture>());       }
             }
         }
@@ -297,6 +303,9 @@ AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
         if (asset.IsMaterial()) {
             materialAssets.push_back(id);
         }
+        if (asset.IsSampler()) {
+            samplerAssets.push_back(id);
+        }
         if (asset.IsTexture()) {
             textureAssets.push_back(id);
         }
@@ -386,6 +395,7 @@ void Assets::ReBuildDependencyGraph() noexcept {
                 dependencyGraph.AddEdge(id, material.ShaderProgram);
             }
         }
+        if (asset.IsSampler()) {}
         if (asset.IsTexture()) {}
     }
 }
@@ -426,7 +436,9 @@ size_t MaterialPostDeserialization::TypeNameToVariantIndex(std::string_view type
     else if (typeName == "mat3x4") { return 18uLL; }
     else if (typeName == "mat4x2") { return 19uLL; }
     else if (typeName == "mat4x3") { return 20uLL; }
-    else { return -1uLL; } // =)
+
+    else if (typeName == "sampler2D") { return 21uLL; }
+    else { DOA_LOG_WARNING("MaterialPostDeserialization::TypeNameToVariantIndex encountered unknown typeName %s", typeName.data()); return -1uLL; } // =)
 }
 void MaterialPostDeserialization::InsertUniform(Material::Uniforms& uniforms, int location, const UniformValue& uniform) noexcept {
     if (const Uniform1f* ptr = std::get_if<Uniform1f>(&uniform.Value))      { uniforms.Set(location, uniform.Name, *ptr); }
@@ -453,6 +465,8 @@ void MaterialPostDeserialization::InsertUniform(Material::Uniforms& uniforms, in
     else if (const UniformMatrix4x2f* ptr = std::get_if<UniformMatrix4x2f>(&uniform.Value)) { uniforms.Set(location, uniform.Name, *ptr); }
     else if (const UniformMatrix3x4f* ptr = std::get_if<UniformMatrix3x4f>(&uniform.Value)) { uniforms.Set(location, uniform.Name, *ptr); }
     else if (const UniformMatrix4x3f* ptr = std::get_if<UniformMatrix4x3f>(&uniform.Value)) { uniforms.Set(location, uniform.Name, *ptr); }
+
+    else if (const UniformSampler2D* ptr = std::get_if<UniformSampler2D>(&uniform.Value)) { uniforms.Set(location, uniform.Name, *ptr); }
 }
 void MaterialPostDeserialization::EmplaceUniform(Material::Uniforms& uniforms, int location, std::string_view typeName, std::string_view name, int arraySize) noexcept {
     assert(arraySize > 0);
