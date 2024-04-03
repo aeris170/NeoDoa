@@ -1,25 +1,18 @@
 #pragma once
 
+#include <vector>
 #include <string>
+#include <string_view>
 
 #include <Engine/Shader.hpp>
+#include <Engine/GPUShader.hpp>
 
 struct FNode;
 
-enum class ShaderCompilerMessageType {
-    INFO,
-    WARNING,
-    ERROR,
-    ComponentCompilerMessageType_COUNT
-};
-struct ShaderCompilerMessage {
-    int lineNo;
-    ShaderCompilerMessageType messageType;
-    std::string shortMessage, fullMessage;
-};
+// This struct is redundant, but is here to conform to the deserialization standard of NeoDoa.
 struct ShaderDeserializationResult {
     bool erred{ false };
-    std::vector<ShaderCompilerMessage> messages{};
+    std::vector<ShaderCompilerMessage> errors{};
     Shader deserializedShader;
 };
 

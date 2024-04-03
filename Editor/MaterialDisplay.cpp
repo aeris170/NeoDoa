@@ -13,7 +13,15 @@
 #include <Editor/ComponentWidgets.hpp>
 
 static void cb(const ImDrawList* parent_list, const ImDrawCmd* cmd) {
-    glBindSampler(0, *reinterpret_cast<GLuint*>(cmd->UserCallbackData));
+    static GLuint sampler;
+    if (sampler == 0) {
+        glGenSamplers(1, &sampler);
+        glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glSamplerParameteri(sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        glSamplerParameteri(sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    }
+    glBindSampler(0, sampler);
 }
 
 MaterialDisplay::MaterialDisplay(Observer& observer) noexcept :
@@ -139,17 +147,6 @@ void MaterialDisplay::RenderShaderUniforms() noexcept {
     Material& material = materialAsset->DataAs<Material>();
     if (material.ShaderProgram == UUID::Empty()) { return; }
 
-    static GLuint sampler;
-    if (sampler == 0) {
-        glGenSamplers(1, &sampler);
-        glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glSamplerParameteri(sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-        glSamplerParameteri(sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    }
-
-    ImGui::GetWindowDrawList()->AddCallback(cb, &sampler);
-
     AssetHandle programHandle = assets->FindAsset(material.ShaderProgram);
     if (!programHandle.HasValue()) {
         ImGui::Text("Selected program (ID: %%llu) is non-existant!", static_cast<uint64_t>(material.ShaderProgram));
@@ -167,38 +164,45 @@ void MaterialDisplay::RenderShaderUniforms() noexcept {
         return;
     }
 
-    if (CountUniformsInGroup(program, Shader::ShaderType::Vertex) > 0) {
+    const GPUShaderProgram* gpuProgramPtr = assets->GPUBridge().GetShaderPrograms().Query(material.ShaderProgram);
+    if (!gpuProgramPtr) {
+        ImGui::Text("Selected program (ID: %%llu) is not allocated on the GPU yet!", static_cast<uint64_t>(material.ShaderProgram));
+        return;
+    }
+    const GPUShaderProgram& gpuProgram = *gpuProgramPtr;
+
+    if (CountUniformsInGroup(gpuProgram, ShaderType::Vertex) > 0) {
         ImGui::SeparatorText(std::format("Vertex Shader - {} ({})", assets->FindAsset(program.VertexShader)->DataAs<Shader>().Name, program.VertexShader.AsString()).c_str());
-        RenderUniformGroup(material.VertexUniforms, program, Shader::ShaderType::Vertex);
+        RenderUniformGroup(material.VertexUniforms, gpuProgram, ShaderType::Vertex);
     }
 
-    if (program.TessellationControlShader != UUID::Empty() && CountUniformsInGroup(program, Shader::ShaderType::TessellationControl) > 0) {
+    if (program.TessellationControlShader != UUID::Empty() && CountUniformsInGroup(gpuProgram, ShaderType::TessellationControl) > 0) {
         ImGui::SeparatorText(std::format("Tessellation Control Shader - {} ({})", assets->FindAsset(program.TessellationControlShader)->DataAs<Shader>().Name, program.TessellationControlShader.AsString()).c_str());
-        RenderUniformGroup(material.VertexUniforms, program, Shader::ShaderType::TessellationControl);
+        RenderUniformGroup(material.VertexUniforms, gpuProgram, ShaderType::TessellationControl);
     }
 
-    if (program.TessellationEvaluationShader != UUID::Empty() && CountUniformsInGroup(program, Shader::ShaderType::TessellationEvaluation) > 0) {
+    if (program.TessellationEvaluationShader != UUID::Empty() && CountUniformsInGroup(gpuProgram, ShaderType::TessellationEvaluation) > 0) {
         ImGui::SeparatorText(std::format("Tessellation Evaluation Shader - {} ({})", assets->FindAsset(program.TessellationEvaluationShader)->DataAs<Shader>().Name, program.TessellationEvaluationShader.AsString()).c_str());
-        RenderUniformGroup(material.VertexUniforms, program, Shader::ShaderType::TessellationEvaluation);
+        RenderUniformGroup(material.VertexUniforms, gpuProgram, ShaderType::TessellationEvaluation);
     }
 
-    if (program.GeometryShader != UUID::Empty() && CountUniformsInGroup(program, Shader::ShaderType::Geometry) > 0) {
+    if (program.GeometryShader != UUID::Empty() && CountUniformsInGroup(gpuProgram, ShaderType::Geometry) > 0) {
         ImGui::SeparatorText(std::format("Geometry Shader - {} ({})", assets->FindAsset(program.GeometryShader)->DataAs<Shader>().Name, program.GeometryShader.AsString()).c_str());
-        RenderUniformGroup(material.VertexUniforms, program, Shader::ShaderType::Geometry);
+        RenderUniformGroup(material.VertexUniforms, gpuProgram, ShaderType::Geometry);
     }
 
-    if (CountUniformsInGroup(program, Shader::ShaderType::Fragment) > 0) {
+    if (CountUniformsInGroup(gpuProgram, ShaderType::Fragment) > 0) {
         ImGui::SeparatorText(std::format("Fragment Shader - {} ({})", assets->FindAsset(program.FragmentShader)->DataAs<Shader>().Name, program.FragmentShader.AsString()).c_str());
-        RenderUniformGroup(material.VertexUniforms, program, Shader::ShaderType::Fragment);
+        RenderUniformGroup(material.VertexUniforms, gpuProgram, ShaderType::Fragment);
     }
 
     textureView.Render();
 }
 
-int MaterialDisplay::CountUniformsInGroup(const ShaderProgram& program, Shader::ShaderType group) noexcept {
+int MaterialDisplay::CountUniformsInGroup(const GPUShaderProgram& program, ShaderType group) noexcept {
     return static_cast<int>(std::ranges::count_if(program.Uniforms, [group](const auto& uniform) { return uniform.ReferencedBy == group; }));
 }
-void MaterialDisplay::RenderUniformGroup(Material::Uniforms& uniforms, const ShaderProgram& program, Shader::ShaderType group) noexcept {
+void MaterialDisplay::RenderUniformGroup(Material::Uniforms& uniforms, const GPUShaderProgram& program, ShaderType group) noexcept {
     for (const auto& uniform : program.Uniforms) {
         if (uniform.ReferencedBy != group) { continue; }
 
@@ -213,7 +217,7 @@ void MaterialDisplay::RenderUniformGroup(Material::Uniforms& uniforms, const Sha
         }
     }
 }
-bool MaterialDisplay::RenderSingleUniform(Material::Uniforms& uniforms, const UniformValue& uniformValue, const ShaderProgram::Uniform& uniform) noexcept {
+bool MaterialDisplay::RenderSingleUniform(Material::Uniforms& uniforms, const UniformValue& uniformValue, const GPUShaderProgram::Uniform& uniform) noexcept {
     bool rv{ false };
     //ImGui::Text("Name: %s, Type: %s", uniform.Name.c_str(), uniform.TypeName.c_str());
 
@@ -341,9 +345,12 @@ bool MaterialDisplay::RenderSingleUniform(Material::Uniforms& uniforms, const Un
                 texture = missingTexture;
             }
 
+            ImGui::GetWindowDrawList()->AddCallback(cb, nullptr);
             if (Image2DButtonWidget(uniformValue.Name.c_str(), texture->TextureIDRaw())) {
                 textureView.Show(*texture);
             }
+            ImGui::GetWindowDrawList()->AddCallback(ImDrawCallback_ResetRenderState, nullptr);
+
             if (ImGui::BeginPopupContextItem(nullptr, ImGuiPopupFlags_MouseButtonRight)) {
                 if (ImGui::Button(cat(ObserverIcons::MaterialDisplayIcons::ContextMenu::RESET_UNIFORM_ICON, "Reset"))) {
                     uniforms.Set(uniform.Location, uniform.Name, UniformSampler2D{ UUID::Empty(), value.samplerUUID });
@@ -366,15 +373,25 @@ bool MaterialDisplay::RenderSingleUniform(Material::Uniforms& uniforms, const Un
             }
         }
         { // Sampler
-            ImGui::BeginDisabled();
             std::string data;
             AssetHandle handle = assets->FindAsset(value.samplerUUID);
             if (handle && handle->IsSampler()) {
                 data = std::format("{} (UUID:{})", handle->DataAs<Sampler>().Name, value.samplerUUID.AsString());
             } else {
-                data = "No Sampler assigned.";
+                data = "Optional. Drag-Drop a sampler asset to set.";
             }
-            UneditableStringWidget(std::format("{} Texture Sampler", uniformValue.Name), data);
+            ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled));
+            UneditableStringWidget(std::format("{} (Texture Sampler)", uniformValue.Name), data);
+            ImGui::PopStyleColor();
+
+            if (ImGui::BeginPopupContextItem("sampler_ctx_menu", ImGuiPopupFlags_MouseButtonRight)) {
+                if (ImGui::Button(cat(ObserverIcons::MaterialDisplayIcons::ContextMenu::RESET_UNIFORM_ICON, "Reset"))) {
+                    uniforms.Set(uniform.Location, uniform.Name, UniformSampler2D{ value.textureUUID, UUID::Empty() });
+                    rv = true;
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::EndPopup();
+            }
             if (ImGui::BeginDragDropTarget()) {
                 if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DND_DEMO_CELL")) {
                     UUID data = *(const UUID*) payload->Data;
@@ -387,7 +404,6 @@ bool MaterialDisplay::RenderSingleUniform(Material::Uniforms& uniforms, const Un
                 }
                 ImGui::EndDragDropTarget();
             }
-            ImGui::EndDisabled();
         }
     } else if (uniform.TypeName == "sampler3D") {
         ImGui::TextUnformatted("Implementation pending...");
@@ -448,7 +464,9 @@ void MaterialDisplay::TextureView::Render() noexcept {
         w = h * aspect;
     }
 
+    ImGui::GetWindowDrawList()->AddCallback(cb, nullptr);
     ImGui::Image(texture->TextureIDRaw(), { w, h }, { 0, 1 }, { 1, 0 }, { (float) r, (float) g, (float) b, (float) a }, { 1, 1, 0, 1 });
+    ImGui::GetWindowDrawList()->AddCallback(ImDrawCallback_ResetRenderState, nullptr);
 
     if (drawInspector) {
         ImRect rc = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());

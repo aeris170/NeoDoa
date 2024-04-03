@@ -5,6 +5,7 @@
 #include <Engine/Assets.hpp>
 #include <Engine/Shader.hpp>
 #include <Engine/Material.hpp>
+#include <Engine/GPUShader.hpp>
 
 struct Observer;
 
@@ -24,9 +25,9 @@ private:
     AssetHandle materialAsset{};
     const Texture* missingTexture{ &Texture::Missing() };
 
-    int CountUniformsInGroup(const ShaderProgram& program, Shader::ShaderType group) noexcept;
-    void RenderUniformGroup(Material::Uniforms& uniforms, const ShaderProgram& program, Shader::ShaderType group) noexcept;
-    bool RenderSingleUniform(Material::Uniforms& uniforms, const UniformValue& value, const ShaderProgram::Uniform& uniform) noexcept;
+    int CountUniformsInGroup(const GPUShaderProgram& program, ShaderType group) noexcept;
+    void RenderUniformGroup(Material::Uniforms& uniforms, const GPUShaderProgram& program, ShaderType group) noexcept;
+    bool RenderSingleUniform(Material::Uniforms& uniforms, const UniformValue& value, const GPUShaderProgram::Uniform& uniform) noexcept;
 
     struct TextureView {
         void Render() noexcept;

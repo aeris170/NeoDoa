@@ -40,7 +40,11 @@ const CorePtr& Core::CreateCore(Resolution resolution, const char* title, bool i
 #pragma endregion
 
 #pragma region Angel Initialization
-    _this->angel = std::make_unique<struct Angel>();
+    _this->angel = std::make_unique<Angel>();
+#pragma endregion
+
+#pragma region GPU Resource Allocator Initialization
+    _this->gpuBridge = std::make_unique<AssetGPUBridge>();
 #pragma endregion
 
 #pragma region Built-in Stuff Initialization
@@ -216,8 +220,10 @@ std::unique_ptr<FrameBuffer>& Core::GetFrameBuffer() { return offscreenBuffer; }
 
 void Core::CreateAndLoadProject(std::string_view workspace, std::string_view name) {
     UnloadProject();
+
+    gpuBridge = std::make_unique<AssetGPUBridge>();
     project = std::make_unique<Project>(std::string(workspace), std::string(name));
-    assets = std::make_unique<Assets>(*project.get());
+    assets = std::make_unique<Assets>(*project.get(), *gpuBridge.get());
     assets->EnsureDeserialization();
 }
 void Core::LoadProject(const std::string& path) {
@@ -229,8 +235,9 @@ void Core::LoadProject(const std::string& path) {
         DOA_LOG_FATAL("Could not deserialize project @%s", path.c_str());
         std::exit(1);
     }
+    gpuBridge = std::make_unique<AssetGPUBridge>();
     project = std::make_unique<Project>(std::move(pdr.project));
-    assets = std::make_unique<Assets>(*project.get());
+    assets = std::make_unique<Assets>(*project.get(), *gpuBridge.get());
     assets->EnsureDeserialization();
     project->OpenStartupScene();
 }
@@ -249,6 +256,7 @@ void Core::SaveLoadedProjectToDisk() const {
 bool Core::HasLoadedProject() { return project != nullptr; }
 
 std::unique_ptr<Assets>& Core::GetAssets() { return assets; }
+std::unique_ptr<AssetGPUBridge>& Core::GetAssetGPUBridge() { return gpuBridge; }
 
 void Core::Start() {
     static bool renderingOffscreen = offscreenBuffer != nullptr;

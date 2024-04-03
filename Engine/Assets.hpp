@@ -15,6 +15,8 @@
 #include <Engine/Asset.hpp>
 #include <Engine/FileNode.hpp>
 
+struct AssetGPUBridge;
+
 struct AssetHandle {
 
     AssetHandle() noexcept;
@@ -73,7 +75,7 @@ struct Assets : ObserverPattern::Observer {
     static bool IsSamplerFile(const FNode& file);
     static bool IsComponentDefinitionFile(const FNode& file);
 
-    explicit Assets(const Project& project) noexcept;
+    explicit Assets(const Project& project, AssetGPUBridge& bridge) noexcept;
     ~Assets() = default;
     Assets(const Assets&) = delete;
     Assets(Assets&&) = delete;
@@ -120,6 +122,8 @@ struct Assets : ObserverPattern::Observer {
     const UUIDCollection& MaterialAssetIDs() const;
     const UUIDCollection& SamplerAssetIDs() const;
 
+    const AssetGPUBridge& GPUBridge() const;
+
     AssetHandle Import(const FNode& file);
     void ReimportAll();
 
@@ -161,6 +165,8 @@ private:
 
     AdjacencyList<UUID> dependencyGraph{};
 
+    AssetGPUBridge& bridge;
+
     AssetHandle ImportFile(AssetDatabase& database, const FNode& file);
     void ImportAllFiles(AssetDatabase& database, const FNode& root);
     void Deserialize(const UUIDCollection& assets);
@@ -169,8 +175,13 @@ private:
     void ReBuildDependencyGraph() noexcept;
 
     template<AssetType T>
-    void PerformPostDeserializationAction(T& asset) noexcept {}
+    void PerformPostDeserializationAction(UUID id) noexcept {}
 };
+
+template <>
+void Assets::PerformPostDeserializationAction<Shader>(UUID id) noexcept;
+template <>
+void Assets::PerformPostDeserializationAction<ShaderProgram>(UUID id) noexcept;
 
 // Material Post Serialiation Helpers
 namespace MaterialPostDeserialization {
@@ -180,4 +191,4 @@ namespace MaterialPostDeserialization {
 }
 
 template <>
-void Assets::PerformPostDeserializationAction<Material>(Material& asset) noexcept;
+void Assets::PerformPostDeserializationAction<Material>(UUID id) noexcept;

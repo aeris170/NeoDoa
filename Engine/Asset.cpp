@@ -1,5 +1,6 @@
 #include <Engine/Asset.hpp>
 
+#include <Engine/Core.hpp>
 #include <Engine/Assets.hpp>
 #include <Engine/ProjectDeserializer.hpp>
 #include <Engine/SceneSerializer.hpp>
@@ -130,18 +131,8 @@ void Asset::Deserialize() {
         if (Assets::IsComputeShaderFile(*file)) {
             result = DeserializeComputeShader(*file);
         }
-        for (auto& message : result.messages) {
-            switch (message.messageType) {
-            case ShaderCompilerMessageType::INFO:
-                infoList.emplace_back(std::move(message));
-                break;
-            case ShaderCompilerMessageType::WARNING:
-                warningList.emplace_back(std::move(message));
-                break;
-            case ShaderCompilerMessageType::ERROR:
-                errorList.emplace_back(std::move(message));
-                break;
-            }
+        for (auto& message : result.errors) {
+            errorList.emplace_back(std::move(message));
         }
         data = std::move(result.deserializedShader);
     }
@@ -158,10 +149,8 @@ void Asset::Deserialize() {
     }
     if (IsMaterial()) {
         MaterialDeserializationResult result = DeserializeMaterial(*file);
-        if (result.erred) {
-            for (auto& error : result.errors) {
-                errorList.emplace_back(std::move(error));
-            }
+        for (auto& error : result.errors) {
+            errorList.emplace_back(std::move(error));
         }
         data = std::move(result.deserializedMaterial);
     }

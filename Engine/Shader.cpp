@@ -1,6 +1,5 @@
 #include "Shader.hpp"
 
-#include <iomanip>
 #include <string_view>
 
 #include <Engine/Log.hpp>
@@ -35,21 +34,24 @@ Shader Shader::Copy(const Shader& shader) noexcept {
     return shader.Deserialize(shader.Serialize());
 }
 
-bool ShaderProgram::IsComplete() const  noexcept                     { return HasVertexShader() && HasFragmentShader();      }
+bool ShaderProgram::IsComplete() const  noexcept {
+    if (!HasComputeShader()) {
+        return HasVertexShader() && HasFragmentShader() ;
+    } else {
+        return !HasVertexShader() &&
+            !HasTessellationControlShader() &&
+            !HasTessellationEvaluationShader() &&
+            !HasGeometryShader() &&
+            !HasFragmentShader() &&
+            HasComputeShader();
+    }
+}
 bool ShaderProgram::HasVertexShader() const noexcept                 { return VertexShader                 != UUID::Empty(); }
 bool ShaderProgram::HasTessellationControlShader() const noexcept    { return TessellationControlShader    != UUID::Empty(); }
 bool ShaderProgram::HasTessellationEvaluationShader() const noexcept { return TessellationEvaluationShader != UUID::Empty(); }
 bool ShaderProgram::HasGeometryShader() const noexcept               { return GeometryShader               != UUID::Empty(); }
 bool ShaderProgram::HasFragmentShader() const noexcept               { return FragmentShader               != UUID::Empty(); }
-
-int ShaderProgram::GetUniformLocation(std::string_view name) const noexcept {
-    auto search = std::ranges::find_if(Uniforms, [name](const Uniform& uniform) { return uniform.Name == name; });
-    if (search == Uniforms.end()) {
-        DOA_LOG_WARNING("Program %s does not contain uniform %s", std::quoted(Name), std::quoted(name));
-        return -1;
-    }
-    return search->Location;
-}
+bool ShaderProgram::HasComputeShader() const noexcept                { return ComputeShader                != UUID::Empty(); }
 
 std::string ShaderProgram::Serialize() const noexcept { return SerializeShaderProgram(*this); }
 ShaderProgram ShaderProgram::Deserialize(std::string_view data) noexcept { return DeserializeShaderProgram(data).deserializedShaderProgram; }

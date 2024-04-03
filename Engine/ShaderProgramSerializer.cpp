@@ -41,6 +41,7 @@ void ShaderProgramSerializer::Shaders::DefaultSerialize(tinyxml2::XMLPrinter& pr
         SerializeTessellationEvaluationShader(printer, program.TessellationEvaluationShader);
         SerializeGeometryShader(printer, program.GeometryShader);
         SerializeFragmentShader(printer, program.FragmentShader);
+        SerializeComputeShader(printer, program.ComputeShader);
     }
     printer.CloseElement(); // shaders close
 }
@@ -70,7 +71,7 @@ void ShaderProgramSerializer::Shaders::DefaultSerializeFragmentShader(tinyxml2::
     printer.CloseElement();
 }
 void ShaderProgramSerializer::Shaders::DefaultSerializeComputeShader(tinyxml2::XMLPrinter& printer, const UUID& computeShader) {
-    /*printer.OpenElement("vertex-shader");
-    printer.PushAttribute("uuid", vertexShader);
-    printer.CloseElement();*/
+    printer.OpenElement("compute-shader");
+    printer.PushAttribute("uuid", computeShader);
+    printer.CloseElement();
 }

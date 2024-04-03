@@ -123,6 +123,13 @@ set(GROUP_LIST
     "ECS/Systems/System.cpp"
     "ECS/Systems/System.hpp"
 	
+    "Graphics/AssetBridge.cpp"
+    "Graphics/AssetBridge.hpp"
+    "Graphics/GPUShader.cpp"
+    "Graphics/GPUShader.hpp"
+    "Graphics/Graphics.cpp"
+    "Graphics/Graphics.hpp"
+	
     "ImGui/FontAwesome.hpp"
     "ImGui/ImGuiRenderCommand.hpp"
     "ImGui/ImGuiRenderer.cpp"

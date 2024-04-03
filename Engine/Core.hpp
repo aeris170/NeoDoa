@@ -14,6 +14,7 @@
 #include "Window.hpp"
 #include "Project.hpp"
 #include "FrameBuffer.hpp"
+#include "AssetBridge.hpp"
 
 struct Core;
 struct Resolution;
@@ -44,6 +45,7 @@ struct Core {
     bool HasLoadedProject();
 
     std::unique_ptr<Assets>& GetAssets();
+    std::unique_ptr<AssetGPUBridge>& GetAssetGPUBridge();
 
     void Start();
     void Stop();
@@ -60,6 +62,7 @@ private:
     std::unique_ptr<FrameBuffer> offscreenBuffer{ nullptr };
     std::unique_ptr<Project> project{ nullptr };
     std::unique_ptr<Assets> assets{ nullptr };
+    std::unique_ptr<AssetGPUBridge> gpuBridge{ nullptr };
 
     Core() = default;
     ~Core() = default;

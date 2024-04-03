@@ -1,17 +1,10 @@
-#include "Assets.hpp"
+#include <Engine/Assets.hpp>
 
-#include <fstream>
-#include <sstream>
 #include <string>
-#include <iostream>
 #include <utility>
 
-#include <stb_image.h>
-
-#include "Core.hpp"
-#include "Project.hpp"
-#include "Log.hpp"
-#include "SceneSerializer.hpp"
+#include <Engine/Core.hpp>
+#include <Engine/SceneSerializer.hpp>
 
 AssetHandle::AssetHandle() noexcept :
     _asset(nullptr) {}
@@ -49,8 +42,9 @@ bool Assets::IsMaterialFile(const FNode& file) { return file.ext == MATERIAL_EXT
 bool Assets::IsSamplerFile(const FNode& file) { return file.ext == SAMPLER_EXT; }
 bool Assets::IsComponentDefinitionFile(const FNode& file) { return file.ext == COMP_EXT; }
 
-Assets::Assets(const Project& project) noexcept :
-    _root({ &project, nullptr, "", "", "", true }) {
+Assets::Assets(const Project& project, AssetGPUBridge& bridge) noexcept :
+    _root({ &project, nullptr, "", "", "", true }),
+    bridge(bridge) {
     BuildFileNodeTree(project, _root);
     ImportAllFiles(database, _root);
 }
@@ -137,6 +131,8 @@ const Assets::UUIDCollection& Assets::ShaderProgramAssetIDs() const { return sha
 const Assets::UUIDCollection& Assets::MaterialAssetIDs() const { return materialAssets; }
 const Assets::UUIDCollection& Assets::SamplerAssetIDs() const { return samplerAssets; }
 
+const AssetGPUBridge& Assets::GPUBridge() const { return bridge; }
+
 AssetHandle Assets::Import(const FNode& file) { return ImportFile(database, file); }
 void Assets::ReimportAll() {
     database.clear();
@@ -166,16 +162,6 @@ void Assets::EnsureDeserialization() {
     Deserialize(materialAssets);
 
     ReBuildDependencyGraph();
-
-    for (auto& [_, asset] : database) {
-        if (asset.IsScene())               { PerformPostDeserializationAction(asset.DataAs<Scene>());         }
-        if (asset.IsComponentDefinition()) { PerformPostDeserializationAction(asset.DataAs<Component>());     }
-        if (asset.IsShader())              { PerformPostDeserializationAction(asset.DataAs<Shader>());        }
-        if (asset.IsShaderProgram())       { PerformPostDeserializationAction(asset.DataAs<ShaderProgram>()); }
-        if (asset.IsMaterial())            { PerformPostDeserializationAction(asset.DataAs<Material>());      }
-        if (asset.IsSampler())             { PerformPostDeserializationAction(asset.DataAs<Sampler>());       }
-        if (asset.IsTexture())             { PerformPostDeserializationAction(asset.DataAs<Texture>());       }
-    }
 }
 
 void Assets::TryRegisterDependencyBetween(UUID dependent, UUID dependency) noexcept {
@@ -195,23 +181,33 @@ void Assets::OnNotify(const ObserverPattern::Observable* source, ObserverPattern
         assert(asset); // must be non-null
         const UUID origin = asset->ID();
 
+        if (asset->IsScene())               { PerformPostDeserializationAction<Scene>        (origin); }
+        if (asset->IsComponentDefinition()) { PerformPostDeserializationAction<Component>    (origin); }
+        if (asset->IsShader())              { PerformPostDeserializationAction<Shader>       (origin); }
+        if (asset->IsShaderProgram())       { PerformPostDeserializationAction<ShaderProgram>(origin); }
+        if (asset->IsMaterial())            { PerformPostDeserializationAction<Material>     (origin); }
+        if (asset->IsSampler())             { PerformPostDeserializationAction<Sampler>      (origin); }
+        if (asset->IsTexture())             { PerformPostDeserializationAction<Texture>      (origin); }
+
         if (dependencyGraph.HasVertex(origin)) {
             auto edgeVertices = dependencyGraph.GetIncomingEdgesOf(origin);
             while (edgeVertices.HasNext()) {
                 const UUID& dependentID = edgeVertices.Next();
                 assert(database.contains(dependentID));
                 database[dependentID].ForceDeserialize();
-
-                auto& dependent = database[dependentID];
-                if (dependent.IsScene())               { PerformPostDeserializationAction(dependent.DataAs<Scene>());         }
-                if (dependent.IsComponentDefinition()) { PerformPostDeserializationAction(dependent.DataAs<Component>());     }
-                if (dependent.IsShader())              { PerformPostDeserializationAction(dependent.DataAs<Shader>());        }
-                if (dependent.IsShaderProgram())       { PerformPostDeserializationAction(dependent.DataAs<ShaderProgram>()); }
-                if (dependent.IsMaterial())            { PerformPostDeserializationAction(dependent.DataAs<Material>());      }
-                if (dependent.IsSampler())             { PerformPostDeserializationAction(dependent.DataAs<Sampler>());       }
-                if (dependent.IsTexture())             { PerformPostDeserializationAction(dependent.DataAs<Texture>());       }
             }
         }
+    }
+    if (message == "data_deleted"_hs || message == "destructed"_hs) {
+        const Asset* asset = dynamic_cast<const Asset*>(source);
+        assert(asset); // must be non-null
+        if (asset->IsScene())               {}
+        if (asset->IsComponentDefinition()) {}
+        if (asset->IsShader())              { bridge.GetShaders().Deallocate(asset->ID());        }
+        if (asset->IsShaderProgram())       { bridge.GetShaderPrograms().Deallocate(asset->ID()); }
+        if (asset->IsMaterial())            {}
+        if (asset->IsSampler())             {}
+        if (asset->IsTexture())             {}
     }
 }
 
@@ -397,6 +393,46 @@ void Assets::ReBuildDependencyGraph() noexcept {
         }
         if (asset.IsSampler()) {}
         if (asset.IsTexture()) {}
+    }
+}
+
+template <>
+void Assets::PerformPostDeserializationAction<Shader>(UUID id) noexcept {
+    bridge.GetShaders().Deallocate(id);
+    std::vector<ShaderCompilerMessage> messages = bridge.GetShaders().Allocate(*this, id);
+
+    // Cast-away const. Asset's are never created const.
+    const Asset& asset{ database[id] };
+    std::vector<std::any>& infoMessages = const_cast<std::vector<std::any>&>(asset.InfoMessages());
+    std::vector<std::any>& warningMessages = const_cast<std::vector<std::any>&>(asset.WarningMessages());
+    std::vector<std::any>& errorMessages = const_cast<std::vector<std::any>&>(asset.ErrorMessages());
+    for (auto& message : messages) {
+        switch (message.MessageType) {
+        using enum ShaderCompilerMessageType;
+        case Info:
+            infoMessages.emplace_back(std::move(message));
+            break;
+        case Warning:
+            warningMessages.emplace_back(std::move(message));
+            break;
+        case Error:
+            errorMessages.emplace_back(std::move(message));
+            break;
+        default:
+            std::unreachable();
+        }
+    }
+}
+template <>
+void Assets::PerformPostDeserializationAction<ShaderProgram>(UUID id) noexcept {
+    bridge.GetShaderPrograms().Deallocate(id);
+    std::vector<ShaderLinkerMessage> messages = bridge.GetShaderPrograms().Allocate(*this, id);
+
+    // Cast-away const. Asset's are never created const.
+    const Asset& asset{ database[id] };
+    std::vector<std::any>& errorMessages = const_cast<std::vector<std::any>&>(asset.ErrorMessages());
+    for (auto& message : messages) {
+        errorMessages.emplace_back(std::move(message));
     }
 }
 
@@ -600,16 +636,18 @@ void MaterialPostDeserialization::EmplaceUniform(Material::Uniforms& uniforms, i
 }
 
 template <>
-void Assets::PerformPostDeserializationAction<Material>(Material& asset) noexcept {
+void Assets::PerformPostDeserializationAction<Material>(UUID id) noexcept {
+    Material& asset = database[id].DataAs<Material>();
     if (!asset.HasShaderProgram()) {
         asset.ClearAllUniforms();
         return;
     }
     assert(database.contains(asset.ShaderProgram));
+    assert(bridge.GetShaderPrograms().Exists(asset.ShaderProgram));
 
-    const ShaderProgram& program = database[asset.ShaderProgram].DataAs<ShaderProgram>();
+    const GPUShaderProgram& program = bridge.GetShaderPrograms().Fetch(asset.ShaderProgram);
 
-    auto&& algorithm = [](Material::Uniforms& uniforms, Shader::ShaderType group, const ShaderProgram& program) {
+    auto&& algorithm = [](Material::Uniforms& uniforms, ShaderType group, const GPUShaderProgram& program) {
         Material::Uniforms copy = std::move(uniforms);
         uniforms.Clear();
 
@@ -629,9 +667,9 @@ void Assets::PerformPostDeserializationAction<Material>(Material& asset) noexcep
         }
     };
 
-    algorithm(asset.VertexUniforms, Shader::ShaderType::Vertex, program);
-    algorithm(asset.TessellationControlUniforms, Shader::ShaderType::TessellationControl, program);
-    algorithm(asset.TessellationEvaluationUniforms, Shader::ShaderType::TessellationEvaluation, program);
-    algorithm(asset.GeometryUniforms, Shader::ShaderType::Geometry, program);
-    algorithm(asset.FragmentUniforms, Shader::ShaderType::Fragment, program);
+    algorithm(asset.VertexUniforms, ShaderType::Vertex, program);
+    algorithm(asset.TessellationControlUniforms, ShaderType::TessellationControl, program);
+    algorithm(asset.TessellationEvaluationUniforms, ShaderType::TessellationEvaluation, program);
+    algorithm(asset.GeometryUniforms, ShaderType::Geometry, program);
+    algorithm(asset.FragmentUniforms, ShaderType::Fragment, program);
 }

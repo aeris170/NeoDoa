@@ -57,7 +57,7 @@ void ShaderDisplay::RenderMessagesTable() noexcept {
         ImGui::TableSetColumnIndex(1);
 
         const ShaderCompilerMessage& m{ std::any_cast<const ShaderCompilerMessage&>(message) };
-        ImGui::TextWrapped("%s", m.shortMessage.c_str());
+        ImGui::TextWrapped("%s", m.ShortMessage.c_str());
     }
     ImGui::PopStyleColor();
 
@@ -73,7 +73,7 @@ void ShaderDisplay::RenderMessagesTable() noexcept {
         ImGui::TableSetColumnIndex(1);
 
         const ShaderCompilerMessage& m{ std::any_cast<const ShaderCompilerMessage&>(message) };
-        ImGui::TextWrapped("%s", m.shortMessage.c_str());
+        ImGui::TextWrapped("%s", m.ShortMessage.c_str());
     }
     ImGui::PopStyleColor();
 
@@ -89,7 +89,7 @@ void ShaderDisplay::RenderMessagesTable() noexcept {
         ImGui::TableSetColumnIndex(1);
 
         const ShaderCompilerMessage& m{ std::any_cast<const ShaderCompilerMessage&>(message) };
-        ImGui::TextWrapped("%s", m.shortMessage.c_str());
+        ImGui::TextWrapped("%s", m.ShortMessage.c_str());
     }
     ImGui::PopStyleColor();
 

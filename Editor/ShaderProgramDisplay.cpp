@@ -173,7 +173,7 @@ void ShaderProgramDisplay::RenderVertexShader(ShaderProgram& program) noexcept {
             AssetHandle handle = assets->FindAsset(data);
             assert(handle.HasValue());
             if (handle->IsShader()) {
-                if (handle->DataAs<Shader>().Type == Shader::ShaderType::Vertex) {
+                if (handle->DataAs<Shader>().Type == ShaderType::Vertex) {
                     assets->TryDeleteDependencyBetween(shaderProgramAsset->ID(), program.VertexShader);
                     program.VertexShader = data;
                     assets->TryRegisterDependencyBetween(shaderProgramAsset->ID(), data);
@@ -225,7 +225,7 @@ void ShaderProgramDisplay::RenderTessCtrlShader(ShaderProgram& program) noexcept
             AssetHandle handle = assets->FindAsset(data);
             assert(handle.HasValue());
             if (handle->IsShader()) {
-                if (handle->DataAs<Shader>().Type == Shader::ShaderType::TessellationControl) {
+                if (handle->DataAs<Shader>().Type == ShaderType::TessellationControl) {
                     assets->TryDeleteDependencyBetween(shaderProgramAsset->ID(), program.TessellationControlShader);
                     program.TessellationControlShader = data;
                     assets->TryRegisterDependencyBetween(shaderProgramAsset->ID(), data);
@@ -277,7 +277,7 @@ void ShaderProgramDisplay::RenderTessEvalShader(ShaderProgram& program) noexcept
             AssetHandle handle = assets->FindAsset(data);
             assert(handle.HasValue());
             if (handle->IsShader()) {
-                if (handle->DataAs<Shader>().Type == Shader::ShaderType::TessellationEvaluation) {
+                if (handle->DataAs<Shader>().Type == ShaderType::TessellationEvaluation) {
                     assets->TryDeleteDependencyBetween(shaderProgramAsset->ID(), program.TessellationEvaluationShader);
                     program.TessellationEvaluationShader = data;
                     assets->TryRegisterDependencyBetween(shaderProgramAsset->ID(), data);
@@ -329,7 +329,7 @@ void ShaderProgramDisplay::RenderGeometryShader(ShaderProgram& program) noexcept
             AssetHandle handle = assets->FindAsset(data);
             assert(handle.HasValue());
             if (handle->IsShader()) {
-                if (handle->DataAs<Shader>().Type == Shader::ShaderType::Geometry) {
+                if (handle->DataAs<Shader>().Type == ShaderType::Geometry) {
                     assets->TryDeleteDependencyBetween(shaderProgramAsset->ID(), program.GeometryShader);
                     program.GeometryShader = data;
                     assets->TryRegisterDependencyBetween(shaderProgramAsset->ID(), data);
@@ -381,7 +381,7 @@ void ShaderProgramDisplay::RenderFragmentShader(ShaderProgram& program) noexcept
             AssetHandle handle = assets->FindAsset(data);
             assert(handle.HasValue());
             if (handle->IsShader()) {
-                if (handle->DataAs<Shader>().Type == Shader::ShaderType::Fragment) {
+                if (handle->DataAs<Shader>().Type == ShaderType::Fragment) {
                     assets->TryDeleteDependencyBetween(shaderProgramAsset->ID(), program.FragmentShader);
                     program.FragmentShader = data;
                     assets->TryRegisterDependencyBetween(shaderProgramAsset->ID(), data);
