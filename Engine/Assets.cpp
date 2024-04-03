@@ -401,7 +401,7 @@ void Assets::PerformPostDeserializationAction<Shader>(UUID id) noexcept {
     bridge.GetShaders().Deallocate(id);
     std::vector<ShaderCompilerMessage> messages = bridge.GetShaders().Allocate(*this, id);
 
-    // Cast-away const. Asset's are never created const.
+    // Cast-away const. Assets are never created const.
     const Asset& asset{ database[id] };
     std::vector<std::any>& infoMessages = const_cast<std::vector<std::any>&>(asset.InfoMessages());
     std::vector<std::any>& warningMessages = const_cast<std::vector<std::any>&>(asset.WarningMessages());
@@ -428,7 +428,7 @@ void Assets::PerformPostDeserializationAction<ShaderProgram>(UUID id) noexcept {
     bridge.GetShaderPrograms().Deallocate(id);
     std::vector<ShaderLinkerMessage> messages = bridge.GetShaderPrograms().Allocate(*this, id);
 
-    // Cast-away const. Asset's are never created const.
+    // Cast-away const. Assets are never created const.
     const Asset& asset{ database[id] };
     std::vector<std::any>& errorMessages = const_cast<std::vector<std::any>&>(asset.ErrorMessages());
     for (auto& message : messages) {
