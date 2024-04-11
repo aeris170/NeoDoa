@@ -6,6 +6,7 @@
 #include <Engine/Shader.hpp>
 #include <Engine/Material.hpp>
 #include <Engine/GPUShader.hpp>
+#include <Engine/GPUTexture.hpp>
 
 struct Observer;
 
@@ -31,10 +32,11 @@ private:
 
     struct TextureView {
         void Render() noexcept;
-        void Show(const Texture& texture) noexcept;
+        void Show(const Texture& texture, const GPUTexture& gpuTexture) noexcept;
         void Hide() noexcept;
     private:
         bool visible{ false };
         const Texture* texture{ nullptr };
+        const GPUTexture* gpuTexture{ nullptr };
     } textureView;
 };

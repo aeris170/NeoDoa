@@ -126,7 +126,12 @@ bool FNode::ReadContent() const {
     std::ifstream file(Path(), std::ifstream::in | std::ifstream::binary);
 
     if (file.is_open()) {
-        std::getline(file, content, '\0');
+        file.seekg(0, std::ios::end);
+        std::streampos fileSize = file.tellg();
+        file.seekg(0, std::ios::beg);
+
+        content.resize(fileSize);
+        file.read(content.data(), fileSize);
         file.close();
         return true;
     }

@@ -10,11 +10,15 @@
 #include <Engine/UUID.hpp>
 #include <Engine/Assets.hpp>
 #include <Engine/GPUShader.hpp>
+#include <Engine/GPUTexture.hpp>
 
 #define ND_EXPLICIT_SPECIALIZE_ALLOCATOR(Name, T, ErrorMessageType) \
 using Name = GPUObjectDatabase<T, ErrorMessageType>; \
 template<> \
 std::vector<ErrorMessageType> Name::Allocate(const Assets& assets, const UUID asset) noexcept
+#define ND_EXPLICIT_SPECIALIZE_ALLOCATOR_SPECIALIZE_MISSING(Name, T) \
+template<> \
+const T& Name::Missing() const noexcept
 
 struct AssetGPUBridge;
 
@@ -63,27 +67,37 @@ struct GPUObjectDatabase {
         database.erase(asset);
     }
 
+    const T& Missing() const noexcept {
+        DOA_LOG_FATAL("Illegal missing resource!"); std::unreachable();
+    }
+
 private:
     AssetGPUBridge& bridge;
     Database database{};
 };
 
-// This macros expansion is available at the top of this file.
+// This macro's expansion is available at the top of this file.
+ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUSamplers, GPUSampler, SamplerAllocatorMessage);
+ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUTextures, GPUTexture, TextureAllocatorMessage); ND_EXPLICIT_SPECIALIZE_ALLOCATOR_SPECIALIZE_MISSING(GPUTextures, GPUTexture);
 ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUShaders, GPUShader, ShaderCompilerMessage);
 ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUShaderPrograms, GPUShaderProgram, ShaderLinkerMessage);
 
 struct AssetGPUBridge {
 
+    GPUSamplers& GetSamplers() noexcept;
+    const GPUSamplers& GetSamplers() const noexcept;
+    GPUTextures& GetTextures() noexcept;
+    const GPUTextures& GetTextures() const noexcept;
     GPUShaders& GetShaders() noexcept;
     const GPUShaders& GetShaders() const noexcept;
     GPUShaderPrograms& GetShaderPrograms() noexcept;
     const GPUShaderPrograms& GetShaderPrograms() const noexcept;
 
 private:
+    GPUSamplers gpuSamplers{ *this };
+    GPUTextures gpuTextures{ *this };
     GPUShaders gpuShaders{ *this };
     GPUShaderPrograms gpuShaderPrograms{ *this };
-    //GPUSamplerDatabase GPUSamplers{};
-    //GPUTextureDatabase GPUTextures{};
 public:
     AssetGPUBridge() noexcept = default;
     ~AssetGPUBridge() noexcept = default;
@@ -93,3 +107,5 @@ public:
     AssetGPUBridge& operator=(AssetGPUBridge&&) noexcept = default;
 };
 
+#undef ND_EXPLICIT_SPECIALIZE_ALLOCATOR
+#undef ND_EXPLICIT_SPECIALIZE_ALLOCATOR_SPECIALIZE_MISSING

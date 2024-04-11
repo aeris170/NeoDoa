@@ -26,7 +26,7 @@ void SVGPathway::Initialize(std::filesystem::path&& directory, Color color) {
     Initialized = true;
 }
 
-const Texture& SVGPathway::Get(const std::string& key, const TextureStyle style, const TextureSize size) {
+const GPUTexture& SVGPathway::Get(const std::string& key, const TextureStyle style, const TextureSize size) {
     assert(Initialized);
     switch (style) {
     using enum TextureStyle;
@@ -89,37 +89,60 @@ void SVGPathway::Load(std::string_view key) {
         static_cast<float>(stoi(tokens[3]))
     };
 
+    auto convertToSpan = [](uint8_t* ptr, size_t size) -> std::span<std::byte> {
+        return std::span<std::byte>(reinterpret_cast<std::byte*>(ptr), size);
+    };
+
     { // Fill the "Textures"
+        // Small
         lunasvg::Bitmap bitmapScaledAspect;
         bitmapScaledAspect = lunadoc->renderToBitmap(
             static_cast<uint32_t>((box[2] - box[0]) * SCALE_FACTOR_SMALL),
             static_cast<uint32_t>((box[3] - box[1]) * SCALE_FACTOR_SMALL),
             RASTER_BG_COLOR
         );
-        auto small = Texture::CreateTextureRaw("!!" + name + "_none_small!!", bitmapScaledAspect.data(), bitmapScaledAspect.width(), bitmapScaledAspect.height());
+        GPUTextureBuilder builder;
+        builder.SetName("!!" + name + "_none_small!!")
+            .SetWidth(bitmapScaledAspect.width())
+            .SetHeight(bitmapScaledAspect.height())
+            .SetData(TextureFormat::RGBA8, convertToSpan(bitmapScaledAspect.data(), bitmapScaledAspect.width() * bitmapScaledAspect.height() * 4));
+        auto [texSmall, _] = builder.Build();
 
+        // Medium
         bitmapScaledAspect = lunadoc->renderToBitmap(
             static_cast<uint32_t>((box[2] - box[0]) * SCALE_FACTOR_MEDIUM),
             static_cast<uint32_t>((box[3] - box[1]) * SCALE_FACTOR_MEDIUM),
             RASTER_BG_COLOR
         );
-        auto medium = Texture::CreateTextureRaw("!!" + name + "_none_medium!!", bitmapScaledAspect.data(), bitmapScaledAspect.width(), bitmapScaledAspect.height());
+        builder.SetName("!!" + name + "_none_medium!!")
+            .SetWidth(bitmapScaledAspect.width())
+            .SetHeight(bitmapScaledAspect.height())
+            .SetData(TextureFormat::RGBA8, convertToSpan(bitmapScaledAspect.data(), bitmapScaledAspect.width() * bitmapScaledAspect.height() * 4));
+        auto [texMedium, __] = builder.Build();
 
+        // Large
         bitmapScaledAspect = lunadoc->renderToBitmap(
             static_cast<uint32_t>((box[2] - box[0]) * SCALE_FACTOR_LARGE),
             static_cast<uint32_t>((box[3] - box[1]) * SCALE_FACTOR_LARGE),
             RASTER_BG_COLOR
         );
-        auto large = Texture::CreateTextureRaw("!!" + name + "_none_large!!", bitmapScaledAspect.data(), bitmapScaledAspect.width(), bitmapScaledAspect.height());
+        builder.SetName("!!" + name + "_none_large!!")
+            .SetWidth(bitmapScaledAspect.width())
+            .SetHeight(bitmapScaledAspect.height())
+            .SetData(TextureFormat::RGBA8, convertToSpan(bitmapScaledAspect.data(), bitmapScaledAspect.width() * bitmapScaledAspect.height() * 4));
+        auto [texLarge, ___] = builder.Build();
 
-        const auto& empty = Texture::Empty();
-        if (small != empty && medium != empty && large != empty) {
-            Textures.try_emplace(name, std::move(small), std::move(medium), std::move(large));
+        if (texSmall && texMedium && texLarge) {
+            Textures.try_emplace(name, std::move(texSmall.value()), std::move(texMedium.value()), std::move(texLarge.value()));
         }
     }
 
     { // Fill the "TexturesPadded"
         auto paddingFunction = [](std::unique_ptr<lunasvg::Document>& lunadoc, const std::vector<float>& box, const std::string& name, std::string_view scaleFactorName, float scaleFactor) {
+            auto convertToSpan = [](uint32_t* ptr, size_t size) -> std::span<std::byte> {
+                return std::span<std::byte>(reinterpret_cast<std::byte*>(ptr), size);
+            };
+
             lunasvg::Bitmap bitmapPadded;
             bitmapPadded = lunadoc->renderToBitmap(
                 static_cast<uint32_t>((box[2] - box[0]) * scaleFactor),
@@ -162,35 +185,47 @@ void SVGPathway::Load(std::string_view key) {
                 }
             }
 
-            auto tex = Texture::CreateTextureRaw("!!" + name + "_padded_" + scaleFactorName.data() + "!!", (unsigned char*) (paddedBuf), dimension, dimension);
+            GPUTextureBuilder builder;
+            builder.SetName("!!" + name + "_padded_" + scaleFactorName.data() + "!!")
+                .SetWidth(static_cast<unsigned>(dimension))
+                .SetHeight(static_cast<unsigned>(dimension))
+                .SetData(TextureFormat::RGBA8, convertToSpan(paddedBuf, width * height * sizeof(uint32_t)));
+            auto [tex, _] = builder.Build();
+
             delete[] paddedBuf;
-            return tex;
+            return std::move(tex);
         };
 
-        auto small = paddingFunction(lunadoc, box, name, "small", SCALE_FACTOR_SMALL);
-        auto medium = paddingFunction(lunadoc, box, name, "medium", SCALE_FACTOR_MEDIUM);
-        auto large = paddingFunction(lunadoc, box, name, "large", SCALE_FACTOR_LARGE);
+        auto smallTex = paddingFunction(lunadoc, box, name, "small", SCALE_FACTOR_SMALL);
+        auto mediumTex = paddingFunction(lunadoc, box, name, "medium", SCALE_FACTOR_MEDIUM);
+        auto largeTex = paddingFunction(lunadoc, box, name, "large", SCALE_FACTOR_LARGE);
 
-        const auto& empty = Texture::Empty();
-        if (small != empty && medium != empty && large != empty) {
-            TexturesPadded.try_emplace(name, std::move(small), std::move(medium), std::move(large));
+        if (smallTex && mediumTex && largeTex) {
+            TexturesPadded.try_emplace(name, std::move(smallTex.value()), std::move(mediumTex.value()), std::move(largeTex.value()));
         }
     }
 
     lunasvg::Bitmap bitmapScaled;
     { // Fill the "TexturesScaled"
         bitmapScaled = lunadoc->renderToBitmap(WIDTH, HEIGHT, RASTER_BG_COLOR);
-        auto tex = Texture::CreateTextureRaw("!!" + name + "_scaled!!", bitmapScaled.data(), bitmapScaled.width(), bitmapScaled.height());
-        if (tex != Texture::Empty()) {
+
+        GPUTextureBuilder builder;
+        builder.SetName("!!" + name + "_scaled!!")
+            .SetWidth(bitmapScaled.width())
+            .SetHeight(bitmapScaled.height())
+            .SetData(TextureFormat::RGBA8, convertToSpan(bitmapScaled.data(), bitmapScaled.width() * bitmapScaled.height() * 4));
+        auto [tex, _] = builder.Build();
+
+        if (tex) {
             /* we cannot copy (we can but why copy?), there is no "size" defined for scaled texture. if there were, it
             wouldn't make sense. "Hey SVG, pls give me A SMALL SCALED texture", what even is a SMALL SCALED texture? there is only one
             scaled texture and it is placed to the beginning of the pack. for future: ref. [1] */
-            TexturesScaled.try_emplace(name, std::move(tex), Texture::Copy(Texture::Empty()), Texture::Copy(Texture::Empty()));
+            TexturesScaled.try_emplace(name, std::move(tex.value()), GPUTexture{}, GPUTexture{});
         }
     }
 }
 
-Texture& SVGPathway::TexturePack::operator[](size_t index) noexcept {
+GPUTexture& SVGPathway::TexturePack::operator[](size_t index) noexcept {
     assert(index >= 0 && index < 3);
     switch(index){
         case 0: return SmallTexture;

@@ -1,45 +1,7 @@
 #pragma once
 
 #include <Engine/Color.hpp>
-
-enum class TextureMinificationMode {
-    Nearest,
-    Linear,
-    NearestMipmapNearest,
-    LinearMipmapNearest,
-    NearestMipmapLinear,
-    LinearMipmapLinear
-};
-
-enum class TextureMagnificationMode {
-    Nearest,
-    Linear
-};
-
-enum class TextureWrappingMode {
-    Repeat,
-    MirroredRepeat,
-    ClampToEdge,
-    MirrorClampToEdge,
-    ClampToBorder
-};
-
-
-enum class TextureCompareMode {
-    CompareRefToTexture,
-    None
-};
-
-enum class TextureCompareFunction {
-    LessEqual,
-    GreaterEqual,
-    Less,
-    Greater,
-    Equal,
-    NotEqual,
-    Always,
-    Never
-};
+#include <Engine/Graphics.hpp>
 
 struct Sampler {
     std::string Name{};

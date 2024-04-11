@@ -21,7 +21,13 @@ void AssetHandle::Reset() { _asset = nullptr; }
 
 bool Assets::IsSceneFile(const FNode& file) { return file.ext == SCENE_EXT; }
 bool Assets::IsScriptFile(const FNode& file) { return file.ext == SCRIPT_EXT; }
-bool Assets::IsTextureFile(const FNode& file) { return file.ext == TEXTURE_EXT_PNG || file.ext == TEXTURE_EXT_JPG || file.ext == TEXTURE_EXT_JPEG; }
+bool Assets::IsTextureFile(const FNode& file) {
+    return file.ext == TEXTURE_EXT_PNG ||
+        file.ext == TEXTURE_EXT_BMP ||
+        file.ext == TEXTURE_EXT_TGA ||
+        file.ext == TEXTURE_EXT_JPG ||
+        file.ext == TEXTURE_EXT_JPEG;
+}
 bool Assets::IsModelFile(const FNode& file) { return file.ext == MODEL_EXT; }
 bool Assets::IsShaderFile(const FNode& file) {
     return  IsVertexShaderFile(file) ||
@@ -396,6 +402,18 @@ void Assets::ReBuildDependencyGraph() noexcept {
     }
 }
 
+template <>
+void Assets::PerformPostDeserializationAction<Texture>(UUID id) noexcept {
+    bridge.GetTextures().Deallocate(id);
+    std::vector<TextureAllocatorMessage> messages = bridge.GetTextures().Allocate(*this, id);
+
+    // Cast-away const. Assets are never created const.
+    const Asset& asset{ database[id] };
+    std::vector<std::any>& errorMessages = const_cast<std::vector<std::any>&>(asset.ErrorMessages());
+    for (auto& message : messages) {
+        errorMessages.emplace_back(std::move(message));
+    }
+}
 template <>
 void Assets::PerformPostDeserializationAction<Shader>(UUID id) noexcept {
     bridge.GetShaders().Deallocate(id);

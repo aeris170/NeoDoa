@@ -8,8 +8,8 @@
 #include <Utility/SimpleSocket.hpp>
 
 #include <Engine/Core.hpp>
-#include <Engine/Texture.hpp>
 #include <Engine/FileNode.hpp>
+#include <Engine/GPUTexture.hpp>
 #include <Engine/FontAwesome.hpp>
 
 #include <Launcher/ProjectData.hpp>
@@ -34,8 +34,8 @@ struct GUI {
 private:
     float delta;
 
-    Texture launcherLogo{ Texture::CreateTexture("launcher_logo", "Images/launcherlogo-64_x_64.png") };
-    Texture launcherLogoVivid{ Texture::CreateTexture("launcher_logo_vivid", "Images/launcherlogovivid-64_x_64.png") };
+    GPUTexture launcherLogo{};
+    GPUTexture launcherLogoVivid{};
 
     ImGuiWindowFlags window_flags{ ImGuiWindowFlags_None };
     ImGuiDockNodeFlags dockspace_flags{ ImGuiDockNodeFlags_None };

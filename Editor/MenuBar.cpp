@@ -1,10 +1,14 @@
-#include <Editor/MenuBar.hpp>
+﻿#include <Editor/MenuBar.hpp>
+
+#include <stb_image.h>
 
 #include <Utility/ConstexprConcat.hpp>
 
 #include <Engine/Core.hpp>
 #include <Engine/Log.hpp>
 #include <Engine/Angel.hpp>
+#include <Engine/Texture.hpp>
+#include <Engine/TextureDeserializer.hpp>
 
 #include <Editor/GUI.hpp>
 #include <Editor/Icons.hpp>
@@ -127,32 +131,50 @@ void MenuBar::RenderHelpSubMenu() noexcept {
 // Inner struct: About Section
 MenuBar::AboutSection::AboutSection(MenuBar& owner) noexcept :
     mb(owner),
-    neodoaBanner(Texture::CreateTexture("!!neodoa_banner!!", "Images/social.png")),
     licences({
-        { "NeoDoa", R"(NeoDoa Public Licence
+        { "NeoDoa", R"(# SOFTWARE LICENSE AGREEMENT
+This Software License Agreement ("Agreement") is made and entered into as of 2024-02-10 ("Effective Date") by and between Doğa Oruç, a private person, having its principal place of business in Türkiye ("Licensor"), and Licensee, either a private person, a registered company, or a partnership, having its principal place of business anywhere ("Licensee").
 
-	> Copyright(C)[2022][Doga Oruc]
+WHEREAS, the Licensor owns certain software that it desires to license to the Licensee;
 
-	> NeoDoa Public Licence
-	> TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+WHEREAS, Licensee desires to use such software under the terms and conditions set forth herein.
 
-	1. Do whatever you like with the original work, just don't be a dick.
+NOW, THEREFORE, in consideration of the mutual promises contained herein and for other good and valuable consideration, the parties agree as follows:
 
-	    Being a dick includes - but is not limited to - the following instances:
+## 1. Definition of Software:
+The term "Software" refers to the **NeoDoa**, including any updates, modifications, or associated documentation provided by the Licensor.
 
-		1a. Outright copyright infringement - Don't just copy this and change the name.
-		1b. Selling the unmodified original with no work done what - so - ever, that's REALLY being a dick.
-		1c. Modifying the original work to contain hidden harmful content. That would make you a PROPER dick.
+## 2. Grant of License:
+Subject to the terms and conditions of this Agreement, the Licensor grants the Licensee a non-exclusive, non-transferable license to use the Software. To apply, reach out to the Licensor.
 
-	2. If you become rich through modifications, related works / services, or supporting the original work,
-	share the love. Only a dick would make loads off this work and not buy the original work's
-	creator(s) a pint.
+## 3. Derivative Works:
+All modifications and derivative works must be submitted as Pull Requests to the [official **NeoDoa** GitHub repository](https://github.com/aeris170/NeoDoa). Without supervision from the Licensor, no modifications or derivative works are allowed.
 
-	3. Software is provided with no warranty. Asking for help won't make you a dick, but asking someone to
-	write your code for you makes you a DONKEY dick. If you happen to solve your problem before any help arrives,
-	you would submit the fix back to regain your status of non-dick.)"},
+## 4. Commercial Use:
+Commercial use is permitted on an application basis. To apply for commercial use, reach out to the Licensor.
+
+## 5. Attribution:
+Licensee is required to provide attribution to Licensor in the form of a fade in/out **NeoDoa** social logo staying on the screen no shorter than 5 seconds (skippable with keypresses) first thing at the start of their program.
+
+## 6. Intellectual Property Rights:
+All intellectual property rights in the Software shall remain the property of the Licensor. The Licensee does not acquire any rights to the Software except for the limited use rights specified in this Agreement.
+
+## 7. Warranty and Liability:
+The Software is provided "as is" without warranty of any kind. Licensor shall not be liable for any damages arising out of or related to the use or inability to use the Software.
+
+## 8. Termination:
+This Agreement shall terminate automatically if the Licensee breaches any of its terms and conditions. Upon termination, Licensee must cease all use of the Software and destroy all copies.
+
+## 9. Governing Law:
+This Agreement shall be governed by and construed under the laws of Türkiye.
+
+IN WITNESS WHEREOF, the parties have executed this Software License Agreement as of the Effective Date.
+
+Licensor: Doğa Oruç
+
+Licensee: Licensee)"},
         { "AngelScript", R"(AngelCode Scripting Library
-	Copyright � 2003 - 2020 Andreas J�nsson
+	Copyright © 2003 - 2020 Andreas Jönsson
 
 	This software is provided 'as-is', without any express or implied warranty.In no event will the authors be
 	held liable for any damages arising from the use of this software.
@@ -340,7 +362,7 @@ MenuBar::AboutSection::AboutSection(MenuBar& owner) noexcept :
 	MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.)" },
         { "GLFW", R"(Copyright (c) 2002-2006 Marcus Geelnard
 
-	Copyright (c) 2006-2019 Camilla L�wy
+	Copyright (c) 2006-2019 Camilla Löwy
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -489,19 +511,6 @@ MenuBar::AboutSection::AboutSection(MenuBar& owner) noexcept :
 	AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
 	ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 	WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.)" },
-        { "TinyFileDialogs", R"(This software is provided 'as-is', without any express or implied
-	warranty.  In no event will the authors be held liable for any damages
-	arising from the use of this software.
-	Permission is granted to anyone to use this software for any purpose,
-	including commercial applications, and to alter it and redistribute it
-	freely, subject to the following restrictions:
-	1. The origin of this software must not be misrepresented; you must not
-	claim that you wrote the original software.  If you use this software
-	in a product, an acknowledgment in the product documentation would be
-	appreciated but is not required.
-	2. Altered source versions must be plainly marked as such, and must not be
-	misrepresented as being the original software.
-	3. This notice may not be removed or altered from any source distribution.)" },
         { "TinyXML2", R"(This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any
 	damages arising from the use of this software.
@@ -546,8 +555,30 @@ MenuBar::AboutSection::AboutSection(MenuBar& owner) noexcept :
 			services; loss of use, data, or profits; or business interruption)
 
 	In the event that YOU, the library user, accept these terms, you are free
-	to use this software free of charge, with or without modifications. Have fun : )" }
-             }) {}
+	to use this software free of charge, with or without modifications. Have fun : )" }}) {
+
+	stbi_set_flip_vertically_on_load(true);
+	int w, h, nrChannels;
+	auto* readPixels = stbi_load("Images/social.png", &w, &h, &nrChannels, STBI_rgb_alpha);
+
+	GPUTextureBuilder builder;
+	builder.SetName("!!neodoa_banner!!");
+	if (readPixels) {
+		std::span pixels{ reinterpret_cast<const std::byte*>(readPixels), w * h * nrChannels * sizeof(stbi_uc) };
+		builder.SetWidth(w)
+			.SetHeight(h)
+			.SetData(TextureFormat::RGBA8, pixels);
+	} else {
+		const Texture& texture = Texture::Missing();
+		builder.SetWidth(texture.Width)
+			.SetHeight(texture.Height)
+			.SetData(texture.Format, texture.PixelData);
+	}
+	auto [tex, _] = builder.Build();
+	neodoaBanner = std::move(tex.value());
+
+	stbi_image_free(readPixels);
+}
 
 void MenuBar::AboutSection::RenderAboutPopup() noexcept {
     GUI& gui = mb.get().gui;
@@ -565,7 +596,7 @@ void MenuBar::AboutSection::RenderAboutPopup() noexcept {
         ImGui::PushFont(gui.GetFont());
         ImGui::TextColored({ 0.7f, 0.7f, 0.7f, 1.0f }, PRODUCT_NAME);
         ImGui::PopFont();
-        ImGui::Image(neodoaBanner.TextureIDRaw(), { ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().x / 2 }, { 0, 1 }, { 1, 0 });
+        ImGui::Image(reinterpret_cast<void*>(neodoaBanner.GLObjectID), { ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().x / 2 }, { 0, 1 }, { 1, 0 });
         ImGui::Text(PRODUCT_DESCRIPTION);
         ImGui::Dummy({ 0, 20 });
         if (ImGui::Button(LIBS_BUTTON_TEXT, { ImGui::GetContentRegionAvail().x, 30 })) {

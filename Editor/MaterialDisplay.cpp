@@ -13,15 +13,12 @@
 #include <Editor/ComponentWidgets.hpp>
 
 static void cb(const ImDrawList* parent_list, const ImDrawCmd* cmd) {
-    static GLuint sampler;
-    if (sampler == 0) {
-        glGenSamplers(1, &sampler);
-        glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glSamplerParameteri(sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-        glSamplerParameteri(sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    }
-    glBindSampler(0, sampler);
+    static GPUSampler sampler = GPUSamplerBuilder()
+        .SetMinificationFilter(TextureMinificationMode::Nearest)
+        .SetMagnificationFilter(TextureMagnificationMode::Nearest)
+        .SetWrapS(TextureWrappingMode::ClampToBorder)
+        .SetWrapT(TextureWrappingMode::ClampToBorder).Build().first.value();
+    glBindSampler(0, sampler.GLObjectID); // TODO get rid of this "low-level" gl call!!
 }
 
 MaterialDisplay::MaterialDisplay(Observer& observer) noexcept :
@@ -338,22 +335,26 @@ bool MaterialDisplay::RenderSingleUniform(Material::Uniforms& uniforms, const Un
 
         { // Texture
             const Texture* texture{ nullptr };
+            const GPUTexture* gpuTexture{ nullptr };
             AssetHandle handle = assets->FindAsset(value.textureUUID);
             if (handle && handle->IsTexture()) {
                 texture = &handle->DataAs<Texture>();
+                gpuTexture = assets->GPUBridge().GetTextures().Query(handle->ID());
+                assert(gpuTexture);
             } else {
                 texture = missingTexture;
+                gpuTexture = &assets->GPUBridge().GetTextures().Missing();
             }
 
             ImGui::GetWindowDrawList()->AddCallback(cb, nullptr);
-            if (Image2DButtonWidget(uniformValue.Name.c_str(), texture->TextureIDRaw())) {
-                textureView.Show(*texture);
+            if (Image2DButtonWidget(uniformValue.Name.c_str(), reinterpret_cast<void*>(gpuTexture->GLObjectID))) {
+                textureView.Show(*texture, *gpuTexture);
             }
             ImGui::GetWindowDrawList()->AddCallback(ImDrawCallback_ResetRenderState, nullptr);
 
             if (ImGui::BeginPopupContextItem(nullptr, ImGuiPopupFlags_MouseButtonRight)) {
                 if (ImGui::Button(cat(ObserverIcons::MaterialDisplayIcons::ContextMenu::RESET_UNIFORM_ICON, "Reset"))) {
-                    uniforms.Set(uniform.Location, uniform.Name, UniformSampler2D{ UUID::Empty(), value.samplerUUID });
+                    uniforms.Set(uniform.Location, uniform.Name, UniformSampler2D{ UUID::Empty(), value.samplerUUID }); // TODO make view update on texture change!!
                     rv = true;
                     ImGui::CloseCurrentPopup();
                 }
@@ -435,7 +436,7 @@ bool MaterialDisplay::RenderSingleUniform(Material::Uniforms& uniforms, const Un
 
 void MaterialDisplay::TextureView::Render() noexcept {
     if (!visible) { return; }
-    ImGui::Begin(std::format("Texture View - {}", texture->Name()).c_str(), &visible);
+    ImGui::Begin(std::format("Texture View - {}", texture->Name).c_str(), &visible);
     /* channels */
     static bool r{ true }, g{ true }, b{ true }, a{ true };
     /* inspect params */
@@ -448,8 +449,8 @@ void MaterialDisplay::TextureView::Render() noexcept {
     windowWidth = windowWidth - ImGui::GetStyle().FramePadding.x;
     windowHeight = windowHeight - totalBottomPadding;
 
-    float w = static_cast<float>(texture->Width());
-    float h = static_cast<float>(texture->Height());
+    float w = static_cast<float>(texture->Width);
+    float h = static_cast<float>(texture->Height);
     float aspect = w / h;
 
     float maxWidth = windowWidth;
@@ -465,7 +466,7 @@ void MaterialDisplay::TextureView::Render() noexcept {
     }
 
     ImGui::GetWindowDrawList()->AddCallback(cb, nullptr);
-    ImGui::Image(texture->TextureIDRaw(), { w, h }, { 0, 1 }, { 1, 0 }, { (float) r, (float) g, (float) b, (float) a }, { 1, 1, 0, 1 });
+    ImGui::Image(reinterpret_cast<void*>(gpuTexture->GLObjectID), { w, h }, { 0, 1 }, { 1, 0 }, { (float) r, (float) g, (float) b, (float) a }, { 1, 1, 0, 1 });
     ImGui::GetWindowDrawList()->AddCallback(ImDrawCallback_ResetRenderState, nullptr);
 
     if (drawInspector) {
@@ -476,9 +477,9 @@ void MaterialDisplay::TextureView::Render() noexcept {
             mouseUVCoord.y >= 0.0f &&
             mouseUVCoord.x <= 1.0f &&
             mouseUVCoord.y <= 1.0f) {
-            float w = static_cast<float>(texture->Width());
-            float h = static_cast<float>(texture->Height());
-            auto pixels = reinterpret_cast<const unsigned char*>(Texture::GetByteBufferOf(*texture));
+            float w = static_cast<float>(texture->Width);
+            float h = static_cast<float>(texture->Height);
+            auto pixels = reinterpret_cast<const unsigned char*>(texture->PixelData.data());
             ImageInspect::inspect(static_cast<int>(w), static_cast<int>(h), pixels, mouseUVCoord, { w, h }, drawNormals, drawHistogram);
         }
     }
@@ -495,8 +496,9 @@ void MaterialDisplay::TextureView::Render() noexcept {
     ImGui::SameLine(); ImGui::Text("Histogram:");  ImGui::SameLine(); ImGui::Checkbox("##histogram", &drawHistogram);
     ImGui::End();
 }
-void MaterialDisplay::TextureView::Show(const Texture& texture) noexcept {
+void MaterialDisplay::TextureView::Show(const Texture& texture, const GPUTexture& gpuTexture) noexcept {
     visible = true;
     this->texture = &texture;
+    this->gpuTexture = &gpuTexture;
 }
 void MaterialDisplay::TextureView::Hide() noexcept { visible = false; }

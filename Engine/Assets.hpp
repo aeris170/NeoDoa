@@ -44,6 +44,8 @@ struct Assets : ObserverPattern::Observer {
     inline static std::string SCENE_EXT{ ".scn" };
     inline static std::string SCRIPT_EXT{ ".scrpt" };
     inline static std::string TEXTURE_EXT_PNG{ ".png" };
+    inline static std::string TEXTURE_EXT_BMP{ ".bmp" };
+    inline static std::string TEXTURE_EXT_TGA{ ".tga" };
     inline static std::string TEXTURE_EXT_JPG{ ".jpg" };
     inline static std::string TEXTURE_EXT_JPEG{ ".jpeg" };
     inline static std::string MODEL_EXT{ ".mdl" };
@@ -178,6 +180,8 @@ private:
     void PerformPostDeserializationAction(UUID id) noexcept {}
 };
 
+template <>
+void Assets::PerformPostDeserializationAction<Texture>(UUID id) noexcept;
 template <>
 void Assets::PerformPostDeserializationAction<Shader>(UUID id) noexcept;
 template <>

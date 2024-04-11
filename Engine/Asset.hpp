@@ -9,15 +9,16 @@
 #include <Engine/UUID.hpp>
 #include <Engine/FileNode.hpp>
 #include <Engine/Scene.hpp>
+#include <Engine/Component.hpp>
+#include <Engine/Sampler.hpp>
+#include <Engine/Texture.hpp>
 #include <Engine/Shader.hpp>
 #include <Engine/Material.hpp>
-#include <Engine/Component.hpp>
 //#include "Script.hpp"
-#include "Texture.hpp"
 #include "Model.hpp"
 
 
-#define ASSET_TYPE Scene, Component, Shader, ShaderProgram, Material, Texture, Sampler, Model
+#define ASSET_TYPE Scene, Component, Sampler, Texture, Shader, ShaderProgram, Material, Model
 template<typename T>
 concept AssetType = concepts::IsAnyOf<T, ASSET_TYPE> && concepts::Copyable<T> && concepts::Serializable<T> && std::movable<T>;
 using AssetData = std::variant<std::monostate, ASSET_TYPE>;
@@ -57,13 +58,13 @@ struct Asset final : ObserverPattern::Observable {
 
     bool IsScene() const;
     bool IsComponentDefinition() const;
-    bool IsScript() const;
+    bool IsSampler() const;
     bool IsTexture() const;
-    bool IsModel() const;
     bool IsShader() const;
     bool IsShaderProgram() const;
     bool IsMaterial() const;
-    bool IsSampler() const;
+    bool IsScript() const;
+    bool IsModel() const;
 
     bool HasInfoMessages() const;
     const std::vector<std::any>& InfoMessages() const;

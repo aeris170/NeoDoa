@@ -7,11 +7,14 @@
 
 #include <imgui.h>
 #include <imgui_internal.h>
+#include <stb_image.h>
 
 #include <Submodules/detector/detector.hpp>
 
 #include <Utility/StringTransform.hpp>
 #include <Utility/Trim.hpp>
+
+#include <Engine/TextureDeserializer.hpp>
 
 #include <Launcher/FileDialog.hpp>
 
@@ -25,6 +28,48 @@ GUI::GUI(const CorePtr& core) noexcept :
     FileDialog::Initialize();
 
     Window->SetTitle("NeoDoa Launcher");
+
+    stbi_set_flip_vertically_on_load(true);
+    int w, h, nrChannels;
+    auto* readPixels = stbi_load("Images/launcherlogo-64_x_64.png", &w, &h, &nrChannels, STBI_rgb_alpha);
+
+    GPUTextureBuilder builder;
+    builder.SetName("launcher_logo");
+    if (readPixels) {
+        std::span pixels{ reinterpret_cast<const std::byte*>(readPixels), w * h * nrChannels * sizeof(stbi_uc) };
+        builder.SetWidth(w)
+            .SetHeight(h)
+            .SetData(TextureFormat::RGBA8, pixels);
+    } else {
+        const Texture& texture = Texture::Missing();
+        builder.SetWidth(texture.Width)
+            .SetHeight(texture.Height)
+            .SetData(texture.Format, texture.PixelData);
+    }
+    auto [tex, _] = builder.Build();
+    launcherLogo = std::move(tex.value());
+
+    stbi_image_free(readPixels);
+
+    w, h, nrChannels;
+    readPixels = stbi_load("Images/launcherlogovivid-64_x_64.png", &w, &h, &nrChannels, STBI_rgb_alpha);
+
+    builder.SetName("launcher_logo_vivid");
+    if (readPixels) {
+        std::span pixels{ reinterpret_cast<const std::byte*>(readPixels), w * h * nrChannels * sizeof(stbi_uc) };
+        builder.SetWidth(w)
+            .SetHeight(h)
+            .SetData(TextureFormat::RGBA8, pixels);
+    } else {
+        const Texture& texture = Texture::Missing();
+        builder.SetWidth(texture.Width)
+            .SetHeight(texture.Height)
+            .SetData(texture.Format, texture.PixelData);
+    }
+    auto [texVivid, __] = builder.Build();
+    launcherLogoVivid = std::move(texVivid.value());
+
+    stbi_image_free(readPixels);
 
     projectDataFile = std::make_unique<FNode>(FNodeCreationParams {
         .name = "projects"
@@ -182,9 +227,9 @@ void GUI::RenderCustomTitleBar() noexcept {
     p0 = p0 + TitleBarInternalPadding;
     ImVec2 p2 = p0 + TitleBarLogoSize;
     if (ImGui::IsMouseHoveringRect(p0, p1) || ImGui::IsMouseHoveringRect(p0, p2)) {
-        logo = launcherLogoVivid.TextureIDRaw();
+        logo = reinterpret_cast<void*>(launcherLogoVivid.GLObjectID);
     } else {
-        logo = launcherLogo.TextureIDRaw();
+        logo = reinterpret_cast<void*>(launcherLogo.GLObjectID);
     }
     ImGui::Image(logo, TitleBarLogoSize);
 

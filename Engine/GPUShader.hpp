@@ -4,8 +4,6 @@
 #include <utility>
 #include <optional>
 
-#include <GL/glew.h>
-
 #include <Engine/Graphics.hpp>
 
 // Shader
@@ -25,12 +23,7 @@ struct GPUShader {
     ShaderType Type{};
     std::string Name{};
 
-    GPUShader() noexcept = default;
-    ~GPUShader() noexcept;
-    GPUShader(const GPUShader&) = delete;
-    GPUShader(GPUShader&& other) noexcept;
-    GPUShader& operator=(const GPUShader&) = delete;
-    GPUShader& operator=(GPUShader&& other) noexcept;
+    ND_GRAPHICS_MOVE_ONLY_RESOURCE(GPUShader);
 };
 
 struct GPUShaderBuilder {
@@ -48,12 +41,7 @@ private:
     std::string name{};
     std::string sourceCode{};
 public:
-    GPUShaderBuilder() = default;
-    ~GPUShaderBuilder() = default;
-    GPUShaderBuilder(const GPUShaderBuilder&) = delete;
-    GPUShaderBuilder& operator=(const GPUShaderBuilder&) = delete;
-    GPUShaderBuilder(GPUShaderBuilder&&) = delete;
-    GPUShaderBuilder& operator=(GPUShaderBuilder&&) = delete;
+    ND_GRAPHICS_BUILDER_RULE_OF_0(GPUShaderBuilder);
 };
 
 // Shader Program
@@ -73,12 +61,7 @@ struct GPUShaderProgram {
 
     std::vector<Uniform> Uniforms{};
 
-    GPUShaderProgram() noexcept = default;
-    ~GPUShaderProgram() noexcept;
-    GPUShaderProgram(const GPUShaderProgram&) = delete;
-    GPUShaderProgram(GPUShaderProgram&& other) noexcept;
-    GPUShaderProgram& operator=(const GPUShaderProgram&) = delete;
-    GPUShaderProgram& operator=(GPUShaderProgram&& other) noexcept;
+    ND_GRAPHICS_MOVE_ONLY_RESOURCE(GPUShaderProgram);
 
     int GetUniformLocation(std::string_view name) const noexcept;
 };
@@ -109,10 +92,5 @@ private:
     GPUShader* fragShader{};
     GPUShader* compShader{};
 public:
-    GPUShaderProgramBuilder() = default;
-    ~GPUShaderProgramBuilder() = default;
-    GPUShaderProgramBuilder(const GPUShaderProgramBuilder&) = delete;
-    GPUShaderProgramBuilder& operator=(const GPUShaderProgramBuilder&) = delete;
-    GPUShaderProgramBuilder(GPUShaderProgramBuilder&&) = delete;
-    GPUShaderProgramBuilder& operator=(GPUShaderProgramBuilder&&) = delete;
+    ND_GRAPHICS_BUILDER_RULE_OF_0(GPUShaderProgramBuilder);
 };

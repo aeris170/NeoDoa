@@ -6,15 +6,15 @@
 #include <Engine/SceneSerializer.hpp>
 #include <Engine/SceneDeserializer.hpp>
 #include <Engine/ComponentDeserializer.hpp>
+#include <Engine/SamplerSerializer.hpp>
+#include <Engine/SamplerDeserializer.hpp>
+#include <Engine/TextureSerializer.hpp>
+#include <Engine/TextureDeserializer.hpp>
 #include <Engine/ShaderDeserializer.hpp>
 #include <Engine/ShaderProgramSerializer.hpp>
 #include <Engine/ShaderProgramDeserializer.hpp>
 #include <Engine/MaterialSerializer.hpp>
 #include <Engine/MaterialDeserializer.hpp>
-#include <Engine/SamplerSerializer.hpp>
-#include <Engine/SamplerDeserializer.hpp>
-#include <Engine/TextureSerializer.hpp>
-#include <Engine/TextureDeserializer.hpp>
 
 Asset::Asset() noexcept :
     Asset(UUID::Empty(), nullptr) {}
@@ -61,9 +61,24 @@ void Asset::Serialize() {
         doc.SaveFile(file->AbsolutePath().string().c_str());
         return;
     }
+    if (IsSampler()) {
+        std::string serializedData;
+        serializedData = SerializeSampler(DataAs<Sampler>());
+        file->ModifyContent(std::move(serializedData));
+        file->DisposeContent();
+    }
     if (IsTexture()) {
-        SerializeTexture(DataAs<Texture>());
-        // TODO WRITE TO FILE
+        EncodedTextureData serializedData;
+        serializedData = SerializeTexture(DataAs<Texture>(), ExtToEncoding(file->Extension()));
+
+        std::string stringified;
+        stringified.reserve(serializedData.EncodedData.size());
+        for (const std::byte b : serializedData.EncodedData) {
+            stringified.push_back(static_cast<char>(b));
+        }
+
+        file->ModifyContent(std::move(stringified));
+        file->DisposeContent();
     }
     /*
     * TODO others
@@ -77,12 +92,6 @@ void Asset::Serialize() {
     if (IsMaterial()) {
         std::string serializedData;
         serializedData = SerializeMaterial(DataAs<Material>());
-        file->ModifyContent(std::move(serializedData));
-        file->DisposeContent();
-    }
-    if (IsSampler()) {
-        std::string serializedData;
-        serializedData = SerializeSampler(DataAs<Sampler>());
         file->ModifyContent(std::move(serializedData));
         file->DisposeContent();
     }
@@ -110,6 +119,24 @@ void Asset::Deserialize() {
             }
         }
         data = std::move(result.deserializedComponent);
+    }
+    if (IsSampler()) {
+        SamplerDeserializationResult result = DeserializeSampler(*file);
+        if (result.erred) {
+            for (auto& error : result.errors) {
+                errorList.emplace_back(std::move(error));
+            }
+        }
+        data = std::move(result.deserializedSampler);
+    }
+    if (IsTexture()) {
+        TextureDeserializationResult result = DeserializeTexture(*file);
+        if (result.erred) {
+            for (auto& error : result.errors) {
+                errorList.emplace_back(std::move(error));
+            }
+        }
+        data = std::move(result.deserializedTexture);
     }
     if (IsShader()) {
         ShaderDeserializationResult result;
@@ -154,18 +181,6 @@ void Asset::Deserialize() {
         }
         data = std::move(result.deserializedMaterial);
     }
-    if (IsSampler()) {
-        SamplerDeserializationResult result = DeserializeSampler(*file);
-        if (result.erred) {
-            for (auto& error : result.errors) {
-                errorList.emplace_back(std::move(error));
-            }
-        }
-        data = std::move(result.deserializedSampler);
-    }
-    if (IsTexture()) {
-        data = DeserializeTexture(*file);
-    }
     /*
     * TODO others
     */
@@ -192,13 +207,13 @@ UUID Asset::Instantiate() const {
 
 bool Asset::IsScene() const { return Assets::IsSceneFile(*file); }
 bool Asset::IsComponentDefinition() const { return Assets::IsComponentDefinitionFile(*file); }
-bool Asset::IsScript() const { return Assets::IsScriptFile(*file); }
+bool Asset::IsSampler() const { return Assets::IsSamplerFile(*file); }
 bool Asset::IsTexture() const { return Assets::IsTextureFile(*file); }
-bool Asset::IsModel() const { return Assets::IsModelFile(*file); }
 bool Asset::IsShader() const { return Assets::IsShaderFile(*file); }
 bool Asset::IsShaderProgram() const { return Assets::IsShaderProgramFile(*file); }
 bool Asset::IsMaterial() const { return Assets::IsMaterialFile(*file); }
-bool Asset::IsSampler() const { return Assets::IsSamplerFile(*file); }
+bool Asset::IsScript() const { return Assets::IsScriptFile(*file); }
+bool Asset::IsModel() const { return Assets::IsModelFile(*file); }
 
 bool Asset::HasInfoMessages() const { return !infoList.empty(); }
 const std::vector<std::any>& Asset::InfoMessages() const { return infoList; }

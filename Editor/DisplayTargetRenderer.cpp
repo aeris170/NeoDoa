@@ -455,9 +455,12 @@ void DisplayTargetRenderer::RenderTextureView(AssetHandle h) {
     windowHeight = windowHeight - totalBottomPadding;
 
     if (h->HasDeserializedData()) {
-        const auto& tex = h->DataAs<Texture>();
-        float w = static_cast<float>(tex.Width());
-        float h = static_cast<float>(tex.Height());
+        const GPUTexture* gpuTex = observer.get().gui.get().CORE->GetAssetGPUBridge()->GetTextures().Query(h->ID());
+        assert(gpuTex);
+        const Texture& tex = h->DataAs<Texture>();
+
+        float w = static_cast<float>(tex.Width);
+        float h = static_cast<float>(tex.Height);
         float aspect = w / h;
 
         float maxWidth = windowWidth;
@@ -472,7 +475,7 @@ void DisplayTargetRenderer::RenderTextureView(AssetHandle h) {
             w = h * aspect;
         }
 
-        ImGui::Image(tex.TextureIDRaw(), { w, h }, { 0, 1 }, { 1, 0 }, { (float) r, (float) g, (float) b, (float) a }, { 1, 1, 0, 1 });
+        ImGui::Image(reinterpret_cast<void*>(gpuTex->GLObjectID), { w, h }, { 0, 1 }, { 1, 0 }, { (float) r, (float) g, (float) b, (float) a }, { 1, 1, 0, 1 });
 
         if (drawInspector) {
             ImRect rc = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
@@ -482,9 +485,9 @@ void DisplayTargetRenderer::RenderTextureView(AssetHandle h) {
                 mouseUVCoord.y >= 0.0f &&
                 mouseUVCoord.x <= 1.0f &&
                 mouseUVCoord.y <= 1.0f) {
-                float w = static_cast<float>(tex.Width());
-                float h = static_cast<float>(tex.Height());
-                auto pixels = reinterpret_cast<const unsigned char*>(Texture::GetByteBufferOf(tex));
+                float w = static_cast<float>(tex.Width);
+                float h = static_cast<float>(tex.Height);
+                auto pixels = reinterpret_cast<const unsigned char*>(tex.PixelData.data());
                 ImageInspect::inspect(static_cast<int>(w), static_cast<int>(h), pixels, mouseUVCoord, { w, h }, drawNormals, drawHistogram);
             }
         }

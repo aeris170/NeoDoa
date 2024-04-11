@@ -127,6 +127,8 @@ set(GROUP_LIST
     "Graphics/AssetBridge.hpp"
     "Graphics/GPUShader.cpp"
     "Graphics/GPUShader.hpp"
+    "Graphics/GPUTexture.cpp"
+    "Graphics/GPUTexture.hpp"
     "Graphics/Graphics.cpp"
     "Graphics/Graphics.hpp"
 	
