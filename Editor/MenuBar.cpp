@@ -596,7 +596,7 @@ void MenuBar::AboutSection::RenderAboutPopup() noexcept {
         ImGui::PushFont(gui.GetFont());
         ImGui::TextColored({ 0.7f, 0.7f, 0.7f, 1.0f }, PRODUCT_NAME);
         ImGui::PopFont();
-        ImGui::Image(reinterpret_cast<void*>(neodoaBanner.GLObjectID), { ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().x / 2 }, { 0, 1 }, { 1, 0 });
+        ImGui::Image(neodoaBanner, { ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().x / 2 }, { 0, 1 }, { 1, 0 });
         ImGui::Text(PRODUCT_DESCRIPTION);
         ImGui::Dummy({ 0, 20 });
         if (ImGui::Button(LIBS_BUTTON_TEXT, { ImGui::GetContentRegionAvail().x, 30 })) {

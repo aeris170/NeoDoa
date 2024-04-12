@@ -347,7 +347,7 @@ bool MaterialDisplay::RenderSingleUniform(Material::Uniforms& uniforms, const Un
             }
 
             ImGui::GetWindowDrawList()->AddCallback(cb, nullptr);
-            if (Image2DButtonWidget(uniformValue.Name.c_str(), reinterpret_cast<void*>(gpuTexture->GLObjectID))) {
+            if (Image2DButtonWidget(uniformValue.Name.c_str(), *gpuTexture)) {
                 textureView.Show(*texture, *gpuTexture);
             }
             ImGui::GetWindowDrawList()->AddCallback(ImDrawCallback_ResetRenderState, nullptr);
@@ -466,7 +466,7 @@ void MaterialDisplay::TextureView::Render() noexcept {
     }
 
     ImGui::GetWindowDrawList()->AddCallback(cb, nullptr);
-    ImGui::Image(reinterpret_cast<void*>(gpuTexture->GLObjectID), { w, h }, { 0, 1 }, { 1, 0 }, { (float) r, (float) g, (float) b, (float) a }, { 1, 1, 0, 1 });
+    ImGui::Image(*gpuTexture, { w, h }, { 0, 1 }, { 1, 0 }, { (float) r, (float) g, (float) b, (float) a }, { 1, 1, 0, 1 });
     ImGui::GetWindowDrawList()->AddCallback(ImDrawCallback_ResetRenderState, nullptr);
 
     if (drawInspector) {

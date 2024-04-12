@@ -319,18 +319,18 @@ ImGuiIO* GUI::IO() const { return io; }
 ImFont* GUI::GetFont() const { return font; }
 ImFont* GUI::GetFontBold() const { return fontBold; }
 
-void* GUI::GetFolderIcon(TextureSize size) const                       { return reinterpret_cast<void*>(SVGPathway::Get(FOLDER_ICON_KEY,           TextureStyle::PADDED, size).GLObjectID); }
-void* GUI::GetProjectIcon(TextureSize size) const                      { return reinterpret_cast<void*>(SVGPathway::Get(PROJECT_ICON_KEY,          TextureStyle::PADDED, size).GLObjectID); }
-void* GUI::GetSceneIcon(TextureSize size) const                        { return reinterpret_cast<void*>(SVGPathway::Get(SCENE_ICON_KEY,            TextureStyle::PADDED, size).GLObjectID); }
-void* GUI::GetComponentIcon(TextureSize size) const                    { return reinterpret_cast<void*>(SVGPathway::Get(COMPONENT_ICON_KEY,        TextureStyle::PADDED, size).GLObjectID); }
-void* GUI::GetVertexShaderIcon(TextureSize size) const                 { return reinterpret_cast<void*>(SVGPathway::Get(VERTEX_SHADER_ICON_KEY,    TextureStyle::PADDED, size).GLObjectID); }
-void* GUI::GetTessellationControlShaderIcon(TextureSize size) const    { return reinterpret_cast<void*>(SVGPathway::Get(TESS_CTRL_SHADER_ICON_KEY, TextureStyle::PADDED, size).GLObjectID); }
-void* GUI::GetTessellationEvaluationShaderIcon(TextureSize size) const { return reinterpret_cast<void*>(SVGPathway::Get(TESS_EVAL_SHADER_ICON_KEY, TextureStyle::PADDED, size).GLObjectID); }
-void* GUI::GetGeometryShaderIcon(TextureSize size) const               { return reinterpret_cast<void*>(SVGPathway::Get(GEOMETRY_SHADER_ICON_KEY,  TextureStyle::PADDED, size).GLObjectID); }
-void* GUI::GetFragmentShaderIcon(TextureSize size) const               { return reinterpret_cast<void*>(SVGPathway::Get(FRAGMENT_SHADER_ICON_KEY,  TextureStyle::PADDED, size).GLObjectID); }
-void* GUI::GetComputeShaderIcon(TextureSize size) const                { return reinterpret_cast<void*>(SVGPathway::Get(COMPUTE_SHADER_ICON_KEY,   TextureStyle::PADDED, size).GLObjectID); }
-void* GUI::GetFileIcon(TextureSize size) const                         { return reinterpret_cast<void*>(SVGPathway::Get(FILE_ICON_KEY,             TextureStyle::PADDED, size).GLObjectID); }
-void* GUI::GetBackArrowIcon(TextureSize size) const                    { return reinterpret_cast<void*>(SVGPathway::Get(BACK_ARROW_ICON_KEY,       TextureStyle::PADDED, size).GLObjectID); }
+void* GUI::GetFolderIcon(TextureSize size) const                       { return SVGPathway::Get(FOLDER_ICON_KEY,           TextureStyle::PADDED, size); }
+void* GUI::GetProjectIcon(TextureSize size) const                      { return SVGPathway::Get(PROJECT_ICON_KEY,          TextureStyle::PADDED, size); }
+void* GUI::GetSceneIcon(TextureSize size) const                        { return SVGPathway::Get(SCENE_ICON_KEY,            TextureStyle::PADDED, size); }
+void* GUI::GetComponentIcon(TextureSize size) const                    { return SVGPathway::Get(COMPONENT_ICON_KEY,        TextureStyle::PADDED, size); }
+void* GUI::GetVertexShaderIcon(TextureSize size) const                 { return SVGPathway::Get(VERTEX_SHADER_ICON_KEY,    TextureStyle::PADDED, size); }
+void* GUI::GetTessellationControlShaderIcon(TextureSize size) const    { return SVGPathway::Get(TESS_CTRL_SHADER_ICON_KEY, TextureStyle::PADDED, size); }
+void* GUI::GetTessellationEvaluationShaderIcon(TextureSize size) const { return SVGPathway::Get(TESS_EVAL_SHADER_ICON_KEY, TextureStyle::PADDED, size); }
+void* GUI::GetGeometryShaderIcon(TextureSize size) const               { return SVGPathway::Get(GEOMETRY_SHADER_ICON_KEY,  TextureStyle::PADDED, size); }
+void* GUI::GetFragmentShaderIcon(TextureSize size) const               { return SVGPathway::Get(FRAGMENT_SHADER_ICON_KEY,  TextureStyle::PADDED, size); }
+void* GUI::GetComputeShaderIcon(TextureSize size) const                { return SVGPathway::Get(COMPUTE_SHADER_ICON_KEY,   TextureStyle::PADDED, size); }
+void* GUI::GetFileIcon(TextureSize size) const                         { return SVGPathway::Get(FILE_ICON_KEY,             TextureStyle::PADDED, size); }
+void* GUI::GetBackArrowIcon(TextureSize size) const                    { return SVGPathway::Get(BACK_ARROW_ICON_KEY,       TextureStyle::PADDED, size); }
 
 void* GUI::FindIconForFileType(const FNode& file, TextureSize size) const {
     assert(HasOpenProject());

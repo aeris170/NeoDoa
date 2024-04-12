@@ -227,9 +227,9 @@ void GUI::RenderCustomTitleBar() noexcept {
     p0 = p0 + TitleBarInternalPadding;
     ImVec2 p2 = p0 + TitleBarLogoSize;
     if (ImGui::IsMouseHoveringRect(p0, p1) || ImGui::IsMouseHoveringRect(p0, p2)) {
-        logo = reinterpret_cast<void*>(launcherLogoVivid.GLObjectID);
+        logo = launcherLogoVivid;
     } else {
-        logo = reinterpret_cast<void*>(launcherLogo.GLObjectID);
+        logo = launcherLogo;
     }
     ImGui::Image(logo, TitleBarLogoSize);
 

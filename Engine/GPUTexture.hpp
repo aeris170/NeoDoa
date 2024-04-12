@@ -68,6 +68,8 @@ struct GPUTexture {
     TextureFormat Format{};
 
     ND_GRAPHICS_MOVE_ONLY_RESOURCE(GPUTexture);
+
+    operator void*() const { return reinterpret_cast<void*>(GLObjectID); }
 };
 struct GPUTextureBuilder {
     GPUTextureBuilder& SetName(std::string_view name) noexcept;
