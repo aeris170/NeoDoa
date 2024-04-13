@@ -19,16 +19,17 @@ bool AssetHandle::HasValue() const { return _asset != nullptr; }
 Asset& AssetHandle::Value() const { return *_asset; }
 void AssetHandle::Reset() { _asset = nullptr; }
 
-bool Assets::IsSceneFile(const FNode& file) { return file.ext == SCENE_EXT; }
-bool Assets::IsScriptFile(const FNode& file) { return file.ext == SCRIPT_EXT; }
+bool Assets::IsProjectFile(const FNode& file) noexcept { return file.ext == ProjectExtension; }
+bool Assets::IsSceneFile(const FNode& file) { return file.ext == SceneExtension; }
+bool Assets::IsComponentDefinitionFile(const FNode& file) { return file.ext == ComponentDefinitionExtension; }
+bool Assets::IsSamplerFile(const FNode& file) { return file.ext == SamplerExtension; }
 bool Assets::IsTextureFile(const FNode& file) {
-    return file.ext == TEXTURE_EXT_PNG ||
-        file.ext == TEXTURE_EXT_BMP ||
-        file.ext == TEXTURE_EXT_TGA ||
-        file.ext == TEXTURE_EXT_JPG ||
-        file.ext == TEXTURE_EXT_JPEG;
+    return file.ext == TextureExtensionPNG ||
+        file.ext == TextureExtensionBMP ||
+        file.ext == TextureExtensionTGA ||
+        file.ext == TextureExtensionJPG ||
+        file.ext == TextureExtensionJPEG;
 }
-bool Assets::IsModelFile(const FNode& file) { return file.ext == MODEL_EXT; }
 bool Assets::IsShaderFile(const FNode& file) {
     return  IsVertexShaderFile(file) ||
             IsTessellationControlShaderFile(file) ||
@@ -37,16 +38,16 @@ bool Assets::IsShaderFile(const FNode& file) {
             IsFragmentShaderFile(file) ||
             IsComputeShaderFile(file);
 }
-bool Assets::IsVertexShaderFile(const FNode& file) { return file.ext == VERTEX_SHADER_EXT; }
-bool Assets::IsTessellationControlShaderFile(const FNode& file) { return file.ext == TESS_CTRL_SHADER_EXT; }
-bool Assets::IsTessellationEvaluationShaderFile(const FNode& file) { return file.ext == TESS_EVAL_SHADER_EXT; }
-bool Assets::IsGeometryShaderFile(const FNode& file) { return file.ext == GEOMETRY_SHADER_EXT; }
-bool Assets::IsFragmentShaderFile(const FNode& file) { return file.ext == FRAGMENT_SHADER_EXT; }
-bool Assets::IsComputeShaderFile(const FNode & file) { return file.ext == COMPUTE_SHADER_EXT; }
-bool Assets::IsShaderProgramFile(const FNode& file) { return file.ext == SHADER_PROGRAM_EXT; }
-bool Assets::IsMaterialFile(const FNode& file) { return file.ext == MATERIAL_EXT; }
-bool Assets::IsSamplerFile(const FNode& file) { return file.ext == SAMPLER_EXT; }
-bool Assets::IsComponentDefinitionFile(const FNode& file) { return file.ext == COMP_EXT; }
+bool Assets::IsVertexShaderFile(const FNode& file) { return file.ext == VertexShaderExtension; }
+bool Assets::IsTessellationControlShaderFile(const FNode& file) { return file.ext == TessellationControlShaderExtension; }
+bool Assets::IsTessellationEvaluationShaderFile(const FNode& file) { return file.ext == TessellationEvaluationShaderExtension; }
+bool Assets::IsGeometryShaderFile(const FNode& file) { return file.ext == GeometryShaderExtension; }
+bool Assets::IsFragmentShaderFile(const FNode& file) { return file.ext == FragmentShaderExtension; }
+bool Assets::IsComputeShaderFile(const FNode & file) { return file.ext == ComputeShaderExtension; }
+bool Assets::IsShaderProgramFile(const FNode& file) { return file.ext == ShaderProgramExtension; }
+bool Assets::IsMaterialFile(const FNode& file) { return file.ext == MaterialExtension; }
+bool Assets::IsScriptFile(const FNode& file) { return file.ext == SCRIPT_EXT; }
+bool Assets::IsModelFile(const FNode& file) { return file.ext == MODEL_EXT; }
 
 Assets::Assets(const Project& project, AssetGPUBridge& bridge) noexcept :
     _root({ &project, nullptr, "", "", "", true }),
@@ -231,13 +232,13 @@ AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
         * Step 8: Separate imported asset to its own subcategory (and put it into allAssets list)
         * Step 9: Set ownself as imported asset's Observer and return
     */
-    if (file.ext == PROJ_EXT) { return nullptr; }
+    if (IsProjectFile(file)) { return nullptr; }
     if (file.IsDirectory()) { return nullptr; }
-    if (file.ext == ID_EXT) { return nullptr; }
+    if (file.ext == AssetIDExtension) { return nullptr; }
     // Step 1
     FNode importData = FNode::HollowCopy(file);
-    importData.ext.append(ID_EXT);
-    importData.fullName.append(ID_EXT);
+    importData.ext.append(AssetIDExtension);
+    importData.fullName.append(AssetIDExtension);
 
     tinyxml2::XMLDocument doc;
     tinyxml2::XMLError err = doc.LoadFile(importData.AbsolutePath().string().c_str());

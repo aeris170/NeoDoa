@@ -18,13 +18,13 @@ static RawData ToRawData(const std::string_view str) {
 }
 TextureEncoding ExtToEncoding(const std::string_view ext) noexcept {
     using enum TextureEncoding;
-    if (ext == Assets::TEXTURE_EXT_PNG) {
+    if (ext == Assets::TextureExtensionPNG) {
         return PNG;
-    } else if (ext == Assets::TEXTURE_EXT_BMP) {
+    } else if (ext == Assets::TextureExtensionBMP) {
         return BMP;
-    } else if (ext == Assets::TEXTURE_EXT_TGA) {
+    } else if (ext == Assets::TextureExtensionTGA) {
         return TGA;
-    } else if(ext == Assets::TEXTURE_EXT_JPG || ext == Assets::TEXTURE_EXT_JPEG) {
+    } else if(ext == Assets::TextureExtensionJPG || ext == Assets::TextureExtensionJPEG) {
         return JPG;
     } else {
         std::unreachable();
@@ -39,7 +39,7 @@ TextureDeserializationResult DeserializeTexture(const FNode& file) {
     encodedData.EncodedData = ToRawData(file.DisposeContent());
 
     const auto& ext = file.Extension();
-    encodedData.HasTransparency = ext == Assets::TEXTURE_EXT_PNG;
+    encodedData.HasTransparency = ext == Assets::TextureExtensionPNG;
     encodedData.Encoding = ExtToEncoding(ext);
 
     return DeserializeTexture(encodedData);

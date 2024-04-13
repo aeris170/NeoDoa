@@ -416,7 +416,7 @@ void GUI::RenderProjectData(ProjectData& data) noexcept {
                     } else if constexpr (detect::is_linux_v) {
                         exe = "./Editor &";
                     }
-                    std::string command = std::string(exe).append(1, ' ').append(data.AbsolutePath).append(data.Name).append(Assets::PROJ_EXT);
+                    std::string command = std::string(exe).append(1, ' ').append(data.AbsolutePath).append(data.Name).append(Assets::ProjectExtension);
                     auto sys = std::system(command.c_str());
                     if (sys == -1) {
                         DOA_LOG_WARNING("[Launcher::GUI] A call to std::system returned -1.");
@@ -540,7 +540,7 @@ bool GUI::IsProjectAlreadyOpen(const ProjectData& project) noexcept {
         openProjects.push_back(trim(s));
     }
 
-    std::string absolutePath = std::string(project.AbsolutePath).append(project.Name).append(Assets::PROJ_EXT);
+    std::string absolutePath = std::string(project.AbsolutePath).append(project.Name).append(Assets::ProjectExtension);
     auto search = std::ranges::find_if(openProjects, [&absolutePath](auto& elem) {
         return elem == absolutePath;
     });

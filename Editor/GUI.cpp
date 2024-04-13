@@ -249,7 +249,7 @@ void GUI::CreateNewScene(FNode& folder, std::string_view name) {
     if (!HasOpenProject()) { return; }
 
     const Scene temporary(name); const auto data = temporary.Serialize();
-    AssetHandle handle = CORE->GetAssets()->CreateAssetAt<Scene>(folder, std::string(name) + Assets::SCENE_EXT, data);
+    AssetHandle handle = CORE->GetAssets()->CreateAssetAt<Scene>(folder, std::string(name) + Assets::SceneExtension, data);
     assert(handle.HasValue());
     DOA_LOG_INFO("Succesfully created a new scene asset named %s at %s", name.data(), folder.Path().c_str());
     if (!HasOpenScene()) {
@@ -336,7 +336,7 @@ void* GUI::FindIconForFileType(const FNode& file, TextureSize size) const {
     assert(HasOpenProject());
 
     if (file.IsDirectory()) { return GetFolderIcon(size); }
-    if (file.Extension() == Assets::PROJ_EXT) { return GetProjectIcon(size); } /* TODO FIX THIS SHITTY EXTENSION CHECK */
+    if (Assets::IsProjectFile(file)) { return GetProjectIcon(size); }
 
     assert(CORE->GetAssets()->IsAssetExistsAt(file));
     AssetHandle asset = CORE->GetAssets()->FindAssetAt(file);
