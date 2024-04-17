@@ -26,8 +26,36 @@
 
 using OwningPointerToRawData = std::unique_ptr<std::byte>;
 using NonOwningPointerToRawData = std::byte*;
+using NonOwningPointerToConstRawData = const std::byte*;
 using RawData = std::vector<std::byte>;
 using RawDataView = std::span<const std::byte>;
+using RawDataWriteableView = std::span<std::byte>;
+
+enum class BufferProperties : uint32_t {
+    None             = (1 << 0),
+    DynamicStorage   = (1 << 1),
+    ReadableFromCPU  = (1 << 2),
+    WriteableFromCPU = (1 << 3),
+    Persistent       = (1 << 4),
+    Coherent         = (1 << 5),
+    CPUStorage       = (1 << 6)
+};
+constexpr BufferProperties operator &(const BufferProperties lhs, const BufferProperties rhs) {
+    return static_cast<BufferProperties>(static_cast<uint32_t>(lhs) & static_cast<uint32_t>(rhs));
+}
+constexpr BufferProperties operator |(const BufferProperties lhs, enum BufferProperties rhs) {
+    return static_cast<BufferProperties>(static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs));
+}
+constexpr GLenum ToGLBufferFlags(BufferProperties properties) noexcept {
+    GLenum glBitmask = 0;
+    if (static_cast<bool>(properties & BufferProperties::DynamicStorage))   glBitmask |= GL_DYNAMIC_STORAGE_BIT;
+    if (static_cast<bool>(properties & BufferProperties::ReadableFromCPU))  glBitmask |= GL_MAP_READ_BIT;
+    if (static_cast<bool>(properties & BufferProperties::WriteableFromCPU)) glBitmask |= GL_MAP_WRITE_BIT;
+    if (static_cast<bool>(properties & BufferProperties::Persistent))       glBitmask |= GL_MAP_PERSISTENT_BIT;
+    if (static_cast<bool>(properties & BufferProperties::Coherent))         glBitmask |= GL_MAP_COHERENT_BIT;
+    if (static_cast<bool>(properties & BufferProperties::CPUStorage))       glBitmask |= GL_CLIENT_STORAGE_BIT;
+    return glBitmask;
+}
 
 enum class ShaderType {
     Vertex,
