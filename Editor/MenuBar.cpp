@@ -567,7 +567,7 @@ Licensee: Licensee)"},
 		std::span pixels{ reinterpret_cast<const std::byte*>(readPixels), w * h * nrChannels * sizeof(stbi_uc) };
 		builder.SetWidth(w)
 			.SetHeight(h)
-			.SetData(TextureFormat::RGBA8, pixels);
+			.SetData(DataFormat::RGBA8, pixels);
 	} else {
 		const Texture& texture = Texture::Missing();
 		builder.SetWidth(texture.Width)

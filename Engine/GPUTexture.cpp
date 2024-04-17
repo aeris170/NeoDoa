@@ -138,7 +138,7 @@ GPUTextureBuilder& GPUTextureBuilder::SetDepth(unsigned depth) noexcept {
     this->depth = depth;
     return *this;
 }
-GPUTextureBuilder& GPUTextureBuilder::SetData(TextureFormat format, RawDataView data) noexcept {
+GPUTextureBuilder& GPUTextureBuilder::SetData(DataFormat format, RawDataView data) noexcept {
     this->format = format;
     this->pixels = data;
     return *this;

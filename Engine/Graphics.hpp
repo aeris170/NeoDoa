@@ -194,7 +194,7 @@ constexpr std::string_view ToString(TextureCompareFunction func) noexcept {
     std::unreachable();
 }
 
-enum class TextureFormat {
+enum class DataFormat {
     // Unsigned normalized formats
     R8,
     RG8,
@@ -257,8 +257,8 @@ enum class TextureFormat {
     DEPTH32F_STENCIL8
 };
 
-constexpr GLenum ToGLSizedFormat(TextureFormat format) {
-    using enum TextureFormat;
+constexpr GLenum ToGLSizedFormat(DataFormat format) {
+    using enum DataFormat;
     switch (format) {
     // Unsigned normalized formats
     case R8:                 return GL_R8;
@@ -324,8 +324,8 @@ constexpr GLenum ToGLSizedFormat(TextureFormat format) {
     }
 }
 
-constexpr GLenum ToGLBaseFormat(TextureFormat format) {
-    using enum TextureFormat;
+constexpr GLenum ToGLBaseFormat(DataFormat format) {
+    using enum DataFormat;
     switch (format) {
     case R8:
     case R16:
@@ -392,8 +392,8 @@ constexpr GLenum ToGLBaseFormat(TextureFormat format) {
     }
 }
 
-constexpr std::string_view ToString(TextureFormat format) {
-    using enum TextureFormat;
+constexpr std::string_view ToString(DataFormat format) {
+    using enum DataFormat;
     switch (format) {
     // Unsigned normalized formats
     case R8:                 return "R8";

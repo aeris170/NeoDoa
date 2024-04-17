@@ -10,7 +10,7 @@ const Texture& Texture::Missing() noexcept {
         .Width = 2,
         .Height = 2,
         .Channels = 4,
-        .Format = TextureFormat::RGBA8,
+        .Format = DataFormat::RGBA8,
         .PixelData = {
             ND_BYTE(0), ND_BYTE(255), ND_BYTE(255), ND_BYTE(255), ND_BYTE(0), ND_BYTE(0)  , ND_BYTE(0)  , ND_BYTE(255),
             ND_BYTE(0), ND_BYTE(0)  , ND_BYTE(0)  , ND_BYTE(255), ND_BYTE(0), ND_BYTE(255), ND_BYTE(255), ND_BYTE(255)

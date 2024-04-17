@@ -68,13 +68,13 @@ TextureDeserializationResult DeserializeTexture(const EncodedTextureData& data) 
         rv.deserializedTexture.Height = height;
         rv.deserializedTexture.Channels = nrChannels;
         if (nrChannels == 1) {
-            rv.deserializedTexture.Format = TextureFormat::R8;
+            rv.deserializedTexture.Format = DataFormat::R8;
         } else if (nrChannels == 2) {
-            rv.deserializedTexture.Format = TextureFormat::RG8;
+            rv.deserializedTexture.Format = DataFormat::RG8;
         } else if (nrChannels == 3) {
-            rv.deserializedTexture.Format = TextureFormat::RGB8;
+            rv.deserializedTexture.Format = DataFormat::RGB8;
         } else if (nrChannels == 4) {
-            rv.deserializedTexture.Format = TextureFormat::RGBA8;
+            rv.deserializedTexture.Format = DataFormat::RGBA8;
         } else {
             std::unreachable();
         }

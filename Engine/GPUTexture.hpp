@@ -65,7 +65,7 @@ struct GPUTexture {
     unsigned Width{};
     unsigned Height{};
     unsigned Depth{};
-    TextureFormat Format{};
+    DataFormat Format{};
 
     ND_GRAPHICS_MOVE_ONLY_RESOURCE(GPUTexture);
 
@@ -76,7 +76,7 @@ struct GPUTextureBuilder {
     GPUTextureBuilder& SetWidth(unsigned width) noexcept;
     GPUTextureBuilder& SetHeight(unsigned height) noexcept;
     GPUTextureBuilder& SetDepth(unsigned depth) noexcept;
-    GPUTextureBuilder& SetData(TextureFormat format, RawDataView data) noexcept;
+    GPUTextureBuilder& SetData(DataFormat format, RawDataView data) noexcept;
     [[nodiscard]] std::pair<std::optional<GPUTexture>, std::vector<TextureAllocatorMessage>> Build() noexcept;
 
 private:
@@ -84,7 +84,7 @@ private:
     unsigned width{ 1 };
     unsigned height{ 1 };
     unsigned depth{ 1 };
-    TextureFormat format{};
+    DataFormat format{};
     RawDataView pixels{};
 public:
     ND_GRAPHICS_BUILDER_RULE_OF_0(GPUTextureBuilder);

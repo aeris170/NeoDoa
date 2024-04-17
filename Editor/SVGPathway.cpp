@@ -105,7 +105,7 @@ void SVGPathway::Load(std::string_view key) {
         builder.SetName("!!" + name + "_none_small!!")
             .SetWidth(bitmapScaledAspect.width())
             .SetHeight(bitmapScaledAspect.height())
-            .SetData(TextureFormat::RGBA8, convertToSpan(bitmapScaledAspect.data(), bitmapScaledAspect.width() * bitmapScaledAspect.height() * 4));
+            .SetData(DataFormat::RGBA8, convertToSpan(bitmapScaledAspect.data(), bitmapScaledAspect.width() * bitmapScaledAspect.height() * 4));
         auto [texSmall, _] = builder.Build();
 
         // Medium
@@ -117,7 +117,7 @@ void SVGPathway::Load(std::string_view key) {
         builder.SetName("!!" + name + "_none_medium!!")
             .SetWidth(bitmapScaledAspect.width())
             .SetHeight(bitmapScaledAspect.height())
-            .SetData(TextureFormat::RGBA8, convertToSpan(bitmapScaledAspect.data(), bitmapScaledAspect.width() * bitmapScaledAspect.height() * 4));
+            .SetData(DataFormat::RGBA8, convertToSpan(bitmapScaledAspect.data(), bitmapScaledAspect.width() * bitmapScaledAspect.height() * 4));
         auto [texMedium, __] = builder.Build();
 
         // Large
@@ -129,7 +129,7 @@ void SVGPathway::Load(std::string_view key) {
         builder.SetName("!!" + name + "_none_large!!")
             .SetWidth(bitmapScaledAspect.width())
             .SetHeight(bitmapScaledAspect.height())
-            .SetData(TextureFormat::RGBA8, convertToSpan(bitmapScaledAspect.data(), bitmapScaledAspect.width() * bitmapScaledAspect.height() * 4));
+            .SetData(DataFormat::RGBA8, convertToSpan(bitmapScaledAspect.data(), bitmapScaledAspect.width() * bitmapScaledAspect.height() * 4));
         auto [texLarge, ___] = builder.Build();
 
         if (texSmall && texMedium && texLarge) {
@@ -189,7 +189,7 @@ void SVGPathway::Load(std::string_view key) {
             builder.SetName("!!" + name + "_padded_" + scaleFactorName.data() + "!!")
                 .SetWidth(static_cast<unsigned>(dimension))
                 .SetHeight(static_cast<unsigned>(dimension))
-                .SetData(TextureFormat::RGBA8, convertToSpan(paddedBuf, width * height * sizeof(uint32_t)));
+                .SetData(DataFormat::RGBA8, convertToSpan(paddedBuf, width * height * sizeof(uint32_t)));
             auto [tex, _] = builder.Build();
 
             delete[] paddedBuf;
@@ -213,7 +213,7 @@ void SVGPathway::Load(std::string_view key) {
         builder.SetName("!!" + name + "_scaled!!")
             .SetWidth(bitmapScaled.width())
             .SetHeight(bitmapScaled.height())
-            .SetData(TextureFormat::RGBA8, convertToSpan(bitmapScaled.data(), bitmapScaled.width() * bitmapScaled.height() * 4));
+            .SetData(DataFormat::RGBA8, convertToSpan(bitmapScaled.data(), bitmapScaled.width() * bitmapScaled.height() * 4));
         auto [tex, _] = builder.Build();
 
         if (tex) {
