@@ -8,11 +8,11 @@ void GPUBuffer::BufferSubData(GPUBuffer& buffer, size_t sizeBytes, NonOwningPoin
     glNamedBufferSubData(buffer.GLObjectID, offsetBytes, sizeBytes, data);
 }
 
-void GPUBuffer::GetBufferSubData(GPUBuffer& buffer, RawDataWriteableView dataView, size_t offsetBytes) noexcept {
+void GPUBuffer::GetBufferSubData(const GPUBuffer& buffer, RawDataWriteableView dataView, size_t offsetBytes) noexcept {
     glGetNamedBufferSubData(buffer.GLObjectID, offsetBytes, dataView.size_bytes(), dataView.data());
 }
 
-void GPUBuffer::CopyBufferSubData(GPUBuffer& readBuffer, GPUBuffer& writeBuffer, size_t sizeBytesToCopy, size_t readOffsetBytes, size_t writeOffsetBytes) noexcept {
+void GPUBuffer::CopyBufferSubData(const GPUBuffer& readBuffer, GPUBuffer& writeBuffer, size_t sizeBytesToCopy, size_t readOffsetBytes, size_t writeOffsetBytes) noexcept {
     assert(readBuffer.GLObjectID > 0);
     assert(readBuffer.GLObjectID > 0);
     glCopyNamedBufferSubData(
@@ -24,15 +24,28 @@ void GPUBuffer::CopyBufferSubData(GPUBuffer& readBuffer, GPUBuffer& writeBuffer,
     );
 }
 
-void GPUBuffer::ClearBufferSubData(GPUBuffer& buffer, DataFormat format, size_t sizeBytesToClear, size_t offsetBytes = 0uLL) noexcept {
+void GPUBuffer::ClearBufferSubData(GPUBuffer& buffer, DataFormat format, size_t sizeBytesToClear, size_t offsetBytes) noexcept {
     glClearNamedBufferSubData(buffer.GLObjectID, ToGLSizedFormat(format), offsetBytes, sizeBytesToClear, ToGLBaseFormat(format), GL_UNSIGNED_BYTE, nullptr);
 }
 
 GPUBuffer::~GPUBuffer() noexcept {
     glDeleteBuffers(1, &GLObjectID);
 }
+GPUBuffer::GPUBuffer(const GPUBuffer& other) noexcept {
+    *this = other;
+}
 GPUBuffer::GPUBuffer(GPUBuffer&& other) noexcept {
     *this = std::move(other);
+}
+GPUBuffer& GPUBuffer::operator=(const GPUBuffer& other) noexcept {
+    GPUBufferBuilder builder;
+    builder.SetName(other.Name + " (Copy)")
+        .SetProperties(other.Properties);
+    auto&& [buffer, _] = builder.Build();
+
+    *this = std::move(buffer.value());
+    CopyBufferSubData(other, *this, SizeBytes);
+    return *this;
 }
 GPUBuffer& GPUBuffer::operator=(GPUBuffer&& other) noexcept {
     std::swap(GLObjectID, other.GLObjectID);

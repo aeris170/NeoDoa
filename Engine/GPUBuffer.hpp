@@ -14,9 +14,9 @@ struct GPUBuffer {
     static void BufferSubData(GPUBuffer& buffer, RawDataView dataView, size_t offsetBytes = 0uLL) noexcept;
     static void BufferSubData(GPUBuffer& buffer, size_t sizeBytes, NonOwningPointerToConstRawData data, size_t offsetBytes = 0uLL) noexcept;
 
-    static void GetBufferSubData(GPUBuffer& buffer, RawDataWriteableView dataView, size_t offsetBytes = 0uLL) noexcept;
+    static void GetBufferSubData(const GPUBuffer& buffer, RawDataWriteableView dataView, size_t offsetBytes = 0uLL) noexcept;
 
-    static void CopyBufferSubData(GPUBuffer& readBuffer, GPUBuffer& writeBuffer, size_t sizeBytesToCopy, size_t readOffsetBytes = 0uLL, size_t writeOffsetBytes = 0uLL) noexcept;
+    static void CopyBufferSubData(const GPUBuffer& readBuffer, GPUBuffer& writeBuffer, size_t sizeBytesToCopy, size_t readOffsetBytes = 0uLL, size_t writeOffsetBytes = 0uLL) noexcept;
 
     static void ClearBufferSubData(GPUBuffer& buffer, DataFormat format, size_t sizeBytesToClear, size_t offsetBytes = 0uLL) noexcept;
 
@@ -32,7 +32,7 @@ struct GPUBuffer {
     bool IsCoherent() const noexcept;
     bool IsCPUStorage() const noexcept;
 
-    ND_GRAPHICS_MOVE_ONLY_RESOURCE(GPUBuffer);
+    ND_GRAPHICS_COPYABLE_MOVEABLE_RESOURCE(GPUBuffer);
 };
 
 struct GPUBufferBuilder {
