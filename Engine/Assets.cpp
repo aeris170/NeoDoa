@@ -20,17 +20,17 @@ Asset& AssetHandle::Value() const { return *_asset; }
 void AssetHandle::Reset() { _asset = nullptr; }
 
 bool Assets::IsProjectFile(const FNode& file) noexcept { return file.ext == ProjectExtension; }
-bool Assets::IsSceneFile(const FNode& file) { return file.ext == SceneExtension; }
-bool Assets::IsComponentDefinitionFile(const FNode& file) { return file.ext == ComponentDefinitionExtension; }
-bool Assets::IsSamplerFile(const FNode& file) { return file.ext == SamplerExtension; }
-bool Assets::IsTextureFile(const FNode& file) {
+bool Assets::IsSceneFile(const FNode& file) noexcept { return file.ext == SceneExtension; }
+bool Assets::IsComponentDefinitionFile(const FNode& file) noexcept { return file.ext == ComponentDefinitionExtension; }
+bool Assets::IsSamplerFile(const FNode& file) noexcept { return file.ext == SamplerExtension; }
+bool Assets::IsTextureFile(const FNode& file) noexcept {
     return file.ext == TextureExtensionPNG ||
         file.ext == TextureExtensionBMP ||
         file.ext == TextureExtensionTGA ||
         file.ext == TextureExtensionJPG ||
         file.ext == TextureExtensionJPEG;
 }
-bool Assets::IsShaderFile(const FNode& file) {
+bool Assets::IsShaderFile(const FNode& file) noexcept {
     return  IsVertexShaderFile(file) ||
             IsTessellationControlShaderFile(file) ||
             IsTessellationEvaluationShaderFile(file) ||
@@ -38,16 +38,16 @@ bool Assets::IsShaderFile(const FNode& file) {
             IsFragmentShaderFile(file) ||
             IsComputeShaderFile(file);
 }
-bool Assets::IsVertexShaderFile(const FNode& file) { return file.ext == VertexShaderExtension; }
-bool Assets::IsTessellationControlShaderFile(const FNode& file) { return file.ext == TessellationControlShaderExtension; }
-bool Assets::IsTessellationEvaluationShaderFile(const FNode& file) { return file.ext == TessellationEvaluationShaderExtension; }
-bool Assets::IsGeometryShaderFile(const FNode& file) { return file.ext == GeometryShaderExtension; }
-bool Assets::IsFragmentShaderFile(const FNode& file) { return file.ext == FragmentShaderExtension; }
-bool Assets::IsComputeShaderFile(const FNode & file) { return file.ext == ComputeShaderExtension; }
-bool Assets::IsShaderProgramFile(const FNode& file) { return file.ext == ShaderProgramExtension; }
-bool Assets::IsMaterialFile(const FNode& file) { return file.ext == MaterialExtension; }
-bool Assets::IsScriptFile(const FNode& file) { return file.ext == SCRIPT_EXT; }
-bool Assets::IsModelFile(const FNode& file) { return file.ext == MODEL_EXT; }
+bool Assets::IsVertexShaderFile(const FNode& file) noexcept { return file.ext == VertexShaderExtension; }
+bool Assets::IsTessellationControlShaderFile(const FNode& file) noexcept { return file.ext == TessellationControlShaderExtension; }
+bool Assets::IsTessellationEvaluationShaderFile(const FNode& file) noexcept { return file.ext == TessellationEvaluationShaderExtension; }
+bool Assets::IsGeometryShaderFile(const FNode& file) noexcept { return file.ext == GeometryShaderExtension; }
+bool Assets::IsFragmentShaderFile(const FNode& file) noexcept { return file.ext == FragmentShaderExtension; }
+bool Assets::IsComputeShaderFile(const FNode & file) noexcept { return file.ext == ComputeShaderExtension; }
+bool Assets::IsShaderProgramFile(const FNode& file) noexcept { return file.ext == ShaderProgramExtension; }
+bool Assets::IsMaterialFile(const FNode& file) noexcept { return file.ext == MaterialExtension; }
+bool Assets::IsScriptFile(const FNode& file) noexcept { return file.ext == SCRIPT_EXT; }
+bool Assets::IsModelFile(const FNode& file) noexcept { return file.ext == MODEL_EXT; }
 
 Assets::Assets(const Project& project, AssetGPUBridge& bridge) noexcept :
     _root({ &project, nullptr, "", "", "", true }),
