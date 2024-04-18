@@ -17,7 +17,7 @@ GPUShader::GPUShader(GPUShader&& other) noexcept {
     *this = std::move(other);
 }
 GPUShader& GPUShader::operator=(GPUShader&& other) noexcept {
-    GLObjectID = std::exchange(other.GLObjectID, {});
+    std::swap(GLObjectID, other.GLObjectID);
     Type = std::exchange(other.Type, {});
     Name = std::move(other.Name);
     return *this;
@@ -141,7 +141,7 @@ GPUShaderProgram::GPUShaderProgram(GPUShaderProgram&& other) noexcept {
     *this = std::move(other);
 }
 GPUShaderProgram& GPUShaderProgram::operator=(GPUShaderProgram&& other) noexcept {
-    GLObjectID = std::exchange(other.GLObjectID, {});
+    std::swap(GLObjectID, other.GLObjectID);
     Name = std::move(other.Name);
     Uniforms = std::move(other.Uniforms);
     return *this;

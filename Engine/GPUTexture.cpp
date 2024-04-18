@@ -12,7 +12,7 @@ GPUSampler::GPUSampler(GPUSampler&& other) noexcept {
     *this = std::move(other);
 }
 GPUSampler& GPUSampler::operator=(GPUSampler&& other) noexcept {
-    GLObjectID = std::exchange(other.GLObjectID, {});
+    std::swap(GLObjectID, other.GLObjectID);
     Name = std::move(other.Name);
     return *this;
 }
@@ -110,7 +110,7 @@ GPUTexture::GPUTexture(GPUTexture&& other) noexcept {
     *this = std::move(other);
 }
 GPUTexture& GPUTexture::operator=(GPUTexture&& other) noexcept {
-    GLObjectID = std::exchange(other.GLObjectID, {});
+    std::swap(GLObjectID, other.GLObjectID);
     Name = std::move(other.Name);
     Width = std::exchange(other.Width, {});
     Height = std::exchange(other.Height, {});

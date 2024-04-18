@@ -28,6 +28,20 @@ void GPUBuffer::ClearBufferSubData(GPUBuffer& buffer, DataFormat format, size_t 
     glClearNamedBufferSubData(buffer.GLObjectID, ToGLSizedFormat(format), offsetBytes, sizeBytesToClear, ToGLBaseFormat(format), GL_UNSIGNED_BYTE, nullptr);
 }
 
+GPUBuffer::~GPUBuffer() noexcept {
+    glDeleteBuffers(1, &GLObjectID);
+}
+GPUBuffer::GPUBuffer(GPUBuffer&& other) noexcept {
+    *this = std::move(other);
+}
+GPUBuffer& GPUBuffer::operator=(GPUBuffer&& other) noexcept {
+    std::swap(GLObjectID, other.GLObjectID);
+    Name = std::move(other.Name);
+    Properties = std::exchange(other.Properties, {});
+    SizeBytes = std::exchange(other.SizeBytes, {});
+    return *this;
+}
+
 bool GPUBuffer::IsDynamicStorage() const noexcept   { return static_cast<bool>(Properties & BufferProperties::DynamicStorage);   }
 bool GPUBuffer::IsReadableFromCPU() const noexcept  { return static_cast<bool>(Properties & BufferProperties::ReadableFromCPU);  }
 bool GPUBuffer::IsWriteableFromCPU() const noexcept { return static_cast<bool>(Properties & BufferProperties::WriteableFromCPU); }
