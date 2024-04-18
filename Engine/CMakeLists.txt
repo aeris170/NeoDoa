@@ -131,6 +131,10 @@ set(GROUP_LIST
     "Graphics/GPUShader.hpp"
     "Graphics/GPUTexture.cpp"
     "Graphics/GPUTexture.hpp"
+    "Graphics/GPUVertexArray.cpp"
+    "Graphics/GPUVertexArray.hpp"
+    "Graphics/GPUVertexAttribLayout.cpp"
+    "Graphics/GPUVertexAttribLayout.hpp"
     "Graphics/Graphics.cpp"
     "Graphics/Graphics.hpp"
 	

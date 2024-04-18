@@ -8,6 +8,14 @@
 
 #include <GL/glew.h>
 
+#define ND_GRAPHICS_COPYABLE_MOVEABLE_RESOURCE(x) \
+    x() noexcept = default; \
+    ~x() noexcept; \
+    x(const x& other) noexcept; \
+    x(x&& other) noexcept; \
+    x& operator=(const x& other) noexcept; \
+    x& operator=(x&& other) noexcept
+
 #define ND_GRAPHICS_MOVE_ONLY_RESOURCE(x) \
     x() noexcept = default; \
     ~x() noexcept; \
