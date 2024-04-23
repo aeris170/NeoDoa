@@ -148,14 +148,20 @@ GPUTextureBuilder& GPUTextureBuilder::SetDepth(unsigned depth) noexcept {
     this->depth = depth;
     return *this;
 }
+GPUTextureBuilder& GPUTextureBuilder::SetSamples(Multisample multisample) noexcept {
+    samples = multisample;
+    return *this;
+}
 GPUTextureBuilder& GPUTextureBuilder::SetData(DataFormat format, RawDataView data) noexcept {
     this->format = format;
     this->pixels = data;
     return *this;
 }
+
 std::pair<std::optional<GPUTexture>, std::vector<TextureAllocatorMessage>> GPUTextureBuilder::Build() noexcept {
     GLuint texture;
     if (depth > 1) {
+        assert(samples == Multisample::None); // Multisampled 3D textures are not allowed.
         glCreateTextures(GL_TEXTURE_3D, 1, &texture);
         glTextureStorage3D(
             texture,
@@ -164,14 +170,26 @@ std::pair<std::optional<GPUTexture>, std::vector<TextureAllocatorMessage>> GPUTe
             width, height, depth
         );
     } else if (width > 1) {
-        glCreateTextures(GL_TEXTURE_2D, 1, &texture);
-        glTextureStorage2D(
-            texture,
-            static_cast<GLsizei>(1 + std::floor(std::log2(std::max(width, height)))),
-            ToGLSizedFormat(format),
-            width, height
-        );
+        if (samples == Multisample::None) {
+            glCreateTextures(GL_TEXTURE_2D, 1, &texture);
+            glTextureStorage2D(
+                texture,
+                static_cast<GLsizei>(1 + std::floor(std::log2(std::max(width, height)))),
+                ToGLSizedFormat(format),
+                width, height
+            );
+        } else {
+            glCreateTextures(GL_TEXTURE_2D_MULTISAMPLE, 1, &texture);
+            glTextureStorage2DMultisample(
+                texture,
+                static_cast<GLsizei>(samples),
+                ToGLSizedFormat(format),
+                width, height,
+                GL_TRUE
+            );
+        }
     } else {
+        assert(samples == Multisample::None); // Multisampled 1D textures are not allowed.
         glCreateTextures(GL_TEXTURE_1D, 1, &texture);
         glTextureStorage1D(
             texture,
@@ -213,7 +231,9 @@ std::pair<std::optional<GPUTexture>, std::vector<TextureAllocatorMessage>> GPUTe
                 pixels.data()
             );
         }
-        glGenerateTextureMipmap(texture);
+        if (samples == Multisample::None) {
+            glGenerateTextureMipmap(texture); // Mipmaps are not allowed on multisampled textures.
+        }
     }
 
     std::optional<GPUTexture> gpuTexture{ std::nullopt };

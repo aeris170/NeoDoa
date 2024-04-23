@@ -230,6 +230,22 @@ constexpr std::string_view ToString(TextureCompareFunction func) noexcept {
     std::unreachable();
 }
 
+enum class Multisample : uint8_t {
+    None = 1,
+    x2   = 2,
+    x4   = 4,
+    x8   = 8
+};
+constexpr std::string_view ToString(Multisample ms) noexcept {
+    using enum Multisample;
+    switch (ms) {
+    case None: return "No MS";
+    case x2:   return "2x MS";
+    case x4:   return "4x MS";
+    case x8:   return "8x MS";
+    }
+    std::unreachable();
+}
 enum class DataFormat {
     // Unsigned normalized formats
     R8,

@@ -72,10 +72,12 @@ struct GPUTexture {
     unsigned Height{};
     unsigned Depth{};
     DataFormat Format{};
+    Multisample Samples{};
+
+    bool IsMultisampled() const noexcept;
+    operator void* () const;
 
     ND_GRAPHICS_MOVE_ONLY_RESOURCE(GPUTexture);
-
-    operator void*() const { return reinterpret_cast<void*>(GLObjectID); }
 };
 struct GPUTextureBuilder {
     GPUTextureBuilder& SetName(std::string_view name) noexcept;
@@ -83,6 +85,8 @@ struct GPUTextureBuilder {
     GPUTextureBuilder& SetHeight(unsigned height) noexcept;
     GPUTextureBuilder& SetDepth(unsigned depth) noexcept;
     GPUTextureBuilder& SetData(DataFormat format, RawDataView data) noexcept;
+    GPUTextureBuilder& SetSamples(Multisample multisample) noexcept;
+
     [[nodiscard]] std::pair<std::optional<GPUTexture>, std::vector<TextureAllocatorMessage>> Build() noexcept;
 
 private:
@@ -94,6 +98,7 @@ private:
     unsigned depth{ 1 };
     DataFormat format{};
     RawDataView pixels{};
+    Multisample samples{ Multisample::None };
 public:
     ND_GRAPHICS_BUILDER_RULE_OF_0(GPUTextureBuilder);
 };
