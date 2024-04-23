@@ -21,7 +21,9 @@ struct GPUBuffer {
     static void ClearBufferSubData(GPUBuffer& buffer, DataFormat format, size_t sizeBytesToClear, size_t offsetBytes = 0uLL) noexcept;
 
     GLuint GLObjectID{};
+#ifdef DEBUG
     std::string Name{};
+#endif
     BufferProperties Properties;
     size_t SizeBytes{};
 
@@ -44,7 +46,9 @@ struct GPUBufferBuilder {
     [[nodiscard]] std::pair<std::optional<GPUBuffer>, std::vector<BufferAllocatorMessage>> Build() noexcept;
 
 private:
+#ifdef DEBUG
     std::string name{};
+#endif
     BufferProperties properties{};
     size_t size{};
     NonOwningPointerToConstRawData data{};

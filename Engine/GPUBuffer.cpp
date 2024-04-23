@@ -39,7 +39,10 @@ GPUBuffer::GPUBuffer(GPUBuffer&& other) noexcept {
 }
 GPUBuffer& GPUBuffer::operator=(const GPUBuffer& other) noexcept {
     GPUBufferBuilder builder;
-    builder.SetName(other.Name + " (Copy)")
+    builder
+#ifdef DEBUG
+        .SetName(other.Name + " (Copy)")
+#endif
         .SetProperties(other.Properties);
     auto&& [buffer, _] = builder.Build();
 
@@ -49,7 +52,9 @@ GPUBuffer& GPUBuffer::operator=(const GPUBuffer& other) noexcept {
 }
 GPUBuffer& GPUBuffer::operator=(GPUBuffer&& other) noexcept {
     std::swap(GLObjectID, other.GLObjectID);
+#ifdef DEBUG
     Name = std::move(other.Name);
+#endif
     Properties = std::exchange(other.Properties, {});
     SizeBytes = std::exchange(other.SizeBytes, {});
     return *this;
@@ -63,7 +68,9 @@ bool GPUBuffer::IsCoherent() const noexcept         { return static_cast<bool>(P
 bool GPUBuffer::IsCPUStorage() const noexcept       { return static_cast<bool>(Properties & BufferProperties::CPUStorage);       }
 
 GPUBufferBuilder& GPUBufferBuilder::SetName(std::string_view name) noexcept {
+#ifdef DEBUG
     this->name = name;
+#endif
     return *this;
 }
 GPUBufferBuilder& GPUBufferBuilder::SetProperties(BufferProperties properties) noexcept {
@@ -90,7 +97,9 @@ std::pair<std::optional<GPUBuffer>, std::vector<BufferAllocatorMessage>> GPUBuff
     std::optional<GPUBuffer> gpuBuffer{ std::nullopt };
     gpuBuffer.emplace();
     gpuBuffer->GLObjectID = buffer;
+#ifdef DEBUG
     gpuBuffer->Name = std::move(name);
+#endif
     gpuBuffer->Properties = properties;
     gpuBuffer->SizeBytes = size;
 

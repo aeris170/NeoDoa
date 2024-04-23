@@ -19,7 +19,9 @@ GPUShader::GPUShader(GPUShader&& other) noexcept {
 GPUShader& GPUShader::operator=(GPUShader&& other) noexcept {
     std::swap(GLObjectID, other.GLObjectID);
     Type = std::exchange(other.Type, {});
+#ifdef DEBUG
     Name = std::move(other.Name);
+#endif
     return *this;
 }
 
@@ -28,7 +30,9 @@ GPUShaderBuilder& GPUShaderBuilder::SetType(ShaderType shaderType) noexcept {
     return *this;
 }
 GPUShaderBuilder& GPUShaderBuilder::SetName(std::string_view shaderName) noexcept {
+#ifdef DEBUG
     name = shaderName;
+#endif
     return *this;
 }
 GPUShaderBuilder& GPUShaderBuilder::SetSourceCode(std::string_view code) noexcept {
@@ -74,7 +78,9 @@ std::pair<std::optional<GPUShader>, std::vector<ShaderCompilerMessage>> GPUShade
         gpuShader.emplace();
         gpuShader->GLObjectID = shader;
         gpuShader->Type = type;
+#ifdef DEBUG
         gpuShader->Name = std::move(name);
+#endif
     }
 
     return { std::move(gpuShader), std::move(messages) };
@@ -142,22 +148,28 @@ GPUShaderProgram::GPUShaderProgram(GPUShaderProgram&& other) noexcept {
 }
 GPUShaderProgram& GPUShaderProgram::operator=(GPUShaderProgram&& other) noexcept {
     std::swap(GLObjectID, other.GLObjectID);
+#ifdef DEBUG
     Name = std::move(other.Name);
+#endif
     Uniforms = std::move(other.Uniforms);
     return *this;
 }
 
 int GPUShaderProgram::GetUniformLocation(std::string_view name) const noexcept {
     auto search = std::ranges::find_if(Uniforms, [name](const Uniform& uniform) { return uniform.Name == name; });
+#ifdef DEBUG
     if (search == Uniforms.end()) {
         DOA_LOG_WARNING("Program %s does not contain uniform %s", std::quoted(Name), std::quoted(name));
         return -1;
     }
+#endif
     return search->Location;
 }
 
 GPUShaderProgramBuilder& GPUShaderProgramBuilder::SetName(const std::string_view programName) noexcept {
+#ifdef DEBUG
     name = programName;
+#endif
     return *this;
 }
 GPUShaderProgramBuilder& GPUShaderProgramBuilder::SetVertexShader(GPUShader& shader) noexcept {
@@ -227,7 +239,9 @@ std::pair<std::optional<GPUShaderProgram>, std::vector<ShaderLinkerMessage>> GPU
     if (success) {
         gpuShaderProgram.emplace();
         gpuShaderProgram->GLObjectID = program;
+#ifdef DEBUG
         gpuShaderProgram->Name = std::move(name);
+#endif
         gpuShaderProgram->Uniforms = ExtractActiveProgramUniforms(program, messages);
     }
 
@@ -265,7 +279,9 @@ std::pair<std::optional<GPUShaderProgram>, std::vector<ShaderLinkerMessage>> GPU
     if (success) {
         gpuShaderProgram.emplace();
         gpuShaderProgram->GLObjectID = program;
+#ifdef DEBUG
         gpuShaderProgram->Name = std::move(name);
+#endif
         gpuShaderProgram->Uniforms = ExtractActiveProgramUniforms(program, messages);
     }
 

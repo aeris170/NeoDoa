@@ -21,7 +21,9 @@ struct ShaderCompilerMessage {
 struct GPUShader {
     GLuint GLObjectID{};
     ShaderType Type{};
+#ifdef DEBUG
     std::string Name{};
+#endif
 
     ND_GRAPHICS_MOVE_ONLY_RESOURCE(GPUShader);
 };
@@ -38,7 +40,9 @@ private:
     static void QueryShaderCompilerMessages(GLuint shader, std::vector<ShaderCompilerMessage>& messages) noexcept;
 
     ShaderType type{};
+#ifdef DEBUG
     std::string name{};
+#endif
     std::string sourceCode{};
 public:
     ND_GRAPHICS_BUILDER_RULE_OF_0(GPUShaderBuilder);
@@ -57,7 +61,9 @@ struct GPUShaderProgram {
     };
 
     GLuint GLObjectID;
+#ifdef DEBUG
     std::string Name;
+#endif
 
     std::vector<Uniform> Uniforms{};
 
@@ -84,7 +90,9 @@ private:
     static bool LinkProgram(GLuint program, std::vector<ShaderLinkerMessage>& messages) noexcept;
     static std::vector<GPUShaderProgram::Uniform> ExtractActiveProgramUniforms(GLuint program, std::vector<ShaderLinkerMessage>& messages) noexcept;
 
+#ifdef DEBUG
     std::string name{};
+#endif
     GPUShader* vertShader{};
     GPUShader* tessCtrlShader{};
     GPUShader* tessEvalShader{};

@@ -9,7 +9,9 @@ using VertexArrayAllocatorMessage = std::string;
 struct GPUVertexArray {
 
     GLuint GLObjectID{};
+#ifdef DEBUG
     std::string Name{};
+#endif
     std::vector<GPUBuffer> ArrayBuffers{};
     std::vector<GPUVertexAttribLayout> Layouts{};
     std::optional<GPUBuffer> ElementBuffer{};
@@ -29,7 +31,9 @@ struct GPUVertexArrayBuilder {
     [[nodiscard]] std::pair<std::optional<GPUVertexArray>, std::vector<VertexArrayAllocatorMessage>> Build() noexcept;
 
 private:
+#ifdef DEBUG
     std::string name{};
+#endif
     std::vector<GPUBuffer> arrayBuffers{};
     std::vector<GPUVertexAttribLayout> layouts{};
     std::optional<GPUBuffer> elementBuffer{};

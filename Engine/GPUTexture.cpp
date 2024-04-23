@@ -13,12 +13,16 @@ GPUSampler::GPUSampler(GPUSampler&& other) noexcept {
 }
 GPUSampler& GPUSampler::operator=(GPUSampler&& other) noexcept {
     std::swap(GLObjectID, other.GLObjectID);
+#ifdef DEBUG
     Name = std::move(other.Name);
+#endif
     return *this;
 }
 
 GPUSamplerBuilder& GPUSamplerBuilder::SetName(std::string_view name) noexcept {
+#ifdef DEBUG
     this->name = name;
+#endif
     return *this;
 }
 GPUSamplerBuilder& GPUSamplerBuilder::SetMinificationFilter(TextureMinificationMode mode) noexcept {
@@ -97,7 +101,9 @@ std::pair<std::optional<GPUSampler>, std::vector<SamplerAllocatorMessage>> GPUSa
     std::optional<GPUSampler> gpuSampler{ std::nullopt };
     gpuSampler.emplace();
     gpuSampler->GLObjectID = sampler;
+#ifdef DEBUG
     gpuSampler->Name = std::move(name);
+#endif
 
     return { std::move(gpuSampler), {} };
 }
@@ -111,7 +117,9 @@ GPUTexture::GPUTexture(GPUTexture&& other) noexcept {
 }
 GPUTexture& GPUTexture::operator=(GPUTexture&& other) noexcept {
     std::swap(GLObjectID, other.GLObjectID);
+#ifdef DEBUG
     Name = std::move(other.Name);
+#endif
     Width = std::exchange(other.Width, {});
     Height = std::exchange(other.Height, {});
     Depth = std::exchange(other.Depth, {});
@@ -119,22 +127,24 @@ GPUTexture& GPUTexture::operator=(GPUTexture&& other) noexcept {
     return *this;
 }
 
+bool GPUTexture::IsMultisampled() const noexcept { return Samples != Multisample::None; }
+GPUTexture::operator void* () const { return reinterpret_cast<void*>(GLObjectID); }
+
 GPUTextureBuilder& GPUTextureBuilder::SetName(std::string_view name) noexcept {
+#ifdef DEBUG
     this->name = name;
+#endif
     return *this;
 }
 GPUTextureBuilder& GPUTextureBuilder::SetWidth(unsigned width) noexcept {
-    assert(width > 0);
     this->width = width;
     return *this;
 }
 GPUTextureBuilder& GPUTextureBuilder::SetHeight(unsigned height) noexcept {
-    assert(height > 0);
     this->height = height;
     return *this;
 }
 GPUTextureBuilder& GPUTextureBuilder::SetDepth(unsigned depth) noexcept {
-    assert(depth > 0);
     this->depth = depth;
     return *this;
 }
@@ -209,7 +219,9 @@ std::pair<std::optional<GPUTexture>, std::vector<TextureAllocatorMessage>> GPUTe
     std::optional<GPUTexture> gpuTexture{ std::nullopt };
     gpuTexture.emplace();
     gpuTexture->GLObjectID = texture;
+#ifdef DEBUG
     gpuTexture->Name = std::move(name);
+#endif
     gpuTexture->Width = width;
     gpuTexture->Height = height;
     gpuTexture->Depth = depth;

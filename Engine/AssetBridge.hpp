@@ -27,7 +27,7 @@ struct GPUObjectDatabase {
 #if DEBUG
     using Database = std::unordered_map<UUID, T>;
 #elif NDEBUG
-    using GPUShaderDatabase = entt::dense_map<UUID, T>;
+    using Database = entt::dense_map<UUID, T>;
 #else
 #error "Neither DEBUG nor NDEBUG are defined!"
 #endif

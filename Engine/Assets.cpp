@@ -369,7 +369,7 @@ void Assets::ReBuildDependencyGraph() noexcept {
         dependencyGraph.AddVertex(id);
     }
 
-    for (auto& [id, asset] : database) {
+    for (const auto& [id, asset] : database) {
         // Some asset types have no innate dependencies.
         if (asset.IsScene()) {}
         if (asset.IsComponentDefinition()) {}

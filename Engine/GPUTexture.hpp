@@ -14,7 +14,9 @@ using SamplerAllocatorMessage = std::string;
 
 struct GPUSampler {
     GLuint GLObjectID{};
+#ifdef DEBUG
     std::string Name{};
+#endif
 
     ND_GRAPHICS_MOVE_ONLY_RESOURCE(GPUSampler);
 };
@@ -36,7 +38,9 @@ struct GPUSamplerBuilder {
     [[nodiscard]] std::pair<std::optional<GPUSampler>, std::vector<SamplerAllocatorMessage>> Build() noexcept;
 
 private:
+#ifdef DEBUG
     std::string name{};
+#endif
     TextureMinificationMode minFilter{ TextureMinificationMode::NearestMipmapLinear };
     TextureMagnificationMode magFilter{ TextureMagnificationMode::Linear };
     float minLOD{ -1000.0f };
@@ -61,7 +65,9 @@ using TextureAllocatorMessage = std::string;
 
 struct GPUTexture {
     GLuint GLObjectID{};
+#ifdef DEBUG
     std::string Name{};
+#endif
     unsigned Width{};
     unsigned Height{};
     unsigned Depth{};
@@ -80,7 +86,9 @@ struct GPUTextureBuilder {
     [[nodiscard]] std::pair<std::optional<GPUTexture>, std::vector<TextureAllocatorMessage>> Build() noexcept;
 
 private:
+#ifdef DEBUG
     std::string name{};
+#endif
     unsigned width{ 1 };
     unsigned height{ 1 };
     unsigned depth{ 1 };

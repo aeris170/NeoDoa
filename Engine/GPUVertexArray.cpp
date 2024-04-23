@@ -10,6 +10,9 @@ GPUVertexArray::GPUVertexArray(GPUVertexArray&& other) noexcept {
 }
 GPUVertexArray& GPUVertexArray::operator=(GPUVertexArray&& other) noexcept {
     std::swap(GLObjectID, other.GLObjectID);
+#ifdef DEBUG
+    Name = std::move(other.Name);
+#endif
     ArrayBuffers = std::move(other.ArrayBuffers);
     Layouts = std::move(other.Layouts);
     ElementBuffer = std::move(other.ElementBuffer);
@@ -19,7 +22,9 @@ GPUVertexArray& GPUVertexArray::operator=(GPUVertexArray&& other) noexcept {
 bool GPUVertexArray::HasElementBuffer() const noexcept { return ElementBuffer.has_value(); }
 
 GPUVertexArrayBuilder& GPUVertexArrayBuilder::SetName(std::string_view name) noexcept {
+#ifdef DEBUG
     this->name = name;
+#endif
     return *this;
 }
 GPUVertexArrayBuilder& GPUVertexArrayBuilder::SetArrayBuffer(const GPUBuffer& buffer, const GPUVertexAttribLayout& layout) noexcept {
@@ -80,7 +85,9 @@ GPUVertexArrayBuilder& GPUVertexArrayBuilder::SetElementBuffer(GPUBuffer&& buffe
     std::optional<GPUVertexArray> gpuVertexArray{ std::nullopt };
     gpuVertexArray.emplace();
     gpuVertexArray->GLObjectID = vertexArray;
+#ifdef DEBUG
     gpuVertexArray->Name = std::move(name);
+#endif
     gpuVertexArray->ArrayBuffers = std::move(arrayBuffers);
     gpuVertexArray->Layouts = std::move(layouts);
     gpuVertexArray->ElementBuffer = std::move(elementBuffer);

@@ -41,6 +41,10 @@ struct Asset final : ObserverPattern::Observable {
     T& DataAs() {
         return std::get<T>(data);
     }
+    template<AssetType T>
+    const T& DataAs() const {
+        return std::get<T>(data);
+    }
     uint64_t Version() const;
 
     void Serialize();
