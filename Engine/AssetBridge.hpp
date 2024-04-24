@@ -9,16 +9,11 @@
 #include <Engine/Log.hpp>
 #include <Engine/UUID.hpp>
 #include <Engine/Assets.hpp>
+#include <Engine/GPUBuffer.hpp>
 #include <Engine/GPUShader.hpp>
 #include <Engine/GPUTexture.hpp>
-
-#define ND_EXPLICIT_SPECIALIZE_ALLOCATOR(Name, T, ErrorMessageType) \
-using Name = GPUObjectDatabase<T, ErrorMessageType>; \
-template<> \
-std::vector<ErrorMessageType> Name::Allocate(const Assets& assets, const UUID asset) noexcept
-#define ND_EXPLICIT_SPECIALIZE_ALLOCATOR_SPECIALIZE_MISSING(Name, T) \
-template<> \
-const T& Name::Missing() const noexcept
+#include <Engine/GPUFrameBuffer.hpp>
+#include <Engine/GPUVertexArray.hpp>
 
 struct AssetGPUBridge;
 
@@ -76,28 +71,49 @@ private:
     Database database{};
 };
 
-// This macro's expansion is available at the top of this file.
-ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUSamplers, GPUSampler, SamplerAllocatorMessage);
-ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUTextures, GPUTexture, TextureAllocatorMessage); ND_EXPLICIT_SPECIALIZE_ALLOCATOR_SPECIALIZE_MISSING(GPUTextures, GPUTexture);
+#define ND_EXPLICIT_SPECIALIZE_ALLOCATOR(Name, T, ErrorMessageType) \
+using Name = GPUObjectDatabase<T, ErrorMessageType>; \
+template<> \
+std::vector<ErrorMessageType> Name::Allocate(const Assets& assets, const UUID asset) noexcept
+#define ND_EXPLICIT_SPECIALIZE_ALLOCATOR_SPECIALIZE_MISSING(Name, T) \
+template<> \
+const T& Name::Missing() const noexcept
+ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUBuffers, GPUBuffer, BufferAllocatorMessage);
+ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUFrameBuffers, GPUFrameBuffer, FrameBufferAllocatorMessage);
 ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUShaders, GPUShader, ShaderCompilerMessage);
 ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUShaderPrograms, GPUShaderProgram, ShaderLinkerMessage);
+ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUSamplers, GPUSampler, SamplerAllocatorMessage);
+ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUTextures, GPUTexture, TextureAllocatorMessage); ND_EXPLICIT_SPECIALIZE_ALLOCATOR_SPECIALIZE_MISSING(GPUTextures, GPUTexture);
+ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUVertexArrays, GPUVertexArray, VertexArrayAllocatorMessage);
+#undef ND_EXPLICIT_SPECIALIZE_ALLOCATOR
+#undef ND_EXPLICIT_SPECIALIZE_ALLOCATOR_SPECIALIZE_MISSING
 
 struct AssetGPUBridge {
 
-    GPUSamplers& GetSamplers() noexcept;
-    const GPUSamplers& GetSamplers() const noexcept;
-    GPUTextures& GetTextures() noexcept;
-    const GPUTextures& GetTextures() const noexcept;
+    GPUBuffers& GetGPUBuffers() noexcept;
+    const GPUBuffers& GetGPUBuffers() const noexcept;
+    GPUFrameBuffers& GetGPUFrameBuffers() noexcept;
+    const GPUFrameBuffers& GetGPUFrameBuffers() const noexcept;
     GPUShaders& GetShaders() noexcept;
     const GPUShaders& GetShaders() const noexcept;
     GPUShaderPrograms& GetShaderPrograms() noexcept;
     const GPUShaderPrograms& GetShaderPrograms() const noexcept;
+    GPUSamplers& GetSamplers() noexcept;
+    const GPUSamplers& GetSamplers() const noexcept;
+    GPUTextures& GetTextures() noexcept;
+    const GPUTextures& GetTextures() const noexcept;
+    GPUVertexArrays& GetGPUVertexArrays() noexcept;
+    const GPUVertexArrays& GetGPUVertexArrays() const noexcept;
 
 private:
-    GPUSamplers gpuSamplers{ *this };
-    GPUTextures gpuTextures{ *this };
+    GPUBuffers gpuBuffers{ *this };
+    GPUFrameBuffers gpuFrameBuffers{ *this };
     GPUShaders gpuShaders{ *this };
     GPUShaderPrograms gpuShaderPrograms{ *this };
+    GPUSamplers gpuSamplers{ *this };
+    GPUTextures gpuTextures{ *this };
+    GPUVertexArrays gpuVertexArrays{ *this };
+
 public:
     AssetGPUBridge() noexcept = default;
     ~AssetGPUBridge() noexcept = default;
@@ -106,6 +122,3 @@ public:
     AssetGPUBridge& operator=(AssetGPUBridge&) noexcept = delete;
     AssetGPUBridge& operator=(AssetGPUBridge&&) noexcept = default;
 };
-
-#undef ND_EXPLICIT_SPECIALIZE_ALLOCATOR
-#undef ND_EXPLICIT_SPECIALIZE_ALLOCATOR_SPECIALIZE_MISSING
