@@ -1,21 +1,21 @@
+[submodule "Submodules/angelscript_addons_impl"]
+	path = Submodules/angelscript_addons_impl
+	url = https://github.com/NeoDoa-Collective/angelscript_addons_impl
+[submodule "Submodules/detector"]
+	path = Submodules/detector
+	url = https://github.com/NeoDoa-Collective/detector
 [submodule "Submodules/EZEasing"]
 	path = Submodules/EZEasing
 	url = https://github.com/NeoDoa-Collective/EZEasing
 [submodule "Submodules/IconFontCppHeaders"]
 	path = Submodules/IconFontCppHeaders
 	url = https://github.com/NeoDoa-Collective/IconFontCppHeaders
-[submodule "Submodules/detector"]
-	path = Submodules/detector
-	url = https://github.com/NeoDoa-Collective/detector
-[submodule "Submodules/libtinyfiledialogs"]
-	path = Submodules/libtinyfiledialogs
-	url = https://github.com/NeoDoa-Collective/libtinyfiledialogs
 [submodule "Submodules/imgInspect"]
 	path = Submodules/imgInspect
 	url = https://github.com/NeoDoa-Collective/imgInspect
+[submodule "Submodules/libtinyfiledialogs"]
+	path = Submodules/libtinyfiledialogs
+	url = https://github.com/NeoDoa-Collective/libtinyfiledialogs
 [submodule "Submodules/stb_impl"]
 	path = Submodules/stb_impl
 	url = https://github.com/NeoDoa-Collective/stb_impl
-[submodule "Submodules/angelscript_addons_impl"]
-	path = Submodules/angelscript_addons_impl
-	url = https://github.com/NeoDoa-Collective/angelscript_addons_impl
