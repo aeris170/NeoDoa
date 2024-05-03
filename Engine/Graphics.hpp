@@ -247,7 +247,7 @@ constexpr std::string_view ToString(Multisample ms) noexcept {
     std::unreachable();
 }
 enum class DataFormat {
-    // Unsigned normalized formats
+    // Unsigned unified formats
     R8,
     RG8,
     RGB8,
@@ -264,7 +264,7 @@ enum class DataFormat {
     RG32F,
     RGB32F,
     RGBA32F,
-    // Signed normalized formats
+    // Signed normalized unified formats
     R8_SNORM,
     RG8_SNORM,
     RGB8_SNORM,
@@ -273,7 +273,7 @@ enum class DataFormat {
     RG16_SNORM,
     RGB16_SNORM,
     RGBA16_SNORM,
-    // Unsigned integer formats
+    // Unsigned integer unified formats
     R8UI,
     RG8UI,
     RGB8UI,
@@ -286,7 +286,7 @@ enum class DataFormat {
     RG32UI,
     RGB32UI,
     RGBA32UI,
-    // Signed integer formats
+    // Signed integer unified formats
     R8I,
     RG8I,
     RGB8I,
@@ -299,14 +299,40 @@ enum class DataFormat {
     RG32I,
     RGB32I,
     RGBA32I,
+    // SRGB Formats
+    SRGB8,
+    SRGBA8,
+
     // Depth formats
-    DEPTH_COMPONENT16,
-    DEPTH_COMPONENT24,
-    DEPTH_COMPONENT32,
+    DEPTH16,
+    DEPTH24,
+    DEPTH32,
     DEPTH32F,
+    // Stencil Formats
+    STENCIL1,
+    STENCIL4,
+    STENCIL8,
+    STENCIL16,
     // Depth-stencil formats
     DEPTH24_STENCIL8,
-    DEPTH32F_STENCIL8
+    DEPTH32F_STENCIL8,
+
+    // Split Formats
+    R3G3B2,
+    RGB5A1,
+    RGB10A2,
+    RGB10A2UI,
+    R11FG11FB10F,
+    RGB9E5,
+    // Other Formats (when do they even get used?)
+    RGB4,
+    RGB5,
+    RGB565,
+    RGB10,
+    RGB12,
+    RGBA2,
+    RGBA4,
+    RGBA12
 };
 
 constexpr GLenum ToGLSizedFormat(DataFormat format) {
@@ -364,14 +390,38 @@ constexpr GLenum ToGLSizedFormat(DataFormat format) {
     case RG32I:              return GL_RG32I;
     case RGB32I:             return GL_RGB32I;
     case RGBA32I:            return GL_RGBA32I;
+    // SRGB Formats
+    case SRGB8:              return GL_SRGB8;
+    case SRGBA8:             return GL_SRGB8_ALPHA8;
     // Depth formats
-    case DEPTH_COMPONENT16:  return GL_DEPTH_COMPONENT16;
-    case DEPTH_COMPONENT24:  return GL_DEPTH_COMPONENT24;
-    case DEPTH_COMPONENT32:  return GL_DEPTH_COMPONENT32;
+    case DEPTH16:            return GL_DEPTH_COMPONENT16;
+    case DEPTH24:            return GL_DEPTH_COMPONENT24;
+    case DEPTH32:            return GL_DEPTH_COMPONENT32;
     case DEPTH32F:           return GL_DEPTH_COMPONENT32F;
+    // Stencil Formats
+    case STENCIL1:           return GL_STENCIL_INDEX1;
+    case STENCIL4:           return GL_STENCIL_INDEX4;
+    case STENCIL8:           return GL_STENCIL_INDEX8;
+    case STENCIL16:          return GL_STENCIL_INDEX16;
     // Depth-stencil formats
     case DEPTH24_STENCIL8:   return GL_DEPTH24_STENCIL8;
     case DEPTH32F_STENCIL8:  return GL_DEPTH32F_STENCIL8;
+    // Split Formats
+    case R3G3B2:             return GL_R3_G3_B2;
+    case RGB5A1:             return GL_RGB5_A1;
+    case RGB10A2:            return GL_RGB10_A2;
+    case RGB10A2UI:          return GL_RGB10_A2UI;
+    case R11FG11FB10F:       return GL_R11F_G11F_B10F;
+    case RGB9E5:             return GL_RGB9_E5;
+    // Other Formats (when do they even get used?)
+    case RGB4:               return GL_RGB4;
+    case RGB5:               return GL_RGB5;
+    case RGB565:             return GL_RGB565;
+    case RGB10:              return GL_RGB10;
+    case RGB12:              return GL_RGB12;
+    case RGBA2:              return GL_RGBA2;
+    case RGBA4:              return GL_RGBA4;
+    case RGBA12:             return GL_RGBA12;
     default:                 std::unreachable();
     }
 }
@@ -417,6 +467,14 @@ constexpr GLenum ToGLBaseFormat(DataFormat format) {
     case RGB8I:
     case RGB16I:
     case RGB32I:
+    case R3G3B2:
+    case R11FG11FB10F:
+    case RGB9E5:
+    case RGB4:
+    case RGB5:
+    case RGB565:
+    case RGB10:
+    case RGB12:
         return GL_RGB;
     case RGBA8:
     case RGBA16:
@@ -430,12 +488,27 @@ constexpr GLenum ToGLBaseFormat(DataFormat format) {
     case RGBA8I:
     case RGBA16I:
     case RGBA32I:
+    case RGB5A1:
+    case RGB10A2:
+    case RGB10A2UI:
+    case RGBA2:
+    case RGBA4:
+    case RGBA12:
         return GL_RGBA;
-    case DEPTH_COMPONENT16:
-    case DEPTH_COMPONENT24:
-    case DEPTH_COMPONENT32:
+    case SRGB8:
+        return GL_SRGB;
+    case SRGBA8:
+        return GL_SRGB_ALPHA;
+    case DEPTH16:
+    case DEPTH24:
+    case DEPTH32:
     case DEPTH32F:
         return GL_DEPTH_COMPONENT;
+    case STENCIL1:
+    case STENCIL4:
+    case STENCIL8:
+    case STENCIL16:
+        return GL_STENCIL_INDEX;
     case DEPTH24_STENCIL8:
     case DEPTH32F_STENCIL8:
         return GL_DEPTH_STENCIL;
@@ -447,7 +520,7 @@ constexpr GLenum ToGLBaseFormat(DataFormat format) {
 constexpr std::string_view ToString(DataFormat format) {
     using enum DataFormat;
     switch (format) {
-    // Unsigned normalized formats
+    // Unsigned unified formats
     case R8:                 return "R8";
     case RG8:                return "RG8";
     case RGB8:               return "RGB8";
@@ -464,7 +537,7 @@ constexpr std::string_view ToString(DataFormat format) {
     case RG32F:              return "RG32F";
     case RGB32F:             return "RGB32F";
     case RGBA32F:            return "RGBA32F";
-    // Signed normalized formats
+    // Signed normalized unified formats
     case R8_SNORM:           return "R8_SNORM";
     case RG8_SNORM:          return "RG8_SNORM";
     case RGB8_SNORM:         return "RGB8_SNORM";
@@ -473,7 +546,7 @@ constexpr std::string_view ToString(DataFormat format) {
     case RG16_SNORM:         return "RG16_SNORM";
     case RGB16_SNORM:        return "RGB16_SNORM";
     case RGBA16_SNORM:       return "RGBA16_SNORM";
-    // Unsigned integer formats
+    // Unsigned integer unified formats
     case R8UI:               return "R8UI";
     case RG8UI:              return "RG8UI";
     case RGB8UI:             return "RGB8UI";
@@ -486,7 +559,7 @@ constexpr std::string_view ToString(DataFormat format) {
     case RG32UI:             return "RG32UI";
     case RGB32UI:            return "RGB32UI";
     case RGBA32UI:           return "RGBA32UI";
-    // Signed integer formats
+    // Signed integer unified formats
     case R8I:                return "R8I";
     case RG8I:               return "RG8I";
     case RGB8I:              return "RGB8I";
@@ -499,14 +572,38 @@ constexpr std::string_view ToString(DataFormat format) {
     case RG32I:              return "RG32I";
     case RGB32I:             return "RGB32I";
     case RGBA32I:            return "RGBA32I";
+    // SRGB Formats
+    case SRGB8:              return "sRGB8";
+    case SRGBA8:             return "sRGBA8";
     // Depth formats
-    case DEPTH_COMPONENT16:  return "DEPTH_COMPONENT16";
-    case DEPTH_COMPONENT24:  return "DEPTH_COMPONENT24";
-    case DEPTH_COMPONENT32:  return "DEPTH_COMPONENT32";
+    case DEPTH16:            return "DEPTH16";
+    case DEPTH24:            return "DEPTH24";
+    case DEPTH32:            return "DEPTH32";
     case DEPTH32F:           return "DEPTH32F";
+    // Stencil formats
+    case STENCIL1:           return "STENCIL1";
+    case STENCIL4:           return "STENCIL4";
+    case STENCIL8:           return "STENCIL8";
+    case STENCIL16:          return "STENCIL16";
     // Depth-stencil formats
     case DEPTH24_STENCIL8:   return "DEPTH24_STENCIL8";
     case DEPTH32F_STENCIL8:  return "DEPTH32F_STENCIL8";
+    // Split Formats
+    case R3G3B2:             return "R3G3B2";
+    case RGB5A1:             return "RGB5A1";
+    case RGB10A2:            return "RGB10A2";
+    case RGB10A2UI:          return "RGB10A2UI";
+    case R11FG11FB10F:       return "R11FG11FB10F";
+    case RGB9E5:             return "RGB9E5";
+        // Other Formats (when do they even get used?)
+    case RGB4:               return "RGB4";
+    case RGB5:               return "RGB5";
+    case RGB565:             return "RGB565";
+    case RGB10:              return "RGB10";
+    case RGB12:              return "RGB12";
+    case RGBA2:              return "RGBA2";
+    case RGBA4:              return "RGBA4";
+    case RGBA12:             return "RGBA12";
     default:                 std::unreachable();
     }
 }
