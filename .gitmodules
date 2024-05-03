@@ -19,6 +19,3 @@
 [submodule "Submodules/angelscript_addons_impl"]
 	path = Submodules/angelscript_addons_impl
 	url = https://github.com/NeoDoa-Collective/angelscript_addons_impl
-[submodule "Submodules/debugbreak"]
-	path = Submodules/debugbreak
-	url = https://github.com/NeoDoa-Collective/debugbreak
