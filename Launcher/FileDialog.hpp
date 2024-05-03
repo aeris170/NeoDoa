@@ -10,8 +10,8 @@
 #include <unordered_map>
 #include <algorithm>
 
-#include <Engine/TypedefsAndConstants.hpp>
 #include <Engine/Log.hpp>
+#include <Engine/Graphics.hpp>
 
 #define IFD_DIALOG_FILE			0
 #define IFD_DIALOG_DIRECTORY	1
@@ -21,7 +21,7 @@ class FileDialog {
 public:
 	static inline void Initialize() {
 		Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
-			TEX tex;
+			GLuint tex;
 			glGenTextures(1, &tex);
 			glBindTexture(GL_TEXTURE_2D, tex);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -31,10 +31,10 @@ public:
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, (fmt == 0) ? GL_BGRA : GL_RGBA, GL_UNSIGNED_BYTE, data);
 			glGenerateMipmap(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, 0);
-			return reinterpret_cast<void*>(tex);
+			return reinterpret_cast<void*>(static_cast<uint64_t>(tex));
 		};
 		Instance().DeleteTexture = [](void* tex) {
-			TEX texID = static_cast<TEX>(reinterpret_cast<uint64_t>(tex));
+			GLuint texID = static_cast<GLuint>(reinterpret_cast<uint64_t>(tex));
 			glDeleteTextures(1, &texID);
 		};
 	}

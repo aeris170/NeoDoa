@@ -22,9 +22,8 @@ static zmq::socket_type GetZMQSocketType(SocketType type) {
 		return zmq::socket_type::push;
 	case SocketType::Pull:
 		return zmq::socket_type::pull;
-	default:
-		break;
 	}
+	std::unreachable();
 }
 
 static zmq::send_flags GetZMQSendFlag(SendFlag flag) {
@@ -35,9 +34,8 @@ static zmq::send_flags GetZMQSendFlag(SendFlag flag) {
 		return zmq::send_flags::dontwait;
 	case SendFlag::SendMore:
 		return zmq::send_flags::sndmore;
-	default:
-		break;
 	}
+	std::unreachable();
 }
 
 static zmq::recv_flags GetZMQRecvFlag(ReceiveFlag flag) {
@@ -46,9 +44,8 @@ static zmq::recv_flags GetZMQRecvFlag(ReceiveFlag flag) {
 		return zmq::recv_flags::none;
 	case ReceiveFlag::DontWait:
 		return zmq::recv_flags::dontwait;
-	default:
-		break;
 	}
+	std::unreachable();
 }
 
 
