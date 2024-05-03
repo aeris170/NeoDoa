@@ -60,7 +60,7 @@ struct GPUShaderProgram {
         ShaderType ReferencedBy;
     };
 
-    GLuint GLObjectID;
+    GLuint GLObjectID{};
 #ifdef DEBUG
     std::string Name;
 #endif

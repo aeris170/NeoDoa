@@ -3,6 +3,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <tinyxml2.h>
+#include <debugbreak.h>
 
 #include "Angel.hpp"
 #include "Scene.hpp"
@@ -352,4 +353,5 @@ static void message_callback(GLenum source, GLenum type, GLuint id, GLenum sever
     }();
 
     DOA_LOG_OPENGL("%s, %s, %s, %d: %s", src_str, type_str, severity_str, id, message);
+    debug_break();
 }
