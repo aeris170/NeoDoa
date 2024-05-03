@@ -97,7 +97,12 @@ public:
     }
 
 private:
+#ifdef DEBUG
+    std::unordered_map<entt::id_type, entt::poly<Attachment>> _attachments{};
+#elif NDEBUG
     entt::dense_map<entt::id_type, entt::poly<Attachment>> _attachments{};
-    //std::vector<entt::poly<Attachment>> _attachments{};
+#else
+#error "Neither DEBUG nor NDEBUG are defined!"
+#endif
     /* Core Attachment */
 };

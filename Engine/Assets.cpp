@@ -661,34 +661,41 @@ void Assets::PerformPostDeserializationAction<Material>(UUID id) noexcept {
         asset.ClearAllUniforms();
         return;
     }
-    assert(database.contains(asset.ShaderProgram));
-    assert(bridge.GetShaderPrograms().Exists(asset.ShaderProgram));
+    assert(database.contains(asset.ShaderProgram)); // Asset must exist, but GPU resource may not due to compilation-linking errors.
+    //assert(bridge.GetShaderPrograms().Exists(asset.ShaderProgram));
 
-    const GPUShaderProgram& program = bridge.GetShaderPrograms().Fetch(asset.ShaderProgram);
+    const GPUShaderProgram* program = bridge.GetShaderPrograms().Query(asset.ShaderProgram);
+    if (program) {
+        auto&& algorithm = [](Material::Uniforms& uniforms, ShaderType group, const GPUShaderProgram& program) {
+            Material::Uniforms copy = std::move(uniforms);
+            uniforms.Clear();
 
-    auto&& algorithm = [](Material::Uniforms& uniforms, ShaderType group, const GPUShaderProgram& program) {
-        Material::Uniforms copy = std::move(uniforms);
-        uniforms.Clear();
+            auto& uniformList = copy.GetAll();
 
-        auto& uniformList = copy.GetAll();
+            for (auto& uniform : program.Uniforms) {
+                if (uniform.ReferencedBy != group) { continue; }
 
-        for (auto& uniform : program.Uniforms) {
-            if (uniform.ReferencedBy != group) { continue; }
-
-            auto search = std::ranges::find_if(uniformList, [&uniform](auto& uniformValue) {
-                return uniformValue.Name == uniform.Name && uniformValue.Value.index() == MaterialPostDeserialization::TypeNameToVariantIndex(uniform.TypeName);
-            });
-            if (search != uniformList.end()) {
-                MaterialPostDeserialization::InsertUniform(uniforms, uniform.Location, *search);
-            } else {
-                MaterialPostDeserialization::EmplaceUniform(uniforms, uniform.Location, uniform.TypeName, uniform.Name, uniform.ArraySize);
+                auto search = std::ranges::find_if(uniformList, [&uniform](auto& uniformValue) {
+                    return uniformValue.Name == uniform.Name && uniformValue.Value.index() == MaterialPostDeserialization::TypeNameToVariantIndex(uniform.TypeName);
+                });
+                if (search != uniformList.end()) {
+                    MaterialPostDeserialization::InsertUniform(uniforms, uniform.Location, *search);
+                } else {
+                    MaterialPostDeserialization::EmplaceUniform(uniforms, uniform.Location, uniform.TypeName, uniform.Name, uniform.ArraySize);
+                }
             }
-        }
-    };
+        };
 
-    algorithm(asset.VertexUniforms, ShaderType::Vertex, program);
-    algorithm(asset.TessellationControlUniforms, ShaderType::TessellationControl, program);
-    algorithm(asset.TessellationEvaluationUniforms, ShaderType::TessellationEvaluation, program);
-    algorithm(asset.GeometryUniforms, ShaderType::Geometry, program);
-    algorithm(asset.FragmentUniforms, ShaderType::Fragment, program);
+        algorithm(asset.VertexUniforms, ShaderType::Vertex, *program);
+        algorithm(asset.TessellationControlUniforms, ShaderType::TessellationControl, *program);
+        algorithm(asset.TessellationEvaluationUniforms, ShaderType::TessellationEvaluation, *program);
+        algorithm(asset.GeometryUniforms, ShaderType::Geometry, *program);
+        algorithm(asset.FragmentUniforms, ShaderType::Fragment, *program);
+    } else {
+        // Cast-away const. Assets are never created const.
+        const Asset& asset{ database[id] };
+        std::vector<std::any>& errorMessages = const_cast<std::vector<std::any>&>(asset.ErrorMessages());
+        errorMessages.emplace_back(std::string("Material deserialization failed."));
+        errorMessages.emplace_back(std::string("Referenced shader program failed to allocate. Check for errors in program!"));
+    }
 }

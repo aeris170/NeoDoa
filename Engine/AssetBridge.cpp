@@ -38,28 +38,67 @@ std::vector<ShaderLinkerMessage> GPUShaderPrograms::Allocate(const Assets& asset
     assert(handle && handle->IsShaderProgram());
     const ShaderProgram& program{ handle->DataAs<ShaderProgram>() };
 
+    std::vector<ShaderLinkerMessage> preBuildMessages;
+    GPUShader* vertShader = bridge.GetShaders().Query(program.VertexShader);
+    GPUShader* tessEvalShader = bridge.GetShaders().Query(program.TessellationEvaluationShader);
+    GPUShader* tessCtrlShader = bridge.GetShaders().Query(program.TessellationControlShader);
+    GPUShader* geomShader = bridge.GetShaders().Query(program.GeometryShader);
+    GPUShader* fragShader = bridge.GetShaders().Query(program.FragmentShader);
+    GPUShader* compShader = bridge.GetShaders().Query(program.ComputeShader);
+
+    if (program.HasComputeShader()) {
+        if (!compShader) {
+            preBuildMessages.emplace_back("Cannot build pipeline!");
+            preBuildMessages.emplace_back("Compute shader couldn't compile. Check Compute shader for compiler errors.");
+        }
+    } else {
+        if (program.HasVertexShader() && !vertShader) {
+            preBuildMessages.emplace_back("Vertex shader couldn't compile. Check Vertex shader for compiler errors.");
+        }
+        if (program.HasTessellationEvaluationShader() && !tessEvalShader) {
+            preBuildMessages.emplace_back("Tessellation Evaluation shader couldn't compile. Check Tessellation Evaluation shader for compiler errors.");
+        }
+        if (program.HasTessellationControlShader() && !tessCtrlShader) {
+            preBuildMessages.emplace_back("Tessellation Control shader couldn't compile. Check Tessellation Control shader for compiler errors.");
+        }
+        if (program.HasGeometryShader() && !geomShader) {
+            preBuildMessages.emplace_back("Geometry shader couldn't compile. Check Geometry shader for compiler errors.");
+        }
+        if (program.HasFragmentShader() && !fragShader) {
+            preBuildMessages.emplace_back("Fragment shader couldn't compile. Check Fragment shader for compiler errors.");
+        }
+
+        // Prepend message if erred
+        if (!preBuildMessages.empty()) {
+            preBuildMessages.emplace(preBuildMessages.begin(), "Cannot build pipeline!");
+        }
+    }
+
+    if (!preBuildMessages.empty()) {
+        DOA_LOG_ERROR("Shader program allocation failed for %s (UUID: %s). Aborting.", program.Name.c_str(), asset.AsString().c_str());
+        return preBuildMessages;
+    }
+
     GPUShaderProgramBuilder builder;
 
     builder.SetName(program.Name);
-    if (GPUShader* compShader = bridge.GetShaders().Query(program.ComputeShader)) {
+    if (vertShader) {
+        builder.SetVertexShader(*vertShader);
+    }
+    if (tessEvalShader) {
+        builder.SetTessellationEvaluationShader(*tessEvalShader);
+    }
+    if (tessCtrlShader) {
+        builder.SetTessellationControlShader(*tessCtrlShader);
+    }
+    if (geomShader) {
+        builder.SetGeometryShader(*geomShader);
+    }
+    if (fragShader) {
+        builder.SetFragmentShader(*fragShader);
+    }
+    if (compShader) {
         builder.SetComputeShader(*compShader);
-    } else {
-        GPUShader* vertShader = bridge.GetShaders().Query(program.VertexShader);
-        GPUShader* fragShader = bridge.GetShaders().Query(program.FragmentShader);
-        if (vertShader && fragShader) {
-            builder.SetVertexShader(*vertShader).SetFragmentShader(*fragShader);
-        }
-
-        if (GPUShader* tessEvalShader = bridge.GetShaders().Query(program.TessellationEvaluationShader)) {
-            builder.SetTessellationEvaluationShader(*tessEvalShader);
-            if (GPUShader* tessCtrl = bridge.GetShaders().Query(program.TessellationControlShader)) {
-                builder.SetTessellationControlShader(*tessCtrl);
-            }
-        }
-
-        if (GPUShader* geomShader = bridge.GetShaders().Query(program.GeometryShader)) {
-            builder.SetGeometryShader(*geomShader);
-        }
     }
 
     auto [gpuShaderProgram, messages] = builder.Build();

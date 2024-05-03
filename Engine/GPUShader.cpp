@@ -66,12 +66,13 @@ std::pair<std::optional<GPUShader>, std::vector<ShaderCompilerMessage>> GPUShade
     int success;
     glCompileShader(shader);
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+
+    QueryShaderCompilerMessages(shader, messages);
+
     if (!success) {
         messages.emplace_back(0, ShaderCompilerMessageType::Error, std::format("{} Shader compilation failed!", ToString(type)));
         glDeleteShader(shader);
     }
-
-    QueryShaderCompilerMessages(shader, messages);
 
     std::optional<GPUShader> gpuShader{ std::nullopt };
     if (success) {
