@@ -3,7 +3,7 @@
 	url = https://github.com/NeoDoa-Collective/angelscript_addons_impl
 [submodule "Submodules/detector"]
 	path = Submodules/detector
-	url = C:\\NeoDoa\\Submodules\\detector
+	url = https://github.com/NeoDoa-Collective/detector
 [submodule "Submodules/EZEasing"]
 	path = Submodules/EZEasing
 	url = https://github.com/NeoDoa-Collective/EZEasing
