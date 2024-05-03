@@ -146,24 +146,24 @@ void MaterialDisplay::RenderShaderUniforms() noexcept {
 
     AssetHandle programHandle = assets->FindAsset(material.ShaderProgram);
     if (!programHandle.HasValue()) {
-        ImGui::Text("Selected program (ID: %%llu) is non-existant!", static_cast<uint64_t>(material.ShaderProgram));
+        ImGui::Text("Selected program (ID: %llu) is non-existant!", static_cast<uint64_t>(material.ShaderProgram));
         return;
     }
 
     if (!programHandle->IsShaderProgram()) {
-        ImGui::Text("Selected program (ID: %%llu) is non a shader program!", static_cast<uint64_t>(material.ShaderProgram));
+        ImGui::Text("Selected program (ID: %llu) is non a shader program!", static_cast<uint64_t>(material.ShaderProgram));
         return;
     }
 
     const ShaderProgram& program = programHandle->DataAs<ShaderProgram>();
     if (!program.IsComplete()) {
-        ImGui::Text("Selected program (ID: %%llu) is not complete!", static_cast<uint64_t>(material.ShaderProgram));
+        ImGui::Text("Selected program (ID: %llu) is not complete!", static_cast<uint64_t>(material.ShaderProgram));
         return;
     }
 
     const GPUShaderProgram* gpuProgramPtr = assets->GPUBridge().GetShaderPrograms().Query(material.ShaderProgram);
     if (!gpuProgramPtr) {
-        ImGui::Text("Selected program (ID: %%llu) is not allocated on the GPU yet!", static_cast<uint64_t>(material.ShaderProgram));
+        ImGui::Text("Selected program (ID: %llu) is not allocated on the GPU yet!", static_cast<uint64_t>(material.ShaderProgram));
         return;
     }
     const GPUShaderProgram& gpuProgram = *gpuProgramPtr;
