@@ -9,6 +9,7 @@ target_include_directories(Engine PUBLIC ..)
 
 target_link_libraries(Engine PUBLIC Utility)
 target_link_libraries(Engine PUBLIC angelscript_addons_impl)
+target_link_libraries(Engine PUBLIC debugbreak)
 target_link_libraries(Engine PUBLIC stb_impl)
 
 find_package(assimp CONFIG REQUIRED)
