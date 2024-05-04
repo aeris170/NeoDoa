@@ -625,7 +625,7 @@ void MenuBar::AboutSection::RenderLicenceNotices() noexcept {
         ImGui::PopFont();
         auto title = (std::string("License###") + name);
         if (ImGui::CollapsingHeader(title.c_str(), ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick)) {
-            ImGui::TextUnformatted(licence.c_str());
+            ImGui::TextWrapped("%s", licence.c_str());
         }
     }
 }
