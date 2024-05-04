@@ -1,5 +1,5 @@
 #include <Engine/VertexAttribLayout.hpp>
-
+/*
 template<>
 void VertexAttribLayout::Define<float_t>(size_t count, bool isNormalized) {
     static size_t size{ sizeof(float_t) };
@@ -62,4 +62,4 @@ void VertexAttribLayout::Define<uint32_t>(size_t count, bool isNormalized) {
     elements.emplace_back(GL_UNSIGNED_INT, count, isNormalized);
     offsets.emplace_back(offsets.back() + count * size);
     stride += static_cast<GLuint>(count * size);
-}
+}*/

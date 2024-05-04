@@ -23,7 +23,7 @@ private:
 
     friend struct VertexArray;
 };
-
+/*
 template<>
 void VertexAttribLayout::Define<float_t>(size_t count, bool isNormalized);
 template<>
@@ -40,3 +40,4 @@ template<>
 void VertexAttribLayout::Define<int32_t>(size_t count, bool isNormalized);
 template<>
 void VertexAttribLayout::Define<uint32_t>(size_t count, bool isNormalized);
+*/

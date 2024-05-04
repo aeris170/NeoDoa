@@ -357,7 +357,7 @@ void* GUI::FindIconForFileType(const FNode& file, TextureSize size) const {
     }
     return GetFileIcon(size);
 }
-void* GUI::FindIconByName(const std::string_view key, TextureSize size) const { return reinterpret_cast<void*>(SVGPathway::Get(std::string(key), TextureStyle::PADDED, size).GLObjectID); }
+void* GUI::FindIconByName(const std::string_view key, TextureSize size) const { return reinterpret_cast<void*>(static_cast<uint64_t>(SVGPathway::Get(std::string(key), TextureStyle::PADDED, size).GLObjectID)); }
 
 MetaAssetInfo& GUI::GetMetaInfoOf(const FNode& file) { return meta.GetMetaAssetInfoBank().GetMetaInfoOf(file); }
 

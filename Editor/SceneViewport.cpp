@@ -54,7 +54,7 @@ void SceneViewport::Render() {
     RenderSceneToBuffer(scene);
 
     ImVec2 size{ static_cast<float>(viewportSize.Width), static_cast<float>(viewportSize.Height) };
-    ImGui::Image(reinterpret_cast<void*>(viewportFramebuffer->GetColorAttachment()), size, { 0, 1 }, { 1, 0 });
+    ImGui::Image(reinterpret_cast<void*>(static_cast<uint64_t>(viewportFramebuffer->GetColorAttachment())), size, { 0, 1 }, { 1, 0 });
 
     ImGui::PushClipRect({ viewportPosition.x, viewportPosition.y }, { viewportPosition.x + size.x, viewportPosition.y + size.y }, false);
     gizmos.settings.viewportSize = viewportSize;

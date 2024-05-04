@@ -132,7 +132,7 @@ void MenuBar::RenderHelpSubMenu() noexcept {
 MenuBar::AboutSection::AboutSection(MenuBar& owner) noexcept :
     mb(owner),
     licences({
-        { "NeoDoa", R"(# SOFTWARE LICENSE AGREEMENT
+        { "NeoDoa", reinterpret_cast<const char*>(u8R"(# SOFTWARE LICENSE AGREEMENT
 This Software License Agreement ("Agreement") is made and entered into as of 2024-02-10 ("Effective Date") by and between Doğa Oruç, a private person, having its principal place of business in Türkiye ("Licensor"), and Licensee, either a private person, a registered company, or a partnership, having its principal place of business anywhere ("Licensee").
 
 WHEREAS, the Licensor owns certain software that it desires to license to the Licensee;
@@ -172,7 +172,7 @@ IN WITNESS WHEREOF, the parties have executed this Software License Agreement as
 
 Licensor: Doğa Oruç
 
-Licensee: Licensee)"},
+Licensee: Licensee)")},
         { "AngelScript", R"(AngelCode Scripting Library
 	Copyright © 2003 - 2020 Andreas Jönsson
 

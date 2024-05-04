@@ -86,6 +86,7 @@ std::string SamplerSerializer::Helpers::ToString(const TextureMinificationMode m
     case NearestMipmapLinear:  return nameof(NearestMipmapLinear);
     case LinearMipmapLinear:   return nameof(LinearMipmapLinear);
     }
+    std::unreachable();
 }
 std::string SamplerSerializer::Helpers::ToString(const TextureMagnificationMode mode) noexcept {
     switch(mode) {
@@ -93,6 +94,7 @@ std::string SamplerSerializer::Helpers::ToString(const TextureMagnificationMode 
     case Nearest: return nameof(Nearest);
     case Linear:  return nameof(Linear);
     }
+    std::unreachable();
 }
 std::string SamplerSerializer::Helpers::ToString(const TextureWrappingMode mode) noexcept {
     switch(mode) {
@@ -103,6 +105,7 @@ std::string SamplerSerializer::Helpers::ToString(const TextureWrappingMode mode)
     case MirrorClampToEdge: return nameof(MirrorClampToEdge);
     case ClampToBorder:     return nameof(ClampToBorder);
     }
+    std::unreachable();
 }
 std::string SamplerSerializer::Helpers::ToString(const TextureCompareMode mode) noexcept {
     switch(mode) {
@@ -110,6 +113,7 @@ std::string SamplerSerializer::Helpers::ToString(const TextureCompareMode mode) 
     case CompareRefToTexture: return nameof(CompareRefToTexture);
     case None:                return nameof(None);
     }
+    std::unreachable();
 }
 std::string SamplerSerializer::Helpers::ToString(const TextureCompareFunction function) noexcept {
     switch(function) {
@@ -123,4 +127,5 @@ std::string SamplerSerializer::Helpers::ToString(const TextureCompareFunction fu
     case Always:       return nameof(Always);
     case Never:        return nameof(Never);
     }
+    std::unreachable();
 }
