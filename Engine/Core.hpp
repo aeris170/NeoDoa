@@ -60,6 +60,7 @@ private:
     WindowPtr window{ nullptr };
     std::unique_ptr<Input> input{ nullptr };
     std::unique_ptr<FrameBuffer> offscreenBuffer{ nullptr };
+    GPUFrameBuffer offscreenBuffer_{};
     std::unique_ptr<Project> project{ nullptr };
     std::unique_ptr<Assets> assets{ nullptr };
     std::unique_ptr<AssetGPUBridge> gpuBridge{ nullptr };
@@ -97,12 +98,6 @@ public:
     }
 
 private:
-#ifdef DEBUG
-    std::unordered_map<entt::id_type, entt::poly<Attachment>> _attachments{};
-#elif NDEBUG
     entt::dense_map<entt::id_type, entt::poly<Attachment>> _attachments{};
-#else
-#error "Neither DEBUG nor NDEBUG are defined!"
-#endif
     /* Core Attachment */
 };

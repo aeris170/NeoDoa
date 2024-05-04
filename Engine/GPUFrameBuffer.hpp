@@ -48,7 +48,7 @@ using FrameBufferAllocatorMessage = std::string;
 struct GPUFrameBuffer {
     GLuint GLObjectID{};
 #ifdef DEBUG
-    std::string Name{};
+    std::string Name{ "Backbuffer" };
 #endif
     std::array<std::optional<std::variant<GPUTexture, GPURenderBuffer>>, 8> ColorAttachments{};
     std::optional<std::variant<GPUTexture, GPURenderBuffer>> DepthAttachment{};

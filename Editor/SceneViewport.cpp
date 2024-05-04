@@ -50,7 +50,7 @@ void SceneViewport::Render() {
         ImGui::GetWindowPos().x + ImGui::GetCursorPos().x,
         ImGui::GetWindowPos().y + ImGui::GetCursorPos().y
     };
-    ReallocBufferIfNeeded({ static_cast<size_t>(ImGui::GetContentRegionAvail().x), static_cast<size_t>(ImGui::GetContentRegionAvail().y) });
+    ReallocBufferIfNeeded({ static_cast<unsigned>(ImGui::GetContentRegionAvail().x), static_cast<unsigned>(ImGui::GetContentRegionAvail().y) });
     RenderSceneToBuffer(scene);
 
     ImVec2 size{ static_cast<float>(viewportSize.Width), static_cast<float>(viewportSize.Height) };
@@ -81,6 +81,7 @@ void SceneViewport::ReallocBufferIfNeeded(Resolution size) {
 }
 void SceneViewport::RenderSceneToBuffer(Scene& scene) {
     viewportFramebuffer->Bind();
+    viewportFramebuffer->ClearColorBuffer(scene.ClearColor.r, scene.ClearColor.g, scene.ClearColor.b, scene.ClearColor.a);
     scene.Update(gui.get().delta);
     scene.Render();
     FrameBuffer::BackBuffer().Bind();

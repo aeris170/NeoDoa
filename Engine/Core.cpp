@@ -190,6 +190,23 @@ const CorePtr& Core::CreateCore(Resolution resolution, const char* title, bool i
         builder.SetDepthStencilAttachment(OpenGL::DEPTH24_STENCIL8);
         _this->offscreenBuffer = builder.BuildUnique();
     }
+    if (renderOffscreen) {
+        GPUTextureBuilder tBuilder;
+        auto color = tBuilder.SetWidth(resolution.Width).SetHeight(resolution.Height).SetData(DataFormat::RGBA8, {}).Build().first;
+
+        GPURenderBufferBuilder rbBuilder;
+        auto depthStencil = rbBuilder.SetLayout(resolution.Width, resolution.Height, DataFormat::DEPTH32F_STENCIL8).Build().first;
+        assert(depthStencil.has_value());
+
+        GPUFrameBufferBuilder fbBuilder;
+        fbBuilder.SetName("NeoDoa Core Offscreen Buffer")
+            .AttachColorTexture(std::move(color.value()), 0)
+            .AttachDepthStencilRenderBuffer(std::move(depthStencil.value()));
+        auto fb = fbBuilder.Build().first;
+        assert(fb.has_value());
+
+        _this->offscreenBuffer_ = std::move(fb.value());
+    }
 #pragma endregion
 
 #pragma region KHR_debug
@@ -280,7 +297,7 @@ void Core::Start() {
 
         if (project != nullptr && project->HasOpenScene()) {
             for (auto [id, attachment] : _attachments) {
-                attachment->BeforeFrame(project.get());
+                //attachment->BeforeFrame(project.get());
             }
             Scene& scene = project->GetOpenScene();
             if (playing) {
@@ -297,7 +314,7 @@ void Core::Start() {
                 glViewport(0, 0, window->GetContentResolution().Width, window->GetContentResolution().Height);
             }
             for (auto [id, attachment] : _attachments) {
-                attachment->AfterFrame(project.get());
+                //attachment->AfterFrame(project.get());
             }
         }
 

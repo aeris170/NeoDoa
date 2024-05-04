@@ -97,6 +97,7 @@ void Scene::Render() {
     //cam.UpdateProjection();
     //cam.UpdateViewProjection();
 
+    /*
     _registry.view<OrthoCameraComponent>().each([](Entity entt, OrthoCameraComponent& camera) {
         if (!camera.IsActiveAndRendering()) { return; }
         camera.UpdateMatrices();
@@ -116,7 +117,7 @@ void Scene::Render() {
         DOA_LOG_INFO("perspective camera attached to entity %d", EntityTo<int>(camera.GetEntity()));
         //render stuff here
     });
-
+    */
     /*
     _registry.view<ScriptComponent>().each([this, &angel](Entity entity, ScriptComponent& script) {
         for (auto& module : script._modules) {
