@@ -15,6 +15,8 @@ struct GPUVertexArray {
     std::vector<GPUBuffer> ArrayBuffers{};
     std::vector<GPUVertexAttribLayout> Layouts{};
     std::optional<GPUBuffer> ElementBuffer{};
+    DataType IndexType{};
+    TopologyType Topology{};
 
     bool HasElementBuffer() const noexcept;
 
@@ -25,8 +27,9 @@ struct GPUVertexArrayBuilder {
     GPUVertexArrayBuilder& SetName(std::string_view name) noexcept;
     GPUVertexArrayBuilder& SetArrayBuffer(const GPUBuffer& buffer, const GPUVertexAttribLayout& layout) noexcept;
     GPUVertexArrayBuilder& SetArrayBuffer(GPUBuffer&& buffer, GPUVertexAttribLayout&& layout) noexcept;
-    GPUVertexArrayBuilder& SetElementBuffer(const GPUBuffer& buffer) noexcept;
-    GPUVertexArrayBuilder& SetElementBuffer(GPUBuffer&& buffer) noexcept;
+    GPUVertexArrayBuilder& SetElementBuffer(const GPUBuffer& buffer, DataType indexType = DataType::UnsignedShort) noexcept;
+    GPUVertexArrayBuilder& SetElementBuffer(GPUBuffer&& buffer, DataType indexType = DataType::UnsignedShort) noexcept;
+    GPUVertexArrayBuilder& SetTopology(TopologyType topology) noexcept;
 
     [[nodiscard]] std::pair<std::optional<GPUVertexArray>, std::vector<VertexArrayAllocatorMessage>> Build() noexcept;
 
@@ -37,6 +40,8 @@ private:
     std::vector<GPUBuffer> arrayBuffers{};
     std::vector<GPUVertexAttribLayout> layouts{};
     std::optional<GPUBuffer> elementBuffer{};
+    DataType indexType{};
+    TopologyType topology{ TopologyType::Triangles };
 
 public:
     ND_GRAPHICS_BUILDER_RULE_OF_0(GPUVertexArrayBuilder);

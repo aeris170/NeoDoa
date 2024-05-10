@@ -16,6 +16,8 @@ GPUVertexArray& GPUVertexArray::operator=(GPUVertexArray&& other) noexcept {
     ArrayBuffers = std::move(other.ArrayBuffers);
     Layouts = std::move(other.Layouts);
     ElementBuffer = std::move(other.ElementBuffer);
+    std::swap(IndexType, other.IndexType);
+    std::swap(Topology, other.Topology);
     return *this;
 }
 
@@ -37,12 +39,18 @@ GPUVertexArrayBuilder& GPUVertexArrayBuilder::SetArrayBuffer(GPUBuffer&& buffer,
     layouts.emplace_back(std::move(layout));
     return *this;
 }
-GPUVertexArrayBuilder& GPUVertexArrayBuilder::SetElementBuffer(const GPUBuffer& buffer) noexcept {
+GPUVertexArrayBuilder& GPUVertexArrayBuilder::SetElementBuffer(const GPUBuffer& buffer, DataType indexType) noexcept {
     elementBuffer.emplace(buffer);
+    this->indexType = indexType;
     return *this;
 }
-GPUVertexArrayBuilder& GPUVertexArrayBuilder::SetElementBuffer(GPUBuffer&& buffer) noexcept {
+GPUVertexArrayBuilder& GPUVertexArrayBuilder::SetElementBuffer(GPUBuffer&& buffer, DataType indexType) noexcept {
     elementBuffer.emplace(std::move(buffer));
+    this->indexType = indexType;
+    return *this;
+}
+GPUVertexArrayBuilder& GPUVertexArrayBuilder::SetTopology(TopologyType topology) noexcept {
+    this->topology = topology;
     return *this;
 }
 
@@ -57,6 +65,7 @@ GPUVertexArrayBuilder& GPUVertexArrayBuilder::SetElementBuffer(GPUBuffer&& buffe
         const GPUBuffer& arrayBuffer{ arrayBuffers[bindingIndx] };
         const GPUVertexAttribLayout& layout{ layouts[bindingIndx] };
         glVertexArrayVertexBuffer(vertexArray, bindingIndx, arrayBuffer.GLObjectID, 0, layout.Stride);
+        glVertexArrayBindingDivisor(vertexArray, bindingIndx, layout.Divisor);
         for (unsigned i = 0; i < layout.Elements.size(); i++) {
             const GPUVertexAttribLayout::Element& elem{ layout.Elements[i] };
 
@@ -91,6 +100,8 @@ GPUVertexArrayBuilder& GPUVertexArrayBuilder::SetElementBuffer(GPUBuffer&& buffe
     gpuVertexArray->ArrayBuffers = std::move(arrayBuffers);
     gpuVertexArray->Layouts = std::move(layouts);
     gpuVertexArray->ElementBuffer = std::move(elementBuffer);
+    gpuVertexArray->IndexType = indexType;
+    gpuVertexArray->Topology = topology;
 
     return { std::move(gpuVertexArray), {} };
 }

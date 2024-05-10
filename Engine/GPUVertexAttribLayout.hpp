@@ -15,8 +15,11 @@ struct GPUVertexAttribLayout {
     };
 
     GLuint Stride{};
+    GLuint Divisor{};
     std::vector<Element> Elements{};
-    std::vector<GLuint> Offsets{};
+    std::vector<GLuint> Offsets{ 0u };
+
+    void Divide(GLuint divisor) noexcept;
 
     template<typename T>
     void Define([[maybe_unused]] size_t count, [[maybe_unused]] bool isNormalized = false) { DOA_LOG_FATAL("Unsupported Vertex attrib!"); std::unreachable(); }

@@ -1,12 +1,31 @@
 #pragma once
 
 #include <span>
+#include <array>
 #include <memory>
 #include <vector>
 #include <cstddef>
 #include <string_view>
 
 #include <GL/glew.h>
+
+struct Region;
+struct GPUFrameBuffer;
+struct GPUVertexArray;
+
+namespace Graphics {
+    void Blit(const GPUFrameBuffer& source, GPUFrameBuffer& destination) noexcept;
+    void Render(const GPUVertexArray& vao, int count, int first = 0) noexcept;
+    void RenderInstanced(const GPUVertexArray& vao, int instanceCount, int count, int first = 0) noexcept;
+
+    void SetRenderArea(const Region region) noexcept;
+    void SetRenderTarget(const GPUFrameBuffer& renderTarget) noexcept;
+    void ClearRenderTargetColor(const GPUFrameBuffer& renderTarget, std::array<float, 4> color = { 0, 0, 0, 0 }, unsigned colorBufferIndex = 0) noexcept;
+    void ClearRenderTargetColors(const GPUFrameBuffer& renderTarget, std::array<float, 4> color = { 0, 0, 0, 0 }) noexcept;
+    void ClearRenderTargetDepth(const GPUFrameBuffer& renderTarget, float depth = 1) noexcept;
+    void ClearRenderTargetStencil(const GPUFrameBuffer& renderTarget, int stencil = 0) noexcept;
+    void ClearRenderTarget(const GPUFrameBuffer& renderTarget, std::array<float, 4> color = { 0, 0, 0, 0 }, float depth = 1, int stencil = 0) noexcept;
+}
 
 #define ND_GRAPHICS_COPYABLE_MOVEABLE_RESOURCE(x) \
     x() noexcept = default; \
@@ -56,12 +75,13 @@ constexpr BufferProperties operator |(const BufferProperties lhs, enum BufferPro
 }
 constexpr GLenum ToGLBufferFlags(BufferProperties properties) noexcept {
     GLenum glBitmask = 0;
-    if (static_cast<bool>(properties & BufferProperties::DynamicStorage))   glBitmask |= GL_DYNAMIC_STORAGE_BIT;
-    if (static_cast<bool>(properties & BufferProperties::ReadableFromCPU))  glBitmask |= GL_MAP_READ_BIT;
-    if (static_cast<bool>(properties & BufferProperties::WriteableFromCPU)) glBitmask |= GL_MAP_WRITE_BIT;
-    if (static_cast<bool>(properties & BufferProperties::Persistent))       glBitmask |= GL_MAP_PERSISTENT_BIT;
-    if (static_cast<bool>(properties & BufferProperties::Coherent))         glBitmask |= GL_MAP_COHERENT_BIT;
-    if (static_cast<bool>(properties & BufferProperties::CPUStorage))       glBitmask |= GL_CLIENT_STORAGE_BIT;
+    using enum BufferProperties;
+    if (static_cast<bool>(properties & DynamicStorage))   glBitmask |= GL_DYNAMIC_STORAGE_BIT;
+    if (static_cast<bool>(properties & ReadableFromCPU))  glBitmask |= GL_MAP_READ_BIT;
+    if (static_cast<bool>(properties & WriteableFromCPU)) glBitmask |= GL_MAP_WRITE_BIT;
+    if (static_cast<bool>(properties & Persistent))       glBitmask |= GL_MAP_PERSISTENT_BIT;
+    if (static_cast<bool>(properties & Coherent))         glBitmask |= GL_MAP_COHERENT_BIT;
+    if (static_cast<bool>(properties & CPUStorage))       glBitmask |= GL_CLIENT_STORAGE_BIT;
     return glBitmask;
 }
 
@@ -334,7 +354,6 @@ enum class DataFormat {
     RGBA4,
     RGBA12
 };
-
 constexpr GLenum ToGLSizedFormat(DataFormat format) {
     using enum DataFormat;
     switch (format) {
@@ -516,7 +535,6 @@ constexpr GLenum ToGLBaseFormat(DataFormat format) {
         std::unreachable();
     }
 }
-
 constexpr std::string_view ToString(DataFormat format) {
     using enum DataFormat;
     switch (format) {
@@ -606,4 +624,79 @@ constexpr std::string_view ToString(DataFormat format) {
     case RGBA12:             return "RGBA12";
     default:                 std::unreachable();
     }
+}
+
+enum class TopologyType {
+    Points,
+    Lines,
+    LineStrip,
+    LineLoop,
+    Triangles,
+    TriangleStrip,
+    TriangleFan
+};
+constexpr GLenum ToGLTopology(TopologyType t) noexcept {
+    using enum TopologyType;
+    switch (t) {
+    case Points        : return GL_POINTS;
+    case Lines         : return GL_LINES;
+    case LineStrip     : return GL_LINE_STRIP;
+    case LineLoop      : return GL_LINE_LOOP;
+    case Triangles     : return GL_TRIANGLES;
+    case TriangleStrip : return GL_TRIANGLE_STRIP;
+    case TriangleFan   : return GL_TRIANGLE_FAN;
+    }
+    std::unreachable();
+}
+constexpr std::string_view ToString(TopologyType t) noexcept {
+    using enum TopologyType;
+    switch (t) {
+    case Points        : return "Points";
+    case Lines         : return "Lines";
+    case LineStrip     : return "Line Strip";
+    case LineLoop      : return "Line Loop";
+    case Triangles     : return "Triangles";
+    case TriangleStrip : return "Triangle Strip";
+    case TriangleFan   : return "Triangle Fan";
+    }
+    std::unreachable();
+}
+
+enum class DataType {
+    Byte,
+    UnsignedByte,
+    Short,
+    UnsignedShort,
+    Int,
+    UnsignedInt,
+    Float,
+    Double
+};
+constexpr GLenum ToGLDataType(DataType t) noexcept {
+    using enum DataType;
+    switch (t) {
+    case Byte:          return GL_BYTE;
+    case UnsignedByte:  return GL_UNSIGNED_BYTE;
+    case Short:         return GL_SHORT;
+    case UnsignedShort: return GL_UNSIGNED_SHORT;
+    case Int:           return GL_INT;
+    case UnsignedInt:   return GL_UNSIGNED_INT;
+    case Float:         return GL_FLOAT;
+    case Double:        return GL_DOUBLE;
+    }
+    std::unreachable();
+}
+constexpr std::string_view ToString(DataType t) noexcept {
+    using enum DataType;
+    switch (t) {
+    case Byte:          return "Byte";
+    case UnsignedByte:  return "Unsigned Byte";
+    case Short:         return "Short";
+    case UnsignedShort: return "Unsigned Short";
+    case Int:           return "Int";
+    case UnsignedInt:   return "Unsigned Int";
+    case Float:         return "Float";
+    case Double:        return "Double";
+    }
+    std::unreachable();
 }

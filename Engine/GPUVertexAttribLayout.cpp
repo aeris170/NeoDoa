@@ -6,6 +6,10 @@ GPUVertexAttribLayout::GPUVertexAttribLayout(GPUVertexAttribLayout&&) noexcept =
 GPUVertexAttribLayout& GPUVertexAttribLayout::operator=(const GPUVertexAttribLayout&) noexcept = default;
 GPUVertexAttribLayout& GPUVertexAttribLayout::operator=(GPUVertexAttribLayout&&) noexcept = default;
 
+void GPUVertexAttribLayout::Divide(GLuint divisor) noexcept {
+    Divisor = divisor;
+}
+
 template<>
 void GPUVertexAttribLayout::Define<float_t>(size_t count, bool isNormalized) {
     static size_t size{ sizeof(float_t) };

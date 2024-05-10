@@ -184,6 +184,10 @@ GPUFrameBufferBuilder& GPUFrameBufferBuilder::AttachDepthStencilRenderBuffer(GPU
 #ifdef DEBUG
         gpuFrameBuffer->Name = std::move(name);
 #endif
+    gpuFrameBuffer->ColorAttachments = std::move(colorAttachments);
+    gpuFrameBuffer->DepthAttachment = std::move(depthAttachment);
+    gpuFrameBuffer->StencilAttachment = std::move(stencilAttachment);
+    gpuFrameBuffer->DepthStencilAttachment = std::move(depthStencilAttachment);
 
     return { std::move(gpuFrameBuffer), {} };
 }
