@@ -13,8 +13,9 @@
 #include "Assets.hpp"
 #include "Window.hpp"
 #include "Project.hpp"
-#include "FrameBuffer.hpp"
 #include "AssetBridge.hpp"
+
+#include <Engine/GPUFrameBuffer.hpp>
 
 struct Core;
 struct Resolution;
@@ -34,7 +35,6 @@ struct Core {
     std::unique_ptr<Angel>& GetAngel();
     WindowPtr& GetWindow();
     std::unique_ptr<Input>& GetInput();
-    std::unique_ptr<FrameBuffer>& GetFrameBuffer();
 
     void CreateAndLoadProject(std::string_view workspace, std::string_view name);
     void LoadProject(const std::string& path);
@@ -59,8 +59,6 @@ private:
     std::unique_ptr<Angel> angel{ nullptr };
     WindowPtr window{ nullptr };
     std::unique_ptr<Input> input{ nullptr };
-    std::unique_ptr<FrameBuffer> offscreenBuffer{ nullptr };
-    GPUFrameBuffer offscreenBuffer_{};
     std::unique_ptr<Project> project{ nullptr };
     std::unique_ptr<Assets> assets{ nullptr };
     std::unique_ptr<AssetGPUBridge> gpuBridge{ nullptr };

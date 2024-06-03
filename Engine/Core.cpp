@@ -1,6 +1,5 @@
 #include "Core.hpp"
 
-#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <tinyxml2.h>
 #include <debugbreak.h>
@@ -183,32 +182,6 @@ const CorePtr& Core::CreateCore(Resolution resolution, const char* title, bool i
     */
 #pragma endregion
 
-    if (renderOffscreen) {
-        FrameBufferBuilder builder;
-        builder.SetResolution(resolution);
-        builder.AddColorAttachment(OpenGL::RGB8);
-        builder.SetDepthStencilAttachment(OpenGL::DEPTH24_STENCIL8);
-        _this->offscreenBuffer = builder.BuildUnique();
-    }
-    if (renderOffscreen) {
-        GPUTextureBuilder tBuilder;
-        auto color = tBuilder.SetWidth(resolution.Width).SetHeight(resolution.Height).SetData(DataFormat::RGBA8, {}).Build().first;
-
-        GPURenderBufferBuilder rbBuilder;
-        auto depthStencil = rbBuilder.SetLayout(resolution.Width, resolution.Height, DataFormat::DEPTH32F_STENCIL8).Build().first;
-        assert(depthStencil.has_value());
-
-        GPUFrameBufferBuilder fbBuilder;
-        fbBuilder.SetName("NeoDoa Core Offscreen Buffer")
-            .AttachColorTexture(std::move(color.value()), 0)
-            .AttachDepthStencilRenderBuffer(std::move(depthStencil.value()));
-        auto fb = fbBuilder.Build().first;
-        assert(fb.has_value());
-
-        _this->offscreenBuffer_ = std::move(fb.value());
-    }
-#pragma endregion
-
 #pragma region KHR_debug
 #ifdef DEBUG
     glEnable(GL_DEBUG_OUTPUT);
@@ -234,7 +207,6 @@ void Core::SetPlaying(bool playing) { this->playing = playing; }
 std::unique_ptr<Angel>& Core::GetAngel() { return angel; }
 WindowPtr& Core::GetWindow() { return window; }
 std::unique_ptr<Input>& Core::GetInput() { return input; }
-std::unique_ptr<FrameBuffer>& Core::GetFrameBuffer() { return offscreenBuffer; }
 
 void Core::CreateAndLoadProject(std::string_view workspace, std::string_view name) {
     UnloadProject();
@@ -277,21 +249,12 @@ std::unique_ptr<Assets>& Core::GetAssets() { return assets; }
 std::unique_ptr<AssetGPUBridge>& Core::GetAssetGPUBridge() { return gpuBridge; }
 
 void Core::Start() {
-    static bool renderingOffscreen = offscreenBuffer != nullptr;
     float lastTime = static_cast<float>(glfwGetTime());
     float currentTime;
-
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
-
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glFrontFace(GL_CCW);
 
     running = true;
     while (running) {
         currentTime = static_cast<float>(glfwGetTime());
-        glViewport(0, 0, window->GetContentResolution().Width, window->GetContentResolution().Height);
 
         float delta = currentTime - lastTime;
 
