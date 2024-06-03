@@ -126,26 +126,23 @@ void Graphics::Blit(const GPUFrameBuffer& source, GPUFrameBuffer& destination) n
         GL_NEAREST
     );
 }
-void Graphics::Render(const GPUVertexArray& vao, int count, int first) noexcept {
-    glBindVertexArray(vao.GLObjectID);
-    if (vao.ElementBuffer) {
-        glDrawElements(ToGLTopology(vao.Topology), count, ToGLDataType(vao.IndexType), nullptr);
+void Graphics::Render(int count, int first) noexcept {
+    const GPUPipeline& pipeline = currentPipeline->get();
+    if (pipeline.IndexBuffer) {
+        glDrawElements(ToGLTopology(pipeline.Topology), count, ToGLDataType(pipeline.IndexType), nullptr);
     } else {
-        glDrawArrays(ToGLTopology(vao.Topology), first, count);
+        glDrawArrays(ToGLTopology(pipeline.Topology), first, count);
     }
 }
-void Graphics::RenderInstanced(const GPUVertexArray& vao, int instanceCount, int count, int first) noexcept {
-    glBindVertexArray(vao.GLObjectID);
-    if (vao.ElementBuffer) {
-        glDrawElementsInstanced(ToGLTopology(vao.Topology), count, ToGLDataType(vao.IndexType), nullptr, instanceCount);
+void Graphics::RenderInstanced(int instanceCount, int count, int first) noexcept {
+    const GPUPipeline& pipeline = currentPipeline->get();
+    if (pipeline.IndexBuffer) {
+        glDrawElementsInstanced(ToGLTopology(pipeline.Topology), count, ToGLDataType(pipeline.IndexType), nullptr, instanceCount);
     } else {
-        glDrawArraysInstanced(ToGLTopology(vao.Topology), first, count, instanceCount);
+        glDrawArraysInstanced(ToGLTopology(pipeline.Topology), first, count, instanceCount);
     }
 }
 
-void Graphics::SetRenderArea(const Region region) noexcept {
-    glViewport(region.X, region.Y, region.Width, region.Height);
-}
 void Graphics::SetRenderTarget(const GPUFrameBuffer& renderTarget) noexcept {
     glBindFramebuffer(GL_FRAMEBUFFER, renderTarget.GLObjectID);
 }
@@ -182,6 +179,8 @@ void Graphics::ClearRenderTarget(const GPUFrameBuffer& renderTarget, std::array<
             ClearRenderTargetStencil(renderTarget, stencil);
         }
     }
+}
+
 void Graphics::BindPipeline(const GPUPipeline& pipeline) noexcept {
     currentPipeline.emplace(pipeline);
 

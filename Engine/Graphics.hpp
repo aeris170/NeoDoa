@@ -16,11 +16,11 @@ struct GPUFrameBuffer;
 struct GPUDescriptorSet;
 
 namespace Graphics {
-    void Blit(const GPUFrameBuffer& source, GPUFrameBuffer& destination) noexcept;
-    void Render(const GPUVertexArray& vao, int count, int first = 0) noexcept;
-    void RenderInstanced(const GPUVertexArray& vao, int instanceCount, int count, int first = 0) noexcept;
 
-    void SetRenderArea(const Region region) noexcept;
+    void Blit(const GPUFrameBuffer& source, GPUFrameBuffer& destination) noexcept;
+    void Render(int count, int first = 0) noexcept;
+    void RenderInstanced(int instanceCount, int count, int first = 0) noexcept;
+
     void SetRenderTarget(const GPUFrameBuffer& renderTarget) noexcept;
     void ClearRenderTargetColor(const GPUFrameBuffer& renderTarget, std::array<float, 4> color = { 0, 0, 0, 0 }, unsigned colorBufferIndex = 0) noexcept;
     void ClearRenderTargetColors(const GPUFrameBuffer& renderTarget, std::array<float, 4> color = { 0, 0, 0, 0 }) noexcept;
