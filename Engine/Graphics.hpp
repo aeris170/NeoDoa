@@ -13,6 +13,7 @@
 struct Region;
 struct GPUPipeline;
 struct GPUFrameBuffer;
+struct GPUDescriptorSet;
 
 namespace Graphics {
     void Blit(const GPUFrameBuffer& source, GPUFrameBuffer& destination) noexcept;
@@ -28,6 +29,8 @@ namespace Graphics {
     void ClearRenderTarget(const GPUFrameBuffer& renderTarget, std::array<float, 4> color = { 0, 0, 0, 0 }, float depth = 1, int stencil = 0) noexcept;
 
     void BindPipeline(const GPUPipeline& pipeline) noexcept;
+
+    void BindDescriptorSet(const GPUDescriptorSet& descriptorSet) noexcept;
 }
 
 #define ND_GRAPHICS_COPYABLE_MOVEABLE_RESOURCE(x) \

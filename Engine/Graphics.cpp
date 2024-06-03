@@ -7,6 +7,11 @@
 #include <Engine/Region.hpp>
 #include <Engine/GPUFrameBuffer.hpp>
 #include <Engine/GPUPipeline.hpp>
+#include <Engine/GPUDescriptorSet.hpp>
+namespace {
+    std::optional<std::reference_wrapper<const GPUPipeline>> currentPipeline;
+
+}
 
 void Graphics::Blit(const GPUFrameBuffer& source, GPUFrameBuffer& destination) noexcept {
     bool blitColor = !source.ColorAttachments.empty() && !destination.ColorAttachments.empty();
@@ -207,4 +212,23 @@ void Graphics::BindPipeline(const GPUPipeline& pipeline) noexcept {
     glUseProgram(pipeline.ShaderProgram->get().GLObjectID);
     glBindVertexArray(pipeline.GLObjectID);
 }
+
+void Graphics::BindDescriptorSet(const GPUDescriptorSet& descriptorSet) noexcept {
+    for (const DescriptorBinding& binding : descriptorSet.Bindings) {
+        if (std::holds_alternative<std::monostate>(binding.Descriptor)) { continue; }
+
+        std::visit(overloaded::lambda {
+            [] (const std::monostate&) { /* empty */ },
+            [&binding](const DescriptorBinding::UniformBuffer& uniformBuffer) {
+                glBindBufferBase(GL_UNIFORM_BUFFER, binding.BindingSlot, uniformBuffer.Buffer.get().GLObjectID);
+            },
+            [&binding](const DescriptorBinding::StorageBuffer& storageBuffer) {
+                glBindBufferBase(GL_SHADER_STORAGE_BUFFER, binding.BindingSlot, storageBuffer.Buffer.get().GLObjectID);
+            },
+            [&binding](const DescriptorBinding::CombinedImageSampler& combinedImageSampler) {
+                glBindTextureUnit(binding.BindingSlot, combinedImageSampler.Texture.get().GLObjectID);
+                glBindSampler(binding.BindingSlot, combinedImageSampler.Sampler.get().GLObjectID);
+            },
+        }, binding.Descriptor);
+    }
 }
