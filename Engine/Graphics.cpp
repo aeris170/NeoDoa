@@ -177,4 +177,34 @@ void Graphics::ClearRenderTarget(const GPUFrameBuffer& renderTarget, std::array<
             ClearRenderTargetStencil(renderTarget, stencil);
         }
     }
+void Graphics::BindPipeline(const GPUPipeline& pipeline) noexcept {
+    currentPipeline.emplace(pipeline);
+
+    glPolygonMode(GL_FRONT_AND_BACK, ToGLPolygonMode(pipeline.Polygon));
+    pipeline.IsFaceCullingEnabled ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
+    glCullFace(ToGLCullMode(pipeline.Cull));
+    glViewport(pipeline.Viewport.X, pipeline.Viewport.Y, pipeline.Viewport.Width, pipeline.Viewport.Height);
+
+    pipeline.IsScissorEnabled ? glEnable(GL_SCISSOR_TEST) : glDisable(GL_SCISSOR_TEST);
+    glScissor(pipeline.Scissor.X, pipeline.Scissor.Y, pipeline.Scissor.Width, pipeline.Scissor.Height);
+
+    pipeline.IsDepthTestEnabled ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
+    glDepthMask(pipeline.IsDepthWriteEnabled ? GL_TRUE : GL_FALSE);
+    glDepthFunc(ToGLDepthFunction(pipeline.DepthFunc));
+    pipeline.IsDepthClampEnabled ? glEnable(GL_DEPTH_CLAMP) : glDisable(GL_DEPTH_CLAMP);
+
+    pipeline.IsMultisampleEnabled ? glEnable(GL_MULTISAMPLE) : glDisable(GL_MULTISAMPLE);
+
+    pipeline.IsBlendEnabled ? glEnable(GL_BLEND) : glDisable(GL_BLEND);
+    glBlendFuncSeparate(
+        ToGLBlendFactor(pipeline.SourceFactor),
+        ToGLBlendFactor(pipeline.DestinationFactor),
+        ToGLBlendFactor(pipeline.SourceAlphaFactor),
+        ToGLBlendFactor(pipeline.DestinationAlphaFactor)
+    );
+
+    assert(pipeline.ShaderProgram);
+    glUseProgram(pipeline.ShaderProgram->get().GLObjectID);
+    glBindVertexArray(pipeline.GLObjectID);
+}
 }
