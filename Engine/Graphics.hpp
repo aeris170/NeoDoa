@@ -18,6 +18,10 @@ struct GPUDescriptorSet;
 namespace Graphics {
 
     void Blit(const GPUFrameBuffer& source, GPUFrameBuffer& destination) noexcept;
+    void BlitDepth(const GPUFrameBuffer& source, GPUFrameBuffer& destination) noexcept;
+    void BlitStencil(const GPUFrameBuffer& source, GPUFrameBuffer& destination) noexcept;
+    void BlitDepthStencil(const GPUFrameBuffer& source, GPUFrameBuffer& destination) noexcept;
+
     void Render(int count, int first = 0) noexcept;
     void RenderInstanced(int instanceCount, int count, int first = 0) noexcept;
 

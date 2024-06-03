@@ -146,6 +146,70 @@ void Graphics::Blit(const GPUFrameBuffer& source, GPUFrameBuffer& destination) n
         GL_NEAREST
     );
 }
+void Graphics::BlitDepth(const GPUFrameBuffer& source, GPUFrameBuffer& destination) noexcept {
+    const auto* srcAttachment =      source.DepthAttachment ?      &source.DepthAttachment : nullptr;
+    const auto* dstAttachment = destination.DepthAttachment ? &destination.DepthAttachment : nullptr;
+
+    if (!HasBlitCondition(srcAttachment, dstAttachment)) {
+        DOA_LOG_OPENGL("Couldn't BlitDepth! Depth attachment missing from one or both operands!");
+        return;
+    }
+
+    Resolution sourceResolution     { GetAttachmentDimensions(srcAttachment->value()) };
+    Resolution destinationResolution{ GetAttachmentDimensions(dstAttachment->value()) };
+
+    glBlitNamedFramebuffer(
+        source.GLObjectID,
+        destination.GLObjectID,
+        0, 0, sourceResolution.Width, sourceResolution.Height,
+        0, 0, destinationResolution.Width, destinationResolution.Height,
+        GL_DEPTH_BUFFER_BIT,
+        GL_NEAREST
+    );
+}
+void Graphics::BlitStencil(const GPUFrameBuffer& source, GPUFrameBuffer& destination) noexcept {
+    const auto* srcAttachment =      source.StencilAttachment ?      &source.StencilAttachment : nullptr;
+    const auto* dstAttachment = destination.StencilAttachment ? &destination.StencilAttachment : nullptr;
+
+    if (!HasBlitCondition(srcAttachment, dstAttachment)) {
+        DOA_LOG_OPENGL("Couldn't BlitStencil! Stencil attachment missing from one or both operands!");
+        return;
+    }
+
+    Resolution sourceResolution     { GetAttachmentDimensions(srcAttachment->value()) };
+    Resolution destinationResolution{ GetAttachmentDimensions(dstAttachment->value()) };
+
+    glBlitNamedFramebuffer(
+        source.GLObjectID,
+        destination.GLObjectID,
+        0, 0, sourceResolution.Width, sourceResolution.Height,
+        0, 0, destinationResolution.Width, destinationResolution.Height,
+        GL_STENCIL_BUFFER_BIT,
+        GL_NEAREST
+    );
+}
+void Graphics::BlitDepthStencil(const GPUFrameBuffer& source, GPUFrameBuffer& destination) noexcept {
+    const auto* srcAttachment =      source.DepthStencilAttachment ?      &source.DepthStencilAttachment : nullptr;
+    const auto* dstAttachment = destination.DepthStencilAttachment ? &destination.DepthStencilAttachment : nullptr;
+
+    if (!HasBlitCondition(srcAttachment, dstAttachment)) {
+        DOA_LOG_OPENGL("Couldn't BlitDepthStencil! DepthStencil attachment missing from one or both operands!");
+        return;
+    }
+
+    Resolution sourceResolution     { GetAttachmentDimensions(srcAttachment->value()) };
+    Resolution destinationResolution{ GetAttachmentDimensions(dstAttachment->value()) };
+
+    glBlitNamedFramebuffer(
+        source.GLObjectID,
+        destination.GLObjectID,
+        0, 0,      sourceResolution.Width,     sourceResolution.Height,
+        0, 0, destinationResolution.Width, destinationResolution.Height,
+        GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT,
+        GL_NEAREST
+    );
+}
+
 void Graphics::Render(int count, int first) noexcept {
     const GPUPipeline& pipeline = currentPipeline->get();
     if (pipeline.IndexBuffer) {
