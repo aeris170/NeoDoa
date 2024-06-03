@@ -128,6 +128,8 @@ set(GROUP_LIST
     "Graphics/AssetBridge.hpp"
     "Graphics/GPUBuffer.cpp"
     "Graphics/GPUBuffer.hpp"
+    "Graphics/GPUDescriptorSet.cpp"
+    "Graphics/GPUDescriptorSet.hpp"
     "Graphics/GPUFrameBuffer.cpp"
     "Graphics/GPUFrameBuffer.hpp"
     "Graphics/GPUShader.cpp"
