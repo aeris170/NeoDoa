@@ -7,7 +7,7 @@ struct System : entt::type_list<void(Registry& reg), void(Registry&, float)> {
     template<typename Base>
     struct type : Base {
         bool inited = false;
-        void Init(Registry& reg) { if (inited) return; inited = true; entt::poly_call<0>(*this, reg); }
+        void Init(Registry& reg) { if (inited) { inited = true; return; } entt::poly_call<0>(*this, reg); }
         void Execute(Registry& reg, float deltaTime) { entt::poly_call<1>(*this, reg, deltaTime); }
     };
 

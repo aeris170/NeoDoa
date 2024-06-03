@@ -97,8 +97,8 @@ struct Scene {
 
     static Scene Copy(const Scene& scene);
 
-    void Update(float delta);
-    void Render();
+    void ExecuteSystems(bool isPlaying, float delta);
+    //void Render();
 
 private:
     Renderer _renderer;

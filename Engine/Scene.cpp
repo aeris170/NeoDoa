@@ -85,13 +85,13 @@ Scene Scene::Deserialize(const std::string& data) { return DeserializeScene(data
 
 Scene Scene::Copy(const Scene& scene) { return scene.Deserialize(scene.Serialize()); }
 
-void Scene::Update(float deltaTime) {
+void Scene::ExecuteSystems(bool isPlaying, float deltaTime) {
     for (entt::poly<System>& s : _systems) {
         s->Init(_registry);
         s->Execute(_registry, deltaTime);
     }
 }
-void Scene::Render() {
+//void Scene::Render() {
     //auto& cam = GetActiveCamera();
     //cam.UpdateView();
     //cam.UpdateProjection();
@@ -160,4 +160,4 @@ void Scene::Render() {
     _outlineRenderer.Render(selecteds, _activeCamera, SelectionOutlineColor);
     */
 #endif
-}
+//}

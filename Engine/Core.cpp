@@ -297,24 +297,14 @@ void Core::Start() {
 
         if (project != nullptr && project->HasOpenScene()) {
             for (auto [id, attachment] : _attachments) {
-                //attachment->BeforeFrame(project.get());
+                attachment->BeforeFrame(project.get());
             }
+
             Scene& scene = project->GetOpenScene();
-            if (playing) {
-                scene.Update(delta);
-            }
-            if (renderingOffscreen) {
-                offscreenBuffer->Bind();
-            }
-            glClearColor(scene.ClearColor.r, scene.ClearColor.g, scene.ClearColor.b, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-            scene.Render();
-            if (renderingOffscreen) {
-                FrameBuffer::BackBuffer().Bind();
-                glViewport(0, 0, window->GetContentResolution().Width, window->GetContentResolution().Height);
-            }
+            scene.ExecuteSystems(playing, delta);
+
             for (auto [id, attachment] : _attachments) {
-                //attachment->AfterFrame(project.get());
+                attachment->AfterFrame(project.get());
             }
         }
 
