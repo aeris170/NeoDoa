@@ -27,7 +27,6 @@ struct GPUShader {
 
     ND_GRAPHICS_MOVE_ONLY_RESOURCE(GPUShader);
 };
-
 struct GPUShaderBuilder {
     GPUShaderBuilder& SetType(ShaderType type) noexcept;
     GPUShaderBuilder& SetName(std::string_view name) noexcept;
@@ -62,7 +61,7 @@ struct GPUShaderProgram {
 
     GLuint GLObjectID{};
 #ifdef DEBUG
-    std::string Name;
+    std::string Name{};
 #endif
 
     std::vector<Uniform> Uniforms{};
