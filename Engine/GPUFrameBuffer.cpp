@@ -131,9 +131,12 @@ GPUFrameBufferBuilder& GPUFrameBufferBuilder::AttachDepthStencilRenderBuffer(GPU
     GLuint frameBuffer;
     glCreateFramebuffers(1, &frameBuffer);
 
-    unsigned i{};
-    for (const auto& colorAttachment : colorAttachments) {
-        if (colorAttachment) {
+    std::array<GLenum, MaxColorAttachments> drawBuffers;
+    for (int i = 0; i < colorAttachments.size(); i++) {
+        const auto& colorAttachment = colorAttachments[i];
+
+        if (colorAttachments[i].has_value()) {
+            drawBuffers[i] = GL_COLOR_ATTACHMENT0 + i;
             std::visit(overloaded::lambda{
                 [frameBuffer, &i](const GPUTexture& texture) {
                     glNamedFramebufferTexture(frameBuffer, GL_COLOR_ATTACHMENT0 + i, texture.GLObjectID, 0);
@@ -142,9 +145,11 @@ GPUFrameBufferBuilder& GPUFrameBufferBuilder::AttachDepthStencilRenderBuffer(GPU
                     glNamedFramebufferRenderbuffer(frameBuffer, GL_COLOR_ATTACHMENT0 + i, GL_RENDERBUFFER, renderBuffer.GLObjectID);
                 }
             }, colorAttachment.value());
-            i++;
+        } else {
+            drawBuffers[i] = GL_NONE;
         }
     }
+    glNamedFramebufferDrawBuffers(frameBuffer, drawBuffers.size(), drawBuffers.data());
 
     if (depthStencilAttachment) {
         std::visit(overloaded::lambda{

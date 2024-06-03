@@ -46,13 +46,14 @@ public:
 
 // FrameBuffer
 using FrameBufferAllocatorMessage = std::string;
+constexpr unsigned MaxColorAttachments = 8;
 
 struct GPUFrameBuffer {
     GLuint GLObjectID{};
 #ifdef DEBUG
     std::string Name{ "Backbuffer" };
 #endif
-    std::array<std::optional<std::variant<GPUTexture, GPURenderBuffer>>, 8> ColorAttachments{};
+    std::array<std::optional<std::variant<GPUTexture, GPURenderBuffer>>, MaxColorAttachments> ColorAttachments{};
     std::optional<std::variant<GPUTexture, GPURenderBuffer>> DepthAttachment{};
     std::optional<std::variant<GPUTexture, GPURenderBuffer>> StencilAttachment{};
     std::optional<std::variant<GPUTexture, GPURenderBuffer>> DepthStencilAttachment{};
@@ -76,7 +77,7 @@ private:
 #ifdef DEBUG
     std::string name{};
 #endif
-    std::array<std::optional<std::variant<GPUTexture, GPURenderBuffer>>, 8> colorAttachments{};
+    std::array<std::optional<std::variant<GPUTexture, GPURenderBuffer>>, MaxColorAttachments> colorAttachments{};
     std::optional<std::variant<GPUTexture, GPURenderBuffer>> depthAttachment{};
     std::optional<std::variant<GPUTexture, GPURenderBuffer>> stencilAttachment{};
     std::optional<std::variant<GPUTexture, GPURenderBuffer>> depthStencilAttachment{};
