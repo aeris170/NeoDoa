@@ -8,7 +8,7 @@
 #include <Engine/Core.hpp>
 #include <Engine/Input.hpp>
 #include <Engine/Window.hpp>
-#include <Engine/FrameBuffer.hpp>
+#include <Engine/Graphics.hpp>
 
 #include <Editor/GUI.hpp>
 #include <Editor/Icons.hpp>
@@ -54,7 +54,7 @@ void SceneViewport::Render() {
     RenderSceneToBuffer(scene);
 
     ImVec2 size{ static_cast<float>(viewportSize.Width), static_cast<float>(viewportSize.Height) };
-    ImGui::Image(reinterpret_cast<void*>(static_cast<uint64_t>(viewportFramebuffer->GetColorAttachment())), size, { 0, 1 }, { 1, 0 });
+    ImGui::Image(reinterpret_cast<void*>(static_cast<uint64_t>(std::get<GPUTexture>(viewportFramebuffer.ColorAttachments[0].value()).GLObjectID)), size, { 0, 1 }, { 1, 0 });
 
     ImGui::PushClipRect({ viewportPosition.x, viewportPosition.y }, { viewportPosition.x + size.x, viewportPosition.y + size.y }, false);
     gizmos.settings.viewportSize = viewportSize;
@@ -77,14 +77,35 @@ SceneViewport::ViewportCamera& SceneViewport::GetViewportCamera() { return viewp
 void SceneViewport::ReallocBufferIfNeeded(Resolution size) {
     if (viewportSize == size) { return; }
     viewportSize = size;
-    viewportFramebuffer = std::move(FrameBufferBuilder().SetResolution(size).AddColorAttachment(OpenGL::RGB8).BuildUnique());
+    viewportCamera.GetPerspectiveCamera()._aspect = size.Aspect();
+
+    GPUTextureBuilder tBuilder;
+    auto&& color = tBuilder
+        .SetWidth(viewportSize.Width)
+        .SetHeight(viewportSize.Height)
+        .SetData(DataFormat::RGBA16F, {})
+        //.SetSamples(Multisample::x8)
+        .Build().first;
+    assert(color.has_value());
+
+    GPURenderBufferBuilder rbBuilder;
+    auto&& depthStencil = rbBuilder.SetLayout(viewportSize.Width, viewportSize.Height, DataFormat::DEPTH32F_STENCIL8).Build().first;
+    assert(depthStencil.has_value());
+
+    GPUFrameBufferBuilder fbBuilder;
+    fbBuilder.SetName("NeoDoa Editor Scene Viewport Buffer")
+        .AttachColorTexture(std::move(color.value()), 0)
+        .AttachDepthStencilRenderBuffer(std::move(depthStencil.value()));
+    auto&& fb = fbBuilder.Build().first;
+    assert(fb.has_value());
+
+    viewportFramebuffer = std::move(fb.value());
 }
 void SceneViewport::RenderSceneToBuffer(Scene& scene) {
-    viewportFramebuffer->Bind();
-    viewportFramebuffer->ClearColorBuffer(scene.ClearColor.r, scene.ClearColor.g, scene.ClearColor.b, scene.ClearColor.a);
-    scene.Update(gui.get().delta);
-    scene.Render();
-    FrameBuffer::BackBuffer().Bind();
+    //scene.Update(gui.get().delta);
+    //scene.Render();
+    Graphics::SetRenderTarget(viewportFramebuffer);
+    Graphics::SetRenderTarget({});
 }
 
 void SceneViewport::DrawViewportSettings(bool hasScene) {

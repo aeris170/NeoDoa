@@ -9,7 +9,7 @@
 
 #include <Engine/Scene.hpp>
 #include <Engine/Resolution.hpp>
-#include <Engine/FrameBuffer.hpp>
+#include <Engine/GPUFrameBuffer.hpp>
 
 #include <Editor/Gizmos.hpp>
 
@@ -50,7 +50,7 @@ struct SceneViewport {
 private:
     glm::vec2 viewportPosition{};
     Resolution viewportSize{};
-    std::unique_ptr<FrameBuffer> viewportFramebuffer{ nullptr };
+    GPUFrameBuffer viewportFramebuffer;
 
     void ReallocBufferIfNeeded(Resolution size);
     void RenderSceneToBuffer(Scene& scene);
