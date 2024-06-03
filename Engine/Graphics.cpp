@@ -5,12 +5,32 @@
 #include <Utility/TemplateUtilities.hpp>
 
 #include <Engine/Region.hpp>
+#include <Engine/Resolution.hpp>
+#include <Engine/GPUShader.hpp>
+#include <Engine/GPUBuffer.hpp>
 #include <Engine/GPUFrameBuffer.hpp>
 #include <Engine/GPUPipeline.hpp>
 #include <Engine/GPUDescriptorSet.hpp>
+
 namespace {
     std::optional<std::reference_wrapper<const GPUPipeline>> currentPipeline;
 
+    Resolution GetAttachmentDimensions(const std::variant<GPUTexture, GPURenderBuffer>& attachment) noexcept {
+        return std::visit(overloaded::lambda{
+            [](const GPUTexture& t) -> Resolution {
+                return { t.Width, t.Height };
+            },
+            [](const GPURenderBuffer& rb) -> Resolution {
+                return { rb.Width, rb.Height };
+            }
+        }, attachment);
+    }
+
+    // Helper function to check if blitting condition is met
+    bool HasBlitCondition(const std::optional<std::variant<GPUTexture, GPURenderBuffer>>* srcAttachment,
+                          const std::optional<std::variant<GPUTexture, GPURenderBuffer>>* dstAttachment) {
+        return srcAttachment && dstAttachment && srcAttachment->has_value() && dstAttachment->has_value();
+    }
 }
 
 void Graphics::Blit(const GPUFrameBuffer& source, GPUFrameBuffer& destination) noexcept {
