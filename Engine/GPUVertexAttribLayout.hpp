@@ -26,7 +26,7 @@ struct GPUVertexAttribLayout {
     ND_GRAPHICS_COPYABLE_MOVEABLE_RESOURCE(GPUVertexAttribLayout);
 
 private:
-    friend struct GPUVertexArray;
+    friend struct GPUPipeline;
 };
 
 template<>

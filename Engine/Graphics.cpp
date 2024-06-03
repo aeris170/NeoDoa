@@ -6,7 +6,7 @@
 
 #include <Engine/Region.hpp>
 #include <Engine/GPUFrameBuffer.hpp>
-#include <Engine/GPUVertexArray.hpp>
+#include <Engine/GPUPipeline.hpp>
 
 void Graphics::Blit(const GPUFrameBuffer& source, GPUFrameBuffer& destination) noexcept {
     bool blitColor = !source.ColorAttachments.empty() && !destination.ColorAttachments.empty();

@@ -5,13 +5,14 @@
 #include <memory>
 #include <vector>
 #include <cstddef>
+#include <optional>
 #include <string_view>
 
 #include <GL/glew.h>
 
 struct Region;
+struct GPUPipeline;
 struct GPUFrameBuffer;
-struct GPUVertexArray;
 
 namespace Graphics {
     void Blit(const GPUFrameBuffer& source, GPUFrameBuffer& destination) noexcept;
@@ -697,6 +698,174 @@ constexpr std::string_view ToString(DataType t) noexcept {
     case UnsignedInt:   return "Unsigned Int";
     case Float:         return "Float";
     case Double:        return "Double";
+    }
+    std::unreachable();
+}
+
+enum class PolygonMode {
+    Fill,
+    Line,
+    Point
+};
+constexpr GLenum ToGLPolygonMode(PolygonMode mode) noexcept {
+    using enum PolygonMode;
+    switch (mode) {
+    case Fill:  return GL_FILL;
+    case Line:  return GL_LINE;
+    case Point: return GL_POINT;
+    }
+    std::unreachable();
+}
+constexpr std::string_view ToString(PolygonMode mode) noexcept {
+    using enum PolygonMode;
+    switch (mode) {
+    case Fill:  return "Fill";
+    case Line:  return "Line";
+    case Point: return "Point";
+    }
+    std::unreachable();
+}
+
+enum class CullMode {
+    Front,
+    Back,
+    FrontAndBack
+};
+constexpr GLenum ToGLCullMode(CullMode mode) noexcept {
+    using enum CullMode;
+    switch (mode) {
+    case Front:        return GL_FRONT;
+    case Back:         return GL_BACK;
+    case FrontAndBack: return GL_FRONT_AND_BACK;
+    }
+    std::unreachable();
+}
+constexpr std::string_view ToString(CullMode mode) noexcept {
+    using enum CullMode;
+    switch (mode) {
+    case Front:         return "Front";
+    case Back:          return "Back";
+    case FrontAndBack:  return "Front And Back";
+    }
+    std::unreachable();
+}
+
+enum class DepthFunction {
+    Always,
+    Never,
+    Less,
+    Equal,
+    LessEqual,
+    Greater,
+    GreaterEqual,
+    NotEqual,
+};
+constexpr GLenum ToGLDepthFunction(DepthFunction mode) noexcept {
+    using enum DepthFunction;
+    switch (mode) {
+    case Always:       return GL_ALWAYS;
+    case Never:        return GL_NEVER;
+    case Less:         return GL_LESS;
+    case Equal:        return GL_EQUAL;
+    case LessEqual:    return GL_LEQUAL;
+    case Greater:      return GL_GREATER;
+    case GreaterEqual: return GL_NOTEQUAL;
+    case NotEqual:     return GL_GEQUAL;
+    }
+    std::unreachable();
+}
+constexpr std::string_view ToString(DepthFunction mode) noexcept {
+    using enum DepthFunction;
+    switch (mode) {
+    case Always:       return "Always";
+    case Never:        return "Never";
+    case Less:         return "Less";
+    case Equal:        return "Equal";
+    case LessEqual:    return "Less Equal";
+    case Greater:      return "Greater";
+    case GreaterEqual: return "Greater Equal";
+    case NotEqual:     return "Not Equal";
+    }
+    std::unreachable();
+}
+
+enum class BlendFactor {
+    Zero,
+    One,
+    SrcColor,
+    OneMinusSrcColor,
+    DstColor,
+    OneMinusDstColor,
+    SrcAlpha,
+    OneMinusSrcAlpha,
+    DstAlpha,
+    OneMinusDstAlpha,
+    ConstantColor,
+    OneMinusConstantColor,
+    ConstantAlpha,
+    OneMinusConstantAlpha,
+    SrcAlphaSaturate,
+};
+constexpr GLenum ToGLBlendFactor(BlendFactor factor) noexcept {
+    using enum BlendFactor;
+    switch (factor) {
+    case Zero:                  return GL_ZERO;
+    case One:                   return GL_ONE;
+    case SrcColor:              return GL_SRC_COLOR;
+    case OneMinusSrcColor:      return GL_ONE_MINUS_SRC_COLOR;
+    case DstColor:              return GL_DST_COLOR;
+    case OneMinusDstColor:      return GL_ONE_MINUS_DST_COLOR;
+    case SrcAlpha:              return GL_SRC_ALPHA;
+    case OneMinusSrcAlpha:      return GL_ONE_MINUS_SRC_ALPHA;
+    case DstAlpha:              return GL_DST_ALPHA;
+    case OneMinusDstAlpha:      return GL_ONE_MINUS_DST_ALPHA;
+    case ConstantColor:         return GL_CONSTANT_COLOR;
+    case OneMinusConstantColor: return GL_ONE_MINUS_CONSTANT_COLOR;
+    case ConstantAlpha:         return GL_CONSTANT_ALPHA;
+    case OneMinusConstantAlpha: return GL_ONE_MINUS_CONSTANT_ALPHA;
+    case SrcAlphaSaturate:      return GL_SRC_ALPHA_SATURATE;
+    }
+    std::unreachable();
+}
+constexpr std::string_view ToString(BlendFactor factor) noexcept {
+    using enum BlendFactor;
+    switch (factor) {
+    case Zero:                  return "Zero";
+    case One:                   return "One";
+    case SrcColor:              return "Src Color";
+    case OneMinusSrcColor:      return "One Minus Src Color";
+    case DstColor:              return "Dst Color";
+    case OneMinusDstColor:      return "One Minus Dst Color";
+    case SrcAlpha:              return "Src Alpha";
+    case OneMinusSrcAlpha:      return "One Minus Src Alpha";
+    case DstAlpha:              return "Dst Alpha";
+    case OneMinusDstAlpha:      return "One Minus Dst Alpha";
+    case ConstantColor:         return "Constant Color";
+    case OneMinusConstantColor: return "One Minus Constant Color";
+    case ConstantAlpha:         return "Constant Alpha";
+    case OneMinusConstantAlpha: return "One Minus Constant Alpha";
+    case SrcAlphaSaturate:      return "Src Alpha Saturate";
+    }
+    std::unreachable();
+}
+
+enum class InputRate {
+    PerVertex,
+    PerInstance
+};
+constexpr GLuint ToGLInputRate(InputRate rate) noexcept {
+    using enum InputRate;
+    switch (rate) {
+    case PerVertex:   return 0;
+    case PerInstance: return 1;
+    }
+    std::unreachable();
+}
+constexpr std::string_view ToString(InputRate rate) noexcept {
+    using enum InputRate;
+    switch (rate) {
+    case PerVertex:   return "Per Vertex";
+    case PerInstance: return "Per Instance";
     }
     std::unreachable();
 }
