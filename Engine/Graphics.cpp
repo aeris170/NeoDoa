@@ -133,8 +133,8 @@ void Graphics::Blit(const GPUFrameBuffer& source, GPUFrameBuffer& destination) n
         return;
     }
 
-    auto mask = (blitColor ? GL_COLOR_BUFFER_BIT : GLuint()) ||
-                (blitDepth ? GL_DEPTH_BUFFER_BIT : GLuint()) ||
+    auto mask = (blitColor ? GL_COLOR_BUFFER_BIT : GLuint()) |
+                (blitDepth ? GL_DEPTH_BUFFER_BIT : GLuint()) |
                 (blitStencil ? GL_STENCIL_BUFFER_BIT : GLuint());
 
     glBlitNamedFramebuffer(
