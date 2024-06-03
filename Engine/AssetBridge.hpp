@@ -9,11 +9,9 @@
 #include <Engine/Log.hpp>
 #include <Engine/UUID.hpp>
 #include <Engine/Assets.hpp>
-#include <Engine/GPUBuffer.hpp>
 #include <Engine/GPUShader.hpp>
 #include <Engine/GPUTexture.hpp>
 #include <Engine/GPUFrameBuffer.hpp>
-#include <Engine/GPUVertexArray.hpp>
 
 struct AssetGPUBridge;
 
@@ -78,20 +76,16 @@ std::vector<ErrorMessageType> Name::Allocate(const Assets& assets, const UUID as
 #define ND_EXPLICIT_SPECIALIZE_ALLOCATOR_SPECIALIZE_MISSING(Name, T) \
 template<> \
 const T& Name::Missing() const noexcept
-ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUBuffers, GPUBuffer, BufferAllocatorMessage);
 ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUFrameBuffers, GPUFrameBuffer, FrameBufferAllocatorMessage);
 ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUShaders, GPUShader, ShaderCompilerMessage);
 ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUShaderPrograms, GPUShaderProgram, ShaderLinkerMessage);
 ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUSamplers, GPUSampler, SamplerAllocatorMessage);
 ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUTextures, GPUTexture, TextureAllocatorMessage); ND_EXPLICIT_SPECIALIZE_ALLOCATOR_SPECIALIZE_MISSING(GPUTextures, GPUTexture);
-ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUVertexArrays, GPUVertexArray, VertexArrayAllocatorMessage);
 #undef ND_EXPLICIT_SPECIALIZE_ALLOCATOR
 #undef ND_EXPLICIT_SPECIALIZE_ALLOCATOR_SPECIALIZE_MISSING
 
 struct AssetGPUBridge {
 
-    GPUBuffers& GetGPUBuffers() noexcept;
-    const GPUBuffers& GetGPUBuffers() const noexcept;
     GPUFrameBuffers& GetGPUFrameBuffers() noexcept;
     const GPUFrameBuffers& GetGPUFrameBuffers() const noexcept;
     GPUShaders& GetShaders() noexcept;
@@ -102,17 +96,13 @@ struct AssetGPUBridge {
     const GPUSamplers& GetSamplers() const noexcept;
     GPUTextures& GetTextures() noexcept;
     const GPUTextures& GetTextures() const noexcept;
-    GPUVertexArrays& GetGPUVertexArrays() noexcept;
-    const GPUVertexArrays& GetGPUVertexArrays() const noexcept;
 
 private:
-    GPUBuffers gpuBuffers{ *this };
     GPUFrameBuffers gpuFrameBuffers{ *this };
     GPUShaders gpuShaders{ *this };
     GPUShaderPrograms gpuShaderPrograms{ *this };
     GPUSamplers gpuSamplers{ *this };
     GPUTextures gpuTextures{ *this };
-    GPUVertexArrays gpuVertexArrays{ *this };
 
 public:
     AssetGPUBridge() noexcept = default;

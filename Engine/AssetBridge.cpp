@@ -1,11 +1,5 @@
 #include <Engine/AssetBridge.hpp>
 
-// GPUBuffer
-template<>
-std::vector<BufferAllocatorMessage> GPUBuffers::Allocate(const Assets& assets, const UUID asset) noexcept {
-    return {};
-}
-
 // GPUFrameBuffer
 template<>
 std::vector<FrameBufferAllocatorMessage> GPUFrameBuffers::Allocate(const Assets& assets, const UUID asset) noexcept {
@@ -177,14 +171,6 @@ const GPUTexture& GPUTextures::Missing() const noexcept {
     return missing;
 }
 
-// GPUVertexArray
-template<>
-std::vector<VertexArrayAllocatorMessage> GPUVertexArrays::Allocate(const Assets& assets, const UUID asset) noexcept {
-    return {};
-}
-
-GPUBuffers& AssetGPUBridge::GetGPUBuffers() noexcept                        { return gpuBuffers;        }
-const GPUBuffers& AssetGPUBridge::GetGPUBuffers() const noexcept            { return gpuBuffers;        }
 GPUFrameBuffers& AssetGPUBridge::GetGPUFrameBuffers() noexcept              { return gpuFrameBuffers;   }
 const GPUFrameBuffers& AssetGPUBridge::GetGPUFrameBuffers() const noexcept  { return gpuFrameBuffers;   }
 GPUShaders& AssetGPUBridge::GetShaders() noexcept                           { return gpuShaders;        }
@@ -195,5 +181,3 @@ GPUSamplers& AssetGPUBridge::GetSamplers() noexcept                         { re
 const GPUSamplers& AssetGPUBridge::GetSamplers() const noexcept             { return gpuSamplers;       }
 GPUTextures& AssetGPUBridge::GetTextures() noexcept                         { return gpuTextures;       }
 const GPUTextures& AssetGPUBridge::GetTextures() const noexcept             { return gpuTextures;       }
-GPUVertexArrays& AssetGPUBridge::GetGPUVertexArrays() noexcept              { return gpuVertexArrays;   }
-const GPUVertexArrays& AssetGPUBridge::GetGPUVertexArrays() const noexcept  { return gpuVertexArrays;   }
