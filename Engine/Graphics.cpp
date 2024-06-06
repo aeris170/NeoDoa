@@ -25,12 +25,6 @@ namespace {
             }
         }, attachment);
     }
-
-    // Helper function to check if blitting condition is met
-    bool HasBlitCondition(const std::optional<std::variant<GPUTexture, GPURenderBuffer>>* srcAttachment,
-                          const std::optional<std::variant<GPUTexture, GPURenderBuffer>>* dstAttachment) {
-        return srcAttachment && dstAttachment && srcAttachment->has_value() && dstAttachment->has_value();
-    }
 }
 
 void Graphics::Blit(const GPUFrameBuffer& source, GPUFrameBuffer& destination) noexcept {
@@ -150,19 +144,17 @@ void Graphics::BlitDepth(const GPUFrameBuffer& source, GPUFrameBuffer& destinati
     const auto* srcAttachment =      source.DepthAttachment ?      &source.DepthAttachment : nullptr;
     const auto* dstAttachment = destination.DepthAttachment ? &destination.DepthAttachment : nullptr;
 
-    if (!HasBlitCondition(srcAttachment, dstAttachment)) {
-        DOA_LOG_OPENGL("Couldn't BlitDepth! Depth attachment missing from one or both operands!");
-        return;
-    }
+    assert(srcAttachment && srcAttachment->has_value());
+    assert(dstAttachment && dstAttachment->has_value());
 
-    Resolution sourceResolution     { GetAttachmentDimensions(srcAttachment->value()) };
-    Resolution destinationResolution{ GetAttachmentDimensions(dstAttachment->value()) };
+    Resolution srcResolution{ GetAttachmentDimensions(srcAttachment->value()) };
+    Resolution dstResolution{ GetAttachmentDimensions(dstAttachment->value()) };
 
     glBlitNamedFramebuffer(
         source.GLObjectID,
         destination.GLObjectID,
-        0, 0, sourceResolution.Width, sourceResolution.Height,
-        0, 0, destinationResolution.Width, destinationResolution.Height,
+        0, 0, srcResolution.Width, srcResolution.Height,
+        0, 0, dstResolution.Width, dstResolution.Height,
         GL_DEPTH_BUFFER_BIT,
         GL_NEAREST
     );
@@ -171,19 +163,17 @@ void Graphics::BlitStencil(const GPUFrameBuffer& source, GPUFrameBuffer& destina
     const auto* srcAttachment =      source.StencilAttachment ?      &source.StencilAttachment : nullptr;
     const auto* dstAttachment = destination.StencilAttachment ? &destination.StencilAttachment : nullptr;
 
-    if (!HasBlitCondition(srcAttachment, dstAttachment)) {
-        DOA_LOG_OPENGL("Couldn't BlitStencil! Stencil attachment missing from one or both operands!");
-        return;
-    }
+    assert(srcAttachment && srcAttachment->has_value());
+    assert(dstAttachment && dstAttachment->has_value());
 
-    Resolution sourceResolution     { GetAttachmentDimensions(srcAttachment->value()) };
-    Resolution destinationResolution{ GetAttachmentDimensions(dstAttachment->value()) };
+    Resolution srcResolution{ GetAttachmentDimensions(srcAttachment->value()) };
+    Resolution dstResolution{ GetAttachmentDimensions(dstAttachment->value()) };
 
     glBlitNamedFramebuffer(
         source.GLObjectID,
         destination.GLObjectID,
-        0, 0, sourceResolution.Width, sourceResolution.Height,
-        0, 0, destinationResolution.Width, destinationResolution.Height,
+        0, 0, srcResolution.Width, srcResolution.Height,
+        0, 0, dstResolution.Width, dstResolution.Height,
         GL_STENCIL_BUFFER_BIT,
         GL_NEAREST
     );
@@ -192,19 +182,17 @@ void Graphics::BlitDepthStencil(const GPUFrameBuffer& source, GPUFrameBuffer& de
     const auto* srcAttachment =      source.DepthStencilAttachment ?      &source.DepthStencilAttachment : nullptr;
     const auto* dstAttachment = destination.DepthStencilAttachment ? &destination.DepthStencilAttachment : nullptr;
 
-    if (!HasBlitCondition(srcAttachment, dstAttachment)) {
-        DOA_LOG_OPENGL("Couldn't BlitDepthStencil! DepthStencil attachment missing from one or both operands!");
-        return;
-    }
+    assert(srcAttachment && srcAttachment->has_value());
+    assert(dstAttachment && dstAttachment->has_value());
 
-    Resolution sourceResolution     { GetAttachmentDimensions(srcAttachment->value()) };
-    Resolution destinationResolution{ GetAttachmentDimensions(dstAttachment->value()) };
+    Resolution srcResolution{ GetAttachmentDimensions(srcAttachment->value()) };
+    Resolution dstResolution{ GetAttachmentDimensions(dstAttachment->value()) };
 
     glBlitNamedFramebuffer(
         source.GLObjectID,
         destination.GLObjectID,
-        0, 0,      sourceResolution.Width,     sourceResolution.Height,
-        0, 0, destinationResolution.Width, destinationResolution.Height,
+        0, 0, srcResolution.Width, srcResolution.Height,
+        0, 0, dstResolution.Width, dstResolution.Height,
         GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT,
         GL_NEAREST
     );
