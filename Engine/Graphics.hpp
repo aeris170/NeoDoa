@@ -18,6 +18,7 @@ struct GPUDescriptorSet;
 namespace Graphics {
 
     void Blit(const GPUFrameBuffer& source, GPUFrameBuffer& destination) noexcept;
+    void BlitColor(const GPUFrameBuffer& source, GPUFrameBuffer& destination, unsigned srcAttachment, std::span<unsigned> dstAttachments) noexcept;
     void BlitDepth(const GPUFrameBuffer& source, GPUFrameBuffer& destination) noexcept;
     void BlitStencil(const GPUFrameBuffer& source, GPUFrameBuffer& destination) noexcept;
     void BlitDepthStencil(const GPUFrameBuffer& source, GPUFrameBuffer& destination) noexcept;

@@ -1,6 +1,7 @@
 ﻿#include <Engine/Graphics.hpp>
 
 #include <cassert>
+#include <algorithm>
 
 #include <Utility/TemplateUtilities.hpp>
 
@@ -139,6 +140,46 @@ void Graphics::Blit(const GPUFrameBuffer& source, GPUFrameBuffer& destination) n
         mask,
         GL_NEAREST
     );
+}
+void Graphics::BlitColor(const GPUFrameBuffer& source, GPUFrameBuffer& destination, unsigned srcAttachment, std::span<unsigned> dstAttachments) noexcept {
+    assert(srcAttachment < source.ColorAttachments.size());
+    assert(source.ColorAttachments[srcAttachment].has_value());
+
+    assert(std::ranges::all_of(dstAttachments, [&destination](auto dstAttachment) { return dstAttachment < destination.ColorAttachments.size(); }));
+    assert(std::ranges::all_of(dstAttachments, [&destination](auto dstAttachment) { return destination.ColorAttachments[dstAttachment].has_value(); }));
+    assert(std::ranges::all_of(dstAttachments, [&destination, &dstAttachments](auto dstAttachment) {
+        return GetAttachmentDimensions(destination.ColorAttachments[dstAttachments[0]].value()) == GetAttachmentDimensions(destination.ColorAttachments[dstAttachment].value());
+    }));
+
+    std::array<GLenum, MaxColorAttachments> drawBuffers{ GL_NONE };
+    for (auto dstAttachment : dstAttachments) {
+        drawBuffers[dstAttachment] = GL_COLOR_ATTACHMENT0 + dstAttachment;
+    }
+
+    // Set read/draw buffers
+    glNamedFramebufferReadBuffer(source.GLObjectID, GL_COLOR_ATTACHMENT0 + srcAttachment);
+    glNamedFramebufferDrawBuffers(destination.GLObjectID, drawBuffers.size(), drawBuffers.data());
+
+    Resolution srcResolution{ GetAttachmentDimensions(source.ColorAttachments[srcAttachment].value()) };
+    Resolution dstResolution{ GetAttachmentDimensions(destination.ColorAttachments[dstAttachments[0]].value()) };
+
+    glBlitNamedFramebuffer(
+        source.GLObjectID,
+        destination.GLObjectID,
+        0, 0, srcResolution.Width, srcResolution.Height,
+        0, 0, dstResolution.Width, dstResolution.Height,
+        GL_COLOR_BUFFER_BIT,
+        GL_NEAREST
+    );
+
+    // Restore draw buffers of destination framebuffer
+    std::ranges::fill(drawBuffers, GL_NONE);
+    for (size_t i = 0; i < destination.ColorAttachments.size(); ++i) {
+        if (destination.ColorAttachments[i].has_value()) {
+            drawBuffers[i] = GL_COLOR_ATTACHMENT0 + i;
+        }
+    }
+    glNamedFramebufferDrawBuffers(destination.GLObjectID, drawBuffers.size(), drawBuffers.data());
 }
 void Graphics::BlitDepth(const GPUFrameBuffer& source, GPUFrameBuffer& destination) noexcept {
     const auto* srcAttachment =      source.DepthAttachment ?      &source.DepthAttachment : nullptr;
