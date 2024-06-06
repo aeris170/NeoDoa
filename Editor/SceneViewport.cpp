@@ -9,6 +9,11 @@
 #include <Engine/Input.hpp>
 #include <Engine/Window.hpp>
 #include <Engine/Graphics.hpp>
+#include <Engine/TransformComponent.hpp>
+#include <Engine/GPUBuffer.hpp>
+#include <Engine/GPUVertexAttribLayout.hpp>
+#include <Engine/GPUPipeline.hpp>
+#include <Engine/GPUDescriptorSet.hpp>
 
 #include <Editor/GUI.hpp>
 #include <Editor/Icons.hpp>
@@ -24,9 +29,142 @@ PerspectiveCamera& SceneViewport::ViewportCamera::GetPerspectiveCamera() { retur
 bool SceneViewport::ViewportCamera::IsOrtho() const { return activeCamera == &ortho; }
 bool SceneViewport::ViewportCamera::IsPerspective() const { return activeCamera == &perspective; }
 
+GPUPipeline pipe;
+GPUShaderProgram prog;
+GPUDescriptorSet perFrame;
+GPUDescriptorSet perObject;
+const GPUTexture* tex;
+GPUSampler sampler;
+GPUBuffer buf;
+GPUBuffer perFrameUniformBuffer;
+GPUBuffer perObjectUniformBuffer;
 SceneViewport::SceneViewport(GUI& gui) noexcept :
     gui(gui),
-    gizmos(*this) {}
+    gizmos(*this) {
+
+    float vertices[] = {
+    // Back face
+    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, // Bottom-left
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // top-right
+     0.5f, -0.5f, -0.5f,  1.0f, 0.0f, // bottom-right
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // top-right
+    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, // bottom-left
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f, // top-left
+    // Front face
+     0.5f, -0.5f,  0.5f,  1.0f, 0.0f, // bottom-right
+     0.5f,  0.5f,  0.5f,  1.0f, 1.0f, // top-right
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // bottom-left
+     0.5f,  0.5f,  0.5f,  1.0f, 1.0f, // top-right
+    -0.5f,  0.5f,  0.5f,  0.0f, 1.0f, // top-left
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // bottom-left
+    // Left face
+    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // top-right
+    -0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // top-left
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // bottom-left
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // bottom-left
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // bottom-right
+    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // top-right
+    // Right face
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // top-left
+     0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // bottom-right
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // top-right
+     0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // bottom-right
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // top-left
+     0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // bottom-left
+    // Bottom face
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // top-right
+     0.5f, -0.5f, -0.5f,  1.0f, 1.0f, // top-left
+     0.5f, -0.5f,  0.5f,  1.0f, 0.0f, // bottom-left
+     0.5f, -0.5f,  0.5f,  1.0f, 0.0f, // bottom-left
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // bottom-right
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // top-right
+    // Top face
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f, // top-left
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // bottom-right
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // top-right
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // bottom-right
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  // top-left
+    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f, // bottom-left
+    };
+    const std::byte* bytePtr = reinterpret_cast<const std::byte*>(vertices);
+
+    GPUBufferBuilder bBuilder;
+    buf = bBuilder.SetStorage(std::span<const std::byte>(bytePtr, 180 * sizeof(float))).Build().first.value();
+    perFrameUniformBuffer = bBuilder.SetProperties(BufferProperties::DynamicStorage).SetStorage(sizeof(glm::mat4) * 2, nullptr).Build().first.value(); // proj and view
+    perObjectUniformBuffer = bBuilder.SetProperties(BufferProperties::DynamicStorage).SetStorage(sizeof(glm::mat4), nullptr).Build().first.value(); // model
+    GPUVertexAttribLayout layout;
+    layout.Define<float>(3);
+    layout.Define<float>(2);
+
+    GPUShaderBuilder sBuilder;
+    auto v = sBuilder.SetType(ShaderType::Vertex).SetSourceCode(R"(
+#version 460 core
+
+layout(location = 0) in vec3 vPos;
+layout(location = 1) in vec2 vUV;
+
+out vec2 fUV;
+
+layout(std140, binding = 0) uniform ProjViewBuffer {
+    mat4 projection;
+    mat4 view;
+};
+
+layout(std140, binding = 1) uniform ModelBuffer {
+    mat4 model;
+};
+
+void main() {
+	gl_Position = projection * view * model * vec4(vPos, 1.0);
+    fUV = vUV;
+}
+    )").Build().first;
+    auto f = sBuilder.SetType(ShaderType::Fragment).SetSourceCode(R"(
+#version 460 core
+
+in vec2 fUV;
+
+layout (binding = 0) uniform sampler2D tex;
+
+out vec4 FragColor;
+
+void main() {
+	FragColor = texture(tex, fUV) * vec4(1,1,1,1);
+}
+)").Build().first;
+
+    GPUShaderProgramBuilder spBuilder;
+    prog = spBuilder.SetVertexShader(v.value()).SetFragmentShader(f.value()).Build().first.value();
+
+    GPUPipelineBuilder aBuilder;
+    pipe = aBuilder
+        .SetArrayBuffer(0, buf, layout)
+        .SetTopology(TopologyType::Triangles)
+        .SetPolygonMode(PolygonMode::Fill)
+        .SetViewport({ 0, 0, viewportSize.Width, viewportSize.Height })
+        .SetDepthTestEnabled(true)
+        .SetDepthWriteEnabled(true)
+        .SetMultisampleEnabled(true)
+        .SetShaderProgram(prog)
+        .Build().first.value();
+
+    tex = &Core::GetCore()->GetAssetGPUBridge()->GetTextures().Missing();
+
+    GPUSamplerBuilder saBuilder;
+    sampler = saBuilder
+        .SetMagnificationFilter(TextureMagnificationMode::Nearest)
+        .Build().first.value();
+
+    GPUDescriptorSetBuilder dsBuilder;
+    perFrame = dsBuilder
+        .SetUniformBufferBinding(0, perFrameUniformBuffer)
+        .Build().first.value();
+
+    perObject = dsBuilder
+        .SetUniformBufferBinding(1, perObjectUniformBuffer)
+        .SetCombinedImageSamplerBinding(0, *tex, sampler)
+        .Build().first.value();
+}
 
 
 bool SceneViewport::Begin() {
@@ -55,6 +193,7 @@ void SceneViewport::Render() {
 
     ImVec2 size{ static_cast<float>(viewportSize.Width), static_cast<float>(viewportSize.Height) };
     ImGui::Image(reinterpret_cast<void*>(static_cast<uint64_t>(std::get<GPUTexture>(viewportFramebuffer.ColorAttachments[0].value()).GLObjectID)), size, { 0, 1 }, { 1, 0 });
+    //ImGui::Image(reinterpret_cast<void*>(static_cast<uint64_t>(Core::GetCore()->GetFrameBuffer()->GetColorAttachment())), size, { 0, 1 }, { 1, 0 });
 
     ImGui::PushClipRect({ viewportPosition.x, viewportPosition.y }, { viewportPosition.x + size.x, viewportPosition.y + size.y }, false);
     gizmos.settings.viewportSize = viewportSize;
@@ -100,12 +239,42 @@ void SceneViewport::ReallocBufferIfNeeded(Resolution size) {
     assert(fb.has_value());
 
     viewportFramebuffer = std::move(fb.value());
+    pipe.Viewport = { 0, 0, viewportSize.Width, viewportSize.Height };
 }
 void SceneViewport::RenderSceneToBuffer(Scene& scene) {
     //scene.Update(gui.get().delta);
     //scene.Render();
+    if (gizmos.selectedEntity == NULL_ENTT) return;
+
+
     Graphics::SetRenderTarget(viewportFramebuffer);
+    Graphics::BindPipeline(pipe);
+    Graphics::ClearRenderTarget(viewportFramebuffer, { scene.ClearColor.r, scene.ClearColor.g, scene.ClearColor.b, scene.ClearColor.a });
+
+    // Bind per-frame uniform
+    viewportCamera.GetPerspectiveCamera().UpdateView();
+    viewportCamera.GetPerspectiveCamera().UpdateProjection();
+    glm::mat4 matrices[2] {
+        viewportCamera.GetPerspectiveCamera()._projectionMatrix,
+        viewportCamera.GetPerspectiveCamera()._viewMatrix
+    };
+    GPUBuffer::BufferSubData(perFrameUniformBuffer, sizeof(matrices), reinterpret_cast<NonOwningPointerToConstRawData>(glm::value_ptr(matrices[0])));
+    Graphics::BindDescriptorSet(perFrame);
+    // ---
+
+    // Bind per-object uniform
+    const auto& t = scene.GetComponent<TransformComponent>(gizmos.selectedEntity);
+    glm::mat4 model = t.GetLocalMatrix();
+    GPUBuffer::BufferSubData(perObjectUniformBuffer, sizeof(model), reinterpret_cast<NonOwningPointerToConstRawData>(glm::value_ptr(model)));
+    Graphics::BindDescriptorSet(perObject);
+    // ---
+
+    Graphics::Render(36);
     Graphics::SetRenderTarget({});
+
+
+
+
 }
 
 void SceneViewport::DrawViewportSettings(bool hasScene) {
