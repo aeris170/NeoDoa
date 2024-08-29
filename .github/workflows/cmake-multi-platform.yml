@@ -62,36 +62,14 @@ jobs:
       run: |
         chmod +x ${{ steps.strings.outputs.scripts-dir }}/fetch_apt_get.sh
         ${{ steps.strings.outputs.scripts-dir }}/fetch_apt_get.sh
-        
-    - name: Install GCC 14 (for Linux)
+
+    - name: Set up GCC latest (for Linux)
       if: matrix.os == 'ubuntu-latest' && matrix.cpp_compiler == 'g++'
-      run: |
-        sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-        sudo apt-get update
-        sudo apt-get install -y gcc-13 g++-13
+      uses: egor-tensin/setup-gcc@v1.3
 
-    - name: Set up GCC 14 (for Linux)
-      if: matrix.os == 'ubuntu-latest' && matrix.cpp_compiler == 'g++'
-      run: |
-        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 100
-        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 100
-        sudo update-alternatives --config gcc
-        sudo update-alternatives --config g++
-
-        
-    - name: Install Clang 17 (for Linux)
+    - name: Set up Clang latest (for Linux)
       if: matrix.os == 'ubuntu-latest' && matrix.cpp_compiler == 'clang++'
-      run: |
-        wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add - &&\
-        sudo apt-get install -y clang-17 clang++-17
-
-    - name: Set up Clang 17 (for Linux)
-      if: matrix.os == 'ubuntu-latest' && matrix.cpp_compiler == 'clang++'
-      run: |
-        sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-17 100
-        sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-17 100
-        sudo update-alternatives --config clang
-        sudo update-alternatives --config clang++
+      uses: egor-tensin/setup-clang@v1.4
         
     - name: Set up dependencies with custom script
       shell: bash
