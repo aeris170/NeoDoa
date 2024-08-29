@@ -66,7 +66,17 @@ jobs:
     - name: Set up dependencies with custom script
       shell: bash
       run: |
-        chmod +x ${{ steps.strings.outputs.scripts-dir }}/vcpkg.sh
+        # Convert Windows path to Unix path for Bash
+        scripts_dir="${{ steps.strings.outputs.scripts-dir }}"
+        scripts_dir_unix=$(echo "$scripts_dir" | sed 's/\\/\//g')
+        vcpkg_script="${scripts_dir_unix}/vcpkg.sh"
+        vcpkg_script_unix=$(echo "$vcpkg_script" | sed 's/\\/\//g')
+        vcpkg_dir="${{ github.workspace }}/vcpkg"
+        vcpkg_dir_unix=$(echo "$vcpkg_dir" | sed 's/\\/\//g')
+        
+        # Make the script executable
+        chmod +x "$vcpkg_script_unix"
+        
         # Conditionally set the triplet based on the OS
         if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
           triplet="x64-linux"
@@ -76,7 +86,9 @@ jobs:
           echo "Error: Unsupported OS '${{ matrix.os }}'. Supported OSes are ubuntu-latest and windows-latest."
           exit 1
         fi
-        ${{ steps.strings.outputs.scripts-dir }}/vcpkg.sh $triplet https ${{ github.workspace }}/vcpkg
+        
+        # Run the script
+        "$vcpkg_script_unix" $triplet https "$vcpkg_dir_unix"
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
