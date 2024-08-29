@@ -24,26 +24,7 @@ jobs:
       # To add more build types (Release, Debug, RelWithDebInfo, etc.) customize the build_type list.
       matrix:
         os: [ubuntu-latest, windows-latest]
-        triplet: [x64-linux, x64-windows]
         build_type: [Debug, Release, RelWithDebInfo, MinSizeRel]
-        c_compiler: [gcc, clang, cl]
-        include:
-          - os: windows-latest
-            c_compiler: cl
-            cpp_compiler: cl
-          - os: ubuntu-latest
-            c_compiler: gcc
-            cpp_compiler: g++
-          - os: ubuntu-latest
-            c_compiler: clang
-            cpp_compiler: clang++
-        exclude:
-          - os: windows-latest
-            c_compiler: gcc
-          - os: windows-latest
-            c_compiler: clang
-          - os: ubuntu-latest
-            c_compiler: cl
 
     steps:
     - uses: actions/checkout@v4
@@ -61,15 +42,22 @@ jobs:
     - name: Set up dependencies with custom script
       run: |
         chmod +x ${{ steps.strings.outputs.scripts-dir }}/vcpkg.sh
-        ${{ steps.strings.outputs.scripts-dir }}/vcpkg.sh ${{ matrix.triplet }} https ${{ github.workspace }}/vcpkg
+        # Conditionally set the triplet based on the OS
+        if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
+          triplet="x64-linux"
+        elif [ "${{ matrix.os }}" == "windows-latest" ]; then
+          triplet="x64-windows"
+        else
+          echo "Error: Unsupported OS '${{ matrix.os }}'. Supported OSes are ubuntu-latest and windows-latest."
+          exit 1
+        fi
+        ${{ steps.strings.outputs.scripts-dir }}/vcpkg.sh $triplet https ${{ github.workspace }}/vcpkg
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: >
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
-        -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
-        -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -S ${{ github.workspace }}
 
