@@ -57,6 +57,12 @@ jobs:
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
         echo "scripts-dir=${{ github.workspace }}/scripts" >> "$GITHUB_OUTPUT"
 
+    - name: Run (Linux-specific) script for apt-get
+      if: runner.os == 'Linux'
+      run: |
+        chmod +x ${{ steps.strings.outputs.scripts-dir }}/fetch_apt_get.sh
+        ${{ steps.strings.outputs.scripts-dir }}/fetch_apt_get.sh
+        
     - name: Set up dependencies with custom script
       shell: bash
       run: |
