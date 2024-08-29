@@ -59,7 +59,7 @@ jobs:
     - name: Set up dependencies with custom script
       run: |
         chmod +x ${{ steps.strings.outputs.scripts-dir }}/vcpkg.sh
-        ${{ steps.strings.outputs.scripts-dir }}/script.sh ${{ matrix.triplet } https ${{ github.workspace }}/vcpkg
+        ${{ steps.strings.outputs.scripts-dir }}/script.sh ${{ matrix.triplet }} https ${{ github.workspace }}/vcpkg
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
