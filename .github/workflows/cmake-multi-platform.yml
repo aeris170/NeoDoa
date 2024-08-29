@@ -68,9 +68,20 @@ jobs:
       run: |
         sudo add-apt-repository ppa:ubuntu-toolchain-r/test
         sudo apt-get update
-        sudo apt-get install gcc-14.2
-        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14.2 100
-        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14.2 100
+        sudo apt-get install gcc-13 g++-13 -y
+        
+        # Locate the new version of gcc and g++
+        gcc_bin=$(which gcc-13)
+        gxx_bin=$(which g++-13)
+        
+        # If gcc-13 and g++-13 are installed, update the symbolic links
+        if [ -x "$gcc_bin" ] && [ -x "$gxx_bin" ]; then
+          sudo ln -sf $gcc_bin /usr/bin/gcc
+          sudo ln -sf $gxx_bin /usr/bin/g++
+        else
+          echo "GCC 13 installation failed or binaries not found."
+          exit 1
+        fi
 
     - name: Set up Clang latest (for Linux)
       if: matrix.os == 'ubuntu-latest' && matrix.cpp_compiler == 'clang++'
@@ -78,8 +89,18 @@ jobs:
         wget https://apt.llvm.org/llvm.sh
         chmod u+x llvm.sh
         sudo ./llvm.sh 17
-        sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-17 100
-        sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-17 100
+        
+        # Locate the new version of clang
+        clang_bin=$(which clang-17)
+        clangxx_bin=$(which clang++-17)
+        
+        if [ -x "$clang_bin" ] && [ -x "$clangxx_bin" ]; then
+          sudo ln -sf $clang_bin /usr/bin/clang
+          sudo ln -sf $clangxx_bin /usr/bin/clang++
+        else
+          echo "Clang 17 installation failed or binaries not found."
+          exit 1
+        fi
 
     - name: Set up dependencies with custom script
       shell: bash
