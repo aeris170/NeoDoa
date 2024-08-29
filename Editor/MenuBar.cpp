@@ -58,9 +58,10 @@ void MenuBar::RenderFileSubMenu() noexcept {
 		assert(currentFolder != nullptr);
 		gui.ShowNewSceneAssetModal(*currentFolder);
 	}
-	if (ImGui::BeginMenu("Open Scene...", gui.HasOpenProject())) {
-		const auto& assets = gui.CORE->GetAssets();
-		for (const auto& uuid : assets->SceneAssetIDs()) {
+	const auto& assets = gui.CORE->GetAssets();
+	const auto& scenes = assets->SceneAssetIDs();
+	if (ImGui::BeginMenu("Open Scene...", gui.HasOpenProject() && !scenes.empty())) {
+		for (const auto& uuid : scenes) {
 			AssetHandle sceneAsset = assets->FindAsset(uuid);
 			if (ImGui::MenuItem(sceneAsset.Value().File().Name().data(), nullptr, nullptr)) {
 				gui.OpenScene(sceneAsset);

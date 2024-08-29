@@ -21,7 +21,7 @@
 struct GUI {
 
     const CorePtr& Core;
-    const WindowPtr& Window;
+    const std::unique_ptr<IWindow>& Window;
 
     explicit GUI(const CorePtr& core) noexcept;
 

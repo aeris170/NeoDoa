@@ -8,18 +8,7 @@
 
 #include <Engine/Graphics.hpp>
 
-using BufferAllocatorMessage = std::string;
-
 struct GPUBuffer {
-    static void BufferSubData(GPUBuffer& buffer, RawDataView dataView, size_t offsetBytes = 0uLL) noexcept;
-    static void BufferSubData(GPUBuffer& buffer, size_t sizeBytes, NonOwningPointerToConstRawData data, size_t offsetBytes = 0uLL) noexcept;
-
-    static void GetBufferSubData(const GPUBuffer& buffer, RawDataWriteableView dataView, size_t offsetBytes = 0uLL) noexcept;
-
-    static void CopyBufferSubData(const GPUBuffer& readBuffer, GPUBuffer& writeBuffer, size_t sizeBytesToCopy, size_t readOffsetBytes = 0uLL, size_t writeOffsetBytes = 0uLL) noexcept;
-
-    static void ClearBufferSubData(GPUBuffer& buffer, DataFormat format, size_t sizeBytesToClear, size_t offsetBytes = 0uLL) noexcept;
-
     GLuint GLObjectID{};
 #ifdef DEBUG
     std::string Name{};
@@ -55,4 +44,9 @@ private:
 
 public:
     ND_GRAPHICS_BUILDER_RULE_OF_0(GPUBufferBuilder);
+
+private:
+#ifdef OPENGL_4_6_SUPPORT
+    friend std::pair<std::optional<GPUBuffer>, std::vector<BufferAllocatorMessage>> Graphics::OpenGL::Build(GPUBufferBuilder&) noexcept;
+#endif
 };

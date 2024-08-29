@@ -1,8 +1,6 @@
 #include "Core.hpp"
 
-#include <GLFW/glfw3.h>
 #include <tinyxml2.h>
-#include <debugbreak.h>
 
 #include "Angel.hpp"
 #include "Scene.hpp"
@@ -17,34 +15,56 @@
 #include "ProjectSerializer.hpp"
 #include "ProjectDeserializer.hpp"
 
-static void message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, GLchar const* message, void const* user_param);
+#include <Engine/Monitor.hpp>
+#include <Engine/WindowGLFW.hpp>
 
-const CorePtr& Core::CreateCore(Resolution resolution, const char* title, bool isFullscreen, const char* windowIcon, bool renderOffscreen) {
-#pragma region GLFW and Core/Window/Input Initialization
-    glfwInit();
-    _this = CorePtr(new Core, DeleteCore);
-    _this->window = Window::CreateWindow(resolution, title, isFullscreen, windowIcon);
-    _this->input = CreateInput();
+const CorePtr& Core::CreateCore(GraphicsBackend gBackend, WindowBackend wBackend, const ContextWindowCreationParams& params) {
+    std::set_new_handler(HandleNew);
+#pragma region Core/Window/Input/ImGui Initialization
+    Monitors::Initialize();
+    CorePtr& core = *const_cast<CorePtr*>(&GetCore()); // cast-away const to initialize internals. GetCore never instantiates a const Core!
+
+    switch (wBackend) {
+        using enum WindowBackend;
+        case GLFW:
+            core->window = std::make_unique<WindowGLFW>(gBackend, params);
+            break;
+#ifdef SDL_SUPPORT
+        case SDL:
+            core->window = std::make_unique<WindowSDL>(gBackend, params);
+            break;
+#endif
+        default:
+            std::unreachable();
+    };
+
+    IWindow& window = *core->window.get();
+    core->input = std::make_unique<Input>(window);
+    ImGuiInit(window);
+    ImGuiSetUpWindowIcons(params.IconPack);
 #pragma endregion
 
 #pragma region GLEW Initialization
-    glewExperimental = GL_TRUE;
-    glewInit();
+    if (window.IsSoftwareRendererContextWindow() || window.IsOpenGLContextWindow()) {
+        glewExperimental = GL_TRUE;
+        GLenum error = glewInit();
+        if (error != GLEW_OK) {
+            DOA_LOG_FATAL("GLEW couldn't initialize! Reason: %s", glewGetErrorString(error));
+            std::abort();
+        }
+    }
 #pragma endregion
 
-#pragma region System Information
-    DOA_LOG_INFO("OpenGL version: %s", glGetString(GL_VERSION));
-    DOA_LOG_INFO("GLSL version: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
-    DOA_LOG_INFO("Vendor: %s", glGetString(GL_VENDOR));
-    DOA_LOG_INFO("GPU: %s", glGetString(GL_RENDERER));
+#pragma region Graphics Backend Initialization
+    Graphics::ChangeGraphicsBackend(gBackend);
 #pragma endregion
 
 #pragma region Angel Initialization
-    _this->angel = std::make_unique<Angel>();
+    core->angel = std::make_unique<Angel>();
 #pragma endregion
 
 #pragma region GPU Resource Allocator Initialization
-    _this->gpuBridge = std::make_unique<AssetGPUBridge>();
+    core->gpuBridge = std::make_unique<AssetGPUBridge>();
 #pragma endregion
 
 #pragma region Built-in Stuff Initialization
@@ -182,30 +202,58 @@ const CorePtr& Core::CreateCore(Resolution resolution, const char* title, bool i
     */
 #pragma endregion
 
-#pragma region KHR_debug
-#ifdef DEBUG
-    glEnable(GL_DEBUG_OUTPUT);
-    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-    glDebugMessageCallback(message_callback, nullptr);
-    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
-#endif
-#pragma endregion
-
-    return _this;
+    return core;
 }
-const CorePtr& Core::GetCore() { return _this; }
+const CorePtr& Core::GetCore() {
+    static CorePtr core{ new Core, DeleteCore };
+    return core;
+}
 void Core::DestroyCore() {
-    _this->Stop();
-    _this.reset();
+    Monitors::DeInitialize();
+    ImGuiClean();
+    CorePtr& core = *const_cast<CorePtr*>(&GetCore()); // cast-away const to destroy instance. GetCore never instantiates a const Core!
+    core->Stop();
+    core.reset();
 }
-void Core::DeleteCore(Core* core) { delete core; }
+
+bool Core::IsAnyContextInitialized() const noexcept {
+    return window &&
+        (window->IsSoftwareRendererContextWindow() ||
+         window->IsOpenGLContextWindow() ||
+         window->IsVulkanContextWindow() ||
+         window->IsDirect3D12ContextWindow() ||
+         window->IsDirect3D11ContextWindow());
+}
+bool Core::IsSoftwareRendererInitialized() const noexcept {
+    return window && window->IsSoftwareRendererContextWindow();
+}
+#if defined(OPENGL_4_6_SUPPORT) || defined(OPENGL_3_3_SUPPORT)
+bool Core::IsOpenGLInitialized() const noexcept {
+    return window && window->IsOpenGLContextWindow();
+}
+#endif
+#ifdef VULKAN_SUPPORT
+bool Core::IsVulkanInitialized() const noexcept {
+    return window && window->IsVulkanContextWindow();
+}
+#endif
+#ifdef DIRECT3D_12_SUPPORT
+bool Core::IsDirect3D12Initialized() const noexcept {
+    return window && window->IsDirect3D12ContextWindow();
+}
+#endif
+#ifdef DIRECT3D_11_SUPPORT
+bool Core::IsDirect3D11Initialized() const noexcept {
+    return window && window->IsDirect3D11ContextWindow();
+}
+#endif
 
 bool Core::IsRunning() const { return running; }
 bool Core::IsPlaying() const { return playing; }
 void Core::SetPlaying(bool playing) { this->playing = playing; }
 
 std::unique_ptr<Angel>& Core::GetAngel() { return angel; }
-WindowPtr& Core::GetWindow() { return window; }
+std::unique_ptr<IWindow>& Core::GetWindow() { return window; }
 std::unique_ptr<Input>& Core::GetInput() { return input; }
 
 void Core::CreateAndLoadProject(std::string_view workspace, std::string_view name) {
@@ -273,55 +321,21 @@ void Core::Start() {
 
         ImGuiRender(delta);
 
-        glfwSwapBuffers(window->GetPlatformWindow());
-        glfwPollEvents();
+        window->SwapBuffers();
+
+        input->Step();
+        window->PollEvents();
         lastTime = currentTime;
 
-        if (glfwWindowShouldClose(window->GetPlatformWindow())) {
-            Stop();
-        }
+        if (window->ShouldClose()) { Stop(); }
     }
 }
 void Core::Stop() {
     running = false;
 }
 
-static void message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, GLchar const* message, void const* user_param) {
-    auto const src_str = [source]() {
-        switch (source) {
-        case GL_DEBUG_SOURCE_API: return "API";
-        case GL_DEBUG_SOURCE_WINDOW_SYSTEM: return "WINDOW SYSTEM";
-        case GL_DEBUG_SOURCE_SHADER_COMPILER: return "SHADER COMPILER";
-        case GL_DEBUG_SOURCE_THIRD_PARTY: return "THIRD PARTY";
-        case GL_DEBUG_SOURCE_APPLICATION: return "APPLICATION";
-        case GL_DEBUG_SOURCE_OTHER: return "OTHER";
-        default: return "DEFAULT";
-        }
-    }();
-
-    auto const type_str = [type]() {
-        switch (type) {
-        case GL_DEBUG_TYPE_ERROR: return "ERROR";
-        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: return "DEPRECATED_BEHAVIOR";
-        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR: return "UNDEFINED_BEHAVIOR";
-        case GL_DEBUG_TYPE_PORTABILITY: return "PORTABILITY";
-        case GL_DEBUG_TYPE_PERFORMANCE: return "PERFORMANCE";
-        case GL_DEBUG_TYPE_MARKER: return "MARKER";
-        case GL_DEBUG_TYPE_OTHER: return "OTHER";
-        default: return "DEFAULT";
-        }
-    }();
-
-    auto const severity_str = [severity]() {
-        switch (severity) {
-        case GL_DEBUG_SEVERITY_NOTIFICATION: return "NOTIFICATION";
-        case GL_DEBUG_SEVERITY_LOW: return "LOW";
-        case GL_DEBUG_SEVERITY_MEDIUM: return "MEDIUM";
-        case GL_DEBUG_SEVERITY_HIGH: return "HIGH";
-        default: return "DEFAULT";
-        }
-    }();
-
-    DOA_LOG_OPENGL("%s, %s, %s, %d: %s", src_str, type_str, severity_str, id, message);
-    debug_break();
+void Core::DeleteCore(Core* core) { delete core; }
+void Core::HandleNew() {
+    DOA_LOG_FATAL("Memory allocation failed, terminating");
+    std::set_new_handler(nullptr);
 }

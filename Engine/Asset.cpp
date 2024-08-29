@@ -24,7 +24,7 @@ Asset::Asset(const UUID id, FNode* file) noexcept :
     file(file) {}
 Asset::~Asset() noexcept { NotifyObservers("destructed"_hs); }
 Asset::Asset(Asset&& other) noexcept : ObserverPattern::Observable(std::move(other)),
-    id(std::move(other.id)),
+    id(std::exchange(other.id, UUID::Empty())),
     file(std::exchange(other.file, nullptr)),
     data(std::move(other.data)),
     version(std::exchange(other.version, 0)),
@@ -35,7 +35,7 @@ Asset::Asset(Asset&& other) noexcept : ObserverPattern::Observable(std::move(oth
 }
 Asset& Asset::operator=(Asset&& other) noexcept {
     ObserverPattern::Observable::operator=(std::move(other));
-    id = std::move(other.id);
+    id = std::exchange(other.id, UUID::Empty());
     file = std::exchange(other.file, nullptr);
     DeleteDeserializedData();
     data.swap(other.data);

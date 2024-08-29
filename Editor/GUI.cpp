@@ -20,17 +20,17 @@ GUI::GUI(const CorePtr& core) noexcept :
     Events.OnReimport     += std::bind_front(&GUI::OnReimport    , this);
     Events.OnAssetDeleted += std::bind_front(&GUI::OnAssetDeleted, this);
 
-    //shortcutHandler.RegisterShortcut(Shortcuts::NewProjectShortcut,   [this]() { ShowNewProjectModal();  }, ImGuiInputFlags_RouteGlobalLow);
-    //shortcutHandler.RegisterShortcut(Shortcuts::OpenProjectShortcut,  [this]() { ShowOpenProjectModal(); }, ImGuiInputFlags_RouteGlobalLow);
-    shortcutHandler.RegisterShortcut(Shortcuts::SaveProjectShortcut,  [this]() { SaveProjectToDisk();    }, ImGuiInputFlags_RouteGlobalLow);
-    shortcutHandler.RegisterShortcut(Shortcuts::CloseProjectShortcut, [this]() { CloseProject();         }, ImGuiInputFlags_RouteGlobalLow);
+    //shortcutHandler.RegisterShortcut(Shortcuts::NewProjectShortcut,   [this]() { ShowNewProjectModal();  }, ImGuiInputFlags_RouteGlobal);
+    //shortcutHandler.RegisterShortcut(Shortcuts::OpenProjectShortcut,  [this]() { ShowOpenProjectModal(); }, ImGuiInputFlags_RouteGlobal);
+    shortcutHandler.RegisterShortcut(Shortcuts::SaveProjectShortcut,  [this]() { SaveProjectToDisk();    }, ImGuiInputFlags_RouteGlobal);
+    shortcutHandler.RegisterShortcut(Shortcuts::CloseProjectShortcut, [this]() { CloseProject();         }, ImGuiInputFlags_RouteGlobal);
 
-    shortcutHandler.RegisterShortcut(Shortcuts::UndoShortcut, [this]() { UndoLastCommand(); }, ImGuiInputFlags_RouteGlobalLow);
-    shortcutHandler.RegisterShortcut(Shortcuts::RedoShortcut, [this]() { RedoLastCommand(); }, ImGuiInputFlags_RouteGlobalLow);
+    shortcutHandler.RegisterShortcut(Shortcuts::UndoShortcut, [this]() { UndoLastCommand(); }, ImGuiInputFlags_RouteGlobal);
+    shortcutHandler.RegisterShortcut(Shortcuts::RedoShortcut, [this]() { RedoLastCommand(); }, ImGuiInputFlags_RouteGlobal);
 
-    shortcutHandler.RegisterShortcut(Shortcuts::NewSceneShortcut,   [this]() { ShowNewSceneAssetModal(*am.GetCurrentFolder()); }, ImGuiInputFlags_RouteGlobalLow);
-    shortcutHandler.RegisterShortcut(Shortcuts::SaveSceneShortcut,  [this]() { SaveScene();  }, ImGuiInputFlags_RouteGlobalLow);
-    shortcutHandler.RegisterShortcut(Shortcuts::CloseSceneShortcut, [this]() { CloseScene(); }, ImGuiInputFlags_RouteGlobalLow);
+    shortcutHandler.RegisterShortcut(Shortcuts::NewSceneShortcut,   [this]() { ShowNewSceneAssetModal(*am.GetCurrentFolder()); }, ImGuiInputFlags_RouteGlobal);
+    shortcutHandler.RegisterShortcut(Shortcuts::SaveSceneShortcut,  [this]() { SaveScene();  }, ImGuiInputFlags_RouteGlobal);
+    shortcutHandler.RegisterShortcut(Shortcuts::CloseSceneShortcut, [this]() { CloseScene(); }, ImGuiInputFlags_RouteGlobal);
 }
 
 void GUI::Prepare() {
@@ -154,13 +154,13 @@ void GUI::operator() (float delta) {
 
     if (urh.Begin()) {
         urh.Render();
-        urh.End();
     }
+    urh.End();
 
-    if (svcs.Begin()) {
+    if (svcs.Begin(sv.GetViewportCameraSettingsButtonPosition())) {
         svcs.Render();
-        svcs.End();
     }
+    svcs.End();
 
     nam.Render();
 
@@ -360,6 +360,7 @@ void* GUI::FindIconForFileType(const FNode& file, TextureSize size) const {
 void* GUI::FindIconByName(const std::string_view key, TextureSize size) const { return reinterpret_cast<void*>(static_cast<uint64_t>(SVGPathway::Get(std::string(key), TextureStyle::PADDED, size).GLObjectID)); }
 
 MetaAssetInfo& GUI::GetMetaInfoOf(const FNode& file) { return meta.GetMetaAssetInfoBank().GetMetaInfoOf(file); }
+MetaAssetInfoBank& GUI::GetMetaAssetInfoBank() noexcept { return meta.GetMetaAssetInfoBank(); }
 
 void GUI::ShowNewSceneAssetModal(FNode& currentFolder) const                        { nam.ShowSceneCreationModal(currentFolder);                        }
 void GUI::ShowNewComponentAssetModal(FNode& currentFolder) const                    { nam.ShowComponentCreationModal(currentFolder);                    }

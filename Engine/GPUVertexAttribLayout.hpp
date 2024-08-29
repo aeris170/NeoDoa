@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <cmath>
 #include <vector>
 
@@ -17,8 +18,8 @@ struct GPUVertexAttribLayout {
     unsigned Stride{};
     InputRate InputRate{ InputRate::PerVertex };
     unsigned AttribCount{};
-    std::array<Element, 16> Elements{};
-    std::array<unsigned, 16> Offsets{ 0u };
+    std::array<Element, MaxVertexAttributes> Elements{};
+    std::array<unsigned, MaxVertexAttributes + 1> Offsets{ 0u };
 
     template<typename T>
     void Define([[maybe_unused]] unsigned count, [[maybe_unused]] bool isNormalized = false) { DOA_LOG_FATAL("Unsupported Vertex attrib!"); std::unreachable(); }

@@ -24,26 +24,31 @@ struct FNode {
             using iterator_category = std::forward_iterator_tag;
             using difference_type = std::ptrdiff_t;
             using value_type = T;
-            using ptr = value_type*;
-            using ref = value_type&;
+            using pointer = value_type*;
+            using reference = value_type&;
             using smart = const std::unique_ptr<std::remove_const_t<T>>;
 
-            Iterator(smart* ptr) : _ptr(ptr) {}
+            Iterator(smart* ptr) : ptr(ptr) {}
 
-            ref operator*() const { return *(_ptr->get()); }
-            ptr operator->() { return _ptr->get(); }
-            Iterator<T>& operator++() { _ptr++; return *this; }
+            reference operator*() const { return *(ptr->get()); }
+            pointer operator->() { return ptr->get(); }
+            Iterator<T>& operator++() { ptr++; return *this; }
             Iterator<T> operator++(int) { Iterator tmp = *this; ++(*this); return tmp; }
             friend bool operator==(const Iterator<T>& a, const Iterator<T>& b) = default;
 
         private:
-            smart* _ptr;
+            smart* ptr;
         };
 
         ChildrenList(std::vector<std::unique_ptr<FNode>>& children) noexcept;
 
+        FNode& operator[](std::size_t idx);
+        const FNode& operator[](std::size_t idx) const;
+
         Iterator<FNode> begin();
         Iterator<FNode> end();
+
+        size_t size() const;
 
     private:
         std::vector<std::unique_ptr<FNode>>& children;
@@ -126,7 +131,7 @@ private:
 
     bool isDirectory{ false };
 
-    /* FNode guarantees references are never invalid unless DeleteChildNode is called therefore the unique_ptr's */
+    /* FNode guarantees references are always valid unless DeleteChildNode is called therefore, the unique_ptr's */
     /* are used here to prevent FNode objects from sliding around on deletions/reallocations of vector. */
     std::vector<std::unique_ptr<FNode>> children{};
 

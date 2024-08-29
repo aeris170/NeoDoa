@@ -1,17 +1,15 @@
 #pragma once
 
+#include <array>
+#include <vector>
+#include <utility>
 #include <optional>
+#include <string_view>
 #include <type_traits>
 
 #include <Engine/Region.hpp>
 #include <Engine/Graphics.hpp>
 #include <Engine/GPUVertexAttribLayout.hpp>
-
-using PipelineAllocatorMessage = std::string;
-constexpr uint8_t MaxVertexBufferBinding = 8;
-
-struct GPUBuffer;
-struct GPUShaderProgram;
 
 struct GPUPipeline {
 
@@ -116,4 +114,9 @@ private:
 
 public:
     ND_GRAPHICS_BUILDER_RULE_OF_0(GPUPipelineBuilder);
+
+private:
+#ifdef OPENGL_4_6_SUPPORT
+    friend std::pair<std::optional<GPUPipeline>, std::vector<PipelineAllocatorMessage>> Graphics::OpenGL::Build(GPUPipelineBuilder&) noexcept;
+#endif
 };

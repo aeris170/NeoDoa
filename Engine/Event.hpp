@@ -11,7 +11,7 @@ struct Event<ReturnType(Args...)> {
     Event& operator+=(std::function<ReturnType(Args...)> callback) noexcept;
     void operator()(Args... args) noexcept;
 private:
-    eventpp::CallbackList<ReturnType(Args...)> callbackList;
+    mutable eventpp::CallbackList<ReturnType(Args...)> callbackList;
 };
 
 template<typename ReturnType, typename... Args>

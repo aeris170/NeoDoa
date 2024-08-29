@@ -23,11 +23,19 @@ namespace WindowIcons {
     inline constexpr const char SCENE_VIEWPORT_CAMERA_SETTINGS_WINDOW_ICON[]{ ICON_FA_CAMERA_MOVIE  };
 }
 
+namespace ComponentWidgetIcons {
+    namespace ContextMenu {
+        inline constexpr const char ResetIcon[]{ ICON_FA_ARROW_ROTATE_LEFT " " };
+    }
+}
+
 namespace SceneHierarchyIcons {
     inline constexpr const char SCENE_ICON[]{ ICON_FA_CUBES_STACKED " " };
     inline constexpr const char ENTITY_ICON[]{ ICON_FA_CUBE " " };
 
     namespace ContextMenu {
+        inline constexpr const char MAKE_STARTUP_SCENE_ICON[]{ ICON_FA_BADGE_CHECK " "};
+
         inline constexpr const char CREATE_NEW_ENTITY_ICON[]{ ICON_FA_PLUS " " };
         inline constexpr const char CLOSE_SCENE_ICON[]{ ICON_FA_SQUARE_XMARK " " };
 
@@ -49,6 +57,7 @@ namespace SceneViewportIcons {
 }
 
 namespace ComponentIcons {
+
     inline constexpr const char GENERIC_COMPONENT_ICON[] = ICON_FA_GEAR "  ";
     inline const unordered_string_map<const std::string> DEFINED_COMPONENT_ICONS {
         { nameof(IDComponent), ICON_FA_ID_CARD "  " },

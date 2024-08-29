@@ -12,15 +12,6 @@
 #include <Editor/ImGuiExtensions.hpp>
 #include <Editor/ComponentWidgets.hpp>
 
-static void cb(const ImDrawList* parent_list, const ImDrawCmd* cmd) {
-    static GPUSampler sampler = GPUSamplerBuilder()
-        .SetMinificationFilter(TextureMinificationMode::Nearest)
-        .SetMagnificationFilter(TextureMagnificationMode::Nearest)
-        .SetWrapS(TextureWrappingMode::ClampToBorder)
-        .SetWrapT(TextureWrappingMode::ClampToBorder).Build().first.value();
-    glBindSampler(0, sampler.GLObjectID); // TODO get rid of this "low-level" gl call!!
-}
-
 MaterialDisplay::MaterialDisplay(Observer& observer) noexcept :
     observer(observer) {}
 
@@ -346,11 +337,9 @@ bool MaterialDisplay::RenderSingleUniform(Material::Uniforms& uniforms, const Un
                 gpuTexture = &assets->GPUBridge().GetTextures().Missing();
             }
 
-            ImGui::GetWindowDrawList()->AddCallback(cb, nullptr);
             if (Image2DButtonWidget(uniformValue.Name.c_str(), *gpuTexture)) {
                 textureView.Show(*texture, *gpuTexture);
             }
-            ImGui::GetWindowDrawList()->AddCallback(ImDrawCallback_ResetRenderState, nullptr);
 
             if (ImGui::BeginPopupContextItem(nullptr, ImGuiPopupFlags_MouseButtonRight)) {
                 if (ImGui::Button(cat(ObserverIcons::MaterialDisplayIcons::ContextMenu::RESET_UNIFORM_ICON, "Reset"))) {
@@ -465,9 +454,7 @@ void MaterialDisplay::TextureView::Render() noexcept {
         w = h * aspect;
     }
 
-    ImGui::GetWindowDrawList()->AddCallback(cb, nullptr);
     ImGui::Image(*gpuTexture, { w, h }, { 0, 1 }, { 1, 0 }, { (float) r, (float) g, (float) b, (float) a }, { 1, 1, 0, 1 });
-    ImGui::GetWindowDrawList()->AddCallback(ImDrawCallback_ResetRenderState, nullptr);
 
     if (drawInspector) {
         ImRect rc = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());

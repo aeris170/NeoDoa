@@ -97,7 +97,7 @@ struct GUI {
     ImGuiDockNodeFlags dockspace_flags{ ImGuiDockNodeFlags_None };
 
     const CorePtr& CORE;
-    WindowPtr& window;
+    std::unique_ptr<IWindow>& window;
     std::string defaultWindowName{ "NeoDoa Editor" };
     bool dockspaceOpen{ true };
 
@@ -168,6 +168,7 @@ struct GUI {
     void* FindIconByName(const std::string_view key, TextureSize size = TextureSize::MEDIUM) const;
 
     MetaAssetInfo& GetMetaInfoOf(const FNode& file);
+    MetaAssetInfoBank& GetMetaAssetInfoBank() noexcept;
 
     //- Modals -//
     void ShowNewSceneAssetModal(FNode& currentFolder) const;

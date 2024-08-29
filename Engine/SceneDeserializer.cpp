@@ -137,8 +137,13 @@ void SceneDeserializer::Entities::DefaultDeserializeIDComponent(tinyxml2::XMLEle
     scene.RemoveComponent<TransformComponent>(id.GetEntity()); /* remove tr-cmp bevause we will deserialize one from file */
 }
 void SceneDeserializer::Entities::DefaultDeserializeTransformComponent(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity) {
-    auto matrix = Helpers::DeserializeMat4(*componentNode.FirstChildElement(nameof_c(TransformComponent::localMatrix)));
-    TransformComponent transform = { entity, matrix };
+    auto t = Helpers::DeserializeVec3(*componentNode.FirstChildElement(nameof_c(TransformComponent::localTranslation)));
+    auto r = Helpers::DeserializeQuat(*componentNode.FirstChildElement(nameof_c(TransformComponent::localRotation)));
+    auto s = Helpers::DeserializeVec3(*componentNode.FirstChildElement(nameof_c(TransformComponent::localScale)));
+    TransformComponent transform{ entity };
+    transform.SetLocalTranslation(t);
+    transform.SetLocalRotation(r);
+    transform.SetLocalScale(s);
     scene.InsertComponent<TransformComponent>(transform.GetEntity(), std::move(transform));
 }
 void SceneDeserializer::Entities::DefaultDeserializeParentComponent(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity) {

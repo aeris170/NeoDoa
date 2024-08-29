@@ -83,7 +83,7 @@ protected:
     void NotifyObservers(ObserverPattern::Notification message) final;
 
 private:
-    UUID id{};
+    UUID id{ UUID::Empty() };
     FNode* file{ nullptr };
     AssetData data{ std::monostate{} };
     uint64_t version{};

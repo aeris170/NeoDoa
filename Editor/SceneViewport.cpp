@@ -86,10 +86,10 @@ SceneViewport::SceneViewport(GUI& gui) noexcept :
     -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  // top-left
     -0.5f,  0.5f,  0.5f,  0.0f, 0.0f, // bottom-left
     };
-    const std::byte* bytePtr = reinterpret_cast<const std::byte*>(vertices);
+    std::byte* bytePtr = reinterpret_cast<std::byte*>(vertices);
 
     GPUBufferBuilder bBuilder;
-    buf = bBuilder.SetStorage(std::span<const std::byte>(bytePtr, 180 * sizeof(float))).Build().first.value();
+    buf = bBuilder.SetStorage(std::span<std::byte>(bytePtr, 180 * sizeof(float))).Build().first.value();
     perFrameUniformBuffer = bBuilder.SetProperties(BufferProperties::DynamicStorage).SetStorage(sizeof(glm::mat4) * 2, nullptr).Build().first.value(); // proj and view
     perObjectUniformBuffer = bBuilder.SetProperties(BufferProperties::DynamicStorage).SetStorage(sizeof(glm::mat4), nullptr).Build().first.value(); // model
     GPUVertexAttribLayout layout;
@@ -138,6 +138,8 @@ void main() {
 
     GPUPipelineBuilder aBuilder;
     pipe = aBuilder
+        .SetFaceCullEnabled(true)
+        .SetCullMode(CullMode::Back)
         .SetArrayBuffer(0, buf, layout)
         .SetTopology(TopologyType::Triangles)
         .SetPolygonMode(PolygonMode::Fill)
@@ -153,6 +155,8 @@ void main() {
     GPUSamplerBuilder saBuilder;
     sampler = saBuilder
         .SetMagnificationFilter(TextureMagnificationMode::Nearest)
+        .SetWrapS(TextureWrappingMode::ClampToEdge)
+        .SetWrapT(TextureWrappingMode::ClampToEdge)
         .Build().first.value();
 
     GPUDescriptorSetBuilder dsBuilder;
@@ -192,8 +196,7 @@ void SceneViewport::Render() {
     RenderSceneToBuffer(scene);
 
     ImVec2 size{ static_cast<float>(viewportSize.Width), static_cast<float>(viewportSize.Height) };
-    ImGui::Image(reinterpret_cast<void*>(static_cast<uint64_t>(std::get<GPUTexture>(viewportFramebuffer.ColorAttachments[0].value()).GLObjectID)), size, { 0, 1 }, { 1, 0 });
-    //ImGui::Image(reinterpret_cast<void*>(static_cast<uint64_t>(Core::GetCore()->GetFrameBuffer()->GetColorAttachment())), size, { 0, 1 }, { 1, 0 });
+    ImGui::Image(std::get<GPUTexture>(viewportFramebuffer.ColorAttachments[0].value()), size, { 0, 1 }, { 1, 0 });
 
     ImGui::PushClipRect({ viewportPosition.x, viewportPosition.y }, { viewportPosition.x + size.x, viewportPosition.y + size.y }, false);
     gizmos.settings.viewportSize = viewportSize;
@@ -213,43 +216,71 @@ void SceneViewport::End() {
 
 SceneViewport::ViewportCamera& SceneViewport::GetViewportCamera() { return viewportCamera; }
 
+ImVec2 SceneViewport::GetViewportCameraSettingsButtonPosition() const noexcept { return viewportCameraSettingsButtonPosition; }
+
 void SceneViewport::ReallocBufferIfNeeded(Resolution size) {
     if (viewportSize == size) { return; }
     viewportSize = size;
     viewportCamera.GetPerspectiveCamera()._aspect = size.Aspect();
 
-    GPUTextureBuilder tBuilder;
-    auto&& color = tBuilder
-        .SetWidth(viewportSize.Width)
-        .SetHeight(viewportSize.Height)
-        .SetData(DataFormat::RGBA16F, {})
-        //.SetSamples(Multisample::x8)
-        .Build().first;
-    assert(color.has_value());
+    { // Build Multisampled FB
+        GPURenderBufferBuilder rbBuilder;
+        auto&& color = rbBuilder
+            .SetLayout(viewportSize.Width, viewportSize.Height, DataFormat::RGBA16F)
+            .SetSamples(Multisample::x8)
+            .Build().first;
+        assert(color.has_value());
 
-    GPURenderBufferBuilder rbBuilder;
-    auto&& depthStencil = rbBuilder.SetLayout(viewportSize.Width, viewportSize.Height, DataFormat::DEPTH32F_STENCIL8).Build().first;
-    assert(depthStencil.has_value());
+        auto&& depthStencil = rbBuilder
+            .SetLayout(viewportSize.Width, viewportSize.Height, DataFormat::DEPTH32F_STENCIL8)
+            .SetSamples(Multisample::x8)
+            .Build().first;
+        assert(depthStencil.has_value());
 
-    GPUFrameBufferBuilder fbBuilder;
-    fbBuilder.SetName("NeoDoa Editor Scene Viewport Buffer")
-        .AttachColorTexture(std::move(color.value()), 0)
-        .AttachDepthStencilRenderBuffer(std::move(depthStencil.value()));
-    auto&& fb = fbBuilder.Build().first;
-    assert(fb.has_value());
+        GPUFrameBufferBuilder fbBuilder;
+        fbBuilder.SetName("NeoDoa Editor Scene Viewport Buffer (MS)")
+            .AttachColorRenderBuffer(std::move(color.value()), 0)
+            .AttachDepthStencilRenderBuffer(std::move(depthStencil.value()));
+        auto&& fb = fbBuilder.Build().first;
+        assert(fb.has_value());
 
-    viewportFramebuffer = std::move(fb.value());
+        viewportFramebufferMultisampled = std::move(fb.value());
+    }
+
+    { // Build FB
+        GPUTextureBuilder tBuilder;
+        auto&& color = tBuilder
+            .SetWidth(viewportSize.Width)
+            .SetHeight(viewportSize.Height)
+            .SetData(DataFormat::RGBA16F, {})
+            .SetSamples(Multisample::None)
+            .Build().first;
+        assert(color.has_value());
+
+        GPURenderBufferBuilder rbBuilder;
+        auto&& depthStencil = rbBuilder.SetLayout(viewportSize.Width, viewportSize.Height, DataFormat::DEPTH32F_STENCIL8).Build().first;
+        assert(depthStencil.has_value());
+
+        GPUFrameBufferBuilder fbBuilder;
+        fbBuilder.SetName("NeoDoa Editor Scene Viewport Buffer")
+            .AttachColorTexture(std::move(color.value()), 0)
+            .AttachDepthStencilRenderBuffer(std::move(depthStencil.value()));
+        auto&& fb = fbBuilder.Build().first;
+        assert(fb.has_value());
+
+        viewportFramebuffer = std::move(fb.value());
+    }
+
     pipe.Viewport = { 0, 0, viewportSize.Width, viewportSize.Height };
 }
 void SceneViewport::RenderSceneToBuffer(Scene& scene) {
     //scene.Update(gui.get().delta);
     //scene.Render();
-    if (gizmos.selectedEntity == NULL_ENTT) return;
 
-
-    Graphics::SetRenderTarget(viewportFramebuffer);
+    std::array<unsigned, 1> targets{ 0 };
+    Graphics::SetRenderTarget(viewportFramebufferMultisampled, targets);
     Graphics::BindPipeline(pipe);
-    Graphics::ClearRenderTarget(viewportFramebuffer, { scene.ClearColor.r, scene.ClearColor.g, scene.ClearColor.b, scene.ClearColor.a });
+    Graphics::ClearRenderTarget(viewportFramebufferMultisampled, { scene.ClearColor.r, scene.ClearColor.g, scene.ClearColor.b, scene.ClearColor.a });
 
     // Bind per-frame uniform
     viewportCamera.GetPerspectiveCamera().UpdateView();
@@ -258,23 +289,23 @@ void SceneViewport::RenderSceneToBuffer(Scene& scene) {
         viewportCamera.GetPerspectiveCamera()._projectionMatrix,
         viewportCamera.GetPerspectiveCamera()._viewMatrix
     };
-    GPUBuffer::BufferSubData(perFrameUniformBuffer, sizeof(matrices), reinterpret_cast<NonOwningPointerToConstRawData>(glm::value_ptr(matrices[0])));
+    Graphics::BufferSubData(perFrameUniformBuffer, sizeof(matrices), reinterpret_cast<NonOwningPointerToConstRawData>(glm::value_ptr(matrices[0])));
     Graphics::BindDescriptorSet(perFrame);
     // ---
 
     // Bind per-object uniform
-    const auto& t = scene.GetComponent<TransformComponent>(gizmos.selectedEntity);
-    glm::mat4 model = t.GetLocalMatrix();
-    GPUBuffer::BufferSubData(perObjectUniformBuffer, sizeof(model), reinterpret_cast<NonOwningPointerToConstRawData>(glm::value_ptr(model)));
-    Graphics::BindDescriptorSet(perObject);
-    // ---
+    for (const auto& e : scene.GetRegistry().view<TransformComponent>()) {
+        glm::mat4 model = TransformComponent::ComputeWorldMatrix(e, scene);
+        Graphics::BufferSubData(perObjectUniformBuffer, sizeof(model), reinterpret_cast<NonOwningPointerToConstRawData>(glm::value_ptr(model)));
+        Graphics::BindDescriptorSet(perObject);
 
-    Graphics::Render(36);
+        Graphics::Render(36);
+    }
+    // ---
     Graphics::SetRenderTarget({});
 
-
-
-
+    std::array<unsigned, 1> dst{ 0 };
+    Graphics::BlitColor(viewportFramebufferMultisampled, viewportFramebuffer, 0, dst);
 }
 
 void SceneViewport::DrawViewportSettings(bool hasScene) {
@@ -350,6 +381,7 @@ void SceneViewport::DrawViewportSettings(bool hasScene) {
     ImGui::SameLine();
 
     ImGui::BeginDisabled(!gui.HasOpenScene());
+    viewportCameraSettingsButtonPosition = ImGui::GetWindowPos() + ImGui::GetCursorPos();
     if (ImGui::Button(WindowStrings::SceneViewportCameraSettingsWindowTitle)) {
         gui.GetSceneViewportCameraSettings().Show();
     }
@@ -447,16 +479,16 @@ void SceneViewport::HandleMouseControls() {
         } else if (viewportCamera.IsPerspective()) {
             glm::vec3 right = glm::normalize(glm::cross(forward, up)) * (controls.cameraSpeed * gui.delta);
             glm::vec3 fwd = glm::normalize(forward) * (controls.cameraSpeed * gui.delta);
-            if (gui.CORE->GetInput()->IsKeyPressed(KEY_W)) {
+            if (gui.CORE->GetInput()->IsKeyDepressed(Key::W)) {
                 eye += fwd;
             }
-            if (gui.CORE->GetInput()->IsKeyPressed(KEY_A)) {
+            if (gui.CORE->GetInput()->IsKeyDepressed(Key::A)) {
                 eye -= right;
             }
-            if (gui.CORE->GetInput()->IsKeyPressed(KEY_S)) {
+            if (gui.CORE->GetInput()->IsKeyDepressed(Key::S)) {
                 eye -= fwd;
             }
-            if (gui.CORE->GetInput()->IsKeyPressed(KEY_D)) {
+            if (gui.CORE->GetInput()->IsKeyDepressed(Key::D)) {
                 eye += right;
             }
             controls.yaw += delta.x;
@@ -472,7 +504,7 @@ void SceneViewport::HandleMouseControls() {
             direction.z = sin(glm::radians(controls.yaw)) * cos(glm::radians(controls.pitch));
             forward = glm::normalize(direction);
         } else {
-            assert(false); /* no camera? */
+            std::unreachable();
         }
         controls.prevDelta = v;
     }

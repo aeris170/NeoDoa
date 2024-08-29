@@ -20,8 +20,6 @@ typedef GLuint RBO;
 typedef GLuint ProgramID;
 typedef GLint UniformLocation;
 
-typedef std::function<void(float)> ImGuiFunction;
-
 /* This is taken from glfw3.h, if that wasn't obvious. They only exist to be registered to Angel Script. */
 static int KEY_UNKNOWN = GLFW_KEY_UNKNOWN;
 static int KEY_SPACE = GLFW_KEY_SPACE;

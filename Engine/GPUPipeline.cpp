@@ -5,7 +5,7 @@
 #include <cassert>
 
 GPUPipeline::~GPUPipeline() noexcept {
-    glDeleteVertexArrays(1, &GLObjectID);
+    Graphics::Destructors::Destruct(*this);
 }
 GPUPipeline::GPUPipeline(GPUPipeline&& other) noexcept {
     *this = std::move(other);
@@ -21,6 +21,7 @@ GPUPipeline& GPUPipeline::operator=(GPUPipeline&& other) noexcept {
     IndexType = other.IndexType;
     Topology = other.Topology;
     Polygon = other.Polygon;
+    IsFaceCullingEnabled = other.IsFaceCullingEnabled;
     Cull = other.Cull;
     Viewport = other.Viewport;
     IsScissorEnabled = other.IsScissorEnabled;
@@ -126,78 +127,6 @@ GPUPipelineBuilder& GPUPipelineBuilder::SetShaderProgram(const GPUShaderProgram&
     return *this;
 }
 
-[[nodiscard]] std::pair<std::optional<GPUPipeline>, std::vector<PipelineAllocatorMessage>> GPUPipelineBuilder::Build() noexcept {
-    assert(vertexBuffers.size() == vertexLayouts.size()); // impossible
-
-    if (!shaderProgam) {
-        return { std::nullopt, { "Cannot create pipeline without a shader program!" } };
-    }
-
-    GLuint vertexArray;
-    glCreateVertexArrays(1, &vertexArray);
-
-    unsigned attribIndex{};
-    for (unsigned bindingIndx = 0; bindingIndx < vertexBuffers.size(); bindingIndx++) {
-        if (!vertexBuffers[bindingIndx].has_value()) { continue; }
-
-        const GPUBuffer& vertexBuffer{ vertexBuffers[bindingIndx].value().get() };
-        const GPUVertexAttribLayout& layout{ vertexLayouts[bindingIndx] };
-        glVertexArrayVertexBuffer(vertexArray, bindingIndx, vertexBuffer.GLObjectID, 0, layout.Stride);
-        glVertexArrayBindingDivisor(vertexArray, bindingIndx, ToGLInputRate(layout.InputRate));
-        for (unsigned i = 0; i < layout.Elements.size(); i++) {
-            const GPUVertexAttribLayout::Element& elem{ layout.Elements[i] };
-            if (elem.Count == 0) { continue; }
-
-            glEnableVertexArrayAttrib(vertexArray, attribIndex);
-            if (elem.Type == GL_INT ||
-                elem.Type == GL_BYTE ||
-                elem.Type == GL_SHORT ||
-                elem.Type == GL_UNSIGNED_INT ||
-                elem.Type == GL_UNSIGNED_BYTE ||
-                elem.Type == GL_UNSIGNED_SHORT) {
-                glVertexArrayAttribIFormat(vertexArray, attribIndex, elem.Count, elem.Type, layout.Offsets[i]);
-            } else if (elem.Type == GL_DOUBLE) {
-                glVertexArrayAttribLFormat(vertexArray, attribIndex, elem.Count, elem.Type, layout.Offsets[i]);
-            } else {
-                glVertexArrayAttribFormat(vertexArray, attribIndex, elem.Count, elem.Type, elem.IsNormalized, layout.Offsets[i]);
-            }
-            glVertexArrayAttribBinding(vertexArray, attribIndex, bindingIndx);
-            attribIndex++;
-        }
-    }
-
-    if (indexBuffer) {
-        glVertexArrayElementBuffer(vertexArray, indexBuffer->GLObjectID);
-    }
-
-    std::optional<GPUPipeline> gpuPipeline{ std::nullopt };
-    gpuPipeline.emplace();
-    gpuPipeline->GLObjectID = vertexArray;
-#ifdef DEBUG
-    gpuPipeline->Name = std::move(name);
-#endif
-    gpuPipeline->VertexBuffers = std::move(vertexBuffers);
-    gpuPipeline->VertexLayouts = std::move(vertexLayouts);
-    gpuPipeline->IndexBuffer = indexBuffer;
-    gpuPipeline->IndexType = indexType;
-    gpuPipeline->Topology = topology;
-    gpuPipeline->IsFaceCullingEnabled = isFaceCullingEnabled;
-    gpuPipeline->Cull = cullMode;
-    gpuPipeline->Polygon = polygonMode;
-    gpuPipeline->Viewport = viewport;
-    gpuPipeline->IsScissorEnabled = isScissorEnabled;
-    gpuPipeline->Scissor = scissor;
-    gpuPipeline->IsDepthTestEnabled = isDepthTestEnabled;
-    gpuPipeline->IsDepthWriteEnabled = isDepthWriteEnabled;
-    gpuPipeline->DepthFunc = depthFunction;
-    gpuPipeline->IsDepthClampEnabled = isDepthClampEnabled;
-    gpuPipeline->IsMultisampleEnabled = isMultisampleEnabled;
-    gpuPipeline->IsBlendEnabled = isBlendEnabled;
-    gpuPipeline->SourceFactor = srcRGBFactor;
-    gpuPipeline->DestinationFactor = dstRGBFactor;
-    gpuPipeline->SourceAlphaFactor = srcAlphaFactor;
-    gpuPipeline->DestinationAlphaFactor = dstAlphaFactor;
-    gpuPipeline->ShaderProgram = shaderProgam;
-
-    return { std::move(gpuPipeline), {} };
+std::pair<std::optional<GPUPipeline>, std::vector<PipelineAllocatorMessage>> GPUPipelineBuilder::Build() noexcept {
+    return Graphics::Builders::Build(*this);
 }

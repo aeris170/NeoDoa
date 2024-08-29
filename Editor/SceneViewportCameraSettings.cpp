@@ -9,12 +9,26 @@
 SceneViewportCameraSettings::SceneViewportCameraSettings(GUI& owner) noexcept :
     gui(owner) {}
 
-bool SceneViewportCameraSettings::Begin() noexcept {
+bool SceneViewportCameraSettings::Begin(ImVec2 position) noexcept {
     if (!isOpen) { return false; }
 
+    ImGui::SetNextWindowPos(position, ImGuiCond_Always);
     ImGui::SetNextWindowSize({ 480, 440 }, ImGuiCond_Always);
     ImGui::PushID(WindowStrings::SceneViewportCameraSettingsWindowName);
-    bool visible = ImGui::Begin(WindowStrings::SceneViewportCameraSettingsWindowTitleID, &isOpen, ImGuiWindowFlags_NoResize);
+    static auto flags = ImGuiWindowFlags_NoMove |
+                        ImGuiWindowFlags_NoResize |
+                        ImGuiWindowFlags_NoCollapse |
+                        ImGuiWindowFlags_AlwaysAutoResize;
+    bool visible = ImGui::Begin(WindowStrings::SceneViewportCameraSettingsWindowTitleID, &isOpen, flags);
+
+    if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+        visible = false;
+        isOpen = false;
+    }
+
+    if (!isOpen) {
+        isClosing = true;
+    }
 
     return visible;
 }
@@ -56,14 +70,22 @@ void SceneViewportCameraSettings::Render() noexcept {
     ImGui::NewLine();
 
     auto& active = viewportCamera.GetActiveCamera();
+    FancyVectorWidgetSettings<Display::XYZ> settings = defaultFancyVectorSettingsXYZ;
+    settings.resetAllToSame = false;
     FancyVector3Widget("Eye", active.eye);
-    FancyVector3Widget("Forward", active.forward);
-    FancyVector3Widget("Up", active.up);
+    settings.resetTos = { 0, 0, -1 };
+    FancyVector3Widget("Forward", active.forward, settings);
+    settings.resetTos = { 0, 1, 0 };
+    FancyVector3Widget("Up", active.up, settings);
     FloatWidget("Zoom", active.zoom);
 
     ImGui::EndGroup();
 }
 void SceneViewportCameraSettings::End() noexcept {
+    if (!isOpen && !isClosing) { return; }
+
+    isClosing = false;
+
     ImGui::End();
     ImGui::PopID();
 }

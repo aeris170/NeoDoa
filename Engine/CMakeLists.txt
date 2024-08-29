@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 add_library(Engine STATIC)
+
 target_include_directories(Engine PUBLIC ..)
 
 target_link_libraries(Engine PUBLIC Utility)
@@ -35,16 +36,16 @@ target_link_libraries(Engine PUBLIC ICU::uc ICU::dt ICU::i18n)
 
 set(GROUP_LIST
     "NeoDoa.hpp"
-	
+
     "TypedefsAndConstants.hpp"
-	
+
     "Asset/Asset.cpp"
     "Asset/Asset.hpp"
     "Asset/Assets.cpp"
     "Asset/Assets.hpp"
     "Asset/UUID.cpp"
     "Asset/UUID.hpp"
-    
+
     "Asset/Color/Color.hpp"
     "Asset/Component/Component.cpp"
     "Asset/Component/Component.hpp"
@@ -85,17 +86,25 @@ set(GROUP_LIST
     "Asset/Texture/Serialize/TextureSerializer.hpp"
     "Asset/Texture/Serialize/TextureDeserializer.cpp"
     "Asset/Texture/Serialize/TextureDeserializer.hpp"
-	
+
     "Core/Core.cpp"
     "Core/Core.hpp"
+    "Core/DataTypes.cpp"
+    "Core/DataTypes.hpp"
     "Core/Input.cpp"
     "Core/Input.hpp"
-    "Core/Window.cpp"
-    "Core/Window.hpp"
     "Core/TypeSystem.hpp"
-	
+    "Core/Window/Monitor.cpp"
+    "Core/Window/Monitor.hpp"
+    "Core/Window/MonitorGLFW.cpp"
+    "Core/Window/MonitorGLFW.hpp"
+    "Core/Window/Window.cpp"
+    "Core/Window/Window.hpp"
+    "Core/Window/WindowGLFW.cpp"
+    "Core/Window/WindowGLFW.hpp"
+
     "Event/Event.hpp"
-	
+
     "OpenGL/OpenGLCommon.hpp"
     "OpenGL/Buffer.cpp"
     "OpenGL/Buffer.hpp"
@@ -105,7 +114,7 @@ set(GROUP_LIST
     "OpenGL/VertexArray.hpp"
     "OpenGL/VertexAttribLayout.cpp"
     "OpenGL/VertexAttribLayout.hpp"
-	
+
     "ECS/Registry.hpp"
     "ECS/Components/BehaviourComponent.cpp"
     "ECS/Components/BehaviourComponent.hpp"
@@ -115,6 +124,8 @@ set(GROUP_LIST
     "ECS/Components/ChildComponent.hpp"
     "ECS/Components/IDComponent.cpp"
     "ECS/Components/IDComponent.hpp"
+    "ECS/Components/MultiMaterialComponent.cpp"
+    "ECS/Components/MultiMaterialComponent.hpp"
     "ECS/Components/ParentComponent.cpp"
     "ECS/Components/ParentComponent.hpp"
     "ECS/Components/TransformComponent.cpp"
@@ -123,7 +134,7 @@ set(GROUP_LIST
     "ECS/Entity/Entity.hpp"
     "ECS/Systems/System.cpp"
     "ECS/Systems/System.hpp"
-	
+
     "Graphics/AssetBridge.cpp"
     "Graphics/AssetBridge.hpp"
     "Graphics/GPUBuffer.cpp"
@@ -142,23 +153,28 @@ set(GROUP_LIST
     "Graphics/GPUVertexAttribLayout.hpp"
     "Graphics/Graphics.cpp"
     "Graphics/Graphics.hpp"
-	
+    "Graphics/GraphicsGL.cpp"
+    "Graphics/GraphicsGL.hpp"
+    "Graphics/GraphicsNone.cpp"
+    "Graphics/GraphicsNone.hpp"
+
     "ImGui/FontAwesome.hpp"
     "ImGui/ImGuiRenderCommand.hpp"
     "ImGui/ImGuiRenderer.cpp"
     "ImGui/ImGuiRenderer.hpp"
-	
+
     "Log/Log.cpp"
     "Log/Log.hpp"
-	
+
     "Misc/AABB.cpp"
     "Misc/AABB.hpp"
-    "Misc/Vertex.hpp"
+    "Misc/AssimpGLMConvert.hpp"
+    "Misc/OstreamImpls.cpp"
+    "Misc/Point.hpp"
     "Misc/Region.hpp"
     "Misc/Resolution.hpp"
-    "Misc/OstreamImpls.cpp"
-    "Misc/AssimpGLMConvert.hpp"
-	
+    "Misc/Vertex.hpp"
+
     "Project/Project.cpp"
     "Project/Project.hpp"
     "Project/Serialize/ProjectSerializer.cpp"
@@ -176,7 +192,7 @@ set(GROUP_LIST
     "Project/Scene/Serialize/SceneSerializer.hpp"
     "Project/Scene/Serialize/SceneDeserializer.cpp"
     "Project/Scene/Serialize/SceneDeserializer.hpp"
-	
+
     "Renderer/Renderer.cpp"
     "Renderer/Renderer.hpp"
     "Renderer/OutlineRenderer.cpp"

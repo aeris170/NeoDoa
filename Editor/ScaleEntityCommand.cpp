@@ -28,8 +28,10 @@ void ScaleEntityCommand::UnExecute() noexcept {
 
 bool ScaleEntityCommand::TryMergeWith(UndoRedoStack& history, const ICommand* command) noexcept {
     if (const ScaleEntityCommand* other = dynamic_cast<const ScaleEntityCommand*>(command)) {
-        newScale = other->newScale;
-        return true;
+        if (entity == other->entity) {
+            newScale = other->newScale;
+            return true;
+        }
     }
     return false;
 }

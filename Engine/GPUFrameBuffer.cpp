@@ -2,11 +2,9 @@
 
 #include <cassert>
 
-#include <Utility/TemplateUtilities.hpp>
-
 // RenderBuffer
 GPURenderBuffer::~GPURenderBuffer() noexcept {
-    glDeleteRenderbuffers(1, &GLObjectID);
+    Graphics::Destructors::Destruct(*this);
 }
 GPURenderBuffer::GPURenderBuffer(GPURenderBuffer&& other) noexcept {
     *this = std::move(other);
@@ -19,6 +17,7 @@ GPURenderBuffer& GPURenderBuffer::operator=(GPURenderBuffer&& other) noexcept {
     Width = std::exchange(other.Width, {});
     Height = std::exchange(other.Height, {});
     Format = std::exchange(other.Format, {});
+    Samples = std::exchange(other.Samples, {});
     return *this;
 }
 
@@ -44,28 +43,18 @@ GPURenderBufferBuilder& GPURenderBufferBuilder::SetLayout(unsigned width, unsign
     SetWidth(width).SetHeight(height).SetFormat(format);
     return *this;
 }
+GPURenderBufferBuilder& GPURenderBufferBuilder::SetSamples(Multisample multisample) noexcept {
+    samples = multisample;
+    return *this;
+}
 
-[[nodiscard]] std::pair<std::optional<GPURenderBuffer>, RenderBufferAllocatorMessage> GPURenderBufferBuilder::Build() noexcept {
-    GLuint renderBuffer;
-    glCreateRenderbuffers(1, &renderBuffer);
-    glNamedRenderbufferStorage(renderBuffer, ToGLSizedFormat(format), width, height);
-
-    std::optional<GPURenderBuffer> gpuRenderBuffer{ std::nullopt };
-    gpuRenderBuffer.emplace();
-    gpuRenderBuffer->GLObjectID = renderBuffer;
-#ifdef DEBUG
-    gpuRenderBuffer->Name = std::move(name);
-#endif
-    gpuRenderBuffer->Width = width;
-    gpuRenderBuffer->Height = height;
-    gpuRenderBuffer->Format = format;
-
-    return { std::move(gpuRenderBuffer), {} };
+std::pair<std::optional<GPURenderBuffer>, std::vector<RenderBufferAllocatorMessage>> GPURenderBufferBuilder::Build() noexcept {
+    return Graphics::Builders::Build(*this);
 }
 
 // FrameBuffer
 GPUFrameBuffer::~GPUFrameBuffer() noexcept {
-    glDeleteFramebuffers(1, &GLObjectID);
+    Graphics::Destructors::Destruct(*this);
 }
 GPUFrameBuffer::GPUFrameBuffer(GPUFrameBuffer&& other) noexcept {
     *this = std::move(other);
@@ -127,73 +116,7 @@ GPUFrameBufferBuilder& GPUFrameBufferBuilder::AttachDepthStencilRenderBuffer(GPU
     return *this;
 }
 
-[[nodiscard]] std::pair<std::optional<GPUFrameBuffer>, FrameBufferAllocatorMessage> GPUFrameBufferBuilder::Build() noexcept {
-    GLuint frameBuffer;
-    glCreateFramebuffers(1, &frameBuffer);
-
-    std::array<GLenum, MaxColorAttachments> drawBuffers;
-    for (int i = 0; i < colorAttachments.size(); i++) {
-        const auto& colorAttachment = colorAttachments[i];
-
-        if (colorAttachments[i].has_value()) {
-            drawBuffers[i] = GL_COLOR_ATTACHMENT0 + i;
-            std::visit(overloaded::lambda{
-                [frameBuffer, &i](const GPUTexture& texture) {
-                    glNamedFramebufferTexture(frameBuffer, GL_COLOR_ATTACHMENT0 + i, texture.GLObjectID, 0);
-                },
-                [frameBuffer, &i](const GPURenderBuffer& renderBuffer) {
-                    glNamedFramebufferRenderbuffer(frameBuffer, GL_COLOR_ATTACHMENT0 + i, GL_RENDERBUFFER, renderBuffer.GLObjectID);
-                }
-            }, colorAttachment.value());
-        } else {
-            drawBuffers[i] = GL_NONE;
-        }
-    }
-    glNamedFramebufferDrawBuffers(frameBuffer, drawBuffers.size(), drawBuffers.data());
-
-    if (depthStencilAttachment) {
-        std::visit(overloaded::lambda{
-            [frameBuffer](const GPUTexture& texture) {
-                glNamedFramebufferTexture(frameBuffer, GL_DEPTH_STENCIL_ATTACHMENT, texture.GLObjectID, 0);
-            },
-            [frameBuffer](const GPURenderBuffer& renderBuffer) {
-                glNamedFramebufferRenderbuffer(frameBuffer, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBuffer.GLObjectID);
-            }
-        }, depthStencilAttachment.value());
-    } else {
-        if (depthAttachment) {
-            std::visit(overloaded::lambda{
-                [frameBuffer](const GPUTexture& texture) {
-                    glNamedFramebufferTexture(frameBuffer, GL_DEPTH_ATTACHMENT, texture.GLObjectID, 0);
-                },
-                [frameBuffer](const GPURenderBuffer& renderBuffer) {
-                    glNamedFramebufferRenderbuffer(frameBuffer, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, renderBuffer.GLObjectID);
-                }
-            }, depthAttachment.value());
-        }
-        if (stencilAttachment) {
-            std::visit(overloaded::lambda{
-                [frameBuffer](const GPUTexture& texture) {
-                    glNamedFramebufferTexture(frameBuffer, GL_STENCIL_ATTACHMENT, texture.GLObjectID, 0);
-                },
-                [frameBuffer](const GPURenderBuffer& renderBuffer) {
-                    glNamedFramebufferRenderbuffer(frameBuffer, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBuffer.GLObjectID);
-                }
-            }, stencilAttachment.value());
-        }
-    }
-
-    std::optional<GPUFrameBuffer> gpuFrameBuffer{ std::nullopt };
-    gpuFrameBuffer.emplace();
-    gpuFrameBuffer->GLObjectID = frameBuffer;
-#ifdef DEBUG
-        gpuFrameBuffer->Name = std::move(name);
-#endif
-    gpuFrameBuffer->ColorAttachments = std::move(colorAttachments);
-    gpuFrameBuffer->DepthAttachment = std::move(depthAttachment);
-    gpuFrameBuffer->StencilAttachment = std::move(stencilAttachment);
-    gpuFrameBuffer->DepthStencilAttachment = std::move(depthStencilAttachment);
-
-    return { std::move(gpuFrameBuffer), {} };
+std::pair<std::optional<GPUFrameBuffer>, std::vector<FrameBufferAllocatorMessage>> GPUFrameBufferBuilder::Build() noexcept {
+    return Graphics::Builders::Build(*this);
 }
 

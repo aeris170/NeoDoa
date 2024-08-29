@@ -48,11 +48,19 @@ namespace WindowStrings {
     inline constexpr auto SceneViewportCameraSettingsWindowTitleID{ cat(SceneViewportCameraSettingsWindowTitle.c, ImGuiIDDesignator, SceneViewportCameraSettingsWindowName) };
 }
 
+namespace ComponentWidgetStrings {
+    namespace ContextMenu {
+        inline constexpr const char Reset[]{ "Reset" };
+    }
+}
+
 namespace SceneHierarchyStrings {
     inline constexpr const char SCENE_ICON[]{ ICON_FA_CUBES_STACKED " " };
     inline constexpr const char ENTITY_ICON[]{ ICON_FA_CUBE " " };
 
     namespace ContextMenu {
+        inline constexpr const char MakeStartupScene[]{ "Make Startup Scene" };
+
         inline constexpr const char CREATE_NEW_ENTITY_ICON[]{ ICON_FA_PLUS " " };
         inline constexpr const char CLOSE_SCENE_ICON[]{ ICON_FA_SQUARE_XMARK " " };
 

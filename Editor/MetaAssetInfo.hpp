@@ -52,7 +52,7 @@ private:
     DataStructure metaInfo;
 };
 
-#if DEBUG
+#ifdef DEBUG
 #include <type_traits>
 static_assert(std::is_default_constructible_v<MetaAssetInfo>);
 static_assert(std::is_copy_constructible_v<MetaAssetInfo>);

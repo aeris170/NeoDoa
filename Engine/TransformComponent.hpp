@@ -6,35 +6,23 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
-#include <glm/gtx/transform.hpp>
 
 #include <Engine/Entity.hpp>
 
+struct Scene;
+
 struct TransformComponent {
     explicit TransformComponent(const Entity owner) noexcept;
-    TransformComponent(const Entity owner, const glm::mat4& matrix) noexcept;
 
-    static void InsertTranslation(glm::mat4& m, const glm::vec3& translation);
-    static void InsertRotation(glm::mat4& m, const glm::quat& rotation);
-    static void InsertScale(glm::mat4& m, const glm::vec3& scale);
-    static void Compose(glm::mat4& m, const glm::vec3& translation, const glm::quat& rotation, const glm::vec3& scale);
+    static glm::vec3 ComputeWorldTranslation(const Entity entity, const Scene& scene);
+    static glm::quat ComputeWorldRotation(const Entity entity, const Scene& scene);
+    static glm::vec3 ComputeLossyScale(const Entity entity, const Scene& scene);
+    static glm::mat4 ComputeWorldMatrix(const Entity entity, const Scene& scene);
 
-    static glm::vec3 ExtractTranslation(const glm::mat4& m);
-    static glm::quat ExtractRotation(const glm::mat4& m);
-    static glm::vec3 ExtractScale(const glm::mat4& m);
-    static void Decompose(const glm::mat4& m, glm::vec3& pos, glm::quat& rot, glm::vec3& scale);
+    static glm::mat4 Compose(glm::vec3 translation, glm::quat rotation, glm::vec3 scale);
+    static void Decompose(const glm::mat4& matrix, glm::vec3* translation, glm::quat* rotation, glm::vec3* scale);
 
     Entity GetEntity() const;
-
-    glm::vec3 GetWorldTranslation() const;
-    void SetWorldTranslation(glm::vec3 worldTranslation);
-
-    glm::quat GetWorldRotation() const;
-    void SetWorldRotation(glm::quat worldRotation);
-
-    glm::vec3 GetLossyScale() const;
-
-    glm::mat4 GetWorldMatrix() const;
 
     glm::vec3 GetLocalTranslation() const;
     void SetLocalTranslation(glm::vec3 localTranslation);
@@ -45,14 +33,10 @@ struct TransformComponent {
     glm::vec3 GetLocalScale() const;
     void SetLocalScale(glm::vec3 localScale);
 
-    glm::mat4 GetLocalMatrix() const;
-    void SetLocalMatrix(glm::mat4 localMatrix);
-
 private:
     Entity entity;
 
-    glm::vec3 localTranslation{ glm::vec3(0, 0, 0) };
+    glm::vec3 localTranslation{ 0, 0, 0 };
     glm::quat localRotation{ glm::quat_identity<float, glm::packed_highp>() };
-    glm::vec3 localScale{ glm::vec3(1, 1, 1) };
-    glm::mat4 localMatrix{ glm::identity<glm::mat4>() };
+    glm::vec3 localScale{ 1, 1, 1 };
 };

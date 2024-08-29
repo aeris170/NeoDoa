@@ -28,8 +28,10 @@ void RotateEntityCommand::UnExecute() noexcept {
 
 bool RotateEntityCommand::TryMergeWith(UndoRedoStack& history, const ICommand* command) noexcept {
     if (const RotateEntityCommand* other = dynamic_cast<const RotateEntityCommand*>(command)) {
-        newRotation = other->newRotation;
-        return true;
+        if (entity == other->entity) {
+            newRotation = other->newRotation;
+            return true;
+        }
     }
     return false;
 }

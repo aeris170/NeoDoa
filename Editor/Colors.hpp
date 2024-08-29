@@ -1,4 +1,11 @@
+#pragma once
+
 #include <imgui.h>
+
+namespace MultiAssetWidgetColors {
+    static constexpr ImVec4 DeletedOrUnloadedColor{ 1.0f, 0.6f, 0.6f, 1.0f };
+    static constexpr ImVec4 EmptyColor{ 1.0f, 0.5f, 0.1f, 1.0f };
+}
 
 namespace ComponentDefinitionViewColors {
     static constexpr ImVec4 ERROR_COLOR{ 1.0f, 0.6f, 0.6f, 1.0f };

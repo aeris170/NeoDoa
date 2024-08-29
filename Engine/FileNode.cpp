@@ -9,8 +9,14 @@
 #include "Project.hpp"
 
 FNode::ChildrenList::ChildrenList(std::vector<std::unique_ptr<FNode>>& children) noexcept : children(children) {}
+
+FNode& FNode::ChildrenList::operator[](std::size_t idx)             { return *children.operator[](idx).get(); }
+const FNode& FNode::ChildrenList::operator[](std::size_t idx) const { return *children.operator[](idx).get(); }
+
 FNode::ChildrenList::Iterator<FNode> FNode::ChildrenList::begin() { return { std::to_address(children.begin()) }; }
 FNode::ChildrenList::Iterator<FNode> FNode::ChildrenList::end()   { return { std::to_address(children.end())   }; }
+
+size_t FNode::ChildrenList::size() const { return children.size(); }
 
 FNode::FNode(const FNodeCreationParams& params) noexcept :
     owner(params.owner),

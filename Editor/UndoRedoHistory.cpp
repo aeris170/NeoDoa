@@ -19,6 +19,10 @@ bool UndoRedoHistory::Begin() noexcept {
     ImGui::PushID(WindowStrings::UndoRedoHistoryWindowName);
     bool visible = ImGui::Begin(WindowStrings::UndoRedoHistoryWindowTitleID, &isOpen);
 
+    if (!isOpen) {
+        isClosing = true;
+    }
+
     return visible;
 }
 
@@ -75,6 +79,10 @@ void UndoRedoHistory::Render() noexcept {
 }
 
 void UndoRedoHistory::End() noexcept {
+    if (!isOpen && !isClosing) { return; }
+
+    isClosing = false;
+
     ImGui::End();
     ImGui::PopID();
 }

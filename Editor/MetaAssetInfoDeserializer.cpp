@@ -81,6 +81,26 @@ static const char* FindIconInIcons(const char* icon) {
             return fa_icon;
         }
     }
+    for (const auto& [fa_icon, _] : FileIcons::ShaderIcons) {
+        if (std::strcmp(fa_icon, icon) == 0) {
+            return fa_icon;
+        }
+    }
+    for (const auto& [fa_icon, _] : FileIcons::ShaderProgramIcons) {
+        if (std::strcmp(fa_icon, icon) == 0) {
+            return fa_icon;
+        }
+    }
+    for (const auto& [fa_icon, _] : FileIcons::MaterialIcons) {
+        if (std::strcmp(fa_icon, icon) == 0) {
+            return fa_icon;
+        }
+    }
+    for (const auto& [fa_icon, _] : FileIcons::SamplerIcons) {
+        if (std::strcmp(fa_icon, icon) == 0) {
+            return fa_icon;
+        }
+    }
     for (const auto& [fa_icon, _] : FileIcons::RegularFileIcons) {
         if (std::strcmp(fa_icon, icon) == 0) {
             return fa_icon;

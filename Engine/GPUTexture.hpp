@@ -8,10 +8,9 @@
 #include <string_view>
 
 #include <Engine/Graphics.hpp>
+#include <Engine/DataTypes.hpp>
 
 // Sampler
-using SamplerAllocatorMessage = std::string;
-
 struct GPUSampler {
     GLuint GLObjectID{};
 #ifdef DEBUG
@@ -58,11 +57,14 @@ private:
 
 public:
     ND_GRAPHICS_BUILDER_RULE_OF_0(GPUSamplerBuilder);
+
+private:
+#ifdef OPENGL_4_6_SUPPORT
+    friend std::pair<std::optional<GPUSampler>, std::vector<SamplerAllocatorMessage>> Graphics::OpenGL::Build(GPUSamplerBuilder&) noexcept;
+#endif
 };
 
 // Texture
-using TextureAllocatorMessage = std::string;
-
 struct GPUTexture {
     GLuint GLObjectID{};
 #ifdef DEBUG
@@ -101,4 +103,9 @@ private:
     Multisample samples{ Multisample::None };
 public:
     ND_GRAPHICS_BUILDER_RULE_OF_0(GPUTextureBuilder);
+
+private:
+#ifdef OPENGL_4_6_SUPPORT
+    friend std::pair<std::optional<GPUTexture>, std::vector<TextureAllocatorMessage>> Graphics::OpenGL::Build(GPUTextureBuilder&) noexcept;
+#endif
 };

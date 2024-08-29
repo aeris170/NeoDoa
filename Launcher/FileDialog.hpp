@@ -11,7 +11,7 @@
 #include <algorithm>
 
 #include <Engine/Log.hpp>
-#include <Engine/Graphics.hpp>
+#include <GL/glew.h> // TODO change this to use engine
 
 #define IFD_DIALOG_FILE			0
 #define IFD_DIALOG_DIRECTORY	1

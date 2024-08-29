@@ -173,9 +173,19 @@ void SceneSerializer::Entities::DefaultSerializeTransformComponent(tinyxml2::XML
     {
         printer.PushAttribute("name", nameof_c(TransformComponent));
 
-        auto name = nameof(TransformComponent::localMatrix);
+        auto name = nameof(TransformComponent::localTranslation);
         printer.OpenElement(name.data());
-        SceneSerializer::Helpers::SerializeMat4(printer, component.GetLocalMatrix());
+        SceneSerializer::Helpers::SerializeVec3(printer, component.GetLocalTranslation());
+        printer.CloseElement();
+
+        name = nameof(TransformComponent::localRotation);
+        printer.OpenElement(name.data());
+        SceneSerializer::Helpers::SerializeQuat(printer, component.GetLocalRotation());
+        printer.CloseElement();
+
+        name = nameof(TransformComponent::localScale);
+        printer.OpenElement(name.data());
+        SceneSerializer::Helpers::SerializeVec3(printer, component.GetLocalScale());
         printer.CloseElement();
     }
     printer.CloseElement();

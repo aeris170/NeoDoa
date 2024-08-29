@@ -12,17 +12,24 @@ else
 	clonemode=$2
 fi
 
-mkdir -p vcpkg
+if [ -z "$3" ]; then
+    echo "No vcpkg path supplied, defaulting to ./vcpkg"
+	path="./vcpkg"
+else
+	path=$3
+fi
+
+mkdir -p $path
+cd $path
 if [ "$clonemode" = "https" ]; then
-    git clone https://github.com/Microsoft/vcpkg.git
+    git clone https://github.com/Microsoft/vcpkg.git .
 elif [ "$clonemode" = "ssh" ]; then
-    git clone git@github.com:microsoft/vcpkg.git
+    git clone git@github.com:microsoft/vcpkg.git .
 else
 	echo '\033[0;31mIncorrect clonemode! Expected https or ssh got something else!'
 	exit
 fi
 
-cd vcpkg
 git pull
 chmod +x bootstrap-vcpkg.sh
 ./bootstrap-vcpkg.sh
@@ -38,7 +45,7 @@ echo "Installing Assimp"
 ./vcpkg install assimp --triplet $platform
 
 echo "Installing ImGui"
-./vcpkg install imgui[core,docking-experimental,glfw-binding,opengl3-binding] --triplet $platform --recurse
+./vcpkg install imgui[core,docking-experimental,glfw-binding,sdl2-binding,opengl3-binding,vulkan-binding,dx11-binding,dx12-binding] --triplet $platform --recurse
 ./vcpkg install imguizmo --triplet $platform
 
 echo "Installing EnTT"

@@ -1,23 +1,14 @@
 #pragma once
 
 #include <vector>
+#include <string>
 #include <utility>
 #include <optional>
+#include <string_view>
 
 #include <Engine/Graphics.hpp>
 
 // Shader
-enum class ShaderCompilerMessageType {
-    Info,
-    Warning,
-    Error
-};
-struct ShaderCompilerMessage {
-    int LineNo;
-    ShaderCompilerMessageType MessageType;
-    std::string ShortMessage, FullMessage;
-};
-
 struct GPUShader {
     GLuint GLObjectID{};
     ShaderType Type{};
@@ -34,22 +25,22 @@ struct GPUShaderBuilder {
     [[nodiscard]] std::pair<std::optional<GPUShader>, std::vector<ShaderCompilerMessage>> Build() noexcept;
 
 private:
-    static std::vector<std::string> SplitCompilerMessages(const std::string& messages) noexcept;
-    static ShaderCompilerMessage ParseCompilerMessage(const std::string& message) noexcept;
-    static void QueryShaderCompilerMessages(GLuint shader, std::vector<ShaderCompilerMessage>& messages) noexcept;
-
     ShaderType type{};
 #ifdef DEBUG
     std::string name{};
 #endif
     std::string sourceCode{};
+
 public:
     ND_GRAPHICS_BUILDER_RULE_OF_0(GPUShaderBuilder);
+
+private:
+#ifdef OPENGL_4_6_SUPPORT
+    friend std::pair<std::optional<GPUShader>, std::vector<ShaderCompilerMessage>> Graphics::OpenGL::Build(GPUShaderBuilder&) noexcept;
+#endif
 };
 
 // Shader Program
-using ShaderLinkerMessage = std::string;
-
 struct GPUShaderProgram {
     struct Uniform {
         int Location;
@@ -81,14 +72,6 @@ struct GPUShaderProgramBuilder {
     [[nodiscard]] std::pair<std::optional<GPUShaderProgram>, std::vector<ShaderLinkerMessage>> Build() noexcept;
 
 private:
-    std::pair<std::optional<GPUShaderProgram>, std::vector<ShaderLinkerMessage>> BuildGraphicsPipeline() noexcept;
-    std::pair<std::optional<GPUShaderProgram>, std::vector<ShaderLinkerMessage>> BuildComputePipeline() noexcept;
-
-    static std::vector<std::string> SplitLinkerMessages(const std::string& messages) noexcept;
-    static std::string_view SymbolicConstantToShaderUniformType(GLint symbolicConstant) noexcept;
-    static bool LinkProgram(GLuint program, std::vector<ShaderLinkerMessage>& messages) noexcept;
-    static std::vector<GPUShaderProgram::Uniform> ExtractActiveProgramUniforms(GLuint program, std::vector<ShaderLinkerMessage>& messages) noexcept;
-
 #ifdef DEBUG
     std::string name{};
 #endif
@@ -100,4 +83,9 @@ private:
     GPUShader* compShader{};
 public:
     ND_GRAPHICS_BUILDER_RULE_OF_0(GPUShaderProgramBuilder);
+
+private:
+#ifdef OPENGL_4_6_SUPPORT
+    friend std::pair<std::optional<GPUShaderProgram>, std::vector<ShaderLinkerMessage>> Graphics::OpenGL::Build(GPUShaderProgramBuilder&) noexcept;
+#endif
 };

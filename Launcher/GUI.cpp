@@ -207,7 +207,7 @@ void GUI::RenderCustomTitleBar() noexcept {
     );
 
 #pragma region Handle Window Dragging
-    static glm::vec2 windowPos{};
+    static Point windowPos{};
     static bool dragging{ false };
     if (ImGui::IsMouseHoveringRect(p0, p1) && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
         windowPos = Window->GetPosition();
@@ -218,7 +218,10 @@ void GUI::RenderCustomTitleBar() noexcept {
     }
     if (dragging && ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
         auto drag = ImGui::GetMouseDragDelta();
-        Window->SetPosition(windowPos + glm::vec2{ drag.x, drag.y });
+        Window->SetPosition({
+            static_cast<unsigned>(windowPos.X + drag.x),
+            static_cast<unsigned>(windowPos.Y + drag.y)
+        });
     }
 #pragma endregion
 

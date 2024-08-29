@@ -47,10 +47,15 @@ struct SceneViewport {
 
     ViewportCamera& GetViewportCamera();
 
+    ImVec2 GetViewportCameraSettingsButtonPosition() const noexcept;
+
 private:
     glm::vec2 viewportPosition{};
     Resolution viewportSize{};
+    GPUFrameBuffer viewportFramebufferMultisampled;
     GPUFrameBuffer viewportFramebuffer;
+
+    ImVec2 viewportCameraSettingsButtonPosition;
 
     void ReallocBufferIfNeeded(Resolution size);
     void RenderSceneToBuffer(Scene& scene);

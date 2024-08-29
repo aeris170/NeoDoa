@@ -15,7 +15,7 @@
 #include "Project.hpp"
 #include "AssetBridge.hpp"
 
-#include <Engine/GPUFrameBuffer.hpp>
+#include <Engine/Graphics.hpp>
 
 struct Core;
 struct Resolution;
@@ -24,16 +24,31 @@ using CoreDeleter = std::function<void(Core*)>;
 using CorePtr = std::unique_ptr<Core, CoreDeleter>;
 
 struct Core {
-    static const CorePtr& CreateCore(Resolution resolution, const char* title, bool isFullscreen = false, const char* windowIcon = nullptr, bool renderOffscreen = false);
+    static const CorePtr& CreateCore(GraphicsBackend gBackend, WindowBackend wBackend, const ContextWindowCreationParams& params);
     static const CorePtr& GetCore();
     static void DestroyCore();
+
+    bool IsAnyContextInitialized() const noexcept;
+    bool IsSoftwareRendererInitialized() const noexcept;
+#if defined(OPENGL_4_6_SUPPORT) || defined(OPENGL_3_3_SUPPORT)
+    bool IsOpenGLInitialized() const noexcept;
+#endif
+#ifdef VULKAN_SUPPORT
+    bool IsVulkanInitialized() const noexcept;
+#endif
+#ifdef DIRECT3D_12_SUPPORT
+    bool IsDirect3D12Initialized() const noexcept;
+#endif
+#ifdef DIRECT3D_11_SUPPORT
+    bool IsDirect3D11Initialized() const noexcept;
+#endif
 
     bool IsRunning() const;
     void SetPlaying(bool playing);
     bool IsPlaying() const;
 
     std::unique_ptr<Angel>& GetAngel();
-    WindowPtr& GetWindow();
+    std::unique_ptr<IWindow>& GetWindow();
     std::unique_ptr<Input>& GetInput();
 
     void CreateAndLoadProject(std::string_view workspace, std::string_view name);
@@ -51,17 +66,15 @@ struct Core {
     void Stop();
 
 private:
-    inline static CorePtr _this{ nullptr };
-
     bool running{ false };
     bool playing{ false };
 
-    std::unique_ptr<Angel> angel{ nullptr };
-    WindowPtr window{ nullptr };
-    std::unique_ptr<Input> input{ nullptr };
-    std::unique_ptr<Project> project{ nullptr };
-    std::unique_ptr<Assets> assets{ nullptr };
-    std::unique_ptr<AssetGPUBridge> gpuBridge{ nullptr };
+    std::unique_ptr<Angel> angel{};
+    std::unique_ptr<IWindow> window{};
+    std::unique_ptr<Input> input{};
+    std::unique_ptr<Project> project{};
+    std::unique_ptr<Assets> assets{};
+    std::unique_ptr<AssetGPUBridge> gpuBridge{};
 
     Core() = default;
     ~Core() = default;
@@ -71,6 +84,7 @@ private:
     Core& operator=(Core&&) = delete;
 
     static void DeleteCore(Core* core);
+    static void HandleNew();
 
     /* Core Attachment */
 public:

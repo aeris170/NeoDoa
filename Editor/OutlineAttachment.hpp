@@ -15,7 +15,7 @@ struct OutlineAttachment {
 
     std::shared_ptr<GUI> gui;
     glm::vec4 OutlineColor{ 1.0f, 1.0f, 1.0f, 1.0f };
-    FrameBuffer fbo;
+    //FrameBuffer fbo;
     std::weak_ptr<Shader> solidColorShader;
     std::weak_ptr<Shader> gaussianBlurShader;
 

@@ -1,8 +1,8 @@
 #include <Editor/OutlineAttachment.hpp>
 
 OutlineAttachment::OutlineAttachment(std::shared_ptr<GUI> gui) noexcept :
-    gui(gui),
-    fbo() {}
+    gui(gui)/*,
+    fbo()*/ {}
 
 void OutlineAttachment::BeforeFrame(Project* project) {}
 void OutlineAttachment::AfterFrame(Project* project) {

@@ -208,6 +208,7 @@ void Assets::OnNotify(const ObserverPattern::Observable* source, ObserverPattern
     if (message == "data_deleted"_hs || message == "destructed"_hs) {
         const Asset* asset = dynamic_cast<const Asset*>(source);
         assert(asset); // must be non-null
+        if (asset->ID() == UUID::Empty())   { return; }
         if (asset->IsScene())               {}
         if (asset->IsComponentDefinition()) {}
         if (asset->IsShader())              { bridge.GetShaders().Deallocate(asset->ID());        }
@@ -322,9 +323,13 @@ AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
     }
 }
 void Assets::ImportAllFiles(AssetDatabase& database, const FNode& root) {
+    // ImportFile mutates root.Children, therefore we can't use a range
+    // for loop as; if a re-allocation were to happen, pointers used in
+    // range for loop are invalidated.
     ImportFile(database, root);
-    for (const auto& child : root.Children()) {
-        ImportAllFiles(database, child);
+    const auto children = root.Children();
+    for (int i = 0; i < children.size(); i++) {
+        ImportAllFiles(database, children[i]);
     }
 }
 void Assets::Deserialize(const UUIDCollection& assets) {
@@ -427,7 +432,7 @@ void Assets::PerformPostDeserializationAction<Shader>(UUID id) noexcept {
     std::vector<std::any>& errorMessages = const_cast<std::vector<std::any>&>(asset.ErrorMessages());
     for (auto& message : messages) {
         switch (message.MessageType) {
-        using enum ShaderCompilerMessageType;
+        using enum ShaderCompilerMessage::Type;
         case Info:
             infoMessages.emplace_back(std::move(message));
             break;

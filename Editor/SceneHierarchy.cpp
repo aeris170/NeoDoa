@@ -12,6 +12,7 @@
 #include <Engine/ParentComponent.hpp>
 #include <Engine/ChildComponent.hpp>
 #include <Engine/CameraComponent.hpp>
+#include <Engine/MultiMaterialComponent.hpp>
 
 #include <Editor/GUI.hpp>
 #include <Editor/Icons.hpp>
@@ -64,6 +65,26 @@ void SceneHierarchy::Render() {
     title.reserve(64);
     title.append(scene.Name);
     if (ImGui::CollapsingHeader(title.c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanAvailWidth)) {
+        if (ImGui::BeginPopupContextItem(0, ImGuiPopupFlags_MouseButtonRight)) {
+            UUID startupScene = gui.GetOpenProject().GetStartupScene();
+            UUID thisScene = UUID::Empty();
+
+            const auto& assets = gui.CORE->GetAssets();
+            for (const auto& uuid : assets->SceneAssetIDs()) {
+                AssetHandle sceneAsset = assets->FindAsset(uuid);
+                if (sceneAsset.Value().DataAs<Scene>().Name == scene.Name) {
+                    thisScene = uuid;
+                    break;
+                }
+            }
+
+            assert(thisScene != UUID::Empty());
+
+            if (ImGui::MenuItem(cat(SceneHierarchyIcons::ContextMenu::MAKE_STARTUP_SCENE_ICON, SceneHierarchyStrings::ContextMenu::MakeStartupScene), nullptr, false, startupScene != thisScene)) {
+                gui.GetOpenProject().SetStartupScene(thisScene);
+            }
+            ImGui::EndPopup();
+        }
 
         if (ImGui::BeginDragDropTarget()) {
             auto* payload = ImGui::AcceptDragDropPayload("SELECTED_ENTT");
@@ -92,7 +113,7 @@ void SceneHierarchy::Render() {
         }
     }
 
-    if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered()) {
+    if (ImGui::IsMouseDown(ImGuiMouseButton_Left) && ImGui::IsWindowHovered()) {
         gui.Events.SceneHierarchy.OnEntityDeselected();
     }
 
@@ -183,9 +204,7 @@ void SceneHierarchy::RenderEntityNode(const Entity entity) {
 
     if (ImGui::BeginDragDropSource()) {
         ImGui::SetDragDropPayload("SELECTED_ENTT", &entity, sizeof(Entity));
-        std::string txt;
-        txt.append("DragDrop - ").append(id.GetTag());
-        ImGui::TextUnformatted(txt.c_str());
+        ImGui::Text("DragDrop - %s", id.GetTag().data());
         ImGui::EndDragDropSource();
     }
 
@@ -231,8 +250,8 @@ void SceneHierarchy::RenderEntityNode(const Entity entity) {
                 child.SetParent(parent.GetEntity());
                 parent.GetChildren().push_back(child.GetEntity());
             }
-            ImGui::EndDragDropTarget();
         }
+        ImGui::EndDragDropTarget();
     }
 
     if (ImGui::IsItemHovered(ImGuiHoveredFlags_None) && ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
@@ -268,6 +287,9 @@ void SceneHierarchy::RenderContextMenu(const Entity entity) {
             }
             if (ImGui::MenuItem("Perspec")) {
                 scene.EmplaceComponent<PerspectiveCameraComponent>(entity);
+            }
+            if (ImGui::MenuItem("MMC")) {
+                scene.EmplaceComponent<MultiMaterialComponent>(entity);
             }
             // cpp components end
 
