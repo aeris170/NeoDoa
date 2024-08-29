@@ -950,6 +950,7 @@ void Graphics::OpenGL::Destruct(GPUTexture& texture) noexcept {
     glDeleteTextures(1, &texture.GLObjectID);
 }
 
+#ifdef DEBUG
 static void MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, GLchar const* message, void const* user_param) {
     auto const src_str = [source]() {
         switch (source) {
@@ -989,6 +990,7 @@ static void MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severi
     DOA_LOG_OPENGL("%s, %s, %s, %d: %s", src_str, type_str, severity_str, id, message);
     debug_break();
 }
+#endif
 static std::vector<std::string> SplitCompilerMessages(const std::string& messages) noexcept {
     static const std::regex regex{ "\n(?!\\s)" };
 
