@@ -91,7 +91,8 @@ After this, `git pull` should print `Already up to date.` Proceed to the next st
 
 These can either be install manually or by launching the helper script by executing:
 ```sh
-sh FetchAptGet.sh
+chmod +x ./scripts/fetch_apt_get.sh
+sh ./scripts/fetch_apt_get.sh
 ```
 
 #### 3. Fetching Dependencies
@@ -119,6 +120,7 @@ defaults to `https`, only `https` and `ssh` are accepted.
 
 Examples:
 ```sh
+chmod +x ./FetchDependencies.sh
 sh FetchDependencies.sh                  # Fetch packages for x64-windows using https
 sh FetchDependencies.sh x64-windows ssh  # Fetch packages for x64-windows using ssh (must have an ssh key set-up)
 sh FetchDependencies.sh x64-linux        # Fetch packages for x64-linux   using https (doesn't work on our test systems)
@@ -154,6 +156,7 @@ sh cmake.sh
 ```
 For Linux:
 ```sh
+chmod +x ./cmakeLinuxDebug.sh # cmakeLinuxRelease.sh
 sh cmakeLinuxDebug.sh # OR sh cmakeLinuxRelease.sh
 ```
 
