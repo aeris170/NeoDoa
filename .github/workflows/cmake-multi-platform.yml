@@ -30,10 +30,10 @@ jobs:
           - os: windows-latest
             c_compiler: cl
             cpp_compiler: cl
-          - os: ubuntu-latest
+          - os: ubuntu-24.04
             c_compiler: gcc-14
             cpp_compiler: g++-14
-          - os: ubuntu-latest
+          - os: ubuntu-24.04
             c_compiler: clang-18
             cpp_compiler: clang++-18
         exclude:
@@ -41,7 +41,7 @@ jobs:
             c_compiler: gcc
           - os: windows-latest
             c_compiler: clang
-          - os: ubuntu-latest
+          - os: ubuntu-24.04
             c_compiler: cl
 
     steps:
@@ -78,12 +78,12 @@ jobs:
         chmod +x "$vcpkg_script_unix"
         
         # Conditionally set the triplet based on the OS
-        if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
+        if [ "${{ matrix.os }}" == "ubuntu-24.04" ]; then
           triplet="x64-linux"
         elif [ "${{ matrix.os }}" == "windows-latest" ]; then
           triplet="x64-windows"
         else
-          echo "Error: Unsupported OS '${{ matrix.os }}'. Supported OSes are ubuntu-latest and windows-latest."
+          echo "Error: Unsupported OS '${{ matrix.os }}'. Supported OSes are ubuntu-24.04 and windows-latest."
           exit 1
         fi
         
