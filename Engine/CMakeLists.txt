@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.26.4)
 
 project(Engine LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_library(Engine STATIC)
 
