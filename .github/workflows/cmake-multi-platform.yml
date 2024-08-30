@@ -63,14 +63,14 @@ jobs:
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
         echo "scripts-dir=${{ github.workspace }}/scripts" >> "$GITHUB_OUTPUT"
         
-    - name: Choose GCC versions
+    - name: Choose compiler versions (for Linux)
       if: runner.os == 'Linux'
       run: |
         if [ "${{ matrix.c_compiler }}" == "gcc" ]; then
-          echo "CXX=gcc-14" >> $GITHUB_ENV
+          echo "C=gcc-14" >> $GITHUB_ENV
           echo "CXX=g++-14" >> $GITHUB_ENV
         elif [ "${{ matrix.c_compiler }}" == "clang" ]; then
-          echo "CXX=clang-18" >> $GITHUB_ENV
+          echo "C=clang-18" >> $GITHUB_ENV
           echo "CXX=clang++-18" >> $GITHUB_ENV
         else
           echo "Error: Unsupported compiler '${{ matrix.c_compiler }}'. Supported compilers are GCC and Clang."
