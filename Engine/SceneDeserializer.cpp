@@ -23,7 +23,7 @@ Scene DeserializeScene(const std::string& data) {
     tinyxml2::XMLDocument doc;
     tinyxml2::XMLError err = doc.Parse(data.c_str());
     if (err != tinyxml2::XML_SUCCESS) {
-        DOA_LOG_ERROR("Couldn't deserialize scene!\n\n%s", data);
+        DOA_LOG_ERROR("Couldn't deserialize scene!\n\n%s", data.c_str());
     }
 
     Scene scene{};

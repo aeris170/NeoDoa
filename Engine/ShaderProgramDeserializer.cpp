@@ -17,7 +17,7 @@ ShaderProgramDeserializationResult DeserializeShaderProgram(std::string_view dat
     if (err != tinyxml2::XML_SUCCESS) {
         rv.erred = true;
         rv.errors.emplace_back("Error while parsing program file. Did you edit it? Don't.");
-        DOA_LOG_ERROR("Couldn't deserialize shader program!\n\n%s", data);
+        DOA_LOG_ERROR("Couldn't deserialize shader program!\n\n%s", data.data());
         return rv;
     }
 
