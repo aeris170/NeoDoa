@@ -30,12 +30,18 @@ jobs:
           - os: windows-latest
             c_compiler: cl
             cpp_compiler: cl
+            cmake_cxx_flags: ""
+            cmake_exe_linker_flags: ""
           - os: ubuntu-24.04
             c_compiler: gcc
             cpp_compiler: g++
+            cmake_cxx_flags: "-std=c++23"
+            cmake_exe_linker_flags: ""
           - os: ubuntu-24.04
             c_compiler: clang
             cpp_compiler: clang++
+            cmake_cxx_flags: "-std=c++23 -stdlib=libc++ -lc++experimental"
+            cmake_exe_linker_flags: "-stdlib=libc++"
         exclude:
           - os: windows-latest
             c_compiler: gcc
@@ -57,14 +63,14 @@ jobs:
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
         echo "scripts-dir=${{ github.workspace }}/scripts" >> "$GITHUB_OUTPUT"
         
-    - name: Choose GCC versions
+    - name: Choose compiler versions (for Linux)
       if: runner.os == 'Linux'
       run: |
         if [ "${{ matrix.c_compiler }}" == "gcc" ]; then
-          echo "CXX=gcc-14" >> $GITHUB_ENV
+          echo "C=gcc-14" >> $GITHUB_ENV
           echo "CXX=g++-14" >> $GITHUB_ENV
         elif [ "${{ matrix.c_compiler }}" == "clang" ]; then
-          echo "CXX=clang-18" >> $GITHUB_ENV
+          echo "C=clang-18" >> $GITHUB_ENV
           echo "CXX=clang++-18" >> $GITHUB_ENV
         else
           echo "Error: Unsupported compiler '${{ matrix.c_compiler }}'. Supported compilers are GCC and Clang."
@@ -111,6 +117,8 @@ jobs:
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
+        -DCMAKE_CXX_FLAGS="${{ matrix.cmake_cxx_flags }}"
+        -DCMAKE_EXE_LINKER_FLAGS="${{ matrix.cmake_exe_linker_flags }}"
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -S ${{ github.workspace }}
 
