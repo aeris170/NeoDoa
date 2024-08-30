@@ -34,7 +34,7 @@ jobs:
           - os: ubuntu-24.04
             c_compiler: clang
             cpp_compiler: clang++
-            cmake_cxx_flags: "-std=c++23 -stdlib=libc++"
+            cmake_cxx_flags: "-stdlib=libc++"
         exclude:
           - os: windows-latest
             c_compiler: clang
@@ -100,7 +100,7 @@ jobs:
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
-        -DCMAKE_CXX_FLAGS="${{ matrix.cmake_cxx_flags }}"
+        -DCMAKE_CXX_FLAGS=${{ matrix.cmake_cxx_flags }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -S ${{ github.workspace }}
 
