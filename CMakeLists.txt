@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.26.4)
 
-SET(VCPKG_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg" CACHE STRING "vcpkg dir")
+set(VCPKG_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg" CACHE STRING "vcpkg dir")
 
 function(copy_folder_post_build folder)
   add_custom_command(TARGET ${PROJECT_NAME}  POST_BUILD
