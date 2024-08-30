@@ -31,11 +31,11 @@ jobs:
             c_compiler: cl
             cpp_compiler: cl
           - os: ubuntu-24.04
-            c_compiler: gcc-14
-            cpp_compiler: g++-14
+            c_compiler: gcc
+            cpp_compiler: g++
           - os: ubuntu-24.04
-            c_compiler: clang-18
-            cpp_compiler: clang++-18
+            c_compiler: clang
+            cpp_compiler: clang++
         exclude:
           - os: windows-latest
             c_compiler: gcc
@@ -56,6 +56,20 @@ jobs:
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
         echo "scripts-dir=${{ github.workspace }}/scripts" >> "$GITHUB_OUTPUT"
+        
+    - name: Choose GCC versions
+      if: runner.os == 'Linux'
+      run: |
+        if [ "${{ matrix.c_compiler }}" == "gcc" ]; then
+          echo "CXX=gcc-14" >> $GITHUB_ENV
+          echo "CXX=g++-14" >> $GITHUB_ENV
+        elif [ "${{ matrix.c_compiler }}" == "clang" ]; then
+          echo "CXX=clang-18" >> $GITHUB_ENV
+          echo "CXX=clang++-18" >> $GITHUB_ENV
+        else
+          echo "Error: Unsupported compiler '${{ matrix.c_compiler }}'. Supported compilers are GCC and Clang."
+          exit 1
+        fi
 
     - name: Run (Linux-specific) script for apt-get
       if: runner.os == 'Linux'
