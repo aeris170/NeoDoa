@@ -51,6 +51,15 @@ jobs:
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
         echo "scripts-dir=${{ github.workspace }}/scripts" >> "$GITHUB_OUTPUT"
+        echo "vcpkg-dir=${{ github.workspace }}/vcpkg" >> "$GITHUB_OUTPUT"
+        
+    - name: Cache vcpkg
+      uses: actions/cache@v3
+      with:
+        path: ${{ steps.strings.outputs.vcpkg-dir }}
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg.json') }}
+        restore-keys: |
+          ${{ runner.os }}-vcpkg-
         
     - name: Choose Clang version (for Linux)
       if: runner.os == 'Linux'
@@ -72,7 +81,7 @@ jobs:
         scripts_dir_unix=$(echo "$scripts_dir" | sed 's/\\/\//g')
         vcpkg_script="${scripts_dir_unix}/vcpkg.sh"
         vcpkg_script_unix=$(echo "$vcpkg_script" | sed 's/\\/\//g')
-        vcpkg_dir="${{ github.workspace }}/vcpkg"
+        vcpkg_dir="${{ steps.strings.outputs.vcpkg-dir }}"
         vcpkg_dir_unix=$(echo "$vcpkg_dir" | sed 's/\\/\//g')
         
         # Make the script executable
