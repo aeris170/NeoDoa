@@ -7,7 +7,7 @@ sudo apt-get install -y libxcursor-dev
 sudo apt-get install -y xorg xorg-dev
 sudo apt-get install -y libglu1-mesa libglu1-mesa-dev
 sudo apt-get install -y autoconf autoconf-archive
-sudo apt-get install -y automake libtool
+sudo apt-get install -y automake libtool libltdl-dev
 #sudo apt-get install -y libxmu-dev
 #sudo apt-get install -y libxi-dev
 #sudo apt-get install -y libgl-dev
