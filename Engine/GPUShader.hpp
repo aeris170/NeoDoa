@@ -4,6 +4,7 @@
 #include <string>
 #include <utility>
 #include <optional>
+#include <algorithm>
 #include <string_view>
 
 #include <Engine/Graphics.hpp>
