@@ -22,7 +22,7 @@ MetaAssetInfo DeserializeMetaAssetInfo(const std::string& data) {
     tinyxml2::XMLDocument doc;
     tinyxml2::XMLError err = doc.Parse(data.c_str());
     if (err != tinyxml2::XML_SUCCESS) {
-        DOA_LOG_WARNING("Couldn't deserialize meta asset info!\n\n%s", data);
+        DOA_LOG_WARNING("Couldn't deserialize meta asset info!\n\n%s", data.c_str());
     }
 
     const auto* rootElement = doc.RootElement();
@@ -42,7 +42,7 @@ MetaAssetInfoBankDeserializationResult DeserializeMetaAssetInfoBank(const std::s
     tinyxml2::XMLDocument doc;
     tinyxml2::XMLError err = doc.Parse(data.c_str());
     if (err != tinyxml2::XML_SUCCESS) {
-        DOA_LOG_WARNING("Couldn't deserialize meta asset info bank! All custom set icons are, sadly, gone. You must re-apply your custom asset icons. %s", data);
+        DOA_LOG_WARNING("Couldn't deserialize meta asset info bank! All custom set icons are, sadly, gone. You must re-apply your custom asset icons. %s", data.c_str());
         return { true, {} };
     }
 
