@@ -29,7 +29,7 @@ PerspectiveCamera& SceneViewport::ViewportCamera::GetPerspectiveCamera() { retur
 bool SceneViewport::ViewportCamera::IsOrtho() const { return activeCamera == &ortho; }
 bool SceneViewport::ViewportCamera::IsPerspective() const { return activeCamera == &perspective; }
 
-GPUPipeline pipe;
+GPUPipeline pipeline;
 GPUShaderProgram prog;
 GPUDescriptorSet perFrame;
 GPUDescriptorSet perObject;
@@ -137,7 +137,7 @@ void main() {
     prog = spBuilder.SetVertexShader(v.value()).SetFragmentShader(f.value()).Build().first.value();
 
     GPUPipelineBuilder aBuilder;
-    pipe = aBuilder
+    pipeline = aBuilder
         .SetFaceCullEnabled(true)
         .SetCullMode(CullMode::Back)
         .SetArrayBuffer(0, buf, layout)
@@ -271,7 +271,7 @@ void SceneViewport::ReallocBufferIfNeeded(Resolution size) {
         viewportFramebuffer = std::move(fb.value());
     }
 
-    pipe.Viewport = { 0, 0, viewportSize.Width, viewportSize.Height };
+    pipeline.Viewport = { 0, 0, viewportSize.Width, viewportSize.Height };
 }
 void SceneViewport::RenderSceneToBuffer(Scene& scene) {
     //scene.Update(gui.get().delta);
@@ -279,7 +279,7 @@ void SceneViewport::RenderSceneToBuffer(Scene& scene) {
 
     std::array<unsigned, 1> targets{ 0 };
     Graphics::SetRenderTarget(viewportFramebufferMultisampled, targets);
-    Graphics::BindPipeline(pipe);
+    Graphics::BindPipeline(pipeline);
     Graphics::ClearRenderTarget(viewportFramebufferMultisampled, { scene.ClearColor.r, scene.ClearColor.g, scene.ClearColor.b, scene.ClearColor.a });
 
     // Bind per-frame uniform
