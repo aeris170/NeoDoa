@@ -45,7 +45,16 @@ echo "Installing Assimp"
 ./vcpkg install assimp --triplet $platform
 
 echo "Installing ImGui"
-./vcpkg install imgui[core,docking-experimental,glfw-binding,sdl2-binding,opengl3-binding,vulkan-binding,dx11-binding,dx12-binding] --triplet $platform --recurse
+# Base ImGui package list
+imgui_packages="core,docking-experimental,glfw-binding,sdl2-binding,opengl3-binding,vulkan-binding"
+
+# Add DirectX bindings if the triplet is x64-windows
+if [ "$platform" = "x64-windows" ]; then
+    imgui_packages="$imgui_packages,dx11-binding,dx12-binding"
+fi
+
+# Install the ImGui packages
+./vcpkg install imgui[$imgui_packages] --triplet $platform --recurse
 ./vcpkg install imguizmo --triplet $platform
 
 echo "Installing EnTT"
