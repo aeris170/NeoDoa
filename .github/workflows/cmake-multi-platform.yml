@@ -23,7 +23,7 @@ jobs:
       #
       # To add more build types (Release, Debug, RelWithDebInfo, etc.) customize the build_type list.
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-24.04, windows-latest]
         build_type: [Debug, Release, RelWithDebInfo, MinSizeRel]
         c_compiler: [gcc, clang, cl]
         include:
@@ -31,11 +31,11 @@ jobs:
             c_compiler: cl
             cpp_compiler: cl
           - os: ubuntu-latest
-            c_compiler: gcc
-            cpp_compiler: g++
+            c_compiler: gcc-14
+            cpp_compiler: g++-14
           - os: ubuntu-latest
-            c_compiler: clang
-            cpp_compiler: clang++
+            c_compiler: clang-18
+            cpp_compiler: clang++-18
         exclude:
           - os: windows-latest
             c_compiler: gcc
@@ -63,49 +63,10 @@ jobs:
         chmod +x ${{ steps.strings.outputs.scripts-dir }}/fetch_apt_get.sh
         ${{ steps.strings.outputs.scripts-dir }}/fetch_apt_get.sh
 
-    - name: Set up GCC latest (for Linux)
-      if: matrix.os == 'ubuntu-latest' && matrix.cpp_compiler == 'g++'
-      run: |
-        sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-        sudo apt-get update
-        sudo apt-get install gcc-13 g++-13 -y
-        
-        # Locate the new version of gcc and g++
-        gcc_bin=$(which gcc-13)
-        gxx_bin=$(which g++-13)
-        
-        # If gcc-13 and g++-13 are installed, update the symbolic links
-        if [ -x "$gcc_bin" ] && [ -x "$gxx_bin" ]; then
-          sudo ln -sf $gcc_bin /usr/bin/gcc
-          sudo ln -sf $gxx_bin /usr/bin/g++
-        else
-          echo "GCC 13 installation failed or binaries not found."
-          exit 1
-        fi
-
-    - name: Set up Clang latest (for Linux)
-      if: matrix.os == 'ubuntu-latest' && matrix.cpp_compiler == 'clang++'
-      run: |
-        wget https://apt.llvm.org/llvm.sh
-        chmod u+x llvm.sh
-        sudo ./llvm.sh 17
-        
-        # Locate the new version of clang
-        clang_bin=$(which clang-17)
-        clangxx_bin=$(which clang++-17)
-        
-        if [ -x "$clang_bin" ] && [ -x "$clangxx_bin" ]; then
-          sudo ln -sf $clang_bin /usr/bin/clang
-          sudo ln -sf $clangxx_bin /usr/bin/clang++
-        else
-          echo "Clang 17 installation failed or binaries not found."
-          exit 1
-        fi
-
     - name: Set up dependencies with custom script
       shell: bash
       run: |
-        # Convert Windows path to Unix path for Bash
+        # Convert Windows path to Unix path for Bash (ensures Windows compatibility)
         scripts_dir="${{ steps.strings.outputs.scripts-dir }}"
         scripts_dir_unix=$(echo "$scripts_dir" | sed 's/\\/\//g')
         vcpkg_script="${scripts_dir_unix}/vcpkg.sh"
@@ -134,8 +95,8 @@ jobs:
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: >
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
-        -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+        -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -S ${{ github.workspace }}
 
