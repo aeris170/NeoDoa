@@ -24,27 +24,18 @@ jobs:
       # To add more build types (Release, Debug, RelWithDebInfo, etc.) customize the build_type list.
       matrix:
         os: [ubuntu-24.04, windows-latest]
-        build_type: [Debug, Release, RelWithDebInfo, MinSizeRel]
-        c_compiler: [gcc, clang, cl]
+        build_type: [Debug, Release, RelWithDebInfo]
+        c_compiler: [clang, cl]
         include:
           - os: windows-latest
             c_compiler: cl
             cpp_compiler: cl
             cmake_cxx_flags: ""
-            cmake_exe_linker_flags: ""
-          - os: ubuntu-24.04
-            c_compiler: gcc
-            cpp_compiler: g++
-            cmake_cxx_flags: "-std=c++23"
-            cmake_exe_linker_flags: ""
           - os: ubuntu-24.04
             c_compiler: clang
             cpp_compiler: clang++
-            cmake_cxx_flags: "-std=c++23 -stdlib=libc++ -lc++experimental"
-            cmake_exe_linker_flags: "-stdlib=libc++"
+            cmake_cxx_flags: "-std=c++23 -stdlib=libc++"
         exclude:
-          - os: windows-latest
-            c_compiler: gcc
           - os: windows-latest
             c_compiler: clang
           - os: ubuntu-24.04
@@ -63,19 +54,11 @@ jobs:
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
         echo "scripts-dir=${{ github.workspace }}/scripts" >> "$GITHUB_OUTPUT"
         
-    - name: Choose compiler versions (for Linux)
+    - name: Choose Clang version (for Linux)
       if: runner.os == 'Linux'
       run: |
-        if [ "${{ matrix.c_compiler }}" == "gcc" ]; then
-          echo "C=gcc-14" >> $GITHUB_ENV
-          echo "CXX=g++-14" >> $GITHUB_ENV
-        elif [ "${{ matrix.c_compiler }}" == "clang" ]; then
           echo "C=clang-18" >> $GITHUB_ENV
           echo "CXX=clang++-18" >> $GITHUB_ENV
-        else
-          echo "Error: Unsupported compiler '${{ matrix.c_compiler }}'. Supported compilers are GCC and Clang."
-          exit 1
-        fi
 
     - name: Run (Linux-specific) script for apt-get
       if: runner.os == 'Linux'
