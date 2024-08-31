@@ -61,12 +61,6 @@ jobs:
         key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg.json') }}
         restore-keys: |
           ${{ runner.os }}-vcpkg-
-        
-    - name: Choose Clang version (for Linux)
-      if: runner.os == 'Linux'
-      run: |
-          echo "C=clang-18" >> $GITHUB_ENV
-          echo "CXX=clang++-18" >> $GITHUB_ENV
 
     - name: Run (Linux-specific) script for apt-get
       if: runner.os == 'Linux'
