@@ -54,8 +54,8 @@ struct GPUObjectDatabase {
 
     std::vector<ErrorMessageType> Allocate(const Assets& assets, const UUID asset) noexcept { DOA_LOG_FATAL("Illegal allocator! %s", std::quoted(assets.FindAsset(asset)->File().Name())); std::unreachable(); };
     std::vector<ErrorMessageType> TryAllocate(const Assets& assets, const UUID asset) noexcept {
-        if (Exists(asset)) { return; }
-        Allocate(assets, asset);
+        if (Exists(asset)) { return { ErrorMessageType{ std::format("Canot allocate. Asset {} already has allocated GPU resource!", asset) } }; }
+        return Allocate(assets, asset);
     }
     void Deallocate(const UUID asset) noexcept {
         database.erase(asset);
