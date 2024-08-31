@@ -1,6 +1,7 @@
 #pragma once
 
 #include <span>
+#include <memory>
 #include <vector>
 
 #include <Engine/Point.hpp>
