@@ -54,7 +54,7 @@ struct GPUObjectDatabase {
 
     std::vector<ErrorMessageType> Allocate(const Assets& assets, const UUID asset) noexcept { DOA_LOG_FATAL("Illegal allocator! %s", std::quoted(assets.FindAsset(asset)->File().Name())); std::unreachable(); };
     std::vector<ErrorMessageType> TryAllocate(const Assets& assets, const UUID asset) noexcept {
-        if (Exists(asset)) { return { ErrorMessageType{ std::format("Canot allocate. Asset {} already has allocated GPU resource!", asset) } }; }
+        if (Exists(asset)) { return { ErrorMessageType{ std::format("Cannot allocate. Asset {} already has allocated GPU resource!", asset.AsString()) } }; }
         return Allocate(assets, asset);
     }
     void Deallocate(const UUID asset) noexcept {
@@ -109,7 +109,7 @@ public:
     AssetGPUBridge() noexcept = default;
     ~AssetGPUBridge() noexcept = default;
     AssetGPUBridge(AssetGPUBridge&) noexcept = delete;
-    AssetGPUBridge(AssetGPUBridge&&) noexcept = default;
+    AssetGPUBridge(AssetGPUBridge&&) noexcept = delete;
     AssetGPUBridge& operator=(AssetGPUBridge&) noexcept = delete;
-    AssetGPUBridge& operator=(AssetGPUBridge&&) noexcept = default;
+    AssetGPUBridge& operator=(AssetGPUBridge&&) noexcept = delete;
 };
