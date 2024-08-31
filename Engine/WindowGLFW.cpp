@@ -1,6 +1,7 @@
 #include <Engine/WindowGLFW.hpp>
 
 #include <cassert>
+#include <utility>
 #include <algorithm>
 
 #include <GLFW/glfw3.h>

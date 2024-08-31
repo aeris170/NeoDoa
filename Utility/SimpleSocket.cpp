@@ -1,5 +1,7 @@
 #include <Utility/SimpleSocket.hpp>
 
+#include <utility>
+
 static zmq::socket_type GetZMQSocketType(SocketType type) {
 	switch (type) {
 	case SocketType::Request:

@@ -1,5 +1,7 @@
 #include <Engine/SamplerSerializer.hpp>
 
+#include <utility>
+
 #include <Utility/NameOf.hpp>
 
 std::string SerializeSampler(const Sampler& sampler) noexcept {

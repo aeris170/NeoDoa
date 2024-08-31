@@ -2,6 +2,8 @@
 
 #ifdef OPENGL_4_6_SUPPORT
 
+#include <utility>
+
 #include <GL/glew.h>
 
 #include <Engine/Graphics.hpp>
