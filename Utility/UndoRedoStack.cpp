@@ -4,7 +4,7 @@
 
 ICommand::~ICommand() noexcept {};
 
-bool ICommand::TryMergeWith(UndoRedoStack& history, const ICommand* command) noexcept { return false; }
+bool ICommand::TryMergeWith([[maybe_unused]] UndoRedoStack& history, [[maybe_unused]] const ICommand* command) noexcept { return false; }
 
 void UndoRedoStack::Do(Command&& command) noexcept {
     if (!undoStack.empty() && undoStack.back()->TryMergeWith(*this, command.get())) {

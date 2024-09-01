@@ -304,7 +304,7 @@ void Graphics::OpenGL::BlitColor(const GPUFrameBuffer& source, GPUFrameBuffer& d
 
     // Set read/draw buffers
     glNamedFramebufferReadBuffer(source.GLObjectID, GL_COLOR_ATTACHMENT0 + srcAttachment);
-    glNamedFramebufferDrawBuffers(destination.GLObjectID, drawBuffers.size(), drawBuffers.data());
+    glNamedFramebufferDrawBuffers(destination.GLObjectID, static_cast<GLsizei>(drawBuffers.size()), drawBuffers.data());
 
     Resolution srcResolution{ GetAttachmentDimensions(source.ColorAttachments[srcAttachment].value()) };
     Resolution dstResolution{ GetAttachmentDimensions(destination.ColorAttachments[dstAttachments[0]].value()) };
@@ -398,10 +398,10 @@ void Graphics::OpenGL::SetRenderTarget(const GPUFrameBuffer& renderTarget) noexc
         std::array<GLenum, MaxFrameBufferColorAttachments> drawBuffers{ GL_NONE };
         for (size_t i = 0; i < renderTarget.ColorAttachments.size(); ++i) {
             if (renderTarget.ColorAttachments[i].has_value()) {
-                drawBuffers[i] = GL_COLOR_ATTACHMENT0 + i;
+                drawBuffers[i] = GL_COLOR_ATTACHMENT0 + static_cast<decltype(drawBuffers)::value_type>(i);
             }
         }
-        glNamedFramebufferDrawBuffers(renderTarget.GLObjectID, drawBuffers.size(), drawBuffers.data());
+        glNamedFramebufferDrawBuffers(renderTarget.GLObjectID, static_cast<GLsizei>(drawBuffers.size()), drawBuffers.data());
     }
     glBindFramebuffer(GL_FRAMEBUFFER, renderTarget.GLObjectID);
 }
@@ -412,7 +412,7 @@ void Graphics::OpenGL::SetRenderTarget(const GPUFrameBuffer& renderTarget, std::
     } else {
         std::transform(targets.begin(), targets.begin() + drawBuffers.size(), drawBuffers.begin(), [](auto target) { return GL_COLOR_ATTACHMENT0 + target; });
     }
-    glNamedFramebufferDrawBuffers(renderTarget.GLObjectID, drawBuffers.size(), drawBuffers.data());
+    glNamedFramebufferDrawBuffers(renderTarget.GLObjectID, static_cast<GLsizei>(drawBuffers.size()), drawBuffers.data());
     glBindFramebuffer(GL_FRAMEBUFFER, renderTarget.GLObjectID);
 }
 void Graphics::OpenGL::ClearRenderTargetColor(const GPUFrameBuffer& renderTarget, std::array<float, 4> color, unsigned colorBufferIndex) noexcept {
@@ -577,7 +577,7 @@ std::pair<std::optional<::GPUFrameBuffer>, std::vector<FrameBufferAllocatorMessa
             }, colorAttachment.value());
         }
     }
-    glNamedFramebufferDrawBuffers(frameBuffer, drawBuffers.size(), drawBuffers.data());
+    glNamedFramebufferDrawBuffers(frameBuffer, static_cast<GLsizei>(drawBuffers.size()), drawBuffers.data());
 
     if (builder.depthStencilAttachment) {
         std::visit(overloaded::lambda{
@@ -928,7 +928,7 @@ std::pair<std::optional<::GPUTexture>, std::vector<TextureAllocatorMessage>> Gra
 void Graphics::OpenGL::Destruct(GPUBuffer& buffer) noexcept {
     glDeleteBuffers(1, &buffer.GLObjectID);
 }
-void Graphics::OpenGL::Destruct(GPUDescriptorSet& set) noexcept {}
+void Graphics::OpenGL::Destruct([[maybe_unused]] GPUDescriptorSet& set) noexcept {}
 void Graphics::OpenGL::Destruct(GPURenderBuffer& renderbuffer) noexcept {
     glDeleteRenderbuffers(1, &renderbuffer.GLObjectID);
 }
@@ -952,7 +952,7 @@ void Graphics::OpenGL::Destruct(GPUTexture& texture) noexcept {
 }
 
 #ifdef DEBUG
-static void MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, GLchar const* message, void const* user_param) {
+static void MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, [[maybe_unused]] GLsizei length, const GLchar* message, [[maybe_unused]] const void* user_param) {
     auto const src_str = [source]() {
         switch (source) {
         case GL_DEBUG_SOURCE_API: return "API";
@@ -1229,11 +1229,20 @@ static std::vector<GPUShaderProgram::Uniform> ExtractActiveProgramUniforms(GLuin
 
     for (int i = 0; i < numActiveUniforms; i++) {
         GPUShaderProgram::Uniform uniform;
-        glGetProgramResourceiv(program, GL_UNIFORM, i, properties.size(), properties.data(), values.size(), NULL, values.data());
+        glGetProgramResourceiv(
+            program,
+            GL_UNIFORM, i,
+            static_cast<GLsizei>(properties.size()), properties.data(),
+            static_cast<GLsizei>(values.size()), NULL, values.data()
+        );
 
         // Extract uniform name
         nameData.resize(values[0]); //The length of the name.
-        glGetProgramResourceName(program, GL_UNIFORM, i, nameData.size(), NULL, nameData.data());
+        glGetProgramResourceName(
+            program,
+            GL_UNIFORM, i,
+            static_cast<GLsizei>(nameData.size()), NULL, nameData.data()
+        );
         uniform.Name = std::string(nameData.data(), nameData.size() - 1);
 
         // Extract uniform location

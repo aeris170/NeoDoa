@@ -77,7 +77,7 @@ void SceneDisplay::RenderEntities(const Scene& scene) const noexcept {
     }
 }
 
-void SceneDisplay::RenderSystems(const Scene& scene) const noexcept {
+void SceneDisplay::RenderSystems([[maybe_unused]] const Scene& scene) const noexcept {
     auto flags = ImGuiTableFlags_RowBg |
         ImGuiTableFlags_Borders |
         ImGuiTableFlags_SizingFixedFit |

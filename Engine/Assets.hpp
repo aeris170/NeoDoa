@@ -178,7 +178,7 @@ private:
     void ReBuildDependencyGraph() noexcept;
 
     template<AssetType T>
-    void PerformPostDeserializationAction(UUID id) noexcept {}
+    void PerformPostDeserializationAction([[maybe_unused]] UUID id) noexcept {}
 };
 
 template <>

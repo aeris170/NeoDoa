@@ -86,7 +86,7 @@ void ChildComponentUI::Render(const ChildComponent& childComponent) {
         { nameof(ChildComponent::parent), Prettify(nameof(ChildComponent::parent)) }
     };
 
-    ChildComponent& child = const_cast<ChildComponent&>(childComponent);
+    [[maybe_unused]] ChildComponent& child = const_cast<ChildComponent&>(childComponent);
     UneditableEntityWidget(UINames[nameof(ChildComponent::parent)], childComponent.GetParent());
 }
 

@@ -48,15 +48,15 @@ void Material::Uniforms::Set(int location, std::string_view name, Uniform2ui val
 void Material::Uniforms::Set(int location, std::string_view name, Uniform3ui value) noexcept{ __NEODOA_MATERIAL_UNIFORMS_SET_IMPL }
 void Material::Uniforms::Set(int location, std::string_view name, Uniform4ui value) noexcept{ __NEODOA_MATERIAL_UNIFORMS_SET_IMPL }
 
-void Material::Uniforms::Set(int location, std::string_view name, UniformMatrix2f value, bool transpose) noexcept { __NEODOA_MATERIAL_UNIFORMS_SET_IMPL }
-void Material::Uniforms::Set(int location, std::string_view name, UniformMatrix3f value, bool transpose) noexcept { __NEODOA_MATERIAL_UNIFORMS_SET_IMPL }
-void Material::Uniforms::Set(int location, std::string_view name, UniformMatrix4f value, bool transpose) noexcept { __NEODOA_MATERIAL_UNIFORMS_SET_IMPL }
-void Material::Uniforms::Set(int location, std::string_view name, UniformMatrix2x3f value, bool transpose) noexcept { __NEODOA_MATERIAL_UNIFORMS_SET_IMPL }
-void Material::Uniforms::Set(int location, std::string_view name, UniformMatrix3x2f value, bool transpose) noexcept { __NEODOA_MATERIAL_UNIFORMS_SET_IMPL }
-void Material::Uniforms::Set(int location, std::string_view name, UniformMatrix2x4f value, bool transpose) noexcept { __NEODOA_MATERIAL_UNIFORMS_SET_IMPL }
-void Material::Uniforms::Set(int location, std::string_view name, UniformMatrix4x2f value, bool transpose) noexcept { __NEODOA_MATERIAL_UNIFORMS_SET_IMPL }
-void Material::Uniforms::Set(int location, std::string_view name, UniformMatrix3x4f value, bool transpose) noexcept { __NEODOA_MATERIAL_UNIFORMS_SET_IMPL }
-void Material::Uniforms::Set(int location, std::string_view name, UniformMatrix4x3f value, bool transpose) noexcept { __NEODOA_MATERIAL_UNIFORMS_SET_IMPL }
+void Material::Uniforms::Set(int location, std::string_view name, UniformMatrix2f value, [[maybe_unused]] bool transpose) noexcept { __NEODOA_MATERIAL_UNIFORMS_SET_IMPL }
+void Material::Uniforms::Set(int location, std::string_view name, UniformMatrix3f value, [[maybe_unused]] bool transpose) noexcept { __NEODOA_MATERIAL_UNIFORMS_SET_IMPL }
+void Material::Uniforms::Set(int location, std::string_view name, UniformMatrix4f value, [[maybe_unused]] bool transpose) noexcept { __NEODOA_MATERIAL_UNIFORMS_SET_IMPL }
+void Material::Uniforms::Set(int location, std::string_view name, UniformMatrix2x3f value, [[maybe_unused]] bool transpose) noexcept { __NEODOA_MATERIAL_UNIFORMS_SET_IMPL }
+void Material::Uniforms::Set(int location, std::string_view name, UniformMatrix3x2f value, [[maybe_unused]] bool transpose) noexcept { __NEODOA_MATERIAL_UNIFORMS_SET_IMPL }
+void Material::Uniforms::Set(int location, std::string_view name, UniformMatrix2x4f value, [[maybe_unused]] bool transpose) noexcept { __NEODOA_MATERIAL_UNIFORMS_SET_IMPL }
+void Material::Uniforms::Set(int location, std::string_view name, UniformMatrix4x2f value, [[maybe_unused]] bool transpose) noexcept { __NEODOA_MATERIAL_UNIFORMS_SET_IMPL }
+void Material::Uniforms::Set(int location, std::string_view name, UniformMatrix3x4f value, [[maybe_unused]] bool transpose) noexcept { __NEODOA_MATERIAL_UNIFORMS_SET_IMPL }
+void Material::Uniforms::Set(int location, std::string_view name, UniformMatrix4x3f value, [[maybe_unused]] bool transpose) noexcept { __NEODOA_MATERIAL_UNIFORMS_SET_IMPL }
 
 void Material::Uniforms::Set(int location, std::string_view name, UniformSampler2D value) noexcept { __NEODOA_MATERIAL_UNIFORMS_SET_IMPL }
 

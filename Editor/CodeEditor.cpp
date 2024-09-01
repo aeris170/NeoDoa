@@ -16,7 +16,7 @@ CodeEditor::CodeEditor(GUI& gui) noexcept :
 }
 
 bool CodeEditor::Begin() {
-    const GUI& gui = this->gui;
+    [[maybe_unused]] const GUI& gui = this->gui;
 
     ImGui::PushID(WindowStrings::CodeEditorWindowName);
     bool visible = ImGui::Begin(WindowStrings::CodeEditorWindowTitleID, nullptr, ImGuiWindowFlags_MenuBar);
@@ -24,7 +24,7 @@ bool CodeEditor::Begin() {
     return visible;
 }
 void CodeEditor::Render() {
-    const GUI& gui = this->gui;
+    [[maybe_unused]] const GUI& gui = this->gui;
     RenderMenuBar();
 
     ImGuiTabBarFlags tabBarFlags = ImGuiTabBarFlags_AutoSelectNewTabs |
@@ -177,7 +177,7 @@ void CodeEditor::AddTab(AssetHandle assetHandle) {
         return element.currentAsset == assetHandle;
     });
     if (search != tabs.end()) {
-        selectedTabIndex = search - tabs.begin();
+        selectedTabIndex = static_cast<decltype(selectedTabIndex)>(search - tabs.begin());
         return;
     }
 

@@ -13,7 +13,7 @@ struct ICommand {
     virtual void Execute() noexcept = 0;
     virtual void UnExecute() noexcept = 0;
 
-    virtual bool TryMergeWith(UndoRedoStack& history, const ICommand* command) noexcept;
+    virtual bool TryMergeWith([[maybe_unused]] UndoRedoStack& history, [[maybe_unused]] const ICommand* command) noexcept;
 };
 
 struct UndoRedoStack {
@@ -58,7 +58,7 @@ public:
         bool HasNext() const noexcept override;
         Element Next() noexcept override;
     private:
-        int currentIndex{};
+        size_t currentIndex{};
         const UndoRedoStack& stack;
     };
     // UndoStackIterator
@@ -71,7 +71,7 @@ public:
         bool HasNext() const noexcept override;
         Element Next() noexcept override;
     private:
-        int currentIndex{};
+        size_t currentIndex{};
         const UndoRedoStack& stack;
     };
     // UndoStackReverseIterator
@@ -84,7 +84,7 @@ public:
         bool HasNext() const noexcept override;
         Element Next() noexcept override;
     private:
-        int currentIndex{};
+        size_t currentIndex{};
         const UndoRedoStack& stack;
     };
     // RedoStackIterator
@@ -97,7 +97,7 @@ public:
         bool HasNext() const noexcept override;
         Element Next() noexcept override;
     private:
-        int currentIndex{};
+        size_t currentIndex{};
         const UndoRedoStack& stack;
     };
     // RedoStackReverseIterator
@@ -108,7 +108,7 @@ public:
         bool HasNext() const noexcept override;
         Element Next() noexcept override;
     private:
-        int currentIndex{};
+        size_t currentIndex{};
         std::array<std::unique_ptr<Iterator>, 2> iterators;
     };
     // UndoRedoStackIterator
@@ -119,7 +119,7 @@ public:
         bool HasNext() const noexcept override;
         Element Next() noexcept override;
     private:
-        int currentIndex{};
+        size_t currentIndex{};
         std::array<std::unique_ptr<Iterator>, 2> iterators;
     };
     // UndoRedoStackReverseIterator

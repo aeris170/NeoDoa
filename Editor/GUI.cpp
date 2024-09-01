@@ -214,7 +214,6 @@ void GUI::OpenProjectFromDisk(const std::string& path) {
     CORE->LoadProject(path);
     assert(HasOpenProject());
 
-    Assets& assets = *CORE->GetAssets();
     Project& project = GetOpenProject();
 
     std::string title = defaultWindowName;

@@ -54,7 +54,7 @@ void UndoRedoHistory::Render() noexcept {
     if (isMouseCaught && ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
         float drag = ImGui::GetMouseDragDelta().y;
         float elemSize = ImGui::GetTextLineHeightWithSpacing();
-        int newStackDelta = drag / elemSize;
+        int newStackDelta = static_cast<int>(drag / elemSize);
         int diff = newStackDelta - stackDelta;
         while (diff > 0) { // Undo
             gui.UndoLastCommand();

@@ -219,7 +219,7 @@ inline void AdjacencyList<Vertex, InitialVertexCount, InitialEdgeCountPerVertex>
 
     // S1
     auto vertexIterator = std::ranges::find_if(data, [&vertex](const auto& pair) { return pair.first == vertex; });
-    auto vertexIndex = std::distance(data.begin(), vertexIterator);
+    auto vertexIndex = static_cast<EdgeList::value_type>(std::distance(data.begin(), vertexIterator));
     for (auto& [_, edgeList] : data) {
         auto vertexIndexInEdges = std::ranges::find(edgeList, vertexIndex);
         edgeList.erase(vertexIndexInEdges);

@@ -66,7 +66,7 @@ namespace SceneDeserializer {
         void DefaultDeserializeTransformComponent(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity);
         void DefaultDeserializeParentComponent(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity);
         void DefaultDeserializeChildComponent(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity);
-        void DefaultDeserializeUserDefinedComponents(tinyxml2::XMLElement&, Scene&, Entity, const std::string&);
+        void DefaultDeserializeUserDefinedComponents(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity, const std::string& name);
     }
 
     /* ----- Deserializer Functions ----- */

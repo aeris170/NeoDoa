@@ -498,7 +498,7 @@ size_t MaterialPostDeserialization::TypeNameToVariantIndex(std::string_view type
     else if (typeName == "mat4x3") { return 20uLL; }
 
     else if (typeName == "sampler2D") { return 21uLL; }
-    else { DOA_LOG_WARNING("MaterialPostDeserialization::TypeNameToVariantIndex encountered unknown typeName %s", typeName.data()); return -1uLL; } // =)
+    else { DOA_LOG_WARNING("MaterialPostDeserialization::TypeNameToVariantIndex encountered unknown typeName %s", typeName.data()); return std::numeric_limits<unsigned long long>::max(); } // =)
 }
 void MaterialPostDeserialization::InsertUniform(Material::Uniforms& uniforms, int location, const UniformValue& uniform) noexcept {
     if (const Uniform1f* ptr = std::get_if<Uniform1f>(&uniform.Value))      { uniforms.Set(location, uniform.Name, *ptr); }

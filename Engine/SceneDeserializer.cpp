@@ -163,31 +163,13 @@ void SceneDeserializer::Entities::DefaultDeserializeChildComponent(tinyxml2::XML
     ChildComponent children{ entity, parent };
     scene.InsertComponent<ChildComponent>(children.GetEntity(), std::move(children));
 }
-void SceneDeserializer::Entities::DefaultDeserializeUserDefinedComponents(tinyxml2::XMLElement&, Scene&, Entity, const std::string& name) {}
-
-
-/*
- int DeserializeEnum(const tinyxml2::XMLElement& property);
- Entity DeserializeEntityID(const tinyxml2::XMLElement& property, std::string_view identifierOverride = "id");
- int8_t DeserializeInt8  (const tinyxml2::XMLElement& property);
- int16_t DeserializeInt16 (const tinyxml2::XMLElement& property);
- int32_t DeserializeInt32 (const tinyxml2::XMLElement& property);
- int64_t DeserializeInt64 (const tinyxml2::XMLElement& property);
- uint8_t DeserializeUInt8 (const tinyxml2::XMLElement& property);
- uint16_t DeserializeUInt16(const tinyxml2::XMLElement& property);
- uint32_t DeserializeUInt32(const tinyxml2::XMLElement& property);
- uint64_t DeserializeUInt64(const tinyxml2::XMLElement& property);
- int DeserializeInt(const tinyxml2::XMLElement& property);
- float DeserializeFloat(const tinyxml2::XMLElement& property);
- double DeserializeDouble(const tinyxml2::XMLElement& property);
- bool DeserializeBool(const tinyxml2::XMLElement& property);
-*/
+void SceneDeserializer::Entities::DefaultDeserializeUserDefinedComponents(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity, const std::string& name) {}
 
 int SceneDeserializer::Helpers::DeserializeEnum(const tinyxml2::XMLElement& property) {
     return property.IntAttribute("value");
 }
 Entity SceneDeserializer::Helpers::DeserializeEntityID(const tinyxml2::XMLElement& property, std::string_view identifierOverride) {
-    return static_cast<Entity>(property.UnsignedAttribute(identifierOverride.data(), -1));
+    return static_cast<Entity>(property.UnsignedAttribute(identifierOverride.data(), static_cast<unsigned>(NULL_ENTT)));
 }
 int8_t SceneDeserializer::Helpers::DeserializeInt8(const tinyxml2::XMLElement& property) {
     return static_cast<int8_t>(property.IntAttribute("value"));

@@ -26,7 +26,7 @@ void TranslateEntityCommand::UnExecute() noexcept {
     cmp.SetLocalTranslation(oldTranslation);
 }
 
-bool TranslateEntityCommand::TryMergeWith(UndoRedoStack& history, const ICommand* command) noexcept {
+bool TranslateEntityCommand::TryMergeWith([[maybe_unused]] UndoRedoStack& history, const ICommand* command) noexcept {
     if (const TranslateEntityCommand* other = dynamic_cast<const TranslateEntityCommand*>(command)) {
         if (entity == other->entity) {
             newTranslation = other->newTranslation;

@@ -26,7 +26,7 @@ void RotateEntityCommand::UnExecute() noexcept {
     cmp.SetLocalRotation(oldRotation);
 }
 
-bool RotateEntityCommand::TryMergeWith(UndoRedoStack& history, const ICommand* command) noexcept {
+bool RotateEntityCommand::TryMergeWith([[maybe_unused]] UndoRedoStack& history, const ICommand* command) noexcept {
     if (const RotateEntityCommand* other = dynamic_cast<const RotateEntityCommand*>(command)) {
         if (entity == other->entity) {
             newRotation = other->newRotation;

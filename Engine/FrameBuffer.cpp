@@ -42,7 +42,6 @@ FrameBuffer::FrameBuffer(Resolution resolution, int msaaSamples, std::array<Fram
     resolution(resolution),
     msaaSamples(msaaSamples),
     colorAttachmentCount(colorAttachmentCount) {
-    auto a = OpenGL::BufferBit::COLOR_BUFFER_BIT | OpenGL::BufferBit::DEPTH_BUFFER_BIT;
     hasDepth =
         renderFormat == OpenGL::DepthFormat::DEPTH_COMPONENT16 ||
         renderFormat == OpenGL::DepthFormat::DEPTH_COMPONENT24 ||

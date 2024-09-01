@@ -96,7 +96,7 @@ WindowGLFW::WindowGLFW(GraphicsBackend backend, const ContextWindowCreationParam
     if (params.IsFullScreen) {
         int count;
         GLFWmonitor** monitors = glfwGetMonitors(&count);
-        assert(params.Monitor < count);
+        assert(params.Monitor < static_cast<unsigned>(count));
         monitor = monitors[params.Monitor];
     }
 

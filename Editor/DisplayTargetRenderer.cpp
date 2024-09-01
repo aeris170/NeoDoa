@@ -221,7 +221,7 @@ void DisplayTargetRenderer::RenderIconChangePopup(const FNode& file, MetaAssetIn
             }
         }
 
-        meta.icon_index = selectedItem - begin;
+        meta.icon_index = static_cast<decltype(meta.icon_index)>(selectedItem - begin);
         meta.fa_icon = selectedItem->first;
         meta.svg_icon_key = selectedItem->second;
         ImGui::EndPopup();
@@ -548,7 +548,7 @@ void DisplayTargetRenderer::RenderTextView(AssetHandle h) {
 void DisplayTargetRenderer::OnProjectUnloaded() {
     ResetDisplayTarget();
 }
-void DisplayTargetRenderer::OnReimport(Assets& assets) {
+void DisplayTargetRenderer::OnReimport([[maybe_unused]] Assets& assets) {
     if (!std::holds_alternative<FNode*>(displayTarget)) { return; }
 }
 void DisplayTargetRenderer::OnAssetDeleted(AssetHandle asset) {

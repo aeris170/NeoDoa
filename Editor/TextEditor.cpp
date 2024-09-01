@@ -195,7 +195,7 @@ void TextEditor::DeleteRange(const Coordinates& aStart, const Coordinates& aEnd)
 		auto& lastLine = mLines[aEnd.mLine];
 
 		if (aStart.mLine < aEnd.mLine) {
-			AddGlyphsToLine(aStart.mLine, firstLine.size(), lastLine.begin(), lastLine.end());
+			AddGlyphsToLine(aStart.mLine, static_cast<int>(firstLine.size()), lastLine.begin(), lastLine.end());
 			for (int c = 0; c <= mState.mCurrentCursor; c++) // move up cursors in line that is being moved up
 			{
 				if (mState.mCursors[c].mInteractiveEnd.mLine > aEnd.mLine)
@@ -229,7 +229,6 @@ int TextEditor::InsertTextAt(Coordinates& /* inout */ aWhere, const char* aValue
 			++aValue;
 		} else if (*aValue == '\n') {
 			if (cindex < (int) mLines[aWhere.mLine].size()) {
-				auto& newLine = InsertLine(aWhere.mLine + 1);
 				auto& line = mLines[aWhere.mLine];
 				AddGlyphsToLine(aWhere.mLine + 1, 0, line.begin() + cindex, line.end());
 				RemoveGlyphsFromLine(aWhere.mLine, cindex);
@@ -242,7 +241,6 @@ int TextEditor::InsertTextAt(Coordinates& /* inout */ aWhere, const char* aValue
 			++totalLines;
 			++aValue;
 		} else {
-			auto& line = mLines[aWhere.mLine];
 			auto d = UTF8CharLength(*aValue);
 			while (d-- > 0 && *aValue != '\0')
 				AddGlyphToLine(aWhere.mLine, cindex++, Glyph(*aValue++, PaletteIndex::Default));
@@ -283,11 +281,8 @@ TextEditor::Coordinates TextEditor::ScreenPosToCoordinates(const ImVec2& aPositi
 	if (lineNo >= 0 && lineNo < (int) mLines.size()) {
 		auto& line = mLines.at(lineNo);
 
-		int columnIndex = 0;
 		std::string cumulatedString = "";
-		float columnWidth = 0.0f;
 		float columnX = 0.0f;
-		int delta = 0;
 
 		// First we find the hovered column coord.
 		for (size_t columnIndex = 0; columnIndex < line.size(); ++columnIndex) {
@@ -634,7 +629,7 @@ void TextEditor::RemoveGlyphsFromLine(int aLine, int aStartChar, int aEndChar) {
 
 void TextEditor::AddGlyphsToLine(int aLine, int aTargetIndex, Line::iterator aSourceStart, Line::iterator aSourceEnd) {
 	int targetColumn = GetCharacterColumn(aLine, aTargetIndex);
-	int charsInserted = std::distance(aSourceStart, aSourceEnd);
+	int charsInserted = static_cast<int>(std::distance(aSourceStart, aSourceEnd));
 	auto& line = mLines[aLine];
 	OnLineChanged(true, aLine, targetColumn, charsInserted, false);
 	line.insert(line.begin() + aTargetIndex, aSourceStart, aSourceEnd);
@@ -955,7 +950,7 @@ void TextEditor::Render(bool aParentIsFocused) {
 	}
 
 	ImVec2 cursorScreenPos = ImGui::GetCursorScreenPos();
-	auto scrollX = ImGui::GetScrollX();
+	[[maybe_unused]] auto scrollX = ImGui::GetScrollX();
 	auto scrollY = ImGui::GetScrollY();
 
 	auto lineNo = (int) floor(scrollY / mCharAdvance.y);
@@ -1472,7 +1467,7 @@ void TextEditor::EnterCharacter(ImWchar aChar, bool aShift) {
 
 			const size_t whitespaceSize = newLine.size();
 			auto cindex = GetCharacterIndexR(coord);
-			AddGlyphsToLine(coord.mLine + 1, newLine.size(), line.begin() + cindex, line.end());
+			AddGlyphsToLine(coord.mLine + 1, static_cast<int>(newLine.size()), line.begin() + cindex, line.end());
 			RemoveGlyphsFromLine(coord.mLine, cindex);
 			SetCursorPosition(Coordinates(coord.mLine + 1, GetCharacterColumn(coord.mLine + 1, (int) whitespaceSize)), c);
 		} else {
@@ -1553,7 +1548,7 @@ void TextEditor::SetCursorPosition(const Coordinates& aPosition, int aCursor, bo
 	}
 }
 
-void TextEditor::SetCursorPosition(int aLine, int aCharIndex, int aCursor, bool aClearSelection) {
+void TextEditor::SetCursorPosition(int aLine, int aCharIndex, int aCursor, [[maybe_unused]] bool aClearSelection) {
 	SetCursorPosition({ aLine, GetCharacterColumn(aLine, aCharIndex) }, aCursor);
 }
 
@@ -1857,7 +1852,7 @@ void TextEditor::Paste() {
 				clipTextLines.push_back({ i + 1, 0 });
 			}
 		}
-		clipTextLines.back().second = clipText.length();
+		clipTextLines.back().second = static_cast<int>(clipText.length());
 		canPasteToMultipleCursors = clipTextLines.size() == mState.mCurrentCursor + 1;
 	}
 
@@ -1938,7 +1933,7 @@ void TextEditor::AddCursorForNextOccurrence() {
 
 	std::string selectionText = GetText(currentCursor.GetSelectionStart(), currentCursor.GetSelectionEnd());
 	Coordinates nextStart, nextEnd;
-	if (!FindNextOccurrence(selectionText.c_str(), selectionText.length(), currentCursor.GetSelectionEnd(), nextStart, nextEnd))
+	if (!FindNextOccurrence(selectionText.c_str(), static_cast<int>(selectionText.length()), currentCursor.GetSelectionEnd(), nextStart, nextEnd))
 		return;
 
 	mState.AddCursor();
@@ -2095,7 +2090,7 @@ void TextEditor::MergeCursorsIfPossible() {
 		if (cursorsToDelete.find(c) != cursorsToDelete.end())
 			mState.mCursors.erase(mState.mCursors.begin() + c);
 	}
-	mState.mCurrentCursor -= cursorsToDelete.size();
+	mState.mCurrentCursor -= static_cast<int>(cursorsToDelete.size());
 }
 
 
@@ -2445,7 +2440,7 @@ TextEditor::UndoRecord::UndoRecord(
 }
 
 void TextEditor::UndoRecord::Undo(TextEditor* aEditor) {
-	for (int i = mOperations.size() - 1; i > -1; i--) {
+	for (size_t i = mOperations.size() - 1; i > -1; i--) {
 		const UndoOperation& operation = mOperations[i];
 		if (!operation.mText.empty()) {
 			switch (operation.mType) {

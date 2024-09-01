@@ -23,7 +23,7 @@ MenuBar::MenuBar(GUI& owner) noexcept :
 bool MenuBar::Begin() noexcept { return true; }
 
 void MenuBar::Render() noexcept {
-	GUI& gui = this->gui;
+	[[maybe_unused]] GUI& gui = this->gui;
 
     if (ImGui::BeginMenuBar()) {
         if (ImGui::BeginMenu("File")) {
@@ -120,7 +120,7 @@ void MenuBar::RenderEditSubMenu() noexcept {
 }
 
 void MenuBar::RenderAssetsSubMenu() noexcept {
-    GUI& gui = this->gui;
+	[[maybe_unused]] GUI& gui = this->gui;
 }
 
 void MenuBar::RenderHelpSubMenu() noexcept {

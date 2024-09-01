@@ -403,7 +403,7 @@ FileDialog::FileDialog() {
 	DWORD d = GetLogicalDrives();
 	for (int i = 0; i < 26; i++)
 		if (d & (1 << i))
-			thisPC->Children.push_back(new FileTreeNode(std::string(1, 'A' + i) + ":"));
+			thisPC->Children.push_back(new FileTreeNode(std::string(1, static_cast<char>('A' + i)) + ":"));
 	m_treeCache.push_back(thisPC);
 #else
 	std::error_code ec;
@@ -1529,5 +1529,3 @@ static const unsigned int folder_icon[] = {
 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff,
 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff,
 };
-const char* GetDefaultFolderIcon() { return (const char*)&folder_icon[0]; }
-const char* GetDefaultFileIcon() { return (const char*)&file_icon[0]; }

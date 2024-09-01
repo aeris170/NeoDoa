@@ -8,4 +8,4 @@ BehaviourComponent::~BehaviourComponent() {}
 
 void BehaviourComponent::Init() {}
 
-void BehaviourComponent::Execute(float deltaTime) {}
+void BehaviourComponent::Execute([[maybe_unused]] float deltaTime) {}

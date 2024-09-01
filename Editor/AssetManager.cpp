@@ -23,7 +23,7 @@ AssetManager::AssetManager(GUI& gui) noexcept :
 }
 
 bool AssetManager::Begin() {
-    const GUI& gui = this->gui;
+    [[maybe_unused]] const GUI& gui = this->gui;
     ImGui::PushID(WindowStrings::AssetManagerWindowName);
     bool visible = ImGui::Begin(WindowStrings::AssetManagerWindowTitleID, nullptr, ImGuiWindowFlags_MenuBar);
 
@@ -399,7 +399,7 @@ void AssetManager::RenderSelectedFolderContent() {
 
 void AssetManager::RenderContextMenu() {
     GUI& gui = this->gui.get();
-    Assets& assets = *gui.CORE->GetAssets();
+    [[maybe_unused]] Assets& assets = *gui.CORE->GetAssets();
 
     bool isDisabled = !hasContent;
     if (isDisabled) { ImGui::BeginDisabled(); }
@@ -522,7 +522,6 @@ void AssetManager::SetCurrentFolder(FNode* folder) {
     }
 
     if (!folder->IsDirectory()) { return; }
-    GUI& gui = this->gui;
 
     if (folder == root || folder == currentFolder->ParentNode()) {
         SetSelectedNode(nullptr);
@@ -552,7 +551,7 @@ bool AssetManager::FileFilter::CheckVisibility(const FNode& file) const {
     return true;
 }
 
-void AssetManager::OnProjectLoaded(Project& project) {
+void AssetManager::OnProjectLoaded([[maybe_unused]] Project& project) {
     hasContent = true;
     assets = gui.get().CORE->GetAssets().get();
     root = &assets->Root();

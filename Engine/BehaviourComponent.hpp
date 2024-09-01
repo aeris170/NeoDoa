@@ -19,7 +19,7 @@ public:
     virtual ~BehaviourComponent() = 0;
 
     virtual void Init();
-    virtual void Execute(float deltaTime);
+    virtual void Execute([[maybe_unused]] float deltaTime);
 
     template <typename Component>
     Component& GetComponent() {

@@ -207,7 +207,7 @@ foreach(source IN LISTS GROUP_LIST)
 endforeach()
 
 if(MSVC)
- target_compile_options(Engine PRIVATE "/MP")
+	target_compile_options(Engine PRIVATE "/MP")
 endif()
 
 copy_folder_post_build(Fonts)

@@ -14,7 +14,7 @@
 
 #include <Engine/Log.hpp>
 
-static void MessageCallback(const asSMessageInfo* msg, void* param) {
+static void MessageCallback(const asSMessageInfo* msg, [[maybe_unused]] void* param) {
     if (msg->type == asMSGTYPE_INFORMATION) {
         DOA_LOG_INFO("%s (%d, %d) : %s", msg->section, msg->row, msg->col, msg->message);
     } else if (msg->type == asMSGTYPE_WARNING) {

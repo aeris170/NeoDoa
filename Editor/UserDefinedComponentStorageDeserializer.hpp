@@ -8,4 +8,4 @@
 #include <Engine/Entity.hpp>
 #include <Engine/SceneDeserializer.hpp>
 
-void DeserializeUserDefinedComponentStorage(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity, const std::string&);
+void DeserializeUserDefinedComponentStorage(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity, [[maybe_unused]] const std::string& name);
