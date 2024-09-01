@@ -33,11 +33,9 @@ jobs:
           - os: ubuntu-24.04
             c_compiler: gcc
             cpp_compiler: g++
-            cpp_flags: "-fmax-errors=0"
           - os: ubuntu-24.04
             c_compiler: clang
             cpp_compiler: clang++
-            cpp_flags: "-ferror-limit=0"
         exclude:
           - os: windows-latest
             c_compiler: gcc
@@ -108,7 +106,6 @@ jobs:
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
-        -DCMAKE_CXX_FLAGS=${{ matrix.cpp_flags }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -S ${{ github.workspace }}
 
