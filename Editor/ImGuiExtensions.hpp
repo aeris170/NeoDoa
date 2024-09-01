@@ -1,5 +1,6 @@
 #pragma once
 
+#include <format>
 #include <string_view>
 
 #include <imgui.h>
@@ -19,3 +20,8 @@ ImVec2 ImRotationCenter();
 void ImRotateEnd(float rad = 0, ImVec2 center = ImRotationCenter());
 
 void FocusNextItem();
+
+template<class ...Args>
+void ImGuiFormattedText(std::format_string<Args...> format, Args&&... args) {
+    ImGui::TextUnformatted(std::format(format, std::forward<Args>(args)...).c_str());
+}

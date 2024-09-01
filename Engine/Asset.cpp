@@ -107,13 +107,13 @@ void Asset::Deserialize() {
         auto result = DeserializeComponent(*file);
         for (auto& message : result.messages) {
             switch (message.messageType) {
-                case ComponentCompilerMessageType::INFO:
+                case ComponentCompilerMessageType::Info:
                     infoList.emplace_back(std::move(message));
                     break;
-                case ComponentCompilerMessageType::WARNING:
+                case ComponentCompilerMessageType::Warning:
                     warningList.emplace_back(std::move(message));
                     break;
-                case ComponentCompilerMessageType::ERROR:
+                case ComponentCompilerMessageType::Error:
                     errorList.emplace_back(std::move(message));
                     break;
             }

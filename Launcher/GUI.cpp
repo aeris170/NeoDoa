@@ -30,47 +30,50 @@ GUI::GUI(const CorePtr& core) noexcept :
     Window->SetTitle("NeoDoa Launcher");
 
     stbi_set_flip_vertically_on_load(true);
-    int w, h, nrChannels;
-    auto* readPixels = stbi_load("Images/launcherlogo-64_x_64.png", &w, &h, &nrChannels, STBI_rgb_alpha);
+    { // Load launcher logo
+        int w, h, nrChannels;
+        auto* readPixels = stbi_load("Images/launcherlogo-64_x_64.png", &w, &h, &nrChannels, STBI_rgb_alpha);
 
-    GPUTextureBuilder builder;
-    builder.SetName("launcher_logo");
-    if (readPixels) {
-        std::span pixels{ reinterpret_cast<const std::byte*>(readPixels), w * h * nrChannels * sizeof(stbi_uc) };
-        builder.SetWidth(w)
-            .SetHeight(h)
-            .SetData(DataFormat::RGBA8, pixels);
-    } else {
-        const Texture& texture = Texture::Missing();
-        builder.SetWidth(texture.Width)
-            .SetHeight(texture.Height)
-            .SetData(texture.Format, texture.PixelData);
+        GPUTextureBuilder builder;
+        builder.SetName("launcher_logo");
+        if (readPixels) {
+            std::span pixels{ reinterpret_cast<const std::byte*>(readPixels), w * h * nrChannels * sizeof(stbi_uc) };
+            builder.SetWidth(w)
+                .SetHeight(h)
+                .SetData(DataFormat::RGBA8, pixels);
+        } else {
+            const Texture& texture = Texture::Missing();
+            builder.SetWidth(texture.Width)
+                .SetHeight(texture.Height)
+                .SetData(texture.Format, texture.PixelData);
+        }
+        auto [tex, _] = builder.Build();
+        launcherLogo = std::move(tex.value());
+
+        stbi_image_free(readPixels);
     }
-    auto [tex, _] = builder.Build();
-    launcherLogo = std::move(tex.value());
+    {// Load vibrant launcher logo
+        int w, h, nrChannels;
+        auto* readPixels = stbi_load("Images/launcherlogovivid-64_x_64.png", &w, &h, &nrChannels, STBI_rgb_alpha);
 
-    stbi_image_free(readPixels);
+        GPUTextureBuilder builder;
+        builder.SetName("launcher_logo_vivid");
+        if (readPixels) {
+            std::span pixels{ reinterpret_cast<const std::byte*>(readPixels), w * h * nrChannels * sizeof(stbi_uc) };
+            builder.SetWidth(w)
+                .SetHeight(h)
+                .SetData(DataFormat::RGBA8, pixels);
+        } else {
+            const Texture& texture = Texture::Missing();
+            builder.SetWidth(texture.Width)
+                .SetHeight(texture.Height)
+                .SetData(texture.Format, texture.PixelData);
+        }
+        auto [texVivid, __] = builder.Build();
+        launcherLogoVivid = std::move(texVivid.value());
 
-    w, h, nrChannels;
-    readPixels = stbi_load("Images/launcherlogovivid-64_x_64.png", &w, &h, &nrChannels, STBI_rgb_alpha);
-
-    builder.SetName("launcher_logo_vivid");
-    if (readPixels) {
-        std::span pixels{ reinterpret_cast<const std::byte*>(readPixels), w * h * nrChannels * sizeof(stbi_uc) };
-        builder.SetWidth(w)
-            .SetHeight(h)
-            .SetData(DataFormat::RGBA8, pixels);
-    } else {
-        const Texture& texture = Texture::Missing();
-        builder.SetWidth(texture.Width)
-            .SetHeight(texture.Height)
-            .SetData(texture.Format, texture.PixelData);
+        stbi_image_free(readPixels);
     }
-    auto [texVivid, __] = builder.Build();
-    launcherLogoVivid = std::move(texVivid.value());
-
-    stbi_image_free(readPixels);
-
     projectDataFile = std::make_unique<FNode>(FNodeCreationParams {
         .name = "projects"
     });

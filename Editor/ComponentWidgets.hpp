@@ -197,7 +197,7 @@ bool FancyVectorWidget(const std::string& label, float* vec, FancyVectorWidgetSe
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { ImGui::GetStyle().ItemSpacing.x, 0 });
     ImGui::SetColumnWidth(0, w - compFieldWidth);
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f);
-    ImGui::Text("%s", label.c_str());
+    ImGui::TextUnformatted(label.c_str());
     if (ImGui::BeginPopupContextItem(label.c_str(), ImGuiPopupFlags_MouseButtonRight)) {
         if (ImGui::MenuItem(cat(ComponentWidgetIcons::ContextMenu::ResetIcon, ComponentWidgetStrings::ContextMenu::Reset))) {
             rv = true;
@@ -331,7 +331,7 @@ template<typename T>
 void UneditableArrayWidget(const std::string& label, const std::vector<T>& array) {
     BeginWidget(label);
     for (int i = 0; i < array.size(); i++) {
-        ImGui::Text("%s", std::to_string(array[i]).c_str());
+        ImGui::TextUnformatted(std::to_string(array[i]).c_str());
     }
     EndWidget();
 }

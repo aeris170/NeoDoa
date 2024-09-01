@@ -137,24 +137,24 @@ void MaterialDisplay::RenderShaderUniforms() noexcept {
 
     AssetHandle programHandle = assets->FindAsset(material.ShaderProgram);
     if (!programHandle.HasValue()) {
-        ImGui::Text("Selected program (ID: %llu) is non-existant!", static_cast<uint64_t>(material.ShaderProgram));
+        ImGuiFormattedText("Selected program (ID: {}) is non-existant!", static_cast<uint64_t>(material.ShaderProgram));
         return;
     }
 
     if (!programHandle->IsShaderProgram()) {
-        ImGui::Text("Selected program (ID: %llu) is non a shader program!", static_cast<uint64_t>(material.ShaderProgram));
+        ImGuiFormattedText("Selected program (ID: {}) is non a shader program!", static_cast<uint64_t>(material.ShaderProgram));
         return;
     }
 
     const ShaderProgram& program = programHandle->DataAs<ShaderProgram>();
     if (!program.IsComplete()) {
-        ImGui::Text("Selected program (ID: %llu) is not complete!", static_cast<uint64_t>(material.ShaderProgram));
+        ImGuiFormattedText("Selected program (ID: {}) is not complete!", static_cast<uint64_t>(material.ShaderProgram));
         return;
     }
 
     const GPUShaderProgram* gpuProgramPtr = assets->GPUBridge().GetShaderPrograms().Query(material.ShaderProgram);
     if (!gpuProgramPtr) {
-        ImGui::Text("Selected program (ID: %llu) is not allocated on the GPU yet!", static_cast<uint64_t>(material.ShaderProgram));
+        ImGuiFormattedText("Selected program (ID: {}) is not allocated on the GPU yet!", static_cast<uint64_t>(material.ShaderProgram));
         return;
     }
     const GPUShaderProgram& gpuProgram = *gpuProgramPtr;
@@ -207,7 +207,7 @@ void MaterialDisplay::RenderUniformGroup(Material::Uniforms& uniforms, const GPU
 }
 bool MaterialDisplay::RenderSingleUniform(Material::Uniforms& uniforms, const UniformValue& uniformValue, const GPUShaderProgram::Uniform& uniform) noexcept {
     bool rv{ false };
-    //ImGui::Text("Name: %s, Type: %s", uniform.Name.c_str(), uniform.TypeName.c_str());
+    //ImGuiFormattedText("Name: {}, Type: {}", uniform.Name.c_str(), uniform.TypeName.c_str());
 
     if (uniform.TypeName == "float") {
         Uniform1f value = std::get<Uniform1f>(uniformValue.Value);

@@ -102,14 +102,14 @@ static void CompilationMessageCallback(const asSMessageInfo* msg, void* param) {
 
     ComponentCompilerMessage m;
     if (msg->type == asMSGTYPE_INFORMATION) {
-        m.messageType = ComponentCompilerMessageType::INFO;
+        m.messageType = ComponentCompilerMessageType::Info;
         DOA_LOG_INFO("%s (%d, %d) : %s", msg->section, msg->row, msg->col, msg->message);
     } else if (msg->type == asMSGTYPE_WARNING) {
-        m.messageType = ComponentCompilerMessageType::WARNING;
+        m.messageType = ComponentCompilerMessageType::Warning;
         DOA_LOG_WARNING("%s (%d, %d) : %s", msg->section, msg->row, msg->col, msg->message);
     } else {
         cdr.erred = true;
-        m.messageType = ComponentCompilerMessageType::ERROR;
+        m.messageType = ComponentCompilerMessageType::Error;
         DOA_LOG_ERROR("%s (%d, %d) : %s", msg->section, msg->row, msg->col, msg->message);
     }
     m.message = msg->message;
@@ -139,7 +139,7 @@ ComponentDeserializationResult DeserializeComponent(const FNode& file) {
         DOA_LOG_ERROR(errmsg.c_str());
         rv.messages.emplace_back(
             1, 1,
-            ComponentCompilerMessageType::ERROR,
+            ComponentCompilerMessageType::Error,
             errmsg
         );
         rv.erred = true;
@@ -156,7 +156,7 @@ ComponentDeserializationResult DeserializeComponent(const FNode& file) {
         DOA_LOG_ERROR(errmsg.c_str(), fileName.c_str());
         rv.messages.emplace_back(
             1, 1,
-            ComponentCompilerMessageType::ERROR,
+            ComponentCompilerMessageType::Error,
             errmsg
         );
         rv.erred = true;
@@ -170,7 +170,7 @@ ComponentDeserializationResult DeserializeComponent(const FNode& file) {
         DOA_LOG_ERROR(errmsg.c_str());
         rv.messages.emplace_back(
             1, 1,
-            ComponentCompilerMessageType::ERROR,
+            ComponentCompilerMessageType::Error,
             errmsg
         );
         rv.erred = true;
@@ -183,7 +183,7 @@ ComponentDeserializationResult DeserializeComponent(const FNode& file) {
         DOA_LOG_ERROR(errmsg.c_str(), fileName.c_str());
         rv.messages.emplace_back(
             1, 1,
-            ComponentCompilerMessageType::ERROR,
+            ComponentCompilerMessageType::Error,
             errmsg
         );
         rv.erred = true;
@@ -204,7 +204,7 @@ ComponentDeserializationResult DeserializeComponent(const FNode& file) {
             DOA_LOG_ERROR(errmsg.c_str(), fileName.c_str());
             rv.messages.emplace_back(
                 1, 1,
-                ComponentCompilerMessageType::ERROR,
+                ComponentCompilerMessageType::Error,
                 errmsg
             );
             rv.erred = true;
@@ -216,7 +216,7 @@ ComponentDeserializationResult DeserializeComponent(const FNode& file) {
             DOA_LOG_WARNING(warnmsg.c_str(), fileName.c_str());
             rv.messages.emplace_back(
                 1, 1,
-                ComponentCompilerMessageType::WARNING,
+                ComponentCompilerMessageType::Warning,
                 warnmsg
             );
         }
@@ -229,7 +229,7 @@ ComponentDeserializationResult DeserializeComponent(const FNode& file) {
             if (typeInfo->GetFactoryCount() > 0) {
                 rv.messages.emplace_back(
                     1, 1,
-                    ComponentCompilerMessageType::INFO,
+                    ComponentCompilerMessageType::Info,
                     "Constructors are stripped from binary, do not use constructors!"
                 );
             }

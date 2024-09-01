@@ -207,7 +207,7 @@ void detail::BeginWidget(const std::string& label) {
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { ImGui::GetStyle().ItemSpacing.x, 0 });
     ImGui::SetColumnWidth(0, w - compFieldWidth);
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f + 3);
-    ImGui::Text("%s", label.c_str());
+    ImGui::TextUnformatted(label.c_str());
     ImGui::NextColumn();
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f);
@@ -272,7 +272,7 @@ bool EntityWidget(const std::string& label, Entity& value) {
 void UneditableEntityWidget(const std::string& label, const Entity value) {
     BeginWidget(label);
     int val = EntityTo<int>(value);
-    ImGui::Text("%s", std::to_string(val).c_str());
+    ImGui::TextUnformatted(std::to_string(val).c_str());
     EndWidget();
 }
 
@@ -403,7 +403,7 @@ bool StringWidget(const std::string& label, std::string& value) {
 
 void UneditableStringWidget(const std::string& label, const std::string& value) {
     BeginWidget(label);
-    ImGui::Text("%s", value.c_str());
+    ImGui::TextUnformatted(value.c_str());
     EndWidget();
 }
 
@@ -552,7 +552,7 @@ void Header(const std::string& label) {
     auto boldFont = io.Fonts->Fonts[1];
     ImGui::PushFont(boldFont);
 
-    ImGui::Text("%s", label.c_str());
+    ImGui::TextUnformatted(label.c_str());
     ImGui::Separator();
 
     ImGui::PopFont();

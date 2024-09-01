@@ -3,6 +3,7 @@
 #include <Editor/GUI.hpp>
 #include <Editor/Icons.hpp>
 #include <Editor/Strings.hpp>
+#include <Editor/ImGuiExtensions.hpp>
 #include <Editor/ComponentWidgets.hpp>
 
 SceneSettings::SceneSettings(GUI& gui) noexcept :
@@ -36,11 +37,11 @@ void SceneSettings::DrawStats(Scene& scene) const {
     ImGui::BeginGroup();
 
     auto stats = scene.GetRendererStats();
-    ImGui::Text("Draw Calls: %d", stats.drawCalls);
-    ImGui::Text("Vertices: %d", stats.vertices);
-    ImGui::Text("Indices: %d", stats.indices);
+    ImGuiFormattedText("Draw Calls: {}", stats.drawCalls);
+    ImGuiFormattedText("Vertices: {}", stats.vertices);
+    ImGuiFormattedText("Indices: {}", stats.indices);
     auto fps = gui.IO()->Framerate;
-    ImGui::Text("Editor average %.3f ms/frame (%.1f FPS)", 1000.0f / fps, fps);
+    ImGuiFormattedText("Editor average {:.3f} ms/frame ({:.1f} FPS)", 1000.0f / fps, fps);
     ImGui::ColorEdit3("Clear Color", &scene.ClearColor.r);
     ImGui::ColorEdit3("Selection Outline Color", &scene.SelectionOutlineColor.r);
 

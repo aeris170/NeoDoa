@@ -60,7 +60,7 @@ int Poller::Poll(std::chrono::milliseconds timeout) noexcept {
 
 SimpleSocket::SimpleSocket(SocketType type) noexcept :
     socket(context, GetZMQSocketType(type)) {}
-SimpleSocket::~SimpleSocket() {}
+SimpleSocket::~SimpleSocket() noexcept {}
 
 void SimpleSocket::Send(std::string_view message, SendFlag flag) noexcept {
 	socket.send(zmq::buffer(message), GetZMQSendFlag(flag));

@@ -17,10 +17,10 @@
 #include <Editor/GUI.hpp>
 #include <Editor/Icons.hpp>
 #include <Editor/Strings.hpp>
-#include <Editor/UserDefinedComponentStorage.hpp>
-
+#include <Editor/ImGuiExtensions.hpp>
 #include <Editor/AddEntityCommand.hpp>
 #include <Editor/RemoveEntityCommand.hpp>
+#include <Editor/UserDefinedComponentStorage.hpp>
 
 SceneHierarchy::SceneHierarchy(GUI& gui) noexcept :
     gui(gui) {
@@ -204,7 +204,7 @@ void SceneHierarchy::RenderEntityNode(const Entity entity) {
 
     if (ImGui::BeginDragDropSource()) {
         ImGui::SetDragDropPayload("SELECTED_ENTT", &entity, sizeof(Entity));
-        ImGui::Text("DragDrop - %s", id.GetTag().data());
+        ImGuiFormattedText("DragDrop - {}", id.GetTag().data());
         ImGui::EndDragDropSource();
     }
 
