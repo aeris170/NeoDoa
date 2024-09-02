@@ -1,4 +1,4 @@
-#include "SceneSerializer.hpp"
+#include <Engine/SceneSerializer.hpp>
 
 #include <Utility/NameOf.hpp>
 
@@ -34,8 +34,6 @@ void SceneSerializer::SceneConfig::DefaultSerialize(tinyxml2::XMLPrinter& printe
     {
         SerializeName(printer, scene.Name);
         SerializeClearColor(printer, scene.ClearColor);
-        SerializeSelectionOutlineColor(printer, scene.SelectionOutlineColor);
-        Cameras::Serialize(printer, scene);
     }
     printer.CloseElement(); // config close
 }
@@ -47,82 +45,6 @@ void SceneSerializer::SceneConfig::DefaultSerializeClearColor(tinyxml2::XMLPrint
     printer.PushAttribute("r", color.r);
     printer.PushAttribute("g", color.g);
     printer.PushAttribute("b", color.b);
-    printer.CloseElement();
-}
-void SceneSerializer::SceneConfig::DefaultSerializeSelectionOutlineColor(tinyxml2::XMLPrinter& printer, const Color& color){
-    printer.OpenElement("selectionOutlineColor");
-    printer.PushAttribute("r", color.r);
-    printer.PushAttribute("g", color.g);
-    printer.PushAttribute("b", color.b);
-    printer.CloseElement();
-}
-
-void SceneSerializer::SceneConfig::Cameras::DefaultSerialize(tinyxml2::XMLPrinter& printer, const Scene& scene) {
-    /*printer.OpenElement("cameras");
-    {
-        SerializeActiveCamera(printer, scene);
-        SerializeOrthoCamera(printer, scene.GetOrtho());
-        SerializePerspectiveCamera(printer, scene.GetPerspective());
-    }
-    printer.CloseElement();*/
-}
-void SceneSerializer::SceneConfig::Cameras::DefaultSerializeActiveCamera(tinyxml2::XMLPrinter& printer, const Scene& scene) {
-    //printer.OpenElement("activeCamera");
-    //{
-    //    if (scene.IsOrtho()) {
-    //        printer.PushAttribute("type", "ortho");
-    //    } else if (scene.IsPerspective()) {
-    //        printer.PushAttribute("type", "perspective");
-    //    } else {
-    //        assert(false); /* no camera? */
-    //        throw 1;
-    //    }
-
-    //    const ACamera& activeCamera = scene.GetActiveCamera();
-    //    printer.OpenElement("eye");
-    //    printer.PushAttribute("x", activeCamera.eye.x);
-    //    printer.PushAttribute("y", activeCamera.eye.y);
-    //    printer.PushAttribute("z", activeCamera.eye.z);
-    //    printer.CloseElement();
-
-    //    printer.OpenElement("forward");
-    //    printer.PushAttribute("x", activeCamera.forward.x);
-    //    printer.PushAttribute("y", activeCamera.forward.y);
-    //    printer.PushAttribute("z", activeCamera.forward.z);
-    //    printer.CloseElement();
-
-    //    printer.OpenElement("up");
-    //    printer.PushAttribute("x", activeCamera.up.x);
-    //    printer.PushAttribute("y", activeCamera.up.y);
-    //    printer.PushAttribute("z", activeCamera.up.z);
-    //    printer.CloseElement();
-
-    //    printer.OpenElement("zoom");
-    //    printer.PushAttribute("value", activeCamera.zoom);
-    //    printer.CloseElement();
-    //}
-    //printer.CloseElement();
-}
-void SceneSerializer::SceneConfig::Cameras::DefaultSerializeOrthoCamera(tinyxml2::XMLPrinter& printer, const OrthoCamera& camera) {
-    printer.OpenElement("orthoCamera");
-    {
-        printer.PushAttribute("left", camera._left);
-        printer.PushAttribute("right", camera._right);
-        printer.PushAttribute("bottom", camera._bottom);
-        printer.PushAttribute("top", camera._top);
-        printer.PushAttribute("near", camera._near);
-        printer.PushAttribute("far", camera._far);
-    }
-    printer.CloseElement();
-}
-void SceneSerializer::SceneConfig::Cameras::DefaultSerializePerspectiveCamera(tinyxml2::XMLPrinter& printer, const PerspectiveCamera& camera) {
-    printer.OpenElement("perspectiveCamera");
-    {
-        printer.PushAttribute("fov", camera._fov);
-        printer.PushAttribute("aspect", camera._aspect);
-        printer.PushAttribute("near", camera._near);
-        printer.PushAttribute("far", camera._far);
-    }
     printer.CloseElement();
 }
 
@@ -145,6 +67,12 @@ void SceneSerializer::Entities::DefaultSerializeEntity(tinyxml2::XMLPrinter& pri
         }
         if (scene.HasComponent<ChildComponent>(entity)) {
             SerializeChildComponent(printer, scene.GetComponent<ChildComponent>(entity));
+        }
+        if (scene.HasComponent<OrthoCameraComponent>(entity)) {
+            SerializeOrthoCameraComponent(printer, scene.GetComponent<OrthoCameraComponent>(entity));
+        }
+        if (scene.HasComponent<PerspectiveCameraComponent>(entity)) {
+            SerializePerspectiveCameraComponent(printer, scene.GetComponent<PerspectiveCameraComponent>(entity));
         }
         SerializeUserDefinedComponents(printer, scene, entity);
     }
@@ -226,6 +154,32 @@ void SceneSerializer::Entities::DefaultSerializeChildComponent(tinyxml2::XMLPrin
         printer.OpenElement(name.data());
         SceneSerializer::Helpers::SerializeEntityID(printer, component.GetParent());
         printer.CloseElement();
+    }
+    printer.CloseElement();
+}
+void SceneSerializer::Entities::DefaultSerializeOrthoCameraComponent(tinyxml2::XMLPrinter& printer, const OrthoCameraComponent& component) {
+    printer.OpenElement("cpp-component");
+    {
+        printer.PushAttribute("name", nameof_c(OrthoCameraComponent));
+
+        printer.PushAttribute(nameof_c(OrthoCameraComponent::LeftPlane),   component.GetData().LeftPlane);
+        printer.PushAttribute(nameof_c(OrthoCameraComponent::RightPlane),  component.GetData().RightPlane);
+        printer.PushAttribute(nameof_c(OrthoCameraComponent::BottomPlane), component.GetData().BottomPlane);
+        printer.PushAttribute(nameof_c(OrthoCameraComponent::TopPlane),    component.GetData().TopPlane);
+        printer.PushAttribute(nameof_c(OrthoCameraComponent::NearPlane),   component.GetData().NearPlane);
+        printer.PushAttribute(nameof_c(OrthoCameraComponent::FarPlane),    component.GetData().FarPlane);
+    }
+    printer.CloseElement();
+}
+void SceneSerializer::Entities::DefaultSerializePerspectiveCameraComponent(tinyxml2::XMLPrinter& printer, const PerspectiveCameraComponent& component) {
+    printer.OpenElement("cpp-component");
+    {
+        printer.PushAttribute("name", nameof_c(PerspectiveCameraComponent));
+
+        printer.PushAttribute(nameof_c(OrthoCameraComponent::FOV),         component.GetData().FOV);
+        printer.PushAttribute(nameof_c(OrthoCameraComponent::AspectRatio), component.GetData().AspectRatio);
+        printer.PushAttribute(nameof_c(OrthoCameraComponent::NearPlane),   component.GetData().NearPlane);
+        printer.PushAttribute(nameof_c(OrthoCameraComponent::FarPlane),    component.GetData().FarPlane);
     }
     printer.CloseElement();
 }

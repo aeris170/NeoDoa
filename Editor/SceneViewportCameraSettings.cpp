@@ -56,29 +56,29 @@ void SceneViewportCameraSettings::Render() noexcept {
 
     if (viewportCamera.IsOrtho()) {
         auto& ortho = viewportCamera.GetOrthoCamera();
-        FloatWidget("Left", ortho._left, 1);
-        FloatWidget("Right", ortho._right, 1);
-        FloatWidget("Bottom", ortho._bottom, 1);
-        FloatWidget("Top", ortho._top, 1);
-        FloatWidget("Near", ortho._near, 1);
-        FloatWidget("Far", ortho._far, 1);
+        FloatWidget(nameof(OrthoCamera::LeftPlane),   ortho.LeftPlane, 1);
+        FloatWidget(nameof(OrthoCamera::RightPlane),  ortho.RightPlane, 1);
+        FloatWidget(nameof(OrthoCamera::BottomPlane), ortho.BottomPlane, 1);
+        FloatWidget(nameof(OrthoCamera::TopPlane),    ortho.TopPlane, 1);
+        FloatWidget(nameof(OrthoCamera::NearPlane),   ortho.NearPlane, 1);
+        FloatWidget(nameof(OrthoCamera::FarPlane),    ortho.FarPlane, 1);
     } else if (viewportCamera.IsPerspective()) {
         auto& perspective = viewportCamera.GetPerspectiveCamera();
-        FloatWidget("FOV", perspective._fov, 1, 45, 135);
-        FloatWidget("Near", perspective._near, 1);
-        FloatWidget("Far", perspective._far, 1);
+        FloatWidget(nameof(PerspectiveCamera::FOV),       perspective.FOV, 1, 45, 135);
+        FloatWidget(nameof(PerspectiveCamera::NearPlane), perspective.NearPlane, 1);
+        FloatWidget(nameof(PerspectiveCamera::FarPlane),  perspective.FarPlane, 1);
     }
     ImGui::NewLine();
 
     auto& active = viewportCamera.GetActiveCamera();
     FancyVectorWidgetSettings<Display::XYZ> settings = defaultFancyVectorSettingsXYZ;
     settings.resetAllToSame = false;
-    FancyVector3Widget("Eye", active.eye);
+    FancyVector3Widget(nameof(ACamera::Eye), active.Eye);
     settings.resetTos = { 0, 0, -1 };
-    FancyVector3Widget("Forward", active.forward, settings);
+    FancyVector3Widget(nameof(ACamera::Forward), active.Forward, settings);
     settings.resetTos = { 0, 1, 0 };
-    FancyVector3Widget("Up", active.up, settings);
-    FloatWidget("Zoom", active.zoom);
+    FancyVector3Widget(nameof(ACamera::Up), active.Up, settings);
+    FloatWidget(nameof(ACamera::Zoom), active.Zoom);
 
     ImGui::EndGroup();
 }

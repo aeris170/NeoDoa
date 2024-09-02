@@ -4,7 +4,6 @@
 #include <vector>
 #include <unordered_map>
 
-#include "Renderer.hpp"
 #include "OrthoCamera.hpp"
 #include "PerspectiveCamera.hpp"
 #include "System.hpp"
@@ -18,11 +17,8 @@ struct Scene {
 
     std::string Name;
     Color ClearColor{ 0.2f, 0.3f, 0.3f };
-    Color SelectionOutlineColor{ 0.68f, 0.49f, 0 };
 
     explicit Scene(std::string_view name = "New Scene") noexcept;
-
-    Renderer::Stats GetRendererStats() const;
 
     // E - Entity
     Entity CreateEntity(std::string name = "", uint32_t desiredID = EntityTo<uint32_t>(NULL_ENTT));
@@ -97,11 +93,8 @@ struct Scene {
     static Scene Copy(const Scene& scene);
 
     void ExecuteSystems(bool isPlaying, float delta);
-    //void Render();
 
 private:
-    Renderer _renderer;
-
     Registry _registry;
     std::vector<Entity> _entities;
     std::vector<entt::poly<System>> _systems;

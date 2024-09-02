@@ -1,17 +1,17 @@
 #pragma once
 
-#include "ACamera.hpp"
+#include <Engine/ACamera.hpp>
 
 struct PerspectiveCamera : ACamera {
-    float _fov;
-    float _aspect;
-    float _near;
-    float _far;
+    float FOV;
+    float AspectRatio;
+    float NearPlane;
+    float FarPlane;
 
-    PerspectiveCamera(float fov, float aspect, float near, float far);
+    PerspectiveCamera(float fov, float aspect, float near, float far) noexcept;
 
-    void Set(float fov, float aspect, float near, float far);
-    void UpdateView() override;
-    void UpdateProjection() override;
-    void UpdateViewProjection() override;
+    void Set(float fov, float aspect, float near, float far) noexcept;
+    void UpdateView() noexcept override;
+    void UpdateProjection() noexcept override;
+    void UpdateViewProjection() noexcept override;
 };

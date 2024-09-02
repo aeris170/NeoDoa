@@ -165,6 +165,7 @@ set(GROUP_LIST
     "Project/Serialize/ProjectSerializer.hpp"
     "Project/Serialize/ProjectDeserializer.cpp"
     "Project/Serialize/ProjectDeserializer.hpp"
+	"Project/Scene/ACamera.cpp"
     "Project/Scene/ACamera.hpp"
     "Project/Scene/OrthoCamera.cpp"
     "Project/Scene/OrthoCamera.hpp"

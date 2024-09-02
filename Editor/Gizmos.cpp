@@ -25,8 +25,8 @@ void Gizmos::Render(Scene& scene) {
         ImGuizmo::SetOrthographic(true);
     }
     const auto& camera = sv.GetViewportCamera().GetActiveCamera();
-    glm::mat4 proj = camera._projectionMatrix;
-    glm::mat4 view = camera._viewMatrix;
+    glm::mat4 proj = camera.GetProjectionMatrix();
+    glm::mat4 view = camera.GetViewMatrix();
 
     ImGuizmo::SetRect(
         settings.viewportPosition.x,

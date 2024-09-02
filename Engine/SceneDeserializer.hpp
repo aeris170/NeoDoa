@@ -26,22 +26,17 @@ namespace SceneDeserializer {
         using DeserializeFunction                       = std::function<void(tinyxml2::XMLElement& configNode, Scene& scene)>;
         using DeserializeNameFunction                   = std::function<void(tinyxml2::XMLElement& configNode, Scene& scene)>;
         using DeserializeClearColorFunction             = std::function<void(tinyxml2::XMLElement& configNode, Scene& scene)>;
-        using DeserializeSelectionOutlineColorFunction  = std::function<void(tinyxml2::XMLElement& configNode, Scene& scene)>;
-        namespace Cameras {
-            using DeserializeFunction                   = std::function<void(tinyxml2::XMLElement& camerasNode, Scene& scene)>;
-            using DeserializeActiveCameraFunction       = std::function<void(tinyxml2::XMLElement& activeCameraNode, Scene& scene)>;
-            using DeserializeOrthoCameraFunction        = std::function<void(tinyxml2::XMLElement& orthoCameraNode, Scene& scene)>;
-            using DeserializePerspectiveCameraFunction  = std::function<void(tinyxml2::XMLElement& perspectiveCameraNode, Scene& scene)>;
-        }
     }
     namespace Entities {
-        using DeserializeFunction                       = std::function<void(tinyxml2::XMLElement& entitiesNode, Scene& scene)>;
-        using DeserializeEntityFunction                 = std::function<void(tinyxml2::XMLElement& entityNode, Scene& scene)>;
-        using DeserializeIDComponentFunction            = std::function<void(tinyxml2::XMLElement& componentNode, Scene& scene, Entity& readEntity)>;
-        using DeserializeTransformComponentFunction     = std::function<void(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity)>;
-        using DeserializeParentComponentFunction        = std::function<void(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity)>;
-        using DeserializeChildComponentFunction         = std::function<void(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity)>;
-        using DeserializeUserDefinedComponentsFunction  = std::function<void(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity, const std::string& name)>;
+        using DeserializeFunction                           = std::function<void(tinyxml2::XMLElement& entitiesNode, Scene& scene)>;
+        using DeserializeEntityFunction                     = std::function<void(tinyxml2::XMLElement& entityNode, Scene& scene)>;
+        using DeserializeIDComponentFunction                = std::function<void(tinyxml2::XMLElement& componentNode, Scene& scene, Entity& readEntity)>;
+        using DeserializeTransformComponentFunction         = std::function<void(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity)>;
+        using DeserializeParentComponentFunction            = std::function<void(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity)>;
+        using DeserializeChildComponentFunction             = std::function<void(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity)>;
+        using DeserializeOrthoCameraComponentFunction       = std::function<void(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity)>;
+        using DeserializePerspectiveCameraComponentFunction = std::function<void(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity)>;
+        using DeserializeUserDefinedComponentsFunction      = std::function<void(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity, const std::string& name)>;
     }
 
     /* --- Default Implementations --- */
@@ -51,13 +46,6 @@ namespace SceneDeserializer {
         void DefaultDeserialize(tinyxml2::XMLElement& configNode, Scene& scene);
         void DefaultDeserializeName(tinyxml2::XMLElement& configNode, Scene& scene);
         void DefaultDeserializeClearColor(tinyxml2::XMLElement& configNode, Scene& scene);
-        void DefaultDeserializeSelectionOutlineColor(tinyxml2::XMLElement& configNode, Scene& scene);
-        namespace Cameras {
-            void DefaultDeserialize(tinyxml2::XMLElement& camerasNode, Scene& scene);
-            void DefaultDeserializeActiveCamera(tinyxml2::XMLElement& activeCameraNode, Scene& scene);
-            void DefaultDeserializeOrthoCamera(tinyxml2::XMLElement& orthoCameraNode, Scene& scene);
-            void DefaultDeserializePerspectiveCamera(tinyxml2::XMLElement& perspectiveCameraNode, Scene& scene);
-        }
     }
     namespace Entities {
         void DefaultDeserialize(tinyxml2::XMLElement& entitiesNode, Scene& scene);
@@ -66,31 +54,28 @@ namespace SceneDeserializer {
         void DefaultDeserializeTransformComponent(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity);
         void DefaultDeserializeParentComponent(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity);
         void DefaultDeserializeChildComponent(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity);
+        void DefaultDeserializeOrthoCameraComponent(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity);
+        void DefaultDeserializePerspectiveCameraComponent(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity);
         void DefaultDeserializeUserDefinedComponents(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity, const std::string& name);
     }
 
     /* ----- Deserializer Functions ----- */
-    inline DeserializeFunction Deserialize{ DefaultDeserialize };                                                                     /* Feel free to assign this your own function, if you need custom serialization */
+    inline DeserializeFunction Deserialize{ DefaultDeserialize };                                                                                    /* Feel free to assign this your own function, if you need custom serialization */
     namespace SceneConfig {
-        inline DeserializeFunction Deserialize{ DefaultDeserialize };                                                                 /* Feel free to assign this your own function, if you need custom serialization */
-        inline DeserializeNameFunction DeserializeName{ DefaultDeserializeName };                                                     /* Feel free to assign this your own function, if you need custom serialization */
-        inline DeserializeClearColorFunction DeserializeClearColor{ DefaultDeserializeClearColor };                                   /* Feel free to assign this your own function, if you need custom serialization */
-        inline DeserializeSelectionOutlineColorFunction DeserializeSelectionOutlineColor{ DefaultDeserializeSelectionOutlineColor };  /* Feel free to assign this your own function, if you need custom serialization */
-        namespace Cameras {
-            inline DeserializeFunction Deserialize{ DefaultDeserialize };                                                             /* Feel free to assign this your own function, if you need custom serialization */
-            inline DeserializeActiveCameraFunction DeserializeActiveCamera{ DefaultDeserializeActiveCamera };                         /* Feel free to assign this your own function, if you need custom serialization */
-            inline DeserializeOrthoCameraFunction DeserializeOrthoCamera{ DefaultDeserializeOrthoCamera };                            /* Feel free to assign this your own function, if you need custom serialization */
-            inline DeserializePerspectiveCameraFunction DeserializePerspectiveCamera{ DefaultDeserializePerspectiveCamera };          /* Feel free to assign this your own function, if you need custom serialization */
-        }
+        inline DeserializeFunction Deserialize{ DefaultDeserialize };                                                                                /* Feel free to assign this your own function, if you need custom serialization */
+        inline DeserializeNameFunction DeserializeName{ DefaultDeserializeName };                                                                    /* Feel free to assign this your own function, if you need custom serialization */
+        inline DeserializeClearColorFunction DeserializeClearColor{ DefaultDeserializeClearColor };                                                  /* Feel free to assign this your own function, if you need custom serialization */
     }
     namespace Entities {
-        inline DeserializeFunction Deserialize{ DefaultDeserialize };                                                                 /* Feel free to assign this your own function, if you need custom serialization */
-        inline DeserializeEntityFunction DeserializeEntity{ DefaultDeserializeEntity };                                               /* Feel free to assign this your own function, if you need custom serialization */
-        inline DeserializeIDComponentFunction DeserializeIDComponent{ DefaultDeserializeIDComponent };                                /* Feel free to assign this your own function, if you need custom serialization */
-        inline DeserializeTransformComponentFunction DeserializeTransformComponent{ DefaultDeserializeTransformComponent };           /* Feel free to assign this your own function, if you need custom serialization */
-        inline DeserializeParentComponentFunction DeserializeParentComponent{ DefaultDeserializeParentComponent };                    /* Feel free to assign this your own function, if you need custom serialization */
-        inline DeserializeChildComponentFunction DeserializeChildComponent{ DefaultDeserializeChildComponent };                       /* Feel free to assign this your own function, if you need custom serialization */
-        inline DeserializeUserDefinedComponentsFunction DeserializeUserDefinedComponents{ DefaultDeserializeUserDefinedComponents };  /* Feel free to assign this your own function, if you need custom serialization */
+        inline DeserializeFunction Deserialize{ DefaultDeserialize };                                                                                /* Feel free to assign this your own function, if you need custom serialization */
+        inline DeserializeEntityFunction DeserializeEntity{ DefaultDeserializeEntity };                                                              /* Feel free to assign this your own function, if you need custom serialization */
+        inline DeserializeIDComponentFunction DeserializeIDComponent{ DefaultDeserializeIDComponent };                                               /* Feel free to assign this your own function, if you need custom serialization */
+        inline DeserializeTransformComponentFunction DeserializeTransformComponent{ DefaultDeserializeTransformComponent };                          /* Feel free to assign this your own function, if you need custom serialization */
+        inline DeserializeParentComponentFunction DeserializeParentComponent{ DefaultDeserializeParentComponent };                                   /* Feel free to assign this your own function, if you need custom serialization */
+        inline DeserializeChildComponentFunction DeserializeChildComponent{ DefaultDeserializeChildComponent };                                      /* Feel free to assign this your own function, if you need custom serialization */
+        inline DeserializeOrthoCameraComponentFunction DeserializeOrthoCameraComponent{ DefaultDeserializeOrthoCameraComponent };                    /* Feel free to assign this your own function, if you need custom serialization */
+        inline DeserializePerspectiveCameraComponentFunction DeserializePerspectiveCameraComponent{ DefaultDeserializePerspectiveCameraComponent };  /* Feel free to assign this your own function, if you need custom serialization */
+        inline DeserializeUserDefinedComponentsFunction DeserializeUserDefinedComponents{ DefaultDeserializeUserDefinedComponents };                 /* Feel free to assign this your own function, if you need custom serialization */
     }
 }
 

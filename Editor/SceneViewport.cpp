@@ -223,7 +223,7 @@ ImVec2 SceneViewport::GetViewportCameraSettingsButtonPosition() const noexcept {
 void SceneViewport::ReallocBufferIfNeeded(Resolution size) {
     if (viewportSize == size) { return; }
     viewportSize = size;
-    viewportCamera.GetPerspectiveCamera()._aspect = size.Aspect();
+    viewportCamera.GetPerspectiveCamera().AspectRatio = size.Aspect();
 
     { // Build Multisampled FB
         GPURenderBufferBuilder rbBuilder;
@@ -288,8 +288,8 @@ void SceneViewport::RenderSceneToBuffer(Scene& scene) {
     viewportCamera.GetPerspectiveCamera().UpdateView();
     viewportCamera.GetPerspectiveCamera().UpdateProjection();
     glm::mat4 matrices[2] {
-        viewportCamera.GetPerspectiveCamera()._projectionMatrix,
-        viewportCamera.GetPerspectiveCamera()._viewMatrix
+        viewportCamera.GetPerspectiveCamera().GetProjectionMatrix(),
+        viewportCamera.GetPerspectiveCamera().GetViewMatrix()
     };
     Graphics::BufferSubData(perFrameUniformBuffer, sizeof(matrices), reinterpret_cast<NonOwningPointerToConstRawData>(glm::value_ptr(matrices[0])));
     Graphics::BindDescriptorSet(perFrame);
@@ -425,25 +425,25 @@ void SceneViewport::DrawViewportSettings(bool hasScene) {
 void SceneViewport::DrawCubeControl() {
     auto& camera = viewportCamera.GetActiveCamera();
     camera.UpdateView();
-    glm::mat4 view = camera._viewMatrix;
+    glm::mat4 view = camera.GetViewMatrix();
     ImGuizmo::SetDrawlist();
     ImGuizmo::ViewManipulate(glm::value_ptr(view), 8, { viewportPosition.x + viewportSize.Width - 128 , viewportPosition.y }, { 128, 128 }, 0x10101080);
-    camera.forward = glm::normalize(glm::vec3(-view[0].z, -view[1].z, -view[2].z)); // forward is INVERTED!!!
+    camera.Forward = glm::normalize(glm::vec3(-view[0].z, -view[1].z, -view[2].z)); // forward is INVERTED!!!
 
     // don't change up vector, fuck space sims. up being something other than 0, 1, 0 is VERBOTEN!
     //ptr->_activeCamera->up = glm::normalize(glm::vec3(view[0].y, view[1].y, view[2].y));
 
-    controls.yaw = glm::degrees(atan2(camera.forward.z, camera.forward.x));
-    controls.pitch = glm::degrees(asin(camera.forward.y));
+    controls.yaw = glm::degrees(atan2(camera.Forward.z, camera.Forward.x));
+    controls.pitch = glm::degrees(asin(camera.Forward.y));
 }
 
 void SceneViewport::HandleMouseControls() {
     GUI& gui = this->gui;
     auto& camera = viewportCamera.GetActiveCamera();
-    glm::vec3& eye = camera.eye;
-    glm::vec3& forward = camera.forward;
-    glm::vec3& up = camera.up;
-    float& zoom = camera.zoom;
+    glm::vec3& eye = camera.Eye;
+    glm::vec3& forward = camera.Forward;
+    glm::vec3& up = camera.Up;
+    float& zoom = camera.Zoom;
 
     if (ImGui::IsItemHovered()) {
         zoom += ImGui::GetIO().MouseWheel / 100;

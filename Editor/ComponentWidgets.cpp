@@ -463,9 +463,9 @@ bool ResolutionWidget(const std::string& label, Resolution& resolution) {
 }
 
 bool OrthoCameraWidget(OrthoCamera& cameraData) {
-    glm::vec1 top{ cameraData._top };
-    glm::vec2 leftRight{ cameraData._left, cameraData._right };
-    glm::vec1 bottom{ cameraData._bottom };
+    glm::vec1 top{ cameraData.TopPlane };
+    glm::vec2 leftRight{ cameraData.LeftPlane, cameraData.RightPlane };
+    glm::vec1 bottom{ cameraData.BottomPlane };
 
     FancyVectorWidgetSettings<Display::X> settingsOrthoTop;
     settingsOrthoTop.resetTo = 1;
@@ -497,17 +497,17 @@ bool OrthoCameraWidget(OrthoCamera& cameraData) {
     rv = rv | FancyVector2Widget("Left & Right", leftRight, settingsOrthoLeftRight); // no double pipe because of short circuit shadowing imgui call
     rv = rv | FancyVector1Widget("Bottom", bottom, settingsOrthoBottom);
 
-    cameraData._top = top.x;
-    cameraData._left = leftRight.x;
-    cameraData._right = leftRight.y;
-    cameraData._bottom = bottom.x;
+    cameraData.TopPlane = top.x;
+    cameraData.LeftPlane = leftRight.x;
+    cameraData.RightPlane = leftRight.y;
+    cameraData.BottomPlane = bottom.x;
 
     return rv;
 }
 
 bool PerspectiveCameraWidget(PerspectiveCamera& cameraData) {
-    glm::vec1 fov{ cameraData._fov };
-    glm::vec1 aspect{ cameraData._aspect };
+    glm::vec1 fov{ cameraData.FOV };
+    glm::vec1 aspect{ cameraData.AspectRatio };
 
     FancyVectorWidgetSettings<Display::X> fovSettings;
     fovSettings.resetTo = 110;
@@ -526,7 +526,7 @@ bool PerspectiveCameraWidget(PerspectiveCamera& cameraData) {
     rv = FancyVector1Widget("Field Of View", fov, fovSettings);
     rv = rv | FancyVector1Widget("Aspect Ratio", aspect, aspectSettings); // no double pipe because of short circuit shadowing imgui call
 
-    cameraData._fov = fov.x;
+    cameraData.FOV = fov.x;
 
     return rv;
 }

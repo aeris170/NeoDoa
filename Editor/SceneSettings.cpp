@@ -36,6 +36,8 @@ void SceneSettings::DrawStats(Scene& scene) const {
     GUI& gui = this->gui;
     ImGui::BeginGroup();
 
+    ImGui::TextUnformatted("TODO");
+    /*
     auto stats = scene.GetRendererStats();
     ImGuiFormattedText("Draw Calls: {}", stats.drawCalls);
     ImGuiFormattedText("Vertices: {}", stats.vertices);
@@ -44,6 +46,7 @@ void SceneSettings::DrawStats(Scene& scene) const {
     ImGuiFormattedText("Editor average {:.3f} ms/frame ({:.1f} FPS)", 1000.0f / fps, fps);
     ImGui::ColorEdit3("Clear Color", &scene.ClearColor.r);
     ImGui::ColorEdit3("Selection Outline Color", &scene.SelectionOutlineColor.r);
+    */
 
     ImGui::EndGroup();
 }
