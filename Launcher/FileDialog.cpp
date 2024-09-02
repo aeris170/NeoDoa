@@ -1,3 +1,9 @@
+// This is external code. Disabling warnings.
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunsequenced" // Disable -Wunsequenced, https://easings.net/#easeOutBounce
+#endif
+
 #include <Launcher/FileDialog.hpp>
 
 #include <fstream>
@@ -1532,4 +1538,8 @@ static const unsigned int folder_icon[] = {
 #ifndef _WIN32
 static const char* GetDefaultFolderIcon() { return (const char*) &folder_icon[0]; }
 static const char* GetDefaultFileIcon() { return (const char*) &file_icon[0]; }
+#endif
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
 #endif

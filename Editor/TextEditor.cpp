@@ -1,3 +1,11 @@
+// This is external code. Disabling warnings.
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreorder-ctor"
+#pragma clang diagnostic ignored "-Wsign-compare"
+#pragma clang diagnostic ignored "-Wlogical-op-parantheses"
+#endif
+
 #include <algorithm>
 #include <chrono>
 #include <string>
@@ -2490,3 +2498,7 @@ void TextEditor::UndoRecord::Redo(TextEditor* aEditor) {
 	aEditor->mState = mAfter;
 	aEditor->EnsureCursorVisible();
 }
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif

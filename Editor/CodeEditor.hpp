@@ -51,14 +51,14 @@ private:
     bool isWhitespaceVisible{ true };
     int tabSize{ 4 };
 
-    int selectedTabIndex{ -1 };
+    size_t selectedTabIndex{ std::numeric_limits<size_t>::max() };
     std::vector<EditorTab> tabs{};
     EditorTab emptyTab{};
 
-    int removedTabIndex{ -1 };
+    size_t removedTabIndex{ std::numeric_limits<size_t>::max() };
 
     void AddTab(AssetHandle assetHandle);
-    void CloseTabAt(int index);
+    void CloseTabAt(size_t index);
 
     void RenderMenuBar();
 

@@ -30,7 +30,7 @@ void CodeEditor::Render() {
     ImGuiTabBarFlags tabBarFlags = ImGuiTabBarFlags_AutoSelectNewTabs |
         ImGuiTabBarFlags_FittingPolicyResizeDown | ImGuiTabBarFlags_Reorderable;
     if(ImGui::BeginTabBar("#CodeEditorOpenTabs", tabBarFlags)) {
-        for (auto i = 0; i < tabs.size(); i++) {
+        for (size_t i = 0; i < tabs.size(); i++) {
             if (i == removedTabIndex) { continue; }
 
             auto& tab = tabs[i];
@@ -66,14 +66,14 @@ void CodeEditor::End() {
     ImGui::End();
     ImGui::PopID();
 
-    if (removedTabIndex != -1) {
+    if (removedTabIndex != std::numeric_limits<decltype(removedTabIndex)>::max()) {
         tabs.erase(tabs.begin() + removedTabIndex);
-        removedTabIndex = -1;
+        removedTabIndex = std::numeric_limits<decltype(removedTabIndex)>::max();
     }
 }
 
 void CodeEditor::RenderMenuBar() {
-    bool menuBarEnabled = selectedTabIndex != -1;
+    bool menuBarEnabled = selectedTabIndex != std::numeric_limits<decltype(selectedTabIndex)>::max();
     if (menuBarEnabled) {
         bool shortcutsEnabled = menuBarEnabled;
         if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_S) && shortcutsEnabled) {
@@ -185,10 +185,13 @@ void CodeEditor::AddTab(AssetHandle assetHandle) {
     selectedTabIndex++;
 }
 
-void CodeEditor::CloseTabAt(int index) {
+void CodeEditor::CloseTabAt(size_t index) {
     removedTabIndex = index;
     if (removedTabIndex <= selectedTabIndex) {
-        selectedTabIndex = std::max(0, selectedTabIndex--);
+        selectedTabIndex--;
+        if(selectedTabIndex == std::numeric_limits<decltype(selectedTabIndex)>::max()) {
+            selectedTabIndex = 0;
+        }
     }
 }
 
@@ -204,7 +207,7 @@ void CodeEditor::OnReimport(Assets& assets) {
     }
 }
 void CodeEditor::OnAssetDeleted(AssetHandle handle) {
-    for (int i = 0; i < tabs.size(); i++) {
+    for (size_t i = 0; i < tabs.size(); i++) {
         if (tabs[i].currentAsset == handle) {
             CloseTabAt(i);
             return;

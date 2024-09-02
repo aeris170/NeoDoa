@@ -147,7 +147,7 @@ void SceneDeserializer::Entities::DefaultDeserializePerspectiveCameraComponent(t
     PerspectiveCameraComponent perspective{ entity, std::move(camera) };
     scene.InsertComponent<PerspectiveCameraComponent>(perspective.GetEntity(), std::move(perspective));
 }
-void SceneDeserializer::Entities::DefaultDeserializeUserDefinedComponents(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity, const std::string& name) {}
+void SceneDeserializer::Entities::DefaultDeserializeUserDefinedComponents([[maybe_unused]] tinyxml2::XMLElement& componentNode, [[maybe_unused]] Scene& scene, [[maybe_unused]] Entity entity, [[maybe_unused]] const std::string& name) {}
 
 int SceneDeserializer::Helpers::DeserializeEnum(const tinyxml2::XMLElement& property) {
     return property.IntAttribute("value");
