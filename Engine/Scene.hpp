@@ -5,7 +5,6 @@
 #include <unordered_map>
 
 #include "Renderer.hpp"
-#include "OutlineRenderer.hpp"
 #include "OrthoCamera.hpp"
 #include "PerspectiveCamera.hpp"
 #include "System.hpp"
@@ -102,7 +101,6 @@ struct Scene {
 
 private:
     Renderer _renderer;
-    OutlineRenderer _outlineRenderer;
 
     Registry _registry;
     std::vector<Entity> _entities;

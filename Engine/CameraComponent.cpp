@@ -6,7 +6,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 /* Ortho Camera Below */
-
 OrthoCameraComponent::OrthoCameraComponent(const Entity owner, OrthoCamera&& data) noexcept :
     entity(owner),
     data(std::move(data)) {
@@ -34,13 +33,9 @@ void OrthoCameraComponent::UpdateMatrices() {
 void OrthoCameraComponent::TurnOn() { isActiveAndRendering = true; }
 void OrthoCameraComponent::TurnOff() { isActiveAndRendering = false; }
 bool OrthoCameraComponent::IsActiveAndRendering() const { return isActiveAndRendering; }
-
-FrameBuffer& OrthoCameraComponent::GetFrameBuffer() { return frameBuffer; }
-const FrameBuffer& OrthoCameraComponent::GetFrameBuffer() const { return frameBuffer; }
-
 /* Ortho Camera Above */
-/* Perpective Camera Below */
 
+/* Perpective Camera Below */
 PerspectiveCameraComponent::PerspectiveCameraComponent(const Entity owner, PerspectiveCamera&& data) noexcept :
     entity(owner),
     data(std::move(data)) {
@@ -68,8 +63,4 @@ void PerspectiveCameraComponent::UpdateMatrices() {
 void PerspectiveCameraComponent::TurnOn() { isActiveAndRendering = true; }
 void PerspectiveCameraComponent::TurnOff() { isActiveAndRendering = false; }
 bool PerspectiveCameraComponent::IsActiveAndRendering() const { return isActiveAndRendering; }
-
-FrameBuffer& PerspectiveCameraComponent::GetFrameBuffer() { return frameBuffer; }
-const FrameBuffer& PerspectiveCameraComponent::GetFrameBuffer() const { return frameBuffer; }
-
 /* Perspective Camera Above*/

@@ -5,7 +5,6 @@
 
 #include <Engine/Core.hpp>
 #include <Engine/Project.hpp>
-#include <Engine/FrameBuffer.hpp>
 #include <Engine/Resolution.hpp>
 #include <Engine/TransformComponent.hpp>
 

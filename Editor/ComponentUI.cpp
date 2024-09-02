@@ -103,7 +103,7 @@ void OrthoCameraComponentUI::Render(const OrthoCameraComponent& orthoCameraCompo
     static unordered_string_map<std::string> UINames = {
         { nameof(OrthoCameraComponent::isActiveAndRendering), Prettify(nameof(OrthoCameraComponent::isActiveAndRendering)) },
         { nameof(OrthoCameraComponent::data), Prettify("orthoCameraProperties") },
-        { nameof(FrameBuffer::ClearColor), Prettify("clearColor") },
+        { nameof(ClearColor), Prettify("clearColor") },
         { nameof(OrthoCameraComponent::frameBuffer), Prettify("resolution") }
     };
 
@@ -135,7 +135,7 @@ void PerspectiveCameraComponentUI::Render(const PerspectiveCameraComponent& pers
     static unordered_string_map<std::string> UINames = {
         { nameof(PerspectiveCameraComponent::isActiveAndRendering), Prettify(nameof(PerspectiveCameraComponent::isActiveAndRendering)) },
         { nameof(PerspectiveCameraComponent::data), Prettify("orthoCameraProperties") },
-        { nameof(FrameBuffer::ClearColor), Prettify("clearColor") },
+        { nameof(ClearColor), Prettify("clearColor") },
         { nameof(PerspectiveCameraComponent::frameBuffer), Prettify("resolution") }
     };
 

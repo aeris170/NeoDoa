@@ -57,9 +57,6 @@ set(GROUP_LIST
     "Asset/Material/MaterialSerializer.hpp"
     "Asset/Material/MaterialDeserializer.cpp"
     "Asset/Material/MaterialDeserializer.hpp"
-    "Asset/Model/Avatar.hpp"
-    "Asset/Model/Model.cpp"
-    "Asset/Model/Model.hpp"
     "Asset/Sampler/Sampler.cpp"
     "Asset/Sampler/Sampler.hpp"
     "Asset/Sampler/Serialize/SamplerSerializer.cpp"
@@ -102,16 +99,6 @@ set(GROUP_LIST
     "Core/Window/WindowGLFW.hpp"
 
     "Event/Event.hpp"
-
-    "OpenGL/OpenGLCommon.hpp"
-    "OpenGL/Buffer.cpp"
-    "OpenGL/Buffer.hpp"
-    "OpenGL/FrameBuffer.cpp"
-    "OpenGL/FrameBuffer.hpp"
-    "OpenGL/VertexArray.cpp"
-    "OpenGL/VertexArray.hpp"
-    "OpenGL/VertexAttribLayout.cpp"
-    "OpenGL/VertexAttribLayout.hpp"
 
     "ECS/Registry.hpp"
     "ECS/Components/BehaviourComponent.cpp"
@@ -166,7 +153,6 @@ set(GROUP_LIST
 
     "Misc/AABB.cpp"
     "Misc/AABB.hpp"
-    "Misc/AssimpGLMConvert.hpp"
     "Misc/OstreamImpls.cpp"
     "Misc/Point.hpp"
     "Misc/Region.hpp"
@@ -193,8 +179,6 @@ set(GROUP_LIST
 
     "Renderer/Renderer.cpp"
     "Renderer/Renderer.hpp"
-    "Renderer/OutlineRenderer.cpp"
-    "Renderer/OutlineRenderer.hpp"
 )
 foreach(source IN LISTS GROUP_LIST)
     get_filename_component(source_path "${source}" PATH)

@@ -3,7 +3,6 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <Engine/Shader.hpp>
-#include <Engine/Model.hpp>
 #include <Engine/Renderer.hpp>
 
 #include <Engine/Core.hpp>
