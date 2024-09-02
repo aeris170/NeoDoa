@@ -2,6 +2,7 @@
 
 #include <utility>
 
+#include <glfw/glfw3.h>
 #include <tinyxml2.h>
 
 #include "Angel.hpp"
@@ -299,11 +300,13 @@ std::unique_ptr<Assets>& Core::GetAssets() { return assets; }
 std::unique_ptr<AssetGPUBridge>& Core::GetAssetGPUBridge() { return gpuBridge; }
 
 void Core::Start() {
+    // TODO get rid of glfwGetTime here!
     float lastTime = static_cast<float>(glfwGetTime());
     float currentTime;
 
     running = true;
     while (running) {
+        // TODO get rid of glfwGetTime here!
         currentTime = static_cast<float>(glfwGetTime());
 
         float delta = currentTime - lastTime;

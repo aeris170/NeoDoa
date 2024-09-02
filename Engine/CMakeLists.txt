@@ -37,8 +37,6 @@ target_link_libraries(Engine PUBLIC ICU::uc ICU::dt ICU::i18n)
 set(GROUP_LIST
     "NeoDoa.hpp"
 
-    "TypedefsAndConstants.hpp"
-
     "Asset/Asset.cpp"
     "Asset/Asset.hpp"
     "Asset/Assets.cpp"
