@@ -58,9 +58,9 @@ struct UniformSampler2D {
 //};
 
 struct UniformValue {
-    static constexpr int InvalidLocation{ -1 };
+    static constexpr unsigned InvalidLocation{ std::numeric_limits<unsigned>::max() };
 
-    int Location{ InvalidLocation };
+    unsigned Location{ InvalidLocation };
     std::string Name;
     std::variant<
         Uniform1f, Uniform2f, Uniform3f, Uniform4f,
@@ -81,37 +81,37 @@ struct Material {
     struct Uniforms {
         void Clear() noexcept;
 
-        const UniformValue& Get(int location) const noexcept;
-        const UniformValue* TryGet(int location) const noexcept;
+        const UniformValue& Get(unsigned location) const noexcept;
+        const UniformValue* TryGet(unsigned location) const noexcept;
         const UniformValues& GetAll() const noexcept;
 
-        void Set(int location, std::string_view name, Uniform1f value) noexcept;
-        void Set(int location, std::string_view name, Uniform2f value) noexcept;
-        void Set(int location, std::string_view name, Uniform3f value) noexcept;
-        void Set(int location, std::string_view name, Uniform4f value) noexcept;
+        void Set(unsigned location, std::string_view name, Uniform1f value) noexcept;
+        void Set(unsigned location, std::string_view name, Uniform2f value) noexcept;
+        void Set(unsigned location, std::string_view name, Uniform3f value) noexcept;
+        void Set(unsigned location, std::string_view name, Uniform4f value) noexcept;
 
-        void Set(int location, std::string_view name, Uniform1i value) noexcept;
-        void Set(int location, std::string_view name, Uniform2i value) noexcept;
-        void Set(int location, std::string_view name, Uniform3i value) noexcept;
-        void Set(int location, std::string_view name, Uniform4i value) noexcept;
+        void Set(unsigned location, std::string_view name, Uniform1i value) noexcept;
+        void Set(unsigned location, std::string_view name, Uniform2i value) noexcept;
+        void Set(unsigned location, std::string_view name, Uniform3i value) noexcept;
+        void Set(unsigned location, std::string_view name, Uniform4i value) noexcept;
 
-        void Set(int location, std::string_view name, Uniform1ui value) noexcept;
-        void Set(int location, std::string_view name, Uniform2ui value) noexcept;
-        void Set(int location, std::string_view name, Uniform3ui value) noexcept;
-        void Set(int location, std::string_view name, Uniform4ui value) noexcept;
+        void Set(unsigned location, std::string_view name, Uniform1ui value) noexcept;
+        void Set(unsigned location, std::string_view name, Uniform2ui value) noexcept;
+        void Set(unsigned location, std::string_view name, Uniform3ui value) noexcept;
+        void Set(unsigned location, std::string_view name, Uniform4ui value) noexcept;
 
         //TODO implement GPU transpose
-        void Set(int location, std::string_view name, UniformMatrix2f value, bool transpose = false) noexcept;
-        void Set(int location, std::string_view name, UniformMatrix3f value, bool transpose = false) noexcept;
-        void Set(int location, std::string_view name, UniformMatrix4f value, bool transpose = false) noexcept;
-        void Set(int location, std::string_view name, UniformMatrix2x3f value, bool transpose = false) noexcept;
-        void Set(int location, std::string_view name, UniformMatrix3x2f value, bool transpose = false) noexcept;
-        void Set(int location, std::string_view name, UniformMatrix2x4f value, bool transpose = false) noexcept;
-        void Set(int location, std::string_view name, UniformMatrix4x2f value, bool transpose = false) noexcept;
-        void Set(int location, std::string_view name, UniformMatrix3x4f value, bool transpose = false) noexcept;
-        void Set(int location, std::string_view name, UniformMatrix4x3f value, bool transpose = false) noexcept;
+        void Set(unsigned location, std::string_view name, UniformMatrix2f value, bool transpose = false) noexcept;
+        void Set(unsigned location, std::string_view name, UniformMatrix3f value, bool transpose = false) noexcept;
+        void Set(unsigned location, std::string_view name, UniformMatrix4f value, bool transpose = false) noexcept;
+        void Set(unsigned location, std::string_view name, UniformMatrix2x3f value, bool transpose = false) noexcept;
+        void Set(unsigned location, std::string_view name, UniformMatrix3x2f value, bool transpose = false) noexcept;
+        void Set(unsigned location, std::string_view name, UniformMatrix2x4f value, bool transpose = false) noexcept;
+        void Set(unsigned location, std::string_view name, UniformMatrix4x2f value, bool transpose = false) noexcept;
+        void Set(unsigned location, std::string_view name, UniformMatrix3x4f value, bool transpose = false) noexcept;
+        void Set(unsigned location, std::string_view name, UniformMatrix4x3f value, bool transpose = false) noexcept;
 
-        void Set(int location, std::string_view name, UniformSampler2D value) noexcept;
+        void Set(unsigned location, std::string_view name, UniformSampler2D value) noexcept;
 
     private:
         UniformValues values{};

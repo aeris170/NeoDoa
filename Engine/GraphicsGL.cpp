@@ -420,9 +420,9 @@ void Graphics::OpenGL::ClearRenderTargetColor(const GPUFrameBuffer& renderTarget
     glClearNamedFramebufferfv(renderTarget.GLObjectID, GL_COLOR, colorBufferIndex, color.data());
 }
 void Graphics::OpenGL::ClearRenderTargetColors(const GPUFrameBuffer& renderTarget, std::array<float, 4> color) noexcept {
-    for (int i = 0; i < renderTarget.ColorAttachments.size(); i++) {
+    for (size_t i = 0; i < renderTarget.ColorAttachments.size(); i++) {
         if (renderTarget.ColorAttachments[i]) {
-            glClearNamedFramebufferfv(renderTarget.GLObjectID, GL_COLOR, i, color.data());
+            glClearNamedFramebufferfv(renderTarget.GLObjectID, GL_COLOR, static_cast<GLint>(i), color.data());
         }
     }
 }
@@ -562,17 +562,17 @@ std::pair<std::optional<::GPUFrameBuffer>, std::vector<FrameBufferAllocatorMessa
     glCreateFramebuffers(1, &frameBuffer);
 
     std::array<GLenum, MaxFrameBufferColorAttachments> drawBuffers{ GL_NONE };
-    for (int i = 0; i < builder.colorAttachments.size(); i++) {
+    for (size_t i = 0; i < builder.colorAttachments.size(); i++) {
         const auto& colorAttachment = builder.colorAttachments[i];
 
         if (builder.colorAttachments[i].has_value()) {
-            drawBuffers[i] = GL_COLOR_ATTACHMENT0 + i;
+            drawBuffers[i] = GL_COLOR_ATTACHMENT0 + static_cast<GLenum>(i);
             std::visit(overloaded::lambda {
                 [frameBuffer, &i](const GPUTexture& texture) {
-                    glNamedFramebufferTexture(frameBuffer, GL_COLOR_ATTACHMENT0 + i, texture.GLObjectID, 0);
+                    glNamedFramebufferTexture(frameBuffer, GL_COLOR_ATTACHMENT0 + static_cast<GLenum>(i), texture.GLObjectID, 0);
                 },
                 [frameBuffer, &i](const GPURenderBuffer& renderBuffer) {
-                    glNamedFramebufferRenderbuffer(frameBuffer, GL_COLOR_ATTACHMENT0 + i, GL_RENDERBUFFER, renderBuffer.GLObjectID);
+                    glNamedFramebufferRenderbuffer(frameBuffer, GL_COLOR_ATTACHMENT0 + static_cast<GLenum>(i), GL_RENDERBUFFER, renderBuffer.GLObjectID);
                 }
             }, colorAttachment.value());
         }

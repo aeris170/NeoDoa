@@ -231,17 +231,18 @@ bool EnumWidget(const std::string& label, int& value, const std::vector<EnumValu
     std::stringstream ss;
     ss << "##" << label;
 
-    int selected = -1;
-    for (int i = 0; i < values.size(); i++) {
+    size_t selected{ std::numeric_limits<size_t>::max() };
+    for (size_t i = 0; i < values.size(); i++) {
         auto& element = values[i];
         if (element.value == value) {
             selected = i;
         }
     }
+    assert(selected < values.size());
 
     bool rv{ false };
     if (ImGui::BeginCombo(ss.str().c_str(), values[selected].prettyName.c_str())) {
-        for (int i = 0; i < values.size(); i++) {
+        for (size_t i = 0; i < values.size(); i++) {
             bool is_selected = (value == values[i].value); // You can store your selection however you want, outside or inside your objects
             if (ImGui::Selectable(values[i].prettyName.c_str(), is_selected)) {
                 rv = true;
@@ -509,7 +510,6 @@ bool PerspectiveCameraWidget(PerspectiveCamera& cameraData) {
     glm::vec1 aspect{ cameraData._aspect };
 
     FancyVectorWidgetSettings<Display::X> fovSettings;
-    auto a = fovSettings.displayLabelColorOverride[0].Lighten(0.5);
     fovSettings.resetTo = 110;
     fovSettings.min = 30;
     fovSettings.max = 150;

@@ -328,7 +328,7 @@ void Assets::ImportAllFiles(AssetDatabase& database, const FNode& root) {
     // range for loop are invalidated.
     ImportFile(database, root);
     const auto children = root.Children();
-    for (int i = 0; i < children.size(); i++) {
+    for (size_t i = 0; i < children.size(); i++) {
         ImportAllFiles(database, children[i]);
     }
 }

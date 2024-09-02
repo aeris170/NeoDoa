@@ -20,8 +20,8 @@ enum class LogSource {
 };
 
 struct LogMessage {
-    const std::string _message;
     const LogSeverity _severity;
+    const std::string _message;
 
     LogMessage(LogSeverity severity, const std::string& message) noexcept;
     LogMessage(LogSeverity severity, std::string&& message) noexcept;

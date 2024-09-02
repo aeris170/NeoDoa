@@ -155,11 +155,11 @@ void SVGPathway::Load(std::string_view key) {
             const size_t dimension = size_t(std::max(width, height));
             uint32_t* paddedBuf = new uint32_t[dimension * dimension](); // zero initialized rgba buffer
             const auto* buffer = bitmapPadded.data();
-            auto bufIdx = 0;
+            size_t bufIdx = 0;
 
             bool widthScaled = width != dimension;
-            for (int y = 0; y < dimension; y++) {
-                for (int x = 0; x < dimension; x++) {
+            for (size_t y = 0; y < dimension; y++) {
+                for (size_t x = 0; x < dimension; x++) {
                     unsigned char* currentElement{ nullptr };
                     if (widthScaled) {
                         // pad left-right

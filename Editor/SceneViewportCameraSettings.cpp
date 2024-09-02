@@ -42,8 +42,9 @@ void SceneViewportCameraSettings::Render() noexcept {
     ImGui::PopFont();
     int camSelection = viewportCamera.IsOrtho() ? 0 : 1;
 
-    /* | is intentional, || leads to invisible Perspective radio button */
-    if (ImGui::RadioButton("Ortho", &camSelection, 0) | ImGui::RadioButton("Perspective", &camSelection, 1)) {
+    bool ortho = ImGui::RadioButton("Ortho", &camSelection, 0);
+    bool perspective = ImGui::RadioButton("Perspective", &camSelection, 1);
+    if (ortho || perspective) {
         if (camSelection == 0) {
             viewportCamera.SwitchToOrtho();
         } else if (camSelection == 1) {

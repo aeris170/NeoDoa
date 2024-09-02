@@ -330,7 +330,7 @@ template<typename T>
     requires requires (T x) { std::to_string(x); }
 void UneditableArrayWidget(const std::string& label, const std::vector<T>& array) {
     BeginWidget(label);
-    for (int i = 0; i < array.size(); i++) {
+    for (size_t i = 0; i < array.size(); i++) {
         ImGui::TextUnformatted(std::to_string(array[i]).c_str());
     }
     EndWidget();
@@ -344,7 +344,7 @@ bool MultiAssetWidget(std::string_view label, std::vector<UUID>& uuids, const As
     ImVec2 buttonSize = { lineHeight, lineHeight };
     float margin = 3.0f;
 
-    for (int i = 0; i < uuids.size(); i++) {
+    for (size_t i = 0; i < uuids.size(); i++) {
         UUID id = uuids[i];
 
         BeginWidget(std::format("{}[{}]: ", label.data(), i));

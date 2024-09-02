@@ -61,7 +61,7 @@ std::filesystem::path FNode::FolderPath() const {
         return parent->Path();
     } else {
         auto pos = fullName.find_last_of(std::filesystem::path::preferred_separator);
-        if (pos != -1) {
+        if (pos != std::string::npos) {
             return fullName.substr(0, pos);
         } else {
             DOA_LOG_ERROR("FNode::FolderPath cannot calculate folder path!");

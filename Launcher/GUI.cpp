@@ -531,7 +531,7 @@ bool GUI::IsProjectAlreadyOpen(const ProjectData& project) noexcept {
     using namespace std::chrono_literals;
     auto maxRequestReplies{ projectDataCollection.size() };
 
-    for (int i = 0; i < maxRequestReplies; i++) {
+    for (size_t i = 0; i < maxRequestReplies; i++) {
         request.Send("request_project_path", SendFlag::DontWait);
     }
 

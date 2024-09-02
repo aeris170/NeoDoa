@@ -168,7 +168,7 @@ void UserDefinedComponentStorageUI::RenderComponentInstance(const ComponentInsta
     AssetHandle cmpAsset{ Core::GetCore()->GetAssets()->FindAsset(instance.ComponentAssetID()) };
     const auto& component{ cmpAsset->DataAs<Component>() };
     if (!cmpAsset.HasValue() || cmpAsset->HasErrorMessages()) { return; }
-    for (int i = 0; i < component.fields.size(); i++) {
+    for (size_t i = 0; i < component.fields.size(); i++) {
         auto& field{ component.fields[i] };
         const auto& type{ field.typeName };
         auto& value{ instance.MemberValues()[i] };

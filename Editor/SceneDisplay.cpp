@@ -55,7 +55,6 @@ void SceneDisplay::RenderEntities(const Scene& scene) const noexcept {
                     auto& udcs{ scene.GetComponent<UserDefinedComponentStorage>(entt) };
                     for (const auto& [name, instance] : udcs.Components()) {
                         if (!instance.HasError()) {
-                            AssetHandle cmpAsset{ gui.CORE->GetAssets()->FindAsset(instance.ComponentAssetID()) };
                             nameWithIcon = ComponentIcons::FindIconByComponentName(name) + name;
                             ImGui::TextUnformatted(nameWithIcon.c_str());
                         } else {
