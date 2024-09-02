@@ -1,7 +1,7 @@
 // This is external code. Disabling warnings.
 #if defined(__clang__)
 #pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunsequenced" // Disable -Wunsequenced, https://easings.net/#easeOutBounce
+#pragma clang diagnostic ignored "-Wbitwise-instead-of-logical" // Disable -Wunsequenced, https://easings.net/#easeOutBounce
 #endif
 
 #include <Launcher/FileDialog.hpp>

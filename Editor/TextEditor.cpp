@@ -3,7 +3,8 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wreorder-ctor"
 #pragma clang diagnostic ignored "-Wsign-compare"
-#pragma clang diagnostic ignored "-Wlogical-op-parantheses"
+#pragma clang diagnostic ignored "-Wlogical-op-parentheses"
+#pragma clang diagnostic ignored "-Wunused-but-set-variable"
 #endif
 
 #include <algorithm>

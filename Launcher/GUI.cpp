@@ -538,7 +538,7 @@ bool GUI::IsProjectAlreadyOpen(const ProjectData& project) noexcept {
     std::this_thread::sleep_for(150ms); // wait for replies to be sent.
 
     std::vector<std::string> openProjects{};
-    for (int i = 0; i < maxRequestReplies; i++) {
+    for (size_t i = 0; i < maxRequestReplies; i++) {
         auto path = reply.Receive(ReceiveFlag::DontWait);
         if (path == "") { continue; }
 
