@@ -12,12 +12,12 @@ target_link_libraries(Editor PUBLIC Engine)
 
 find_package(argparse CONFIG REQUIRED)
 find_package(cppzmq CONFIG REQUIRED)
-find_package(unofficial-imguizmo CONFIG REQUIRED)
+find_package(imguizmo CONFIG REQUIRED)
 find_package(unofficial-lunasvg CONFIG REQUIRED)
 
 target_link_libraries(Editor PUBLIC argparse::argparse)
 target_link_libraries(Editor PUBLIC cppzmq cppzmq-static)
-target_link_libraries(Editor PUBLIC unofficial::imguizmo::imguizmo)
+target_link_libraries(Editor PUBLIC imguizmo::imguizmo)
 target_link_libraries(Editor PUBLIC unofficial::lunasvg::lunasvg)
 
 set(GROUP_LIST
