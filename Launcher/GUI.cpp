@@ -420,9 +420,12 @@ void GUI::RenderProjectData(ProjectData& data) noexcept {
                     if constexpr (detect::is_windows_v) {
                         exe = "start Editor.exe";
                     } else if constexpr (detect::is_linux_v) {
-                        exe = "./Editor &";
+                        exe = "./Editor";
                     }
                     std::string command = std::string(exe).append(1, ' ').append(data.AbsolutePath).append(data.Name).append(Assets::ProjectExtension);
+                    if constexpr (detect::is_linux_v) {
+                        command = command.append(" &");
+                    }
                     auto sys = std::system(command.c_str());
                     if (sys == -1) {
                         DOA_LOG_WARNING("[Launcher::GUI] A call to std::system returned -1.");
