@@ -324,7 +324,7 @@ enum class InputRate {
 namespace base {                                                                                                                                                                \
     void BufferSubData(GPUBuffer& buffer, RawDataView dataView, size_t offsetBytes = 0uLL) noexcept;                                                                            \
     void BufferSubData(GPUBuffer& buffer, size_t sizeBytes, NonOwningPointerToConstRawData data, size_t offsetBytes = 0uLL) noexcept;                                           \
-    void GetBufferSubData(const GPUBuffer& buffer, RawDataWriteableView dataView, size_t offsetBytes = 0uLL) noexcept;                                                                   \
+    void GetBufferSubData(const GPUBuffer& buffer, RawDataWriteableView dataView, size_t offsetBytes = 0uLL) noexcept;                                                          \
     void CopyBufferSubData(const GPUBuffer& readBuffer, GPUBuffer& writeBuffer, size_t sizeBytesToCopy, size_t readOffsetBytes = 0uLL, size_t writeOffsetBytes = 0uLL) noexcept;\
     void ClearBufferSubData(GPUBuffer& buffer, DataFormat format, size_t sizeBytesToClear, size_t offsetBytes = 0uLL) noexcept;                                                 \
                                                                                                                                                                                 \
