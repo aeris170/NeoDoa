@@ -603,13 +603,13 @@ constexpr std::string_view ToString(DataFormat format) {
 constexpr std::string_view ToString(TopologyType t) noexcept {
     using enum TopologyType;
     switch (t) {
-    case Points: return "Points";
-    case Lines: return "Lines";
-    case LineStrip: return "Line Strip";
-    case LineLoop: return "Line Loop";
-    case Triangles: return "Triangles";
+    case Points:        return "Points";
+    case Lines:         return "Lines";
+    case LineStrip:     return "Line Strip";
+    case LineLoop:      return "Line Loop";
+    case Triangles:     return "Triangles";
     case TriangleStrip: return "Triangle Strip";
-    case TriangleFan: return "Triangle Fan";
+    case TriangleFan:   return "Triangle Fan";
     }
     std::unreachable();
 }
