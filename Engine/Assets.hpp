@@ -57,6 +57,7 @@ struct Assets : ObserverPattern::Observer {
     inline static std::string ComputeShaderExtension{ ".comp" };
     inline static std::string ShaderProgramExtension{ ".prog" };
     inline static std::string MaterialExtension{ ".mat" };
+    inline static std::string FrameBufferExtension{ ".fbo" };
     inline static std::string SCRIPT_EXT{ ".scrpt" };
     inline static std::string MODEL_EXT{ ".mdl" };
     inline static std::string AssetIDExtension{ ".id" };
@@ -75,6 +76,7 @@ struct Assets : ObserverPattern::Observer {
     static bool IsComputeShaderFile(const FNode& file) noexcept;
     static bool IsShaderProgramFile(const FNode& file) noexcept;
     static bool IsMaterialFile(const FNode& file) noexcept;
+    static bool IsFrameBufferFile(const FNode& file) noexcept;
     static bool IsScriptFile(const FNode& file) noexcept;
     static bool IsModelFile(const FNode& file) noexcept;
 
@@ -117,13 +119,14 @@ struct Assets : ObserverPattern::Observer {
     const UUIDCollection& AllAssetsIDs() const;
     const UUIDCollection& SceneAssetIDs() const;
     const UUIDCollection& ScriptAssetIDs() const;
+    const UUIDCollection& SamplerAssetIDs() const;
     const UUIDCollection& TextureAssetIDs() const;
     const UUIDCollection& ComponentDefinitionAssetIDs() const;
     const UUIDCollection& ModelAssetIDs() const;
     const UUIDCollection& ShaderAssetIDs() const;
     const UUIDCollection& ShaderProgramAssetIDs() const;
     const UUIDCollection& MaterialAssetIDs() const;
-    const UUIDCollection& SamplerAssetIDs() const;
+    const UUIDCollection& FrameBufferAssetIDs() const;
 
     const AssetGPUBridge& GPUBridge() const;
 
@@ -158,13 +161,14 @@ private:
     UUIDCollection allAssets{};
     UUIDCollection sceneAssets{};
     UUIDCollection scriptAssets{};
+    UUIDCollection samplerAssets{};
     UUIDCollection textureAssets{};
     UUIDCollection componentDefinitionAssets{};
     UUIDCollection modelAssets{};
     UUIDCollection shaderAssets{};
     UUIDCollection shaderProgramAssets{};
     UUIDCollection materialAssets{};
-    UUIDCollection samplerAssets{};
+    UUIDCollection frameBufferAssets{};
 
     AdjacencyList<UUID> dependencyGraph{};
 
@@ -182,6 +186,8 @@ private:
 };
 
 template <>
+void Assets::PerformPostDeserializationAction<Sampler>(UUID id) noexcept;
+template <>
 void Assets::PerformPostDeserializationAction<Texture>(UUID id) noexcept;
 template <>
 void Assets::PerformPostDeserializationAction<Shader>(UUID id) noexcept;
@@ -197,3 +203,5 @@ namespace MaterialPostDeserialization {
 
 template <>
 void Assets::PerformPostDeserializationAction<Material>(UUID id) noexcept;
+template <>
+void Assets::PerformPostDeserializationAction<FrameBuffer>(UUID id) noexcept;

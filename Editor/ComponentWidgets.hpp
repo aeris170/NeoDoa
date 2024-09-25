@@ -196,7 +196,8 @@ bool FancyVectorWidget(const std::string& label, float* vec, FancyVectorWidgetSe
     ImGui::Columns(2, nullptr, false);
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { ImGui::GetStyle().ItemSpacing.x, 0 });
     ImGui::SetColumnWidth(0, w - compFieldWidth);
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f);
+    ImGui::AlignTextToFramePadding();
+    //ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f);
     ImGui::TextUnformatted(label.c_str());
     if (ImGui::BeginPopupContextItem(label.c_str(), ImGuiPopupFlags_MouseButtonRight)) {
         if (ImGui::MenuItem(cat(ComponentWidgetIcons::ContextMenu::ResetIcon, ComponentWidgetStrings::ContextMenu::Reset))) {

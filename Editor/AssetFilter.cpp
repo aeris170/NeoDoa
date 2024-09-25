@@ -37,6 +37,11 @@ bool AssetFilters::IncludeMaterialAssets::operator()(UUID assetID, const Assets&
     assert(handle.HasValue());
     return handle->IsMaterial();
 }
+bool AssetFilters::IncludeFrameBufferAssets::operator()(UUID assetID, const Assets& assets) const noexcept {
+    AssetHandle handle = assets.FindAsset(assetID);
+    assert(handle.HasValue());
+    return handle->IsFrameBuffer();
+}
 bool AssetFilters::IncludeModelAssets::operator()(UUID assetID, const Assets& assets) const noexcept {
     AssetHandle handle = assets.FindAsset(assetID);
     assert(handle.HasValue());
@@ -63,6 +68,9 @@ bool AssetFilters::ExcludeShaderProgramAssets::operator()(UUID assetID, const As
 }
 bool AssetFilters::ExcludeMaterialAssets::operator()(UUID assetID, const  Assets& assets) const noexcept {
     return !IncludeMaterialAssets()(assetID, assets);
+}
+bool AssetFilters::ExcludeFrameBufferAssets::operator()(UUID assetID, const  Assets& assets) const noexcept {
+    return !IncludeFrameBufferAssets()(assetID, assets);
 }
 bool AssetFilters::ExcludeModelAssets::operator()(UUID assetID, const Assets& assets) const noexcept {
     return !IncludeModelAssets()(assetID, assets);

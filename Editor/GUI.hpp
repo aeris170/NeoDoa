@@ -82,12 +82,16 @@ struct GUI {
     static constexpr auto PROJECT_ICON_KEY{ "neodoa" };
     static constexpr auto SCENE_ICON_KEY{ "cubes-stacked" };
     static constexpr auto COMPONENT_ICON_KEY{ "gear" };
+    static constexpr auto SAMPLER_ICON_KEY{ "loader" };
+    static constexpr auto TEXTURE_ICON_KEY{ "image" };
     static constexpr auto VERTEX_SHADER_ICON_KEY{ "circle-v" };
     static constexpr auto TESS_CTRL_SHADER_ICON_KEY{ "circle-t" };
     static constexpr auto TESS_EVAL_SHADER_ICON_KEY{ "square-t" };
     static constexpr auto GEOMETRY_SHADER_ICON_KEY{ "circle-g" };
     static constexpr auto FRAGMENT_SHADER_ICON_KEY{ "circle-f" };
     static constexpr auto COMPUTE_SHADER_ICON_KEY{ "circle-c" };
+    static constexpr auto MATERIAL_ICON_KEY{ "circle" };
+    static constexpr auto FRAMEBUFFER_ICON_KEY{ "gallery-thumbnails" };
     static constexpr auto FILE_ICON_KEY{ "file" };
     static constexpr auto BACK_ARROW_ICON_KEY{ "arrow-left" };
 
@@ -155,12 +159,16 @@ struct GUI {
     void* GetProjectIcon(TextureSize size = TextureSize::MEDIUM) const;
     void* GetSceneIcon(TextureSize size = TextureSize::MEDIUM) const;
     void* GetComponentIcon(TextureSize size = TextureSize::MEDIUM) const;
+    void* GetSamplerIcon(TextureSize size = TextureSize::MEDIUM) const;
+    void* GetTextureIcon(TextureSize size = TextureSize::MEDIUM) const;
     void* GetVertexShaderIcon(TextureSize size = TextureSize::MEDIUM) const;
     void* GetTessellationControlShaderIcon(TextureSize size = TextureSize::MEDIUM) const;
     void* GetTessellationEvaluationShaderIcon(TextureSize size = TextureSize::MEDIUM) const;
     void* GetGeometryShaderIcon(TextureSize size = TextureSize::MEDIUM) const;
     void* GetFragmentShaderIcon(TextureSize size = TextureSize::MEDIUM) const;
     void* GetComputeShaderIcon(TextureSize size = TextureSize::MEDIUM) const;
+    void* GetMaterialIcon(TextureSize size = TextureSize::MEDIUM) const;
+    void* GetFrameBufferIcon(TextureSize size = TextureSize::MEDIUM) const;
     void* GetFileIcon(TextureSize size = TextureSize::MEDIUM) const;
     void* GetBackArrowIcon(TextureSize size = TextureSize::MEDIUM) const;
 
@@ -173,6 +181,7 @@ struct GUI {
     //- Modals -//
     void ShowNewSceneAssetModal(FNode& currentFolder) const;
     void ShowNewComponentAssetModal(FNode& currentFolder) const;
+    void ShowNewSamplerAssetModal(FNode& currentFolder) const;
     void ShowNewVertexShaderAssetModal(FNode& currentFolder) const;
     void ShowNewTessellationControlShaderAssetModal(FNode& currentFolder) const;
     void ShowNewTessellationEvaluationShaderAssetModal(FNode& currentFolder) const;
@@ -180,7 +189,7 @@ struct GUI {
     void ShowNewFragmentShaderAssetModal(FNode& currentFolder) const;
     void ShowNewShaderProgramAssetModal(FNode& currentFolder) const;
     void ShowNewMaterialAssetModal(FNode& currentFolder) const;
-    void ShowNewSamplerAssetModal(FNode& currentFolder) const;
+    void ShowNewFrameBufferAssetModal(FNode& currentFolder) const;
 
     //- Undo/Redo History -//
     UndoRedoStack& GetCommandHistory() noexcept;

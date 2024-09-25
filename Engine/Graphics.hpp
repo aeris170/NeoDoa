@@ -706,3 +706,262 @@ std::ostream& operator<<(std::ostream& os, CullMode mode);
 std::ostream& operator<<(std::ostream& os, DepthFunction func);
 std::ostream& operator<<(std::ostream& os, BlendFactor factor);
 std::ostream& operator<<(std::ostream& os, InputRate rate);
+
+constexpr GraphicsBackend FromString(std::string_view str) noexcept {
+    if (str == "None")             return GraphicsBackend::None;
+    if (str == "Software")         return GraphicsBackend::Software;
+#ifdef OPENGL_4_6_SUPPORT
+    if (str == "OpenGL 4.6")       return GraphicsBackend::OpenGL4_6;
+#endif
+#ifdef OPENGL_3_3_SUPPORT
+    if (str == "OpenGL 3.3")       return GraphicsBackend::OpenGL3_3;
+#endif
+#ifdef VULKAN_SUPPORT
+    if (str == "Vulkan")           return GraphicsBackend::Vulkan;
+#endif
+#ifdef DIRECT3D_12_SUPPORT
+    if (str == "Direct3D 12")      return GraphicsBackend::Direct3D12;
+#endif
+#ifdef DIRECT3D_11_SUPPORT
+    if (str == "Direct3D 11")      return GraphicsBackend::Direct3D11;
+#endif
+    std::unreachable();
+}
+
+constexpr BufferProperties BufferPropertiesFromString(std::string_view str) noexcept {
+    if (str == "None") return BufferProperties::None;
+
+    BufferProperties result = static_cast<BufferProperties>(0);
+    if (str.find("DynamicStorage")   != std::string_view::npos) { result = result | BufferProperties::DynamicStorage;   }
+    if (str.find("ReadableFromCPU")  != std::string_view::npos) { result = result | BufferProperties::ReadableFromCPU;  }
+    if (str.find("WriteableFromCPU") != std::string_view::npos) { result = result | BufferProperties::WriteableFromCPU; }
+    if (str.find("Persistent")       != std::string_view::npos) { result = result | BufferProperties::Persistent;       }
+    if (str.find("Coherent")         != std::string_view::npos) { result = result | BufferProperties::Coherent;         }
+    if (str.find("CPUStorage")       != std::string_view::npos) { result = result | BufferProperties::CPUStorage;       }
+
+    return result;
+}
+
+constexpr ShaderType ShaderTypeFromString(std::string_view str) noexcept {
+    if (str == "Vertex")                  { return ShaderType::Vertex;                 }
+    if (str == "Tessellation Control")    { return ShaderType::TessellationControl;    }
+    if (str == "Tessellation Evaluation") { return ShaderType::TessellationEvaluation; }
+    if (str == "Geometry")                { return ShaderType::Geometry;               }
+    if (str == "Fragment")                { return ShaderType::Fragment;               }
+    if (str == "Compute")                 { return ShaderType::Compute;                }
+    std::unreachable();
+}
+
+constexpr TextureMinificationMode TextureMinificationModeFromString(std::string_view str) noexcept {
+    if (str == "Nearest")                { return TextureMinificationMode::Nearest;              }
+    if (str == "Linear")                 { return TextureMinificationMode::Linear;               }
+    if (str == "Nearest Mipmap Nearest") { return TextureMinificationMode::NearestMipmapNearest; }
+    if (str == "Linear Mipmap Nearest")  { return TextureMinificationMode::LinearMipmapNearest;  }
+    if (str == "Nearest Mipmap Linear")  { return TextureMinificationMode::NearestMipmapLinear;  }
+    if (str == "Linear Mipmap Linear")   { return TextureMinificationMode::LinearMipmapLinear;   }
+    std::unreachable();
+}
+
+constexpr TextureMagnificationMode TextureMagnificationModeFromString(std::string_view str) noexcept {
+    if (str == "Nearest") { return TextureMagnificationMode::Nearest; }
+    if (str == "Linear")  { return TextureMagnificationMode::Linear;  }
+    std::unreachable();
+}
+
+constexpr TextureWrappingMode TextureWrappingModeFromString(std::string_view str) noexcept {
+    if (str == "Repeat")               { return TextureWrappingMode::Repeat;            }
+    if (str == "Mirrored Repeat")      { return TextureWrappingMode::MirroredRepeat;    }
+    if (str == "Clamp To Edge")        { return TextureWrappingMode::ClampToEdge;       }
+    if (str == "Mirror Clamp To Edge") { return TextureWrappingMode::MirrorClampToEdge; }
+    if (str == "Clamp To Border")      { return TextureWrappingMode::ClampToBorder;     }
+    std::unreachable();
+}
+
+constexpr TextureCompareMode TextureCompareModeFromString(std::string_view str) noexcept {
+    if (str == "Compare Reference to Texture") { return TextureCompareMode::CompareRefToTexture; }
+    if (str == "None")                         { return TextureCompareMode::None;                }
+    std::unreachable();
+}
+
+constexpr TextureCompareFunction TextureCompareFunctionFromString(std::string_view str) noexcept {
+    if (str == "Less Equal")    { return TextureCompareFunction::LessEqual;    }
+    if (str == "Greater Equal") { return TextureCompareFunction::GreaterEqual; }
+    if (str == "Less")          { return TextureCompareFunction::Less;         }
+    if (str == "Greater")       { return TextureCompareFunction::Greater;      }
+    if (str == "Equal")         { return TextureCompareFunction::Equal;        }
+    if (str == "Not Equal")     { return TextureCompareFunction::NotEqual;     }
+    if (str == "Always")        { return TextureCompareFunction::Always;       }
+    if (str == "Never")         { return TextureCompareFunction::Never;        }
+    std::unreachable();
+}
+
+constexpr Multisample MultisampleFromString(std::string_view str) noexcept {
+    if (str == "No MS") { return Multisample::None; }
+    if (str == "2x MS") { return Multisample::x2;   }
+    if (str == "4x MS") { return Multisample::x4;   }
+    if (str == "8x MS") { return Multisample::x8;   }
+    std::unreachable();
+}
+
+constexpr DataFormat DataFormatFromString(std::string_view str) noexcept {
+    using enum DataFormat;
+    if (str == "R8")                 return R8;
+    if (str == "RG8")                return RG8;
+    if (str == "RGB8")               return RGB8;
+    if (str == "RGBA8")              return RGBA8;
+    if (str == "R16")                return R16;
+    if (str == "RG16")               return RG16;
+    if (str == "RGB16")              return RGB16;
+    if (str == "RGBA16")             return RGBA16;
+    if (str == "R16F")               return R16F;
+    if (str == "RG16F")              return RG16F;
+    if (str == "RGB16F")             return RGB16F;
+    if (str == "RGBA16F")            return RGBA16F;
+    if (str == "R32F")               return R32F;
+    if (str == "RG32F")              return RG32F;
+    if (str == "RGB32F")             return RGB32F;
+    if (str == "RGBA32F")            return RGBA32F;
+
+    if (str == "R8_SNORM")           return R8_SNORM;
+    if (str == "RG8_SNORM")          return RG8_SNORM;
+    if (str == "RGB8_SNORM")         return RGB8_SNORM;
+    if (str == "RGBA8_SNORM")        return RGBA8_SNORM;
+    if (str == "R16_SNORM")          return R16_SNORM;
+    if (str == "RG16_SNORM")         return RG16_SNORM;
+    if (str == "RGB16_SNORM")        return RGB16_SNORM;
+    if (str == "RGBA16_SNORM")       return RGBA16_SNORM;
+
+    if (str == "R8UI")               return R8UI;
+    if (str == "RG8UI")              return RG8UI;
+    if (str == "RGB8UI")             return RGB8UI;
+    if (str == "RGBA8UI")            return RGBA8UI;
+    if (str == "R16UI")              return R16UI;
+    if (str == "RG16UI")             return RG16UI;
+    if (str == "RGB16UI")            return RGB16UI;
+    if (str == "RGBA16UI")           return RGBA16UI;
+    if (str == "R32UI")              return R32UI;
+    if (str == "RG32UI")             return RG32UI;
+    if (str == "RGB32UI")            return RGB32UI;
+    if (str == "RGBA32UI")           return RGBA32UI;
+
+    if (str == "R8I")                return R8I;
+    if (str == "RG8I")               return RG8I;
+    if (str == "RGB8I")              return RGB8I;
+    if (str == "RGBA8I")             return RGBA8I;
+    if (str == "R16I")               return R16I;
+    if (str == "RG16I")              return RG16I;
+    if (str == "RGB16I")             return RGB16I;
+    if (str == "RGBA16I")            return RGBA16I;
+    if (str == "R32I")               return R32I;
+    if (str == "RG32I")              return RG32I;
+    if (str == "RGB32I")             return RGB32I;
+    if (str == "RGBA32I")            return RGBA32I;
+
+    if (str == "sRGB8")              return SRGB8;
+    if (str == "sRGBA8")             return SRGBA8;
+
+    if (str == "DEPTH16")            return DEPTH16;
+    if (str == "DEPTH24")            return DEPTH24;
+    if (str == "DEPTH32")            return DEPTH32;
+    if (str == "DEPTH32F")           return DEPTH32F;
+
+    if (str == "STENCIL1")           return STENCIL1;
+    if (str == "STENCIL4")           return STENCIL4;
+    if (str == "STENCIL8")           return STENCIL8;
+    if (str == "STENCIL16")          return STENCIL16;
+
+    if (str == "DEPTH24_STENCIL8")   return DEPTH24_STENCIL8;
+    if (str == "DEPTH32F_STENCIL8")  return DEPTH32F_STENCIL8;
+
+    if (str == "R3G3B2")             return R3G3B2;
+    if (str == "RGB5A1")             return RGB5A1;
+    if (str == "RGB10A2")            return RGB10A2;
+    if (str == "RGB10A2UI")          return RGB10A2UI;
+    if (str == "R11FG11FB10F")       return R11FG11FB10F;
+    if (str == "RGB9E5")             return RGB9E5;
+
+    if (str == "RGB4")               return RGB4;
+    if (str == "RGB5")               return RGB5;
+    if (str == "RGB565")             return RGB565;
+    if (str == "RGB10")              return RGB10;
+    if (str == "RGB12")              return RGB12;
+    if (str == "RGBA2")              return RGBA2;
+    if (str == "RGBA4")              return RGBA4;
+    if (str == "RGBA12")             return RGBA12;
+
+    std::unreachable();
+}
+
+constexpr TopologyType TopologyTypeFromString(std::string_view str) noexcept {
+    if (str == "Points")         { return TopologyType::Points;        }
+    if (str == "Lines")          { return TopologyType::Lines;         }
+    if (str == "Line Strip")     { return TopologyType::LineStrip;     }
+    if (str == "Line Loop")      { return TopologyType::LineLoop;      }
+    if (str == "Triangles")      { return TopologyType::Triangles;     }
+    if (str == "Triangle Strip") { return TopologyType::TriangleStrip; }
+    if (str == "Triangle Fan")   { return TopologyType::TriangleFan;   }
+    std::unreachable();
+}
+
+constexpr DataType DataTypeFromString(std::string_view str) noexcept {
+    if (str == "Byte")           { return DataType::Byte;          }
+    if (str == "Unsigned Byte")  { return DataType::UnsignedByte;  }
+    if (str == "Short")          { return DataType::Short;         }
+    if (str == "Unsigned Short") { return DataType::UnsignedShort; }
+    if (str == "Int")            { return DataType::Int;           }
+    if (str == "Unsigned Int")   { return DataType::UnsignedInt;   }
+    if (str == "Float")          { return DataType::Float;         }
+    if (str == "Double")         { return DataType::Double;        }
+    std::unreachable();
+}
+
+constexpr PolygonMode PolygonModeFromString(std::string_view str) noexcept {
+    if (str == "Fill")  { return PolygonMode::Fill;  }
+    if (str == "Line")  { return PolygonMode::Line;  }
+    if (str == "Point") { return PolygonMode::Point; }
+    std::unreachable();
+}
+
+constexpr CullMode CullModeFromString(std::string_view str) noexcept {
+    if (str == "Front")          { return CullMode::Front;        }
+    if (str == "Back")           { return CullMode::Back;         }
+    if (str == "Front And Back") { return CullMode::FrontAndBack; }
+    std::unreachable();
+}
+
+constexpr DepthFunction DepthFunctionFromString(std::string_view str) noexcept {
+    if (str == "Always")        { return DepthFunction::Always;       }
+    if (str == "Never")         { return DepthFunction::Never;        }
+    if (str == "Less")          { return DepthFunction::Less;         }
+    if (str == "Equal")         { return DepthFunction::Equal;        }
+    if (str == "Less Equal")    { return DepthFunction::LessEqual;    }
+    if (str == "Greater")       { return DepthFunction::Greater;      }
+    if (str == "Greater Equal") { return DepthFunction::GreaterEqual; }
+    if (str == "Not Equal")     { return DepthFunction::NotEqual;     }
+    std::unreachable();
+}
+
+constexpr BlendFactor BlendFactorFromString(std::string_view str) noexcept {
+    if (str == "Zero")                     { return BlendFactor::Zero;                  }
+    if (str == "One")                      { return BlendFactor::One;                   }
+    if (str == "Src Color")                { return BlendFactor::SrcColor;              }
+    if (str == "One Minus Src Color")      { return BlendFactor::OneMinusSrcColor;      }
+    if (str == "Dst Color")                { return BlendFactor::DstColor;              }
+    if (str == "One Minus Dst Color")      { return BlendFactor::OneMinusDstColor;      }
+    if (str == "Src Alpha")                { return BlendFactor::SrcAlpha;              }
+    if (str == "One Minus Src Alpha")      { return BlendFactor::OneMinusSrcAlpha;      }
+    if (str == "Dst Alpha")                { return BlendFactor::DstAlpha;              }
+    if (str == "One Minus Dst Alpha")      { return BlendFactor::OneMinusDstAlpha;      }
+    if (str == "Constant Color")           { return BlendFactor::ConstantColor;         }
+    if (str == "One Minus Constant Color") { return BlendFactor::OneMinusConstantColor; }
+    if (str == "Constant Alpha")           { return BlendFactor::ConstantAlpha;         }
+    if (str == "One Minus Constant Alpha") { return BlendFactor::OneMinusConstantAlpha; }
+    if (str == "Src Alpha Saturate")       { return BlendFactor::SrcAlphaSaturate;  }
+    std::unreachable();
+}
+
+constexpr InputRate InputRateFromString(std::string_view str) noexcept {
+    if (str == "Per Vertex")   { return InputRate::PerVertex;   }
+    if (str == "Per Instance") { return InputRate::PerInstance; }
+    std::unreachable();
+}

@@ -580,7 +580,7 @@ std::pair<std::optional<::GPUFrameBuffer>, std::vector<FrameBufferAllocatorMessa
     glNamedFramebufferDrawBuffers(frameBuffer, static_cast<GLsizei>(drawBuffers.size()), drawBuffers.data());
 
     if (builder.depthStencilAttachment) {
-        std::visit(overloaded::lambda{
+        std::visit(overloaded::lambda {
             [frameBuffer](const GPUTexture& texture) {
                 glNamedFramebufferTexture(frameBuffer, GL_DEPTH_STENCIL_ATTACHMENT, texture.GLObjectID, 0);
             },
@@ -590,7 +590,7 @@ std::pair<std::optional<::GPUFrameBuffer>, std::vector<FrameBufferAllocatorMessa
         }, builder.depthStencilAttachment.value());
     } else {
         if (builder.depthAttachment) {
-            std::visit(overloaded::lambda{
+            std::visit(overloaded::lambda {
                 [frameBuffer](const GPUTexture& texture) {
                     glNamedFramebufferTexture(frameBuffer, GL_DEPTH_ATTACHMENT, texture.GLObjectID, 0);
                 },
@@ -600,7 +600,7 @@ std::pair<std::optional<::GPUFrameBuffer>, std::vector<FrameBufferAllocatorMessa
             }, builder.depthAttachment.value());
         }
         if (builder.stencilAttachment) {
-            std::visit(overloaded::lambda{
+            std::visit(overloaded::lambda {
                 [frameBuffer](const GPUTexture& texture) {
                     glNamedFramebufferTexture(frameBuffer, GL_STENCIL_ATTACHMENT, texture.GLObjectID, 0);
                 },
@@ -632,7 +632,7 @@ std::pair<std::optional<::GPUFrameBuffer>, std::vector<FrameBufferAllocatorMessa
             messages.emplace_back("Framebuffer has incomplete read buffer.");
             break;
         case GL_FRAMEBUFFER_UNSUPPORTED:
-            messages.emplace_back("Framebuffer is unsupported.");
+            messages.emplace_back("Framebuffer configuration is unsupported.");
             break;
         case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
             messages.emplace_back("Framebuffer has incomplete multisample.");

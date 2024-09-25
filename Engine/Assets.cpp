@@ -46,6 +46,7 @@ bool Assets::IsFragmentShaderFile(const FNode& file) noexcept { return file.ext 
 bool Assets::IsComputeShaderFile(const FNode & file) noexcept { return file.ext == ComputeShaderExtension; }
 bool Assets::IsShaderProgramFile(const FNode& file) noexcept { return file.ext == ShaderProgramExtension; }
 bool Assets::IsMaterialFile(const FNode& file) noexcept { return file.ext == MaterialExtension; }
+bool Assets::IsFrameBufferFile(const FNode& file) noexcept { return file.ext == FrameBufferExtension; }
 bool Assets::IsScriptFile(const FNode& file) noexcept { return file.ext == SCRIPT_EXT; }
 bool Assets::IsModelFile(const FNode& file) noexcept { return file.ext == MODEL_EXT; }
 
@@ -94,6 +95,7 @@ void Assets::DeleteAsset(const AssetHandle asset) {
     std::erase(shaderProgramAssets, id);
     std::erase(materialAssets, id);
     std::erase(textureAssets, id);
+    std::erase(frameBufferAssets, id);
 
     dependencyGraph.RemoveVertex(id);
     //ReimportAll();
@@ -130,13 +132,14 @@ const FNode& Assets::Root() const { return _root; }
 const Assets::UUIDCollection& Assets::AllAssetsIDs() const { return allAssets; }
 const Assets::UUIDCollection& Assets::SceneAssetIDs() const { return sceneAssets; }
 const Assets::UUIDCollection& Assets::ScriptAssetIDs() const { return scriptAssets; }
+const Assets::UUIDCollection& Assets::SamplerAssetIDs() const { return samplerAssets; }
 const Assets::UUIDCollection& Assets::TextureAssetIDs() const { return textureAssets; }
 const Assets::UUIDCollection& Assets::ComponentDefinitionAssetIDs() const { return componentDefinitionAssets; }
 const Assets::UUIDCollection& Assets::ModelAssetIDs() const { return modelAssets; }
 const Assets::UUIDCollection& Assets::ShaderAssetIDs() const { return shaderAssets; }
 const Assets::UUIDCollection& Assets::ShaderProgramAssetIDs() const { return shaderProgramAssets; }
 const Assets::UUIDCollection& Assets::MaterialAssetIDs() const { return materialAssets; }
-const Assets::UUIDCollection& Assets::SamplerAssetIDs() const { return samplerAssets; }
+const Assets::UUIDCollection& Assets::FrameBufferAssetIDs() const { return frameBufferAssets; }
 
 const AssetGPUBridge& Assets::GPUBridge() const { return bridge; }
 
@@ -151,6 +154,7 @@ void Assets::ReimportAll() {
     materialAssets.clear();
     samplerAssets.clear();
     textureAssets.clear();
+    frameBufferAssets.clear();
 
     _root.children.clear();
     dependencyGraph.Clear();
@@ -167,6 +171,7 @@ void Assets::EnsureDeserialization() {
     Deserialize(shaderAssets);
     Deserialize(shaderProgramAssets);
     Deserialize(materialAssets);
+    Deserialize(frameBufferAssets);
 
     ReBuildDependencyGraph();
 }
@@ -190,11 +195,12 @@ void Assets::OnNotify(const ObserverPattern::Observable* source, ObserverPattern
 
         if (asset->IsScene())               { PerformPostDeserializationAction<Scene>        (origin); }
         if (asset->IsComponentDefinition()) { PerformPostDeserializationAction<Component>    (origin); }
+        if (asset->IsSampler())             { PerformPostDeserializationAction<Sampler>      (origin); }
+        if (asset->IsTexture())             { PerformPostDeserializationAction<Texture>      (origin); }
         if (asset->IsShader())              { PerformPostDeserializationAction<Shader>       (origin); }
         if (asset->IsShaderProgram())       { PerformPostDeserializationAction<ShaderProgram>(origin); }
         if (asset->IsMaterial())            { PerformPostDeserializationAction<Material>     (origin); }
-        if (asset->IsSampler())             { PerformPostDeserializationAction<Sampler>      (origin); }
-        if (asset->IsTexture())             { PerformPostDeserializationAction<Texture>      (origin); }
+        if (asset->IsFrameBuffer())         { PerformPostDeserializationAction<FrameBuffer>  (origin); }
 
         if (dependencyGraph.HasVertex(origin)) {
             auto edgeVertices = dependencyGraph.GetIncomingEdgesOf(origin);
@@ -211,11 +217,12 @@ void Assets::OnNotify(const ObserverPattern::Observable* source, ObserverPattern
         if (asset->ID() == UUID::Empty())   { return; }
         if (asset->IsScene())               {}
         if (asset->IsComponentDefinition()) {}
+        if (asset->IsSampler())             { bridge.GetSamplers().Deallocate(asset->ID());       }
+        if (asset->IsTexture())             { bridge.GetTextures().Deallocate(asset->ID());       }
         if (asset->IsShader())              { bridge.GetShaders().Deallocate(asset->ID());        }
         if (asset->IsShaderProgram())       { bridge.GetShaderPrograms().Deallocate(asset->ID()); }
         if (asset->IsMaterial())            {}
-        if (asset->IsSampler())             {}
-        if (asset->IsTexture())             {}
+        if (asset->IsFrameBuffer())         { bridge.GetFrameBuffers().Deallocate(asset->ID());   }
     }
 }
 
@@ -313,6 +320,9 @@ AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
         if (asset.IsTexture()) {
             textureAssets.push_back(id);
         }
+        if (asset.IsFrameBuffer()) {
+            frameBufferAssets.push_back(id);
+        }
 
         asset.AddObserver(*this);
         dependencyGraph.AddVertex(id);
@@ -378,6 +388,8 @@ void Assets::ReBuildDependencyGraph() noexcept {
         // Some asset types have no innate dependencies.
         if (asset.IsScene()) {}
         if (asset.IsComponentDefinition()) {}
+        if (asset.IsSampler()) {}
+        if (asset.IsTexture()) {}
         if (asset.IsShader()) {}
         if (asset.IsShaderProgram()) {
             const ShaderProgram& program = asset.DataAs<ShaderProgram>();
@@ -403,11 +415,22 @@ void Assets::ReBuildDependencyGraph() noexcept {
                 dependencyGraph.AddEdge(id, material.ShaderProgram);
             }
         }
-        if (asset.IsSampler()) {}
-        if (asset.IsTexture()) {}
+        if (asset.IsFrameBuffer()) {}
     }
 }
 
+template <>
+void Assets::PerformPostDeserializationAction<Sampler>(UUID id) noexcept {
+    bridge.GetSamplers().Deallocate(id);
+    std::vector<SamplerAllocatorMessage> messages = bridge.GetSamplers().Allocate(*this, id);
+
+    // Cast-away const. Assets are never created const.
+    const Asset& asset{ database[id] };
+    std::vector<std::any>& errorMessages = const_cast<std::vector<std::any>&>(asset.ErrorMessages());
+    for (auto& message : messages) {
+        errorMessages.emplace_back(std::move(message));
+    }
+}
 template <>
 void Assets::PerformPostDeserializationAction<Texture>(UUID id) noexcept {
     bridge.GetTextures().Deallocate(id);
@@ -702,5 +725,18 @@ void Assets::PerformPostDeserializationAction<Material>(UUID id) noexcept {
         std::vector<std::any>& errorMessages = const_cast<std::vector<std::any>&>(asset.ErrorMessages());
         errorMessages.emplace_back(std::string("Material deserialization failed."));
         errorMessages.emplace_back(std::string("Referenced shader program failed to allocate. Check for errors in program!"));
+    }
+}
+
+template <>
+void Assets::PerformPostDeserializationAction<FrameBuffer>(UUID id) noexcept {
+    bridge.GetFrameBuffers().Deallocate(id);
+    std::vector<FrameBufferAllocatorMessage> messages = bridge.GetFrameBuffers().Allocate(*this, id);
+
+    // Cast-away const. Assets are never created const.
+    const Asset& asset{ database[id] };
+    std::vector<std::any>& errorMessages = const_cast<std::vector<std::any>&>(asset.ErrorMessages());
+    for (auto& message : messages) {
+        errorMessages.emplace_back(std::move(message));
     }
 }

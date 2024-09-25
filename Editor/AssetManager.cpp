@@ -108,6 +108,8 @@ void AssetManager::RenderTreeView() {
 
 void AssetManager::RenderTreeViewRecursive(FNode& current) {
     if (!current.IsDirectory()) return;
+    if (current.Name().starts_with('.')) return;
+
     GUI& gui = this->gui;
 
     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_NavLeftJumpsBackHere | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
@@ -426,6 +428,10 @@ void AssetManager::RenderContextMenu() {
             if (ImGui::MenuItem(component)) {
                 gui.ShowNewComponentAssetModal(*currentFolder);
             }
+            static constexpr auto sampler = cat(FileIcons::SAMPLER_ICON, " ", "Sampler");
+            if (ImGui::MenuItem(sampler)) {
+                gui.ShowNewSamplerAssetModal(*currentFolder);
+            }
             static constexpr auto shader = cat(FileIcons::SHADER_ICON, " ", "Shader");
             if (ImGui::BeginMenu(shader)) {
                 static constexpr auto vertexShader = cat(FileIcons::VERTEX_SHADER_ICON, " ", "Vertex Shader");
@@ -468,9 +474,9 @@ void AssetManager::RenderContextMenu() {
             if (ImGui::MenuItem(material)) {
                 gui.ShowNewMaterialAssetModal(*currentFolder);
             }
-            static constexpr auto sampler = cat(FileIcons::SAMPLER_ICON, " ", "Sampler");
-            if (ImGui::MenuItem(sampler)) {
-                gui.ShowNewSamplerAssetModal(*currentFolder);
+            static constexpr auto frameBuffer = cat(FileIcons::FRAMEBUFFER_ICON, " ", "Frame Buffer");
+            if (ImGui::MenuItem(frameBuffer)) {
+                gui.ShowNewFrameBufferAssetModal(*currentFolder);
             }
             ImGui::EndMenu();
         }

@@ -131,9 +131,9 @@ void SamplerDisplay::RenderSamplerParameters() noexcept {
         sampler.MagFilter = static_cast<decltype(Sampler::MagFilter)>(magFilter);
     }
 
-    changed |=FloatWidget(Prettify(nameof(Sampler::MinLOD)), sampler.MinLOD);
-    changed |=FloatWidget(Prettify(nameof(Sampler::MaxLOD)), sampler.MaxLOD);
-    changed |=FloatWidget(Prettify(nameof(Sampler::LODBias)), sampler.LODBias);
+    changed |= FloatWidget(Prettify(nameof(Sampler::MinLOD)), sampler.MinLOD);
+    changed |= FloatWidget(Prettify(nameof(Sampler::MaxLOD)), sampler.MaxLOD);
+    changed |= FloatWidget(Prettify(nameof(Sampler::LODBias)), sampler.LODBias);
 
     { // Wrap S
         int wrapS{ static_cast<int>(sampler.WrapS) };

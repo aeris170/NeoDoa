@@ -71,12 +71,17 @@ static const char* FindIconInIcons(const char* icon) {
             return fa_icon;
         }
     }
-    for (const auto& [fa_icon, _] : FileIcons::TextureIcons) {
+    for (const auto& [fa_icon, _] : FileIcons::ComponentIcons) {
         if (std::strcmp(fa_icon, icon) == 0) {
             return fa_icon;
         }
     }
-    for (const auto& [fa_icon, _] : FileIcons::ComponentIcons) {
+    for (const auto& [fa_icon, _] : FileIcons::SamplerIcons) {
+        if (std::strcmp(fa_icon, icon) == 0) {
+            return fa_icon;
+        }
+    }
+    for (const auto& [fa_icon, _] : FileIcons::TextureIcons) {
         if (std::strcmp(fa_icon, icon) == 0) {
             return fa_icon;
         }
@@ -96,7 +101,7 @@ static const char* FindIconInIcons(const char* icon) {
             return fa_icon;
         }
     }
-    for (const auto& [fa_icon, _] : FileIcons::SamplerIcons) {
+    for (const auto& [fa_icon, _] : FileIcons::FrameBufferIcons) {
         if (std::strcmp(fa_icon, icon) == 0) {
             return fa_icon;
         }

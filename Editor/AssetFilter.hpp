@@ -41,6 +41,9 @@ namespace AssetFilters {
     struct IncludeMaterialAssets {
         bool operator()(UUID assetID, const Assets& assets) const noexcept;
     };
+    struct IncludeFrameBufferAssets {
+        bool operator()(UUID assetID, const Assets& assets) const noexcept;
+    };
     struct IncludeModelAssets {
         bool operator()(UUID assetID, const Assets& assets) const noexcept;
     };
@@ -66,6 +69,9 @@ namespace AssetFilters {
     struct ExcludeMaterialAssets {
         bool operator()(UUID assetID, const Assets& assets) const noexcept;
     };
+    struct ExcludeFrameBufferAssets {
+        bool operator()(UUID assetID, const Assets& assets) const noexcept;
+    };
     struct ExcludeModelAssets {
         bool operator()(UUID assetID, const Assets& assets) const noexcept;
     };
@@ -78,6 +84,7 @@ static_assert(AssetFilter<AssetFilters::IncludeTextureAssets      >);
 static_assert(AssetFilter<AssetFilters::IncludeShaderAssets       >);
 static_assert(AssetFilter<AssetFilters::IncludeShaderProgramAssets>);
 static_assert(AssetFilter<AssetFilters::IncludeMaterialAssets     >);
+static_assert(AssetFilter<AssetFilters::IncludeFrameBufferAssets  >);
 static_assert(AssetFilter<AssetFilters::IncludeModelAssets        >);
 
 static_assert(AssetFilter<AssetFilters::ExcludeSceneAssets        >);
@@ -87,4 +94,5 @@ static_assert(AssetFilter<AssetFilters::ExcludeTextureAssets      >);
 static_assert(AssetFilter<AssetFilters::ExcludeShaderAssets       >);
 static_assert(AssetFilter<AssetFilters::ExcludeShaderProgramAssets>);
 static_assert(AssetFilter<AssetFilters::ExcludeMaterialAssets     >);
+static_assert(AssetFilter<AssetFilters::ExcludeFrameBufferAssets  >);
 static_assert(AssetFilter<AssetFilters::ExcludeModelAssets        >);

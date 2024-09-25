@@ -3,7 +3,131 @@
 // GPUFrameBuffer
 template<>
 std::vector<FrameBufferAllocatorMessage> GPUFrameBuffers::Allocate(const Assets& assets, const UUID asset) noexcept {
-    return {};
+    AssetHandle handle{ assets.FindAsset(asset) };
+    assert(handle && handle->IsFrameBuffer());
+    const FrameBuffer& frameBuffer{ handle->DataAs<FrameBuffer>() };
+
+    GPUFrameBufferBuilder builder;
+    builder.SetName(frameBuffer.Name);
+
+    GPUTextureBuilder tBuilder;
+    GPURenderBufferBuilder rbBuilder;
+    size_t limit = std::min(frameBuffer.ColorAttachments.size(), static_cast<size_t>(MaxFrameBufferColorAttachments));
+    for (size_t i = 0; i < limit; i++) {
+        const FrameBufferAttachment& attachment = frameBuffer.ColorAttachments[i];
+        if (attachment.HasReadbackSupport) {
+            tBuilder.SetWidth(attachment.Resolution.Width).SetHeight(attachment.Resolution.Height).SetData(attachment.Format, {});
+            tBuilder.SetSamples(attachment.Samples);
+
+            auto [gpuTexture, messages] = tBuilder.Build();
+            if (gpuTexture.has_value()) {
+                builder.AttachColorTexture(std::move(gpuTexture.value()), static_cast<unsigned>(i));
+            } else {
+                DOA_LOG_ERROR("Texture attachment (for color) allocation failed for %s (UUID: %s). Aborting.", frameBuffer.Name.c_str(), asset.AsString().c_str());
+                return messages;
+            }
+        } else {
+            rbBuilder.SetLayout(attachment.Resolution.Width, attachment.Resolution.Height, attachment.Format);
+            rbBuilder.SetSamples(attachment.Samples);
+
+            auto [gpuRenderBuffer, messages] = rbBuilder.Build();
+            if (gpuRenderBuffer.has_value()) {
+                builder.AttachColorRenderBuffer(std::move(gpuRenderBuffer.value()), static_cast<unsigned>(i));
+            } else {
+                DOA_LOG_ERROR("RenderBuffer attachment (for color) allocation failed for %s (UUID: %s). Aborting.", frameBuffer.Name.c_str(), asset.AsString().c_str());
+                return messages;
+            }
+        }
+    }
+
+    if (frameBuffer.DepthAttachment.has_value()) {
+        const FrameBufferAttachment& attachment = frameBuffer.DepthAttachment.value();
+        if (attachment.HasReadbackSupport) {
+            tBuilder.SetWidth(attachment.Resolution.Width).SetHeight(attachment.Resolution.Height).SetData(attachment.Format, {});
+            tBuilder.SetSamples(attachment.Samples);
+
+            auto [gpuTexture, messages] = tBuilder.Build();
+            if (gpuTexture.has_value()) {
+                builder.AttachDepthTexture(std::move(gpuTexture.value()));
+            } else {
+                DOA_LOG_ERROR("Texture attachment (for depth) allocation failed for %s (UUID: %s). Aborting.", frameBuffer.Name.c_str(), asset.AsString().c_str());
+                return messages;
+            }
+        } else {
+            rbBuilder.SetLayout(attachment.Resolution.Width, attachment.Resolution.Height, attachment.Format);
+            rbBuilder.SetSamples(attachment.Samples);
+
+            auto [gpuRenderBuffer, messages] = rbBuilder.Build();
+            if (gpuRenderBuffer.has_value()) {
+                builder.AttachDepthRenderBuffer(std::move(gpuRenderBuffer.value()));
+            } else {
+                DOA_LOG_ERROR("RenderBuffer attachment (for depth) allocation failed for %s (UUID: %s). Aborting.", frameBuffer.Name.c_str(), asset.AsString().c_str());
+                return messages;
+            }
+        }
+    }
+
+    if (frameBuffer.StencilAttachment.has_value()) {
+        const FrameBufferAttachment& attachment = frameBuffer.StencilAttachment.value();
+        if (attachment.HasReadbackSupport) {
+            tBuilder.SetWidth(attachment.Resolution.Width).SetHeight(attachment.Resolution.Height).SetData(attachment.Format, {});
+            tBuilder.SetSamples(attachment.Samples);
+
+            auto [gpuTexture, messages] = tBuilder.Build();
+            if (gpuTexture.has_value()) {
+                builder.AttachStencilTexture(std::move(gpuTexture.value()));
+            } else {
+                DOA_LOG_ERROR("Texture attachment (for stencil) allocation failed for %s (UUID: %s). Aborting.", frameBuffer.Name.c_str(), asset.AsString().c_str());
+                return messages;
+            }
+        } else {
+            rbBuilder.SetLayout(attachment.Resolution.Width, attachment.Resolution.Height, attachment.Format);
+            rbBuilder.SetSamples(attachment.Samples);
+
+            auto [gpuRenderBuffer, messages] = rbBuilder.Build();
+            if (gpuRenderBuffer.has_value()) {
+                builder.AttachStencilRenderBuffer(std::move(gpuRenderBuffer.value()));
+            } else {
+                DOA_LOG_ERROR("RenderBuffer attachment (for stencil) allocation failed for %s (UUID: %s). Aborting.", frameBuffer.Name.c_str(), asset.AsString().c_str());
+                return messages;
+            }
+        }
+    }
+
+    if (frameBuffer.DepthStencilAttachment.has_value()) {
+        const FrameBufferAttachment& attachment = frameBuffer.DepthStencilAttachment.value();
+        if (attachment.HasReadbackSupport) {
+            tBuilder.SetWidth(attachment.Resolution.Width).SetHeight(attachment.Resolution.Height).SetData(attachment.Format, {});
+            tBuilder.SetSamples(attachment.Samples);
+
+            auto [gpuTexture, messages] = tBuilder.Build();
+            if (gpuTexture.has_value()) {
+                builder.AttachDepthStencilTexture(std::move(gpuTexture.value()));
+            } else {
+                DOA_LOG_ERROR("Texture attachment (for depth-stencil) allocation failed for %s (UUID: %s). Aborting.", frameBuffer.Name.c_str(), asset.AsString().c_str());
+                return messages;
+            }
+        } else {
+            rbBuilder.SetLayout(attachment.Resolution.Width, attachment.Resolution.Height, attachment.Format);
+            rbBuilder.SetSamples(attachment.Samples);
+
+            auto [gpuRenderBuffer, messages] = rbBuilder.Build();
+            if (gpuRenderBuffer.has_value()) {
+                builder.AttachDepthStencilRenderBuffer(std::move(gpuRenderBuffer.value()));
+            } else {
+                DOA_LOG_ERROR("RenderBuffer attachment (for depth-stencil) allocation failed for %s (UUID: %s). Aborting.", frameBuffer.Name.c_str(), asset.AsString().c_str());
+                return messages;
+            }
+        }
+    }
+
+    auto [gpuFrameBuffer, messages] = builder.Build();
+    if (gpuFrameBuffer.has_value()) {
+        database[asset] = std::move(gpuFrameBuffer.value());
+    } else {
+        DOA_LOG_ERROR("FrameBuffer allocation failed for %s (UUID: %s). Aborting.", frameBuffer.Name.c_str(), asset.AsString().c_str());
+    }
+    return messages;
 }
 
 // GPUShader
@@ -171,13 +295,13 @@ const GPUTexture& GPUTextures::Missing() const noexcept {
     return missing;
 }
 
-GPUFrameBuffers& AssetGPUBridge::GetGPUFrameBuffers() noexcept              { return gpuFrameBuffers;   }
-const GPUFrameBuffers& AssetGPUBridge::GetGPUFrameBuffers() const noexcept  { return gpuFrameBuffers;   }
-GPUShaders& AssetGPUBridge::GetShaders() noexcept                           { return gpuShaders;        }
-const GPUShaders& AssetGPUBridge::GetShaders() const noexcept               { return gpuShaders;        }
-GPUShaderPrograms& AssetGPUBridge::GetShaderPrograms() noexcept             { return gpuShaderPrograms; }
-const GPUShaderPrograms& AssetGPUBridge::GetShaderPrograms() const noexcept { return gpuShaderPrograms; }
 GPUSamplers& AssetGPUBridge::GetSamplers() noexcept                         { return gpuSamplers;       }
 const GPUSamplers& AssetGPUBridge::GetSamplers() const noexcept             { return gpuSamplers;       }
 GPUTextures& AssetGPUBridge::GetTextures() noexcept                         { return gpuTextures;       }
 const GPUTextures& AssetGPUBridge::GetTextures() const noexcept             { return gpuTextures;       }
+GPUShaders& AssetGPUBridge::GetShaders() noexcept                           { return gpuShaders;        }
+const GPUShaders& AssetGPUBridge::GetShaders() const noexcept               { return gpuShaders;        }
+GPUShaderPrograms& AssetGPUBridge::GetShaderPrograms() noexcept             { return gpuShaderPrograms; }
+const GPUShaderPrograms& AssetGPUBridge::GetShaderPrograms() const noexcept { return gpuShaderPrograms; }
+GPUFrameBuffers& AssetGPUBridge::GetFrameBuffers() noexcept                 { return gpuFrameBuffers;   }
+const GPUFrameBuffers& AssetGPUBridge::GetFrameBuffers() const noexcept     { return gpuFrameBuffers;   }

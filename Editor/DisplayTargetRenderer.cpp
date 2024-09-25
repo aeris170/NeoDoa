@@ -22,10 +22,11 @@ DisplayTargetRenderer::DisplayTargetRenderer(Observer& observer) noexcept :
     observer(observer),
     sceneDisplay(observer),
     componentDefinitionDisplay(observer),
+    samplerDisplay(observer),
     shaderDisplay(observer),
     shaderProgramDisplay(observer),
     materialDisplay(observer),
-    samplerDisplay(observer) {
+    frameBufferDisplay(observer) {
     GUI& gui = observer.gui;
     gui.Events.OnProjectUnloaded                 += std::bind_front(&DisplayTargetRenderer::OnProjectUnloaded,  this);
     gui.Events.OnReimport                        += std::bind_front(&DisplayTargetRenderer::OnReimport,         this);
@@ -181,6 +182,14 @@ void DisplayTargetRenderer::RenderIconChangePopup(const FNode& file, MetaAssetIn
             auto& items = FileIcons::ComponentIcons;
             begin = &items.front();
             end = &items.back() + 1;
+        } else if (Assets::IsSamplerFile(file)) {
+            auto& items = FileIcons::SamplerIcons;
+            begin = &items.front();
+            end = &items.back() + 1;
+        } else if (Assets::IsTextureFile(file)) {
+            auto& items = FileIcons::TextureIcons;
+            begin = &items.front();
+            end = &items.back() + 1;
         } else if (Assets::IsShaderFile(file)) {
             auto& items = FileIcons::ShaderIcons;
             begin = &items.front();
@@ -193,12 +202,8 @@ void DisplayTargetRenderer::RenderIconChangePopup(const FNode& file, MetaAssetIn
             auto& items = FileIcons::MaterialIcons;
             begin = &items.front();
             end = &items.back() + 1;
-        } else if (Assets::IsSamplerFile(file)) {
-            auto& items = FileIcons::SamplerIcons;
-            begin = &items.front();
-            end = &items.back() + 1;
-        } else if (Assets::IsTextureFile(file)) {
-            auto& items = FileIcons::TextureIcons;
+        } else if (Assets::IsFrameBufferFile(file)) {
+            auto& items = FileIcons::FrameBufferIcons;
             begin = &items.front();
             end = &items.back() + 1;
         } else {
@@ -265,16 +270,18 @@ void DisplayTargetRenderer::RenderAssetView(AssetHandle h) {
         RenderSceneView(h);
     } else if (h->IsComponentDefinition()) {
         RenderComponentDefinitionView(h);
+    } else if (h->IsSampler()) {
+        RenderSamplerView(h);
+    } else if (h->IsTexture()) {
+        RenderTextureView(h);
     } else if (h->IsShader()) {
         RenderShaderView(h);
     } else if (h->IsShaderProgram()) {
         RenderShaderProgramView(h);
     } else if (h->IsMaterial()) {
         RenderMaterialView(h);
-    } else if (h->IsSampler()) {
-        RenderSamplerView(h);
-    } else if (h->IsTexture()) {
-        RenderTextureView(h);
+    } else if (h->IsFrameBuffer()) {
+        RenderFrameBufferView(h);
     } else {
         RenderTextView(h);
     }
@@ -317,99 +324,6 @@ void DisplayTargetRenderer::RenderComponentDefinitionView(AssetHandle h) {
         ImGui::BeginTooltip();
         ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
         ImGui::TextUnformatted("Forces deserialization on this component definition. All data in RAM is purged, and new data is read from disk. This operation will cause re-instantiation of user defined components without loss of data.");
-        ImGui::PopTextWrapPos();
-        ImGui::EndTooltip();
-    }
-}
-void DisplayTargetRenderer::RenderShaderView(AssetHandle h) {
-    assert(h->IsShader());
-
-    shaderDisplay.SetDisplayTarget(h);
-    shaderDisplay.RenderMessagesTable();
-
-    if (h->HasDeserializedData()) {
-        if (!h->HasErrorMessages()) {
-            shaderDisplay.RenderFields();
-            ImGui::Separator();
-            shaderDisplay.RenderSourceCode();
-        }
-    } else {
-        ImGui::Text("Shader is not deserialized...");
-    }
-
-    static int extraPadding = 16;
-    float lineHeight = ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2;
-    if (ImGui::GetContentRegionAvail().y > 34.0f) {
-        ImGui::SetCursorPosY(ImGui::GetWindowHeight() - lineHeight - extraPadding);
-    }
-
-    if (ImGui::Button("Refresh", { ImGui::GetContentRegionAvail().x, 0 })) {
-        h->ForceDeserialize();
-    }
-    if (ImGui::IsItemHovered()) {
-        ImGui::BeginTooltip();
-        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-        ImGui::TextUnformatted("Forces deserialization on this shader. All data in VRAM is purged, and new data is allocated.");
-        ImGui::PopTextWrapPos();
-        ImGui::EndTooltip();
-    }
-}
-void DisplayTargetRenderer::RenderShaderProgramView(AssetHandle h) {
-    assert(h->IsShaderProgram());
-
-    shaderProgramDisplay.SetDisplayTarget(*observer.get().gui.get().CORE->GetAssets(), h);
-    shaderProgramDisplay.RenderMessagesTable();
-    ImGui::Separator();
-    if (h->HasDeserializedData()) {
-        shaderProgramDisplay.RenderShaders();
-    } else {
-        ImGui::Text("Shader Program is not deserialized...");
-    }
-
-    static int extraPadding = 16;
-    float lineHeight = ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2;
-    if (ImGui::GetContentRegionAvail().y > 34.0f) {
-        ImGui::SetCursorPosY(ImGui::GetWindowHeight() - lineHeight - extraPadding);
-    }
-
-    if (ImGui::Button("Refresh", { ImGui::GetContentRegionAvail().x, 0 })) {
-        h->ForceDeserialize();
-    }
-    if (ImGui::IsItemHovered()) {
-        ImGui::BeginTooltip();
-        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-        ImGui::TextUnformatted("Forces deserialization on this shader program. All data in VRAM is purged, and new data is allocated.");
-        ImGui::PopTextWrapPos();
-        ImGui::EndTooltip();
-    }
-}
-void DisplayTargetRenderer::RenderMaterialView(AssetHandle h) {
-    assert(h->IsMaterial());
-
-    materialDisplay.SetDisplayTarget(*observer.get().gui.get().CORE->GetAssets(), h);
-    materialDisplay.RenderMessagesTable();
-    ImGui::Separator();
-    if (h->HasDeserializedData()) {
-        materialDisplay.RenderProgramCombo();
-        ImGui::Separator();
-        materialDisplay.RenderShaderUniforms();
-    } else {
-        ImGui::Text("Material is not deserialized...");
-    }
-
-    static int extraPadding = 16;
-    float lineHeight = ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2;
-    if (ImGui::GetContentRegionAvail().y > 34.0f) {
-        ImGui::SetCursorPosY(ImGui::GetWindowHeight() - lineHeight - extraPadding);
-    }
-
-    if (ImGui::Button("Refresh", { ImGui::GetContentRegionAvail().x, 0 })) {
-        h->ForceDeserialize();
-    }
-    if (ImGui::IsItemHovered()) {
-        ImGui::BeginTooltip();
-        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-        ImGui::TextUnformatted("Forces deserialization on material. All data in RAM is purged, and new data is allocated.");
         ImGui::PopTextWrapPos();
         ImGui::EndTooltip();
     }
@@ -518,6 +432,133 @@ void DisplayTargetRenderer::RenderTextureView(AssetHandle h) {
         ImGui::BeginTooltip();
         ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
         ImGui::TextUnformatted("Forces deserialization on this texture. All data in RAM/VRAM is purged, and new data is read from disk.");
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
+}
+void DisplayTargetRenderer::RenderShaderView(AssetHandle h) {
+    assert(h->IsShader());
+
+    shaderDisplay.SetDisplayTarget(h);
+    shaderDisplay.RenderMessagesTable();
+
+    if (h->HasDeserializedData()) {
+        if (!h->HasErrorMessages()) {
+            shaderDisplay.RenderFields();
+            ImGui::Separator();
+            shaderDisplay.RenderSourceCode();
+        }
+    } else {
+        ImGui::Text("Shader is not deserialized...");
+    }
+
+    static int extraPadding = 16;
+    float lineHeight = ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2;
+    if (ImGui::GetContentRegionAvail().y > 34.0f) {
+        ImGui::SetCursorPosY(ImGui::GetWindowHeight() - lineHeight - extraPadding);
+    }
+
+    if (ImGui::Button("Refresh", { ImGui::GetContentRegionAvail().x, 0 })) {
+        h->ForceDeserialize();
+    }
+    if (ImGui::IsItemHovered()) {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted("Forces deserialization on this shader. All data in VRAM is purged, and new data is allocated.");
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
+}
+void DisplayTargetRenderer::RenderShaderProgramView(AssetHandle h) {
+    assert(h->IsShaderProgram());
+
+    shaderProgramDisplay.SetDisplayTarget(*observer.get().gui.get().CORE->GetAssets(), h);
+    shaderProgramDisplay.RenderMessagesTable();
+    ImGui::Separator();
+    if (h->HasDeserializedData()) {
+        shaderProgramDisplay.RenderShaders();
+    } else {
+        ImGui::Text("Shader Program is not deserialized...");
+    }
+
+    static int extraPadding = 16;
+    float lineHeight = ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2;
+    if (ImGui::GetContentRegionAvail().y > 34.0f) {
+        ImGui::SetCursorPosY(ImGui::GetWindowHeight() - lineHeight - extraPadding);
+    }
+
+    if (ImGui::Button("Refresh", { ImGui::GetContentRegionAvail().x, 0 })) {
+        h->ForceDeserialize();
+    }
+    if (ImGui::IsItemHovered()) {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted("Forces deserialization on this shader program. All data in VRAM is purged, and new data is allocated.");
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
+}
+void DisplayTargetRenderer::RenderMaterialView(AssetHandle h) {
+    assert(h->IsMaterial());
+
+    materialDisplay.SetDisplayTarget(*observer.get().gui.get().CORE->GetAssets(), h);
+    materialDisplay.RenderMessagesTable();
+    ImGui::Separator();
+    if (h->HasDeserializedData()) {
+        materialDisplay.RenderProgramCombo();
+        ImGui::Separator();
+        materialDisplay.RenderShaderUniforms();
+    } else {
+        ImGui::Text("Material is not deserialized...");
+    }
+
+    static int extraPadding = 16;
+    float lineHeight = ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2;
+    if (ImGui::GetContentRegionAvail().y > 34.0f) {
+        ImGui::SetCursorPosY(ImGui::GetWindowHeight() - lineHeight - extraPadding);
+    }
+
+    if (ImGui::Button("Refresh", { ImGui::GetContentRegionAvail().x, 0 })) {
+        h->ForceDeserialize();
+    }
+    if (ImGui::IsItemHovered()) {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted("Forces deserialization on material. All data in RAM is purged, and new data is allocated.");
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
+}
+void DisplayTargetRenderer::RenderFrameBufferView(AssetHandle h) {
+    assert(h->IsFrameBuffer());
+
+    frameBufferDisplay.SetDisplayTarget(h);
+    frameBufferDisplay.RenderMessagesTable();
+    ImGui::Separator();
+    if (h->HasDeserializedData()) {
+        frameBufferDisplay.RenderColorAttachments();
+        ImGui::Separator();
+        frameBufferDisplay.RenderDepthAttachment();
+        frameBufferDisplay.RenderStencilAttachment();
+        frameBufferDisplay.RenderDepthStencilAttachment();
+    } else {
+        ImGui::Text("Frame Buffer is not deserialized...");
+    }
+
+    static int extraPadding = 16;
+    float lineHeight = ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2;
+    if (ImGui::GetContentRegionAvail().y > 34.0f) {
+        ImGui::SetCursorPosY(ImGui::GetWindowHeight() - lineHeight - extraPadding);
+    }
+
+    if (ImGui::Button("Refresh", { ImGui::GetContentRegionAvail().x, 0 })) {
+        h->ForceDeserialize();
+    }
+
+    if (ImGui::IsItemHovered()) {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted("Forces deserialization on this frame buffer object. All data in VRAM is purged, and new data is allocated.");
         ImGui::PopTextWrapPos();
         ImGui::EndTooltip();
     }

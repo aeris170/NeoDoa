@@ -9,10 +9,11 @@
 
 #include <Editor/SceneDisplay.hpp>
 #include <Editor/ComponentDefinitionDisplay.hpp>
+#include <Editor/SamplerDisplay.hpp>
 #include <Editor/ShaderDisplay.hpp>
 #include <Editor/ShaderProgramDisplay.hpp>
 #include <Editor/MaterialDisplay.hpp>
-#include <Editor/SamplerDisplay.hpp>
+#include <Editor/FrameBufferDisplay.hpp>
 
 struct Scene;
 
@@ -40,10 +41,11 @@ private:
 
     SceneDisplay sceneDisplay;
     ComponentDefinitionDisplay componentDefinitionDisplay;
+    SamplerDisplay samplerDisplay;
     ShaderDisplay shaderDisplay;
     ShaderProgramDisplay shaderProgramDisplay;
     MaterialDisplay materialDisplay;
-    SamplerDisplay samplerDisplay;
+    FrameBufferDisplay frameBufferDisplay;
 
     void HandleTargetWhenEmpty();
     void HandleTargetWhenEntity(Scene& scene, const Entity entt);
@@ -54,11 +56,12 @@ private:
     void RenderAssetView(AssetHandle h);
     void RenderSceneView(AssetHandle h);
     void RenderComponentDefinitionView(AssetHandle h);
+    void RenderSamplerView(AssetHandle h);
+    void RenderTextureView(AssetHandle h);
     void RenderShaderView(AssetHandle h);
     void RenderShaderProgramView(AssetHandle h);
     void RenderMaterialView(AssetHandle h);
-    void RenderSamplerView(AssetHandle h);
-    void RenderTextureView(AssetHandle h);
+    void RenderFrameBufferView(AssetHandle h);
     void RenderTextView(AssetHandle h);
 
     void OnProjectUnloaded();

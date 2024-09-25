@@ -87,23 +87,23 @@ ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUTextures, GPUTexture, TextureAllocatorMessag
 
 struct AssetGPUBridge {
 
-    GPUFrameBuffers& GetGPUFrameBuffers() noexcept;
-    const GPUFrameBuffers& GetGPUFrameBuffers() const noexcept;
-    GPUShaders& GetShaders() noexcept;
-    const GPUShaders& GetShaders() const noexcept;
-    GPUShaderPrograms& GetShaderPrograms() noexcept;
-    const GPUShaderPrograms& GetShaderPrograms() const noexcept;
     GPUSamplers& GetSamplers() noexcept;
     const GPUSamplers& GetSamplers() const noexcept;
     GPUTextures& GetTextures() noexcept;
     const GPUTextures& GetTextures() const noexcept;
+    GPUShaders& GetShaders() noexcept;
+    const GPUShaders& GetShaders() const noexcept;
+    GPUShaderPrograms& GetShaderPrograms() noexcept;
+    const GPUShaderPrograms& GetShaderPrograms() const noexcept;
+    GPUFrameBuffers& GetFrameBuffers() noexcept;
+    const GPUFrameBuffers& GetFrameBuffers() const noexcept;
 
 private:
-    GPUFrameBuffers gpuFrameBuffers{ *this };
-    GPUShaders gpuShaders{ *this };
-    GPUShaderPrograms gpuShaderPrograms{ *this };
     GPUSamplers gpuSamplers{ *this };
     GPUTextures gpuTextures{ *this };
+    GPUShaders gpuShaders{ *this };
+    GPUShaderPrograms gpuShaderPrograms{ *this };
+    GPUFrameBuffers gpuFrameBuffers{ *this };
 
 public:
     AssetGPUBridge() noexcept = default;

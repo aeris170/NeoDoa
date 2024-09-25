@@ -197,14 +197,19 @@ namespace FileIcons {
         std::pair{ SCENE_ICON, "cubes-stacked" }
     };
 
-    inline constexpr const char TEXTURE_ICON[]{ ICON_FA_IMAGE };
-    inline std::array<ElementType, 1> TextureIcons{
-        std::pair{ TEXTURE_ICON, "image" }
-    };
-
     inline constexpr const char COMPONENT_ICON[]{ ICON_FA_GEAR };
     inline std::array<ElementType, 1> ComponentIcons{
         std::pair{ COMPONENT_ICON, "gear" }
+    };
+
+    inline constexpr const char SAMPLER_ICON[]{ ICON_FA_LOADER };
+    inline std::array<ElementType, 1> SamplerIcons{
+        std::pair{ SAMPLER_ICON, "loader" }
+    };
+
+    inline constexpr const char TEXTURE_ICON[]{ ICON_FA_IMAGE };
+    inline std::array<ElementType, 1> TextureIcons{
+        std::pair{ TEXTURE_ICON, "image" }
     };
 
     inline constexpr const char SHADER_ICON[]           { ICON_FA_CIRCLE_S };
@@ -233,9 +238,9 @@ namespace FileIcons {
         std::pair{ MATERIAL_ICON, "circle" }
     };
 
-    inline constexpr const char SAMPLER_ICON[]{ ICON_FA_LOADER };
-    inline std::array<ElementType, 1> SamplerIcons{
-        std::pair{ SAMPLER_ICON, "loader" }
+    inline constexpr const char FRAMEBUFFER_ICON[]{ ICON_FA_GALLERY_THUMBNAILS };
+    inline std::array<ElementType, 1> FrameBufferIcons{
+        std::pair{ FRAMEBUFFER_ICON, "gallery-thumbnails" }
     };
 
     inline constexpr const char FILE_ICON[]                    { ICON_FA_FILE                    };

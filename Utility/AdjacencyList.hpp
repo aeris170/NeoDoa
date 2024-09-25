@@ -222,7 +222,9 @@ inline void AdjacencyList<Vertex, InitialVertexCount, InitialEdgeCountPerVertex>
     auto vertexIndex = static_cast<EdgeList::value_type>(std::distance(data.begin(), vertexIterator));
     for (auto& [_, edgeList] : data) {
         auto vertexIndexInEdges = std::ranges::find(edgeList, vertexIndex);
-        edgeList.erase(vertexIndexInEdges);
+        if (vertexIndexInEdges != edgeList.end()) {
+            edgeList.erase(vertexIndexInEdges);
+        }
     }
 
     // S2

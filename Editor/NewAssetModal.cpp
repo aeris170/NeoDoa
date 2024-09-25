@@ -21,6 +21,10 @@ void NewAssetModal::ShowComponentCreationModal(FNode& currentFolder) const {
 	/* cast-away const - this modal is never created const */
 	const_cast<NewAssetModal*>(this)->Reset(currentFolder, NewAssetData::AssetType::Component);
 }
+void NewAssetModal::ShowSamplerCreationModal(FNode& currentFolder) const {
+	/* cast-away const - this modal is never created const */
+	const_cast<NewAssetModal*>(this)->Reset(currentFolder, NewAssetData::AssetType::Sampler);
+}
 void NewAssetModal::ShowVertexShaderCreationModal(FNode& currentFolder) const {
 	/* cast-away const - this modal is never created const */
 	const_cast<NewAssetModal*>(this)->Reset(currentFolder, NewAssetData::AssetType::VertexShader);
@@ -49,9 +53,9 @@ void NewAssetModal::ShowMaterialCreationModal(FNode& currentFolder) const {
 	/* cast-away const - this modal is never created const */
 	const_cast<NewAssetModal*>(this)->Reset(currentFolder, NewAssetData::AssetType::Material);
 }
-void NewAssetModal::ShowSamplerCreationModal(FNode& currentFolder) const {
+void NewAssetModal::ShowFrameBufferCreationModal(FNode& currentFolder) const {
 	/* cast-away const - this modal is never created const */
-	const_cast<NewAssetModal*>(this)->Reset(currentFolder, NewAssetData::AssetType::Sampler);
+	const_cast<NewAssetModal*>(this)->Reset(currentFolder, NewAssetData::AssetType::FrameBuffer);
 }
 
 void NewAssetModal::Hide() const {
@@ -71,16 +75,17 @@ void NewAssetModal::Reset(FNode& currentFolder, NewAssetData::AssetType typeOfAs
 		.append(1, static_cast<char>(std::filesystem::path::preferred_separator))
 		.append(currentFolder.Path().string()).c_str();
 
-	static auto defSceneName          = "MyScene";                        assert(std::strlen(defSceneName)          < buf.size());
-	static auto defComponentName	  = "MyComponent";                    assert(std::strlen(defComponentName)      < buf.size());
-	static auto defVertexShaderName	  = "MyVertexShader";                 assert(std::strlen(defVertexShaderName)   < buf.size());
-	static auto defTessCtrlShaderName = "MyTessellationControlShader";    assert(std::strlen(defTessCtrlShaderName) < buf.size());
-	static auto defTessEvalShaderName = "MyTessellationEvaluationShader"; assert(std::strlen(defTessEvalShaderName) < buf.size());
-	static auto defGeometryShaderName = "MyGeometryShader";               assert(std::strlen(defGeometryShaderName) < buf.size());
-	static auto defFragmentShaderName = "MyFragmentShader";               assert(std::strlen(defFragmentShaderName) < buf.size());
-	static auto defShaderProgramName  = "MyShaderProgram";                assert(std::strlen(defShaderProgramName)  < buf.size());
-	static auto defMaterialName       = "MyMaterial";                     assert(std::strlen(defMaterialName)       < buf.size());
-	static auto defSamplerName        = "MySampler";                      assert(std::strlen(defSamplerName)        < buf.size());
+	static constexpr auto defSceneName          = "MyScene";                        static_assert(std::char_traits<char>::length(defSceneName)          < BufferSize);
+	static constexpr auto defComponentName	    = "MyComponent";                    static_assert(std::char_traits<char>::length(defComponentName)      < BufferSize);
+	static constexpr auto defSamplerName        = "MySampler";                      static_assert(std::char_traits<char>::length(defSamplerName)        < BufferSize);
+	static constexpr auto defVertexShaderName	= "MyVertexShader";                 static_assert(std::char_traits<char>::length(defVertexShaderName)   < BufferSize);
+	static constexpr auto defTessCtrlShaderName = "MyTessellationControlShader";    static_assert(std::char_traits<char>::length(defTessCtrlShaderName) < BufferSize);
+	static constexpr auto defTessEvalShaderName = "MyTessellationEvaluationShader"; static_assert(std::char_traits<char>::length(defTessEvalShaderName) < BufferSize);
+	static constexpr auto defGeometryShaderName = "MyGeometryShader";               static_assert(std::char_traits<char>::length(defGeometryShaderName) < BufferSize);
+	static constexpr auto defFragmentShaderName = "MyFragmentShader";               static_assert(std::char_traits<char>::length(defFragmentShaderName) < BufferSize);
+	static constexpr auto defShaderProgramName  = "MyShaderProgram";                static_assert(std::char_traits<char>::length(defShaderProgramName)  < BufferSize);
+	static constexpr auto defMaterialName       = "MyMaterial";                     static_assert(std::char_traits<char>::length(defMaterialName)       < BufferSize);
+	static constexpr auto defFrameBufferName    = "MyFrameBuffer";                  static_assert(std::char_traits<char>::length(defFrameBufferName)    < BufferSize);
 	switch(typeOfAssetToCreate) {
 		using enum NewAssetData::AssetType;
 	case Scene:
@@ -92,6 +97,13 @@ void NewAssetModal::Reset(FNode& currentFolder, NewAssetData::AssetType typeOfAs
 		std::strcpy(buf.data(), defComponentName);
 		titleText = std::format(TITLE_TEXT, "Component");
 		confirmText = std::format(CONFIRM_TEXT, "a Component");
+		break;
+	case Sampler:
+		std::strcpy(buf.data(), defSamplerName);
+		titleText = std::format(TITLE_TEXT, "Sampler");
+		confirmText = std::format(CONFIRM_TEXT, "a Sampler");
+		break;
+	case Texture:
 		break;
 	case VertexShader:
 		std::strcpy(buf.data(), defVertexShaderName);
@@ -128,17 +140,15 @@ void NewAssetModal::Reset(FNode& currentFolder, NewAssetData::AssetType typeOfAs
 		titleText = std::format(TITLE_TEXT, "Material");
 		confirmText = std::format(CONFIRM_TEXT, "a Material");
 		break;
-	case Sampler:
-		std::strcpy(buf.data(), defSamplerName);
-		titleText = std::format(TITLE_TEXT, "Sampler");
-		confirmText = std::format(CONFIRM_TEXT, "a Sampler");
-		break;
-	case Texture:
+	case FrameBuffer:
+		std::strcpy(buf.data(), defFrameBufferName);
+		titleText = std::format(TITLE_TEXT, "Frame Buffer");
+		confirmText = std::format(CONFIRM_TEXT, "a Frame Buffer");
 		break;
 	case Model:
 		break;
 	default:
-		assert(false); // invalid enum
+		std::unreachable(); // invalid enum
 	}
 }
 
@@ -238,6 +248,11 @@ void NewAssetModal::CreateAsset() {
 	case Component:
 		CreateComponentAsset();
 		break;
+	case Sampler:
+		CreateSamplerAsset();
+		break;
+	case Texture:
+		break;
 	case VertexShader:
 		CreateVertexShaderAsset();
 		break;
@@ -259,10 +274,8 @@ void NewAssetModal::CreateAsset() {
 	case Material:
 		CreateMaterialAsset();
 		break;
-	case Sampler:
-		CreateSamplerAsset();
-		break;
-	case Texture:
+	case FrameBuffer:
+		CreateFrameBufferAsset();
 		break;
 	case Model:
 		break;
@@ -275,59 +288,76 @@ void NewAssetModal::CreateSceneAsset() {
 	gui.CreateNewScene(*newAssetData.currentFolder, newAssetData.name);
 }
 void NewAssetModal::CreateComponentAsset() {
-	const GUI& gui = this->gui.get();
+	GUI& gui = this->gui.get();
 	const auto sourceCode = CodeGenerator::GenerateComponentDeclaration(newAssetData.name);
-	gui.CORE->GetAssets()->CreateAssetAt<Component>(*newAssetData.currentFolder, newAssetData.name + Assets::ComponentDefinitionExtension, sourceCode);
+	auto handle = gui.CORE->GetAssets()->CreateAssetAt<Component>(*newAssetData.currentFolder, newAssetData.name + Assets::ComponentDefinitionExtension, sourceCode);
 	DOA_LOG_INFO("Succesfully created a new component asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
-}
-void NewAssetModal::CreateVertexShaderAsset() {
-	const GUI& gui = this->gui.get();
-	const auto sourceCode = CodeGenerator::GenerateVertexShaderCode();
-	gui.CORE->GetAssets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.name + Assets::VertexShaderExtension, sourceCode);
-	DOA_LOG_INFO("Succesfully created a new vertex shader asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
-}
-void NewAssetModal::CreateTessellationControlAsset() {
-	const GUI& gui = this->gui.get();
-	const auto sourceCode = CodeGenerator::GenerateTessellationControlShaderCode();
-	gui.CORE->GetAssets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.name + Assets::TessellationControlShaderExtension, sourceCode);
-	DOA_LOG_INFO("Succesfully created a new tessellation control shader asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
-}
-void NewAssetModal::CreateTessellationEvaluationAsset() {
-	const GUI& gui = this->gui.get();
-	const auto sourceCode = CodeGenerator::GenerateTessellationEvaluationShaderCode();
-	gui.CORE->GetAssets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.name + Assets::TessellationEvaluationShaderExtension, sourceCode);
-	DOA_LOG_INFO("Succesfully created a new tessellation evaluation shader asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
-}
-void NewAssetModal::CreateGeometryShaderAsset() {
-	const GUI& gui = this->gui.get();
-	const auto sourceCode = CodeGenerator::GenerateGeometryShaderCode();
-	gui.CORE->GetAssets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.name + Assets::GeometryShaderExtension, sourceCode);
-	DOA_LOG_INFO("Succesfully created a new geometry shader asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
-}
-void NewAssetModal::CreateFragmentShaderAsset() {
-	const GUI& gui = this->gui.get();
-	const auto sourceCode = CodeGenerator::GenerateFragmentShaderCode();
-	gui.CORE->GetAssets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.name + Assets::FragmentShaderExtension, sourceCode);
-	DOA_LOG_INFO("Succesfully created a new fragment shader asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
-}
-void NewAssetModal::CreateShaderProgramAsset() {
-	const GUI& gui = this->gui.get();
-	ShaderProgram temporary{ .Name = newAssetData.name };
-	const auto data = temporary.Serialize();
-	gui.CORE->GetAssets()->CreateAssetAt<ShaderProgram>(*newAssetData.currentFolder, newAssetData.name + Assets::ShaderProgramExtension, data);
-	DOA_LOG_INFO("Succesfully created a new shader program asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
-}
-void NewAssetModal::CreateMaterialAsset() {
-	const GUI& gui = this->gui.get();
-	Material temporary{ newAssetData.name };
-	const auto data = temporary.Serialize();
-	gui.CORE->GetAssets()->CreateAssetAt<Material>(*newAssetData.currentFolder, newAssetData.name + Assets::MaterialExtension, data);
-	DOA_LOG_INFO("Succesfully created a material asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
+	gui.Events.OnAssetCreated(handle);
 }
 void NewAssetModal::CreateSamplerAsset() {
-	const GUI& gui = this->gui.get();
+	GUI& gui = this->gui.get();
 	Sampler temporary{ .Name = newAssetData.name };
 	const auto data = temporary.Serialize();
-	gui.CORE->GetAssets()->CreateAssetAt<Sampler>(*newAssetData.currentFolder, newAssetData.name + Assets::SamplerExtension, data);
+	auto handle = gui.CORE->GetAssets()->CreateAssetAt<Sampler>(*newAssetData.currentFolder, newAssetData.name + Assets::SamplerExtension, data);
 	DOA_LOG_INFO("Succesfully created a sampler asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
+	gui.Events.OnAssetCreated(handle);
+}
+void NewAssetModal::CreateVertexShaderAsset() {
+	GUI& gui = this->gui.get();
+	const auto sourceCode = CodeGenerator::GenerateVertexShaderCode();
+	auto handle = gui.CORE->GetAssets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.name + Assets::VertexShaderExtension, sourceCode);
+	DOA_LOG_INFO("Succesfully created a new vertex shader asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
+	gui.Events.OnAssetCreated(handle);
+}
+void NewAssetModal::CreateTessellationControlAsset() {
+	GUI& gui = this->gui.get();
+	const auto sourceCode = CodeGenerator::GenerateTessellationControlShaderCode();
+	auto handle = gui.CORE->GetAssets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.name + Assets::TessellationControlShaderExtension, sourceCode);
+	DOA_LOG_INFO("Succesfully created a new tessellation control shader asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
+	gui.Events.OnAssetCreated(handle);
+}
+void NewAssetModal::CreateTessellationEvaluationAsset() {
+	GUI& gui = this->gui.get();
+	const auto sourceCode = CodeGenerator::GenerateTessellationEvaluationShaderCode();
+	auto handle = gui.CORE->GetAssets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.name + Assets::TessellationEvaluationShaderExtension, sourceCode);
+	DOA_LOG_INFO("Succesfully created a new tessellation evaluation shader asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
+	gui.Events.OnAssetCreated(handle);
+}
+void NewAssetModal::CreateGeometryShaderAsset() {
+	GUI& gui = this->gui.get();
+	const auto sourceCode = CodeGenerator::GenerateGeometryShaderCode();
+	auto handle = gui.CORE->GetAssets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.name + Assets::GeometryShaderExtension, sourceCode);
+	DOA_LOG_INFO("Succesfully created a new geometry shader asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
+	gui.Events.OnAssetCreated(handle);
+}
+void NewAssetModal::CreateFragmentShaderAsset() {
+	GUI& gui = this->gui.get();
+	const auto sourceCode = CodeGenerator::GenerateFragmentShaderCode();
+	auto handle = gui.CORE->GetAssets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.name + Assets::FragmentShaderExtension, sourceCode);
+	DOA_LOG_INFO("Succesfully created a new fragment shader asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
+	gui.Events.OnAssetCreated(handle);
+}
+void NewAssetModal::CreateShaderProgramAsset() {
+	GUI& gui = this->gui.get();
+	ShaderProgram temporary{ .Name = newAssetData.name };
+	const auto data = temporary.Serialize();
+	auto handle = gui.CORE->GetAssets()->CreateAssetAt<ShaderProgram>(*newAssetData.currentFolder, newAssetData.name + Assets::ShaderProgramExtension, data);
+	DOA_LOG_INFO("Succesfully created a new shader program asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
+	gui.Events.OnAssetCreated(handle);
+}
+void NewAssetModal::CreateMaterialAsset() {
+	GUI& gui = this->gui.get();
+	Material temporary{ newAssetData.name };
+	const auto data = temporary.Serialize();
+	auto handle = gui.CORE->GetAssets()->CreateAssetAt<Material>(*newAssetData.currentFolder, newAssetData.name + Assets::MaterialExtension, data);
+	DOA_LOG_INFO("Succesfully created a material asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
+	gui.Events.OnAssetCreated(handle);
+}
+void NewAssetModal::CreateFrameBufferAsset() {
+	GUI& gui = this->gui.get();
+	FrameBuffer temporary{ .Name = newAssetData.name };
+	const auto data = temporary.Serialize();
+	auto handle = gui.CORE->GetAssets()->CreateAssetAt<FrameBuffer>(*newAssetData.currentFolder, newAssetData.name + Assets::FrameBufferExtension, data);
+	DOA_LOG_INFO("Succesfully created a frame buffer asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
+	gui.Events.OnAssetCreated(handle);
 }
