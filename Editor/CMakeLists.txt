@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.26.4)
 
 project(Editor LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(Editor)
 
@@ -12,12 +12,12 @@ target_link_libraries(Editor PUBLIC Engine)
 
 find_package(argparse CONFIG REQUIRED)
 find_package(cppzmq CONFIG REQUIRED)
-find_package(unofficial-imguizmo CONFIG REQUIRED)
+find_package(imguizmo CONFIG REQUIRED)
 find_package(unofficial-lunasvg CONFIG REQUIRED)
 
 target_link_libraries(Editor PUBLIC argparse::argparse)
 target_link_libraries(Editor PUBLIC cppzmq cppzmq-static)
-target_link_libraries(Editor PUBLIC unofficial::imguizmo::imguizmo)
+target_link_libraries(Editor PUBLIC imguizmo::imguizmo)
 target_link_libraries(Editor PUBLIC unofficial::lunasvg::lunasvg)
 
 set(GROUP_LIST
@@ -46,6 +46,8 @@ set(GROUP_LIST
     "Language/CodeGenerator.cpp"
     "Language/CodeGenerator.hpp"
 	
+	"UI/AssetFilter/AssetFilter.cpp"
+	"UI/AssetFilter/AssetFilter.hpp"
     "UI/Colors/Colors.hpp"
     "UI/Components/ComponentUI.cpp"
     "UI/Components/ComponentUI.hpp"
@@ -92,6 +94,22 @@ set(GROUP_LIST
     "UI/GUI/Modals/NewAssetModal.hpp"
     "UI/GUI/Observer/Observer.cpp"
     "UI/GUI/Observer/Observer.hpp"
+    "UI/GUI/Observer/Displays/DisplayTargetRenderer.cpp"
+    "UI/GUI/Observer/Displays/DisplayTargetRenderer.hpp"
+    "UI/GUI/Observer/Displays/ComponentDefinitionDisplay/ComponentDefinitionDisplay.cpp"
+    "UI/GUI/Observer/Displays/ComponentDefinitionDisplay/ComponentDefinitionDisplay.hpp"
+    "UI/GUI/Observer/Displays/FrameBufferDisplay/FrameBufferDisplay.cpp"
+    "UI/GUI/Observer/Displays/FrameBufferDisplay/FrameBufferDisplay.hpp"
+    "UI/GUI/Observer/Displays/MaterialDisplay/MaterialDisplay.cpp"
+    "UI/GUI/Observer/Displays/MaterialDisplay/MaterialDisplay.hpp"
+    "UI/GUI/Observer/Displays/SamplerDisplay/SamplerDisplay.cpp"
+    "UI/GUI/Observer/Displays/SamplerDisplay/SamplerDisplay.hpp"
+    "UI/GUI/Observer/Displays/SceneDisplay/SceneDisplay.cpp"
+    "UI/GUI/Observer/Displays/SceneDisplay/SceneDisplay.hpp"
+    "UI/GUI/Observer/Displays/ShaderDisplay/ShaderDisplay.cpp"
+    "UI/GUI/Observer/Displays/ShaderDisplay/ShaderDisplay.hpp"
+    "UI/GUI/Observer/Displays/ShaderProgramDisplay/ShaderProgramDisplay.cpp"
+    "UI/GUI/Observer/Displays/ShaderProgramDisplay/ShaderProgramDisplay.hpp"
     "UI/GUI/SceneHierarchy/SceneHierarchy.cpp"
     "UI/GUI/SceneHierarchy/SceneHierarchy.hpp"
     "UI/GUI/SceneSettings/SceneSettings.cpp"

@@ -7,36 +7,20 @@
 #include <GL/glew.h>
 
 #include <Engine/UUID.hpp>
+#include <Engine/Graphics.hpp>
 
 struct Shader {
-    enum class ShaderType {
-        Vertex,
-        TessellationControl,
-        TessellationEvaluation,
-        Geometry,
-        Fragment,
-        Compute
-    };
-
-    struct Uniform {
-        std::string TypeName;
-        std::string Name;
-    };
-
-    GLuint ID;
     ShaderType Type;
     std::string Name;
     std::string SourceCode;
-    std::vector<Uniform> Uniforms;
 
-    std::string Serialize() const;
-    static Shader Deserialize(const std::string_view data);
+    std::string Serialize() const noexcept;
+    static Shader Deserialize(const std::string_view data) noexcept;
 
-    static Shader Copy(const Shader& shader);
+    static Shader Copy(const Shader& shader) noexcept;
 };
 
 struct ShaderProgram {
-    GLuint ID;
     std::string Name;
 
     UUID VertexShader                { UUID::Empty() };
@@ -44,16 +28,18 @@ struct ShaderProgram {
     UUID TessellationEvaluationShader{ UUID::Empty() };
     UUID GeometryShader              { UUID::Empty() };
     UUID FragmentShader              { UUID::Empty() };
+    UUID ComputeShader               { UUID::Empty() };
 
-    bool IsComplete() const;
-    bool HasVertexShader() const;
-    bool HasTessellationControlShader() const;
-    bool HasTessellationEvaluationShader() const;
-    bool HasGeometryShader() const;
-    bool HasFragmentShader() const;
+    bool IsComplete() const noexcept;
+    bool HasVertexShader() const noexcept;
+    bool HasTessellationControlShader() const noexcept;
+    bool HasTessellationEvaluationShader() const noexcept;
+    bool HasGeometryShader() const noexcept;
+    bool HasFragmentShader() const noexcept;
+    bool HasComputeShader() const noexcept;
 
-    std::string Serialize() const;
-    static ShaderProgram Deserialize(const std::string_view data);
+    std::string Serialize() const noexcept;
+    static ShaderProgram Deserialize(const std::string_view data) noexcept;
 
-    static ShaderProgram Copy(const ShaderProgram& program);
+    static ShaderProgram Copy(const ShaderProgram& program) noexcept;
 };

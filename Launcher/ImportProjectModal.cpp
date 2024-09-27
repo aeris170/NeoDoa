@@ -2,6 +2,8 @@
 
 #include <Engine/ProjectDeserializer.hpp>
 
+#include <Editor/ImGuiExtensions.hpp>
+
 #include <Launcher/GUI.hpp>
 #include <Launcher/FileDialog.hpp>
 
@@ -72,8 +74,8 @@ void ImportProjectModal::RenderSelectionDialog() noexcept {
 	}
 }
 void ImportProjectModal::RenderConfirmationDialog() noexcept {
-	ImGui::Text("Name: %s", importProjectData.name.c_str());
-	ImGui::Text("Path: %s", importProjectData.path.c_str());
+	ImGuiFormattedText("Name: {}", importProjectData.name.c_str());
+	ImGuiFormattedText("Path: {}", importProjectData.path.c_str());
 	ImGui::NewLine();
 	ImGui::TextUnformatted("Continue and open project?");
 	ImGui::Separator();

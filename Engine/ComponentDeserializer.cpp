@@ -102,14 +102,14 @@ static void CompilationMessageCallback(const asSMessageInfo* msg, void* param) {
 
     ComponentCompilerMessage m;
     if (msg->type == asMSGTYPE_INFORMATION) {
-        m.messageType = ComponentCompilerMessageType::INFO;
+        m.messageType = ComponentCompilerMessageType::Info;
         DOA_LOG_INFO("%s (%d, %d) : %s", msg->section, msg->row, msg->col, msg->message);
     } else if (msg->type == asMSGTYPE_WARNING) {
-        m.messageType = ComponentCompilerMessageType::WARNING;
+        m.messageType = ComponentCompilerMessageType::Warning;
         DOA_LOG_WARNING("%s (%d, %d) : %s", msg->section, msg->row, msg->col, msg->message);
     } else {
         cdr.erred = true;
-        m.messageType = ComponentCompilerMessageType::ERROR;
+        m.messageType = ComponentCompilerMessageType::Error;
         DOA_LOG_ERROR("%s (%d, %d) : %s", msg->section, msg->row, msg->col, msg->message);
     }
     m.message = msg->message;
@@ -139,7 +139,7 @@ ComponentDeserializationResult DeserializeComponent(const FNode& file) {
         DOA_LOG_ERROR(errmsg.c_str());
         rv.messages.emplace_back(
             1, 1,
-            ComponentCompilerMessageType::ERROR,
+            ComponentCompilerMessageType::Error,
             errmsg
         );
         rv.erred = true;
@@ -156,7 +156,7 @@ ComponentDeserializationResult DeserializeComponent(const FNode& file) {
         DOA_LOG_ERROR(errmsg.c_str(), fileName.c_str());
         rv.messages.emplace_back(
             1, 1,
-            ComponentCompilerMessageType::ERROR,
+            ComponentCompilerMessageType::Error,
             errmsg
         );
         rv.erred = true;
@@ -170,7 +170,7 @@ ComponentDeserializationResult DeserializeComponent(const FNode& file) {
         DOA_LOG_ERROR(errmsg.c_str());
         rv.messages.emplace_back(
             1, 1,
-            ComponentCompilerMessageType::ERROR,
+            ComponentCompilerMessageType::Error,
             errmsg
         );
         rv.erred = true;
@@ -183,7 +183,7 @@ ComponentDeserializationResult DeserializeComponent(const FNode& file) {
         DOA_LOG_ERROR(errmsg.c_str(), fileName.c_str());
         rv.messages.emplace_back(
             1, 1,
-            ComponentCompilerMessageType::ERROR,
+            ComponentCompilerMessageType::Error,
             errmsg
         );
         rv.erred = true;
@@ -192,7 +192,7 @@ ComponentDeserializationResult DeserializeComponent(const FNode& file) {
 
     { // Check component count - we can have one and only one component per file!
         int componentDefinitionCount{ 0 };
-        for (auto i = 0; i < declaredObjectCount; i++) {
+        for (decltype(declaredObjectCount) i = 0; i < declaredObjectCount; i++) {
             auto typeInfo = scriptModule->GetObjectTypeByIndex(i);
             if (angel->IsComponentDefinition(typeInfo)) {
                 componentDefinitionCount++;
@@ -204,7 +204,7 @@ ComponentDeserializationResult DeserializeComponent(const FNode& file) {
             DOA_LOG_ERROR(errmsg.c_str(), fileName.c_str());
             rv.messages.emplace_back(
                 1, 1,
-                ComponentCompilerMessageType::ERROR,
+                ComponentCompilerMessageType::Error,
                 errmsg
             );
             rv.erred = true;
@@ -216,61 +216,57 @@ ComponentDeserializationResult DeserializeComponent(const FNode& file) {
             DOA_LOG_WARNING(warnmsg.c_str(), fileName.c_str());
             rv.messages.emplace_back(
                 1, 1,
-                ComponentCompilerMessageType::WARNING,
+                ComponentCompilerMessageType::Warning,
                 warnmsg
             );
         }
     }
 
+    auto typeInfo = scriptModule->GetObjectTypeByIndex(0);
+    if (angel->IsComponentDefinition(typeInfo)) {
+        if (typeInfo->GetFactoryCount() > 0) {
+            rv.messages.emplace_back(
+                1, 1,
+                ComponentCompilerMessageType::Info,
+                "Constructors are stripped from binary, do not use constructors!"
+            );
+        }
 
-    for (auto i = 0; i < declaredObjectCount; i++) {
-        auto typeInfo = scriptModule->GetObjectTypeByIndex(i);
-        if (angel->IsComponentDefinition(typeInfo)) {
-            if (typeInfo->GetFactoryCount() > 0) {
-                rv.messages.emplace_back(
-                    1, 1,
-                    ComponentCompilerMessageType::INFO,
-                    "Constructors are stripped from binary, do not use constructors!"
-                );
+        rv.deserializedComponent.name = typeInfo->GetName();
+        rv.deserializedComponent.declaration = content;
+
+        int fieldCount = typeInfo->GetPropertyCount();
+        for (int j = 0; j < fieldCount; j++) {
+            PropertyData d;
+            const char* propName;
+            typeInfo->GetProperty(j, &propName, &d.typeId, &d.isPrivate, &d.isProtected, &d.offset, &d.isReference, &d.accessMask, &d.compositeOffset, &d.isCompositeIndirect);
+            d.name = propName;
+            d.typeInfo = typeInfo;
+
+            switch (d.typeId) {
+                case asTYPEID_VOID: d.typeName = "void"; break;
+                case asTYPEID_BOOL: d.typeName = "bool"; break;
+                case asTYPEID_INT8: d.typeName = "int8"; break;
+                case asTYPEID_INT16: d.typeName = "int16"; break;
+                case asTYPEID_INT32: d.typeName = "int"; break;
+                case asTYPEID_INT64: d.typeName = "long"; break;
+                case asTYPEID_UINT8: d.typeName = "uint8"; break;
+                case asTYPEID_UINT16: d.typeName = "uint16"; break;
+                case asTYPEID_UINT32: d.typeName = "unsigned int"; break;
+                case asTYPEID_UINT64: d.typeName = "unsigned long"; break;
+                case asTYPEID_FLOAT: d.typeName = "float"; break;
+                case asTYPEID_DOUBLE: d.typeName = "double"; break;
+                case asTYPEID_OBJHANDLE: d.typeName = "ptr"; break;
+                case asTYPEID_HANDLETOCONST: d.typeName = "const ptr"; break;
+                case asTYPEID_MASK_OBJECT: d.typeName = "mask"; break;
+                case asTYPEID_APPOBJECT: d.typeName = "native object"; break;
+                case asTYPEID_SCRIPTOBJECT: d.typeName = "angel object"; break;
+                case asTYPEID_TEMPLATE: d.typeName = "template"; break;
+                case asTYPEID_MASK_SEQNBR: d.typeName = "mask sequence"; break;
+                default: d.typeName = scriptEngine.GetTypeInfoById(d.typeId)->GetName(); break;
             }
 
-            rv.deserializedComponent.name = typeInfo->GetName();
-            rv.deserializedComponent.declaration = content;
-
-            int fieldCount = typeInfo->GetPropertyCount();
-            for (int j = 0; j < fieldCount; j++) {
-                PropertyData d;
-                const char* propName;
-                typeInfo->GetProperty(j, &propName, &d.typeId, &d.isPrivate, &d.isProtected, &d.offset, &d.isReference, &d.accessMask, &d.compositeOffset, &d.isCompositeIndirect);
-                d.name = propName;
-                d.typeInfo = typeInfo;
-
-                switch (d.typeId) {
-                    case asTYPEID_VOID: d.typeName = "void"; break;
-                    case asTYPEID_BOOL: d.typeName = "bool"; break;
-                    case asTYPEID_INT8: d.typeName = "int8"; break;
-                    case asTYPEID_INT16: d.typeName = "int16"; break;
-                    case asTYPEID_INT32: d.typeName = "int"; break;
-                    case asTYPEID_INT64: d.typeName = "long"; break;
-                    case asTYPEID_UINT8: d.typeName = "uint8"; break;
-                    case asTYPEID_UINT16: d.typeName = "uint16"; break;
-                    case asTYPEID_UINT32: d.typeName = "unsigned int"; break;
-                    case asTYPEID_UINT64: d.typeName = "unsigned long"; break;
-                    case asTYPEID_FLOAT: d.typeName = "float"; break;
-                    case asTYPEID_DOUBLE: d.typeName = "double"; break;
-                    case asTYPEID_OBJHANDLE: d.typeName = "ptr"; break;
-                    case asTYPEID_HANDLETOCONST: d.typeName = "const ptr"; break;
-                    case asTYPEID_MASK_OBJECT: d.typeName = "mask"; break;
-                    case asTYPEID_APPOBJECT: d.typeName = "native object"; break;
-                    case asTYPEID_SCRIPTOBJECT: d.typeName = "angel object"; break;
-                    case asTYPEID_TEMPLATE: d.typeName = "template"; break;
-                    case asTYPEID_MASK_SEQNBR: d.typeName = "mask sequence"; break;
-                    default: d.typeName = scriptEngine.GetTypeInfoById(d.typeId)->GetName(); break;
-                }
-
-                rv.deserializedComponent.fields.emplace_back(d.typeName, d.name);
-            }
-            break;
+            rv.deserializedComponent.fields.emplace_back(d.typeName, d.name);
         }
     }
 
@@ -314,7 +310,7 @@ ComponentDeserializationResult DeserializeComponent(const std::string_view data)
         DOA_LOG_ERROR("Component deserialization failed! Couldn't find a component definition!");
         return ComponentDeserializationResult{ .erred{ true } };
     }
-    for (auto i = 0; i < declaredObjectCount; i++) {
+    for (decltype(declaredObjectCount) i = 0; i < declaredObjectCount; i++) {
         auto typeInfo = scriptModule->GetObjectTypeByIndex(i);
         if (!angel->IsComponentDefinition(typeInfo)) {
             rv.deserializedComponent.name = typeInfo->GetName();

@@ -23,7 +23,7 @@ AssetManager::AssetManager(GUI& gui) noexcept :
 }
 
 bool AssetManager::Begin() {
-    const GUI& gui = this->gui;
+    [[maybe_unused]] const GUI& gui = this->gui;
     ImGui::PushID(WindowStrings::AssetManagerWindowName);
     bool visible = ImGui::Begin(WindowStrings::AssetManagerWindowTitleID, nullptr, ImGuiWindowFlags_MenuBar);
 
@@ -108,6 +108,8 @@ void AssetManager::RenderTreeView() {
 
 void AssetManager::RenderTreeViewRecursive(FNode& current) {
     if (!current.IsDirectory()) return;
+    if (current.Name().starts_with('.')) return;
+
     GUI& gui = this->gui;
 
     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_NavLeftJumpsBackHere | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
@@ -399,7 +401,7 @@ void AssetManager::RenderSelectedFolderContent() {
 
 void AssetManager::RenderContextMenu() {
     GUI& gui = this->gui.get();
-    Assets& assets = *gui.CORE->GetAssets();
+    [[maybe_unused]] Assets& assets = *gui.CORE->GetAssets();
 
     bool isDisabled = !hasContent;
     if (isDisabled) { ImGui::BeginDisabled(); }
@@ -425,6 +427,10 @@ void AssetManager::RenderContextMenu() {
             static constexpr auto component = cat(FileIcons::COMPONENT_ICON, " ", "Component");
             if (ImGui::MenuItem(component)) {
                 gui.ShowNewComponentAssetModal(*currentFolder);
+            }
+            static constexpr auto sampler = cat(FileIcons::SAMPLER_ICON, " ", "Sampler");
+            if (ImGui::MenuItem(sampler)) {
+                gui.ShowNewSamplerAssetModal(*currentFolder);
             }
             static constexpr auto shader = cat(FileIcons::SHADER_ICON, " ", "Shader");
             if (ImGui::BeginMenu(shader)) {
@@ -464,7 +470,14 @@ void AssetManager::RenderContextMenu() {
             if (ImGui::MenuItem(shaderProgram)) {
                 gui.ShowNewShaderProgramAssetModal(*currentFolder);
             }
-
+            static constexpr auto material = cat(FileIcons::MATERIAL_ICON, " ", "Material");
+            if (ImGui::MenuItem(material)) {
+                gui.ShowNewMaterialAssetModal(*currentFolder);
+            }
+            static constexpr auto frameBuffer = cat(FileIcons::FRAMEBUFFER_ICON, " ", "Frame Buffer");
+            if (ImGui::MenuItem(frameBuffer)) {
+                gui.ShowNewFrameBufferAssetModal(*currentFolder);
+            }
             ImGui::EndMenu();
         }
 
@@ -515,7 +528,6 @@ void AssetManager::SetCurrentFolder(FNode* folder) {
     }
 
     if (!folder->IsDirectory()) { return; }
-    GUI& gui = this->gui;
 
     if (folder == root || folder == currentFolder->ParentNode()) {
         SetSelectedNode(nullptr);
@@ -545,7 +557,7 @@ bool AssetManager::FileFilter::CheckVisibility(const FNode& file) const {
     return true;
 }
 
-void AssetManager::OnProjectLoaded(Project& project) {
+void AssetManager::OnProjectLoaded([[maybe_unused]] Project& project) {
     hasContent = true;
     assets = gui.get().CORE->GetAssets().get();
     root = &assets->Root();

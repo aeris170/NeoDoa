@@ -10,7 +10,8 @@
 #include "Shader.hpp"
 #include "Entity.hpp"
 #include "Registry.hpp"
-#include "TypedefsAndConstants.hpp"
+
+typedef GLuint VBO;
 
 struct Model;
 struct Mesh;

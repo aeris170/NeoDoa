@@ -14,5 +14,4 @@ struct ChildComponent {
 private:
     Entity entity{ NULL_ENTT };
     Entity parent{ NULL_ENTT };
-    Entity _oldParent{ NULL_ENTT };
 };

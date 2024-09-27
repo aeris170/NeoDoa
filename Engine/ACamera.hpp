@@ -4,18 +4,23 @@
 
 struct ACamera {
 
-    glm::vec3 eye{ 0, 0, 0 };
-    glm::vec3 forward{ 0, 0, -1 };
-    glm::vec3 up{ 0, 1, 0 };
-    float zoom{ 1 };
-
-    glm::mat4 _viewMatrix;
-    glm::mat4 _projectionMatrix;
-    glm::mat4 _viewProjectionMatrix;
-
-    virtual ~ACamera() = default;
+    virtual ~ACamera() = 0;
 
     virtual void UpdateView() = 0;
     virtual void UpdateProjection() = 0;
     virtual void UpdateViewProjection() = 0;
+
+    const glm::mat4& GetViewMatrix() const noexcept;
+    const glm::mat4& GetProjectionMatrix() const noexcept;
+    const glm::mat4& GetViewProjectionMatrix() const noexcept;
+
+    glm::vec3 Eye{ 0, 0, 0 };
+    glm::vec3 Forward{ 0, 0, -1 };
+    glm::vec3 Up{ 0, 1, 0 };
+    float Zoom{ 1 };
+
+protected:
+    glm::mat4 viewMatrix;
+    glm::mat4 projectionMatrix;
+    glm::mat4 viewProjectionMatrix;
 };

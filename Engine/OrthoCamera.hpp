@@ -1,19 +1,19 @@
 #pragma once
 
-#include "ACamera.hpp"
+#include <Engine/ACamera.hpp>
 
 struct OrthoCamera : ACamera {
-    float _left;
-    float _right;
-    float _bottom;
-    float _top;
-    float _near;
-    float _far;
+    float LeftPlane;
+    float RightPlane;
+    float BottomPlane;
+    float TopPlane;
+    float NearPlane;
+    float FarPlane;
 
-    OrthoCamera(float left, float right, float bottom, float top, float near, float far);
+    OrthoCamera(float left, float right, float bottom, float top, float near, float far) noexcept;
 
-    void Set(float left, float right, float bottom, float top, float near, float far);
-    void UpdateView() override;
-    void UpdateProjection() override;
-    void UpdateViewProjection() override;
+    void Set(float left, float right, float bottom, float top, float near, float far) noexcept;
+    void UpdateView() noexcept override;
+    void UpdateProjection() noexcept override;
+    void UpdateViewProjection() noexcept override;
 };

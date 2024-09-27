@@ -9,8 +9,14 @@
 #include "Project.hpp"
 
 FNode::ChildrenList::ChildrenList(std::vector<std::unique_ptr<FNode>>& children) noexcept : children(children) {}
+
+FNode& FNode::ChildrenList::operator[](std::size_t idx)             { return *children.operator[](idx).get(); }
+const FNode& FNode::ChildrenList::operator[](std::size_t idx) const { return *children.operator[](idx).get(); }
+
 FNode::ChildrenList::Iterator<FNode> FNode::ChildrenList::begin() { return { std::to_address(children.begin()) }; }
 FNode::ChildrenList::Iterator<FNode> FNode::ChildrenList::end()   { return { std::to_address(children.end())   }; }
+
+size_t FNode::ChildrenList::size() const { return children.size(); }
 
 FNode::FNode(const FNodeCreationParams& params) noexcept :
     owner(params.owner),
@@ -55,7 +61,7 @@ std::filesystem::path FNode::FolderPath() const {
         return parent->Path();
     } else {
         auto pos = fullName.find_last_of(std::filesystem::path::preferred_separator);
-        if (pos != -1) {
+        if (pos != std::string::npos) {
             return fullName.substr(0, pos);
         } else {
             DOA_LOG_ERROR("FNode::FolderPath cannot calculate folder path!");
@@ -126,7 +132,12 @@ bool FNode::ReadContent() const {
     std::ifstream file(Path(), std::ifstream::in | std::ifstream::binary);
 
     if (file.is_open()) {
-        std::getline(file, content, '\0');
+        file.seekg(0, std::ios::end);
+        std::streampos fileSize = file.tellg();
+        file.seekg(0, std::ios::beg);
+
+        content.resize(fileSize);
+        file.read(content.data(), fileSize);
         file.close();
         return true;
     }

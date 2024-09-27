@@ -27,11 +27,11 @@ struct Gizmos {
 
     void Render(Scene& scene);
 
+    Entity selectedEntity{ NULL_ENTT };
 private:
     std::reference_wrapper<SceneViewport> sv;
 
     // -- //
-    Entity selectedEntity{ NULL_ENTT };
     void OnEntitySelected(Entity entity);
     void OnEntityDeselected();
     void OnEntityDeleted(Entity entity);

@@ -5,7 +5,7 @@
 
 #include <Editor/UserDefinedComponentStorage.hpp>
 
-void DeserializeUserDefinedComponentStorage(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity, const std::string& name) {
+void DeserializeUserDefinedComponentStorage(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity, [[maybe_unused]] const std::string& name) {
     if (!scene.HasComponent<UserDefinedComponentStorage>(entity)) {
         scene.EmplaceComponent<UserDefinedComponentStorage>(entity);
     }

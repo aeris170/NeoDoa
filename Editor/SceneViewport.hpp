@@ -9,7 +9,7 @@
 
 #include <Engine/Scene.hpp>
 #include <Engine/Resolution.hpp>
-#include <Engine/FrameBuffer.hpp>
+#include <Engine/GPUFrameBuffer.hpp>
 
 #include <Editor/Gizmos.hpp>
 
@@ -47,10 +47,15 @@ struct SceneViewport {
 
     ViewportCamera& GetViewportCamera();
 
+    ImVec2 GetViewportCameraSettingsButtonPosition() const noexcept;
+
 private:
     glm::vec2 viewportPosition{};
     Resolution viewportSize{};
-    std::unique_ptr<FrameBuffer> viewportFramebuffer{ nullptr };
+    GPUFrameBuffer viewportFramebufferMultisampled;
+    GPUFrameBuffer viewportFramebuffer;
+
+    ImVec2 viewportCameraSettingsButtonPosition;
 
     void ReallocBufferIfNeeded(Resolution size);
     void RenderSceneToBuffer(Scene& scene);

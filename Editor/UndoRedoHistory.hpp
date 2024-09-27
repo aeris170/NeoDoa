@@ -18,6 +18,7 @@ struct UndoRedoHistory {
 
 private:
     bool isOpen{ false };
+    bool isClosing{ false };
     bool isMouseCaught{ false };
     int stackDelta{};
 };

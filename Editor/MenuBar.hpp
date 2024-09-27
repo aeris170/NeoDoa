@@ -8,7 +8,7 @@
 
 #include <imgui.h>
 
-#include <Engine/Texture.hpp>
+#include <Engine/GPUTexture.hpp>
 
 struct GUI;
 
@@ -34,7 +34,7 @@ private:
         static constexpr auto PRODUCT_DESCRIPTION{ "A game engine. Build: Windows" };
 
         std::reference_wrapper<MenuBar> mb;
-        Texture neodoaBanner;
+        GPUTexture neodoaBanner;
         std::vector<std::tuple<std::string, std::string>> licences;
 
         bool ab{ false }, ab_open{ true }, lib_open{ true };

@@ -19,6 +19,10 @@ bool UndoRedoHistory::Begin() noexcept {
     ImGui::PushID(WindowStrings::UndoRedoHistoryWindowName);
     bool visible = ImGui::Begin(WindowStrings::UndoRedoHistoryWindowTitleID, &isOpen);
 
+    if (!isOpen) {
+        isClosing = true;
+    }
+
     return visible;
 }
 
@@ -50,7 +54,7 @@ void UndoRedoHistory::Render() noexcept {
     if (isMouseCaught && ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
         float drag = ImGui::GetMouseDragDelta().y;
         float elemSize = ImGui::GetTextLineHeightWithSpacing();
-        int newStackDelta = drag / elemSize;
+        int newStackDelta = static_cast<int>(drag / elemSize);
         int diff = newStackDelta - stackDelta;
         while (diff > 0) { // Undo
             gui.UndoLastCommand();
@@ -75,6 +79,10 @@ void UndoRedoHistory::Render() noexcept {
 }
 
 void UndoRedoHistory::End() noexcept {
+    if (!isOpen && !isClosing) { return; }
+
+    isClosing = false;
+
     ImGui::End();
     ImGui::PopID();
 }

@@ -22,7 +22,7 @@ MetaAssetInfo DeserializeMetaAssetInfo(const std::string& data) {
     tinyxml2::XMLDocument doc;
     tinyxml2::XMLError err = doc.Parse(data.c_str());
     if (err != tinyxml2::XML_SUCCESS) {
-        DOA_LOG_WARNING("Couldn't deserialize meta asset info!\n\n%s", data);
+        DOA_LOG_WARNING("Couldn't deserialize meta asset info!\n\n%s", data.c_str());
     }
 
     const auto* rootElement = doc.RootElement();
@@ -42,7 +42,7 @@ MetaAssetInfoBankDeserializationResult DeserializeMetaAssetInfoBank(const std::s
     tinyxml2::XMLDocument doc;
     tinyxml2::XMLError err = doc.Parse(data.c_str());
     if (err != tinyxml2::XML_SUCCESS) {
-        DOA_LOG_WARNING("Couldn't deserialize meta asset info bank! All custom set icons are, sadly, gone. You must re-apply your custom asset icons. %s", data);
+        DOA_LOG_WARNING("Couldn't deserialize meta asset info bank! All custom set icons are, sadly, gone. You must re-apply your custom asset icons. %s", data.c_str());
         return { true, {} };
     }
 
@@ -71,12 +71,37 @@ static const char* FindIconInIcons(const char* icon) {
             return fa_icon;
         }
     }
+    for (const auto& [fa_icon, _] : FileIcons::ComponentIcons) {
+        if (std::strcmp(fa_icon, icon) == 0) {
+            return fa_icon;
+        }
+    }
+    for (const auto& [fa_icon, _] : FileIcons::SamplerIcons) {
+        if (std::strcmp(fa_icon, icon) == 0) {
+            return fa_icon;
+        }
+    }
     for (const auto& [fa_icon, _] : FileIcons::TextureIcons) {
         if (std::strcmp(fa_icon, icon) == 0) {
             return fa_icon;
         }
     }
-    for (const auto& [fa_icon, _] : FileIcons::ComponentIcons) {
+    for (const auto& [fa_icon, _] : FileIcons::ShaderIcons) {
+        if (std::strcmp(fa_icon, icon) == 0) {
+            return fa_icon;
+        }
+    }
+    for (const auto& [fa_icon, _] : FileIcons::ShaderProgramIcons) {
+        if (std::strcmp(fa_icon, icon) == 0) {
+            return fa_icon;
+        }
+    }
+    for (const auto& [fa_icon, _] : FileIcons::MaterialIcons) {
+        if (std::strcmp(fa_icon, icon) == 0) {
+            return fa_icon;
+        }
+    }
+    for (const auto& [fa_icon, _] : FileIcons::FrameBufferIcons) {
         if (std::strcmp(fa_icon, icon) == 0) {
             return fa_icon;
         }

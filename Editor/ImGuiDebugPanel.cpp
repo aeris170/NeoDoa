@@ -1,6 +1,13 @@
+// This is external code. Disabling warnings.
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wsign-compare"
+#endif
+
 #if _DEBUG
 
 #include <Editor/TextEditor.hpp>
+#include <Editor/ImGuiExtensions.hpp>
 
 void TextEditor::ImGuiDebugPanel(const std::string& panelName)
 {
@@ -17,21 +24,21 @@ void TextEditor::ImGuiDebugPanel(const std::string& panelName)
 	}
 	if (ImGui::CollapsingHeader("Lines")) {
 		for (int i = 0; i < mLines.size(); i++) {
-			ImGui::Text("%d", mLines[i].size());
+			ImGuiFormattedText("{}", mLines[i].size());
 		}
 	}
 	if (ImGui::CollapsingHeader("Undo")) {
 		static std::string numberOfRecordsText;
 		numberOfRecordsText = "Number of records: " + std::to_string(mUndoBuffer.size());
-		ImGui::Text("%s", numberOfRecordsText.c_str());
+		ImGui::TextUnformatted(numberOfRecordsText.c_str());
 		ImGui::DragInt("Undo index", &mState.mCurrentCursor);
 		for (int i = 0; i < mUndoBuffer.size(); i++) {
 			if (ImGui::CollapsingHeader(std::to_string(i).c_str())) {
 
 				ImGui::Text("Operations");
 				for (int j = 0; j < mUndoBuffer[i].mOperations.size(); j++) {
-					ImGui::Text("%s", mUndoBuffer[i].mOperations[j].mText.c_str());
-					ImGui::Text(mUndoBuffer[i].mOperations[j].mType == UndoOperationType::Add ? "Add" : "Delete");
+					ImGui::TextUnformatted(mUndoBuffer[i].mOperations[j].mText.c_str());
+					ImGui::TextUnformatted(mUndoBuffer[i].mOperations[j].mType == UndoOperationType::Add ? "Add" : "Delete");
 					ImGui::DragInt2("Start", &mUndoBuffer[i].mOperations[j].mStart.mLine);
 					ImGui::DragInt2("End", &mUndoBuffer[i].mOperations[j].mEnd.mLine);
 					ImGui::Separator();
@@ -231,4 +238,8 @@ void TextEditor::UnitTests() {
 		assert(!FindNextOccurrence("lalal", 4, { 3, 5 }, outStart, outEnd)); // not found
 	}
 }
+#endif
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
 #endif

@@ -7,10 +7,9 @@
 struct FNode;
 
 enum class ComponentCompilerMessageType {
-    INFO,
-    WARNING,
-    ERROR,
-    ComponentCompilerMessageType_COUNT
+    Info,
+    Warning,
+    Error,
 };
 struct ComponentCompilerMessage {
     int lineNo, columnNo;

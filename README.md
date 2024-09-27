@@ -12,27 +12,29 @@
 **NeoDoa** is still under development and is not ready for producing games, but it will be 😎 Below are the finished and upcoming features.
 
 * **Graphics**
-	* OpenGL 4.5 Core Profile based renderer
-	* Agressive Instancing and Batched Rendering!!
-	* WIP: Point and spot and custom lights
-	* WIP: High Quality Text Rendering using [Signed Distance Fields](https://steamcdn-a.akamaihd.net/apps/valve/2007/SIGGRAPH2007_AlphaTestedMagnification.pdf)
-	* WIP: Shadows
-	* WIP: Waters
-	* WIP: Skybox
-	* WIP: Deferred Shading
-	* WIP: Skeletal Animations
+	* **Hot-swappable graphics backends**
+	* OpenGL 4.6 Core Profile
+	* WIP: OpenGL 3.3 Core Profile
+	* WIP: Direct3D12
+	* WIP: Direct3D11
+	* WIP: Vulkan
 * **Collision & Physics**
 	* WIP: With PhysX
 * **Audio**
  	* WIP: With OpenAL
 * **Asset Loading**
+	* **Don't bother** - automatic importing and categorizing of assets
+	* **Have control** - import/load/unload assets at will
+	* **Don't pollute** - use ubiquitous file formats, without needing special formats only NeoDoa can interpret
+	* **Never crash** - get nice error lists on why loads have failed and placeholders for unloaded assets
 	* 3D models loading via [Assimp](https://www.assimp.org/)
 	* Texture loading via [stb_image](https://github.com/nothings/stb)
 * **Scripting system**
-	* Scripting via [AngelScript](https://www.angelcode.com/angelscript/)
-	* With true ECS!
+	* Pure ECS
+	* Define components and implement systems in C++
 * **Input**
-	* Mouse, Keyboard. 
+	* Mouse
+	* Keyboard
 	* WIP: Controller
 	* WIP: Joystick
 * **Editor**
@@ -79,6 +81,7 @@ After this, `git pull` should print `Already up to date.` Proceed to the next st
 **If you are using Windows, please skip this step.**
 
 **NeoDoa** requires various installations from `apt-get` to compile. These are listed below:
+> libc++-dev libc++abi-dev
 > build-essential
 > curl zip unzip tar
 > pkg-config
@@ -87,7 +90,7 @@ After this, `git pull` should print `Already up to date.` Proceed to the next st
 > xorg xorg-dev
 > libglu1-mesa libglu1-mesa-dev
 > autoconf autoconf-archive
->
+> automake libtool libltdl-dev
 
 These can either be install manually or by launching the helper script by executing:
 ```sh
@@ -98,34 +101,28 @@ sh ./scripts/fetch_apt_get.sh
 #### 3. Fetching Dependencies
 
 **NeoDoa** uses `vcpkg` to manage packages and depends on packages listed below: 
-> angelscript[addons]
-> argparse
-> assimp
-> imgui[core,docking-experimental,glfw-binding,opengl3-binding]
-> imguizmo
-> entt
-> eventpp
-> glew 
-> glfw3
-> glm
-> icu
-> lunasvg
-> stb
+> angelscript[addons],
+> argparse,
+> assimp,
+> cppzmq,
+> entt,
+> eventpp,
+> glew,
+> glfw3,
+> glm,
+> icu,
+> imgui[core,docking-experimental,glfw-binding,sdl2-binding,opengl3-binding,vulkan-binding],
+> imguizmo,
+> lunasvg,
+> stb,
 > tinyxml2
 
-The packages above must be installed by launching the helper script [`FetchDependencies.sh`](https://github.com/aeris170/NeoDoa/blob/master/FetchDependencies.sh). This script takes two arguments
-`platform` and `clonemode`. `platform` defaults to `x64-windows` and can be overriden to `x64-linux` or your OS of choosing
-by passing it as the first argument. `clonemode` governs how the script should try to clone `vcpkg` repository. Passing nothing
-defaults to `https`, only `https` and `ssh` are accepted.
+The packages above must be installed by launching the helper script [`vcpkg.sh`](https://github.com/aeris170/NeoDoa/blob/master/scripts/vcpkg.sh) or
+[`vcpkg.ps1`](https://github.com/aeris170/NeoDoa/blob/master/scripts/vcpkg.ps1). The script takes two arguments `clonemode` and `vcpkg-dir`.
 
-Examples:
-```sh
-chmod +x ./FetchDependencies.sh
-sh FetchDependencies.sh                  # Fetch packages for x64-windows using https
-sh FetchDependencies.sh x64-windows ssh  # Fetch packages for x64-windows using ssh (must have an ssh key set-up)
-sh FetchDependencies.sh x64-linux        # Fetch packages for x64-linux   using https (doesn't work on our test systems)
-sh FetchDependencies.sh x64-linux ssh    # Fetch packages for x64-linux   using ssh (must have an ssh key set-up)
-```
+* `clonemode` controls how to clone the `vcpkg` repository. Passing nothing defaults to `ssh`, only `https` and `ssh` are accepted.
+
+* `vcpkg-dir` controls where to clone the `vcpkg` repository. Passing nothing defaults to `./vcpkg`.
 
 You should see no errors when this scripts completes. If you do, please create an issue [here](https://github.com/aeris170/NeoDoa/issues).
 
@@ -191,7 +188,3 @@ Please follow these steps to report a bug
 2. **Create a testcase** - please create the smallest isolated testcase that you can that reproduces your bug
 
 3. **Share as much information as possible** - everything little helps, OS, IDE, GPU, all that stuff.
-
-## NeoDoa Platform
-
-**NeoDoa** is an open source cross-platform game engine which you can use to develop games on Windows, Linux and MacOS (although untested on).

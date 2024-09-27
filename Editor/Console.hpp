@@ -42,7 +42,7 @@ private:
 
     LogSeverity selectedSeverity{ LogSeverity::TRACE };
 
-    int oldCount{ 0 };
+    unsigned oldCount{ 0 };
 
     void RenderTopPanel();
     void RenderFilterButtons();

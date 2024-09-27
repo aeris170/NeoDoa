@@ -10,7 +10,7 @@ bool CheckProjectValidity(const ProjectData& data) noexcept {
     std::filesystem::path path = data.AbsolutePath;
     FNode projectFile{{
         .name = (path / data.Name).string(),
-        .ext = Assets::PROJ_EXT
+        .ext = Assets::ProjectExtension
     }};
     ProjectDeserializationResult pdr = DeserializeProject(&projectFile);
     return !pdr.erred;

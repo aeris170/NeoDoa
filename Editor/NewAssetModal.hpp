@@ -17,15 +17,21 @@ struct NewAssetModal {
 
     void ShowSceneCreationModal(FNode& currentFolder) const;
     void ShowComponentCreationModal(FNode& currentFolder) const;
+    void ShowSamplerCreationModal(FNode& currentFolder) const;
     void ShowVertexShaderCreationModal(FNode& currentFolder) const;
     void ShowTessellationControlShaderCreationModal(FNode& currentFolder) const;
     void ShowTessellationEvaluationShaderCreationModal(FNode& currentFolder) const;
     void ShowGeometryShaderCreationModal(FNode& currentFolder) const;
     void ShowFragmentShaderCreationModal(FNode& currentFolder) const;
     void ShowShaderProgramCreationModal(FNode& currentFolder) const;
+    void ShowMaterialCreationModal(FNode& currentFolder) const;
+    void ShowFrameBufferCreationModal(FNode& currentFolder) const;
 
     void Hide() const;
 private:
+
+    static constexpr size_t BufferSize{ 128 };
+
     std::reference_wrapper<GUI> gui;
     mutable bool isModalActive{ false };
     mutable bool isModalOpen{ true };
@@ -36,7 +42,7 @@ private:
         */
         NameSelection, Confirmation
     } stage;
-    mutable std::array<char, 128> buf;
+    mutable std::array<char, BufferSize> buf;
     mutable bool badName;
     mutable std::string titleText;
     mutable std::string confirmText;
@@ -45,13 +51,16 @@ private:
         enum class AssetType {
             Scene,
             Component,
+            Sampler,
+            Texture,
             VertexShader,
             TessellationControlShader,
             TessellationEvaluationShader,
             GeometryShader,
             FragmentShader,
             ShaderProgram,
-            Texture,
+            Material,
+            FrameBuffer,
             Model
         } type;
         FNode* currentFolder{ nullptr };
@@ -67,12 +76,15 @@ private:
     void CreateAsset();
     void CreateSceneAsset();
     void CreateComponentAsset();
+    void CreateSamplerAsset();
     void CreateVertexShaderAsset();
     void CreateTessellationControlAsset();
     void CreateTessellationEvaluationAsset();
     void CreateGeometryShaderAsset();
     void CreateFragmentShaderAsset();
     void CreateShaderProgramAsset();
+    void CreateMaterialAsset();
+    void CreateFrameBufferAsset();
 
     friend struct GUI;
 

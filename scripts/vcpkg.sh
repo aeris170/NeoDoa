@@ -1,92 +1,132 @@
-if [ -z "$1" ]; then
-    echo "No triplet supplied, defaulting to x64-windows"
-	platform="x64-windows"
-else
-	platform=$1
-fi
+WHITE="\033[1;37m"
+YELLOW="\033[1;33m"
+GREEN="\033[1;32m"
+RED="\033[1;31m"
+RESET="\033[0m"
 
-if [ -z "$2" ]; then
-    echo "No clonemode supplied, defaulting to https"
+# Check if clonemode argument is provided
+if [ -z "$1" ]; then
+    echo -e "${YELLOW}No clonemode supplied, defaulting to https${RESET}"
 	clonemode="https"
 else
-	clonemode=$2
+	clonemode=$1
 fi
 
-if [ -z "$3" ]; then
-    echo "No vcpkg path supplied, defaulting to ./vcpkg"
+# Check if vcpkg path argument is provided
+if [ -z "$2" ]; then
+    echo -e "${YELLOW}No vcpkg path supplied, defaulting to ./vcpkg${RESET}"
 	path="./vcpkg"
 else
-	path=$3
+	path=$2
 fi
 
-mkdir -p $path
-cd $path
-if [ "$clonemode" = "https" ]; then
-    git clone https://github.com/Microsoft/vcpkg.git .
-elif [ "$clonemode" = "ssh" ]; then
-    git clone git@github.com:microsoft/vcpkg.git .
+echo -e "${WHITE}Clonemode: $clonemode${RESET}"
+echo -e "${WHITE}vcpkg path: $path${RESET}"
+
+# Check if the directory exists, if not, create it
+if [ ! -d "$path" ]; then
+    echo -e "${WHITE}Creating directory: $path${RESET}"
+    mkdir -p "$path"
 else
-	echo '\033[0;31mIncorrect clonemode! Expected https or ssh got something else!'
-	exit
+    echo -e "${YELLOW}Directory already exists: $path${RESET}"
 fi
 
-git pull
-chmod +x bootstrap-vcpkg.sh
-./bootstrap-vcpkg.sh
-./vcpkg integrate install
+# Change directory to the vcpkg path
+echo -e "${WHITE}Changing to directory: $path${RESET}"
+cd "$path"
 
-echo "Installing AngelScript"
-./vcpkg install angelscript[addons] --triplet $platform --recurse
-
-echo "Installing argparse"
-./vcpkg install argparse --triplet $platform
-
-echo "Installing Assimp"
-./vcpkg install assimp --triplet $platform
-
-echo "Installing ImGui"
-# Base ImGui package list
-imgui_packages="core,docking-experimental,glfw-binding,sdl2-binding,opengl3-binding,vulkan-binding"
-
-# Add DirectX bindings if the triplet is x64-windows
-if [ "$platform" = "x64-windows" ]; then
-    imgui_packages="$imgui_packages,dx11-binding,dx12-binding"
+# Clone vcpkg using the provided clonemode
+echo -e "${WHITE}Cloning vcpkg...${RESET}"
+if [ "$clonemode" = "ssh" ]; then
+    git clone git@github.com:microsoft/vcpkg.git . 2>&1 | tee cloneOutput.log
+elif [ "$clonemode" = "https" ]; then
+    git clone https://github.com/Microsoft/vcpkg.git . 2>&1 | tee cloneOutput.log
+else
+    echo -e "${RED}Incorrect clonemode! Expected https or ssh, got something else${RESET}"
+    cd ..
+    exit 1
 fi
 
-# Install the ImGui packages
-./vcpkg install imgui[$imgui_packages] --triplet $platform --recurse
-./vcpkg install imguizmo --triplet $platform
+# Check if clone was successful
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Error during git clone.${RESET}"
+    cat cloneOutput.log
+    rm cloneOutput.log
+    cd ..
+    exit 1
+fi
+rm cloneOutput.log
 
-echo "Installing EnTT"
-./vcpkg install entt --triplet $platform
+# Pull the latest changes
+echo -e "${WHITE}Pulling latest vcpkg changes...${RESET}"
+git pull 2>&1 | tee pullOutput.log
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Error during git pull.${RESET}"
+    cat pullOutput.log
+    rm pullOutput.log
+    cd ..
+    exit 1
+fi
+rm pullOutput.log
 
-echo "Istalling Eventpp"
-./vcpkg install eventpp --triplet $platform
+# Run the bootstrap script
+if [ -f "./bootstrap-vcpkg.sh" ]; then
+    echo -e "${WHITE}Running bootstrap-vcpkg.sh...${RESET}"
+    ./bootstrap-vcpkg.sh 2>&1 | tee bootstrapOutput.log
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}Error during bootstrap.${RESET}"
+        cat bootstrapOutput.log
+        rm bootstrapOutput.log
+        cd ..
+        exit 1
+    fi
+    rm bootstrapOutput.log
+else
+    echo -e "${RED}Bootstrap script not found!${RESET}"
+    cd ..
+    exit 1
+fi
 
-echo "Installing GLEW"
-./vcpkg install glew --triplet $platform
+# Install required packages
+echo -e "${WHITE}Installing required vcpkg packages...${RESET}"
+./vcpkg install \
+    'angelscript[addons]' \
+    'argparse' \
+    'assimp' \
+    'cppzmq' \
+    'entt' \
+    'eventpp' \
+    'glew' \
+    'glfw3' \
+    'glm' \
+    'icu' \
+    'imgui[core,docking-experimental,glfw-binding,sdl2-binding,opengl3-binding,vulkan-binding]' \
+    'imguizmo' \
+    'lunasvg' \
+    'stb' \
+    'tinyxml2' \
+    --recurse 2>&1 | tee installOutput.log
 
-echo "Installing GLFW"
-./vcpkg install glfw3 --triplet $platform
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Error during vcpkg install.${RESET}"
+    cat installOutput.log
+    rm installOutput.log
+    cd ..
+    exit 1
+fi
+rm installOutput.log
 
-echo "Installing GLM"
-./vcpkg install glm --triplet $platform
+# Integrate vcpkg
+echo -e "${WHITE}Integrating vcpkg...${RESET}"
+./vcpkg integrate install 2>&1 | tee integrateOutput.log
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Error during vcpkg integrate.${RESET}"
+    cat integrateOutput.log
+    rm integrateOutput.log
+    cd ..
+    exit 1
+fi
+rm integrateOutput.log
 
-echo "Installing ICU"
-./vcpkg install icu --triplet $platform
-
-echo "Installing LunaSVG"
-./vcpkg install lunasvg --triplet $platform
-
-echo "Installing STB"
-./vcpkg install stb --triplet $platform
-
-echo "Installing TinyXML2"
-./vcpkg install tinyxml2 --triplet $platform
-
-echo "Installing ZeroMQ (cppzmp)"
-./vcpkg install cppzmq --triplet $platform
-
-./vcpkg upgrade
-
-./vcpkg integrate install
+# Notify completion
+echo -e "${GREEN}vcpkg setup complete!${RESET}"

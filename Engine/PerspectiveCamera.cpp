@@ -1,34 +1,31 @@
-#include "PerspectiveCamera.hpp"
+#include <Engine/PerspectiveCamera.hpp>
 
 #include <algorithm>
 
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-PerspectiveCamera::PerspectiveCamera(float fov, float aspect, float near, float far) :
-    _fov(fov),
-    _aspect(aspect),
-    _near(near),
-    _far(far) {}
+PerspectiveCamera::PerspectiveCamera(float fov, float aspect, float near, float far) noexcept :
+    FOV(fov),
+    AspectRatio(aspect),
+    NearPlane(near),
+    FarPlane(far) {}
 
-void PerspectiveCamera::Set(float fov, float aspect, float near, float far) {
-    _fov = fov;
-    _aspect = aspect;
-    _near = near;
-    _far = far;
+void PerspectiveCamera::Set(float fov, float aspect, float near, float far) noexcept {
+    FOV = fov;
+    AspectRatio = aspect;
+    NearPlane = near;
+    FarPlane = far;
 }
-
-void PerspectiveCamera::UpdateView() {
-    forward = glm::normalize(forward);
-    up = glm::normalize(up);
-    _viewMatrix = glm::lookAt(eye, eye + forward, up);
+void PerspectiveCamera::UpdateView() noexcept {
+    Forward = glm::normalize(Forward);
+    Up = glm::normalize(Up);
+    viewMatrix = glm::lookAt(Eye, Eye + Forward, Up);
 }
-
-void PerspectiveCamera::UpdateProjection() {
-    zoom = std::max(1.f, zoom);
-    _projectionMatrix = glm::perspective(glm::radians(_fov / zoom), _aspect, _near, _far);
+void PerspectiveCamera::UpdateProjection() noexcept {
+    Zoom = std::max(1.f, Zoom);
+    projectionMatrix = glm::perspective(glm::radians(FOV / Zoom), AspectRatio, NearPlane, FarPlane);
 }
-
-void PerspectiveCamera::UpdateViewProjection() {
-    _viewProjectionMatrix = _projectionMatrix * _viewMatrix;
+void PerspectiveCamera::UpdateViewProjection() noexcept {
+    viewProjectionMatrix = projectionMatrix * viewMatrix;
 }

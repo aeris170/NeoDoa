@@ -1,11 +1,14 @@
 #pragma once
 
+#include <functional>
+
 #include <imgui.h>
 
-#include "TypedefsAndConstants.hpp"
+#include <Engine/Window.hpp>
 
-struct GLFWwindow;
 struct ImGuiContext;
+
+using ImGuiFunction = std::function<void(float)>;
 
 inline const ImVec4 WINDOW_BG{ 0.1f, 0.105f, 0.11f, 1.0f };
 inline const ImVec4 WINDOW_BG_ALT{ 0.2f, 0.205f, 0.21f, 1.0f };
@@ -40,8 +43,8 @@ inline const ImWchar ICONS_RANGES_TURKISH[] = {
     0
 };
 
-ImGuiContext* ImGuiInit(GLFWwindow* window);
-void ImGuiSetUpWindowIcons(std::vector<GLFWimage>&& icons);
+ImGuiContext* ImGuiInit(IWindow& window);
+void ImGuiSetUpWindowIcons(WindowIconPack icons);
 
 void ImGuiRender(float delta);
 void ImGuiAddRenderCommand(ImGuiFunction function);

@@ -11,11 +11,13 @@
 #include <Engine/TransformComponent.hpp>
 #include <Engine/ParentComponent.hpp>
 #include <Engine/ChildComponent.hpp>
+#include <Engine/MultiMaterialComponent.hpp>
 #include <Engine/CameraComponent.hpp>
 
 #include <Editor/GUI.hpp>
 #include <Editor/Icons.hpp>
 #include <Editor/Observer.hpp>
+#include <Editor/AssetFilter.hpp>
 #include <Editor/ComponentWidgets.hpp>
 #include <Editor/UserDefinedComponentStorage.hpp>
 
@@ -55,10 +57,8 @@ void TransformComponentUI::Render(GUI& gui, const TransformComponent& transformC
     {
         glm::quat quat = transformComponent.GetLocalRotation();
         glm::vec3 eulersDeg(glm::degrees(glm::eulerAngles(quat)));
-        glm::vec3 old(eulersDeg);
         if (FancyVector3Widget(UINames[nameof(TransformComponent::localRotation)], eulersDeg)) {
-            quat = quat * glm::quat(glm::radians(eulersDeg - old));
-            gui.ExecuteCommand<RotateEntityCommand>(transformComponent.GetEntity(), quat);
+            gui.ExecuteCommand<RotateEntityCommand>(transformComponent.GetEntity(), glm::quat(glm::radians(eulersDeg)));
         }
     }
     // scale
@@ -86,15 +86,24 @@ void ChildComponentUI::Render(const ChildComponent& childComponent) {
         { nameof(ChildComponent::parent), Prettify(nameof(ChildComponent::parent)) }
     };
 
-    ChildComponent& child = const_cast<ChildComponent&>(childComponent);
+    [[maybe_unused]] ChildComponent& child = const_cast<ChildComponent&>(childComponent);
     UneditableEntityWidget(UINames[nameof(ChildComponent::parent)], childComponent.GetParent());
+}
+
+void MultiMaterialComponentUI::Render(GUI& gui, const MultiMaterialComponent& multiMaterialComponent) {
+    static unordered_string_map<std::string> UINames = {
+        { nameof(MultiMaterialComponent::materials), Prettify(nameof(MultiMaterialComponent::materials)) }
+    };
+
+    MultiMaterialComponent& mmc = const_cast<MultiMaterialComponent&>(multiMaterialComponent);
+    MultiAssetWidget(UINames[nameof(MultiMaterialComponent::materials)], mmc.GetMaterials(), *Core::GetCore()->GetAssets().get(), gui.GetMetaAssetInfoBank(), AssetFilters::IncludeMaterialAssets() | AssetFilters::IncludeTextureAssets());
 }
 
 void OrthoCameraComponentUI::Render(const OrthoCameraComponent& orthoCameraComponent) {
     static unordered_string_map<std::string> UINames = {
         { nameof(OrthoCameraComponent::isActiveAndRendering), Prettify(nameof(OrthoCameraComponent::isActiveAndRendering)) },
         { nameof(OrthoCameraComponent::data), Prettify("orthoCameraProperties") },
-        { nameof(FrameBuffer::ClearColor), Prettify("clearColor") },
+        { nameof(ClearColor), Prettify("clearColor") },
         { nameof(OrthoCameraComponent::frameBuffer), Prettify("resolution") }
     };
 
@@ -126,7 +135,7 @@ void PerspectiveCameraComponentUI::Render(const PerspectiveCameraComponent& pers
     static unordered_string_map<std::string> UINames = {
         { nameof(PerspectiveCameraComponent::isActiveAndRendering), Prettify(nameof(PerspectiveCameraComponent::isActiveAndRendering)) },
         { nameof(PerspectiveCameraComponent::data), Prettify("orthoCameraProperties") },
-        { nameof(FrameBuffer::ClearColor), Prettify("clearColor") },
+        { nameof(ClearColor), Prettify("clearColor") },
         { nameof(PerspectiveCameraComponent::frameBuffer), Prettify("resolution") }
     };
 
@@ -159,7 +168,7 @@ void UserDefinedComponentStorageUI::RenderComponentInstance(const ComponentInsta
     AssetHandle cmpAsset{ Core::GetCore()->GetAssets()->FindAsset(instance.ComponentAssetID()) };
     const auto& component{ cmpAsset->DataAs<Component>() };
     if (!cmpAsset.HasValue() || cmpAsset->HasErrorMessages()) { return; }
-    for (int i = 0; i < component.fields.size(); i++) {
+    for (size_t i = 0; i < component.fields.size(); i++) {
         auto& field{ component.fields[i] };
         const auto& type{ field.typeName };
         auto& value{ instance.MemberValues()[i] };
@@ -235,6 +244,13 @@ void ComponentUI::RenderChildComponent(const Observer& observer, const ChildComp
     bool show = ComponentUI::Begin(observer, nameof(ChildComponent));
     if (show) {
         ChildComponentUI::Render(childComponent);
+    }
+    ComponentUI::End(show);
+}
+void ComponentUI::RenderMultiMaterialComponent(const Observer& observer, const MultiMaterialComponent& multiMaterialComponent) {
+    bool show = ComponentUI::Begin(observer, nameof(MultiMaterialComponent));
+    if (show) {
+        MultiMaterialComponentUI::Render(observer.gui, multiMaterialComponent);
     }
     ComponentUI::End(show);
 }

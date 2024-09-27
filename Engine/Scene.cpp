@@ -1,22 +1,19 @@
-#include "Scene.hpp"
+#include <Engine/Scene.hpp>
 
 #include <glm/gtc/type_ptr.hpp>
 
-#include "Shader.hpp"
-#include "Model.hpp"
-#include "Renderer.hpp"
+#include <Engine/Core.hpp>
 
-#include "Core.hpp"
-
-#include "Log.hpp"
-#include "Texture.hpp"
-#include "TransformComponent.hpp"
-#include "IDComponent.hpp"
-#include "ParentComponent.hpp"
-#include "CameraComponent.hpp"
-#include "Project.hpp"
-#include "SceneSerializer.hpp"
-#include "SceneDeserializer.hpp"
+#include <Engine/Log.hpp>
+#include <Engine/Texture.hpp>
+#include <Engine/TransformComponent.hpp>
+#include <Engine/IDComponent.hpp>
+#include <Engine/ParentComponent.hpp>
+#include <Engine/ChildComponent.hpp>
+#include <Engine/CameraComponent.hpp>
+#include <Engine/Project.hpp>
+#include <Engine/SceneSerializer.hpp>
+#include <Engine/SceneDeserializer.hpp>
 
 Scene& Scene::GetLoadedScene() {
     static auto& core = Core::GetCore();
@@ -27,8 +24,6 @@ Scene& Scene::GetLoadedScene() {
 
 Scene::Scene(std::string_view name) noexcept :
     Name(name) {}
-
-Renderer::Stats Scene::GetRendererStats() const { return _renderer.stats; }
 
 Entity Scene::CreateEntity(std::string name, uint32_t desiredID) {
     Entity entt;
@@ -51,9 +46,21 @@ Entity Scene::CreateEntity(std::string name, uint32_t desiredID) {
 
 void Scene::DeleteEntity(Entity entt) {
     if (HasComponent<ParentComponent>(entt)) {
-        auto& parent = GetComponent<ParentComponent>(entt);
+        ParentComponent& parent = GetComponent<ParentComponent>(entt);
         for (const auto& child : parent.GetChildren()) {
             DeleteEntity(child);
+        }
+    }
+
+    if (HasComponent<ChildComponent>(entt)) {
+        const ChildComponent& child = GetComponent<ChildComponent>(entt);
+        assert(HasComponent<ParentComponent>(child.GetParent()));
+        ParentComponent& parent = GetComponent<ParentComponent>(child.GetParent());
+        auto search = std::ranges::find(parent.GetChildren(), entt);
+        assert(search != parent.GetChildren().end());
+        parent.GetChildren().erase(search);
+        if (parent.GetChildren().empty()) {
+            RemoveComponent<ParentComponent>(child.GetParent());
         }
     }
 
@@ -72,78 +79,9 @@ Scene Scene::Deserialize(const std::string& data) { return DeserializeScene(data
 
 Scene Scene::Copy(const Scene& scene) { return scene.Deserialize(scene.Serialize()); }
 
-void Scene::Update(float deltaTime) {
+void Scene::ExecuteSystems(bool isPlaying, float deltaTime) {
     for (entt::poly<System>& s : _systems) {
         s->Init(_registry);
         s->Execute(_registry, deltaTime);
     }
-}
-void Scene::Render() {
-    //auto& cam = GetActiveCamera();
-    //cam.UpdateView();
-    //cam.UpdateProjection();
-    //cam.UpdateViewProjection();
-
-    _registry.view<OrthoCameraComponent>().each([](Entity entt, OrthoCameraComponent& camera) {
-        if (!camera.IsActiveAndRendering()) { return; }
-        camera.UpdateMatrices();
-        auto& fbo = camera.GetFrameBuffer();
-        fbo.Bind();
-        fbo.ClearBuffers();
-        DOA_LOG_INFO("ortho camera attached to entity %d", EntityTo<int>(camera.GetEntity()));
-        //render stuff here
-    });
-
-    _registry.view<PerspectiveCameraComponent>().each([](Entity entt, PerspectiveCameraComponent& camera) {
-        if (!camera.IsActiveAndRendering()) { return; }
-        camera.UpdateMatrices();
-        auto& fbo = camera.GetFrameBuffer();
-        fbo.Bind();
-        fbo.ClearBuffers();
-        DOA_LOG_INFO("perspective camera attached to entity %d", EntityTo<int>(camera.GetEntity()));
-        //render stuff here
-    });
-
-    /*
-    _registry.view<ScriptComponent>().each([this, &angel](Entity entity, ScriptComponent& script) {
-        for (auto& module : script._modules) {
-            if (module._name == "ModelRenderer" && module._isActive) {
-                auto& modelRenderer = module.As<ModelRenderer>();
-                Model*& mdl = modelRenderer.Model();
-                Shader*& shdr = modelRenderer.Shader();
-                _renderer.Register(
-                    shdr->weak_from_this(),
-                    mdl->weak_from_this()
-                );
-
-                _renderer.Submit(
-                    shdr->weak_from_this(),
-                    mdl->weak_from_this(),
-                    entity
-                );
-            }
-        }
-    });
-    _renderer.Render(_registry, _activeCamera);
-    */
-
-#ifdef EDITOR
-    /*
-    // Find selected objects
-    std::vector<std::tuple<Transform&, ModelRenderer&>> selecteds;
-    _registry.view<ScriptComponent>().each([&](Entity entity, ScriptComponent& script) {
-        Transform& t = script["Transform"].As<Transform>();
-        if (t.Selected()) {
-            auto opt = script.TryGet("ModelRenderer");
-            if(opt.has_value()) {
-                ModelRenderer& mr = opt.value().get().As<ModelRenderer>();
-                selecteds.push_back({ t, mr });
-            }
-        }
-    });
-
-    // Outline them
-    _outlineRenderer.Render(selecteds, _activeCamera, SelectionOutlineColor);
-    */
-#endif
 }

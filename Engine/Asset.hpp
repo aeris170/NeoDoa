@@ -1,23 +1,25 @@
 #pragma once
 
-#include "UUID.hpp"
-#include "FileNode.hpp"
-
-#include <Engine/Scene.hpp>
-#include <Engine/Shader.hpp>
-#include <Engine/Component.hpp>
-//#include "Script.hpp"
-#include "Texture.hpp"
-#include "Model.hpp"
-//#include "Material.hpp"
+#include <any>
+#include <variant>
 
 #include <Utility/ObserverPattern.hpp>
 #include <Utility/TemplateUtilities.hpp>
 
-#include <any>
-#include <variant>
+#include <Engine/UUID.hpp>
+#include <Engine/FileNode.hpp>
+#include <Engine/Scene.hpp>
+#include <Engine/Component.hpp>
+#include <Engine/Sampler.hpp>
+#include <Engine/Texture.hpp>
+#include <Engine/Shader.hpp>
+#include <Engine/Material.hpp>
+#include <Engine/FrameBuffer.hpp>
+//#include "Script.hpp"
+//#include "Model.hpp"
 
-#define ASSET_TYPE Scene, Component, Shader, ShaderProgram, Texture, Model
+
+#define ASSET_TYPE Scene, Component, Sampler, Texture, Shader, ShaderProgram, Material, FrameBuffer/*, Model*/
 template<typename T>
 concept AssetType = concepts::IsAnyOf<T, ASSET_TYPE> && concepts::Copyable<T> && concepts::Serializable<T> && std::movable<T>;
 using AssetData = std::variant<std::monostate, ASSET_TYPE>;
@@ -40,6 +42,10 @@ struct Asset final : ObserverPattern::Observable {
     T& DataAs() {
         return std::get<T>(data);
     }
+    template<AssetType T>
+    const T& DataAs() const {
+        return std::get<T>(data);
+    }
     uint64_t Version() const;
 
     void Serialize();
@@ -57,12 +63,14 @@ struct Asset final : ObserverPattern::Observable {
 
     bool IsScene() const;
     bool IsComponentDefinition() const;
-    bool IsScript() const;
+    bool IsSampler() const;
     bool IsTexture() const;
-    bool IsModel() const;
-    bool IsMaterial() const;
     bool IsShader() const;
     bool IsShaderProgram() const;
+    bool IsMaterial() const;
+    bool IsFrameBuffer() const;
+    bool IsScript() const;
+    bool IsModel() const;
 
     bool HasInfoMessages() const;
     const std::vector<std::any>& InfoMessages() const;
@@ -77,7 +85,7 @@ protected:
     void NotifyObservers(ObserverPattern::Notification message) final;
 
 private:
-    UUID id{};
+    UUID id{ UUID::Empty() };
     FNode* file{ nullptr };
     AssetData data{ std::monostate{} };
     uint64_t version{};

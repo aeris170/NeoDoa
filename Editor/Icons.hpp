@@ -23,11 +23,19 @@ namespace WindowIcons {
     inline constexpr const char SCENE_VIEWPORT_CAMERA_SETTINGS_WINDOW_ICON[]{ ICON_FA_CAMERA_MOVIE  };
 }
 
+namespace ComponentWidgetIcons {
+    namespace ContextMenu {
+        inline constexpr const char ResetIcon[]{ ICON_FA_ARROW_ROTATE_LEFT " " };
+    }
+}
+
 namespace SceneHierarchyIcons {
     inline constexpr const char SCENE_ICON[]{ ICON_FA_CUBES_STACKED " " };
     inline constexpr const char ENTITY_ICON[]{ ICON_FA_CUBE " " };
 
     namespace ContextMenu {
+        inline constexpr const char MAKE_STARTUP_SCENE_ICON[]{ ICON_FA_BADGE_CHECK " "};
+
         inline constexpr const char CREATE_NEW_ENTITY_ICON[]{ ICON_FA_PLUS " " };
         inline constexpr const char CLOSE_SCENE_ICON[]{ ICON_FA_SQUARE_XMARK " " };
 
@@ -49,6 +57,7 @@ namespace SceneViewportIcons {
 }
 
 namespace ComponentIcons {
+
     inline constexpr const char GENERIC_COMPONENT_ICON[] = ICON_FA_GEAR "  ";
     inline const unordered_string_map<const std::string> DEFINED_COMPONENT_ICONS {
         { nameof(IDComponent), ICON_FA_ID_CARD "  " },
@@ -110,6 +119,12 @@ namespace ObserverIcons {
         inline constexpr const char ATTACH_COMPONENT_ICON[]{ ICON_FA_LINK " " };
         inline constexpr const char RESET_COMPONENT_DATA_ICON[]{ ICON_FA_ARROW_ROTATE_LEFT " " };
         inline constexpr const char DETACH_COMPONENT_ICON[]{ ICON_FA_TRASH " " };
+    }
+
+    namespace MaterialDisplayIcons {
+        namespace ContextMenu {
+            inline constexpr const char RESET_UNIFORM_ICON[]{ ICON_FA_ARROW_ROTATE_LEFT " " };
+        }
     }
 }
 
@@ -182,14 +197,19 @@ namespace FileIcons {
         std::pair{ SCENE_ICON, "cubes-stacked" }
     };
 
-    inline constexpr const char TEXTURE_ICON[]{ ICON_FA_IMAGE };
-    inline std::array<ElementType, 1> TextureIcons{
-        std::pair{ TEXTURE_ICON, "image" }
-    };
-
     inline constexpr const char COMPONENT_ICON[]{ ICON_FA_GEAR };
     inline std::array<ElementType, 1> ComponentIcons{
         std::pair{ COMPONENT_ICON, "gear" }
+    };
+
+    inline constexpr const char SAMPLER_ICON[]{ ICON_FA_LOADER };
+    inline std::array<ElementType, 1> SamplerIcons{
+        std::pair{ SAMPLER_ICON, "loader" }
+    };
+
+    inline constexpr const char TEXTURE_ICON[]{ ICON_FA_IMAGE };
+    inline std::array<ElementType, 1> TextureIcons{
+        std::pair{ TEXTURE_ICON, "image" }
     };
 
     inline constexpr const char SHADER_ICON[]           { ICON_FA_CIRCLE_S };
@@ -213,6 +233,15 @@ namespace FileIcons {
         std::pair{ SHADER_PROGRAM_ICON, "triangle" }
     };
 
+    inline constexpr const char MATERIAL_ICON[]{ ICON_FA_CIRCLE };
+    inline std::array<ElementType, 1> MaterialIcons{
+        std::pair{ MATERIAL_ICON, "circle" }
+    };
+
+    inline constexpr const char FRAMEBUFFER_ICON[]{ ICON_FA_GALLERY_THUMBNAILS };
+    inline std::array<ElementType, 1> FrameBufferIcons{
+        std::pair{ FRAMEBUFFER_ICON, "gallery-thumbnails" }
+    };
 
     inline constexpr const char FILE_ICON[]                    { ICON_FA_FILE                    };
     inline constexpr const char FILE_ICON_MULTIPLE[]           { ICON_FA_FILES                   };

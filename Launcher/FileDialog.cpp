@@ -1,3 +1,9 @@
+// This is external code. Disabling warnings.
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wbitwise-instead-of-logical" // Disable -Wunsequenced, https://easings.net/#easeOutBounce
+#endif
+
 #include <Launcher/FileDialog.hpp>
 
 #include <fstream>
@@ -18,6 +24,8 @@
 #include <unistd.h>
 #include <pwd.h>
 #endif
+
+#include <Editor/ImGuiExtensions.hpp>
 
 #define IFD_ICON_SIZE ImGui::GetFont()->FontSize + 3
 #define IFD_GUI_ELEMENT_SIZE std::max(GImGui->FontSize + 10.f, 24.f)
@@ -401,7 +409,7 @@ FileDialog::FileDialog() {
 	DWORD d = GetLogicalDrives();
 	for (int i = 0; i < 26; i++)
 		if (d & (1 << i))
-			thisPC->Children.push_back(new FileTreeNode(std::string(1, 'A' + i) + ":"));
+			thisPC->Children.push_back(new FileTreeNode(std::string(1, static_cast<char>('A' + i)) + ":"));
 	m_treeCache.push_back(thisPC);
 #else
 	std::error_code ec;
@@ -1148,12 +1156,12 @@ void FileDialog::m_renderContent()
 				ImGui::TableSetColumnIndex(1);
 				auto tm = std::localtime(&entry.DateModified);
 				if (tm != nullptr)
-					ImGui::Text("%d/%d/%d %02d:%02d", tm->tm_mon + 1, tm->tm_mday, 1900 + tm->tm_year, tm->tm_hour, tm->tm_min);
+					ImGuiFormattedText("{}/{}/{} {:02}:{:02}", tm->tm_mon + 1, tm->tm_mday, 1900 + tm->tm_year, tm->tm_hour, tm->tm_min);
 				else ImGui::Text("---");
 
 				// size
 				ImGui::TableSetColumnIndex(2);
-				ImGui::Text("%.3f KiB", entry.Size/1024.0f);
+				ImGuiFormattedText("{:.3f} KiB", entry.Size/1024.0f);
 			}
 
 			ImGui::EndTable();
@@ -1235,7 +1243,7 @@ void FileDialog::m_renderPopups()
 			ImGui::CloseCurrentPopup();
 		else {
 			const FileData& data = m_content[m_selectedFileItem];
-			ImGui::Text("Are you sure you want to delete %s?", data.Path.filename().string().c_str());
+			ImGuiFormattedText("Are you sure you want to delete {}?", data.Path.filename().string().c_str());
 
 			ImGui::Separator();
 
@@ -1527,5 +1535,11 @@ static const unsigned int folder_icon[] = {
 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff,
 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff,
 };
-const char* GetDefaultFolderIcon() { return (const char*)&folder_icon[0]; }
-const char* GetDefaultFileIcon() { return (const char*)&file_icon[0]; }
+#ifndef _WIN32
+static const char* GetDefaultFolderIcon() { return (const char*) &folder_icon[0]; }
+static const char* GetDefaultFileIcon() { return (const char*) &file_icon[0]; }
+#endif
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif

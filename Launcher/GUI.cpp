@@ -7,11 +7,14 @@
 
 #include <imgui.h>
 #include <imgui_internal.h>
+#include <stb_image.h>
 
 #include <Submodules/detector/detector.hpp>
 
 #include <Utility/StringTransform.hpp>
 #include <Utility/Trim.hpp>
+
+#include <Engine/TextureDeserializer.hpp>
 
 #include <Launcher/FileDialog.hpp>
 
@@ -26,6 +29,51 @@ GUI::GUI(const CorePtr& core) noexcept :
 
     Window->SetTitle("NeoDoa Launcher");
 
+    stbi_set_flip_vertically_on_load(true);
+    { // Load launcher logo
+        int w, h, nrChannels;
+        auto* readPixels = stbi_load("Images/launcherlogo-64_x_64.png", &w, &h, &nrChannels, STBI_rgb_alpha);
+
+        GPUTextureBuilder builder;
+        builder.SetName("launcher_logo");
+        if (readPixels) {
+            std::span pixels{ reinterpret_cast<const std::byte*>(readPixels), w * h * nrChannels * sizeof(stbi_uc) };
+            builder.SetWidth(w)
+                .SetHeight(h)
+                .SetData(DataFormat::RGBA8, pixels);
+        } else {
+            const Texture& texture = Texture::Missing();
+            builder.SetWidth(texture.Width)
+                .SetHeight(texture.Height)
+                .SetData(texture.Format, texture.PixelData);
+        }
+        auto [tex, _] = builder.Build();
+        launcherLogo = std::move(tex.value());
+
+        stbi_image_free(readPixels);
+    }
+    {// Load vibrant launcher logo
+        int w, h, nrChannels;
+        auto* readPixels = stbi_load("Images/launcherlogovivid-64_x_64.png", &w, &h, &nrChannels, STBI_rgb_alpha);
+
+        GPUTextureBuilder builder;
+        builder.SetName("launcher_logo_vivid");
+        if (readPixels) {
+            std::span pixels{ reinterpret_cast<const std::byte*>(readPixels), w * h * nrChannels * sizeof(stbi_uc) };
+            builder.SetWidth(w)
+                .SetHeight(h)
+                .SetData(DataFormat::RGBA8, pixels);
+        } else {
+            const Texture& texture = Texture::Missing();
+            builder.SetWidth(texture.Width)
+                .SetHeight(texture.Height)
+                .SetData(texture.Format, texture.PixelData);
+        }
+        auto [texVivid, __] = builder.Build();
+        launcherLogoVivid = std::move(texVivid.value());
+
+        stbi_image_free(readPixels);
+    }
     projectDataFile = std::make_unique<FNode>(FNodeCreationParams {
         .name = "projects"
     });
@@ -162,7 +210,7 @@ void GUI::RenderCustomTitleBar() noexcept {
     );
 
 #pragma region Handle Window Dragging
-    static glm::vec2 windowPos{};
+    static Point windowPos{};
     static bool dragging{ false };
     if (ImGui::IsMouseHoveringRect(p0, p1) && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
         windowPos = Window->GetPosition();
@@ -173,7 +221,10 @@ void GUI::RenderCustomTitleBar() noexcept {
     }
     if (dragging && ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
         auto drag = ImGui::GetMouseDragDelta();
-        Window->SetPosition(windowPos + glm::vec2{ drag.x, drag.y });
+        Window->SetPosition({
+            static_cast<unsigned>(windowPos.X + drag.x),
+            static_cast<unsigned>(windowPos.Y + drag.y)
+        });
     }
 #pragma endregion
 
@@ -182,9 +233,9 @@ void GUI::RenderCustomTitleBar() noexcept {
     p0 = p0 + TitleBarInternalPadding;
     ImVec2 p2 = p0 + TitleBarLogoSize;
     if (ImGui::IsMouseHoveringRect(p0, p1) || ImGui::IsMouseHoveringRect(p0, p2)) {
-        logo = launcherLogoVivid.TextureIDRaw();
+        logo = launcherLogoVivid;
     } else {
-        logo = launcherLogo.TextureIDRaw();
+        logo = launcherLogo;
     }
     ImGui::Image(logo, TitleBarLogoSize);
 
@@ -369,9 +420,12 @@ void GUI::RenderProjectData(ProjectData& data) noexcept {
                     if constexpr (detect::is_windows_v) {
                         exe = "start Editor.exe";
                     } else if constexpr (detect::is_linux_v) {
-                        exe = "./Editor &";
+                        exe = "./Editor";
                     }
-                    std::string command = std::string(exe).append(1, ' ').append(data.AbsolutePath).append(data.Name).append(Assets::PROJ_EXT);
+                    std::string command = std::string(exe).append(1, ' ').append(data.AbsolutePath).append(data.Name).append(Assets::ProjectExtension);
+                    if constexpr (detect::is_linux_v) {
+                        command = command.append(" &");
+                    }
                     auto sys = std::system(command.c_str());
                     if (sys == -1) {
                         DOA_LOG_WARNING("[Launcher::GUI] A call to std::system returned -1.");
@@ -480,14 +534,14 @@ bool GUI::IsProjectAlreadyOpen(const ProjectData& project) noexcept {
     using namespace std::chrono_literals;
     auto maxRequestReplies{ projectDataCollection.size() };
 
-    for (int i = 0; i < maxRequestReplies; i++) {
+    for (size_t i = 0; i < maxRequestReplies; i++) {
         request.Send("request_project_path", SendFlag::DontWait);
     }
 
     std::this_thread::sleep_for(150ms); // wait for replies to be sent.
 
     std::vector<std::string> openProjects{};
-    for (int i = 0; i < maxRequestReplies; i++) {
+    for (size_t i = 0; i < maxRequestReplies; i++) {
         auto path = reply.Receive(ReceiveFlag::DontWait);
         if (path == "") { continue; }
 
@@ -495,7 +549,7 @@ bool GUI::IsProjectAlreadyOpen(const ProjectData& project) noexcept {
         openProjects.push_back(trim(s));
     }
 
-    std::string absolutePath = std::string(project.AbsolutePath).append(project.Name).append(Assets::PROJ_EXT);
+    std::string absolutePath = std::string(project.AbsolutePath).append(project.Name).append(Assets::ProjectExtension);
     auto search = std::ranges::find_if(openProjects, [&absolutePath](auto& elem) {
         return elem == absolutePath;
     });

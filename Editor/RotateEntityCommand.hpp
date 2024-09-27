@@ -12,7 +12,7 @@ struct RotateEntityCommand : GUICommand {
     void Execute() noexcept override;
     void UnExecute() noexcept override;
 
-    bool TryMergeWith(UndoRedoStack& history, const ICommand* command) noexcept override;
+    bool TryMergeWith([[maybe_unused]] UndoRedoStack& history, const ICommand* command) noexcept override;
 
 private:
     Entity entity;

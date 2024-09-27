@@ -1,5 +1,7 @@
 #include <Editor/SceneViewport.hpp>
 
+#include <utility>
+
 #include <imgui.h>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -8,7 +10,12 @@
 #include <Engine/Core.hpp>
 #include <Engine/Input.hpp>
 #include <Engine/Window.hpp>
-#include <Engine/FrameBuffer.hpp>
+#include <Engine/Graphics.hpp>
+#include <Engine/TransformComponent.hpp>
+#include <Engine/GPUBuffer.hpp>
+#include <Engine/GPUVertexAttribLayout.hpp>
+#include <Engine/GPUPipeline.hpp>
+#include <Engine/GPUDescriptorSet.hpp>
 
 #include <Editor/GUI.hpp>
 #include <Editor/Icons.hpp>
@@ -24,9 +31,146 @@ PerspectiveCamera& SceneViewport::ViewportCamera::GetPerspectiveCamera() { retur
 bool SceneViewport::ViewportCamera::IsOrtho() const { return activeCamera == &ortho; }
 bool SceneViewport::ViewportCamera::IsPerspective() const { return activeCamera == &perspective; }
 
+GPUPipeline pipeline;
+GPUShaderProgram prog;
+GPUDescriptorSet perFrame;
+GPUDescriptorSet perObject;
+const GPUTexture* tex;
+GPUSampler sampler;
+GPUBuffer buf;
+GPUBuffer perFrameUniformBuffer;
+GPUBuffer perObjectUniformBuffer;
 SceneViewport::SceneViewport(GUI& gui) noexcept :
     gui(gui),
-    gizmos(*this) {}
+    gizmos(*this) {
+
+    float vertices[] = {
+    // Back face
+    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, // Bottom-left
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // top-right
+     0.5f, -0.5f, -0.5f,  1.0f, 0.0f, // bottom-right
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // top-right
+    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, // bottom-left
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f, // top-left
+    // Front face
+     0.5f, -0.5f,  0.5f,  1.0f, 0.0f, // bottom-right
+     0.5f,  0.5f,  0.5f,  1.0f, 1.0f, // top-right
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // bottom-left
+     0.5f,  0.5f,  0.5f,  1.0f, 1.0f, // top-right
+    -0.5f,  0.5f,  0.5f,  0.0f, 1.0f, // top-left
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // bottom-left
+    // Left face
+    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // top-right
+    -0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // top-left
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // bottom-left
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // bottom-left
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // bottom-right
+    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // top-right
+    // Right face
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // top-left
+     0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // bottom-right
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // top-right
+     0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // bottom-right
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // top-left
+     0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // bottom-left
+    // Bottom face
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // top-right
+     0.5f, -0.5f, -0.5f,  1.0f, 1.0f, // top-left
+     0.5f, -0.5f,  0.5f,  1.0f, 0.0f, // bottom-left
+     0.5f, -0.5f,  0.5f,  1.0f, 0.0f, // bottom-left
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // bottom-right
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // top-right
+    // Top face
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f, // top-left
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // bottom-right
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // top-right
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // bottom-right
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  // top-left
+    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f, // bottom-left
+    };
+    std::byte* bytePtr = reinterpret_cast<std::byte*>(vertices);
+
+    GPUBufferBuilder bBuilder;
+    buf = bBuilder.SetStorage(std::span<std::byte>(bytePtr, 180 * sizeof(float))).Build().first.value();
+    perFrameUniformBuffer = bBuilder.SetProperties(BufferProperties::DynamicStorage).SetStorage(sizeof(glm::mat4) * 2, nullptr).Build().first.value(); // proj and view
+    perObjectUniformBuffer = bBuilder.SetProperties(BufferProperties::DynamicStorage).SetStorage(sizeof(glm::mat4), nullptr).Build().first.value(); // model
+    GPUVertexAttribLayout layout;
+    layout.Define<float>(3);
+    layout.Define<float>(2);
+
+    GPUShaderBuilder sBuilder;
+    auto v = sBuilder.SetType(ShaderType::Vertex).SetSourceCode(R"(
+#version 460 core
+
+layout(location = 0) in vec3 vPos;
+layout(location = 1) in vec2 vUV;
+
+out vec2 fUV;
+
+layout(std140, binding = 0) uniform ProjViewBuffer {
+    mat4 projection;
+    mat4 view;
+};
+
+layout(std140, binding = 1) uniform ModelBuffer {
+    mat4 model;
+};
+
+void main() {
+	gl_Position = projection * view * model * vec4(vPos, 1.0);
+    fUV = vUV;
+}
+    )").Build().first;
+    auto f = sBuilder.SetType(ShaderType::Fragment).SetSourceCode(R"(
+#version 460 core
+
+in vec2 fUV;
+
+layout (binding = 0) uniform sampler2D tex;
+
+out vec4 FragColor;
+
+void main() {
+	FragColor = texture(tex, fUV) * vec4(1,1,1,1);
+}
+)").Build().first;
+
+    GPUShaderProgramBuilder spBuilder;
+    prog = spBuilder.SetVertexShader(v.value()).SetFragmentShader(f.value()).Build().first.value();
+
+    GPUPipelineBuilder aBuilder;
+    pipeline = aBuilder
+        .SetFaceCullEnabled(true)
+        .SetCullMode(CullMode::Back)
+        .SetArrayBuffer(0, buf, layout)
+        .SetTopology(TopologyType::Triangles)
+        .SetPolygonMode(PolygonMode::Fill)
+        .SetViewport({ 0, 0, viewportSize.Width, viewportSize.Height })
+        .SetDepthTestEnabled(true)
+        .SetDepthWriteEnabled(true)
+        .SetMultisampleEnabled(true)
+        .SetShaderProgram(prog)
+        .Build().first.value();
+
+    tex = &Core::GetCore()->GetAssetGPUBridge()->GetTextures().Missing();
+
+    GPUSamplerBuilder saBuilder;
+    sampler = saBuilder
+        .SetMagnificationFilter(TextureMagnificationMode::Nearest)
+        .SetWrapS(TextureWrappingMode::ClampToEdge)
+        .SetWrapT(TextureWrappingMode::ClampToEdge)
+        .Build().first.value();
+
+    GPUDescriptorSetBuilder dsBuilder;
+    perFrame = dsBuilder
+        .SetUniformBufferBinding(0, perFrameUniformBuffer)
+        .Build().first.value();
+
+    perObject = dsBuilder
+        .SetUniformBufferBinding(1, perObjectUniformBuffer)
+        .SetCombinedImageSamplerBinding(0, *tex, sampler)
+        .Build().first.value();
+}
 
 
 bool SceneViewport::Begin() {
@@ -50,11 +194,11 @@ void SceneViewport::Render() {
         ImGui::GetWindowPos().x + ImGui::GetCursorPos().x,
         ImGui::GetWindowPos().y + ImGui::GetCursorPos().y
     };
-    ReallocBufferIfNeeded({ static_cast<int>(ImGui::GetContentRegionAvail().x), static_cast<int>(ImGui::GetContentRegionAvail().y) });
+    ReallocBufferIfNeeded({ static_cast<unsigned>(ImGui::GetContentRegionAvail().x), static_cast<unsigned>(ImGui::GetContentRegionAvail().y) });
     RenderSceneToBuffer(scene);
 
     ImVec2 size{ static_cast<float>(viewportSize.Width), static_cast<float>(viewportSize.Height) };
-    ImGui::Image(reinterpret_cast<void*>(viewportFramebuffer->GetColorAttachment()), size, { 0, 1 }, { 1, 0 });
+    ImGui::Image(std::get<GPUTexture>(viewportFramebuffer.ColorAttachments[0].value()), size, { 0, 1 }, { 1, 0 });
 
     ImGui::PushClipRect({ viewportPosition.x, viewportPosition.y }, { viewportPosition.x + size.x, viewportPosition.y + size.y }, false);
     gizmos.settings.viewportSize = viewportSize;
@@ -74,16 +218,96 @@ void SceneViewport::End() {
 
 SceneViewport::ViewportCamera& SceneViewport::GetViewportCamera() { return viewportCamera; }
 
+ImVec2 SceneViewport::GetViewportCameraSettingsButtonPosition() const noexcept { return viewportCameraSettingsButtonPosition; }
+
 void SceneViewport::ReallocBufferIfNeeded(Resolution size) {
     if (viewportSize == size) { return; }
     viewportSize = size;
-    viewportFramebuffer = std::move(FrameBufferBuilder().SetResolution(size).AddColorAttachment(OpenGL::RGB8).BuildUnique());
+    viewportCamera.GetPerspectiveCamera().AspectRatio = size.Aspect();
+
+    { // Build Multisampled FB
+        GPURenderBufferBuilder rbBuilder;
+        auto&& color = rbBuilder
+            .SetLayout(viewportSize.Width, viewportSize.Height, DataFormat::RGBA16F)
+            .SetSamples(Multisample::x8)
+            .Build().first;
+        assert(color.has_value());
+
+        auto&& depthStencil = rbBuilder
+            .SetLayout(viewportSize.Width, viewportSize.Height, DataFormat::DEPTH32F_STENCIL8)
+            .SetSamples(Multisample::x8)
+            .Build().first;
+        assert(depthStencil.has_value());
+
+        GPUFrameBufferBuilder fbBuilder;
+        fbBuilder.SetName("NeoDoa Editor Scene Viewport Buffer (MS)")
+            .AttachColorRenderBuffer(std::move(color.value()), 0)
+            .AttachDepthStencilRenderBuffer(std::move(depthStencil.value()));
+        auto&& fb = fbBuilder.Build().first;
+        assert(fb.has_value());
+
+        viewportFramebufferMultisampled = std::move(fb.value());
+    }
+
+    { // Build FB
+        GPUTextureBuilder tBuilder;
+        auto&& color = tBuilder
+            .SetWidth(viewportSize.Width)
+            .SetHeight(viewportSize.Height)
+            .SetData(DataFormat::RGBA16F, {})
+            .SetSamples(Multisample::None)
+            .Build().first;
+        assert(color.has_value());
+
+        GPURenderBufferBuilder rbBuilder;
+        auto&& depthStencil = rbBuilder.SetLayout(viewportSize.Width, viewportSize.Height, DataFormat::DEPTH32F_STENCIL8).Build().first;
+        assert(depthStencil.has_value());
+
+        GPUFrameBufferBuilder fbBuilder;
+        fbBuilder.SetName("NeoDoa Editor Scene Viewport Buffer")
+            .AttachColorTexture(std::move(color.value()), 0)
+            .AttachDepthStencilRenderBuffer(std::move(depthStencil.value()));
+        auto&& fb = fbBuilder.Build().first;
+        assert(fb.has_value());
+
+        viewportFramebuffer = std::move(fb.value());
+    }
+
+    pipeline.Viewport = { 0, 0, viewportSize.Width, viewportSize.Height };
 }
 void SceneViewport::RenderSceneToBuffer(Scene& scene) {
-    viewportFramebuffer->Bind();
-    scene.Update(gui.get().delta);
-    scene.Render();
-    FrameBuffer::BackBuffer().Bind();
+    //scene.Update(gui.get().delta);
+    //scene.Render();
+
+    std::array<unsigned, 1> targets{ 0 };
+    Graphics::SetRenderTarget(viewportFramebufferMultisampled, targets);
+    Graphics::BindPipeline(pipeline);
+    Graphics::ClearRenderTarget(viewportFramebufferMultisampled, { scene.ClearColor.r, scene.ClearColor.g, scene.ClearColor.b, scene.ClearColor.a });
+
+    // Bind per-frame uniform
+    viewportCamera.GetPerspectiveCamera().UpdateView();
+    viewportCamera.GetPerspectiveCamera().UpdateProjection();
+    glm::mat4 matrices[2] {
+        viewportCamera.GetPerspectiveCamera().GetProjectionMatrix(),
+        viewportCamera.GetPerspectiveCamera().GetViewMatrix()
+    };
+    Graphics::BufferSubData(perFrameUniformBuffer, sizeof(matrices), reinterpret_cast<NonOwningPointerToConstRawData>(glm::value_ptr(matrices[0])));
+    Graphics::BindDescriptorSet(perFrame);
+    // ---
+
+    // Bind per-object uniform
+    for (const auto& e : scene.GetRegistry().view<TransformComponent>()) {
+        glm::mat4 model = TransformComponent::ComputeWorldMatrix(e, scene);
+        Graphics::BufferSubData(perObjectUniformBuffer, sizeof(model), reinterpret_cast<NonOwningPointerToConstRawData>(glm::value_ptr(model)));
+        Graphics::BindDescriptorSet(perObject);
+
+        Graphics::Render(36);
+    }
+    // ---
+    Graphics::SetRenderTarget({});
+
+    std::array<unsigned, 1> dst{ 0 };
+    Graphics::BlitColor(viewportFramebufferMultisampled, viewportFramebuffer, 0, dst);
 }
 
 void SceneViewport::DrawViewportSettings(bool hasScene) {
@@ -159,6 +383,7 @@ void SceneViewport::DrawViewportSettings(bool hasScene) {
     ImGui::SameLine();
 
     ImGui::BeginDisabled(!gui.HasOpenScene());
+    viewportCameraSettingsButtonPosition = ImGui::GetWindowPos() + ImGui::GetCursorPos();
     if (ImGui::Button(WindowStrings::SceneViewportCameraSettingsWindowTitle)) {
         gui.GetSceneViewportCameraSettings().Show();
     }
@@ -200,25 +425,25 @@ void SceneViewport::DrawViewportSettings(bool hasScene) {
 void SceneViewport::DrawCubeControl() {
     auto& camera = viewportCamera.GetActiveCamera();
     camera.UpdateView();
-    glm::mat4 view = camera._viewMatrix;
+    glm::mat4 view = camera.GetViewMatrix();
     ImGuizmo::SetDrawlist();
     ImGuizmo::ViewManipulate(glm::value_ptr(view), 8, { viewportPosition.x + viewportSize.Width - 128 , viewportPosition.y }, { 128, 128 }, 0x10101080);
-    camera.forward = glm::normalize(glm::vec3(-view[0].z, -view[1].z, -view[2].z)); // forward is INVERTED!!!
+    camera.Forward = glm::normalize(glm::vec3(-view[0].z, -view[1].z, -view[2].z)); // forward is INVERTED!!!
 
     // don't change up vector, fuck space sims. up being something other than 0, 1, 0 is VERBOTEN!
     //ptr->_activeCamera->up = glm::normalize(glm::vec3(view[0].y, view[1].y, view[2].y));
 
-    controls.yaw = glm::degrees(atan2(camera.forward.z, camera.forward.x));
-    controls.pitch = glm::degrees(asin(camera.forward.y));
+    controls.yaw = glm::degrees(atan2(camera.Forward.z, camera.Forward.x));
+    controls.pitch = glm::degrees(asin(camera.Forward.y));
 }
 
 void SceneViewport::HandleMouseControls() {
     GUI& gui = this->gui;
     auto& camera = viewportCamera.GetActiveCamera();
-    glm::vec3& eye = camera.eye;
-    glm::vec3& forward = camera.forward;
-    glm::vec3& up = camera.up;
-    float& zoom = camera.zoom;
+    glm::vec3& eye = camera.Eye;
+    glm::vec3& forward = camera.Forward;
+    glm::vec3& up = camera.Up;
+    float& zoom = camera.Zoom;
 
     if (ImGui::IsItemHovered()) {
         zoom += ImGui::GetIO().MouseWheel / 100;
@@ -256,16 +481,16 @@ void SceneViewport::HandleMouseControls() {
         } else if (viewportCamera.IsPerspective()) {
             glm::vec3 right = glm::normalize(glm::cross(forward, up)) * (controls.cameraSpeed * gui.delta);
             glm::vec3 fwd = glm::normalize(forward) * (controls.cameraSpeed * gui.delta);
-            if (gui.CORE->GetInput()->IsKeyPressed(KEY_W)) {
+            if (gui.CORE->GetInput()->IsKeyDepressed(Key::W)) {
                 eye += fwd;
             }
-            if (gui.CORE->GetInput()->IsKeyPressed(KEY_A)) {
+            if (gui.CORE->GetInput()->IsKeyDepressed(Key::A)) {
                 eye -= right;
             }
-            if (gui.CORE->GetInput()->IsKeyPressed(KEY_S)) {
+            if (gui.CORE->GetInput()->IsKeyDepressed(Key::S)) {
                 eye -= fwd;
             }
-            if (gui.CORE->GetInput()->IsKeyPressed(KEY_D)) {
+            if (gui.CORE->GetInput()->IsKeyDepressed(Key::D)) {
                 eye += right;
             }
             controls.yaw += delta.x;
@@ -281,7 +506,7 @@ void SceneViewport::HandleMouseControls() {
             direction.z = sin(glm::radians(controls.yaw)) * cos(glm::radians(controls.pitch));
             forward = glm::normalize(direction);
         } else {
-            assert(false); /* no camera? */
+            std::unreachable();
         }
         controls.prevDelta = v;
     }

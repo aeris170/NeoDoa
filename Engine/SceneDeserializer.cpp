@@ -23,7 +23,7 @@ Scene DeserializeScene(const std::string& data) {
     tinyxml2::XMLDocument doc;
     tinyxml2::XMLError err = doc.Parse(data.c_str());
     if (err != tinyxml2::XML_SUCCESS) {
-        DOA_LOG_ERROR("Couldn't deserialize scene!\n\n%s", data);
+        DOA_LOG_ERROR("Couldn't deserialize scene!\n\n%s", data.c_str());
     }
 
     Scene scene{};
@@ -39,8 +39,6 @@ void SceneDeserializer::DefaultDeserialize(tinyxml2::XMLElement& rootNode, Scene
 void SceneDeserializer::SceneConfig::DefaultDeserialize(tinyxml2::XMLElement& configNode, Scene& scene) {
     DeserializeName(configNode, scene);
     DeserializeClearColor(configNode, scene);
-    DeserializeSelectionOutlineColor(configNode, scene);
-    Cameras::Deserialize(*configNode.FirstChildElement("cameras"), scene);
 }
 void SceneDeserializer::SceneConfig::DefaultDeserializeName(tinyxml2::XMLElement& configNode, Scene& scene) {
     scene.Name = configNode.Attribute("name");
@@ -52,56 +50,6 @@ void SceneDeserializer::SceneConfig::DefaultDeserializeClearColor(tinyxml2::XMLE
         clearColor.FloatAttribute("g"),
         clearColor.FloatAttribute("b")
     };
-}
-void SceneDeserializer::SceneConfig::DefaultDeserializeSelectionOutlineColor(tinyxml2::XMLElement& configNode, Scene& scene) {
-    const tinyxml2::XMLElement& selectionOutlineColor = *configNode.FirstChildElement("selectionOutlineColor");
-    scene.SelectionOutlineColor = {
-        selectionOutlineColor.FloatAttribute("r"),
-        selectionOutlineColor.FloatAttribute("g"),
-        selectionOutlineColor.FloatAttribute("b")
-    };
-}
-
-void SceneDeserializer::SceneConfig::Cameras::DefaultDeserialize(tinyxml2::XMLElement& camerasNode, Scene& scene) {
-    //DeserializeActiveCamera(*camerasNode.FirstChildElement("activeCamera"), scene);
-    //DeserializeOrthoCamera(*camerasNode.FirstChildElement("orthoCamera"), scene);
-    //DeserializePerspectiveCamera(*camerasNode.FirstChildElement("perspectiveCamera"), scene);
-}
-void SceneDeserializer::SceneConfig::Cameras::DefaultDeserializeActiveCamera(tinyxml2::XMLElement& activeCameraNode, Scene& scene) {
-    //std::string activeCamType = activeCameraNode.Attribute("type");
-
-    //if (activeCamType == "ortho") {
-    //    scene.SwitchToOrtho();
-    //} else if (activeCamType == "perspective") {
-    //    scene.SwitchToPerspective();
-    //}
-    //ACamera& activeCamera = scene.GetActiveCamera();
-
-    //{
-    //    const tinyxml2::XMLElement* eye = activeCameraNode.FirstChildElement("eye");
-    //    activeCamera.eye = { eye->FloatAttribute("x"), eye->FloatAttribute("y"), eye->FloatAttribute("z") };
-    //}
-    //{
-    //    const tinyxml2::XMLElement* forward = activeCameraNode.FirstChildElement("forward");
-    //    activeCamera.forward = { forward->FloatAttribute("x"), forward->FloatAttribute("y"), forward->FloatAttribute("z") };
-    //}
-    //{
-    //    const tinyxml2::XMLElement* up = activeCameraNode.FirstChildElement("up");
-    //    activeCamera.up = { up->FloatAttribute("x"), up->FloatAttribute("y"), up->FloatAttribute("z") };
-    //}
-    //{
-    //    const tinyxml2::XMLElement* zoom = activeCameraNode.FirstChildElement("zoom");
-    //    activeCamera.zoom = { zoom->FloatAttribute("value") };
-    //}
-}
-void SceneDeserializer::SceneConfig::Cameras::DefaultDeserializeOrthoCamera(tinyxml2::XMLElement& orthoCameraNode, Scene& scene) {
-    /*scene.SetOrtho(orthoCameraNode.FloatAttribute("left"),   orthoCameraNode.FloatAttribute("right"),
-                   orthoCameraNode.FloatAttribute("bottom"), orthoCameraNode.FloatAttribute("top"),
-                   orthoCameraNode.FloatAttribute("near"),   orthoCameraNode.FloatAttribute("far"));*/
-}
-void SceneDeserializer::SceneConfig::Cameras::DefaultDeserializePerspectiveCamera(tinyxml2::XMLElement& perspectiveCameraNode, Scene& scene) {
-    /*scene.SetPerpective(perspectiveCameraNode.FloatAttribute("fov"),  perspectiveCameraNode.FloatAttribute("aspect"),
-                        perspectiveCameraNode.FloatAttribute("near"), perspectiveCameraNode.FloatAttribute("far"));*/
 }
 
 void SceneDeserializer::Entities::DefaultDeserialize(tinyxml2::XMLElement& entitiesNode, Scene& scene) {
@@ -123,6 +71,10 @@ void SceneDeserializer::Entities::DefaultDeserializeEntity(tinyxml2::XMLElement&
                 DeserializeParentComponent(*component, scene, entt);
             } else if (name == nameof(ChildComponent)) {
                 DeserializeChildComponent(*component, scene, entt);
+            } else if (name == nameof(OrthoCameraComponent)) {
+                DeserializeOrthoCameraComponent(*component, scene, entt);
+            } else if (name == nameof(PerspectiveCameraComponent)) {
+                DeserializePerspectiveCameraComponent(*component, scene, entt);
             }
         } else {
             DeserializeUserDefinedComponents(*component, scene, entt, name);
@@ -137,8 +89,13 @@ void SceneDeserializer::Entities::DefaultDeserializeIDComponent(tinyxml2::XMLEle
     scene.RemoveComponent<TransformComponent>(id.GetEntity()); /* remove tr-cmp bevause we will deserialize one from file */
 }
 void SceneDeserializer::Entities::DefaultDeserializeTransformComponent(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity) {
-    auto matrix = Helpers::DeserializeMat4(*componentNode.FirstChildElement(nameof_c(TransformComponent::localMatrix)));
-    TransformComponent transform = { entity, matrix };
+    auto t = Helpers::DeserializeVec3(*componentNode.FirstChildElement(nameof_c(TransformComponent::localTranslation)));
+    auto r = Helpers::DeserializeQuat(*componentNode.FirstChildElement(nameof_c(TransformComponent::localRotation)));
+    auto s = Helpers::DeserializeVec3(*componentNode.FirstChildElement(nameof_c(TransformComponent::localScale)));
+    TransformComponent transform{ entity };
+    transform.SetLocalTranslation(t);
+    transform.SetLocalRotation(r);
+    transform.SetLocalScale(s);
     scene.InsertComponent<TransformComponent>(transform.GetEntity(), std::move(transform));
 }
 void SceneDeserializer::Entities::DefaultDeserializeParentComponent(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity) {
@@ -158,31 +115,45 @@ void SceneDeserializer::Entities::DefaultDeserializeChildComponent(tinyxml2::XML
     ChildComponent children{ entity, parent };
     scene.InsertComponent<ChildComponent>(children.GetEntity(), std::move(children));
 }
-void SceneDeserializer::Entities::DefaultDeserializeUserDefinedComponents(tinyxml2::XMLElement&, Scene&, Entity, const std::string& name) {}
+void SceneDeserializer::Entities::DefaultDeserializeOrthoCameraComponent(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity) {
+    OrthoCamera camera {
+        Helpers::DeserializeFloat(*componentNode.FirstChildElement(nameof_c(OrthoCamera::LeftPlane))),
+        Helpers::DeserializeFloat(*componentNode.FirstChildElement(nameof_c(OrthoCamera::RightPlane))),
+        Helpers::DeserializeFloat(*componentNode.FirstChildElement(nameof_c(OrthoCamera::BottomPlane))),
+        Helpers::DeserializeFloat(*componentNode.FirstChildElement(nameof_c(OrthoCamera::TopPlane))),
+        Helpers::DeserializeFloat(*componentNode.FirstChildElement(nameof_c(OrthoCamera::NearPlane))),
+        Helpers::DeserializeFloat(*componentNode.FirstChildElement(nameof_c(OrthoCamera::FarPlane))),
+    };
+    camera.Eye = Helpers::DeserializeVec3(*componentNode.FirstChildElement(nameof_c(OrthoCamera::Eye)));
+    camera.Forward = Helpers::DeserializeVec3(*componentNode.FirstChildElement(nameof_c(OrthoCamera::Forward)));
+    camera.Up = Helpers::DeserializeVec3(*componentNode.FirstChildElement(nameof_c(OrthoCamera::Up)));
+    camera.Zoom = Helpers::DeserializeFloat(*componentNode.FirstChildElement(nameof_c(OrthoCamera::Zoom)));
 
+    OrthoCameraComponent ortho{ entity, std::move(camera) };
+    scene.InsertComponent<OrthoCameraComponent>(ortho.GetEntity(), std::move(ortho));
+}
+void SceneDeserializer::Entities::DefaultDeserializePerspectiveCameraComponent(tinyxml2::XMLElement& componentNode, Scene& scene, Entity entity) {
+    PerspectiveCamera camera {
+        Helpers::DeserializeFloat(*componentNode.FirstChildElement(nameof_c(PerspectiveCamera::FOV))),
+        Helpers::DeserializeFloat(*componentNode.FirstChildElement(nameof_c(PerspectiveCamera::AspectRatio))),
+        Helpers::DeserializeFloat(*componentNode.FirstChildElement(nameof_c(PerspectiveCamera::NearPlane))),
+        Helpers::DeserializeFloat(*componentNode.FirstChildElement(nameof_c(PerspectiveCamera::FarPlane))),
+    };
+    camera.Eye = Helpers::DeserializeVec3(*componentNode.FirstChildElement(nameof_c(PerspectiveCamera::Eye)));
+    camera.Forward = Helpers::DeserializeVec3(*componentNode.FirstChildElement(nameof_c(PerspectiveCamera::Forward)));
+    camera.Up = Helpers::DeserializeVec3(*componentNode.FirstChildElement(nameof_c(PerspectiveCamera::Up)));
+    camera.Zoom = Helpers::DeserializeFloat(*componentNode.FirstChildElement(nameof_c(PerspectiveCamera::Zoom)));
 
-/*
- int DeserializeEnum(const tinyxml2::XMLElement& property);
- Entity DeserializeEntityID(const tinyxml2::XMLElement& property, std::string_view identifierOverride = "id");
- int8_t DeserializeInt8  (const tinyxml2::XMLElement& property);
- int16_t DeserializeInt16 (const tinyxml2::XMLElement& property);
- int32_t DeserializeInt32 (const tinyxml2::XMLElement& property);
- int64_t DeserializeInt64 (const tinyxml2::XMLElement& property);
- uint8_t DeserializeUInt8 (const tinyxml2::XMLElement& property);
- uint16_t DeserializeUInt16(const tinyxml2::XMLElement& property);
- uint32_t DeserializeUInt32(const tinyxml2::XMLElement& property);
- uint64_t DeserializeUInt64(const tinyxml2::XMLElement& property);
- int DeserializeInt(const tinyxml2::XMLElement& property);
- float DeserializeFloat(const tinyxml2::XMLElement& property);
- double DeserializeDouble(const tinyxml2::XMLElement& property);
- bool DeserializeBool(const tinyxml2::XMLElement& property);
-*/
+    PerspectiveCameraComponent perspective{ entity, std::move(camera) };
+    scene.InsertComponent<PerspectiveCameraComponent>(perspective.GetEntity(), std::move(perspective));
+}
+void SceneDeserializer::Entities::DefaultDeserializeUserDefinedComponents([[maybe_unused]] tinyxml2::XMLElement& componentNode, [[maybe_unused]] Scene& scene, [[maybe_unused]] Entity entity, [[maybe_unused]] const std::string& name) {}
 
 int SceneDeserializer::Helpers::DeserializeEnum(const tinyxml2::XMLElement& property) {
     return property.IntAttribute("value");
 }
 Entity SceneDeserializer::Helpers::DeserializeEntityID(const tinyxml2::XMLElement& property, std::string_view identifierOverride) {
-    return static_cast<Entity>(property.UnsignedAttribute(identifierOverride.data(), -1));
+    return static_cast<Entity>(property.UnsignedAttribute(identifierOverride.data(), static_cast<unsigned>(NULL_ENTT)));
 }
 int8_t SceneDeserializer::Helpers::DeserializeInt8(const tinyxml2::XMLElement& property) {
     return static_cast<int8_t>(property.IntAttribute("value"));

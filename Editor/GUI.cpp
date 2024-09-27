@@ -20,17 +20,17 @@ GUI::GUI(const CorePtr& core) noexcept :
     Events.OnReimport     += std::bind_front(&GUI::OnReimport    , this);
     Events.OnAssetDeleted += std::bind_front(&GUI::OnAssetDeleted, this);
 
-    //shortcutHandler.RegisterShortcut(Shortcuts::NewProjectShortcut,   [this]() { ShowNewProjectModal();  }, ImGuiInputFlags_RouteGlobalLow);
-    //shortcutHandler.RegisterShortcut(Shortcuts::OpenProjectShortcut,  [this]() { ShowOpenProjectModal(); }, ImGuiInputFlags_RouteGlobalLow);
-    shortcutHandler.RegisterShortcut(Shortcuts::SaveProjectShortcut,  [this]() { SaveProjectToDisk();    }, ImGuiInputFlags_RouteGlobalLow);
-    shortcutHandler.RegisterShortcut(Shortcuts::CloseProjectShortcut, [this]() { CloseProject();         }, ImGuiInputFlags_RouteGlobalLow);
+    //shortcutHandler.RegisterShortcut(Shortcuts::NewProjectShortcut,   [this]() { ShowNewProjectModal();  }, ImGuiInputFlags_RouteGlobal);
+    //shortcutHandler.RegisterShortcut(Shortcuts::OpenProjectShortcut,  [this]() { ShowOpenProjectModal(); }, ImGuiInputFlags_RouteGlobal);
+    shortcutHandler.RegisterShortcut(Shortcuts::SaveProjectShortcut,  [this]() { SaveProjectToDisk();    }, ImGuiInputFlags_RouteGlobal);
+    shortcutHandler.RegisterShortcut(Shortcuts::CloseProjectShortcut, [this]() { CloseProject();         }, ImGuiInputFlags_RouteGlobal);
 
-    shortcutHandler.RegisterShortcut(Shortcuts::UndoShortcut, [this]() { UndoLastCommand(); }, ImGuiInputFlags_RouteGlobalLow);
-    shortcutHandler.RegisterShortcut(Shortcuts::RedoShortcut, [this]() { RedoLastCommand(); }, ImGuiInputFlags_RouteGlobalLow);
+    shortcutHandler.RegisterShortcut(Shortcuts::UndoShortcut, [this]() { UndoLastCommand(); }, ImGuiInputFlags_RouteGlobal);
+    shortcutHandler.RegisterShortcut(Shortcuts::RedoShortcut, [this]() { RedoLastCommand(); }, ImGuiInputFlags_RouteGlobal);
 
-    shortcutHandler.RegisterShortcut(Shortcuts::NewSceneShortcut,   [this]() { ShowNewSceneAssetModal(*am.GetCurrentFolder()); }, ImGuiInputFlags_RouteGlobalLow);
-    shortcutHandler.RegisterShortcut(Shortcuts::SaveSceneShortcut,  [this]() { SaveScene();  }, ImGuiInputFlags_RouteGlobalLow);
-    shortcutHandler.RegisterShortcut(Shortcuts::CloseSceneShortcut, [this]() { CloseScene(); }, ImGuiInputFlags_RouteGlobalLow);
+    shortcutHandler.RegisterShortcut(Shortcuts::NewSceneShortcut,   [this]() { ShowNewSceneAssetModal(*am.GetCurrentFolder()); }, ImGuiInputFlags_RouteGlobal);
+    shortcutHandler.RegisterShortcut(Shortcuts::SaveSceneShortcut,  [this]() { SaveScene();  }, ImGuiInputFlags_RouteGlobal);
+    shortcutHandler.RegisterShortcut(Shortcuts::CloseSceneShortcut, [this]() { CloseScene(); }, ImGuiInputFlags_RouteGlobal);
 }
 
 void GUI::Prepare() {
@@ -154,13 +154,13 @@ void GUI::operator() (float delta) {
 
     if (urh.Begin()) {
         urh.Render();
-        urh.End();
     }
+    urh.End();
 
-    if (svcs.Begin()) {
+    if (svcs.Begin(sv.GetViewportCameraSettingsButtonPosition())) {
         svcs.Render();
-        svcs.End();
     }
+    svcs.End();
 
     nam.Render();
 
@@ -214,7 +214,6 @@ void GUI::OpenProjectFromDisk(const std::string& path) {
     CORE->LoadProject(path);
     assert(HasOpenProject());
 
-    Assets& assets = *CORE->GetAssets();
     Project& project = GetOpenProject();
 
     std::string title = defaultWindowName;
@@ -237,7 +236,6 @@ void GUI::OpenProjectFromDisk(const std::string& path) {
 void GUI::CloseProject() {
     Events.OnProjectUnloaded();
 
-    obs.ResetDisplayTarget();
     CloseScene();
     CORE->UnloadProject();
 
@@ -250,9 +248,10 @@ void GUI::CreateNewScene(FNode& folder, std::string_view name) {
     if (!HasOpenProject()) { return; }
 
     const Scene temporary(name); const auto data = temporary.Serialize();
-    AssetHandle handle = CORE->GetAssets()->CreateAssetAt<Scene>(folder, std::string(name) + Assets::SCENE_EXT, data);
+    AssetHandle handle = CORE->GetAssets()->CreateAssetAt<Scene>(folder, std::string(name) + Assets::SceneExtension, data);
     assert(handle.HasValue());
     DOA_LOG_INFO("Succesfully created a new scene asset named %s at %s", name.data(), folder.Path().c_str());
+    Events.OnAssetCreated(handle);
     if (!HasOpenScene()) {
         OpenScene(handle);
     }
@@ -320,34 +319,36 @@ ImGuiIO* GUI::IO() const { return io; }
 ImFont* GUI::GetFont() const { return font; }
 ImFont* GUI::GetFontBold() const { return fontBold; }
 
-void* GUI::GetFolderIcon(TextureSize size) const                       { return SVGPathway::Get(FOLDER_ICON_KEY,           TextureStyle::PADDED, size).TextureIDRaw(); }
-void* GUI::GetProjectIcon(TextureSize size) const                      { return SVGPathway::Get(PROJECT_ICON_KEY,          TextureStyle::PADDED, size).TextureIDRaw(); }
-void* GUI::GetSceneIcon(TextureSize size) const                        { return SVGPathway::Get(SCENE_ICON_KEY,            TextureStyle::PADDED, size).TextureIDRaw(); }
-void* GUI::GetComponentIcon(TextureSize size) const                    { return SVGPathway::Get(COMPONENT_ICON_KEY,        TextureStyle::PADDED, size).TextureIDRaw(); }
-void* GUI::GetVertexShaderIcon(TextureSize size) const                 { return SVGPathway::Get(VERTEX_SHADER_ICON_KEY,    TextureStyle::PADDED, size).TextureIDRaw(); }
-void* GUI::GetTessellationControlShaderIcon(TextureSize size) const    { return SVGPathway::Get(TESS_CTRL_SHADER_ICON_KEY, TextureStyle::PADDED, size).TextureIDRaw(); }
-void* GUI::GetTessellationEvaluationShaderIcon(TextureSize size) const { return SVGPathway::Get(TESS_EVAL_SHADER_ICON_KEY, TextureStyle::PADDED, size).TextureIDRaw(); }
-void* GUI::GetGeometryShaderIcon(TextureSize size) const               { return SVGPathway::Get(GEOMETRY_SHADER_ICON_KEY,  TextureStyle::PADDED, size).TextureIDRaw(); }
-void* GUI::GetFragmentShaderIcon(TextureSize size) const               { return SVGPathway::Get(FRAGMENT_SHADER_ICON_KEY,  TextureStyle::PADDED, size).TextureIDRaw(); }
-void* GUI::GetComputeShaderIcon(TextureSize size) const                { return SVGPathway::Get(COMPUTE_SHADER_ICON_KEY,   TextureStyle::PADDED, size).TextureIDRaw(); }
-void* GUI::GetFileIcon(TextureSize size) const                         { return SVGPathway::Get(FILE_ICON_KEY,             TextureStyle::PADDED, size).TextureIDRaw(); }
-void* GUI::GetBackArrowIcon(TextureSize size) const                    { return SVGPathway::Get(BACK_ARROW_ICON_KEY,       TextureStyle::PADDED, size).TextureIDRaw(); }
+void* GUI::GetFolderIcon(TextureSize size) const                       { return SVGPathway::Get(FOLDER_ICON_KEY,           TextureStyle::PADDED, size); }
+void* GUI::GetProjectIcon(TextureSize size) const                      { return SVGPathway::Get(PROJECT_ICON_KEY,          TextureStyle::PADDED, size); }
+void* GUI::GetSceneIcon(TextureSize size) const                        { return SVGPathway::Get(SCENE_ICON_KEY,            TextureStyle::PADDED, size); }
+void* GUI::GetComponentIcon(TextureSize size) const                    { return SVGPathway::Get(COMPONENT_ICON_KEY,        TextureStyle::PADDED, size); }
+void* GUI::GetSamplerIcon(TextureSize size) const                      { return SVGPathway::Get(SAMPLER_ICON_KEY,          TextureStyle::PADDED, size); }
+void* GUI::GetTextureIcon(TextureSize size) const                      { return SVGPathway::Get(TEXTURE_ICON_KEY,          TextureStyle::PADDED, size); }
+void* GUI::GetVertexShaderIcon(TextureSize size) const                 { return SVGPathway::Get(VERTEX_SHADER_ICON_KEY,    TextureStyle::PADDED, size); }
+void* GUI::GetTessellationControlShaderIcon(TextureSize size) const    { return SVGPathway::Get(TESS_CTRL_SHADER_ICON_KEY, TextureStyle::PADDED, size); }
+void* GUI::GetTessellationEvaluationShaderIcon(TextureSize size) const { return SVGPathway::Get(TESS_EVAL_SHADER_ICON_KEY, TextureStyle::PADDED, size); }
+void* GUI::GetGeometryShaderIcon(TextureSize size) const               { return SVGPathway::Get(GEOMETRY_SHADER_ICON_KEY,  TextureStyle::PADDED, size); }
+void* GUI::GetFragmentShaderIcon(TextureSize size) const               { return SVGPathway::Get(FRAGMENT_SHADER_ICON_KEY,  TextureStyle::PADDED, size); }
+void* GUI::GetComputeShaderIcon(TextureSize size) const                { return SVGPathway::Get(COMPUTE_SHADER_ICON_KEY,   TextureStyle::PADDED, size); }
+void* GUI::GetMaterialIcon(TextureSize size) const                     { return SVGPathway::Get(MATERIAL_ICON_KEY,         TextureStyle::PADDED, size); }
+void* GUI::GetFrameBufferIcon(TextureSize size) const                  { return SVGPathway::Get(FRAMEBUFFER_ICON_KEY,      TextureStyle::PADDED, size); }
+void* GUI::GetFileIcon(TextureSize size) const                         { return SVGPathway::Get(FILE_ICON_KEY,             TextureStyle::PADDED, size); }
+void* GUI::GetBackArrowIcon(TextureSize size) const                    { return SVGPathway::Get(BACK_ARROW_ICON_KEY,       TextureStyle::PADDED, size); }
 
 void* GUI::FindIconForFileType(const FNode& file, TextureSize size) const {
     assert(HasOpenProject());
 
     if (file.IsDirectory()) { return GetFolderIcon(size); }
-    if (file.Extension() == Assets::PROJ_EXT) { return GetProjectIcon(size); } /* TODO FIX THIS SHITTY EXTENSION CHECK */
+    if (Assets::IsProjectFile(file)) { return GetProjectIcon(size); }
 
     assert(CORE->GetAssets()->IsAssetExistsAt(file));
     AssetHandle asset = CORE->GetAssets()->FindAssetAt(file);
 
     if (asset->IsScene())                                              { return GetSceneIcon(size);                        }
     if (asset->IsComponentDefinition())                                { return GetComponentIcon(size);                    }
-    if (asset->IsScript())                                             { return GetSceneIcon(size);                        }
-    if (asset->IsTexture())                                            { return GetSceneIcon(size);                        }
-    if (asset->IsModel())                                              { return GetSceneIcon(size);                        }
-    if (asset->IsMaterial())                                           { return GetSceneIcon(size);                        }
+    if (asset->IsSampler())                                            { return GetSamplerIcon(size);                      }
+    if (asset->IsTexture())                                            { return GetTextureIcon(size);                      }
     if (asset->IsShader()) {
         if (Assets::IsVertexShaderFile(asset->File()))                 { return GetVertexShaderIcon(size);                 }
         if (Assets::IsTessellationControlShaderFile(asset->File()))    { return GetTessellationControlShaderIcon(size);    }
@@ -356,20 +357,27 @@ void* GUI::FindIconForFileType(const FNode& file, TextureSize size) const {
         if (Assets::IsFragmentShaderFile(asset->File()))               { return GetFragmentShaderIcon(size);               }
         if (Assets::IsComputeShaderFile(asset->File()))                { return GetComputeShaderIcon(size);                }
     }
+    if (asset->IsMaterial())                                           { return GetMaterialIcon(size);                     }
+    if (asset->IsFrameBuffer())                                        { return GetFrameBufferIcon(size);                  }
+    if (asset->IsModel())                                              { return GetSceneIcon(size);                        }
     return GetFileIcon(size);
 }
-void* GUI::FindIconByName(const std::string_view key, TextureSize size) const { return SVGPathway::Get(std::string(key), TextureStyle::PADDED, size).TextureIDRaw(); }
+void* GUI::FindIconByName(const std::string_view key, TextureSize size) const { return reinterpret_cast<void*>(static_cast<uint64_t>(SVGPathway::Get(std::string(key), TextureStyle::PADDED, size).GLObjectID)); }
 
 MetaAssetInfo& GUI::GetMetaInfoOf(const FNode& file) { return meta.GetMetaAssetInfoBank().GetMetaInfoOf(file); }
+MetaAssetInfoBank& GUI::GetMetaAssetInfoBank() noexcept { return meta.GetMetaAssetInfoBank(); }
 
 void GUI::ShowNewSceneAssetModal(FNode& currentFolder) const                        { nam.ShowSceneCreationModal(currentFolder);                        }
 void GUI::ShowNewComponentAssetModal(FNode& currentFolder) const                    { nam.ShowComponentCreationModal(currentFolder);                    }
+void GUI::ShowNewSamplerAssetModal(FNode& currentFolder) const                      { nam.ShowSamplerCreationModal(currentFolder);                      }
 void GUI::ShowNewVertexShaderAssetModal(FNode& currentFolder) const                 { nam.ShowVertexShaderCreationModal(currentFolder);                 }
 void GUI::ShowNewTessellationControlShaderAssetModal(FNode& currentFolder) const    { nam.ShowTessellationControlShaderCreationModal(currentFolder);    }
 void GUI::ShowNewTessellationEvaluationShaderAssetModal(FNode& currentFolder) const { nam.ShowTessellationEvaluationShaderCreationModal(currentFolder); }
 void GUI::ShowNewGeometryShaderAssetModal(FNode& currentFolder) const               { nam.ShowGeometryShaderCreationModal(currentFolder);               }
 void GUI::ShowNewFragmentShaderAssetModal(FNode& currentFolder) const               { nam.ShowFragmentShaderCreationModal(currentFolder);               }
 void GUI::ShowNewShaderProgramAssetModal(FNode& currentFolder) const                { nam.ShowShaderProgramCreationModal(currentFolder);                }
+void GUI::ShowNewMaterialAssetModal(FNode& currentFolder) const                     { nam.ShowMaterialCreationModal(currentFolder);                     }
+void GUI::ShowNewFrameBufferAssetModal(FNode& currentFolder) const                  { nam.ShowFrameBufferCreationModal(currentFolder);                  }
 
 UndoRedoStack& GUI::GetCommandHistory() noexcept { return history; }
 void GUI::UndoLastCommand() noexcept {
@@ -415,12 +423,13 @@ void GUI::OnSceneClosed() {
     scene = std::nullopt;
 }
 void GUI::OnReimport(Assets& assets) {
-    if (sceneUUID == UUID::Empty()) { return; }
-
-    AssetHandle currentSceneHandle = assets.FindAsset(sceneUUID);
-    if (!currentSceneHandle.HasValue()) {
-        sceneUUID = UUID::Empty();
-        scene = std::nullopt;
+    meta.GetMetaAssetInfoBank().Clear();
+    if (sceneUUID != UUID::Empty()) {
+        AssetHandle currentSceneHandle = assets.FindAsset(sceneUUID);
+        if (!currentSceneHandle.HasValue()) {
+            sceneUUID = UUID::Empty();
+            scene = std::nullopt;
+        }
     }
 }
 void GUI::OnAssetDeleted(AssetHandle asset) {

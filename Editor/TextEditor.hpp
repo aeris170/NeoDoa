@@ -11,6 +11,7 @@
 #include <unordered_map>
 #include <map>
 #include <regex>
+#include <algorithm>
 
 class IMGUI_API TextEditor {
 public:

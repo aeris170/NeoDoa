@@ -7,6 +7,12 @@
 
 #include <Engine/NeoDoa.hpp>
 
+#include <Editor/Icons.hpp>
+#include <Editor/Colors.hpp>
+#include <Editor/Strings.hpp>
+#include <Editor/AssetFilter.hpp>
+#include <Editor/MetaAssetInfo.hpp>
+
 inline constexpr int compFieldWidth = 300; // must be divisible by both 3 and 4 (and 1 and 2, but you know... MaThS...) (x,y,z,w)
 
 enum class Display {
@@ -93,9 +99,25 @@ bool FancyVector2Widget(const std::string& label, glm::vec2& vec, FancyVectorWid
 bool FancyVector3Widget(const std::string& label, glm::vec3& vec, FancyVectorWidgetSettings<Display::XYZ> settings = defaultFancyVectorSettingsXYZ);
 bool FancyVector4Widget(const std::string& label, glm::vec4& vec, FancyVectorWidgetSettings<Display::XYZW> settings = defaultFancyVectorSettingsXYZW);
 
+bool FancyVectori1Widget(const std::string& label, glm::ivec1& vec, FancyVectorWidgetSettings<Display::X> settings = defaultFancyVectorSettingsX);
+bool FancyVectori2Widget(const std::string& label, glm::ivec2& vec, FancyVectorWidgetSettings<Display::XY> settings = defaultFancyVectorSettingsXY);
+bool FancyVectori3Widget(const std::string& label, glm::ivec3& vec, FancyVectorWidgetSettings<Display::XYZ> settings = defaultFancyVectorSettingsXYZ);
+bool FancyVectori4Widget(const std::string& label, glm::ivec4& vec, FancyVectorWidgetSettings<Display::XYZW> settings = defaultFancyVectorSettingsXYZW);
+
+bool FancyVectorui1Widget(const std::string& label, glm::uvec1& vec, FancyVectorWidgetSettings<Display::X> settings = defaultFancyVectorSettingsX);
+bool FancyVectorui2Widget(const std::string& label, glm::uvec2& vec, FancyVectorWidgetSettings<Display::XY> settings = defaultFancyVectorSettingsXY);
+bool FancyVectorui3Widget(const std::string& label, glm::uvec3& vec, FancyVectorWidgetSettings<Display::XYZ> settings = defaultFancyVectorSettingsXYZ);
+bool FancyVectorui4Widget(const std::string& label, glm::uvec4& vec, FancyVectorWidgetSettings<Display::XYZW> settings = defaultFancyVectorSettingsXYZW);
+
+bool FancyVectorb1Widget(const std::string& label, glm::ivec1& vec, FancyVectorWidgetSettings<Display::X> settings = defaultFancyVectorSettingsX);
+bool FancyVectorb2Widget(const std::string& label, glm::ivec2& vec, FancyVectorWidgetSettings<Display::XY> settings = defaultFancyVectorSettingsXY);
+bool FancyVectorb3Widget(const std::string& label, glm::ivec3& vec, FancyVectorWidgetSettings<Display::XYZ> settings = defaultFancyVectorSettingsXYZ);
+bool FancyVectorb4Widget(const std::string& label, glm::ivec4& vec, FancyVectorWidgetSettings<Display::XYZW> settings = defaultFancyVectorSettingsXYZW);
+
 template<Display dsp>
 bool FancyVectorPiece(FancyVectorWidgetSettings<dsp>& settings, size_t idx, float* vec, ImFont* buttonFont = nullptr, ImVec2 buttonSize = { 0, 0 }) {
     bool rv{ false };
+    ImGui::PushID(settings.displayLabelID[idx]);
 
     if (buttonFont == nullptr) {
         buttonFont = ImGui::GetIO().Fonts->Fonts[1];
@@ -120,7 +142,11 @@ bool FancyVectorPiece(FancyVectorWidgetSettings<dsp>& settings, size_t idx, floa
         if (!settings.disabled) {
             if (settings.resetEnabled) {
                 rv = true;
-                vec[idx] = settings.resetTo;
+                if (settings.resetAllToSame) {
+                    vec[idx] = settings.resetTo;
+                } else {
+                    vec[idx] = settings.resetTos[idx];
+                }
             }
         }
     }
@@ -150,6 +176,7 @@ bool FancyVectorPiece(FancyVectorWidgetSettings<dsp>& settings, size_t idx, floa
     if (settings.disabled) { ImGui::EndDisabled(); }
     ImGui::PopItemWidth();
 
+    ImGui::PopID();
     return rv;
 }
 
@@ -169,8 +196,44 @@ bool FancyVectorWidget(const std::string& label, float* vec, FancyVectorWidgetSe
     ImGui::Columns(2, nullptr, false);
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { ImGui::GetStyle().ItemSpacing.x, 0 });
     ImGui::SetColumnWidth(0, w - compFieldWidth);
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f);
-    ImGui::Text("%s", label.c_str());
+    ImGui::AlignTextToFramePadding();
+    //ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f);
+    ImGui::TextUnformatted(label.c_str());
+    if (ImGui::BeginPopupContextItem(label.c_str(), ImGuiPopupFlags_MouseButtonRight)) {
+        if (ImGui::MenuItem(cat(ComponentWidgetIcons::ContextMenu::ResetIcon, ComponentWidgetStrings::ContextMenu::Reset))) {
+            rv = true;
+            if (settings.resetAllToSame) {
+                vec[0] = settings.resetTo;
+                if constexpr (dsp == Display::XY) {
+                    vec[1] = settings.resetTo;
+                }
+                if constexpr (dsp == Display::XYZ) {
+                    vec[1] = settings.resetTo;
+                    vec[2] = settings.resetTo;
+                }
+                if constexpr (dsp == Display::XYZW) {
+                    vec[1] = settings.resetTo;
+                    vec[2] = settings.resetTo;
+                    vec[3] = settings.resetTo;
+                }
+            } else {
+                vec[0] = settings.resetTos[0];
+                if constexpr (dsp == Display::XY) {
+                    vec[1] = settings.resetTos[1];
+                }
+                if constexpr (dsp == Display::XYZ) {
+                    vec[1] = settings.resetTos[1];
+                    vec[2] = settings.resetTos[2];
+                }
+                if constexpr (dsp == Display::XYZW) {
+                    vec[1] = settings.resetTos[1];
+                    vec[2] = settings.resetTos[2];
+                    vec[3] = settings.resetTos[3];
+                }
+            }
+        }
+        ImGui::EndPopup();
+    }
     ImGui::NextColumn();
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f);
@@ -250,6 +313,8 @@ bool OrthoCameraWidget(OrthoCamera& cameraData);
 
 bool PerspectiveCameraWidget(PerspectiveCamera& cameraData);
 
+bool Image2DButtonWidget(const std::string& label, ImTextureID texture);
+
 void Space();
 
 void Header(const std::string& label);
@@ -266,8 +331,100 @@ template<typename T>
     requires requires (T x) { std::to_string(x); }
 void UneditableArrayWidget(const std::string& label, const std::vector<T>& array) {
     BeginWidget(label);
-    for (int i = 0; i < array.size(); i++) {
-        ImGui::Text("%s", std::to_string(array[i]).c_str());
+    for (size_t i = 0; i < array.size(); i++) {
+        ImGui::TextUnformatted(std::to_string(array[i]).c_str());
     }
     EndWidget();
+}
+
+template<AssetFilter Filter>
+bool MultiAssetWidget(std::string_view label, std::vector<UUID>& uuids, const Assets& assets, MetaAssetInfoBank& metaBank, Filter filter) {
+    ImGuiIO& io = ImGui::GetIO();
+    auto boldFont = io.Fonts->Fonts[1];
+    float lineHeight = boldFont->FontSize + ImGui::GetStyle().FramePadding.y * 2.0f;
+    ImVec2 buttonSize = { lineHeight, lineHeight };
+    float margin = 3.0f;
+
+    for (size_t i = 0; i < uuids.size(); i++) {
+        UUID id = uuids[i];
+
+        BeginWidget(std::format("{}[{}]: ", label.data(), i));
+
+        ImVec4 textColor;
+        std::string_view assetIcon;
+        std::string_view assetName;
+        if (id != UUID::Empty()) {
+            AssetHandle handle = assets.FindAsset(id);
+            if (handle.HasValue()) {
+                textColor = ImGui::GetStyleColorVec4(ImGuiCol_Text);
+                assetIcon = metaBank.GetMetaInfoOf(handle->File()).fa_icon;
+                assetName = handle->File().Name();
+            } else {
+                textColor = MultiAssetWidgetColors::DeletedOrUnloadedColor;
+                assetIcon = ICON_FA_CIRCLE_EXCLAMATION;
+                assetName = "Deleted or unloaded";
+            }
+        } else {
+            textColor = MultiAssetWidgetColors::EmptyColor;
+            assetIcon = ICON_FA_TRIANGLE_EXCLAMATION;
+            assetName = "Empty";
+        }
+
+        std::string name{ std::format("{} {} (UUID: {})", assetIcon, assetName.data(), id.AsString()) };
+
+        float x = ImGui::GetCursorPosX();
+        ImGui::SetNextItemWidth(compFieldWidth - margin - buttonSize.x);
+        float oldDisabledAlpha = ImGui::GetStyle().DisabledAlpha;
+        ImGui::GetStyle().DisabledAlpha = 1.0f;
+        ImGui::BeginDisabled();
+        ImGui::PushStyleColor(ImGuiCol_Text, textColor);
+        ImGui::InputText("", name.data(), name.size(), ImGuiInputTextFlags_ReadOnly); // TODO accept drag-drop if (filter(dropped, assets))
+        if (ImGui::BeginDragDropTarget()) {
+            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DND_DEMO_CELL")) {
+                UUID data = *(const UUID*) payload->Data;
+                AssetHandle handle = assets.FindAsset(data);
+                assert(handle.HasValue());
+                if (filter(data, assets)) {
+                    uuids[i] = data;
+                }
+            }
+            ImGui::EndDragDropTarget();
+        }
+        ImGui::PopStyleColor();
+        ImGui::EndDisabled();
+        ImGui::GetStyle().DisabledAlpha = oldDisabledAlpha;
+        x += compFieldWidth - buttonSize.x;
+
+        ImGui::PushFont(boldFont);
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(x);
+        ImGui::Button(ICON_FA_BULLSEYE_POINTER, buttonSize); // TODO open popup. pass filter
+
+        ImGui::PopFont();
+        EndWidget();
+    }
+    BeginWidget("");
+    ImGui::PushFont(boldFont);
+    float x = ImGui::GetCursorPosX() + compFieldWidth - 2 * (buttonSize.x) - margin;
+
+    ImGui::SameLine();
+    ImGui::SetCursorPosX(x);
+    bool isEmpty = uuids.empty();
+    ImGui::BeginDisabled(isEmpty);
+    if (ImGui::Button(ICON_FA_MINUS, buttonSize)) {
+        uuids.pop_back();
+    }
+    ImGui::EndDisabled();
+    x += margin + buttonSize.x;
+
+    ImGui::SameLine();
+    ImGui::SetCursorPosX(x);
+    if (ImGui::Button(ICON_FA_PLUS_LARGE, buttonSize)) {
+        uuids.push_back(UUID::Empty());
+    }
+    x += margin + buttonSize.x;
+
+    ImGui::PopFont();
+    EndWidget();
+    return true;
 }

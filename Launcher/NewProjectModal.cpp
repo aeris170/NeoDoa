@@ -2,6 +2,8 @@
 
 #include <Utility/Trim.hpp>
 
+#include <Editor/ImGuiExtensions.hpp>
+
 #include <Launcher/GUI.hpp>
 #include <Launcher/FileDialog.hpp>
 
@@ -106,8 +108,8 @@ void NewProjectModal::RenderNameSelectionDialog() noexcept {
 	}
 }
 void NewProjectModal::RenderConfirmationDialog() noexcept {
-	ImGui::Text("Name: %s", newProjectData.name.c_str());
-	ImGui::Text("Path: %s", newProjectData.path.c_str());
+	ImGuiFormattedText("Name: {}", newProjectData.name.c_str());
+	ImGuiFormattedText("Path: {}", newProjectData.path.c_str());
 	ImGui::NewLine();
 	ImGui::TextUnformatted("Continue and create project?");
 	ImGui::Separator();

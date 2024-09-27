@@ -6,17 +6,197 @@
 bool FancyVector1Widget(const std::string& label, glm::vec1& vec, FancyVectorWidgetSettings<Display::X> settings) {
     return FancyVectorWidget(label, &vec.x, settings);
 }
-
 bool FancyVector2Widget(const std::string& label, glm::vec2& vec, FancyVectorWidgetSettings<Display::XY> settings) {
     return FancyVectorWidget(label, &vec.x, settings);
 }
-
 bool FancyVector3Widget(const std::string& label, glm::vec3& vec, FancyVectorWidgetSettings<Display::XYZ> settings) {
     return FancyVectorWidget(label, &vec.x, settings);
 }
-
 bool FancyVector4Widget(const std::string& label, glm::vec4& vec, FancyVectorWidgetSettings<Display::XYZW> settings) {
     return FancyVectorWidget(label, &vec.x, settings);
+}
+
+bool FancyVectori1Widget(const std::string& label, glm::ivec1& vec, FancyVectorWidgetSettings<Display::X> settings) {
+    settings.speed = std::clamp(std::round(settings.speed), 1.0f, static_cast<float>(std::numeric_limits<int>().max()));
+    settings.fmt = "%.0f";
+
+    std::array<float, 1> values = {
+        static_cast<float>(vec.x),
+    };
+    bool rv = FancyVectorWidget(label, values.data(), settings);
+    vec.x = static_cast<int>(std::round(values[0]));
+
+    return rv;
+}
+bool FancyVectori2Widget(const std::string& label, glm::ivec2& vec, FancyVectorWidgetSettings<Display::XY> settings) {
+    settings.speed = std::clamp(std::round(settings.speed), 1.0f, static_cast<float>(std::numeric_limits<int>().max()));
+    settings.fmt = "%.0f";
+
+    std::array<float, 2> values = {
+        static_cast<float>(vec.x),
+        static_cast<float>(vec.y)
+    };
+    bool rv = FancyVectorWidget(label, values.data(), settings);
+    vec.x = static_cast<int>(std::round(values[0]));
+    vec.y = static_cast<int>(std::round(values[1]));
+
+    return rv;
+}
+bool FancyVectori3Widget(const std::string& label, glm::ivec3& vec, FancyVectorWidgetSettings<Display::XYZ> settings) {
+    settings.speed = std::clamp(std::round(settings.speed), 1.0f, static_cast<float>(std::numeric_limits<int>().max()));
+    settings.fmt = "%.0f";
+
+    std::array<float, 3> values = {
+        static_cast<float>(vec.x),
+        static_cast<float>(vec.y),
+        static_cast<float>(vec.z)
+    };
+    bool rv = FancyVectorWidget(label, values.data(), settings);
+    vec.x = static_cast<int>(std::round(values[0]));
+    vec.y = static_cast<int>(std::round(values[1]));
+    vec.z = static_cast<int>(std::round(values[2]));
+
+    return rv;
+}
+bool FancyVectori4Widget(const std::string& label, glm::ivec4& vec, FancyVectorWidgetSettings<Display::XYZW> settings) {
+    settings.speed = std::clamp(std::round(settings.speed), 1.0f, static_cast<float>(std::numeric_limits<int>().max()));
+    settings.fmt = "%.0f";
+
+    std::array<float, 4> values = {
+        static_cast<float>(vec.x),
+        static_cast<float>(vec.y),
+        static_cast<float>(vec.z),
+        static_cast<float>(vec.w)
+    };
+    bool rv = FancyVectorWidget(label, values.data(), settings);
+    vec.x = static_cast<int>(std::round(values[0]));
+    vec.y = static_cast<int>(std::round(values[1]));
+    vec.z = static_cast<int>(std::round(values[2]));
+    vec.w = static_cast<int>(std::round(values[3]));
+
+    return rv;
+}
+
+bool FancyVectorui1Widget(const std::string& label, glm::uvec1& vec, FancyVectorWidgetSettings<Display::X> settings) {
+    settings.speed = std::clamp(std::round(settings.speed), 1.0f, static_cast<float>(std::numeric_limits<int>().max()));
+    settings.min = 0.0f;
+    settings.max = static_cast<float>(std::numeric_limits<unsigned>().max());
+    settings.fmt = "%.0f";
+
+    float value = static_cast<float>(vec.x);
+    bool rv = FancyVectorWidget(label, &value, settings);
+    vec.x = static_cast<unsigned>(std::round(value));
+
+    return rv;
+}
+bool FancyVectorui2Widget(const std::string& label, glm::uvec2& vec, FancyVectorWidgetSettings<Display::XY> settings) {
+    settings.speed = std::clamp(std::round(settings.speed), 1.0f, static_cast<float>(std::numeric_limits<int>().max()));
+    settings.min = 0.0f;
+    settings.max = static_cast<float>(std::numeric_limits<unsigned>().max());
+    settings.fmt = "%.0f";
+
+    std::array<float, 2> values = {
+        static_cast<float>(vec.x),
+        static_cast<float>(vec.y)
+    };
+    bool rv = FancyVectorWidget(label, values.data(), settings);
+    vec.x = static_cast<unsigned>(std::round(values[0]));
+    vec.y = static_cast<unsigned>(std::round(values[1]));
+
+    return rv;
+}
+bool FancyVectorui3Widget(const std::string& label, glm::uvec3& vec, FancyVectorWidgetSettings<Display::XYZ> settings) {
+    settings.speed = std::clamp(std::round(settings.speed), 1.0f, static_cast<float>(std::numeric_limits<int>().max()));
+    settings.min = 0.0f;
+    settings.max = static_cast<float>(std::numeric_limits<unsigned>().max());
+    settings.fmt = "%.0f";
+
+    std::array<float, 3> values = {
+        static_cast<float>(vec.x),
+        static_cast<float>(vec.y),
+        static_cast<float>(vec.z)
+    };
+    bool rv = FancyVectorWidget(label, values.data(), settings);
+    vec.x = static_cast<unsigned>(std::round(values[0]));
+    vec.y = static_cast<unsigned>(std::round(values[1]));
+    vec.z = static_cast<unsigned>(std::round(values[2]));
+
+    return rv;
+}
+bool FancyVectorui4Widget(const std::string& label, glm::uvec4& vec, FancyVectorWidgetSettings<Display::XYZW> settings) {
+    settings.speed = std::clamp(std::round(settings.speed), 1.0f, static_cast<float>(std::numeric_limits<int>().max()));
+    settings.min = 0.0f;
+    settings.max = static_cast<float>(std::numeric_limits<unsigned>().max());
+    settings.fmt = "%.0f";
+
+    std::array<float, 4> values = {
+        static_cast<float>(vec.x),
+        static_cast<float>(vec.y),
+        static_cast<float>(vec.z),
+        static_cast<float>(vec.w)
+    };
+    bool rv = FancyVectorWidget(label, values.data(), settings);
+    vec.x = static_cast<unsigned>(std::round(values[0]));
+    vec.y = static_cast<unsigned>(std::round(values[1]));
+    vec.z = static_cast<unsigned>(std::round(values[2]));
+    vec.w = static_cast<unsigned>(std::round(values[3]));
+
+    return rv;
+}
+
+bool FancyVectorb1Widget(const std::string& label, glm::ivec1& vec, FancyVectorWidgetSettings<Display::X> settings) {
+    settings.min = 0.0f;
+    settings.max = 1.0f;
+    settings.displayLabelOverride[0] = "B";
+    settings.displayLabelColorOverride[0] = Color(0.2f, 0.2f, 0.2f);
+    settings.displayLabelHoverColorOverride[0] = Color(0.3f, 0.3f, 0.3f);
+
+    return FancyVectori1Widget(label, vec, settings);
+}
+bool FancyVectorb2Widget(const std::string& label, glm::ivec2& vec, FancyVectorWidgetSettings<Display::XY> settings) {
+    settings.min = 0.0f;
+    settings.max = 1.0f;
+    settings.displayLabelOverride[0] = "B";
+    settings.displayLabelOverride[1] = "B";
+    settings.displayLabelColorOverride[0] = Color(0.2f, 0.2f, 0.2f);
+    settings.displayLabelColorOverride[1] = Color(0.2f, 0.2f, 0.2f);
+    settings.displayLabelHoverColorOverride[0] = Color(0.3f, 0.3f, 0.3f);
+    settings.displayLabelHoverColorOverride[1] = Color(0.3f, 0.3f, 0.3f);
+
+    return FancyVectori2Widget(label, vec, settings);
+}
+bool FancyVectorb3Widget(const std::string& label, glm::ivec3& vec, FancyVectorWidgetSettings<Display::XYZ> settings) {
+    settings.min = 0.0f;
+    settings.max = 1.0f;
+    settings.displayLabelOverride[0] = "B";
+    settings.displayLabelOverride[1] = "B";
+    settings.displayLabelOverride[2] = "B";
+    settings.displayLabelColorOverride[0] = Color(0.2f, 0.2f, 0.2f);
+    settings.displayLabelColorOverride[1] = Color(0.2f, 0.2f, 0.2f);
+    settings.displayLabelColorOverride[2] = Color(0.2f, 0.2f, 0.2f);
+    settings.displayLabelHoverColorOverride[0] = Color(0.3f, 0.3f, 0.3f);
+    settings.displayLabelHoverColorOverride[1] = Color(0.3f, 0.3f, 0.3f);
+    settings.displayLabelHoverColorOverride[2] = Color(0.3f, 0.3f, 0.3f);
+
+    return FancyVectori3Widget(label, vec, settings);
+}
+bool FancyVectorb4Widget(const std::string& label, glm::ivec4& vec, FancyVectorWidgetSettings<Display::XYZW> settings) {
+    settings.min = 0.0f;
+    settings.max = 1.0f;
+    settings.displayLabelOverride[0] = "B";
+    settings.displayLabelOverride[1] = "B";
+    settings.displayLabelOverride[2] = "B";
+    settings.displayLabelOverride[3] = "B";
+    settings.displayLabelColorOverride[0] = Color(0.2f, 0.2f, 0.2f);
+    settings.displayLabelColorOverride[1] = Color(0.2f, 0.2f, 0.2f);
+    settings.displayLabelColorOverride[2] = Color(0.2f, 0.2f, 0.2f);
+    settings.displayLabelColorOverride[3] = Color(0.2f, 0.2f, 0.2f);
+    settings.displayLabelHoverColorOverride[0] = Color(0.3f, 0.3f, 0.3f);
+    settings.displayLabelHoverColorOverride[1] = Color(0.3f, 0.3f, 0.3f);
+    settings.displayLabelHoverColorOverride[2] = Color(0.3f, 0.3f, 0.3f);
+    settings.displayLabelHoverColorOverride[3] = Color(0.3f, 0.3f, 0.3f);
+
+    return FancyVectori4Widget(label, vec, settings);
 }
 
 void detail::BeginWidget(const std::string& label) {
@@ -27,7 +207,7 @@ void detail::BeginWidget(const std::string& label) {
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { ImGui::GetStyle().ItemSpacing.x, 0 });
     ImGui::SetColumnWidth(0, w - compFieldWidth);
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f + 3);
-    ImGui::Text("%s", label.c_str());
+    ImGui::TextUnformatted(label.c_str());
     ImGui::NextColumn();
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f);
@@ -51,19 +231,18 @@ bool EnumWidget(const std::string& label, int& value, const std::vector<EnumValu
     std::stringstream ss;
     ss << "##" << label;
 
-    int selected = -1;
-    std::vector<const char*> items;
-    for (int i = 0; i < values.size(); i++) {
+    size_t selected{ std::numeric_limits<size_t>::max() };
+    for (size_t i = 0; i < values.size(); i++) {
         auto& element = values[i];
         if (element.value == value) {
             selected = i;
         }
-        items.push_back(element.prettyName.c_str());
     }
+    assert(selected < values.size());
 
     bool rv{ false };
     if (ImGui::BeginCombo(ss.str().c_str(), values[selected].prettyName.c_str())) {
-        for (int i = 0; i < values.size(); i++) {
+        for (size_t i = 0; i < values.size(); i++) {
             bool is_selected = (value == values[i].value); // You can store your selection however you want, outside or inside your objects
             if (ImGui::Selectable(values[i].prettyName.c_str(), is_selected)) {
                 rv = true;
@@ -94,7 +273,7 @@ bool EntityWidget(const std::string& label, Entity& value) {
 void UneditableEntityWidget(const std::string& label, const Entity value) {
     BeginWidget(label);
     int val = EntityTo<int>(value);
-    ImGui::Text("%s", std::to_string(val).c_str());
+    ImGui::TextUnformatted(std::to_string(val).c_str());
     EndWidget();
 }
 
@@ -225,7 +404,7 @@ bool StringWidget(const std::string& label, std::string& value) {
 
 void UneditableStringWidget(const std::string& label, const std::string& value) {
     BeginWidget(label);
-    ImGui::Text("%s", value.c_str());
+    ImGui::TextUnformatted(value.c_str());
     EndWidget();
 }
 
@@ -278,15 +457,15 @@ bool ResolutionWidget(const std::string& label, Resolution& resolution) {
     settingsFBO.displayLabelColorOverride[1] = Color(0.66f, 0.49f, 0.65f);
 
     bool rv = FancyVector2Widget(label, res, settingsFBO);
-    resolution = { static_cast<int>(res.x), static_cast<int>(res.y) };
+    resolution = { static_cast<decltype(Resolution::Width)>(res.x), static_cast<decltype(Resolution::Height)>(res.y) };
 
     return rv;
 }
 
 bool OrthoCameraWidget(OrthoCamera& cameraData) {
-    glm::vec1 top{ cameraData._top };
-    glm::vec2 leftRight{ cameraData._left, cameraData._right };
-    glm::vec1 bottom{ cameraData._bottom };
+    glm::vec1 top{ cameraData.TopPlane };
+    glm::vec2 leftRight{ cameraData.LeftPlane, cameraData.RightPlane };
+    glm::vec1 bottom{ cameraData.BottomPlane };
 
     FancyVectorWidgetSettings<Display::X> settingsOrthoTop;
     settingsOrthoTop.resetTo = 1;
@@ -318,20 +497,19 @@ bool OrthoCameraWidget(OrthoCamera& cameraData) {
     rv = rv | FancyVector2Widget("Left & Right", leftRight, settingsOrthoLeftRight); // no double pipe because of short circuit shadowing imgui call
     rv = rv | FancyVector1Widget("Bottom", bottom, settingsOrthoBottom);
 
-    cameraData._top = top.x;
-    cameraData._left = leftRight.x;
-    cameraData._right = leftRight.y;
-    cameraData._bottom = bottom.x;
+    cameraData.TopPlane = top.x;
+    cameraData.LeftPlane = leftRight.x;
+    cameraData.RightPlane = leftRight.y;
+    cameraData.BottomPlane = bottom.x;
 
     return rv;
 }
 
 bool PerspectiveCameraWidget(PerspectiveCamera& cameraData) {
-    glm::vec1 fov{ cameraData._fov };
-    glm::vec1 aspect{ cameraData._aspect };
+    glm::vec1 fov{ cameraData.FOV };
+    glm::vec1 aspect{ cameraData.AspectRatio };
 
     FancyVectorWidgetSettings<Display::X> fovSettings;
-    auto a = fovSettings.displayLabelColorOverride[0].Lighten(0.5);
     fovSettings.resetTo = 110;
     fovSettings.min = 30;
     fovSettings.max = 150;
@@ -348,8 +526,18 @@ bool PerspectiveCameraWidget(PerspectiveCamera& cameraData) {
     rv = FancyVector1Widget("Field Of View", fov, fovSettings);
     rv = rv | FancyVector1Widget("Aspect Ratio", aspect, aspectSettings); // no double pipe because of short circuit shadowing imgui call
 
-    cameraData._fov = fov.x;
+    cameraData.FOV = fov.x;
 
+    return rv;
+}
+
+bool Image2DButtonWidget(const std::string& label, ImTextureID texture) {
+    BeginWidget(label);
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x - 128 - ImGui::GetStyle().FramePadding.x);
+    std::stringstream ss;
+    ss << "##" << label;
+    bool rv = ImGui::ImageButton(label.c_str(), texture, { 128, 128 }, { 0, 1 }, { 1, 0 });
+    EndWidget();
     return rv;
 }
 
@@ -364,7 +552,7 @@ void Header(const std::string& label) {
     auto boldFont = io.Fonts->Fonts[1];
     ImGui::PushFont(boldFont);
 
-    ImGui::Text("%s", label.c_str());
+    ImGui::TextUnformatted(label.c_str());
     ImGui::Separator();
 
     ImGui::PopFont();
@@ -616,8 +804,6 @@ bool ImGui::NeoDoaColorPickerPopup(const char* label, float col[4], ImGuiColorEd
     bool value_changed_fix_hue_wrap = false;
     if ((flags & ImGuiColorEditFlags_NoInputs) == 0) {
         PushItemWidth((alpha_bar ? bar1_pos_x : bar0_pos_x) + bars_width - picker_pos.x);
-        ImGuiColorEditFlags sub_flags_to_forward = ImGuiColorEditFlags_DataTypeMask_ | ImGuiColorEditFlags_InputMask_ | ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_NoOptions | ImGuiColorEditFlags_NoSmallPreview | ImGuiColorEditFlags_AlphaPreview | ImGuiColorEditFlags_AlphaPreviewHalf;
-        ImGuiColorEditFlags sub_flags = (flags & sub_flags_to_forward) | ImGuiColorEditFlags_NoPicker;
         if (flags & ImGuiColorEditFlags_DisplayRGB || (flags & ImGuiColorEditFlags_DisplayMask_) == 0) {
             FancyVectorWidgetSettings<Display::XYZW> settings;
             settings.fmt = "%g";

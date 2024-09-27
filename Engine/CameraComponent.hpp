@@ -9,7 +9,6 @@
 
 #include "Resolution.hpp"
 #include "Entity.hpp"
-#include "FrameBuffer.hpp"
 
 struct Scene;
 namespace tinyxml2 {
@@ -27,26 +26,21 @@ private:
         -1.0f, 1.0f,
         -1.0f, 1.0f
     };
-    FrameBuffer frameBuffer{};
-
-    OrthoCameraComponent(const Entity owner, OrthoCamera&& matrix) noexcept;
 
 public:
     OrthoCameraComponent(const Entity owner) noexcept;
+    OrthoCameraComponent(const Entity owner, const OrthoCamera& matrix) noexcept;
 
     Entity GetEntity() const;
 
-    const OrthoCamera& GetData() const;
-    void SetData(OrthoCamera&& data);
+    const OrthoCamera& GetData() const noexcept;
+    void SetData(const OrthoCamera& data) noexcept;
 
     void UpdateMatrices();
 
     void TurnOn();
     void TurnOff();
     bool IsActiveAndRendering() const;
-
-    FrameBuffer& GetFrameBuffer();
-    const FrameBuffer& GetFrameBuffer() const;
 
     friend void SerializeOrthoCameraComponent(tinyxml2::XMLPrinter& printer, const OrthoCameraComponent& camera);
     friend OrthoCameraComponent DeserializeOrthoCameraComponent(tinyxml2::XMLElement* component, const Entity entity, const Scene& scene);
@@ -63,26 +57,21 @@ private:
         0.001f,
         10000.0f
     };
-    FrameBuffer frameBuffer{};
-
-    PerspectiveCameraComponent(const Entity owner, PerspectiveCamera&& data) noexcept;
 
 public:
     PerspectiveCameraComponent(const Entity owner) noexcept;
+    PerspectiveCameraComponent(const Entity owner, const PerspectiveCamera& data) noexcept;
 
     Entity GetEntity() const;
 
-    const PerspectiveCamera& GetData() const;
-    void SetData(PerspectiveCamera&& data);
+    const PerspectiveCamera& GetData() const noexcept;
+    void SetData(const PerspectiveCamera& data) noexcept;
 
     void UpdateMatrices();
 
     void TurnOn();
     void TurnOff();
     bool IsActiveAndRendering() const;
-
-    FrameBuffer& GetFrameBuffer();
-    const FrameBuffer& GetFrameBuffer() const;
 
     friend void SerializePerspectiveCameraComponent(tinyxml2::XMLPrinter& printer, const PerspectiveCameraComponent& camera);
     friend PerspectiveCameraComponent DeserializePerspectiveCameraComponent(tinyxml2::XMLElement* component, const Entity entity, const Scene& scene);

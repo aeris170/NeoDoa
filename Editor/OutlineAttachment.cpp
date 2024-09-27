@@ -1,8 +1,8 @@
 #include <Editor/OutlineAttachment.hpp>
 
 OutlineAttachment::OutlineAttachment(std::shared_ptr<GUI> gui) noexcept :
-    gui(gui),
-    fbo() {}
+    gui(gui)/*,
+    fbo()*/ {}
 
 void OutlineAttachment::BeforeFrame(Project* project) {}
 void OutlineAttachment::AfterFrame(Project* project) {
@@ -15,7 +15,7 @@ void OutlineAttachment::AfterFrame(Project* project) {
     //TransformComponent& transformComponent = scene.GetComponent<TransformComponent>(entt);
     //MeshComponent& meshComponent = scene.GetComponent<MeshComponent>(entt);
 
-    fbo.Bind();
+    //fbo.Bind();
     // Graphics::DrawMesh(meshComponent.mesh, transformComponent.GetWorldMatrix(), solidColorShader, )
-    glDepthMask(GL_FALSE);
+    //glDepthMask(GL_FALSE);
 }

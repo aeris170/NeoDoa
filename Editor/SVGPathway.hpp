@@ -8,7 +8,7 @@
 #include <Utility/StringMap.hpp>
 
 #include <Engine/Color.hpp>
-#include <Engine/Texture.hpp>
+#include <Engine/GPUTexture.hpp>
 
 enum class TextureStyle {
     NONE,
@@ -28,15 +28,15 @@ struct SVGPathway {
     static void Initialize(const std::filesystem::path& directory, Color color = { 1, 1, 1, 1 });
     static void Initialize(std::filesystem::path&& directory, Color color = { 1, 1, 1, 1 });
 
-    static const Texture& Get(const std::string& key, const TextureStyle style = TextureStyle::NONE, const TextureSize size = TextureSize::MEDIUM);
+    static const GPUTexture& Get(const std::string& key, const TextureStyle style = TextureStyle::NONE, const TextureSize size = TextureSize::MEDIUM);
 
 private:
     struct TexturePack {
-        Texture SmallTexture;
-        Texture MediumTexture;
-        Texture LargeTexture;
+        GPUTexture SmallTexture;
+        GPUTexture MediumTexture;
+        GPUTexture LargeTexture;
 
-        Texture& operator[](size_t index) noexcept;
+        GPUTexture& operator[](size_t index) noexcept;
     };
 
     static inline std::filesystem::path directory;
