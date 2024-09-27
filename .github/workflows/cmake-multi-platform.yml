@@ -73,32 +73,28 @@ jobs:
         chmod +x ${{ steps.strings.outputs.scripts-dir }}/fetch_apt_get.sh
         ${{ steps.strings.outputs.scripts-dir }}/fetch_apt_get.sh
 
-    - name: Set up dependencies with custom script
+    # Step for Linux
+    - name: Set up dependencies on Linux
+      if: runner.os == 'Linux'
       shell: bash
       run: |
-        # Convert Windows path to Unix path for Bash (ensures Windows compatibility)
         scripts_dir="${{ steps.strings.outputs.scripts-dir }}"
-        scripts_dir_unix=$(echo "$scripts_dir" | sed 's/\\/\//g')
-        vcpkg_script="${scripts_dir_unix}/vcpkg.sh"
-        vcpkg_script_unix=$(echo "$vcpkg_script" | sed 's/\\/\//g')
+        vcpkg_script="${scripts_dir}/vcpkg.sh"
         vcpkg_dir="${{ steps.strings.outputs.vcpkg-dir }}"
-        vcpkg_dir_unix=$(echo "$vcpkg_dir" | sed 's/\\/\//g')
         
         # Make the script executable
-        chmod +x "$vcpkg_script_unix"
+        chmod +x "$vcpkg_script"
         
-        # Conditionally set the triplet based on the OS
-        if [ "${{ matrix.os }}" == "ubuntu-24.04" ]; then
-          triplet="x64-linux"
-        elif [ "${{ matrix.os }}" == "windows-latest" ]; then
-          triplet="x64-windows"
-        else
-          echo "Error: Unsupported OS '${{ matrix.os }}'. Supported OSes are ubuntu-24.04 and windows-latest."
-          exit 1
-        fi
-        
-        # Run the script
-        "$vcpkg_script_unix" $triplet https "$vcpkg_dir_unix"
+        # Run vcpkg.sh with the appropriate triplet
+        "$vcpkg_script" https "$vcpkg_dir"
+    
+    # Step for Windows
+    - name: Set up dependencies on Windows
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        powershell -ExecutionPolicy Bypass -File "${{ steps.strings.outputs.scripts-dir }}\\vcpkg.ps1" `
+          https "${{ steps.strings.outputs.vcpkg-dir }}"
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
