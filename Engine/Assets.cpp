@@ -419,7 +419,7 @@ void Assets::ReBuildDependencyGraph() noexcept {
     }
 }
 
-template <>
+template<>
 void Assets::PerformPostDeserializationAction<Sampler>(UUID id) noexcept {
     bridge.GetSamplers().Deallocate(id);
     std::vector<SamplerAllocatorMessage> messages = bridge.GetSamplers().Allocate(*this, id);
@@ -431,7 +431,7 @@ void Assets::PerformPostDeserializationAction<Sampler>(UUID id) noexcept {
         errorMessages.emplace_back(std::move(message));
     }
 }
-template <>
+template<>
 void Assets::PerformPostDeserializationAction<Texture>(UUID id) noexcept {
     bridge.GetTextures().Deallocate(id);
     std::vector<TextureAllocatorMessage> messages = bridge.GetTextures().Allocate(*this, id);
@@ -443,7 +443,7 @@ void Assets::PerformPostDeserializationAction<Texture>(UUID id) noexcept {
         errorMessages.emplace_back(std::move(message));
     }
 }
-template <>
+template<>
 void Assets::PerformPostDeserializationAction<Shader>(UUID id) noexcept {
     bridge.GetShaders().Deallocate(id);
     std::vector<ShaderCompilerMessage> messages = bridge.GetShaders().Allocate(*this, id);
@@ -470,7 +470,7 @@ void Assets::PerformPostDeserializationAction<Shader>(UUID id) noexcept {
         }
     }
 }
-template <>
+template<>
 void Assets::PerformPostDeserializationAction<ShaderProgram>(UUID id) noexcept {
     bridge.GetShaderPrograms().Deallocate(id);
     std::vector<ShaderLinkerMessage> messages = bridge.GetShaderPrograms().Allocate(*this, id);
@@ -682,7 +682,7 @@ void MaterialPostDeserialization::EmplaceUniform(Material::Uniforms& uniforms, i
     }
 }
 
-template <>
+template<>
 void Assets::PerformPostDeserializationAction<Material>(UUID id) noexcept {
     Material& asset = database[id].DataAs<Material>();
     if (!asset.HasShaderProgram()) {
@@ -728,7 +728,7 @@ void Assets::PerformPostDeserializationAction<Material>(UUID id) noexcept {
     }
 }
 
-template <>
+template<>
 void Assets::PerformPostDeserializationAction<FrameBuffer>(UUID id) noexcept {
     bridge.GetFrameBuffers().Deallocate(id);
     std::vector<FrameBufferAllocatorMessage> messages = bridge.GetFrameBuffers().Allocate(*this, id);

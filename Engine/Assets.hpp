@@ -185,13 +185,13 @@ private:
     void PerformPostDeserializationAction([[maybe_unused]] UUID id) noexcept {}
 };
 
-template <>
+template<>
 void Assets::PerformPostDeserializationAction<Sampler>(UUID id) noexcept;
-template <>
+template<>
 void Assets::PerformPostDeserializationAction<Texture>(UUID id) noexcept;
-template <>
+template<>
 void Assets::PerformPostDeserializationAction<Shader>(UUID id) noexcept;
-template <>
+template<>
 void Assets::PerformPostDeserializationAction<ShaderProgram>(UUID id) noexcept;
 
 // Material Post Serialiation Helpers
@@ -201,7 +201,7 @@ namespace MaterialPostDeserialization {
     void EmplaceUniform(Material::Uniforms& uniforms, int location, std::string_view name, std::string_view typeName, int arraySize = 1) noexcept;
 }
 
-template <>
+template<>
 void Assets::PerformPostDeserializationAction<Material>(UUID id) noexcept;
-template <>
+template<>
 void Assets::PerformPostDeserializationAction<FrameBuffer>(UUID id) noexcept;
