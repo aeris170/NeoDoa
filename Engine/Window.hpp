@@ -52,6 +52,7 @@ struct ContextWindowCreationParams {
     std::string_view Title{ "NeoDoa Window" };
 
     bool IsFullScreen{ false };
+    bool IsCentered{ false };
     unsigned Monitor{}; // 0 is first monitor
 
     bool IsResizable{ false };

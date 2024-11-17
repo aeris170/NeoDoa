@@ -107,6 +107,10 @@ WindowGLFW::WindowGLFW(GraphicsBackend backend, const ContextWindowCreationParam
         DOA_LOG_FATAL("Failed to create GLFW window. Reason: %s", errorMessage);
         std::unreachable();
     }
+    if (params.IsCentered) {
+        auto resolution = Monitors::PrimaryMonitor().GetCurrentVideoMode().Size;
+        glfwSetWindowPos(glfwWindow, (resolution.Width - params.Size.Width) / 2, (resolution.Height - params.Size.Height) / 2);
+    }
 
     glfwSetWindowUserPointer(glfwWindow, this);
     if (isOpenGL) {

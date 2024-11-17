@@ -35,6 +35,8 @@ int main() {
     .Size{ 800, 600 },
     .Title{ "NeoDoa Launcher" },
 
+    .IsCentered{ true },
+
     .IsVisible{ true },
     .IsDecorated{ false },
 
