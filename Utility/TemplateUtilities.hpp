@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <concepts>
 
 namespace concepts {
@@ -25,6 +26,11 @@ namespace concepts {
     template<typename T>
     concept Hashable = requires(T t) {
         { std::hash<T>{}(t) } -> std::convertible_to<std::size_t>;
+    };
+
+    template<typename T>
+    concept ConvertibleToString = requires (T t) {
+        { std::to_string(t) } -> std::convertible_to<std::string>;
     };
 }
 

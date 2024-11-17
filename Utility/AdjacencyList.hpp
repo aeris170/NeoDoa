@@ -25,7 +25,7 @@ struct AdjacencyList {
         using pointer = value_type*;
         using reference = value_type&;
 
-        IncomingEdgeIterator(DataStructure::const_iterator begin, DataStructure::const_iterator end, const Vertex& vertex);
+        IncomingEdgeIterator(const DataStructure::const_iterator& begin, const DataStructure::const_iterator& end, const Vertex& vertex);
 
         bool HasNext() const noexcept;
         const Vertex& Next() noexcept;
@@ -42,7 +42,7 @@ struct AdjacencyList {
     /// </summary>
     struct OutgoingEdgeIterator {
 
-        OutgoingEdgeIterator(DataStructure::const_iterator begin, DataStructure::const_iterator end, const Vertex& vertex);
+        OutgoingEdgeIterator(const DataStructure::const_iterator& begin, const DataStructure::const_iterator& end, const Vertex& vertex);
 
         bool HasNext() const noexcept;
         const Vertex& Next() noexcept;
@@ -104,16 +104,16 @@ struct AdjacencyList {
     void Clear() noexcept;
 
     /// <summary>
-    /// Precondition: origin is present.
+    /// Precondition: vertex is present.
     /// Postcondition: None.
     /// </summary>
-    IncomingEdgeIterator GetIncomingEdgesOf(const Vertex& origin) const noexcept;
+    IncomingEdgeIterator GetIncomingEdgesOf(const Vertex& vertex) const noexcept;
 
     /// <summary>
-    /// Precondition: origin is present.
+    /// Precondition: vertex is present.
     /// Postcondition: None.
     /// </summary>
-    OutgoingEdgeIterator GetOutgoingEdgesOf(const Vertex& origin) const noexcept;
+    OutgoingEdgeIterator GetOutgoingEdgesOf(const Vertex& vertex) const noexcept;
 
 private:
     DataStructure data{};
@@ -121,7 +121,7 @@ private:
 
 template<typename Vertex, size_t InitialVertexCount, size_t InitialEdgeCountPerVertex>
     requires std::equality_comparable<Vertex>
-inline AdjacencyList<Vertex, InitialVertexCount, InitialEdgeCountPerVertex>::IncomingEdgeIterator::IncomingEdgeIterator(DataStructure::const_iterator begin, DataStructure::const_iterator end, const Vertex& vertex) :
+inline AdjacencyList<Vertex, InitialVertexCount, InitialEdgeCountPerVertex>::IncomingEdgeIterator::IncomingEdgeIterator(const DataStructure::const_iterator& begin, const DataStructure::const_iterator& end, const Vertex& vertex) :
     begin(begin),
     current(begin),
     end(end),
@@ -157,7 +157,7 @@ inline const Vertex& AdjacencyList<Vertex, InitialVertexCount, InitialEdgeCountP
 
 template<typename Vertex, size_t InitialVertexCount, size_t InitialEdgeCountPerVertex>
     requires std::equality_comparable<Vertex>
-inline AdjacencyList<Vertex, InitialVertexCount, InitialEdgeCountPerVertex>::OutgoingEdgeIterator::OutgoingEdgeIterator(DataStructure::const_iterator begin, DataStructure::const_iterator end, const Vertex& vertex) :
+inline AdjacencyList<Vertex, InitialVertexCount, InitialEdgeCountPerVertex>::OutgoingEdgeIterator::OutgoingEdgeIterator(const DataStructure::const_iterator& begin, const DataStructure::const_iterator& end, const Vertex& vertex) :
     begin(begin),
     end(end),
     edgeList(std::find_if(begin, end, [&vertex](auto& pair) { return pair.first == vertex; })->second) {}
@@ -196,8 +196,8 @@ inline void AdjacencyList<Vertex, InitialVertexCount, InitialEdgeCountPerVertex>
 
 template<typename Vertex, size_t InitialVertexCount, size_t InitialEdgeCountPerVertex>
     requires std::equality_comparable<Vertex>
-inline bool AdjacencyList<Vertex, InitialVertexCount, InitialEdgeCountPerVertex>::HasVertex(const Vertex& origin) const noexcept {
-    return std::ranges::find_if(data, [&origin](const auto& pair) { return pair.first == origin; }) != data.end();
+inline bool AdjacencyList<Vertex, InitialVertexCount, InitialEdgeCountPerVertex>::HasVertex(const Vertex& vertex) const noexcept {
+    return std::ranges::find_if(data, [&vertex](const auto& pair) { return pair.first == vertex; }) != data.end();
 }
 
 template<typename Vertex, size_t InitialVertexCount, size_t InitialEdgeCountPerVertex>

@@ -17,7 +17,7 @@ bool FancyVector4Widget(const std::string& label, glm::vec4& vec, FancyVectorWid
 }
 
 bool FancyVectori1Widget(const std::string& label, glm::ivec1& vec, FancyVectorWidgetSettings<Display::X> settings) {
-    settings.speed = std::clamp(std::round(settings.speed), 1.0f, static_cast<float>(std::numeric_limits<int>().max()));
+    settings.speed = std::clamp(std::round(settings.speed), 1.0f, static_cast<float>(std::numeric_limits<int>::max()));
     settings.fmt = "%.0f";
 
     std::array<float, 1> values = {
@@ -29,7 +29,7 @@ bool FancyVectori1Widget(const std::string& label, glm::ivec1& vec, FancyVectorW
     return rv;
 }
 bool FancyVectori2Widget(const std::string& label, glm::ivec2& vec, FancyVectorWidgetSettings<Display::XY> settings) {
-    settings.speed = std::clamp(std::round(settings.speed), 1.0f, static_cast<float>(std::numeric_limits<int>().max()));
+    settings.speed = std::clamp(std::round(settings.speed), 1.0f, static_cast<float>(std::numeric_limits<int>::max()));
     settings.fmt = "%.0f";
 
     std::array<float, 2> values = {
@@ -43,7 +43,7 @@ bool FancyVectori2Widget(const std::string& label, glm::ivec2& vec, FancyVectorW
     return rv;
 }
 bool FancyVectori3Widget(const std::string& label, glm::ivec3& vec, FancyVectorWidgetSettings<Display::XYZ> settings) {
-    settings.speed = std::clamp(std::round(settings.speed), 1.0f, static_cast<float>(std::numeric_limits<int>().max()));
+    settings.speed = std::clamp(std::round(settings.speed), 1.0f, static_cast<float>(std::numeric_limits<int>::max()));
     settings.fmt = "%.0f";
 
     std::array<float, 3> values = {
@@ -59,7 +59,7 @@ bool FancyVectori3Widget(const std::string& label, glm::ivec3& vec, FancyVectorW
     return rv;
 }
 bool FancyVectori4Widget(const std::string& label, glm::ivec4& vec, FancyVectorWidgetSettings<Display::XYZW> settings) {
-    settings.speed = std::clamp(std::round(settings.speed), 1.0f, static_cast<float>(std::numeric_limits<int>().max()));
+    settings.speed = std::clamp(std::round(settings.speed), 1.0f, static_cast<float>(std::numeric_limits<int>::max()));
     settings.fmt = "%.0f";
 
     std::array<float, 4> values = {
@@ -78,9 +78,9 @@ bool FancyVectori4Widget(const std::string& label, glm::ivec4& vec, FancyVectorW
 }
 
 bool FancyVectorui1Widget(const std::string& label, glm::uvec1& vec, FancyVectorWidgetSettings<Display::X> settings) {
-    settings.speed = std::clamp(std::round(settings.speed), 1.0f, static_cast<float>(std::numeric_limits<int>().max()));
+    settings.speed = std::clamp(std::round(settings.speed), 1.0f, static_cast<float>(std::numeric_limits<int>::max()));
     settings.min = 0.0f;
-    settings.max = static_cast<float>(std::numeric_limits<unsigned>().max());
+    settings.max = static_cast<float>(std::numeric_limits<unsigned>::max());
     settings.fmt = "%.0f";
 
     float value = static_cast<float>(vec.x);
@@ -90,9 +90,9 @@ bool FancyVectorui1Widget(const std::string& label, glm::uvec1& vec, FancyVector
     return rv;
 }
 bool FancyVectorui2Widget(const std::string& label, glm::uvec2& vec, FancyVectorWidgetSettings<Display::XY> settings) {
-    settings.speed = std::clamp(std::round(settings.speed), 1.0f, static_cast<float>(std::numeric_limits<int>().max()));
+    settings.speed = std::clamp(std::round(settings.speed), 1.0f, static_cast<float>(std::numeric_limits<int>::max()));
     settings.min = 0.0f;
-    settings.max = static_cast<float>(std::numeric_limits<unsigned>().max());
+    settings.max = static_cast<float>(std::numeric_limits<unsigned>::max());
     settings.fmt = "%.0f";
 
     std::array<float, 2> values = {
@@ -106,9 +106,9 @@ bool FancyVectorui2Widget(const std::string& label, glm::uvec2& vec, FancyVector
     return rv;
 }
 bool FancyVectorui3Widget(const std::string& label, glm::uvec3& vec, FancyVectorWidgetSettings<Display::XYZ> settings) {
-    settings.speed = std::clamp(std::round(settings.speed), 1.0f, static_cast<float>(std::numeric_limits<int>().max()));
+    settings.speed = std::clamp(std::round(settings.speed), 1.0f, static_cast<float>(std::numeric_limits<int>::max()));
     settings.min = 0.0f;
-    settings.max = static_cast<float>(std::numeric_limits<unsigned>().max());
+    settings.max = static_cast<float>(std::numeric_limits<unsigned>::max());
     settings.fmt = "%.0f";
 
     std::array<float, 3> values = {
@@ -124,9 +124,9 @@ bool FancyVectorui3Widget(const std::string& label, glm::uvec3& vec, FancyVector
     return rv;
 }
 bool FancyVectorui4Widget(const std::string& label, glm::uvec4& vec, FancyVectorWidgetSettings<Display::XYZW> settings) {
-    settings.speed = std::clamp(std::round(settings.speed), 1.0f, static_cast<float>(std::numeric_limits<int>().max()));
+    settings.speed = std::clamp(std::round(settings.speed), 1.0f, static_cast<float>(std::numeric_limits<int>::max()));
     settings.min = 0.0f;
-    settings.max = static_cast<float>(std::numeric_limits<unsigned>().max());
+    settings.max = static_cast<float>(std::numeric_limits<unsigned>::max());
     settings.fmt = "%.0f";
 
     std::array<float, 4> values = {

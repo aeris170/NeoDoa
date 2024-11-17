@@ -13,6 +13,8 @@
 #include <Editor/AssetFilter.hpp>
 #include <Editor/MetaAssetInfo.hpp>
 
+#include <Utility/TemplateUtilities.hpp>
+
 inline constexpr int compFieldWidth = 300; // must be divisible by both 3 and 4 (and 1 and 2, but you know... MaThS...) (x,y,z,w)
 
 enum class Display {
@@ -327,8 +329,7 @@ namespace ImGui {
 
 using namespace detail;
 
-template<typename T>
-    requires requires (T x) { std::to_string(x); }
+template<typename T> requires concepts::ConvertibleToString<T>
 void UneditableArrayWidget(const std::string& label, const std::vector<T>& array) {
     BeginWidget(label);
     for (size_t i = 0; i < array.size(); i++) {

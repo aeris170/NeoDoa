@@ -729,7 +729,7 @@ void* FileDialog::m_getIcon(const std::filesystem::path& path)
 
 	SHFILEINFOW fileInfo = { 0 };
 	std::wstring pathW = path.wstring();
-	for (int i = 0; i < pathW.size(); i++)
+	for (size_t i = 0; i < pathW.size(); i++)
 		if (pathW[i] == '/')
 			pathW[i] = '\\';
 	SHGetFileInfoW(pathW.c_str(), attrs, &fileInfo, sizeof(SHFILEINFOW), flags);

@@ -6,7 +6,7 @@
 struct GLFWwindow;
 struct GLFWcursor;
 
-struct WindowGLFW : public IWindow {
+struct WindowGLFW final : public IWindow {
 
     using PlatformWindowType = GLFWwindow*;
 
