@@ -58,17 +58,35 @@ jobs:
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
         echo "scripts-dir=${{ github.workspace }}/scripts" >> "$GITHUB_OUTPUT"
         echo "vcpkg-dir=${{ github.workspace }}/vcpkg" >> "$GITHUB_OUTPUT"
-        
+
+    - name: Clean vcpkg directory if exists (Linux)
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        echo "Cleaning vcpkg directory at ${{ steps.strings.outputs.vcpkg-dir }}..."
+        rm -rf "${{ steps.strings.outputs.vcpkg-dir }}"
+
+    - name: Clean vcpkg directory if exists (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        $vcpkgDir = "${{ steps.strings.outputs.vcpkg-dir }}"
+        Write-Host "Cleaning vcpkg directory at $vcpkgDir..."
+        if (Test-Path -Path $vcpkgDir) {
+            Remove-Item -Recurse -Force -Path $vcpkgDir
+        }
+
     - name: Cache vcpkg
       uses: actions/cache@v3
       with:
         path: ${{ steps.strings.outputs.vcpkg-dir }}
         key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg.json') }}
         restore-keys: |
-          ${{ runner.os }}-vcpkg-
+          ${{ runner.os }}-${{ runner.build_type }}-vcpkg-cache
 
     - name: Run (Linux-specific) script for apt-get
       if: runner.os == 'Linux'
+      shell: bash
       run: |
         chmod +x ${{ steps.strings.outputs.scripts-dir }}/fetch_apt_get.sh
         ${{ steps.strings.outputs.scripts-dir }}/fetch_apt_get.sh
