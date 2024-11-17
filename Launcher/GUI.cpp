@@ -177,6 +177,9 @@ void GUI::End() {
 }
 
 void GUI::InsertProjectData(ProjectData&& projectData) noexcept {
+    if (projectData.AbsolutePath.empty() || !projectData.AbsolutePath.ends_with(std::filesystem::path::preferred_separator)) {
+        projectData.AbsolutePath.append(1, std::filesystem::path::preferred_separator);
+    }
     auto search = std::ranges::find_if(projectDataCollection, [&projectData](auto& elem) -> bool {
         return elem.Name == projectData.Name && elem.AbsolutePath == projectData.AbsolutePath;
     });
