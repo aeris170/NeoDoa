@@ -80,9 +80,9 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{ steps.strings.outputs.vcpkg-dir }}
-        key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg.json') }}
+        key: ${{ runner.os }}-${{ matrix.build_type }}-vcpkg-${{ hashFiles('**/vcpkg.json') }}
         restore-keys: |
-          ${{ runner.os }}-${{ runner.build_type }}-vcpkg-cache
+          ${{ runner.os }}-${{ matrix.build_type }}-vcpkg-cache
 
     - name: Run (Linux-specific) script for apt-get
       if: runner.os == 'Linux'
