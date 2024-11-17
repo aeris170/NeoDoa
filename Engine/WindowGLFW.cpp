@@ -290,7 +290,11 @@ bool WindowGLFW::IsVisible() const noexcept {
     return glfwGetWindowAttrib(glfwWindow, GLFW_VISIBLE) == GLFW_TRUE;
 }
 void WindowGLFW::SetVisible(bool isVisible) noexcept {
-    glfwSetWindowAttrib(glfwWindow, GLFW_VISIBLE, isVisible ? GLFW_TRUE : GLFW_FALSE);
+    if (isVisible) {
+        glfwShowWindow(glfwWindow);
+    } else {
+        glfwHideWindow(glfwWindow);
+    }
 }
 
 bool WindowGLFW::IsDecorated() const noexcept {
