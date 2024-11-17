@@ -7,67 +7,65 @@ RESET="\033[0m"
 # Check if clonemode argument is provided
 if [ -z "$1" ]; then
     echo -e "${YELLOW}No clonemode supplied, defaulting to https${RESET}"
-	clonemode="https"
+    clonemode="https"
 else
-	clonemode=$1
+    clonemode=$1
 fi
 
 # Check if vcpkg path argument is provided
 if [ -z "$2" ]; then
     echo -e "${YELLOW}No vcpkg path supplied, defaulting to ./vcpkg${RESET}"
-	path="./vcpkg"
+    path="./vcpkg"
 else
-	path=$2
+    path=$2
 fi
 
 echo -e "${WHITE}Clonemode: $clonemode${RESET}"
 echo -e "${WHITE}vcpkg path: $path${RESET}"
 
-# Check if the directory exists, if not, create it
-if [ ! -d "$path" ]; then
-    echo -e "${WHITE}Creating directory: $path${RESET}"
-    mkdir -p "$path"
-else
-    echo -e "${YELLOW}Directory already exists: $path${RESET}"
-fi
-
-# Change directory to the vcpkg path
-echo -e "${WHITE}Changing to directory: $path${RESET}"
-cd "$path"
-
-# Clone vcpkg using the provided clonemode
-echo -e "${WHITE}Cloning vcpkg...${RESET}"
-if [ "$clonemode" = "ssh" ]; then
-    git clone git@github.com:microsoft/vcpkg.git . 2>&1 | tee cloneOutput.log
-elif [ "$clonemode" = "https" ]; then
-    git clone https://github.com/Microsoft/vcpkg.git . 2>&1 | tee cloneOutput.log
-else
-    echo -e "${RED}Incorrect clonemode! Expected https or ssh, got something else${RESET}"
-    cd ..
-    exit 1
-fi
-
-# Check if clone was successful
-if [ $? -ne 0 ]; then
-    echo -e "${RED}Error during git clone.${RESET}"
-    cat cloneOutput.log
-    rm cloneOutput.log
-    cd ..
-    exit 1
-fi
-rm cloneOutput.log
-
-# Pull the latest changes
-echo -e "${WHITE}Pulling latest vcpkg changes...${RESET}"
-git pull 2>&1 | tee pullOutput.log
-if [ $? -ne 0 ]; then
-    echo -e "${RED}Error during git pull.${RESET}"
-    cat pullOutput.log
+# Check if the directory exists
+if [ -d "$path" ]; then
+    # If the directory exists, go inside and pull the latest changes
+    echo -e "${WHITE}Directory already exists: $path${RESET}"
+    echo -e "${WHITE}Changing to directory: $path${RESET}"
+    cd "$path"
+    echo -e "${WHITE}Pulling latest vcpkg changes...${RESET}"
+    git pull 2>&1 | tee pullOutput.log
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}Error during git pull.${RESET}"
+        cat pullOutput.log
+        rm pullOutput.log
+        cd ..
+        exit 1
+    fi
     rm pullOutput.log
-    cd ..
-    exit 1
+else
+    # If the directory doesn't exist, go to the parent directory and clone the repo
+    echo -e "${WHITE}Directory does not exist: $path${RESET}"
+    echo -e "${WHITE}Changing to parent directory and cloning vcpkg...${RESET}"
+    cd "$(dirname "$path")"
+    if [ "$clonemode" = "ssh" ]; then
+        git clone git@github.com:microsoft/vcpkg.git "$(basename "$path")" 2>&1 | tee cloneOutput.log
+    elif [ "$clonemode" = "https" ]; then
+        git clone https://github.com/Microsoft/vcpkg.git "$(basename "$path")" 2>&1 | tee cloneOutput.log
+    else
+        echo -e "${RED}Incorrect clonemode! Expected https or ssh, got something else${RESET}"
+        cd ..
+        exit 1
+    fi
+
+    # Check if clone was successful
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}Error during git clone.${RESET}"
+        cat cloneOutput.log
+        rm cloneOutput.log
+        cd ..
+        exit 1
+    fi
+    rm cloneOutput.log
+    # Change to the newly cloned vcpkg directory
+    cd "$path"
 fi
-rm pullOutput.log
 
 # Run the bootstrap script
 if [ -f "./bootstrap-vcpkg.sh" ]; then

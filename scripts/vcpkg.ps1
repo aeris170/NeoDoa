@@ -22,46 +22,43 @@ if (-not $args[1]) {
 Write-Host "Clonemode: $clonemode" -ForegroundColor white -BackgroundColor black
 Write-Host "vcpkg path: $path" -ForegroundColor white -BackgroundColor black
 
-# Create the directory if it doesn't exist
-if (-not (Test-Path -Path $path)) {
-    Write-Host "Creating directory: $path" -ForegroundColor white -BackgroundColor black
-    New-Item -Path $path -ItemType Directory | Out-Null
-} else {
+# Check if the directory exists
+if (Test-Path -Path $path) {
+    # If the directory exists, go inside and pull the latest changes
     Write-Host "Directory already exists: $path" -ForegroundColor yellow -BackgroundColor black
-}
+    Write-Host "Changing to directory: $path" -ForegroundColor white -BackgroundColor black
+    Set-Location -Path $path
 
-# Change directory to the vcpkg path
-Write-Host "Changing to directory: $path" -ForegroundColor white -BackgroundColor black
-Set-Location -Path $path
-
-# Clone vcpkg using the provided clonemode
-Write-Host "Cloning vcpkg..." -ForegroundColor white -BackgroundColor black
-if ($clonemode -eq "ssh") {
-    Start-Process -FilePath "git" -ArgumentList "clone git@github.com:microsoft/vcpkg.git ." `
-        -NoNewWindow -Wait -PassThru | Tee-Object -Variable cloneOutput
-} elseif ($clonemode -eq "https") {
-    Start-Process -FilePath "git" -ArgumentList "clone https://github.com/Microsoft/vcpkg.git ." `
-        -NoNewWindow -Wait -PassThru | Tee-Object -Variable cloneOutput
+    Write-Host "Pulling latest vcpkg changes..." -ForegroundColor white -BackgroundColor black
+    $pullOutput = Start-Process -FilePath "git" -ArgumentList "pull" -NoNewWindow -Wait -PassThru
+    if ($pullOutput.ExitCode -ne 0) {
+        Write-Host "Error during git pull: $($pullOutput.StandardError)" -ForegroundColor red -BackgroundColor black
+        Set-Location -Path ..
+        exit 1
+    }
 } else {
-    Write-Host "Incorrect clonemode! Expected https or ssh, got something else" -ForegroundColor red -BackgroundColor black
-	Set-Location -Path ..
-    exit 1
-}
+    # If the directory doesn't exist, go to the parent directory and clone the repo
+    Write-Host "Directory does not exist: $path" -ForegroundColor white -BackgroundColor black
+    Write-Host "Changing to parent directory and cloning vcpkg..." -ForegroundColor white -BackgroundColor black
+    Set-Location -Path (Split-Path -Path $path -Parent)
+    
+    if ($clonemode -eq "ssh") {
+        Start-Process -FilePath "git" -ArgumentList "clone git@github.com:microsoft/vcpkg.git $(Split-Path -Leaf $path)" -NoNewWindow -Wait -PassThru | Tee-Object -Variable cloneOutput
+    } elseif ($clonemode -eq "https") {
+        Start-Process -FilePath "git" -ArgumentList "clone https://github.com/Microsoft/vcpkg.git $(Split-Path -Leaf $path)" -NoNewWindow -Wait -PassThru | Tee-Object -Variable cloneOutput
+    } else {
+        Write-Host "Incorrect clonemode! Expected https or ssh, got something else" -ForegroundColor red -BackgroundColor black
+        Set-Location -Path ..
+        exit 1
+    }
 
-# Check if clone was successful
-if ($cloneOutput.ExitCode -ne 0) {
-    Write-Host "Error during git clone: $($cloneOutput.StandardError)" -ForegroundColor red -BackgroundColor black
-	Set-Location -Path ..
-    exit 1
-}
-
-# Pull the latest changes
-Write-Host "Pulling latest vcpkg changes..." -ForegroundColor white -BackgroundColor black
-$pullOutput = Start-Process -FilePath "git" -ArgumentList "pull" -NoNewWindow -Wait -PassThru
-if ($pullOutput.ExitCode -ne 0) {
-    Write-Host "Error during git pull: $($pullOutput.StandardError)" -ForegroundColor red -BackgroundColor black
-	Set-Location -Path ..
-    exit 1
+    # Check if clone was successful
+    if ($cloneOutput.ExitCode -ne 0) {
+        Write-Host "Error during git clone: $($cloneOutput.StandardError)" -ForegroundColor red -BackgroundColor black
+        Set-Location -Path ..
+        exit 1
+    }
+    Set-Location -Path $path
 }
 
 # Run the bootstrap script
@@ -70,12 +67,12 @@ if (Test-Path -Path "./bootstrap-vcpkg.bat") {
     $bootstrapOutput = Start-Process -FilePath "./bootstrap-vcpkg.bat" -NoNewWindow -Wait -PassThru
     if ($bootstrapOutput.ExitCode -ne 0) {
         Write-Host "Error during bootstrap: $($bootstrapOutput.StandardError)" -ForegroundColor red -BackgroundColor black
-		Set-Location -Path ..
+        Set-Location -Path ..
         exit 1
     }
 } else {
     Write-Host "Bootstrap script not found!" -ForegroundColor red -BackgroundColor black
-	Set-Location -Path ..
+    Set-Location -Path ..
     exit 1
 }
 
@@ -102,7 +99,7 @@ $installOutput = Start-Process -FilePath "./vcpkg.exe" -ArgumentList @(
 ) -NoNewWindow -Wait -PassThru
 if ($installOutput.ExitCode -ne 0) {
     Write-Host "Error during vcpkg install: $($installOutput.StandardError)" -ForegroundColor red -BackgroundColor black
-	Set-Location -Path ..
+    Set-Location -Path ..
     exit 1
 }
 
@@ -111,7 +108,7 @@ Write-Host "Integrating vcpkg..." -ForegroundColor white -BackgroundColor black
 $integrateOutput = Start-Process -FilePath "./vcpkg.exe" -ArgumentList 'integrate', 'install' -NoNewWindow -Wait -PassThru
 if ($integrateOutput.ExitCode -ne 0) {
     Write-Host "Error during vcpkg integrate: $($integrateOutput.StandardError)" -ForegroundColor red -BackgroundColor black
-	Set-Location -Path ..
+    Set-Location -Path ..
     exit 1
 }
 
