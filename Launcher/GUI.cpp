@@ -347,10 +347,7 @@ void GUI::RenderProjectsTable() noexcept {
                 }
             }
 
-            for (auto& data : projectDataCollectionSorted) {
-                RenderProjectData(data);
-            }
-            RenderProjectDataContextMenu(contextOwner);
+            RenderProjectData(projectDataCollectionSorted);
 
             ImGui::EndTable();
         }
@@ -365,98 +362,109 @@ void GUI::RenderProjectsTable() noexcept {
     }
     ImGui::PopStyleVar(2);
 }
-void GUI::RenderProjectData(ProjectData& data) noexcept {
-    ImGui::PushID(data.AbsolutePath.c_str());
-    ImVec2 min, max;
-    ImGui::TableNextRow();
+void GUI::RenderProjectData(ProjectDataCollection& projectDataCollectionSorted) noexcept {
+    // Which ProjectData (row) requested right click context menu to appear
+    // must be remembered because context menu will mutate the right clicked row.
+    // Currently, context menu only allows deletions.
+    static ProjectData contextMenuOwner;
 
-    ImGui::TableNextColumn();
-    min = ImGui::GetCursorScreenPos();
-    ImGui::AlignTextToFramePadding();
-    ImGui::PushStyleColor(ImGuiCol_Text, data.IsFavourite ? ProjectsTableFavouriteColor : ProjectsTableNotFavouriteColor);
-    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetStyle().CellPadding.x);
-    if (ImGui::Button(ProjectsTableFavouriteIcon)) {
-        auto search = std::ranges::find_if(projectDataCollection, [&data](auto& elem) {
-            return elem.Name == data.Name && elem.AbsolutePath == data.AbsolutePath && elem.LastOpened == data.LastOpened;
-        });
-        assert(search != projectDataCollection.end());
-        search->IsFavourite = !search->IsFavourite;
-        isCollectionDirty = true;
-        SaveProjectDataCollectionToDisk();
-    }
-    ImGui::PopStyleColor();
+    for (auto i = 0; i < projectDataCollectionSorted.size(); i++) {
+        auto& data = projectDataCollectionSorted[i];
+        ImGui::PushID(data.AbsolutePath.c_str());
 
+        ImGui::TableNextRow();
 
-    ImGui::TableNextColumn();
-    ImGui::AlignTextToFramePadding();
-    if (data.IsValid) {
-        ImGui::TextColored(ProjectsTableCheckColor, "%s", ProjectsTableCheckIcon);
-    } else {
-        ImGui::TextColored(ProjectsTableCrossColor, "%s", ProjectsTableCrossIcon);
-    }
+        ImGui::TableNextColumn();
+        ImGui::AlignTextToFramePadding();
+        ImGui::PushStyleColor(ImGuiCol_Text, data.IsFavourite ? ProjectsTableFavouriteColor : ProjectsTableNotFavouriteColor);
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetStyle().CellPadding.x);
+        if (ImGui::Button(ProjectsTableFavouriteIcon)) {
+            auto search = std::ranges::find_if(projectDataCollection, [&data](auto& elem) {
+                return elem.Name == data.Name && elem.AbsolutePath == data.AbsolutePath && elem.LastOpened == data.LastOpened;
+            });
+            assert(search != projectDataCollection.end());
+            search->IsFavourite = !search->IsFavourite;
+            isCollectionDirty = true;
+            SaveProjectDataCollectionToDisk();
+        }
+        ImGui::PopStyleColor();
 
-    ImGui::TableNextColumn();
-    ImGui::TextUnformatted(data.Name.c_str());
+        ImGui::TableNextColumn();
+        ImGui::AlignTextToFramePadding();
+        if (data.IsValid) {
+            ImGui::TextColored(ProjectsTableCheckColor, "%s", ProjectsTableCheckIcon);
+        } else {
+            ImGui::TextColored(ProjectsTableCrossColor, "%s", ProjectsTableCrossIcon);
+        }
 
-    ImGui::TableNextColumn();
-    ImGui::TextUnformatted(data.AbsolutePath.c_str());
+        ImGui::TableNextColumn();
+        ImGui::TextUnformatted(data.Name.c_str());
 
-    ImGui::TableNextColumn();
-    ImGui::TextUnformatted(data.LastOpened.c_str());
+        ImGui::TableNextColumn();
+        ImGui::TextUnformatted(data.AbsolutePath.c_str());
 
-    ImGui::TableNextColumn();
-    if (data.IsValid) {
-        ImGui::SetCursorPosX(ImGui::GetCursorPosX() - ImGui::GetStyle().CellPadding.x);
-        if (ImGui::Button(ICON_FA_ROCKET_LAUNCH " LAUNCH!")) {
-            if (CheckProjectValidity(data)) {
-                auto const time = std::chrono::current_zone()->to_local(std::chrono::system_clock::now());
-                auto search = std::ranges::find_if(projectDataCollection, [&data](auto& elem) {
-                    return elem.Name == data.Name && elem.AbsolutePath == data.AbsolutePath && elem.LastOpened == data.LastOpened;
-                });
-                assert(search != projectDataCollection.end());
-                if (!IsProjectAlreadyOpen(*search)) {
-                    search->LastOpened = std::format("{:%Y-%m-%d %X}", time);
-                    isCollectionDirty = true;
-                    SaveProjectDataCollectionToDisk();
+        ImGui::TableNextColumn();
+        ImGui::TextUnformatted(data.LastOpened.c_str());
 
-                    const char* exe;
-                    if constexpr (detect::is_windows_v) {
-                        exe = "start Editor.exe";
-                    } else if constexpr (detect::is_linux_v) {
-                        exe = "./Editor";
-                    }
-                    std::string command = std::string(exe).append(1, ' ').append(data.AbsolutePath).append(data.Name).append(Assets::ProjectExtension);
-                    if constexpr (detect::is_linux_v) {
-                        command = command.append(" &");
-                    }
-                    auto sys = std::system(command.c_str());
-                    if (sys == -1) {
-                        DOA_LOG_WARNING("[Launcher::GUI] A call to std::system returned -1.");
+        ImGui::TableNextColumn();
+        if (data.IsValid) {
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() - ImGui::GetStyle().CellPadding.x);
+            if (ImGui::Button(ICON_FA_ROCKET_LAUNCH " LAUNCH!")) {
+                if (CheckProjectValidity(data)) {
+                    auto const time = std::chrono::current_zone()->to_local(std::chrono::system_clock::now());
+                    auto search = std::ranges::find_if(projectDataCollection, [&data](auto& elem) {
+                        return elem.Name == data.Name && elem.AbsolutePath == data.AbsolutePath && elem.LastOpened == data.LastOpened;
+                    });
+                    assert(search != projectDataCollection.end());
+                    if (!IsProjectAlreadyOpen(*search)) {
+                        search->LastOpened = std::format("{:%Y-%m-%d %X}", time);
+                        isCollectionDirty = true;
+                        SaveProjectDataCollectionToDisk();
+
+                        const char* exe;
+                        if constexpr (detect::is_windows_v) {
+                            exe = "start Editor.exe";
+                        } else if constexpr (detect::is_linux_v) {
+                            exe = "./Editor";
+                        }
+                        std::string command = std::string(exe).append(1, ' ').append(data.AbsolutePath).append(data.Name).append(Assets::ProjectExtension);
+                        if constexpr (detect::is_linux_v) {
+                            command = command.append(" &");
+                        }
+                        auto sys = std::system(command.c_str());
+                        if (sys == -1) {
+                            DOA_LOG_WARNING("[Launcher::GUI] A call to std::system returned -1.");
+                        }
+                    } else {
+                        errorModal.Show(std::format(ErrorProjectAlreadyOpen, data.Name));
                     }
                 } else {
-                    errorModal.Show(std::format(ErrorProjectAlreadyOpen, data.Name));
+                    errorModal.Show(std::format(ErrorCannotOpenProject, data.Name));
+                    data.IsValid = false;
                 }
-            } else {
-                errorModal.Show(std::format(ErrorCannotOpenProject, data.Name));
-                data.IsValid = false;
+            }
+        }
+
+        ImGui::PopID();
+
+        // Here, we open context menu on hovered row and save into contextMenuOwner. Search and read [context] now!
+        //  (i + 1) because first element is at row 1. row 0 is title bar.
+        if ((i + 1) == ImGui::TableGetHoveredRow() && ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
+            if (!errorModal.IsVisible() && !newProjectModal.IsVisible() && !importProjectModal.IsVisible()) {
+                ImGui::OpenPopup(ProjectsTableContextMenuID);
+                contextMenuOwner = data;
             }
         }
     }
 
-    ImGui::PopID();
-    max = ImGui::GetCursorScreenPos();
-    if (ImGui::IsMouseReleased(ImGuiMouseButton_Right) && ImGui::IsMouseHoveringRect(min, max, false)) {
-        if (!errorModal.IsVisible() && !newProjectModal.IsVisible() && !importProjectModal.IsVisible()) {
-            ImGui::OpenPopup(ProjectsTableContextMenuID);
-            contextOwner = data;
-        }
-    }
-}
-void GUI::RenderProjectDataContextMenu(const ProjectData& data) noexcept {
+    // [context] Here, we operate context menu based on contextMenuOwner.
+    // Currently, there is only a "Delete" button.
     if (ImGui::BeginPopup(ProjectsTableContextMenuID)) {
         if (ImGui::MenuItem(ProjectsTableContextMenuDeleteButtonText)) {
-            auto search = std::ranges::find_if(projectDataCollection, [&data](auto& elem) {
-                return elem.Name == data.Name && elem.AbsolutePath == data.AbsolutePath && elem.LastOpened == data.LastOpened;
+            auto search = std::ranges::find_if(projectDataCollection, [this](auto& elem) {
+                return elem.Name == contextMenuOwner.Name &&
+                       elem.AbsolutePath == contextMenuOwner.AbsolutePath &&
+                       elem.LastOpened == contextMenuOwner.LastOpened;
             });
             assert(search != projectDataCollection.end());
             projectDataCollection.erase(search);
