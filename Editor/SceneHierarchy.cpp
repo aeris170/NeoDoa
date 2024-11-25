@@ -313,7 +313,7 @@ void SceneHierarchy::RenderContextMenu(const Entity entity) {
                 }
                 name.insert(0, " ");
                 if (ImGui::MenuItem(name.c_str())) {
-                    storage.AttachComponent(cmpid);
+                    storage.AttachComponent(cmpid, *assets);
                 }
             }
             //script components end

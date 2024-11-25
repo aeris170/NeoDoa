@@ -65,6 +65,10 @@ struct GPUObjectDatabase {
         DOA_LOG_FATAL("Illegal missing resource!"); std::unreachable();
     }
 
+    void Clear() noexcept {
+        database.clear();
+    }
+
 private:
     AssetGPUBridge& bridge;
     Database database{};
@@ -97,6 +101,8 @@ struct AssetGPUBridge {
     const GPUShaderPrograms& GetShaderPrograms() const noexcept;
     GPUFrameBuffers& GetFrameBuffers() noexcept;
     const GPUFrameBuffers& GetFrameBuffers() const noexcept;
+
+    void Clear() noexcept;
 
 private:
     GPUSamplers gpuSamplers{ *this };

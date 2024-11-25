@@ -187,7 +187,7 @@ void GUI::End() {
 void GUI::CreateNewProject(std::string_view workspace, std::string_view name) {
     CORE->CreateAndLoadProject(workspace, name);
     Project& project = GetOpenProject();
-    AssetHandle handle = CORE->GetAssets()->CreateAssetAt<Scene>(CORE->GetAssets()->Root(), "Sample Scene.scn", std::string("Sample Scene"));
+    AssetHandle handle = CORE->GetAssets()->CreateAssetAt(CORE->GetAssets()->Root(), "Sample Scene.scn", std::string("Sample Scene"));
     assert(handle.HasValue());
     project.SetStartupScene(handle->ID());
     OpenScene(handle);
@@ -248,7 +248,7 @@ void GUI::CreateNewScene(FNode& folder, std::string_view name) {
     if (!HasOpenProject()) { return; }
 
     const Scene temporary(name); const auto data = temporary.Serialize();
-    AssetHandle handle = CORE->GetAssets()->CreateAssetAt<Scene>(folder, std::string(name) + Assets::SceneExtension, data);
+    AssetHandle handle = CORE->GetAssets()->CreateAssetAt(folder, std::string(name) + Assets::SceneExtension, data);
     assert(handle.HasValue());
     DOA_LOG_INFO("Succesfully created a new scene asset named %s at %s", name.data(), folder.Path().c_str());
     Events.OnAssetCreated(handle);

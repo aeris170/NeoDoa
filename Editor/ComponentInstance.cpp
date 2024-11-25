@@ -25,36 +25,63 @@ void ComponentInstance::Field::Reset() {
     else if (typeName == "double")        { value.emplace<double_t>(static_cast<double_t>(0)); }
 }
 
-ComponentInstance::ComponentInstance(AssetHandle componentAsset) noexcept :
-    componentAsset(componentAsset) {
-    componentAsset->AddObserver(*this);
-    if (componentAsset->HasDeserializedData()) {
-        FillData(componentAsset->DataAs<Component>().fields, memberValues);
+ComponentInstance::ComponentInstance(const UUID uuid, Assets& assets) noexcept :
+    uuid(uuid),
+    referenceScriptsOwningManager(assets) {
+
+    if (assets.IsComponentDefinitionAsset(uuid)) {
+        if (assets.AssetHasDeserializedData(uuid)) {
+            ReConstructData(assets.GetDataOfAssetAs<Component>(uuid).fields, memberValues);
+        } else {
+            error = InstantiationError::DEFINITION_NOT_DESERIALIZED;
+        }
+    } else {
+        error = InstantiationError::NON_DEFITION_INSTANTIATION;
+    }
+    if (assets.AssetHasDeserializedData(uuid)) {
+        FillData(assets.GetDataOfAssetAs<Component>(uuid).fields, memberValues);
     } else {
         error = InstantiationError::DEFINITION_NOT_DESERIALIZED;
     }
+
+    onAssetDeserializedHandle = assets.Events.OnAssetDeserialized += std::bind_front(&ComponentInstance::OnAssetDeserialized, this);
+    onAssetDataDeletedHandle  = assets.Events.OnAssetDataDeleted  += std::bind_front(&ComponentInstance::OnAssetDataDeleted,  this);
+    onAssetDestructedHandle   = assets.Events.OnAssetDestructed   += std::bind_front(&ComponentInstance::OnAssetDestructed,   this);
 }
-ComponentInstance::ComponentInstance(AssetHandle componentAsset, std::vector<Field>&& data) noexcept :
-    componentAsset(componentAsset) {
-    componentAsset->AddObserver(*this);
+ComponentInstance::ComponentInstance(const UUID uuid, Assets& assets, std::vector<Field>&& data) noexcept :
+    uuid(uuid),
+    referenceScriptsOwningManager(assets) {
     memberValues = std::move(data);
-    if (componentAsset->HasDeserializedData()) {
-        ReConstructData(componentAsset->DataAs<Component>().fields, memberValues);
+
+    if (assets.IsComponentDefinitionAsset(uuid)) {
+        if (assets.AssetHasDeserializedData(uuid)) {
+            ReConstructData(assets.GetDataOfAssetAs<Component>(uuid).fields, memberValues);
+        } else {
+            error = InstantiationError::DEFINITION_NOT_DESERIALIZED;
+        }
     } else {
-        error = InstantiationError::DEFINITION_NOT_DESERIALIZED;
+        error = InstantiationError::NON_DEFITION_INSTANTIATION;
     }
+
+    onAssetDeserializedHandle = assets.Events.OnAssetDeserialized += std::bind_front(&ComponentInstance::OnAssetDeserialized, this);
+    onAssetDataDeletedHandle  = assets.Events.OnAssetDataDeleted  += std::bind_front(&ComponentInstance::OnAssetDataDeleted,  this);
+    onAssetDestructedHandle   = assets.Events.OnAssetDestructed   += std::bind_front(&ComponentInstance::OnAssetDestructed,   this);
 }
-ComponentInstance::ComponentInstance(UUID supposedAssetID, InstantiationError error) noexcept :
-    componentAsset(nullptr),
+ComponentInstance::ComponentInstance(const UUID uuid, Assets& assets, InstantiationError error) noexcept :
+    uuid(uuid),
     error(error),
-    supposedAssetID(supposedAssetID) {}
+    referenceScriptsOwningManager(assets) {
+    onAssetDeserializedHandle = assets.Events.OnAssetDeserialized += std::bind_front(&ComponentInstance::OnAssetDeserialized, this);
+    onAssetDataDeletedHandle  = assets.Events.OnAssetDataDeleted  += std::bind_front(&ComponentInstance::OnAssetDataDeleted,  this);
+    onAssetDestructedHandle   = assets.Events.OnAssetDestructed   += std::bind_front(&ComponentInstance::OnAssetDestructed,   this);
+}
 ComponentInstance::~ComponentInstance() noexcept {
-    if (componentAsset.HasValue()) {
-        componentAsset->RemoveObserver(*this);
-    }
+    referenceScriptsOwningManager.get().Events.OnAssetDeserialized -= onAssetDeserializedHandle;
+    referenceScriptsOwningManager.get().Events.OnAssetDataDeleted  -= onAssetDataDeletedHandle;
+    referenceScriptsOwningManager.get().Events.OnAssetDestructed   -= onAssetDestructedHandle;
 }
 
-UUID ComponentInstance::ComponentAssetID() const { return componentAsset ? componentAsset->ID() : supposedAssetID; }
+UUID ComponentInstance::ComponentAssetID() const { return uuid; }
 std::vector<ComponentInstance::Field>& ComponentInstance::MemberValues() { return memberValues; }
 const std::vector<ComponentInstance::Field>& ComponentInstance::MemberValues() const { return memberValues; }
 
@@ -76,25 +103,30 @@ std::string_view ComponentInstance::ErrorString() const {
     }
 }
 
-void ComponentInstance::OnNotify(const ObserverPattern::Observable* source, ObserverPattern::Notification message) {
-    if (message == "moved"_hs) {
-        /* casting-away const is safe here because Assets are never created const */
-        componentAsset = AssetHandle(const_cast<Asset*>(static_cast<const Asset*>(source)));
-    } else if (message == "deserialized"_hs) {
-        /* component has been deserialized, check for compiler errors, */
-        if (componentAsset->HasErrorMessages()) {
-            error = InstantiationError::DEFINITION_COMPILE_ERROR;
-        } else {
-            /* if there aren't any we potentially have new/reorganized fields so we must */
-            /* reorganize/reconstruct our instance data to reflect the changes on component */
-            ReConstructData(componentAsset->DataAs<Component>().fields, memberValues);
-            /* we also must clean-up the error */
-            error = InstantiationError::OK;
-        }
-    } else if (message == "destructed"_hs) {
-        componentAsset = nullptr;
-        error = InstantiationError::DEFINITION_MISSING;
+void ComponentInstance::OnAssetDeserialized(const UUID uuid) noexcept {
+    if (uuid != this->uuid) { return; }
+
+    /* component has been deserialized, check for compiler errors, */
+    if (referenceScriptsOwningManager.get().AssetHasErrorMessages(uuid)) {
+        error = InstantiationError::DEFINITION_COMPILE_ERROR;
+    } else {
+        /* if there aren't any we potentially have new/reorganized fields so we must */
+        /* reorganize/reconstruct our instance data to reflect the changes on component */
+        ReConstructData(referenceScriptsOwningManager.get().GetDataOfAssetAs<Component>(uuid).fields, memberValues);
+        /* we also must clean-up the error */
+        error = InstantiationError::OK;
     }
+}
+void ComponentInstance::OnAssetDataDeleted(const UUID uuid) noexcept {
+    if (uuid != this->uuid) { return; }
+
+    error = InstantiationError::DEFINITION_NOT_DESERIALIZED;
+}
+void ComponentInstance::OnAssetDestructed(const UUID uuid) noexcept {
+    if (uuid != this->uuid) { return; }
+
+    this->uuid = UUID::Empty();
+    error = InstantiationError::DEFINITION_MISSING;
 }
 
 void ComponentInstance::FillData(const std::vector<Component::Field>& fields, std::vector<ComponentInstance::Field>& data) {

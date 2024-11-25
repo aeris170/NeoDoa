@@ -4,7 +4,21 @@
 #include <utility>
 
 #include <Engine/Core.hpp>
+#include <Engine/ProjectDeserializer.hpp>
 #include <Engine/SceneSerializer.hpp>
+#include <Engine/SceneDeserializer.hpp>
+#include <Engine/ComponentDeserializer.hpp>
+#include <Engine/SamplerSerializer.hpp>
+#include <Engine/SamplerDeserializer.hpp>
+#include <Engine/TextureSerializer.hpp>
+#include <Engine/TextureDeserializer.hpp>
+#include <Engine/ShaderDeserializer.hpp>
+#include <Engine/ShaderProgramSerializer.hpp>
+#include <Engine/ShaderProgramDeserializer.hpp>
+#include <Engine/MaterialSerializer.hpp>
+#include <Engine/MaterialDeserializer.hpp>
+#include <Engine/FrameBufferSerializer.hpp>
+#include <Engine/FrameBufferDeserializer.hpp>
 
 AssetHandle::AssetHandle() noexcept :
     _asset(nullptr) {}
@@ -15,14 +29,61 @@ Asset* AssetHandle::operator->() const noexcept { return _asset; }
 AssetHandle::operator Asset* () const noexcept { return _asset; }
 AssetHandle::operator bool() const noexcept { return HasValue(); }
 
-bool AssetHandle::HasValue() const { return _asset != nullptr; }
-Asset& AssetHandle::Value() const { return *_asset; }
-void AssetHandle::Reset() { _asset = nullptr; }
+bool AssetHandle::HasValue() const noexcept { return _asset != nullptr; }
+Asset& AssetHandle::Value() const noexcept { return *_asset; }
+void AssetHandle::Reset() noexcept { _asset = nullptr; }
 
-bool Assets::IsProjectFile(const FNode& file) noexcept { return file.ext == ProjectExtension; }
-bool Assets::IsSceneFile(const FNode& file) noexcept { return file.ext == SceneExtension; }
+Asset& AssetDatabase::operator[](size_t index) noexcept { return assets.find(index)->second; }
+const Asset& AssetDatabase::operator[](size_t index) const noexcept { return assets.find(index)->second; }
+AssetDatabase::UUIDMap<Asset>::iterator       AssetDatabase::begin()        noexcept { return assets.begin();  }
+AssetDatabase::UUIDMap<Asset>::iterator       AssetDatabase::end()          noexcept { return assets.end();    }
+AssetDatabase::UUIDMap<Asset>::const_iterator AssetDatabase::cbegin() const noexcept { return assets.cbegin(); }
+AssetDatabase::UUIDMap<Asset>::const_iterator AssetDatabase::cend()   const noexcept { return assets.cend();   }
+AssetDatabase::UUIDMap<Asset>::const_iterator AssetDatabase::begin()  const noexcept { return assets.begin();  }
+AssetDatabase::UUIDMap<Asset>::const_iterator AssetDatabase::end()    const noexcept { return assets.end();    }
+
+Asset& AssetDatabase::Emplace(UUID uuid, FNode* file, Assets& owningManager) noexcept {
+    auto& asset = assets.try_emplace(uuid, uuid, owningManager).first->second;
+    files.try_emplace(uuid, file);
+    data.try_emplace(uuid);
+    versions.try_emplace(uuid);
+    infoLists.try_emplace(uuid);
+    warningLists.try_emplace(uuid);
+    errorLists.try_emplace(uuid);
+    return asset;
+}
+bool AssetDatabase::Contains(UUID uuid) const noexcept {
+    return assets.contains(uuid);
+}
+Asset& AssetDatabase::At(UUID uuid) noexcept {
+    return assets.at(uuid);
+}
+const Asset& AssetDatabase::At(UUID uuid) const noexcept {
+    return assets.at(uuid);
+}
+void AssetDatabase::Remove(UUID uuid) noexcept {
+    assets.erase(uuid);
+    files.erase(uuid);
+    data.erase(uuid);
+    versions.erase(uuid);
+    infoLists.erase(uuid);
+    warningLists.erase(uuid);
+    errorLists.erase(uuid);
+}
+void AssetDatabase::Clear() noexcept {
+    assets.clear();
+    files.clear();
+    data.clear();
+    versions.clear();
+    infoLists.clear();
+    warningLists.clear();
+    errorLists.clear();
+}
+
+bool Assets::IsProjectFile(const FNode& file)             noexcept { return file.ext == ProjectExtension;             }
+bool Assets::IsSceneFile(const FNode& file)               noexcept { return file.ext == SceneExtension;               }
 bool Assets::IsComponentDefinitionFile(const FNode& file) noexcept { return file.ext == ComponentDefinitionExtension; }
-bool Assets::IsSamplerFile(const FNode& file) noexcept { return file.ext == SamplerExtension; }
+bool Assets::IsSamplerFile(const FNode& file)             noexcept { return file.ext == SamplerExtension;             }
 bool Assets::IsTextureFile(const FNode& file) noexcept {
     return file.ext == TextureExtensionPNG ||
         file.ext == TextureExtensionBMP ||
@@ -38,17 +99,17 @@ bool Assets::IsShaderFile(const FNode& file) noexcept {
             IsFragmentShaderFile(file) ||
             IsComputeShaderFile(file);
 }
-bool Assets::IsVertexShaderFile(const FNode& file) noexcept { return file.ext == VertexShaderExtension; }
-bool Assets::IsTessellationControlShaderFile(const FNode& file) noexcept { return file.ext == TessellationControlShaderExtension; }
+bool Assets::IsVertexShaderFile(const FNode& file)                 noexcept { return file.ext == VertexShaderExtension;                 }
+bool Assets::IsTessellationControlShaderFile(const FNode& file)    noexcept { return file.ext == TessellationControlShaderExtension;    }
 bool Assets::IsTessellationEvaluationShaderFile(const FNode& file) noexcept { return file.ext == TessellationEvaluationShaderExtension; }
-bool Assets::IsGeometryShaderFile(const FNode& file) noexcept { return file.ext == GeometryShaderExtension; }
-bool Assets::IsFragmentShaderFile(const FNode& file) noexcept { return file.ext == FragmentShaderExtension; }
-bool Assets::IsComputeShaderFile(const FNode & file) noexcept { return file.ext == ComputeShaderExtension; }
-bool Assets::IsShaderProgramFile(const FNode& file) noexcept { return file.ext == ShaderProgramExtension; }
-bool Assets::IsMaterialFile(const FNode& file) noexcept { return file.ext == MaterialExtension; }
-bool Assets::IsFrameBufferFile(const FNode& file) noexcept { return file.ext == FrameBufferExtension; }
-bool Assets::IsScriptFile(const FNode& file) noexcept { return file.ext == SCRIPT_EXT; }
-bool Assets::IsModelFile(const FNode& file) noexcept { return file.ext == MODEL_EXT; }
+bool Assets::IsGeometryShaderFile(const FNode& file)               noexcept { return file.ext == GeometryShaderExtension;               }
+bool Assets::IsFragmentShaderFile(const FNode& file)               noexcept { return file.ext == FragmentShaderExtension;               }
+bool Assets::IsComputeShaderFile(const FNode & file)               noexcept { return file.ext == ComputeShaderExtension;                }
+bool Assets::IsShaderProgramFile(const FNode& file)                noexcept { return file.ext == ShaderProgramExtension;                }
+bool Assets::IsMaterialFile(const FNode& file)                     noexcept { return file.ext == MaterialExtension;                     }
+bool Assets::IsFrameBufferFile(const FNode& file)                  noexcept { return file.ext == FrameBufferExtension;                  }
+bool Assets::IsScriptFile(const FNode& file)                       noexcept { return file.ext == SCRIPT_EXT;                            }
+bool Assets::IsModelFile(const FNode& file)                        noexcept { return file.ext == MODEL_EXT;                             }
 
 Assets::Assets(const Project& project, AssetGPUBridge& bridge) noexcept :
     _root({ &project, nullptr, "", "", "", true }),
@@ -57,95 +118,402 @@ Assets::Assets(const Project& project, AssetGPUBridge& bridge) noexcept :
     ImportAllFiles(database, _root);
 }
 
-FNode& Assets::CreateFolder(FNode& parentFolder, const std::string_view folderName) {
+FNode& Assets::CreateFolder(FNode& parentFolder, const std::string_view folderName) noexcept {
     FNode& rv = *parentFolder.CreateChildFolder({ parentFolder.owner, &parentFolder, std::string(folderName) });
     ReimportAll(); /* folder structure is mutated, must reimport to re-build! */
     return rv;
 }
-void Assets::MoveFolder(FNode& folder, FNode& targetParentFolder) {
+void Assets::MoveFolder(FNode& folder, FNode& targetParentFolder) noexcept {
     folder.MoveUnder(targetParentFolder);
-    ReimportAll(); /* folder structure is mutated, must reimport to re-build! */
+    // ReimportAll(); /* folder structure is mutated, must reimport to re-build! */
 }
-void Assets::DeleteFolder(FNode& folder) {
+void Assets::DeleteFolder(FNode& folder) noexcept {
+    for (auto& child : folder.Children()) {
+        if (child.IsDirectory()) {
+            DeleteFolder(child);
+        } else {
+            DeleteAsset(files[&child]);
+        }
+    }
     folder.Delete();
-    ReimportAll(); /* folder structure is mutated, must reimport to re-build! */
+    // ReimportAll(); /* folder structure is mutated, must reimport to re-build! */
 }
 
-void Assets::SaveAsset(const AssetHandle asset) {
-    if (!asset.HasValue()) { return; }
-    asset->Serialize();
+AssetHandle Assets::CreateAssetAt(FNode& folderPath, const std::string_view fileName, const std::string_view serializedData) noexcept {
+    std::filesystem::path p = fileName;
+    const FNode* newAssetFile = folderPath.CreateChildFile({
+        folderPath.owner,
+        &folderPath,
+        p.stem().string(),
+        p.extension().string(),
+        std::string(serializedData)
+    });
+    const auto [uuid, handle] = ImportFile(database, *newAssetFile);
+    ForceDeserializeAsset(uuid);
+    return handle;
 }
-void Assets::MoveAsset(const AssetHandle asset, FNode& targetParentFolder) {
-    if (!asset.HasValue()) { return; }
-    asset->File().MoveUnder(targetParentFolder);
+void Assets::MoveAsset(const UUID uuid, FNode& targetParentFolder) noexcept {
+    assert(database.Contains(uuid));
+    database.files[uuid]->MoveUnder(targetParentFolder);
     ReimportAll();
 }
-void Assets::DeleteAsset(const AssetHandle asset) {
-    if (!asset.HasValue()) { return; }
+void Assets::DeleteAsset(const UUID uuid) noexcept {
+    assert(database.Contains(uuid));
 
-    files.erase(&asset->File());
-    asset->File().Delete();
+    FNode& file = *database.files[uuid];
+    files.erase(&file);
+    file.Delete();
 
-    UUID id = asset->ID();
-    database.erase(id);
-    std::erase(allAssets, id);
-    std::erase(sceneAssets, id);
-    std::erase(componentDefinitionAssets, id);
-    std::erase(shaderAssets, id);
-    std::erase(shaderProgramAssets, id);
-    std::erase(materialAssets, id);
-    std::erase(textureAssets, id);
-    std::erase(frameBufferAssets, id);
+    database.Remove(uuid);
+    std::erase(allAssets, uuid);
+    std::erase(sceneAssets, uuid);
+    std::erase(componentDefinitionAssets, uuid);
+    std::erase(shaderAssets, uuid);
+    std::erase(shaderProgramAssets, uuid);
+    std::erase(materialAssets, uuid);
+    std::erase(textureAssets, uuid);
+    std::erase(frameBufferAssets, uuid);
 
-    dependencyGraph.RemoveVertex(id);
-    //ReimportAll();
+    dependencyGraph.RemoveVertex(uuid);
+
+    DeleteOtherResourcesCorrespondingToDeletedAsset(uuid);
+    Events.OnAssetDataDeleted(uuid);
+    Events.OnAssetDestructed(uuid);
 }
 
-AssetHandle Assets::FindAsset(UUID uuid) const {
-    if (!database.contains(uuid)) { return nullptr; }
+AssetHandle Assets::FindAsset(UUID uuid) const noexcept {
+    if (!database.Contains(uuid)) { return nullptr; }
 
     /*
     * casting away const is safe here
     * because database does not contain "const Asset*"
-    * in the first place, it contains "Asset*"
+    * in the first place, it contains "Asset"
     */
-    return { const_cast<Asset*>(&database.at(uuid)) };
+    return { const_cast<Asset*>(&database[uuid]) };
 }
-AssetHandle Assets::FindAssetAt(const FNode& file) const {
-    for (const auto& [uuid, asset] : database) {
-        if (asset.File() == file) {
-            /*
-            * casting away const is safe here
-            * because database does not contain "const Asset*"
-            * in the first place, it contains "Asset*"
-            */
-            return { const_cast<Asset*>(&asset) };
-        }
+AssetHandle Assets::FindAssetAt(const FNode& file) const noexcept {
+    if (files.contains(&file)) {
+        UUID uuid = files.find(&file)->second;
+        /*
+        * casting away const is safe here
+        * because database does not contain "const Asset"
+        * in the first place, it contains "Asset"
+        */
+        return { const_cast<Asset*>(&database[uuid]) };
     }
     return nullptr;
 }
-bool Assets::IsAssetExistsAt(const FNode& file) const { return files.contains(&file); }
+bool Assets::IsAssetExistsAt(const FNode& file) const noexcept { return files.contains(&file); }
 
-FNode& Assets::Root() { return _root; }
-const FNode& Assets::Root() const { return _root; }
+FNode& Assets::GetFileOfAsset(const UUID uuid) const noexcept {
+    assert(database.Contains(uuid));
+    return *const_cast<AssetDatabase&>(database).files[uuid];
+}
+const AssetData& Assets::GetDataOfAsset(const UUID uuid) const noexcept {
+    assert(database.Contains(uuid));
+    return const_cast<AssetDatabase&>(database).data[uuid];
+}
+uint64_t Assets::GetVersionOfAsset(const UUID uuid) const noexcept {
+    assert(database.Contains(uuid));
+    return const_cast<AssetDatabase&>(database).versions[uuid];
+}
 
-const Assets::UUIDCollection& Assets::AllAssetsIDs() const { return allAssets; }
-const Assets::UUIDCollection& Assets::SceneAssetIDs() const { return sceneAssets; }
-const Assets::UUIDCollection& Assets::ScriptAssetIDs() const { return scriptAssets; }
-const Assets::UUIDCollection& Assets::SamplerAssetIDs() const { return samplerAssets; }
-const Assets::UUIDCollection& Assets::TextureAssetIDs() const { return textureAssets; }
-const Assets::UUIDCollection& Assets::ComponentDefinitionAssetIDs() const { return componentDefinitionAssets; }
-const Assets::UUIDCollection& Assets::ModelAssetIDs() const { return modelAssets; }
-const Assets::UUIDCollection& Assets::ShaderAssetIDs() const { return shaderAssets; }
-const Assets::UUIDCollection& Assets::ShaderProgramAssetIDs() const { return shaderProgramAssets; }
-const Assets::UUIDCollection& Assets::MaterialAssetIDs() const { return materialAssets; }
-const Assets::UUIDCollection& Assets::FrameBufferAssetIDs() const { return frameBufferAssets; }
+void Assets::SerializeAsset(const UUID uuid) noexcept {
+    assert(database.Contains(uuid));
 
-const AssetGPUBridge& Assets::GPUBridge() const { return bridge; }
+    FNode* file = database.files[uuid];
 
-AssetHandle Assets::Import(const FNode& file) { return ImportFile(database, file); }
-void Assets::ReimportAll() {
-    database.clear();
+    if (IsSceneAsset(uuid)) {
+        std::string serializedData;
+        serializedData = SerializeScene(GetDataOfAssetAs<Scene>(uuid));
+        tinyxml2::XMLDocument doc;
+        doc.Parse(serializedData.c_str());
+        doc.SaveFile(file->AbsolutePath().string().c_str());
+        return;
+    }
+    if (IsSamplerAsset(uuid)) {
+        std::string serializedData;
+        serializedData = SerializeSampler(GetDataOfAssetAs<Sampler>(uuid));
+        file->ModifyContent(std::move(serializedData));
+        file->DisposeContent();
+    }
+    if (IsTextureAsset(uuid)) {
+        EncodedTextureData serializedData;
+        serializedData = SerializeTexture(GetDataOfAssetAs<Texture>(uuid), ExtToEncoding(file->Extension()));
+
+        std::string stringified;
+        stringified.reserve(serializedData.EncodedData.size());
+        for (const std::byte b : serializedData.EncodedData) {
+            stringified.push_back(static_cast<char>(b));
+        }
+
+        file->ModifyContent(std::move(stringified));
+        file->DisposeContent();
+    }
+    /*
+    * TODO others
+    */
+    if (IsShaderProgramAsset(uuid)) {
+        std::string serializedData;
+        serializedData = SerializeShaderProgram(GetDataOfAssetAs<ShaderProgram>(uuid));
+        file->ModifyContent(std::move(serializedData));
+        file->DisposeContent();
+    }
+    if (IsMaterialAsset(uuid)) {
+        std::string serializedData;
+        serializedData = SerializeMaterial(GetDataOfAssetAs<Material>(uuid));
+        file->ModifyContent(std::move(serializedData));
+        file->DisposeContent();
+    }
+    if (IsFrameBufferAsset(uuid)) {
+        std::string serializedData;
+        serializedData = SerializeFrameBuffer(GetDataOfAssetAs<FrameBuffer>(uuid));
+        file->ModifyContent(std::move(serializedData));
+        file->DisposeContent();
+    }
+}
+void Assets::DeserializeAsset(const UUID uuid) noexcept {
+    assert(database.Contains(uuid));
+
+    FNode* file = database.files[uuid];
+    AssetData& data = database.data[uuid];
+    auto& infoList = database.infoLists[uuid];
+    auto& warningList = database.warningLists[uuid];
+    auto& errorList = database.errorLists[uuid];
+
+    if (AssetHasDeserializedData(uuid)) { return; }
+
+    if (IsSceneAsset(uuid)) {
+        data = DeserializeScene(*file);
+    }
+    if (IsComponentDefinitionAsset(uuid)) {
+        auto result = DeserializeComponent(*file);
+        for (auto& message : result.messages) {
+            switch (message.messageType) {
+            case ComponentCompilerMessageType::Info:
+                infoList.emplace_back(std::move(message));
+                break;
+            case ComponentCompilerMessageType::Warning:
+                warningList.emplace_back(std::move(message));
+                break;
+            case ComponentCompilerMessageType::Error:
+                errorList.emplace_back(std::move(message));
+                break;
+            }
+        }
+        data = std::move(result.deserializedComponent);
+    }
+    if (IsSamplerAsset(uuid)) {
+        SamplerDeserializationResult result = DeserializeSampler(*file);
+        if (result.erred) {
+            for (auto& error : result.errors) {
+                errorList.emplace_back(std::move(error));
+            }
+        }
+        data = std::move(result.deserializedSampler);
+    }
+    if (IsTextureAsset(uuid)) {
+        TextureDeserializationResult result = DeserializeTexture(*file);
+        if (result.erred) {
+            for (auto& error : result.errors) {
+                errorList.emplace_back(std::move(error));
+            }
+        }
+        data = std::move(result.deserializedTexture);
+    }
+    if (IsShaderAsset(uuid)) {
+        ShaderDeserializationResult result;
+        if (Assets::IsVertexShaderFile(*file)) {
+            result = DeserializeVertexShader(*file);
+        }
+        if (Assets::IsTessellationControlShaderFile(*file)) {
+            result = DeserializeTessellationControlShader(*file);
+        }
+        if (Assets::IsTessellationEvaluationShaderFile(*file)) {
+            result = DeserializeTessellationEvaluationShader(*file);
+        }
+        if (Assets::IsGeometryShaderFile(*file)) {
+            result = DeserializeGeometryShader(*file);
+        }
+        if (Assets::IsFragmentShaderFile(*file)) {
+            result = DeserializeFragmentShader(*file);
+        }
+        if (Assets::IsComputeShaderFile(*file)) {
+            result = DeserializeComputeShader(*file);
+        }
+        for (auto& message : result.errors) {
+            errorList.emplace_back(std::move(message));
+        }
+        data = std::move(result.deserializedShader);
+    }
+    if (IsShaderProgramAsset(uuid)) {
+        ShaderProgramDeserializationResult result = DeserializeShaderProgram(*file);
+        if (result.erred) {
+            for (auto& error : result.errors) {
+                errorList.emplace_back(std::move(error));
+            }
+        } else {
+            infoList.emplace_back(std::string("Shader Program is complete and ready for use."));
+        }
+        data = std::move(result.deserializedShaderProgram);
+    }
+    if (IsMaterialAsset(uuid)) {
+        MaterialDeserializationResult result = DeserializeMaterial(*file);
+        for (auto& error : result.errors) {
+            errorList.emplace_back(std::move(error));
+        }
+        data = std::move(result.deserializedMaterial);
+    }
+    if (IsFrameBufferAsset(uuid)) {
+        FrameBufferDeserializationResult result = DeserializeFrameBuffer(*file);
+        for (auto& error : result.errors) {
+            errorList.emplace_back(std::move(error));
+        }
+        data = std::move(result.deserializedFrameBuffer);
+    }
+    /*
+    * TODO others
+    */
+    database.versions[uuid]++;
+
+    // Handle post deserialization actions (if any needed)
+    if (IsSceneAsset(uuid)) { PerformPostDeserializationAction<Scene>(uuid); }
+    if (IsComponentDefinitionAsset(uuid)) { PerformPostDeserializationAction<Component>(uuid); }
+    if (IsSamplerAsset(uuid)) { PerformPostDeserializationAction<Sampler>(uuid); }
+    if (IsTextureAsset(uuid)) { PerformPostDeserializationAction<Texture>(uuid); }
+    if (IsShaderAsset(uuid)) { PerformPostDeserializationAction<Shader>(uuid); }
+    if (IsShaderProgramAsset(uuid)) { PerformPostDeserializationAction<ShaderProgram>(uuid); }
+    if (IsMaterialAsset(uuid)) { PerformPostDeserializationAction<Material>(uuid); }
+    if (IsFrameBufferAsset(uuid)) { PerformPostDeserializationAction<FrameBuffer>(uuid); }
+
+    if (dependencyGraph.HasVertex(uuid)) {
+        auto edgeVertices = dependencyGraph.GetIncomingEdgesOf(uuid);
+        while (edgeVertices.HasNext()) {
+            const UUID& dependentID = edgeVertices.Next();
+            assert(database.Contains(dependentID));
+            database[dependentID].ForceDeserialize();
+        }
+    }
+
+    Events.OnAssetDeserialized(uuid);
+}
+void Assets::ForceDeserializeAsset(const UUID uuid) noexcept {
+    assert(database.Contains(uuid));
+    DeleteDeserializedDataOfAsset(uuid);
+    DeserializeAsset(uuid);
+}
+void Assets::DeleteDeserializedDataOfAsset(const UUID uuid) noexcept {
+    assert(database.Contains(uuid));
+    database.data[uuid] = std::monostate{};
+    database.infoLists[uuid].clear();
+    database.warningLists[uuid].clear();
+    database.errorLists[uuid].clear();
+    database.versions[uuid]++;
+
+    DeleteOtherResourcesCorrespondingToDeletedAsset(uuid);
+    Events.OnAssetDataDeleted(uuid);
+}
+bool Assets::AssetHasDeserializedData(const UUID uuid) const noexcept {
+    assert(database.Contains(uuid));
+    return !std::holds_alternative<std::monostate>(const_cast<AssetDatabase&>(database).data[uuid]);
+}
+UUID Assets::InstantiateAsset(const UUID uuid) const noexcept {
+    assert(database.Contains(uuid));
+    return UUID(); // TODO instatiate
+}
+
+bool Assets::IsSceneAsset(const UUID uuid) const noexcept {
+    assert(database.Contains(uuid));
+    return IsSceneFile(*const_cast<AssetDatabase&>(database).files[uuid]);
+}
+bool Assets::IsComponentDefinitionAsset(const UUID uuid) const noexcept {
+    assert(database.Contains(uuid));
+    return IsComponentDefinitionFile(*const_cast<AssetDatabase&>(database).files[uuid]);
+}
+bool Assets::IsSamplerAsset(const UUID uuid) const noexcept {
+    assert(database.Contains(uuid));
+    return IsSamplerFile(*const_cast<AssetDatabase&>(database).files[uuid]);
+}
+bool Assets::IsTextureAsset(const UUID uuid) const noexcept {
+    assert(database.Contains(uuid));
+    return IsTextureFile(*const_cast<AssetDatabase&>(database).files[uuid]);
+}
+bool Assets::IsShaderAsset(const UUID uuid) const noexcept {
+    assert(database.Contains(uuid));
+    return IsShaderFile(*const_cast<AssetDatabase&>(database).files[uuid]);
+}
+bool Assets::IsShaderProgramAsset(const UUID uuid) const noexcept {
+    assert(database.Contains(uuid));
+    return IsShaderProgramFile(*const_cast<AssetDatabase&>(database).files[uuid]);
+}
+bool Assets::IsMaterialAsset(const UUID uuid) const noexcept {
+    assert(database.Contains(uuid));
+    return IsMaterialFile(*const_cast<AssetDatabase&>(database).files[uuid]);
+}
+bool Assets::IsFrameBufferAsset(const UUID uuid) const noexcept {
+    assert(database.Contains(uuid));
+    return IsFrameBufferFile(*const_cast<AssetDatabase&>(database).files[uuid]);
+}
+bool Assets::IsScriptAsset(const UUID uuid) const noexcept {
+    assert(database.Contains(uuid));
+    return IsScriptFile(*const_cast<AssetDatabase&>(database).files[uuid]);
+}
+bool Assets::IsModelAsset(const UUID uuid) const noexcept {
+    assert(database.Contains(uuid));
+    return IsModelFile(*const_cast<AssetDatabase&>(database).files[uuid]);
+}
+
+bool Assets::AssetHasInfoMessages(const UUID uuid) const noexcept {
+    assert(database.Contains(uuid));
+    return const_cast<AssetDatabase&>(database).infoLists[uuid].empty();
+}
+const std::vector<std::any>& Assets::GetInfoMessagesOfAsset(const UUID uuid) const noexcept {
+    assert(database.Contains(uuid));
+    return const_cast<AssetDatabase&>(database).infoLists[uuid];
+}
+
+bool Assets::AssetHasWarningMessages(const UUID uuid) const noexcept {
+    assert(database.Contains(uuid));
+    return const_cast<AssetDatabase&>(database).warningLists[uuid].empty();
+}
+const std::vector<std::any>& Assets::GetWarningMessagesOfAsset(const UUID uuid) const noexcept {
+    assert(database.Contains(uuid));
+    return const_cast<AssetDatabase&>(database).warningLists[uuid];
+}
+
+bool Assets::AssetHasErrorMessages(const UUID uuid) const noexcept {
+    assert(database.Contains(uuid));
+    return const_cast<AssetDatabase&>(database).errorLists[uuid].empty();
+}
+const std::vector<std::any>& Assets::GetErrorMessagesOfAsset(const UUID uuid) const noexcept {
+    assert(database.Contains(uuid));
+    return const_cast<AssetDatabase&>(database).errorLists[uuid];
+}
+
+FNode& Assets::Root() noexcept { return _root; }
+const FNode& Assets::Root() const noexcept { return _root; }
+
+const Assets::UUIDCollection& Assets::AllAssetsIDs()                const noexcept { return allAssets;                 }
+const Assets::UUIDCollection& Assets::SceneAssetIDs()               const noexcept { return sceneAssets;               }
+const Assets::UUIDCollection& Assets::ScriptAssetIDs()              const noexcept { return scriptAssets;              }
+const Assets::UUIDCollection& Assets::SamplerAssetIDs()             const noexcept { return samplerAssets;             }
+const Assets::UUIDCollection& Assets::TextureAssetIDs()             const noexcept { return textureAssets;             }
+const Assets::UUIDCollection& Assets::ComponentDefinitionAssetIDs() const noexcept { return componentDefinitionAssets; }
+const Assets::UUIDCollection& Assets::ModelAssetIDs()               const noexcept { return modelAssets;               }
+const Assets::UUIDCollection& Assets::ShaderAssetIDs()              const noexcept { return shaderAssets;              }
+const Assets::UUIDCollection& Assets::ShaderProgramAssetIDs()       const noexcept { return shaderProgramAssets;       }
+const Assets::UUIDCollection& Assets::MaterialAssetIDs()            const noexcept { return materialAssets;            }
+const Assets::UUIDCollection& Assets::FrameBufferAssetIDs()         const noexcept { return frameBufferAssets;         }
+
+const AssetGPUBridge& Assets::GPUBridge() const noexcept { return bridge; }
+
+std::pair<UUID, AssetHandle> Assets::Import(const FNode& file) noexcept { return ImportFile(database, file); }
+void Assets::ReimportAll() noexcept {
+    for (const auto& [uuid, _] : database.assets) {
+        DeleteOtherResourcesCorrespondingToDeletedAsset(uuid);
+        Events.OnAssetDataDeleted(uuid);
+    }
+    database.Clear();
     allAssets.clear();
     sceneAssets.clear();
     componentDefinitionAssets.clear();
@@ -158,12 +526,13 @@ void Assets::ReimportAll() {
 
     _root.children.clear();
     dependencyGraph.Clear();
+    bridge.Clear();
     BuildFileNodeTree(*_root.OwningProject(), _root);
     ImportAllFiles(database, _root);
     EnsureDeserialization();
 }
 // donkey donk
-void Assets::EnsureDeserialization() {
+void Assets::EnsureDeserialization() noexcept {
     Deserialize(componentDefinitionAssets);
     Deserialize(sceneAssets);
     Deserialize(textureAssets);
@@ -187,46 +556,7 @@ void Assets::TryDeleteDependencyBetween(UUID dependent, UUID dependency) noexcep
     }
 }
 
-void Assets::OnNotify(const ObserverPattern::Observable* source, ObserverPattern::Notification message) {
-    if (message == "deserialized"_hs) {
-        const Asset* asset = dynamic_cast<const Asset*>(source);
-        assert(asset); // must be non-null
-        const UUID origin = asset->ID();
-
-        if (asset->IsScene())               { PerformPostDeserializationAction<Scene>        (origin); }
-        if (asset->IsComponentDefinition()) { PerformPostDeserializationAction<Component>    (origin); }
-        if (asset->IsSampler())             { PerformPostDeserializationAction<Sampler>      (origin); }
-        if (asset->IsTexture())             { PerformPostDeserializationAction<Texture>      (origin); }
-        if (asset->IsShader())              { PerformPostDeserializationAction<Shader>       (origin); }
-        if (asset->IsShaderProgram())       { PerformPostDeserializationAction<ShaderProgram>(origin); }
-        if (asset->IsMaterial())            { PerformPostDeserializationAction<Material>     (origin); }
-        if (asset->IsFrameBuffer())         { PerformPostDeserializationAction<FrameBuffer>  (origin); }
-
-        if (dependencyGraph.HasVertex(origin)) {
-            auto edgeVertices = dependencyGraph.GetIncomingEdgesOf(origin);
-            while (edgeVertices.HasNext()) {
-                const UUID& dependentID = edgeVertices.Next();
-                assert(database.contains(dependentID));
-                database[dependentID].ForceDeserialize();
-            }
-        }
-    }
-    if (message == "data_deleted"_hs || message == "destructed"_hs) {
-        const Asset* asset = dynamic_cast<const Asset*>(source);
-        assert(asset); // must be non-null
-        if (asset->ID() == UUID::Empty())   { return; }
-        if (asset->IsScene())               {}
-        if (asset->IsComponentDefinition()) {}
-        if (asset->IsSampler())             { bridge.GetSamplers().Deallocate(asset->ID());       }
-        if (asset->IsTexture())             { bridge.GetTextures().Deallocate(asset->ID());       }
-        if (asset->IsShader())              { bridge.GetShaders().Deallocate(asset->ID());        }
-        if (asset->IsShaderProgram())       { bridge.GetShaderPrograms().Deallocate(asset->ID()); }
-        if (asset->IsMaterial())            {}
-        if (asset->IsFrameBuffer())         { bridge.GetFrameBuffers().Deallocate(asset->ID());   }
-    }
-}
-
-AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
+std::pair<UUID, AssetHandle> Assets::ImportFile(AssetDatabase& database, const FNode& file) noexcept {
     /* Import a file:
         * Step 1: Get the sibling file: fileName.fileExtension.id
         * Step 2: Check if such file exists
@@ -240,9 +570,9 @@ AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
         * Step 8: Separate imported asset to its own subcategory (and put it into allAssets list)
         * Step 9: Set ownself as imported asset's Observer and return
     */
-    if (IsProjectFile(file)) { return nullptr; }
-    if (file.IsDirectory()) { return nullptr; }
-    if (file.ext == AssetIDExtension) { return nullptr; }
+    if (IsProjectFile(file)) { return { UUID::Empty(), nullptr }; }
+    if (file.IsDirectory()) { return { UUID::Empty(), nullptr }; }
+    if (file.ext == AssetIDExtension) { return { UUID::Empty(), nullptr }; }
     // Step 1
     FNode importData = FNode::HollowCopy(file);
     importData.ext.append(AssetIDExtension);
@@ -282,7 +612,7 @@ AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
         assert(uuid != UUID::Empty()); // this should never happen, break
 
         // Step 5
-        while (database.contains(uuid)) {
+        while (database.Contains(uuid)) {
             // collision detected! generate new UUID
             uuid = UUID();
             doc.RootElement()->FirstChildElement("uuid")->SetText(uuid);
@@ -290,49 +620,47 @@ AssetHandle Assets::ImportFile(AssetDatabase& database, const FNode& file) {
         }
 
         // Step 6
-        auto&& [itr, result] = database.emplace(uuid, Asset{ uuid, const_cast<FNode*>(&file) });
-        auto&& [id, asset] = *itr;
-        files.emplace(&file, id);
+        auto& asset = database.Emplace(uuid, const_cast<FNode*>(&file), *this);
+        files.emplace(&file, uuid);
 
         // Step 7
         // asset.Deserialize();
 
         // Step 8
-        allAssets.push_back(id);
+        allAssets.push_back(uuid);
         if (asset.IsScene()) {
-            sceneAssets.push_back(id);
+            sceneAssets.push_back(uuid);
         }
         if (asset.IsComponentDefinition()) {
-            componentDefinitionAssets.push_back(id);
+            componentDefinitionAssets.push_back(uuid);
         }
         if (asset.IsShader()) {
-            shaderAssets.push_back(id);
+            shaderAssets.push_back(uuid);
         }
         if (asset.IsShaderProgram()) {
-            shaderProgramAssets.push_back(id);
+            shaderProgramAssets.push_back(uuid);
         }
         if (asset.IsMaterial()) {
-            materialAssets.push_back(id);
+            materialAssets.push_back(uuid);
         }
         if (asset.IsSampler()) {
-            samplerAssets.push_back(id);
+            samplerAssets.push_back(uuid);
         }
         if (asset.IsTexture()) {
-            textureAssets.push_back(id);
+            textureAssets.push_back(uuid);
         }
         if (asset.IsFrameBuffer()) {
-            frameBufferAssets.push_back(id);
+            frameBufferAssets.push_back(uuid);
         }
 
-        asset.AddObserver(*this);
-        dependencyGraph.AddVertex(id);
-        return &asset;
+        dependencyGraph.AddVertex(uuid);
+        return { uuid, &asset };
     } else {
         DOA_LOG_ERROR("Failed to import asset at %s do you have read/write access to the directory?", std::quoted(file.Path().c_str()));
-        return nullptr;
+        return { UUID::Empty(), nullptr };
     }
 }
-void Assets::ImportAllFiles(AssetDatabase& database, const FNode& root) {
+void Assets::ImportAllFiles(AssetDatabase& database, const FNode& root) noexcept {
     // ImportFile mutates root.Children, therefore we can't use a range
     // for loop as; if a re-allocation were to happen, pointers used in
     // range for loop are invalidated.
@@ -342,14 +670,14 @@ void Assets::ImportAllFiles(AssetDatabase& database, const FNode& root) {
         ImportAllFiles(database, children[i]);
     }
 }
-void Assets::Deserialize(const UUIDCollection& assets) {
+void Assets::Deserialize(const UUIDCollection& assets) noexcept {
     for (const UUID id : assets) {
         database[id].DeleteDeserializedData();
         database[id].ForceDeserialize();
     }
 }
 
-void Assets::BuildFileNodeTree(const Project& project, FNode& root) {
+void Assets::BuildFileNodeTree(const Project& project, FNode& root) noexcept {
     auto ws = project.Workspace();
     std::filesystem::current_path(ws);
     auto it = std::filesystem::directory_iterator(ws / root.Path());
@@ -419,40 +747,50 @@ void Assets::ReBuildDependencyGraph() noexcept {
     }
 }
 
-template<>
-void Assets::PerformPostDeserializationAction<Sampler>(UUID id) noexcept {
-    bridge.GetSamplers().Deallocate(id);
-    std::vector<SamplerAllocatorMessage> messages = bridge.GetSamplers().Allocate(*this, id);
+void Assets::DeleteOtherResourcesCorrespondingToDeletedAsset(const UUID uuid) noexcept {
+    // Asset data deletion sometimes need to be resolved on GPU side too.
+    // For example: A texture asset being deleted, must trigger a
+    // texture object deletion on GPU. This functionality is performed
+    // via AssetGPUBridge.
+    if (uuid == UUID::Empty()) { return; }
+    if (IsSceneAsset(uuid))               {                                              }
+    if (IsComponentDefinitionAsset(uuid)) {                                              }
+    if (IsSamplerAsset(uuid))             { bridge.GetSamplers().Deallocate(uuid);       }
+    if (IsTextureAsset(uuid))             { bridge.GetTextures().Deallocate(uuid);       }
+    if (IsShaderAsset(uuid))              { bridge.GetShaders().Deallocate(uuid);        }
+    if (IsShaderProgramAsset(uuid))       { bridge.GetShaderPrograms().Deallocate(uuid); }
+    if (IsMaterialAsset(uuid))            {                                              }
+    if (IsFrameBufferAsset(uuid))         { bridge.GetFrameBuffers().Deallocate(uuid);   }
+}
 
-    // Cast-away const. Assets are never created const.
-    const Asset& asset{ database[id] };
-    std::vector<std::any>& errorMessages = const_cast<std::vector<std::any>&>(asset.ErrorMessages());
+template<>
+void Assets::PerformPostDeserializationAction<Sampler>(const UUID uuid) noexcept {
+    bridge.GetSamplers().Deallocate(uuid);
+    std::vector<SamplerAllocatorMessage> messages = bridge.GetSamplers().Allocate(*this, uuid);
+
+    std::vector<std::any>& errorMessages = database.errorLists[uuid];
     for (auto& message : messages) {
         errorMessages.emplace_back(std::move(message));
     }
 }
 template<>
-void Assets::PerformPostDeserializationAction<Texture>(UUID id) noexcept {
-    bridge.GetTextures().Deallocate(id);
-    std::vector<TextureAllocatorMessage> messages = bridge.GetTextures().Allocate(*this, id);
+void Assets::PerformPostDeserializationAction<Texture>(const UUID uuid) noexcept {
+    bridge.GetTextures().Deallocate(uuid);
+    std::vector<TextureAllocatorMessage> messages = bridge.GetTextures().Allocate(*this, uuid);
 
-    // Cast-away const. Assets are never created const.
-    const Asset& asset{ database[id] };
-    std::vector<std::any>& errorMessages = const_cast<std::vector<std::any>&>(asset.ErrorMessages());
+    std::vector<std::any>& errorMessages = database.errorLists[uuid];
     for (auto& message : messages) {
         errorMessages.emplace_back(std::move(message));
     }
 }
 template<>
-void Assets::PerformPostDeserializationAction<Shader>(UUID id) noexcept {
-    bridge.GetShaders().Deallocate(id);
-    std::vector<ShaderCompilerMessage> messages = bridge.GetShaders().Allocate(*this, id);
+void Assets::PerformPostDeserializationAction<Shader>(const UUID uuid) noexcept {
+    bridge.GetShaders().Deallocate(uuid);
+    std::vector<ShaderCompilerMessage> messages = bridge.GetShaders().Allocate(*this, uuid);
 
-    // Cast-away const. Assets are never created const.
-    const Asset& asset{ database[id] };
-    std::vector<std::any>& infoMessages = const_cast<std::vector<std::any>&>(asset.InfoMessages());
-    std::vector<std::any>& warningMessages = const_cast<std::vector<std::any>&>(asset.WarningMessages());
-    std::vector<std::any>& errorMessages = const_cast<std::vector<std::any>&>(asset.ErrorMessages());
+    std::vector<std::any>& infoMessages = database.infoLists[uuid];
+    std::vector<std::any>& warningMessages = database.warningLists[uuid];
+    std::vector<std::any>& errorMessages = database.errorLists[uuid];
     for (auto& message : messages) {
         switch (message.MessageType) {
         using enum ShaderCompilerMessage::Type;
@@ -471,13 +809,11 @@ void Assets::PerformPostDeserializationAction<Shader>(UUID id) noexcept {
     }
 }
 template<>
-void Assets::PerformPostDeserializationAction<ShaderProgram>(UUID id) noexcept {
-    bridge.GetShaderPrograms().Deallocate(id);
-    std::vector<ShaderLinkerMessage> messages = bridge.GetShaderPrograms().Allocate(*this, id);
+void Assets::PerformPostDeserializationAction<ShaderProgram>(const UUID uuid) noexcept {
+    bridge.GetShaderPrograms().Deallocate(uuid);
+    std::vector<ShaderLinkerMessage> messages = bridge.GetShaderPrograms().Allocate(*this, uuid);
 
-    // Cast-away const. Assets are never created const.
-    const Asset& asset{ database[id] };
-    std::vector<std::any>& errorMessages = const_cast<std::vector<std::any>&>(asset.ErrorMessages());
+    std::vector<std::any>& errorMessages = database.errorLists[uuid];
     for (auto& message : messages) {
         errorMessages.emplace_back(std::move(message));
     }
@@ -683,13 +1019,13 @@ void MaterialPostDeserialization::EmplaceUniform(Material::Uniforms& uniforms, i
 }
 
 template<>
-void Assets::PerformPostDeserializationAction<Material>(UUID id) noexcept {
-    Material& asset = database[id].DataAs<Material>();
+void Assets::PerformPostDeserializationAction<Material>(const UUID uuid) noexcept {
+    Material& asset = database[uuid].DataAs<Material>();
     if (!asset.HasShaderProgram()) {
         asset.ClearAllUniforms();
         return;
     }
-    assert(database.contains(asset.ShaderProgram)); // Asset must exist, but GPU resource may not due to compilation-linking errors.
+    assert(database.Contains(asset.ShaderProgram)); // Asset must exist, but GPU resource may not due to compilation-linking errors.
     //assert(bridge.GetShaderPrograms().Exists(asset.ShaderProgram));
 
     const GPUShaderProgram* program = bridge.GetShaderPrograms().Query(asset.ShaderProgram);
@@ -720,22 +1056,17 @@ void Assets::PerformPostDeserializationAction<Material>(UUID id) noexcept {
         algorithm(asset.GeometryUniforms, ShaderType::Geometry, *program);
         algorithm(asset.FragmentUniforms, ShaderType::Fragment, *program);
     } else {
-        // Cast-away const. Assets are never created const.
-        const Asset& asset{ database[id] };
-        std::vector<std::any>& errorMessages = const_cast<std::vector<std::any>&>(asset.ErrorMessages());
+        std::vector<std::any>& errorMessages = database.errorLists[uuid];
         errorMessages.emplace_back(std::string("Material deserialization failed."));
         errorMessages.emplace_back(std::string("Referenced shader program failed to allocate. Check for errors in program!"));
     }
 }
-
 template<>
-void Assets::PerformPostDeserializationAction<FrameBuffer>(UUID id) noexcept {
-    bridge.GetFrameBuffers().Deallocate(id);
-    std::vector<FrameBufferAllocatorMessage> messages = bridge.GetFrameBuffers().Allocate(*this, id);
+void Assets::PerformPostDeserializationAction<FrameBuffer>(const UUID uuid) noexcept {
+    bridge.GetFrameBuffers().Deallocate(uuid);
+    std::vector<FrameBufferAllocatorMessage> messages = bridge.GetFrameBuffers().Allocate(*this, uuid);
 
-    // Cast-away const. Assets are never created const.
-    const Asset& asset{ database[id] };
-    std::vector<std::any>& errorMessages = const_cast<std::vector<std::any>&>(asset.ErrorMessages());
+    std::vector<std::any>& errorMessages = database.errorLists[uuid];
     for (auto& message : messages) {
         errorMessages.emplace_back(std::move(message));
     }

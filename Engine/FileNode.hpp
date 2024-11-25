@@ -5,8 +5,10 @@
 #include <filesystem>
 #include <type_traits>
 
-struct Project;
+struct Asset;
 struct FNode;
+struct Assets;
+struct Project;
 
 struct FNodeCreationParams {
     const Project* owner{ nullptr }; /* optional, if the file in question is owned by a project, set it */

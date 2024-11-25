@@ -52,7 +52,7 @@ void AssetManager::Render() {
 
     if (deletedNode != nullptr) {
         gui.Events.OnAssetDeleted(assets->FindAssetAt(*deletedNode));
-        assets->DeleteAsset(assets->FindAssetAt(*deletedNode));
+        assets->DeleteAsset(assets->FindAssetAt(*deletedNode)->ID());
         if (currentFolder == deletedNode) {
             SetCurrentFolder(root);
         }
