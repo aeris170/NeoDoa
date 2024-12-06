@@ -38,7 +38,6 @@ set(GROUP_LIST
     "NeoDoa.hpp"
 
     "Asset/Asset.cpp"
-    "Asset/Asset.hpp"
     "Asset/Assets.cpp"
     "Asset/Assets.hpp"
     "Asset/UUID.cpp"
