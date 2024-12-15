@@ -28,7 +28,6 @@
 //#include "Script.hpp"
 //#include "Model.hpp"
 
-struct Asset;
 struct Assets;
 struct AssetGPUBridge;
 
@@ -37,6 +36,60 @@ template<typename T>
 concept AssetType = concepts::IsAnyOf<T, ASSET_TYPE>&& concepts::Copyable<T>&& concepts::Serializable<T>&& std::movable<T>;
 using AssetData = std::variant<std::monostate, ASSET_TYPE>;
 #undef ASSET_TYPE
+
+struct Asset final {
+
+    Asset(const UUID id, Assets& owningManager) noexcept;
+    ~Asset() noexcept;
+    Asset(const Asset& other) = delete;
+    Asset(Asset&& other) noexcept;
+    Asset& operator=(const Asset& other) = delete;
+    Asset& operator=(Asset&& other) noexcept;
+
+    UUID ID() const;
+    FNode& File() const;
+    const AssetData& Data() const;
+    template<AssetType T>
+    T& DataAs();
+    template<AssetType T>
+    const T& DataAs() const;
+    uint64_t Version() const;
+
+    void Serialize();
+    void Deserialize();
+    void ForceDeserialize();
+    void DeleteDeserializedData();
+    bool HasDeserializedData() const;
+
+    UUID Instantiate() const;
+
+    template<AssetType T>
+    void UpdateData(T&& newData);
+
+    bool IsScene() const noexcept;
+    bool IsComponentDefinition() const noexcept;
+    bool IsSampler() const noexcept;
+    bool IsTexture() const noexcept;
+    bool IsShader() const noexcept;
+    bool IsShaderProgram() const noexcept;
+    bool IsMaterial() const noexcept;
+    bool IsFrameBuffer() const noexcept;
+    bool IsScript() const noexcept;
+    bool IsModel() const noexcept;
+
+    bool HasInfoMessages() const;
+    const std::vector<std::any>& InfoMessages() const;
+
+    bool HasWarningMessages() const;
+    const std::vector<std::any>& WarningMessages() const;
+
+    bool HasErrorMessages() const;
+    const std::vector<std::any>& ErrorMessages() const;
+
+private:
+    UUID id{ UUID::Empty() };
+    std::reference_wrapper<Assets> owningManager;
+};
 
 // Encapsulates Asset*. AssetHandle's are fundamentally unsafe to
 // hold onto. DON'T cache AssetHandle objects as they are no different
@@ -183,11 +236,13 @@ struct Assets {
     const AssetData& GetDataOfAsset(const UUID uuid) const noexcept;
     template<AssetType T>
     T& GetDataOfAssetAs(const UUID uuid) noexcept {
+        assert(database.data.contains(uuid));
         return std::get<T>(database.data[uuid]);
     }
     template<AssetType T>
     const T& GetDataOfAssetAs(const UUID uuid) const noexcept {
-        return std::get<T>(database.data[uuid]);
+        assert(database.data.contains(uuid));
+        return std::get<T>((*const_cast<AssetDatabase::UUIDMap<AssetData>*>(&database.data))[uuid]);
     }
     uint64_t GetVersionOfAsset(const UUID uuid) const noexcept;
 
@@ -322,62 +377,16 @@ void Assets::PerformPostDeserializationAction<Material>(const UUID uuid) noexcep
 template<>
 void Assets::PerformPostDeserializationAction<FrameBuffer>(const UUID uuid) noexcept;
 
-struct Asset final {
+template<AssetType T>
+T& Asset::DataAs() {
+    return owningManager.get().GetDataOfAssetAs<T>(id);
+}
+template<AssetType T>
+const T& Asset::DataAs() const {
+    return owningManager.get().GetDataOfAssetAs<T>(id);
+}
 
-    Asset(const UUID id, Assets& owningManager) noexcept;
-    ~Asset() noexcept;
-    Asset(const Asset& other) = delete;
-    Asset(Asset&& other) noexcept;
-    Asset& operator=(const Asset& other) = delete;
-    Asset& operator=(Asset&& other) noexcept;
-
-    UUID ID() const;
-    FNode& File() const;
-    const AssetData& Data() const;
-    template<AssetType T>
-    T& DataAs() {
-        return owningManager.get().GetDataOfAssetAs<T>(id);
-    }
-    template<AssetType T>
-    const T& DataAs() const {
-        return owningManager.get().GetDataOfAssetAs<T>(id);
-    }
-    uint64_t Version() const;
-
-    void Serialize();
-    void Deserialize();
-    void ForceDeserialize();
-    void DeleteDeserializedData();
-    bool HasDeserializedData() const;
-
-    UUID Instantiate() const;
-
-    template<AssetType T>
-    void UpdateData(T&& newData) {
-        return owningManager.get().UpdateDataOfAsset(id, std::forward<T>(newData));
-    }
-
-    bool IsScene() const noexcept;
-    bool IsComponentDefinition() const noexcept;
-    bool IsSampler() const noexcept;
-    bool IsTexture() const noexcept;
-    bool IsShader() const noexcept;
-    bool IsShaderProgram() const noexcept;
-    bool IsMaterial() const noexcept;
-    bool IsFrameBuffer() const noexcept;
-    bool IsScript() const noexcept;
-    bool IsModel() const noexcept;
-
-    bool HasInfoMessages() const;
-    const std::vector<std::any>& InfoMessages() const;
-
-    bool HasWarningMessages() const;
-    const std::vector<std::any>& WarningMessages() const;
-
-    bool HasErrorMessages() const;
-    const std::vector<std::any>& ErrorMessages() const;
-
-private:
-    UUID id{ UUID::Empty() };
-    std::reference_wrapper<Assets> owningManager;
-};
+template<AssetType T>
+void Asset::UpdateData(T&& newData) {
+    return owningManager.get().UpdateDataOfAsset(id, std::forward<T>(newData));
+}
