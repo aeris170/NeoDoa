@@ -348,7 +348,7 @@ FileDialog::FileData::FileData(const std::filesystem::path& path) {
 	DateModified = attr.st_ctime;
 
 	HasIconPreview = false;
-	IconPreview = nullptr;
+	IconPreview = reinterpret_cast<TextureHandle>(nullptr);
 	IconPreviewData = nullptr;
 	IconPreviewHeight = 0;
 	IconPreviewWidth = 0;
@@ -709,7 +709,7 @@ void FileDialog::m_parseFilter(const std::string& filter)
 	}
 }
 
-void* FileDialog::m_getIcon(const std::filesystem::path& path)
+TextureHandle FileDialog::m_getIcon(const std::filesystem::path& path)
 {
 #ifdef _WIN32
 	if (m_icons.count(path.string()) > 0)
@@ -718,7 +718,7 @@ void* FileDialog::m_getIcon(const std::filesystem::path& path)
 	std::string pathU8 = path.string();
 
 	std::error_code ec;
-	m_icons[pathU8] = nullptr;
+	m_icons[pathU8] = reinterpret_cast<TextureHandle>(nullptr);
 
 	DWORD attrs = 0;
 	UINT flags = SHGFI_ICON | SHGFI_LARGEICON;
@@ -735,7 +735,7 @@ void* FileDialog::m_getIcon(const std::filesystem::path& path)
 	SHGetFileInfoW(pathW.c_str(), attrs, &fileInfo, sizeof(SHFILEINFOW), flags);
 
 	if (fileInfo.hIcon == nullptr)
-		return nullptr;
+		return reinterpret_cast<TextureHandle>(nullptr);
 
 	// check if icon is already loaded
 	auto itr = std::find(m_iconIndices.begin(), m_iconIndices.end(), fileInfo.iIcon);
@@ -752,14 +752,14 @@ void* FileDialog::m_getIcon(const std::filesystem::path& path)
 	GetIconInfo(fileInfo.hIcon, &iconInfo);
 
 	if (iconInfo.hbmColor == nullptr)
-		return nullptr;
+		return reinterpret_cast<TextureHandle>(nullptr);
 
 	DIBSECTION ds;
 	GetObject(iconInfo.hbmColor, sizeof(ds), &ds);
 	int byteSize = ds.dsBm.bmWidth * ds.dsBm.bmHeight * (ds.dsBm.bmBitsPixel / 8);
 
 	if (byteSize == 0)
-		return nullptr;
+		return reinterpret_cast<TextureHandle>(nullptr);
 
 	uint8_t* data = (uint8_t*)malloc(byteSize);
 	GetBitmapBits(iconInfo.hbmColor, byteSize, data);
@@ -1463,7 +1463,7 @@ void FileDialog::m_renderFileDialog()
 			m_finalize();
 	}
 
-	if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Escape)))
+	if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && ImGui::IsKeyPressed(ImGuiKey_Escape))
 		m_isOpen = false;
 }
 

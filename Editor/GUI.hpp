@@ -155,26 +155,6 @@ struct GUI {
     ImFont* GetFont() const;
     ImFont* GetFontBold() const;
 
-    void* GetFolderIcon(TextureSize size = TextureSize::MEDIUM) const;
-    void* GetProjectIcon(TextureSize size = TextureSize::MEDIUM) const;
-    void* GetSceneIcon(TextureSize size = TextureSize::MEDIUM) const;
-    void* GetComponentIcon(TextureSize size = TextureSize::MEDIUM) const;
-    void* GetSamplerIcon(TextureSize size = TextureSize::MEDIUM) const;
-    void* GetTextureIcon(TextureSize size = TextureSize::MEDIUM) const;
-    void* GetVertexShaderIcon(TextureSize size = TextureSize::MEDIUM) const;
-    void* GetTessellationControlShaderIcon(TextureSize size = TextureSize::MEDIUM) const;
-    void* GetTessellationEvaluationShaderIcon(TextureSize size = TextureSize::MEDIUM) const;
-    void* GetGeometryShaderIcon(TextureSize size = TextureSize::MEDIUM) const;
-    void* GetFragmentShaderIcon(TextureSize size = TextureSize::MEDIUM) const;
-    void* GetComputeShaderIcon(TextureSize size = TextureSize::MEDIUM) const;
-    void* GetMaterialIcon(TextureSize size = TextureSize::MEDIUM) const;
-    void* GetFrameBufferIcon(TextureSize size = TextureSize::MEDIUM) const;
-    void* GetFileIcon(TextureSize size = TextureSize::MEDIUM) const;
-    void* GetBackArrowIcon(TextureSize size = TextureSize::MEDIUM) const;
-
-    void* FindIconForFileType(const FNode& file, TextureSize = TextureSize::MEDIUM) const;
-    void* FindIconByName(const std::string_view key, TextureSize size = TextureSize::MEDIUM) const;
-
     MetaAssetInfo& GetMetaInfoOf(const FNode& file);
     MetaAssetInfoBank& GetMetaAssetInfoBank() noexcept;
 

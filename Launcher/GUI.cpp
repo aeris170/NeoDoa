@@ -231,7 +231,7 @@ void GUI::RenderCustomTitleBar() noexcept {
     }
 #pragma endregion
 
-    void* logo{ nullptr };
+    TextureHandle logo{ reinterpret_cast<TextureHandle>(nullptr) };
     ImGui::SetCursorPos(TitleBarInternalPadding);
     p0 = p0 + TitleBarInternalPadding;
     ImVec2 p2 = p0 + TitleBarLogoSize;

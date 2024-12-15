@@ -131,7 +131,7 @@ void DisplayTargetRenderer::HandleTargetWhenFile(FNode& file) {
     ImGui::PushStyleColor(ImGuiCol_Button, {});
     auto prePos = ImGui::GetCursorPos();
     auto& meta{ gui.GetMetaInfoOf(file) };
-    if (ImGui::ImageButton(meta.GetSVGIcon(), iconSize)) {
+    if (ImGui::ImageButton("DTR_ASSET_ICON", meta.GetSVGIcon(), iconSize)) {
         ImGui::OpenPopup("assetIconCombo");
     }
     auto afterPos = ImGui::GetCursorPos();

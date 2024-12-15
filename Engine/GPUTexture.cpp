@@ -105,7 +105,7 @@ GPUTexture& GPUTexture::operator=(GPUTexture&& other) noexcept {
 }
 
 bool GPUTexture::IsMultisampled() const noexcept { return Samples != Multisample::None; }
-GPUTexture::operator void* () const { return reinterpret_cast<void*>(static_cast<uint64_t>(GLObjectID)); }
+GPUTexture::operator intptr_t() const { return static_cast<intptr_t>(GLObjectID); }
 
 GPUTextureBuilder& GPUTextureBuilder::SetName(std::string_view name) noexcept {
 #ifdef DEBUG

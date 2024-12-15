@@ -77,7 +77,7 @@ struct GPUTexture {
     Multisample Samples{};
 
     bool IsMultisampled() const noexcept;
-    operator void* () const;
+    operator intptr_t() const;
 
     ND_GRAPHICS_MOVE_ONLY_RESOURCE(GPUTexture);
 };
