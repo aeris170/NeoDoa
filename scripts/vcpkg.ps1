@@ -31,11 +31,36 @@ if (Test-Path -Path $path) {
 
     Write-Host "Pulling latest vcpkg changes..." -ForegroundColor white -BackgroundColor black
     $pullOutput = Start-Process -FilePath "git" -ArgumentList "pull" -NoNewWindow -Wait -PassThru
+	
     if ($pullOutput.ExitCode -ne 0) {
         Write-Host "Error during git pull: $($pullOutput.StandardError)" -ForegroundColor red -BackgroundColor black
         Set-Location -Path ..
         exit 1
     }
+	
+	# Run the bootstrap script
+	if (Test-Path -Path "./bootstrap-vcpkg.bat") {
+		Write-Host "Running bootstrap-vcpkg.bat..." -ForegroundColor white -BackgroundColor black
+		$bootstrapOutput = Start-Process -FilePath "./bootstrap-vcpkg.bat" -ArgumentList '-disableMetrics' -NoNewWindow -Wait -PassThru
+		if ($bootstrapOutput.ExitCode -ne 0) {
+			Write-Host "Error during bootstrap: $($bootstrapOutput.StandardError)" -ForegroundColor red -BackgroundColor black
+			Set-Location -Path ..
+			exit 1
+		}
+	} else {
+		Write-Host "Bootstrap script not found!" -ForegroundColor red -BackgroundColor black
+		Set-Location -Path ..
+		exit 1
+	}
+	
+	# Update required packages
+	Write-Host "Updating required vcpkg packages..." -ForegroundColor white -BackgroundColor black
+	$updateOutput = Start-Process -FilePath "./vcpkg.exe" -ArgumentList 'upgrade --no-dry-run' -NoNewWindow -Wait -PassThru
+	if ($updateOutput.ExitCode -ne 0) {
+		Write-Host "Error during vcpkg update: $($updateOutput.StandardError)" -ForegroundColor red -BackgroundColor black
+		Set-Location -Path ..
+		exit 1
+	}
 } else {
     # If the directory doesn't exist, go to the parent directory and clone the repo
     Write-Host "Directory does not exist: $path" -ForegroundColor white -BackgroundColor black
@@ -59,48 +84,48 @@ if (Test-Path -Path $path) {
         exit 1
     }
     Set-Location -Path $path
-}
+	
+	# Run the bootstrap script
+	if (Test-Path -Path "./bootstrap-vcpkg.bat") {
+		Write-Host "Running bootstrap-vcpkg.bat..." -ForegroundColor white -BackgroundColor black
+		$bootstrapOutput = Start-Process -FilePath "./bootstrap-vcpkg.bat" -NoNewWindow -Wait -PassThru
+		if ($bootstrapOutput.ExitCode -ne 0) {
+			Write-Host "Error during bootstrap: $($bootstrapOutput.StandardError)" -ForegroundColor red -BackgroundColor black
+			Set-Location -Path ..
+			exit 1
+		}
+	} else {
+		Write-Host "Bootstrap script not found!" -ForegroundColor red -BackgroundColor black
+		Set-Location -Path ..
+		exit 1
+	}
 
-# Run the bootstrap script
-if (Test-Path -Path "./bootstrap-vcpkg.bat") {
-    Write-Host "Running bootstrap-vcpkg.bat..." -ForegroundColor white -BackgroundColor black
-    $bootstrapOutput = Start-Process -FilePath "./bootstrap-vcpkg.bat" -NoNewWindow -Wait -PassThru
-    if ($bootstrapOutput.ExitCode -ne 0) {
-        Write-Host "Error during bootstrap: $($bootstrapOutput.StandardError)" -ForegroundColor red -BackgroundColor black
-        Set-Location -Path ..
-        exit 1
-    }
-} else {
-    Write-Host "Bootstrap script not found!" -ForegroundColor red -BackgroundColor black
-    Set-Location -Path ..
-    exit 1
-}
-
-# Install required packages
-Write-Host "Installing required vcpkg packages..." -ForegroundColor white -BackgroundColor black
-$installOutput = Start-Process -FilePath "./vcpkg.exe" -ArgumentList @(
-    'install',
-    'angelscript[addons]',
-    'argparse',
-    'assimp',
-    'cppzmq',
-    'entt',
-    'eventpp',
-    'glew',
-    'glfw3',
-    'glm',
-    'icu',
-    'imgui[core,docking-experimental,glfw-binding,sdl2-binding,opengl3-binding,vulkan-binding]',
-    'imguizmo',
-    'lunasvg',
-    'stb',
-    'tinyxml2',
-    '--recurse'
-) -NoNewWindow -Wait -PassThru
-if ($installOutput.ExitCode -ne 0) {
-    Write-Host "Error during vcpkg install: $($installOutput.StandardError)" -ForegroundColor red -BackgroundColor black
-    Set-Location -Path ..
-    exit 1
+	# Install required packages
+	Write-Host "Installing required vcpkg packages..." -ForegroundColor white -BackgroundColor black
+	$installOutput = Start-Process -FilePath "./vcpkg.exe" -ArgumentList @(
+		'install',
+		'angelscript[addons]',
+		'argparse',
+		'assimp',
+		'cppzmq',
+		'entt',
+		'eventpp',
+		'glew',
+		'glfw3',
+		'glm',
+		'icu',
+		'imgui[core,docking-experimental,glfw-binding,sdl2-binding,opengl3-binding,vulkan-binding]',
+		'imguizmo',
+		'lunasvg',
+		'stb',
+		'tinyxml2',
+		'--recurse'
+	) -NoNewWindow -Wait -PassThru
+	if ($installOutput.ExitCode -ne 0) {
+		Write-Host "Error during vcpkg install: $($installOutput.StandardError)" -ForegroundColor red -BackgroundColor black
+		Set-Location -Path ..
+		exit 1
+	}
 }
 
 # Integrate vcpkg
