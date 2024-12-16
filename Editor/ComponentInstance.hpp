@@ -3,24 +3,23 @@
 #include <any>
 #include <string>
 #include <vector>
+#include <functional>
 #include <string_view>
-
-#include <Utility/ObserverPattern.hpp>
 
 #include <Engine/UUID.hpp>
 #include <Engine/Assets.hpp>
 #include <Engine/Component.hpp>
 
 enum class InstantiationError {
-    OK = 0,
-    DEFINITION_MISSING,
-    NON_DEFITION_INSTANTIATION,
-    DEFINITION_COMPILE_ERROR,
-    DEFINITION_NOT_DESERIALIZED,
+    OK = 0,                      // No error
+    DEFINITION_MISSING,          // Instance exists but no reference definition found. Cause: Definition file deleted from disk/not imported into Assets.
+    NON_DEFITION_INSTANTIATION,  // Should never happen under normal circumstances. Cause: NeoDoa somehow managed to instantiate something that is not a definition. How? No idea.
+    DEFINITION_COMPILE_ERROR,    // Instantiation failed due to compiler errors present in the definition file.
+    DEFINITION_NOT_DESERIALIZED, // Definition file exists and is imported, but, contents are not deserialized.
     _COUNT
 };
 
-struct ComponentInstance : public ObserverPattern::Observer {
+struct ComponentInstance {
 
     struct Field {
 
@@ -46,10 +45,10 @@ struct ComponentInstance : public ObserverPattern::Observer {
         std::any value;
     };
 
-    explicit ComponentInstance(AssetHandle componentAsset) noexcept;
-    ComponentInstance(AssetHandle componentAsset, std::vector<Field>&& data) noexcept;
-    explicit ComponentInstance(UUID supposedAssetID, InstantiationError error) noexcept;
-    ~ComponentInstance() noexcept override;
+    explicit ComponentInstance(const UUID uuid, Assets& assets) noexcept;
+    ComponentInstance(const UUID uuid, Assets& assets, std::vector<Field>&& data) noexcept;
+    explicit ComponentInstance(const UUID uuid, Assets& assets, InstantiationError error) noexcept;
+    ~ComponentInstance() noexcept;
     ComponentInstance(const ComponentInstance& other) = delete;
     ComponentInstance(ComponentInstance&& other) noexcept = default;
     ComponentInstance& operator=(const ComponentInstance& other) = delete;
@@ -63,14 +62,19 @@ struct ComponentInstance : public ObserverPattern::Observer {
     InstantiationError GetError() const;
     std::string_view ErrorString() const;
 
-protected:
-    void OnNotify(const ObserverPattern::Observable* source, ObserverPattern::Notification message) override;
-
 private:
-    AssetHandle componentAsset{};
+    UUID uuid{ UUID::Empty() };
     std::vector<Field> memberValues{};
     InstantiationError error{ InstantiationError::OK };
-    UUID supposedAssetID{ UUID::Empty() }; /* only applicable when error != OK */
+
+    std::reference_wrapper<Assets> referenceScriptsOwningManager;
+    decltype(Assets::Events::OnAssetDeserialized)::CallbackHandle onAssetDeserializedHandle;
+    decltype(Assets::Events::OnAssetDataDeleted)::CallbackHandle onAssetDataDeletedHandle;
+    decltype(Assets::Events::OnAssetDestructed)::CallbackHandle onAssetDestructedHandle;
+
+    void OnAssetDeserialized(const UUID uuid) noexcept;
+    void OnAssetDataDeleted(const UUID uuid) noexcept;
+    void OnAssetDestructed(const UUID uuid) noexcept;
 
     static void FillData(const std::vector<Component::Field>& fields, std::vector<Field>& data);
     static void ReConstructData(const std::vector<Component::Field>& fields, std::vector<Field>& data);

@@ -55,13 +55,10 @@ private:
     bool isCollectionDirty{ false };
     ProjectDataCollection projectDataCollectionSorted{};
 
-    ProjectData contextOwner{};
-
     void RenderCustomTitleBar() noexcept;
     void RenderButtons() noexcept;
     void RenderProjectsTable() noexcept;
-    void RenderProjectData(ProjectData& data) noexcept;
-    void RenderProjectDataContextMenu(const ProjectData& data) noexcept;
+    void RenderProjectData(ProjectDataCollection& projectDataColectionSorted) noexcept;
 
     void SaveProjectDataCollectionToDisk() noexcept;
 

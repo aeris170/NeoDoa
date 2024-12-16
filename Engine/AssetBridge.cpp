@@ -305,3 +305,11 @@ GPUShaderPrograms& AssetGPUBridge::GetShaderPrograms() noexcept             { re
 const GPUShaderPrograms& AssetGPUBridge::GetShaderPrograms() const noexcept { return gpuShaderPrograms; }
 GPUFrameBuffers& AssetGPUBridge::GetFrameBuffers() noexcept                 { return gpuFrameBuffers;   }
 const GPUFrameBuffers& AssetGPUBridge::GetFrameBuffers() const noexcept     { return gpuFrameBuffers;   }
+
+void AssetGPUBridge::Clear() noexcept {
+    gpuSamplers.Clear();
+    gpuTextures.Clear();
+    gpuShaders.Clear();
+    gpuShaderPrograms.Clear();
+    gpuFrameBuffers.Clear();
+}

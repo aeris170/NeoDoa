@@ -187,7 +187,7 @@ void GUI::End() {
 void GUI::CreateNewProject(std::string_view workspace, std::string_view name) {
     CORE->CreateAndLoadProject(workspace, name);
     Project& project = GetOpenProject();
-    AssetHandle handle = CORE->GetAssets()->CreateAssetAt<Scene>(CORE->GetAssets()->Root(), "Sample Scene.scn", std::string("Sample Scene"));
+    AssetHandle handle = CORE->GetAssets()->CreateAssetAt(CORE->GetAssets()->Root(), "Sample Scene.scn", std::string("Sample Scene"));
     assert(handle.HasValue());
     project.SetStartupScene(handle->ID());
     OpenScene(handle);
@@ -248,7 +248,7 @@ void GUI::CreateNewScene(FNode& folder, std::string_view name) {
     if (!HasOpenProject()) { return; }
 
     const Scene temporary(name); const auto data = temporary.Serialize();
-    AssetHandle handle = CORE->GetAssets()->CreateAssetAt<Scene>(folder, std::string(name) + Assets::SceneExtension, data);
+    AssetHandle handle = CORE->GetAssets()->CreateAssetAt(folder, std::string(name) + Assets::SceneExtension, data);
     assert(handle.HasValue());
     DOA_LOG_INFO("Succesfully created a new scene asset named %s at %s", name.data(), folder.Path().c_str());
     Events.OnAssetCreated(handle);
@@ -318,51 +318,6 @@ const SceneViewportCameraSettings& GUI::GetSceneViewportCameraSettings() const {
 ImGuiIO* GUI::IO() const { return io; }
 ImFont* GUI::GetFont() const { return font; }
 ImFont* GUI::GetFontBold() const { return fontBold; }
-
-void* GUI::GetFolderIcon(TextureSize size) const                       { return SVGPathway::Get(FOLDER_ICON_KEY,           TextureStyle::PADDED, size); }
-void* GUI::GetProjectIcon(TextureSize size) const                      { return SVGPathway::Get(PROJECT_ICON_KEY,          TextureStyle::PADDED, size); }
-void* GUI::GetSceneIcon(TextureSize size) const                        { return SVGPathway::Get(SCENE_ICON_KEY,            TextureStyle::PADDED, size); }
-void* GUI::GetComponentIcon(TextureSize size) const                    { return SVGPathway::Get(COMPONENT_ICON_KEY,        TextureStyle::PADDED, size); }
-void* GUI::GetSamplerIcon(TextureSize size) const                      { return SVGPathway::Get(SAMPLER_ICON_KEY,          TextureStyle::PADDED, size); }
-void* GUI::GetTextureIcon(TextureSize size) const                      { return SVGPathway::Get(TEXTURE_ICON_KEY,          TextureStyle::PADDED, size); }
-void* GUI::GetVertexShaderIcon(TextureSize size) const                 { return SVGPathway::Get(VERTEX_SHADER_ICON_KEY,    TextureStyle::PADDED, size); }
-void* GUI::GetTessellationControlShaderIcon(TextureSize size) const    { return SVGPathway::Get(TESS_CTRL_SHADER_ICON_KEY, TextureStyle::PADDED, size); }
-void* GUI::GetTessellationEvaluationShaderIcon(TextureSize size) const { return SVGPathway::Get(TESS_EVAL_SHADER_ICON_KEY, TextureStyle::PADDED, size); }
-void* GUI::GetGeometryShaderIcon(TextureSize size) const               { return SVGPathway::Get(GEOMETRY_SHADER_ICON_KEY,  TextureStyle::PADDED, size); }
-void* GUI::GetFragmentShaderIcon(TextureSize size) const               { return SVGPathway::Get(FRAGMENT_SHADER_ICON_KEY,  TextureStyle::PADDED, size); }
-void* GUI::GetComputeShaderIcon(TextureSize size) const                { return SVGPathway::Get(COMPUTE_SHADER_ICON_KEY,   TextureStyle::PADDED, size); }
-void* GUI::GetMaterialIcon(TextureSize size) const                     { return SVGPathway::Get(MATERIAL_ICON_KEY,         TextureStyle::PADDED, size); }
-void* GUI::GetFrameBufferIcon(TextureSize size) const                  { return SVGPathway::Get(FRAMEBUFFER_ICON_KEY,      TextureStyle::PADDED, size); }
-void* GUI::GetFileIcon(TextureSize size) const                         { return SVGPathway::Get(FILE_ICON_KEY,             TextureStyle::PADDED, size); }
-void* GUI::GetBackArrowIcon(TextureSize size) const                    { return SVGPathway::Get(BACK_ARROW_ICON_KEY,       TextureStyle::PADDED, size); }
-
-void* GUI::FindIconForFileType(const FNode& file, TextureSize size) const {
-    assert(HasOpenProject());
-
-    if (file.IsDirectory()) { return GetFolderIcon(size); }
-    if (Assets::IsProjectFile(file)) { return GetProjectIcon(size); }
-
-    assert(CORE->GetAssets()->IsAssetExistsAt(file));
-    AssetHandle asset = CORE->GetAssets()->FindAssetAt(file);
-
-    if (asset->IsScene())                                              { return GetSceneIcon(size);                        }
-    if (asset->IsComponentDefinition())                                { return GetComponentIcon(size);                    }
-    if (asset->IsSampler())                                            { return GetSamplerIcon(size);                      }
-    if (asset->IsTexture())                                            { return GetTextureIcon(size);                      }
-    if (asset->IsShader()) {
-        if (Assets::IsVertexShaderFile(asset->File()))                 { return GetVertexShaderIcon(size);                 }
-        if (Assets::IsTessellationControlShaderFile(asset->File()))    { return GetTessellationControlShaderIcon(size);    }
-        if (Assets::IsTessellationEvaluationShaderFile(asset->File())) { return GetTessellationEvaluationShaderIcon(size); }
-        if (Assets::IsGeometryShaderFile(asset->File()))               { return GetGeometryShaderIcon(size);               }
-        if (Assets::IsFragmentShaderFile(asset->File()))               { return GetFragmentShaderIcon(size);               }
-        if (Assets::IsComputeShaderFile(asset->File()))                { return GetComputeShaderIcon(size);                }
-    }
-    if (asset->IsMaterial())                                           { return GetMaterialIcon(size);                     }
-    if (asset->IsFrameBuffer())                                        { return GetFrameBufferIcon(size);                  }
-    if (asset->IsModel())                                              { return GetSceneIcon(size);                        }
-    return GetFileIcon(size);
-}
-void* GUI::FindIconByName(const std::string_view key, TextureSize size) const { return reinterpret_cast<void*>(static_cast<uint64_t>(SVGPathway::Get(std::string(key), TextureStyle::PADDED, size).GLObjectID)); }
 
 MetaAssetInfo& GUI::GetMetaInfoOf(const FNode& file) { return meta.GetMetaAssetInfoBank().GetMetaInfoOf(file); }
 MetaAssetInfoBank& GUI::GetMetaAssetInfoBank() noexcept { return meta.GetMetaAssetInfoBank(); }

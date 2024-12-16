@@ -52,7 +52,7 @@ void AssetManager::Render() {
 
     if (deletedNode != nullptr) {
         gui.Events.OnAssetDeleted(assets->FindAssetAt(*deletedNode));
-        assets->DeleteAsset(assets->FindAssetAt(*deletedNode));
+        assets->DeleteAsset(assets->FindAssetAt(*deletedNode)->ID());
         if (currentFolder == deletedNode) {
             SetCurrentFolder(root);
         }
@@ -238,7 +238,7 @@ void AssetManager::RenderSelectedFolderContent() {
             if (searchQueryStartIndex >= 0) {
                 // Draw Icon
                 float iconSize = ImGui::GetTextLineHeight();
-                void* icon = gui.GetMetaInfoOf(file).GetSVGIcon();
+                TextureHandle icon = gui.GetMetaInfoOf(file).GetSVGIcon();
                 ImVec2 start = ImGui::GetWindowPos() + ImGui::GetCursorPos();
                 ImVec2 end = { start.x + iconSize, start.y + iconSize };
 
@@ -302,10 +302,10 @@ void AssetManager::RenderSelectedFolderContent() {
                 }
                 ImGui::TableSetColumnIndex(i++ % columns);
 
-                void* icon = gui.GetMetaInfoOf(child).GetSVGIcon();
+                TextureHandle icon = gui.GetMetaInfoOf(child).GetSVGIcon();
 
                 ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
-                ImGui::ImageButton(icon, { currentFolderContentSettings.thumbnailSize, currentFolderContentSettings.thumbnailSize });
+                ImGui::ImageButton("ASSET_ICON", icon, { currentFolderContentSettings.thumbnailSize, currentFolderContentSettings.thumbnailSize });
                 if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
                     assert(assets->IsAssetExistsAt(child));
                     dragDropAssetID = assets->FindAssetAt(child)->ID();
@@ -376,7 +376,7 @@ void AssetManager::RenderSelectedFolderContent() {
                 bool visible = fileFilter.CheckVisibility(child);
                 if (!visible) { continue; }
 
-                void* icon = gui.GetMetaInfoOf(child).GetSVGIcon();
+                TextureHandle icon = gui.GetMetaInfoOf(child).GetSVGIcon();
 
                 if (ImGui::TreeNodeEx(child.Name().data(), ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf)) {
                     if (ImGui::IsItemHovered()) {

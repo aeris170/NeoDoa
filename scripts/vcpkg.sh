@@ -39,6 +39,36 @@ if [ -d "$path" ]; then
         exit 1
     fi
     rm pullOutput.log
+	
+	# Run the bootstrap script
+	if [ -f "./bootstrap-vcpkg.sh" ]; then
+		echo -e "${WHITE}Running bootstrap-vcpkg.sh...${RESET}"
+		./bootstrap-vcpkg.sh -disableMetrics 2>&1 | tee bootstrapOutput.log
+		if [ $? -ne 0 ]; then
+			echo -e "${RED}Error during bootstrap.${RESET}"
+			cat bootstrapOutput.log
+			rm bootstrapOutput.log
+			cd ..
+			exit 1
+		fi
+		rm bootstrapOutput.log
+	else
+		echo -e "${RED}Bootstrap script not found!${RESET}"
+		cd ..
+		exit 1
+	fi
+	
+	# Update required packages
+	echo -e "${WHITE}Updating required vcpkg packages...${RESET}"
+	./vcpkg upgrade --no-dry-run 2>&1 | tee updateOutput.log
+	if [ $? -ne 0 ]; then
+		echo -e "${RED}Error during vcpkg update.${RESET}"
+		cat updateOutput.log
+		rm updateOutput.log
+		cd ..
+		exit 1
+	fi
+	rm updateOutput.log
 else
     # If the directory doesn't exist, go to the parent directory and clone the repo
     echo -e "${WHITE}Directory does not exist: $path${RESET}"
@@ -65,54 +95,54 @@ else
     rm cloneOutput.log
     # Change to the newly cloned vcpkg directory
     cd "$path"
-fi
+	
+	# Run the bootstrap script
+	if [ -f "./bootstrap-vcpkg.sh" ]; then
+		echo -e "${WHITE}Running bootstrap-vcpkg.sh...${RESET}"
+		./bootstrap-vcpkg.sh -disableMetrics 2>&1 | tee bootstrapOutput.log
+		if [ $? -ne 0 ]; then
+			echo -e "${RED}Error during bootstrap.${RESET}"
+			cat bootstrapOutput.log
+			rm bootstrapOutput.log
+			cd ..
+			exit 1
+		fi
+		rm bootstrapOutput.log
+	else
+		echo -e "${RED}Bootstrap script not found!${RESET}"
+		cd ..
+		exit 1
+	fi
 
-# Run the bootstrap script
-if [ -f "./bootstrap-vcpkg.sh" ]; then
-    echo -e "${WHITE}Running bootstrap-vcpkg.sh...${RESET}"
-    ./bootstrap-vcpkg.sh 2>&1 | tee bootstrapOutput.log
-    if [ $? -ne 0 ]; then
-        echo -e "${RED}Error during bootstrap.${RESET}"
-        cat bootstrapOutput.log
-        rm bootstrapOutput.log
-        cd ..
-        exit 1
-    fi
-    rm bootstrapOutput.log
-else
-    echo -e "${RED}Bootstrap script not found!${RESET}"
-    cd ..
-    exit 1
-fi
+	# Install required packages
+	echo -e "${WHITE}Installing required vcpkg packages...${RESET}"
+	./vcpkg install \
+		'angelscript[addons]' \
+		'argparse' \
+		'assimp' \
+		'cppzmq' \
+		'entt' \
+		'eventpp' \
+		'glew' \
+		'glfw3' \
+		'glm' \
+		'icu' \
+		'imgui[core,docking-experimental,glfw-binding,sdl2-binding,opengl3-binding,vulkan-binding]' \
+		'imguizmo' \
+		'lunasvg' \
+		'stb' \
+		'tinyxml2' \
+		--recurse 2>&1 | tee installOutput.log
 
-# Install required packages
-echo -e "${WHITE}Installing required vcpkg packages...${RESET}"
-./vcpkg install \
-    'angelscript[addons]' \
-    'argparse' \
-    'assimp' \
-    'cppzmq' \
-    'entt' \
-    'eventpp' \
-    'glew' \
-    'glfw3' \
-    'glm' \
-    'icu' \
-    'imgui[core,docking-experimental,glfw-binding,sdl2-binding,opengl3-binding,vulkan-binding]' \
-    'imguizmo' \
-    'lunasvg' \
-    'stb' \
-    'tinyxml2' \
-    --recurse 2>&1 | tee installOutput.log
-
-if [ $? -ne 0 ]; then
-    echo -e "${RED}Error during vcpkg install.${RESET}"
-    cat installOutput.log
-    rm installOutput.log
-    cd ..
-    exit 1
+	if [ $? -ne 0 ]; then
+		echo -e "${RED}Error during vcpkg install.${RESET}"
+		cat installOutput.log
+		rm installOutput.log
+		cd ..
+		exit 1
+	fi
+	rm installOutput.log
 fi
-rm installOutput.log
 
 # Integrate vcpkg
 echo -e "${WHITE}Integrating vcpkg...${RESET}"

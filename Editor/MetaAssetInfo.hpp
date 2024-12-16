@@ -5,6 +5,7 @@
 #include <Engine/UUID.hpp>
 #include <Engine/Assets.hpp>
 #include <Engine/FileNode.hpp>
+#include <Engine/ImGuiRenderer.hpp>
 
 #include <Editor/SVGPathway.hpp>
 
@@ -15,7 +16,7 @@ struct MetaAssetInfo {
     const char* fa_icon{ nullptr }; /* from IconsFontAwesome6Pro.h */
     std::string svg_icon_key{}; /* for SVGPathway::Get */
 
-    void* GetSVGIcon(TextureSize size = TextureSize::MEDIUM, TextureStyle style = TextureStyle::PADDED) const;
+    TextureHandle GetSVGIcon(TextureSize size = TextureSize::MEDIUM, TextureStyle style = TextureStyle::PADDED) const;
 };
 
 struct MetaAssetInfoBank {
