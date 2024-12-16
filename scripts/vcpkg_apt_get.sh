@@ -44,6 +44,7 @@ fi
 
 echo -e "${WHITE}Clonemode: $clonemode${RESET}"
 echo -e "${WHITE}vcpkg path: $path${RESET}"
+echo
 
 # Ensure vcpkg directory exists
 if [ -d "$path" ]; then
@@ -88,11 +89,12 @@ else
     # Change to the newly cloned vcpkg directory
     cd "$path"
 fi
+echo
 
 # Run the bootstrap script
 if [ -f "./bootstrap-vcpkg.sh" ]; then
     echo -e "${WHITE}Running bootstrap-vcpkg.sh...${RESET}"
-    ./bootstrap-vcpkg.sh 2>&1 | tee bootstrapOutput.log
+    ./bootstrap-vcpkg.sh -disableMetrics 2>&1 | tee bootstrapOutput.log
     if [ $? -ne 0 ]; then
         echo -e "${RED}Error during bootstrap.${RESET}"
         cat bootstrapOutput.log
@@ -106,24 +108,33 @@ else
     cd ..
     exit 1
 fi
+echo
 
 echo -e "${WHITE}Processing packages...${RESET}"
 echo -e "${WHITE}----------------------${RESET}"
 
-# Iterate over each package name and extract system dependencies from portfiles
+# Find all transitive dependencies of each package and put them into a list,
+transitive_dependencies=()
 for package in "${package_names[@]}"; do
-	package="${package%%\[*}"
+    result=($(./vcpkg depend-info $package --format=dot | grep -oP '^"([a-z0-9\-]*)";' | sed 's/"//' | sed 's/";//'))
+    for i in "${result[@]}"; do
+        transitive_dependencies+=("$i")
+    done
+done
+unique_transitive_dependencies_list=($(printf "%s\n" "${transitive_dependencies[@]}" | sort -u))
 
+# Iterate over each package (or dependency) name and extract system dependencies from portfiles
+required_system_packages=()
+for package in "${unique_transitive_dependencies_list[@]}"; do
     echo -e "Processing portfile for: ${CYAN}$package${RESET}"
-    echo
     
     # Define the portfile path
     file="./ports/$package/portfile.cmake"
     
     # Check if file exists
     if [ ! -f "$file" ]; then
-        echo -e "${RED}File not found for package ${CYAN}$package${RESET}!"
-		echo -e "---------------------------------------------------"
+        echo -e "\e[1A\e[K${RED}File not found for package ${CYAN}$package${RESET}!"
+        echo -e "---------------------------------------------------"
         continue
     fi
     
@@ -131,22 +142,29 @@ for package in "${package_names[@]}"; do
     # - Remove the literal '\n' strings by replacing '\n' with an empty string.
     # - Remove multiple spaces by collapsing them into one.
     processed_content=$(cat "$file" | sed 's/\\n//g' | tr -s ' ')
-    
-    # Extract packages after "apt-get install"
-    apt_get_packages=$(echo "$processed_content" | grep -oP 'apt-get install \K([^"]+)' | sed 's/"$//')
 
     # Extract packages after "apt install"
-    apt_install_packages=$(echo "$processed_content" | grep -oP 'apt install \K([^"]+)' | sed 's/"$//')
+    apt_packages=($(echo "$processed_content" | grep -oP 'apt install \K([^."]+)' | sed 's/"$//'))
+    
+    # Extract packages after "apt-get install"
+    apt_get_packages=($(echo "$processed_content" | grep -oP 'apt-get install \K([^."]+)' | sed 's/"$//'))
 
     # Output the extracted packages
-    if [ -z "$apt_get_packages" ] && [ -z "$apt_install_packages" ]; then
-        echo -e "No apt dependencies found for ${CYAN}$package${RESET}"
+    if [ -z "$apt_packages" ] && [ -z "$apt_get_packages" ]; then
+        echo -e "\e[1A\e[K${CYAN}$package${RESET} has no system package dependencies."
     else
-        echo -e "${CYAN}$package${RESET} requires system packages to be available:"
-        echo -e "${YELLOW}$apt_get_packages $apt_install_packages${RESET}"
+        echo -e "\e[1A\e[K${CYAN}$package${RESET} requires system packages to be available: "
+        
+        for apt_package in "${apt_packages[@]}"; do
+            echo -e "${YELLOW}$apt_package${RESET}"
+            required_system_packages+=("$apt_package")
+        done
+        for apt_get_package in "${apt_get_packages[@]}"; do
+            echo -e "${YELLOW}$apt_get_package${RESET}"
+            required_system_packages+=("$apt_get_package")
+        done
         
         # Install packages
-        echo "Installing..."
         #if [ -n "$apt_get_packages" ]; then
         #    if ! sudo apt-get -qq install -y "$apt_get_packages"; then
         #        echo "Failed to install $apt_get_packages"
@@ -158,8 +176,48 @@ for package in "${package_names[@]}"; do
         #    fi
         #fi
     fi
-	echo "---------------------------------------------------"
+    echo "---------------------------------------------------"
 done
+echo
+
+echo -e "${WHITE}Overall required system packages — THEY ARE MANDATORY:${RESET}"
+unique_required_system_packages=($(printf "%s\n" "${required_system_packages[@]}" | sort -u))
+for package in "${unique_required_system_packages[@]}"; do
+    echo -e "${YELLOW}$package${RESET}"
+done
+echo
+
+if [ -z ${system_packages_user_choice} ]; then
+    read -p "Would you like to install them using apt? [Y/n]: " system_packages_user_choice
+fi
+echo
+
+if [[ $system_packages_user_choice == "Y" || $system_packages_user_choice == "y" ]]; then
+    echo -e "Installing..."
+    sudo apt-get install ${unique_required_system_packages[@]} 2>&1 | tee aptOutput.log
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}Error during system package installation with apt.${RESET}"
+        cat aptOutput.log
+        rm aptOutput.log
+        cd ..
+        exit 1
+    fi
+else
+    echo -e "${RED}YOU WILL HAVE PROBLEMS IF REQUIRED SYSTEM PACKAGES ARE MISSING!${RESET}"
+    read -p "Would you still not like to install them? [Y/n]: " system_packages_user_choice
+    if [[ $system_packages_user_choice == "Y" || $system_packages_user_choice == "y" ]]; then
+        echo -e "Installing..."
+        sudo apt-get install ${unique_required_system_packages[@]} 2>&1 | tee aptOutput.log
+        if [ $? -ne 0 ]; then
+            echo -e "${RED}Error during system package installation with apt.${RESET}"
+            cat aptOutput.log
+            rm aptOutput.log
+            cd ..
+            exit 1
+        fi
+    fi
+fi
+echo
 
 # Install required vcpkg packages
 echo -e "${WHITE}Installing required vcpkg packages...${RESET}"
