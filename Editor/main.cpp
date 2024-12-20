@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
         path = program.get("project_path");
     } catch (const std::exception& err) {
         DOA_LOG_FATAL("FATAL ERROR: %s\n", err.what());
-        path = "C:\\Users\\doga.oruc\\Desktop\\Repo\\.rec\\Test\\T.doa";
+        path = "C:\\NeoDoaTestProjects\\AA\\UltimateTest.doa";
         //std::cerr << program << std::endl;
         //std::exit(1);
     }

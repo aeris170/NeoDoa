@@ -49,10 +49,10 @@ struct ComponentInstance {
     ComponentInstance(const UUID uuid, Assets& assets, std::vector<Field>&& data) noexcept;
     explicit ComponentInstance(const UUID uuid, Assets& assets, InstantiationError error) noexcept;
     ~ComponentInstance() noexcept;
-    ComponentInstance(const ComponentInstance& other) = delete;
-    ComponentInstance(ComponentInstance&& other) noexcept = default;
-    ComponentInstance& operator=(const ComponentInstance& other) = delete;
-    ComponentInstance& operator=(ComponentInstance&& other) noexcept = default;
+    ComponentInstance(const ComponentInstance& other) noexcept;
+    ComponentInstance(ComponentInstance&& other) noexcept;
+    ComponentInstance& operator=(const ComponentInstance& other) noexcept;
+    ComponentInstance& operator=(ComponentInstance&& other) noexcept;
 
     UUID ComponentAssetID() const;
     std::vector<Field>& MemberValues();

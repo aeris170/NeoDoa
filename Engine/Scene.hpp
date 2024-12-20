@@ -11,6 +11,8 @@
 #include "Registry.hpp"
 #include "Color.hpp"
 
+#include <Engine/ECSComponent.hpp>
+
 struct Scene {
 
     static Scene& GetLoadedScene();
@@ -28,25 +30,23 @@ struct Scene {
     const std::vector<Entity>& GetAllEntites() const;
 
     // C - Component
-    template <typename Component, typename... Args>
+    template<ECSComponent Component, typename... Args>
         requires std::constructible_from<Component, Entity, Args...>
     void EmplaceComponent(Entity entity, Args&&... args) {
         _registry.emplace<Component>(entity, entity, std::forward<Args>(args)...);
     }
 
-    template <typename Component>
-        requires std::move_constructible<Component>
+    template<ECSComponent Component>
     void InsertComponent(Entity entity, Component&& component) {
-        _registry.emplace<Component>(entity, std::forward<Component>(component));
+        _registry.emplace<Component>(entity, entity) = std::forward<Component>(component);
     }
 
-    template <typename Component>
-        requires std::move_constructible<Component>
+    template<ECSComponent Component>
     void ReplaceComponent(Entity entity, Component&& component) {
-        _registry.replace<Component>(entity, std::forward<Component>(component));
+        _registry.replace<Component>(entity, entity) = std::forward<Component>(component);
     }
 
-    template <typename Component>
+    template<ECSComponent Component>
     void InsertOrReplaceComponent(Entity entity, Component&& component) {
         if (HasComponent<Component>(entity)) {
             ReplaceComponent<Component>(entity, std::forward<Component>(component));
@@ -55,29 +55,29 @@ struct Scene {
         }
     }
 
-    template <typename Component>
+    template<ECSComponent Component>
     void RemoveComponent(Entity entity) {
         _registry.remove<Component>(entity);
     }
 
-    template <typename Component>
+    template<ECSComponent Component>
     void RemoveComponentIfExists(Entity entity) {
         if (HasComponent<Component>(entity)) {
             RemoveComponent<Component>(entity);
         }
     }
 
-    template <typename Component>
+    template<ECSComponent Component>
     bool HasComponent(Entity entity) const {
         return _registry.all_of<Component>(entity);
     }
 
-    template <typename Component>
+    template<ECSComponent Component>
     Component& GetComponent(Entity entity) {
         return _registry.get<Component>(entity);
     }
 
-    template <typename Component>
+    template<ECSComponent Component>
     const Component& GetComponent(Entity entity) const {
         return _registry.get<Component>(entity);
     }

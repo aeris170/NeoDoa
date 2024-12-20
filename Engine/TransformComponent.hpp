@@ -7,12 +7,17 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 
-#include <Engine/Entity.hpp>
+#include <Engine/ECSComponent.hpp>
 
 struct Scene;
 
 struct TransformComponent {
     explicit TransformComponent(const Entity owner) noexcept;
+    ~TransformComponent() noexcept = default;
+    TransformComponent(const TransformComponent& other) noexcept;
+    TransformComponent(TransformComponent&& other) noexcept;
+    TransformComponent& operator=(const TransformComponent& other) noexcept;
+    TransformComponent& operator=(TransformComponent&& other) noexcept;
 
     static glm::vec3 ComputeWorldTranslation(const Entity entity, const Scene& scene);
     static glm::quat ComputeWorldRotation(const Entity entity, const Scene& scene);
@@ -34,9 +39,11 @@ struct TransformComponent {
     void SetLocalScale(glm::vec3 localScale);
 
 private:
-    Entity entity;
+    Entity entity{ NULL_ENTT };
 
     glm::vec3 localTranslation{ 0, 0, 0 };
     glm::quat localRotation{ glm::quat_identity<float, glm::packed_highp>() };
     glm::vec3 localScale{ 1, 1, 1 };
 };
+
+static_assert(ECSComponent<TransformComponent>);

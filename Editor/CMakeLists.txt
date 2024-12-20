@@ -72,6 +72,8 @@ set(GROUP_LIST
     "UI/GUI/Commands/GUICommand.hpp"
     "UI/GUI/Commands/AddEntityCommand.cpp"
     "UI/GUI/Commands/AddEntityCommand.hpp"
+    "UI/GUI/Commands/RemoveComponentCommand.hpp"
+	"UI/GUI/Commands/ResetComponentCommand.hpp"
     "UI/GUI/Commands/RemoveEntityCommand.cpp"
     "UI/GUI/Commands/RemoveEntityCommand.hpp"
     "UI/GUI/Commands/RenameEntityCommand.cpp"

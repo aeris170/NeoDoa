@@ -106,6 +106,7 @@ set(GROUP_LIST
     "Event/Event.hpp"
 
     "ECS/Registry.hpp"
+	"ECS/ECSComponent.hpp"
     "ECS/Components/BehaviourComponent.cpp"
     "ECS/Components/BehaviourComponent.hpp"
     "ECS/Components/CameraComponent.cpp"

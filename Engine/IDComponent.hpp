@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "Entity.hpp"
+#include <Engine/ECSComponent.hpp>
 
 namespace tinyxml2 {
     class XMLPrinter;
@@ -17,7 +17,12 @@ private:
 
 public:
 
-    IDComponent(Entity entity, std::string tag) noexcept;
+    IDComponent(Entity entity, std::string tag = "NOTAG") noexcept;
+    ~IDComponent() noexcept = default;
+    IDComponent(const IDComponent& other) noexcept;
+    IDComponent(IDComponent&& other) noexcept;
+    IDComponent& operator=(const IDComponent& other) noexcept;
+    IDComponent& operator=(IDComponent&& other) noexcept;
 
     Entity GetEntity() const;
 
@@ -29,3 +34,5 @@ public:
     friend void SerializeIDComponent(tinyxml2::XMLPrinter& printer, const IDComponent& id);
     friend IDComponent DeserializeIDComponent(tinyxml2::XMLElement* property);
 };
+
+static_assert(ECSComponent<IDComponent>);

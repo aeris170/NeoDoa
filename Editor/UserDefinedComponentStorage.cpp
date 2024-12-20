@@ -6,6 +6,20 @@
 
 UserDefinedComponentStorage::UserDefinedComponentStorage(Entity owner) noexcept :
     owner(owner) {}
+UserDefinedComponentStorage::UserDefinedComponentStorage(const UserDefinedComponentStorage& other) noexcept {
+    *this = other;
+}
+UserDefinedComponentStorage::UserDefinedComponentStorage(UserDefinedComponentStorage&& other) noexcept {
+    *this = std::move(other);
+}
+UserDefinedComponentStorage& UserDefinedComponentStorage::operator=(const UserDefinedComponentStorage& other) noexcept {
+    components = other.components;
+    return *this;
+}
+UserDefinedComponentStorage& UserDefinedComponentStorage::operator=(UserDefinedComponentStorage&& other) noexcept {
+    components = std::move(other.components);
+    return *this;
+}
 
 Entity UserDefinedComponentStorage::Owner() const { return owner; }
 

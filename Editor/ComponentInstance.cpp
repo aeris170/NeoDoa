@@ -80,6 +80,28 @@ ComponentInstance::~ComponentInstance() noexcept {
     referenceScriptsOwningManager.get().Events.OnAssetDataDeleted  -= onAssetDataDeletedHandle;
     referenceScriptsOwningManager.get().Events.OnAssetDestructed   -= onAssetDestructedHandle;
 }
+ComponentInstance::ComponentInstance(const ComponentInstance& other) noexcept :
+    referenceScriptsOwningManager(other.referenceScriptsOwningManager) {
+    *this = other;
+}
+ComponentInstance::ComponentInstance(ComponentInstance&& other) noexcept :
+    referenceScriptsOwningManager(other.referenceScriptsOwningManager) {
+    *this = std::move(other);
+}
+ComponentInstance& ComponentInstance::operator=(const ComponentInstance& other) noexcept {
+    uuid = other.uuid;
+    memberValues = other.memberValues;
+    error = other.error;
+    referenceScriptsOwningManager = other.referenceScriptsOwningManager;
+    return *this;
+}
+ComponentInstance& ComponentInstance::operator=(ComponentInstance&& other) noexcept {
+    uuid = std::exchange(other.uuid, UUID::Empty());
+    memberValues = std::move(other.memberValues);
+    error = other.error;
+    referenceScriptsOwningManager = std::move(other.referenceScriptsOwningManager);
+    return *this;
+}
 
 UUID ComponentInstance::ComponentAssetID() const { return uuid; }
 std::vector<ComponentInstance::Field>& ComponentInstance::MemberValues() { return memberValues; }

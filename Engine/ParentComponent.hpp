@@ -2,11 +2,16 @@
 
 #include <vector>
 
-#include "Entity.hpp"
+#include <Engine/ECSComponent.hpp>
 
 struct ParentComponent {
     explicit ParentComponent(const Entity owner) noexcept;
     ParentComponent(const Entity owner, std::vector<Entity>&& children) noexcept;
+    ~ParentComponent() noexcept = default;
+    ParentComponent(const ParentComponent& other) noexcept;
+    ParentComponent(ParentComponent&& other) noexcept;
+    ParentComponent& operator=(const ParentComponent& other) noexcept;
+    ParentComponent& operator=(ParentComponent&& other) noexcept;
 
     Entity GetEntity() const;
 
@@ -18,3 +23,5 @@ private:
     std::vector<Entity> children{};
 
 };
+
+static_assert(ECSComponent<ParentComponent>);
