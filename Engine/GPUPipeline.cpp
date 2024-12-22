@@ -40,7 +40,7 @@ GPUPipeline& GPUPipeline::operator=(GPUPipeline&& other) noexcept {
     return *this;
 }
 
-GPUPipelineBuilder& GPUPipelineBuilder::SetName(std::string_view name) noexcept {
+GPUPipelineBuilder& GPUPipelineBuilder::SetName([[maybe_unused]] std::string_view name) noexcept {
 #ifdef DEBUG
     this->name = name;
 #endif

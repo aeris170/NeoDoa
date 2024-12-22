@@ -41,7 +41,7 @@ bool GPUBuffer::IsPersistent() const noexcept       { return static_cast<bool>(P
 bool GPUBuffer::IsCoherent() const noexcept         { return static_cast<bool>(Properties & BufferProperties::Coherent);         }
 bool GPUBuffer::IsCPUStorage() const noexcept       { return static_cast<bool>(Properties & BufferProperties::CPUStorage);       }
 
-GPUBufferBuilder& GPUBufferBuilder::SetName(std::string_view name) noexcept {
+GPUBufferBuilder& GPUBufferBuilder::SetName([[maybe_unused]] std::string_view name) noexcept {
 #ifdef DEBUG
     this->name = name;
 #endif

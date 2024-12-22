@@ -46,7 +46,7 @@ namespace {
         }, attachment);
     }
 
-    std::pair<std::optional<GPUShaderProgram>, std::vector<ShaderLinkerMessage>> BuildGraphicsPipeline(std::string& name, std::array<GPUShader*, 5> pipelineStages) noexcept {
+    std::pair<std::optional<GPUShaderProgram>, std::vector<ShaderLinkerMessage>> BuildGraphicsPipeline([[maybe_unused]] std::string& name, std::array<GPUShader*, 5> pipelineStages) noexcept {
         const GPUShader* vertShader = pipelineStages[0];
         const GPUShader* tessCtrlShader = pipelineStages[1];
         const GPUShader* tessEvalShader = pipelineStages[2];
@@ -106,7 +106,7 @@ namespace {
 
         return { std::move(gpuShaderProgram), std::move(messages) };
     }
-    std::pair<std::optional<::GPUShaderProgram>, std::vector<ShaderLinkerMessage>> BuildComputePipeline(std::string& name, GPUShader* computeStage) noexcept {
+    std::pair<std::optional<::GPUShaderProgram>, std::vector<ShaderLinkerMessage>> BuildComputePipeline([[maybe_unused]] std::string& name, GPUShader* computeStage) noexcept {
         std::vector<ShaderLinkerMessage> messages{};
         if (!computeStage) {
             messages.emplace_back("Compute shader cannot be null while building a compute pipeline.");

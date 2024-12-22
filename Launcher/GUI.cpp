@@ -368,7 +368,7 @@ void GUI::RenderProjectData(ProjectDataCollection& projectDataCollectionSorted) 
     // Currently, context menu only allows deletions.
     static ProjectData contextMenuOwner;
 
-    for (auto i = 0; i < projectDataCollectionSorted.size(); i++) {
+    for (size_t i = 0; i < projectDataCollectionSorted.size(); i++) {
         auto& data = projectDataCollectionSorted[i];
         ImGui::PushID(data.AbsolutePath.c_str());
 
@@ -461,7 +461,7 @@ void GUI::RenderProjectData(ProjectDataCollection& projectDataCollectionSorted) 
     // Currently, there is only a "Delete" button.
     if (ImGui::BeginPopup(ProjectsTableContextMenuID)) {
         if (ImGui::MenuItem(ProjectsTableContextMenuDeleteButtonText)) {
-            auto search = std::ranges::find_if(projectDataCollection, [this](auto& elem) {
+            auto search = std::ranges::find_if(projectDataCollection, [](auto& elem) {
                 return elem.Name == contextMenuOwner.Name &&
                        elem.AbsolutePath == contextMenuOwner.AbsolutePath &&
                        elem.LastOpened == contextMenuOwner.LastOpened;

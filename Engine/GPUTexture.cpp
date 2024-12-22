@@ -19,7 +19,7 @@ GPUSampler& GPUSampler::operator=(GPUSampler&& other) noexcept {
     return *this;
 }
 
-GPUSamplerBuilder& GPUSamplerBuilder::SetName(std::string_view name) noexcept {
+GPUSamplerBuilder& GPUSamplerBuilder::SetName([[maybe_unused]] std::string_view name) noexcept {
 #ifdef DEBUG
     this->name = name;
 #endif
@@ -107,7 +107,7 @@ GPUTexture& GPUTexture::operator=(GPUTexture&& other) noexcept {
 bool GPUTexture::IsMultisampled() const noexcept { return Samples != Multisample::None; }
 GPUTexture::operator intptr_t() const { return static_cast<intptr_t>(GLObjectID); }
 
-GPUTextureBuilder& GPUTextureBuilder::SetName(std::string_view name) noexcept {
+GPUTextureBuilder& GPUTextureBuilder::SetName([[maybe_unused]] std::string_view name) noexcept {
 #ifdef DEBUG
     this->name = name;
 #endif
