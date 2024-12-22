@@ -36,23 +36,23 @@ for package in "${unique_transitive_dependencies_list[@]}"; do
 
     # Extract packages after "apt install"
     apt_packages=($(echo "$processed_content" | grep -oP 'apt install \K([^\\"]+)' | sed 's/"$//'))
-	for i in "${!apt_packages[@]}"; do
-		# Check if the last character of the element is a dot
-		if [[ ${apt_packages[i]} == *. ]]; then
-			# Remove the trailing dot
-			apt_packages[i]=${apt_packages[i]%.}
-		fi
-	done
+    for i in "${!apt_packages[@]}"; do
+        # Check if the last character of the element is a dot
+        if [[ ${apt_packages[i]} == *. ]]; then
+            # Remove the trailing dot
+            apt_packages[i]=${apt_packages[i]%.}
+        fi
+    done
 
     # Extract packages after "apt-get install"
     apt_get_packages=($(echo "$processed_content" | grep -oP 'apt-get install \K([^.\\"]+)' | sed 's/"$//'))
-	for i in "${!apt_get_packages[@]}"; do
-		# Check if the last character of the element is a dot
-		if [[ ${apt_get_packages[i]} == *. ]]; then
-			# Remove the trailing dot
-			apt_get_packages[i]=${apt_get_packages[i]%.}
-		fi
-	done
+    for i in "${!apt_get_packages[@]}"; do
+        # Check if the last character of the element is a dot
+        if [[ ${apt_get_packages[i]} == *. ]]; then
+            # Remove the trailing dot
+            apt_get_packages[i]=${apt_get_packages[i]%.}
+        fi
+    done
 
     # Output the extracted packages
     if [ -z "$apt_packages" ] && [ -z "$apt_get_packages" ]; then
@@ -109,7 +109,7 @@ if [[ $system_packages_user_choice == "Y" || $system_packages_user_choice == "y"
         fi
         rm aptOutput.log
     done
-	echo "Done. Check for errors."
+    echo "Done. Check for errors."
 else
     echo -e "${RED}YOU WILL HAVE PROBLEMS IF REQUIRED SYSTEM PACKAGES ARE MISSING!${RESET}"
     read -p "Would you still not like to install them? [Y/n]: " system_packages_user_choice
@@ -125,7 +125,7 @@ else
             fi
             rm aptOutput.log
         done
-		echo "Done. Check for errors."
+        echo "Done. Check for errors."
     fi
 fi
 }
@@ -139,20 +139,20 @@ RESET="\033[0m"
 
 # List of package names (real packages from vcpkg.sh)
 package_names=(
-    "angelscript[addons]" 
-    "argparse" 
-    "assimp" 
-    "cppzmq" 
-    "entt" 
-    "eventpp" 
-    "glew" 
-    "glfw3" 
-    "glm" 
-    "icu" 
-    "imgui[core,docking-experimental,glfw-binding,sdl2-binding,opengl3-binding,vulkan-binding]" 
-    "imguizmo" 
-    "lunasvg" 
-    "stb" 
+    "angelscript[addons]"
+    "argparse"
+    "assimp"
+    "cppzmq"
+    "entt"
+    "eventpp"
+    "glew"
+    "glfw3"
+    "glm"
+    "icu"
+    "imgui[core,docking-experimental,glfw-binding,sdl2-binding,opengl3-binding,vulkan-binding]"
+    "imguizmo"
+    "lunasvg"
+    "stb"
     "tinyxml2"
 )
 
@@ -218,8 +218,8 @@ if [ -d "$path" ]; then
 
     ensure_system_packages
     echo
-	
-	# Install required packages
+
+    # Install required packages
     echo -e "${WHITE}Installing required vcpkg packages...${RESET}"
     ./vcpkg install "${package_names[@]}" --recurse 2>&1 | tee installOutput.log
     if [ ${PIPESTATUS[0]} -ne 0 ]; then
