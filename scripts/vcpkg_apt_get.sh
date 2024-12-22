@@ -95,14 +95,7 @@ echo
 echo -e "Installing..."
 sudo apt update
 for package in "${unique_required_system_packages[@]}"; do
-	_=$(sudo apt install ${package} -y -qq 2>&1 | tee aptOutput.log)
-	if [ ${PIPESTATUS[0]} -ne 0 ]; then
-		echo -e "${RED}Error during system package installation with apt.${RESET}"
-		cat aptOutput.log
-		rm aptOutput.log
-		cd ..
-	fi
-	rm aptOutput.log
+	sudo apt-get install ${package} -y -qq > /dev/null
 done
 echo "Done. Check for errors."
 }
@@ -163,29 +156,13 @@ if [ -d "$path" ]; then
     cd "$path"
 
     echo -e "${WHITE}Pulling latest vcpkg changes...${RESET}"
-    git pull 2>&1 | tee pullOutput.log
-    if [ ${PIPESTATUS[0]} -ne 0 ]; then
-        echo -e "${RED}Error during git pull.${RESET}"
-        cat pullOutput.log
-        rm pullOutput.log
-        cd ..
-        exit 1
-    fi
-    rm pullOutput.log
+    git pull > /dev/null
     echo
 
     # Run the bootstrap script
     if [ -f "./bootstrap-vcpkg.sh" ]; then
         echo -e "${WHITE}Running bootstrap-vcpkg.sh...${RESET}"
-        ./bootstrap-vcpkg.sh -disableMetrics 2>&1 | tee bootstrapOutput.log
-        if [ ${PIPESTATUS[0]} -ne 0 ]; then
-            echo -e "${RED}Error during bootstrap.${RESET}"
-            cat bootstrapOutput.log
-            rm bootstrapOutput.log
-            cd ..
-            exit 1
-        fi
-        rm bootstrapOutput.log
+        ./bootstrap-vcpkg.sh -disableMetrics > /dev/null
     else
         echo -e "${RED}Bootstrap script not found!${RESET}"
         cd ..
@@ -198,28 +175,12 @@ if [ -d "$path" ]; then
 
     # Install required packages
     echo -e "${WHITE}Installing required vcpkg packages...${RESET}"
-    ./vcpkg install "${package_names[@]}" --recurse 2>&1 | tee installOutput.log
-    if [ ${PIPESTATUS[0]} -ne 0 ]; then
-        echo -e "${RED}Error during vcpkg install.${RESET}"
-        cat installOutput.log
-        rm installOutput.log
-        cd ..
-        exit 1
-    fi
-    rm installOutput.log
+    ./vcpkg install "${package_names[@]}" --recurse > /dev/null
     echo
 
     # Update required packages
     echo -e "${WHITE}Updating required vcpkg packages...${RESET}"
-    ./vcpkg upgrade --no-dry-run 2>&1 | tee updateOutput.log
-    if [ ${PIPESTATUS[0]} -ne 0 ]; then
-        echo -e "${RED}Error during vcpkg update.${RESET}"
-        cat updateOutput.log
-        rm updateOutput.log
-        cd ..
-        exit 1
-    fi
-    rm updateOutput.log
+    ./vcpkg upgrade --no-dry-run > /dev/null
     echo
 else
     # If the directory doesn't exist, go to the parent directory and clone the repo
@@ -227,24 +188,14 @@ else
     echo -e "${WHITE}Changing to parent directory and cloning vcpkg...${RESET}"
     cd "$(dirname "$path")"
     if [ "$clonemode" = "ssh" ]; then
-        git clone git@github.com:microsoft/vcpkg.git "$(basename "$path")" 2>&1 | tee cloneOutput.log
+        git clone git@github.com:microsoft/vcpkg.git "$(basename "$path")" > /dev/null
     elif [ "$clonemode" = "https" ]; then
-        git clone https://github.com/Microsoft/vcpkg.git "$(basename "$path")" 2>&1 | tee cloneOutput.log
+        git clone https://github.com/Microsoft/vcpkg.git "$(basename "$path")" > /dev/null
     else
         echo -e "${RED}Incorrect clonemode! Expected https or ssh, got something else${RESET}"
         cd ..
         exit 1
     fi
-
-    # Check if clone was successful
-    if [ ${PIPESTATUS[0]} -ne 0 ]; then
-        echo -e "${RED}Error during git clone.${RESET}"
-        cat cloneOutput.log
-        rm cloneOutput.log
-        cd ..
-        exit 1
-    fi
-    rm cloneOutput.log
     echo
 
     # Change to the newly cloned vcpkg directory
@@ -253,15 +204,7 @@ else
     # Run the bootstrap script
     if [ -f "./bootstrap-vcpkg.sh" ]; then
         echo -e "${WHITE}Running bootstrap-vcpkg.sh...${RESET}"
-        ./bootstrap-vcpkg.sh -disableMetrics 2>&1 | tee bootstrapOutput.log
-        if [ ${PIPESTATUS[0]} -ne 0 ]; then
-            echo -e "${RED}Error during bootstrap.${RESET}"
-            cat bootstrapOutput.log
-            rm bootstrapOutput.log
-            cd ..
-            exit 1
-        fi
-        rm bootstrapOutput.log
+        ./bootstrap-vcpkg.sh -disableMetrics > /dev/null
     else
         echo -e "${RED}Bootstrap script not found!${RESET}"
         cd ..
@@ -274,29 +217,13 @@ else
 
     # Install required packages
     echo -e "${WHITE}Installing required vcpkg packages...${RESET}"
-    ./vcpkg install "${package_names[@]}" --recurse 2>&1 | tee installOutput.log
-    if [ ${PIPESTATUS[0]} -ne 0 ]; then
-        echo -e "${RED}Error during vcpkg install.${RESET}"
-        cat installOutput.log
-        rm installOutput.log
-        cd ..
-        exit 1
-    fi
-    rm installOutput.log
+    ./vcpkg install "${package_names[@]}" --recurse > /dev/null
     echo
 fi
 
 # Integrate vcpkg
 echo -e "${WHITE}Integrating vcpkg...${RESET}"
-./vcpkg integrate install 2>&1 | tee integrateOutput.log
-if [ ${PIPESTATUS[0]} -ne 0 ]; then
-    echo -e "${RED}Error during vcpkg integrate.${RESET}"
-    cat integrateOutput.log
-    rm integrateOutput.log
-    cd ..
-    exit 1
-fi
-rm integrateOutput.log
+./vcpkg integrate install > /dev/null
 echo
 
 # Notify completion
