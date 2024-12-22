@@ -19,16 +19,16 @@ struct RemoveComponentCommand : GUICommand {
     }
     void Execute() noexcept override {
         assert(gui.HasOpenScene());
-        assert(gui.GetOpenScene().HasComponent<T>(entity));
+        assert(gui.GetOpenScene().template HasComponent<T>(entity));
         assert(!removedComponent.has_value());
-        removedComponent = std::move(gui.GetOpenScene().GetComponent<T>(entity));
-        gui.GetOpenScene().RemoveComponent<T>(entity);
+        removedComponent = std::move(gui.GetOpenScene().template GetComponent<T>(entity));
+        gui.GetOpenScene().template RemoveComponent<T>(entity);
     }
     void UnExecute() noexcept override {
         assert(gui.HasOpenScene());
-        assert(!gui.GetOpenScene().HasComponent<T>(entity));
+        assert(!gui.GetOpenScene().template HasComponent<T>(entity));
         assert(removedComponent.has_value());
-        gui.GetOpenScene().InsertComponent<T>(entity, std::move(removedComponent.value()));
+        gui.GetOpenScene().template InsertComponent<T>(entity, std::move(removedComponent.value()));
     }
 private:
     Entity entity;

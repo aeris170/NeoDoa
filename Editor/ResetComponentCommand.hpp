@@ -21,17 +21,17 @@ struct ResetComponentCommand : GUICommand {
     }
     void Execute() noexcept override {
         assert(gui.HasOpenScene());
-        assert(gui.GetOpenScene().HasComponent<T>(entity));
+        assert(gui.GetOpenScene().template HasComponent<T>(entity));
         assert(!resettedComponent.has_value());
-        T& t = gui.GetOpenScene().GetComponent<T>(entity);
+        T& t = gui.GetOpenScene().template GetComponent<T>(entity);
         resettedComponent = std::move(t);
         t = T(entity);
     }
     void UnExecute() noexcept override {
         assert(gui.HasOpenScene());
-        assert(gui.GetOpenScene().HasComponent<T>(entity));
+        assert(gui.GetOpenScene().template HasComponent<T>(entity));
         assert(resettedComponent.has_value());
-        T& t = gui.GetOpenScene().GetComponent<T>(entity);
+        T& t = gui.GetOpenScene().template GetComponent<T>(entity);
         t = std::move(resettedComponent.value());
     }
 private:
