@@ -92,42 +92,18 @@ for package in "${unique_required_system_packages[@]}"; do
 done
 echo
 
-if [ -z ${system_packages_user_choice} ]; then
-    read -p "Would you like to install them using apt? [Y/n]: " system_packages_user_choice
-fi
-echo
-
-if [[ $system_packages_user_choice == "Y" || $system_packages_user_choice == "y" ]]; then
-    echo -e "Installing..."
-    for package in "${unique_required_system_packages[@]}"; do
-        _=$(sudo apt install ${package} -y -qq 2>&1 | tee aptOutput.log)
-        if [ ${PIPESTATUS[0]} -ne 0 ]; then
-            echo -e "${RED}Error during system package installation with apt.${RESET}"
-            cat aptOutput.log
-            rm aptOutput.log
-            cd ..
-        fi
-        rm aptOutput.log
-    done
-    echo "Done. Check for errors."
-else
-    echo -e "${RED}YOU WILL HAVE PROBLEMS IF REQUIRED SYSTEM PACKAGES ARE MISSING!${RESET}"
-    read -p "Would you still not like to install them? [Y/n]: " system_packages_user_choice
-    if [[ $system_packages_user_choice == "Y" || $system_packages_user_choice == "y" ]]; then
-        echo -e "Installing..."
-        for package in "${unique_required_system_packages[@]}"; do
-            _=$(sudo apt install ${package} -y -qq 2>&1 | tee aptOutput.log)
-            if [ ${PIPESTATUS[0]} -ne 0 ]; then
-                echo -e "${RED}Error during system package installation with apt.${RESET}"
-                cat aptOutput.log
-                rm aptOutput.log
-                cd ..
-            fi
-            rm aptOutput.log
-        done
-        echo "Done. Check for errors."
-    fi
-fi
+echo -e "Installing..."
+for package in "${unique_required_system_packages[@]}"; do
+	_=$(sudo apt install ${package} -y -qq 2>&1 | tee aptOutput.log)
+	if [ ${PIPESTATUS[0]} -ne 0 ]; then
+		echo -e "${RED}Error during system package installation with apt.${RESET}"
+		cat aptOutput.log
+		rm aptOutput.log
+		cd ..
+	fi
+	rm aptOutput.log
+done
+echo "Done. Check for errors."
 }
 
 WHITE="\033[1;37m"

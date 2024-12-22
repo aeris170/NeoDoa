@@ -84,20 +84,13 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-${{ matrix.build_type }}-vcpkg-cache
 
-    - name: Run (Linux-specific) script for apt-get
-      if: runner.os == 'Linux'
-      shell: bash
-      run: |
-        chmod +x ${{ steps.strings.outputs.scripts-dir }}/fetch_apt_get.sh
-        ${{ steps.strings.outputs.scripts-dir }}/fetch_apt_get.sh
-
     # Step for Linux
     - name: Set up dependencies on Linux
       if: runner.os == 'Linux'
       shell: bash
       run: |
         scripts_dir="${{ steps.strings.outputs.scripts-dir }}"
-        vcpkg_script="${scripts_dir}/vcpkg.sh"
+        vcpkg_script="${scripts_dir}/vcpkg_apt_get.sh"
         vcpkg_dir="${{ steps.strings.outputs.vcpkg-dir }}"
         
         # Make the script executable
