@@ -15,6 +15,7 @@ echo
 
 echo -e "Installing essentials..."
 sudo apt-get -qq install -y build-essential clang cmake curl gcc-14 libstdc++-14-dev tar unzip zip
+sudp apt-get -qq install -y libltdl-dev # Undocumented requirement of libxcrypt, Ubuntu CI runner fails without this.
 sudo update-alternatives --set cc $(update-alternatives --list cc | grep clang)
 sudo update-alternatives --set c++ $(update-alternatives --list c++ | grep clang++)
 echo -e "Done."
