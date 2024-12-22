@@ -93,6 +93,10 @@ jobs:
         vcpkg_script="${scripts_dir}/vcpkg_apt_get.sh"
         vcpkg_dir="${{ steps.strings.outputs.vcpkg-dir }}"
         
+        # Update the system packages
+        sudo apt-get update
+        sudo apt-get upgrade -y
+        
         # Make the script executable
         chmod +x "$vcpkg_script"
         

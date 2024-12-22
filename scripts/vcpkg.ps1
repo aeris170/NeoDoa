@@ -57,6 +57,28 @@ if (Test-Path -Path $path) {
         exit 1
     }
     Write-Host
+	
+	# Install required packages (in case there are any missing ones)
+    Write-Host "Installing required vcpkg packages..." -ForegroundColor white -BackgroundColor black
+    $installOutput = Start-Process -FilePath "./vcpkg.exe" -ArgumentList @(
+        'install',
+        'angelscript[addons]',
+        'argparse',
+        'assimp',
+        'cppzmq',
+        'entt',
+        'eventpp',
+        'glew',
+        'glfw3',
+        'glm',
+        'icu',
+        'imgui[core,docking-experimental,glfw-binding,sdl2-binding,opengl3-binding,vulkan-binding]',
+        'imguizmo',
+        'lunasvg',
+        'stb',
+        'tinyxml2',
+        '--recurse'
+    ) -NoNewWindow -Wait -PassThru
 
     # Update required packages
     Write-Host "Updating required vcpkg packages..." -ForegroundColor white -BackgroundColor black

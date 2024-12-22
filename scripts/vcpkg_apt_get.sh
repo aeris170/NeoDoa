@@ -92,12 +92,12 @@ for package in "${unique_required_system_packages[@]}"; do
 done
 echo
 
-echo -e "Installing..."
-sudo apt update
+sudo apt-get -qq update
 for package in "${unique_required_system_packages[@]}"; do
-	sudo apt-get install ${package} -y -qq > /dev/null
+	echo -e "Installing ${package}"
+	sudo apt-get -q install -y ${package}
+	echo -e "Installed ${package} - check for errors"
 done
-echo "Done. Check for errors."
 }
 
 WHITE="\033[1;37m"
@@ -156,13 +156,13 @@ if [ -d "$path" ]; then
     cd "$path"
 
     echo -e "${WHITE}Pulling latest vcpkg changes...${RESET}"
-    git pull > /dev/null
+    git pull
     echo
 
     # Run the bootstrap script
     if [ -f "./bootstrap-vcpkg.sh" ]; then
         echo -e "${WHITE}Running bootstrap-vcpkg.sh...${RESET}"
-        ./bootstrap-vcpkg.sh -disableMetrics > /dev/null
+        ./bootstrap-vcpkg.sh -disableMetrics
     else
         echo -e "${RED}Bootstrap script not found!${RESET}"
         cd ..
@@ -173,14 +173,14 @@ if [ -d "$path" ]; then
     ensure_system_packages
     echo
 
-    # Install required packages
+	# Install required packages (in case there are any missing ones)
     echo -e "${WHITE}Installing required vcpkg packages...${RESET}"
-    ./vcpkg install "${package_names[@]}" --recurse > /dev/null
+    ./vcpkg install "${package_names[@]}" --recurse
     echo
 
     # Update required packages
     echo -e "${WHITE}Updating required vcpkg packages...${RESET}"
-    ./vcpkg upgrade --no-dry-run > /dev/null
+    ./vcpkg upgrade --no-dry-run
     echo
 else
     # If the directory doesn't exist, go to the parent directory and clone the repo
@@ -188,9 +188,9 @@ else
     echo -e "${WHITE}Changing to parent directory and cloning vcpkg...${RESET}"
     cd "$(dirname "$path")"
     if [ "$clonemode" = "ssh" ]; then
-        git clone git@github.com:microsoft/vcpkg.git "$(basename "$path")" > /dev/null
+        git clone git@github.com:microsoft/vcpkg.git "$(basename "$path")"
     elif [ "$clonemode" = "https" ]; then
-        git clone https://github.com/Microsoft/vcpkg.git "$(basename "$path")" > /dev/null
+        git clone https://github.com/Microsoft/vcpkg.git "$(basename "$path")"
     else
         echo -e "${RED}Incorrect clonemode! Expected https or ssh, got something else${RESET}"
         cd ..
@@ -204,7 +204,7 @@ else
     # Run the bootstrap script
     if [ -f "./bootstrap-vcpkg.sh" ]; then
         echo -e "${WHITE}Running bootstrap-vcpkg.sh...${RESET}"
-        ./bootstrap-vcpkg.sh -disableMetrics > /dev/null
+        ./bootstrap-vcpkg.sh -disableMetrics
     else
         echo -e "${RED}Bootstrap script not found!${RESET}"
         cd ..
@@ -217,13 +217,13 @@ else
 
     # Install required packages
     echo -e "${WHITE}Installing required vcpkg packages...${RESET}"
-    ./vcpkg install "${package_names[@]}" --recurse > /dev/null
+    ./vcpkg install "${package_names[@]}" --recurse
     echo
 fi
 
 # Integrate vcpkg
 echo -e "${WHITE}Integrating vcpkg...${RESET}"
-./vcpkg integrate install > /dev/null
+./vcpkg integrate install
 echo
 
 # Notify completion
