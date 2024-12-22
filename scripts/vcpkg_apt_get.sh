@@ -93,6 +93,7 @@ done
 echo
 
 echo -e "Installing..."
+sudo apt update
 for package in "${unique_required_system_packages[@]}"; do
 	_=$(sudo apt install ${package} -y -qq 2>&1 | tee aptOutput.log)
 	if [ ${PIPESTATUS[0]} -ne 0 ]; then
