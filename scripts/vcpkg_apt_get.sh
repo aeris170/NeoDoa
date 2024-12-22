@@ -95,7 +95,7 @@ echo
 sudo apt-get -qq update
 for package in "${unique_required_system_packages[@]}"; do
 	echo -e "Installing ${package}"
-	sudo apt-get -q install -y ${package}
+	sudo apt-get -qq install -y ${package}
 	echo -e "Installed ${package} - check for errors"
 done
 }
