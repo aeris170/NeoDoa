@@ -90,6 +90,7 @@ jobs:
       shell: bash
       run: |
         scripts_dir="${{ steps.strings.outputs.scripts-dir }}"
+        deb_setup_script="${scripts_dir}/deb_setup.sh"
         vcpkg_script="${scripts_dir}/vcpkg_apt_get.sh"
         vcpkg_dir="${{ steps.strings.outputs.vcpkg-dir }}"
         
@@ -97,8 +98,12 @@ jobs:
         sudo apt-get update
         sudo apt-get upgrade -y
         
-        # Make the script executable
+        # Make the scripts executable
+        chmod +x "$deb_setup_script"
         chmod +x "$vcpkg_script"
+        
+        # Run deb_setup.sh to set-up prerequisite packages and compiler support
+        "$deb_setup_script"
         
         # Run vcpkg.sh with the appropriate triplet
         "$vcpkg_script" https "$vcpkg_dir"
