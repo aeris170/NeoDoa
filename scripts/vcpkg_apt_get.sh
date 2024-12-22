@@ -100,7 +100,7 @@ echo
 if [[ $system_packages_user_choice == "Y" || $system_packages_user_choice == "y" ]]; then
     echo -e "Installing..."
     for package in "${unique_required_system_packages[@]}"; do
-        _=$(sudo apt-get install ${package} -y -qq 2>&1 | tee aptOutput.log)
+        _=$(sudo apt install ${package} -y -qq 2>&1 | tee aptOutput.log)
         if [ ${PIPESTATUS[0]} -ne 0 ]; then
             echo -e "${RED}Error during system package installation with apt.${RESET}"
             cat aptOutput.log
@@ -116,7 +116,7 @@ else
     if [[ $system_packages_user_choice == "Y" || $system_packages_user_choice == "y" ]]; then
         echo -e "Installing..."
         for package in "${unique_required_system_packages[@]}"; do
-            _=$(sudo apt-get install ${package} -y -qq 2>&1 | tee aptOutput.log)
+            _=$(sudo apt install ${package} -y -qq 2>&1 | tee aptOutput.log)
             if [ ${PIPESTATUS[0]} -ne 0 ]; then
                 echo -e "${RED}Error during system package installation with apt.${RESET}"
                 cat aptOutput.log
