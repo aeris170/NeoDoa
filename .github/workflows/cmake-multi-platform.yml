@@ -91,7 +91,7 @@ jobs:
       run: |
         scripts_dir="${{ steps.strings.outputs.scripts-dir }}"
         deb_setup_script="${scripts_dir}/deb_setup.sh"
-        vcpkg_script="${scripts_dir}/vcpkg_apt_get.sh"
+        vcpkg_script="${scripts_dir}/deb_vcpkg.sh"
         vcpkg_dir="${{ steps.strings.outputs.vcpkg-dir }}"
         
         # Update the system packages
