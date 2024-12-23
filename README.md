@@ -1,7 +1,7 @@
 ![NeoDoa](https://user-images.githubusercontent.com/25724155/72576385-9ca35100-38e0-11ea-9f10-5de3852e6df3.png "NeoDoa Logo")
 
 # NeoDoa Game Engine
-**NeoDoa** is a simple, open-source and easy-to-use game engine developed with C++ for high fun game development! NeoDoa uses OpenGL to deliver high performance by hardware accelerating the rendering. 
+**NeoDoa** is a simple, open-source, easy-to-use and performant game engine developed with C++ for high fun game development! 
 <div align="center"> 
 
 ### Leave a ⭐ if you like the project!
@@ -53,19 +53,26 @@
 
 ## How to build
 
+| OS            | Build scripts provided |
+|---------------|:-:|
+| Windows 10/11 |✅|
+| Debian/Ubuntu |✅|
+| openSUSE      |❌ (planned)|
+| Arch          |❌ (planned)|
+
 ### Prerequisites:
  * git 2.40.1 or higher (GIT Bash on Windows)
  * CMake 3.26.4 or higher
- * A C++ compiler with C++23 support (gcc 13.1, clang 17.0.1, MSVC 19.30) or higher
+ * A C++ compiler with C++23 support (clang 18.1.3, MSVC 19.30) or higher
 
 ### Building 
-#### 1. Start by cloning the repository by SSH
+#### 1. Start by cloning the repository by SSH (recommended)
 ``` sh
-git clone git@github.com:aeris170/NeoDoa.git
+git clone --recurse-submodules -j8 git@github.com:aeris170/NeoDoa.git
 ```
 or by HTTPS
 ``` sh
-git clone https://github.com/aeris170/NeoDoa.git
+git clone --recurse-submodules -j8 https://github.com/aeris170/NeoDoa.git
 ```
 
 When cloning is done, go into the cloned folder and initialize submodules
@@ -76,29 +83,7 @@ git submodule update --init
 
 After this, `git pull` should print `Already up to date.` Proceed to the next step.
 
-#### 2. Fetching Required Installations (Linux ONLY)
-
-**If you are using Windows, please skip this step.**
-
-**NeoDoa** requires various installations from `apt-get` to compile. These are listed below:
-> libc++-dev libc++abi-dev
-> build-essential
-> curl zip unzip tar
-> pkg-config
-> libxinerama-dev
-> libxcursor-dev
-> xorg xorg-dev
-> libglu1-mesa libglu1-mesa-dev
-> autoconf autoconf-archive
-> automake libtool libltdl-dev
-
-These can either be install manually or by launching the helper script by executing:
-```sh
-chmod +x ./scripts/fetch_apt_get.sh
-sh ./scripts/fetch_apt_get.sh
-```
-
-#### 3. Fetching Dependencies
+#### 2. Fetching Dependencies
 
 **NeoDoa** uses `vcpkg` to manage packages and depends on packages listed below: 
 > angelscript[addons],
@@ -117,39 +102,38 @@ sh ./scripts/fetch_apt_get.sh
 > stb,
 > tinyxml2
 
-The packages above must be installed by launching the helper script [`vcpkg.sh`](https://github.com/aeris170/NeoDoa/blob/master/scripts/vcpkg.sh) or
-[`vcpkg.ps1`](https://github.com/aeris170/NeoDoa/blob/master/scripts/vcpkg.ps1). The script takes two arguments `clonemode` and `vcpkg-dir`.
+The packages above must be installed. Refer to the table below.
 
-* `clonemode` controls how to clone the `vcpkg` repository. Passing nothing defaults to `ssh`, only `https` and `ssh` are accepted.
+| OS            | How to install dependencies? |
+|---------------|:-:|
+| Windows 10/11 |[`vcpkg.ps1`](https://github.com/aeris170/NeoDoa/blob/master/scripts/vcpkg.ps1)|
+| Debian/Ubuntu |[`deb_vcpkg.sh`](https://github.com/aeris170/NeoDoa/blob/master/scripts/deb_vcpkg.sh)|
+| openSUSE      |Manual via terminal|
+| Arch          |Manual via terminal|
 
-* `vcpkg-dir` controls where to clone the `vcpkg` repository. Passing nothing defaults to `./vcpkg`.
+The scripts mentioned take two arguments `clonemode` and `vcpkg-dir`.
+
+* `clonemode` controls how to clone the `vcpkg` repository. Passing nothing defaults to `ssh`, only `https` and `ssh` are accepted. **`ssh` (default) is recommended.**
+
+* `vcpkg-dir` controls where to clone the `vcpkg` repository. Passing nothing defaults to `./vcpkg`. **`./vcpkg` (default) is recommended.**
+
+Example:
+```sh
+./deb_vcpkg.sh ssh ./vcpkg # Arguments can be omitted, passed defaults
+```
 
 You should see no errors when this scripts completes. If you do, please create an issue [here](https://github.com/aeris170/NeoDoa/issues).
 
-#### 4. Building with CMake
+#### 3. Generating with CMake
 
-Building the makefile (or the Visual Studio Project) should be done with the commands below:
-
-For Windows (Visual Studio Project):
-```sh
-mkdir build
-cd build
-cmake ..
-```
-For Linux:
-```sh
-mkdir build
-cd build
-cmake -DCMAKE_BUILD_TYPE=Release .. # Debug or Release
-```
-
-#### OR
-
-There are also the helper scripts [`cmake.sh`](https://github.com/aeris170/NeoDoa/blob/master/cmake.sh) to execute the commands above.
+Building the makefile (or the Visual Studio Project) could be done by running cmake or by running helper scripts:
+[`cmake.sh`](https://github.com/aeris170/NeoDoa/blob/master/cmake.sh)
+[`cmakeLinuxDebug.sh`](https://github.com/aeris170/NeoDoa/blob/master/cmakeLinuxDebug.sh)
+[`cmakeLinuxRelease.sh`](https://github.com/aeris170/NeoDoa/blob/master/cmakeLinuxRelease.sh)
 
 For Windows (Visual Studio Project):
 ```sh
-sh cmake.sh
+cmake.sh
 ```
 For Linux:
 ```sh
@@ -157,13 +141,13 @@ chmod +x ./cmakeLinuxDebug.sh # cmakeLinuxRelease.sh
 sh cmakeLinuxDebug.sh # OR sh cmakeLinuxRelease.sh
 ```
 
-#### 5. Building!
+#### 4. Building!
 
 If you built to a makefile, what's left is calling `make`
 
 ```sh
 cd build
-make # make -jX    |for X threaded compilation
+make # make -j16
 ```
 
 ---
