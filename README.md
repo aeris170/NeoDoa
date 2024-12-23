@@ -75,32 +75,24 @@ or by HTTPS
 git clone --recurse-submodules -j8 https://github.com/aeris170/NeoDoa.git
 ```
 
-When cloning is done, go into the cloned folder and initialize submodules
-``` sh
-cd NeoDoa
-git submodule update --init
-```
-
-After this, `git pull` should print `Already up to date.` Proceed to the next step.
-
 #### 2. Fetching Dependencies
 
 **NeoDoa** uses `vcpkg` to manage packages and depends on packages listed below: 
-> angelscript[addons],
-> argparse,
-> assimp,
-> cppzmq,
-> entt,
-> eventpp,
-> glew,
-> glfw3,
-> glm,
-> icu,
-> imgui[core,docking-experimental,glfw-binding,sdl2-binding,opengl3-binding,vulkan-binding],
-> imguizmo,
-> lunasvg,
-> stb,
-> tinyxml2
+- angelscript[addons]
+- argparse
+- assimp
+- cppzmq
+- entt
+- eventpp
+- glew
+- glfw3
+- glm
+- icu
+- imgui[core,docking-experimental,glfw-binding,sdl2-binding,opengl3-binding,vulkan-binding,*dx11-binding,dx12-binding*] **(dx11-binding and dx12-binding only installed for Windows 10/11)**
+- imguizmo
+- lunasvg
+- stb
+- tinyxml2
 
 The packages above must be installed. Refer to the table below.
 
