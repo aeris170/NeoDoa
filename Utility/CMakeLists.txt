@@ -39,6 +39,7 @@ set(GROUP_LIST
     "StringTransform.cpp"
     "StringTransform.hpp"
     "TemplateUtilities.hpp"
+	"Tree.hpp"
     "Trim.cpp"
     "Trim.hpp"
     "UndoRedoStack.cpp"
