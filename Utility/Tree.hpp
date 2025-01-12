@@ -1,5 +1,7 @@
 #pragma once
 
+#include <queue>
+#include <stack>
 #include <ranges>
 #include <vector>
 #include <cassert>
@@ -9,9 +11,10 @@
 template<typename NodeData, size_t InitialNodeCapacity = 512, size_t InitialChildCapacity = 8>
 struct Tree {
 
-    static constexpr size_t Root = 0;
-
     using NodeIndex = size_t;
+    static constexpr NodeIndex Root = 0;
+    static constexpr NodeIndex Invalid = static_cast<NodeIndex>(-1);
+
 
     struct Node {
         NodeData Data;
@@ -119,8 +122,28 @@ struct Tree {
     ChildrenList ChildrenOfNodeAt(const NodeIndex index) const noexcept;
 
     /// <summary>
+    /// Breadth First Searches for the first occurence of a node with supplied data on subtree with root with index parent.
+    /// Returns the index of the first occurence or Tree<NodeData>::Invalid
+    /// Precondition: NodeData is equality comparable.
+    ///               A node at parent is present.
+    /// Postcondition: None.
+    /// </summary>
+    NodeIndex FindNodeIndexBFS(const NodeData& data, const NodeIndex parent = Root) const noexcept requires(std::equality_comparable<NodeData>);
+
+    /// <summary>
+    /// Depth First Searches for the first occurence of a node with supplied data on subtree with root with index parent.
+    /// Returns the index of the first occurence or Tree<NodeData>::Invalid
+    /// Precondition: NodeData is equality comparable.
+    ///               A node at parent is present.
+    /// Postcondition: None.
+    /// </summary>
+    NodeIndex FindNodeIndexDFS(const NodeData& data, const NodeIndex parent = Root) const noexcept requires(std::equality_comparable<NodeData>);
+
+    /// <summary>
+    /// Removes the subtree with root with supplied index.
+    /// Special case for index == Root, only Root node remains.
     /// Precondition: A node at index is present.
-    /// Postcondition: Node at index and it's children are deleted. If index == Root, only Root node remains.
+    /// Postcondition: Node at index and it's children aren't present.
     /// </summary>
     void DeleteNode(const NodeIndex index) noexcept;
 
@@ -199,7 +222,50 @@ inline auto Tree<NodeData, InitialNodeCapacity, InitialChildCapacity>::ChildrenO
 template<typename NodeData, size_t InitialNodeCapacity, size_t InitialChildCapacity>
 inline auto Tree<NodeData, InitialNodeCapacity, InitialChildCapacity>::ChildrenOfNodeAt(const NodeIndex index) const noexcept -> ChildrenList {
     assert(index < data.size());
-    return ChildrenList(*this, data[index].Children);
+    return ChildrenList(const_cast<Tree<NodeData, InitialNodeCapacity, InitialChildCapacity>&>(*this), data[index].Children);
+}
+
+template<typename NodeData, size_t InitialNodeCapacity, size_t InitialChildCapacity>
+inline auto Tree<NodeData, InitialNodeCapacity, InitialChildCapacity>::FindNodeIndexBFS(const NodeData& data, const NodeIndex parent) const noexcept -> NodeIndex requires(std::equality_comparable<NodeData>) {
+    assert(parent < this->data.size());
+
+    std::queue<NodeIndex> q;
+    q.push(parent);
+
+    while (!q.empty()) {
+        NodeIndex nodeIndex = q.front();
+        if (this->data[nodeIndex].Data == data) {
+            return nodeIndex;
+        }
+        q.pop();
+
+        for (const auto& childIndex : this->data[nodeIndex].Children) {
+            q.push(childIndex);
+        }
+    }
+
+    return Invalid;
+}
+template<typename NodeData, size_t InitialNodeCapacity, size_t InitialChildCapacity>
+inline auto Tree<NodeData, InitialNodeCapacity, InitialChildCapacity>::FindNodeIndexDFS(const NodeData& data, const NodeIndex parent) const noexcept -> NodeIndex requires(std::equality_comparable<NodeData>) {
+    assert(parent < this->data.size());
+
+    std::stack<NodeIndex> s;
+    s.push(parent);
+
+    while (!s.empty()) {
+        NodeIndex nodeIndex = s.top();
+        if (this->data[nodeIndex].Data == data) {
+            return nodeIndex;
+        }
+        s.pop();
+
+        for (const auto& childIndex : this->data[nodeIndex].Children) {
+            s.push(childIndex);
+        }
+    }
+
+    return Invalid;
 }
 
 template<typename NodeData, size_t InitialNodeCapacity, size_t InitialChildCapacity>
