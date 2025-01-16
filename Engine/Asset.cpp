@@ -21,6 +21,8 @@ Asset& Asset::operator=(Asset&& other) noexcept {
 UUID Asset::ID() const { return id; }
 FNode& Asset::File() const { return owningManager.get().GetFileOfAsset(id); }
 const AssetData& Asset::Data() const { return owningManager.get().GetDataOfAsset(id); }
+SubAssetList Asset::SubAssets() { return owningManager.get().GetSubAssetsOfAsset(id); }
+const SubAssetList Asset::SubAssets() const { return owningManager.get().GetSubAssetsOfAsset(id); }
 uint64_t Asset::Version() const { return owningManager.get().GetVersionOfAsset(id); }
 
 void Asset::Serialize() { owningManager.get().SerializeAsset(id); }
@@ -50,3 +52,25 @@ const std::vector<std::any>& Asset::WarningMessages() const { return owningManag
 
 bool Asset::HasErrorMessages() const { return owningManager.get().AssetHasErrorMessages(id); }
 const std::vector<std::any>& Asset::ErrorMessages() const { return owningManager.get().GetErrorMessagesOfAsset(id); }
+
+SubAssetList::Iterator::Iterator(Tree<UUID>::ChildrenList::NodeIterator itr, const Assets& owningManager)  noexcept :
+    itr(itr),
+    owningManager(owningManager) {}
+
+SubAssetList::Iterator::reference SubAssetList::Iterator::operator*() const  noexcept { return owningManager.FindAsset(*itr).Value(); }
+SubAssetList::Iterator::pointer SubAssetList::Iterator::operator->() const noexcept { return owningManager.FindAsset(*itr); }
+
+SubAssetList::Iterator& SubAssetList::Iterator::operator++()  noexcept { ++itr; return *this; }
+SubAssetList::Iterator SubAssetList::Iterator::operator++(int) noexcept { Iterator tmp = *this; ++(*this); return tmp; }
+
+SubAssetList::SubAssetList(Tree<UUID>::ChildrenList childrenList, const Assets& owningManager) noexcept :
+    childrenList(childrenList),
+    owningManager(owningManager) {};
+
+Asset& SubAssetList::operator[](std::size_t idx)  noexcept { return owningManager.FindAsset(childrenList[idx]).Value(); }
+const Asset& SubAssetList::operator[](std::size_t idx) const noexcept { return owningManager.FindAsset(childrenList[idx]).Value(); }
+
+SubAssetList::Iterator SubAssetList::begin() noexcept { return Iterator(childrenList.begin(), owningManager); }
+SubAssetList::Iterator SubAssetList::end() noexcept { return Iterator(childrenList.end(), owningManager); }
+
+size_t SubAssetList::size() const  noexcept { return childrenList.size(); }

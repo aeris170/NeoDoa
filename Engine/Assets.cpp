@@ -213,6 +213,16 @@ const AssetData& Assets::GetDataOfAsset(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
     return const_cast<AssetDatabase&>(database).data[uuid];
 }
+SubAssetList Assets::GetSubAssetsOfAsset(const UUID uuid) const noexcept {
+    auto index = database.subAssets.FindNodeIndexBFS(uuid, AssetDatabase::SubAssetTree::Root);
+    if (index == AssetDatabase::SubAssetTree::Invalid) {
+        // No such entry at sub-asset tree? Ok, then it has no sub-assets!
+        // Simply create a ChildrenList with 0 indices (second parameter, this -> {})
+        // and use that "empty" ChildrenList to create SubAssetList.
+        return { AssetDatabase::SubAssetTree::ChildrenList(const_cast<AssetDatabase&>(database).subAssets, {}), *this };
+    }
+    return { database.subAssets.ChildrenOfNodeAt(index), *this};
+}
 uint64_t Assets::GetVersionOfAsset(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
     return const_cast<AssetDatabase&>(database).versions[uuid];

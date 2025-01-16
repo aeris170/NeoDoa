@@ -9,6 +9,7 @@
 
 #include <entt/entt.hpp>
 
+#include <Utility/Tree.hpp>
 #include <Utility/AdjacencyList.hpp>
 #include <Utility/TemplateUtilities.hpp>
 
@@ -25,15 +26,14 @@
 #include <Engine/Shader.hpp>
 #include <Engine/Material.hpp>
 #include <Engine/FrameBuffer.hpp>
-//#include "Script.hpp"
-//#include "Model.hpp"
 
 struct Assets;
+struct SubAssetList;
 struct AssetGPUBridge;
 
 #define ASSET_TYPE Scene, Component, Sampler, Texture, Shader, ShaderProgram, Material, FrameBuffer/*, Model*/
 template<typename T>
-concept AssetType = concepts::IsAnyOf<T, ASSET_TYPE>&& concepts::Copyable<T>&& concepts::Serializable<T>&& std::movable<T>;
+concept AssetType = concepts::IsAnyOf<T, ASSET_TYPE> && concepts::Copyable<T> && concepts::Serializable<T> && std::movable<T>;
 using AssetData = std::variant<std::monostate, ASSET_TYPE>;
 #undef ASSET_TYPE
 
@@ -53,6 +53,8 @@ struct Asset final {
     T& DataAs();
     template<AssetType T>
     const T& DataAs() const;
+    SubAssetList SubAssets();
+    const SubAssetList SubAssets() const;
     uint64_t Version() const;
 
     void Serialize();
@@ -117,6 +119,45 @@ private:
     Asset* _asset;
 };
 
+// Zero overhead facade into Tree<UUID>::ChildrenList. Tree<UUID> is how NeoDoa stores sub-asset
+// relationships. Tree<UUID> provides ChildrenList as the way to retrieve "children" of tree nodes.
+// SubAssetList converts UUID (of children) into easily usable Asset&. Designed to have zero overhead.
+struct SubAssetList {
+    struct Iterator {
+        using iterator_category = std::forward_iterator_tag;
+        using difference_type = std::ptrdiff_t;
+        using value_type = Asset;
+        using pointer = AssetHandle;
+        using reference = value_type&;
+
+        Iterator(Tree<UUID>::ChildrenList::NodeIterator itr, const Assets& owningManager) noexcept;
+
+        reference operator*() const noexcept;
+        pointer operator->() const noexcept;
+        Iterator& operator++() noexcept;
+        Iterator operator++(int) noexcept;
+        friend bool operator==(const Iterator& a, const Iterator& b) noexcept { return a.itr == b.itr; }
+
+    private:
+        Tree<UUID>::ChildrenList::NodeIterator itr;
+        const Assets& owningManager;
+    };
+
+    SubAssetList(Tree<UUID>::ChildrenList childrenList, const Assets& owningManager) noexcept;
+
+    Asset& operator[](std::size_t idx) noexcept;
+    const Asset& operator[](std::size_t idx) const noexcept;
+
+    Iterator begin() noexcept;
+    Iterator end() noexcept;
+
+    size_t size() const noexcept;
+
+private:
+    Tree<UUID>::ChildrenList childrenList;
+    const Assets& owningManager;
+};
+
 /* Data-Oriented Asset Database Layout */
 struct AssetDatabase {
 #if DEBUG
@@ -128,6 +169,7 @@ struct AssetDatabase {
 #else
 #error "Neither DEBUG nor NDEBUG are defined!"
 #endif
+    using SubAssetTree = Tree<UUID>;
 
     Asset& operator[](size_t index) noexcept;
     const Asset& operator[](size_t index) const noexcept;
@@ -158,6 +200,7 @@ private:
     UUIDMap<std::vector<std::any>> infoLists{};
     UUIDMap<std::vector<std::any>> warningLists{};
     UUIDMap<std::vector<std::any>> errorLists{};
+    SubAssetTree subAssets{ UUID::Empty() };
 
     friend struct Assets;
 };
@@ -244,6 +287,7 @@ struct Assets {
         assert(database.data.contains(uuid));
         return std::get<T>((*const_cast<AssetDatabase::UUIDMap<AssetData>*>(&database.data))[uuid]);
     }
+    SubAssetList GetSubAssetsOfAsset(const UUID uuid) const noexcept;
     uint64_t GetVersionOfAsset(const UUID uuid) const noexcept;
 
     void SerializeAsset(const UUID uuid) noexcept;
