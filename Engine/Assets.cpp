@@ -19,6 +19,8 @@
 #include <Engine/MaterialDeserializer.hpp>
 #include <Engine/FrameBufferSerializer.hpp>
 #include <Engine/FrameBufferDeserializer.hpp>
+#include <Engine/ModelSerializer.hpp>
+#include <Engine/ModelDeserializer.hpp>
 
 AssetHandle::AssetHandle() noexcept :
     _asset(nullptr) {}
@@ -173,6 +175,7 @@ void Assets::DeleteAsset(const UUID uuid) noexcept {
     std::erase(materialAssets, uuid);
     std::erase(textureAssets, uuid);
     std::erase(frameBufferAssets, uuid);
+    std::erase(modelAssets, uuid);
 
     dependencyGraph.RemoveVertex(uuid);
 
@@ -281,6 +284,13 @@ void Assets::SerializeAsset(const UUID uuid) noexcept {
         file->ModifyContent(std::move(serializedData));
         file->DisposeContent();
     }
+    if (IsModelAsset(uuid)) {
+        // TODO oof...
+        //std::string serializedData;
+        //serializedData = SerializeModel(GetDataOfAssetAs<Model>(uuid));
+        //file->ModifyContent(std::move(serializedData));
+        //file->DisposeContent();
+    }
 }
 void Assets::DeserializeAsset(const UUID uuid) noexcept {
     assert(database.Contains(uuid));
@@ -315,19 +325,15 @@ void Assets::DeserializeAsset(const UUID uuid) noexcept {
     }
     if (IsSamplerAsset(uuid)) {
         SamplerDeserializationResult result = DeserializeSampler(*file);
-        if (result.erred) {
-            for (auto& error : result.errors) {
-                errorList.emplace_back(std::move(error));
-            }
+        for (auto& error : result.errors) {
+            errorList.emplace_back(std::move(error));
         }
         data = std::move(result.deserializedSampler);
     }
     if (IsTextureAsset(uuid)) {
         TextureDeserializationResult result = DeserializeTexture(*file);
-        if (result.erred) {
-            for (auto& error : result.errors) {
-                errorList.emplace_back(std::move(error));
-            }
+        for (auto& error : result.errors) {
+            errorList.emplace_back(std::move(error));
         }
         data = std::move(result.deserializedTexture);
     }
@@ -351,8 +357,8 @@ void Assets::DeserializeAsset(const UUID uuid) noexcept {
         if (Assets::IsComputeShaderFile(*file)) {
             result = DeserializeComputeShader(*file);
         }
-        for (auto& message : result.errors) {
-            errorList.emplace_back(std::move(message));
+        for (auto& error : result.errors) {
+            errorList.emplace_back(std::move(error));
         }
         data = std::move(result.deserializedShader);
     }
@@ -381,6 +387,35 @@ void Assets::DeserializeAsset(const UUID uuid) noexcept {
         }
         data = std::move(result.deserializedFrameBuffer);
     }
+    if (IsModelAsset(uuid)) {
+        /*
+        ModelDeserializationResult result = DeserializeModel(*file);
+        for (auto& error : result.errors) {
+            errorList.emplace_back(std::move(error));
+        }
+        data = std::move(result.deserializedModel);
+
+        auto index = database.subAssets.EmplaceNode(AssetDatabase::SubAssetTree::Root, uuid);
+        for (auto& mesh : result.deserializedMeshes) {
+            UUID meshID = GenerateUUID();
+            database.Emplace(meshID, file, *this);
+            database.data[meshID] = std::move(mesh);
+            database.subAssets.EmplaceNode(index, meshID);
+        }
+        for (auto& material : result.deserializedMaterials) {
+            UUID materialID = GenerateUUID();
+            database.Emplace(materialID, file, *this);
+            database.data[materialID] = std::move(material);
+            database.subAssets.EmplaceNode(index, materialID);
+        }
+        for (auto& texture : result.deserializedTextures) {
+            UUID textureID = GenerateUUID();
+            database.Emplace(textureID, file, *this);
+            database.data[textureID] = std::move(texture);
+            database.subAssets.EmplaceNode(index, textureID);
+        }
+        */
+    }
     /*
     * TODO others
     */
@@ -395,6 +430,7 @@ void Assets::DeserializeAsset(const UUID uuid) noexcept {
     if (IsShaderProgramAsset(uuid)) { PerformPostDeserializationAction<ShaderProgram>(uuid); }
     if (IsMaterialAsset(uuid)) { PerformPostDeserializationAction<Material>(uuid); }
     if (IsFrameBufferAsset(uuid)) { PerformPostDeserializationAction<FrameBuffer>(uuid); }
+    if (IsModelAsset(uuid)) { PerformPostDeserializationAction<Model>(uuid); }
 
     if (dependencyGraph.HasVertex(uuid)) {
         auto edgeVertices = dependencyGraph.GetIncomingEdgesOf(uuid);
@@ -509,11 +545,11 @@ const Assets::UUIDCollection& Assets::ScriptAssetIDs()              const noexce
 const Assets::UUIDCollection& Assets::SamplerAssetIDs()             const noexcept { return samplerAssets;             }
 const Assets::UUIDCollection& Assets::TextureAssetIDs()             const noexcept { return textureAssets;             }
 const Assets::UUIDCollection& Assets::ComponentDefinitionAssetIDs() const noexcept { return componentDefinitionAssets; }
-const Assets::UUIDCollection& Assets::ModelAssetIDs()               const noexcept { return modelAssets;               }
 const Assets::UUIDCollection& Assets::ShaderAssetIDs()              const noexcept { return shaderAssets;              }
 const Assets::UUIDCollection& Assets::ShaderProgramAssetIDs()       const noexcept { return shaderProgramAssets;       }
 const Assets::UUIDCollection& Assets::MaterialAssetIDs()            const noexcept { return materialAssets;            }
 const Assets::UUIDCollection& Assets::FrameBufferAssetIDs()         const noexcept { return frameBufferAssets;         }
+const Assets::UUIDCollection& Assets::ModelAssetIDs()               const noexcept { return modelAssets;               }
 
 const AssetGPUBridge& Assets::GPUBridge() const noexcept { return bridge; }
 
@@ -533,6 +569,7 @@ void Assets::ReimportAll() noexcept {
     samplerAssets.clear();
     textureAssets.clear();
     frameBufferAssets.clear();
+    modelAssets.clear();
 
     _root.children.clear();
     dependencyGraph.Clear();
@@ -551,6 +588,7 @@ void Assets::EnsureDeserialization() noexcept {
     Deserialize(shaderProgramAssets);
     Deserialize(materialAssets);
     Deserialize(frameBufferAssets);
+    Deserialize(modelAssets);
 
     ReBuildDependencyGraph();
 }
@@ -566,6 +604,15 @@ void Assets::TryDeleteDependencyBetween(UUID dependent, UUID dependency) noexcep
     }
 }
 
+UUID Assets::GenerateUUID() const noexcept {
+    UUID uuid{};
+    while (database.Contains(uuid) || uuid == UUID::Empty()) {
+        // collision detected! generate new UUID
+        uuid = UUID();
+    }
+    return uuid;
+}
+
 std::pair<UUID, AssetHandle> Assets::ImportFile(AssetDatabase& database, const FNode& file) noexcept {
     /* Import a file:
         * Step 1: Get the sibling file: fileName.fileExtension.id
@@ -578,7 +625,6 @@ std::pair<UUID, AssetHandle> Assets::ImportFile(AssetDatabase& database, const F
         (this is no longer the case, as we have dependencies between assets
         eg. Scene depends on ComponentDefinition or Material depends on Program, Program depends on Shader etc.)
         * Step 8: Separate imported asset to its own subcategory (and put it into allAssets list)
-        * Step 9: Set ownself as imported asset's Observer and return
     */
     if (IsProjectFile(file)) { return { UUID::Empty(), nullptr }; }
     if (file.IsDirectory()) { return { UUID::Empty(), nullptr }; }
@@ -599,7 +645,7 @@ std::pair<UUID, AssetHandle> Assets::ImportFile(AssetDatabase& database, const F
         printer.PushComment("WARNING!! This file is not for editing! Don't!");
         printer.OpenElement("importData");
         printer.OpenElement("uuid");
-        printer.PushText(UUID());
+        printer.PushText(GenerateUUID());
         printer.CloseElement();
         printer.CloseElement();
 
@@ -661,6 +707,9 @@ std::pair<UUID, AssetHandle> Assets::ImportFile(AssetDatabase& database, const F
         }
         if (asset.IsFrameBuffer()) {
             frameBufferAssets.push_back(uuid);
+        }
+        if (asset.IsModel()) {
+            modelAssets.push_back(uuid);
         }
 
         dependencyGraph.AddVertex(uuid);
@@ -754,6 +803,7 @@ void Assets::ReBuildDependencyGraph() noexcept {
             }
         }
         if (asset.IsFrameBuffer()) {}
+        if (asset.IsModel()) {}
     }
 }
 
@@ -771,6 +821,7 @@ void Assets::DeleteOtherResourcesCorrespondingToDeletedAsset(const UUID uuid) no
     if (IsShaderProgramAsset(uuid))       { bridge.GetShaderPrograms().Deallocate(uuid); }
     if (IsMaterialAsset(uuid))            {                                              }
     if (IsFrameBufferAsset(uuid))         { bridge.GetFrameBuffers().Deallocate(uuid);   }
+    if (IsModelAsset(uuid))               {                                              }
 }
 
 template<>
@@ -1081,3 +1132,7 @@ void Assets::PerformPostDeserializationAction<FrameBuffer>(const UUID uuid) noex
         errorMessages.emplace_back(std::move(message));
     }
 }
+template<>
+void Assets::PerformPostDeserializationAction<Model>(const UUID uuid) noexcept {
+}
+

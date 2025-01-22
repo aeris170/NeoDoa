@@ -26,12 +26,13 @@
 #include <Engine/Shader.hpp>
 #include <Engine/Material.hpp>
 #include <Engine/FrameBuffer.hpp>
+#include <Engine/Model.hpp>
 
 struct Assets;
 struct SubAssetList;
 struct AssetGPUBridge;
 
-#define ASSET_TYPE Scene, Component, Sampler, Texture, Shader, ShaderProgram, Material, FrameBuffer/*, Model*/
+#define ASSET_TYPE Scene, Component, Sampler, Texture, Shader, ShaderProgram, Material, FrameBuffer, Model
 template<typename T>
 concept AssetType = concepts::IsAnyOf<T, ASSET_TYPE> && concepts::Copyable<T> && concepts::Serializable<T> && std::movable<T>;
 using AssetData = std::variant<std::monostate, ASSET_TYPE>;
@@ -377,15 +378,17 @@ private:
     UUIDCollection samplerAssets{};
     UUIDCollection textureAssets{};
     UUIDCollection componentDefinitionAssets{};
-    UUIDCollection modelAssets{};
     UUIDCollection shaderAssets{};
     UUIDCollection shaderProgramAssets{};
     UUIDCollection materialAssets{};
     UUIDCollection frameBufferAssets{};
+    UUIDCollection modelAssets{};
 
     AdjacencyList<UUID> dependencyGraph{};
 
     AssetGPUBridge& bridge;
+
+    UUID GenerateUUID() const noexcept;
 
     std::pair<UUID, AssetHandle> ImportFile(AssetDatabase& database, const FNode& file) noexcept;
     void ImportAllFiles(AssetDatabase& database, const FNode& root) noexcept;
@@ -420,6 +423,8 @@ template<>
 void Assets::PerformPostDeserializationAction<Material>(const UUID uuid) noexcept;
 template<>
 void Assets::PerformPostDeserializationAction<FrameBuffer>(const UUID uuid) noexcept;
+template<>
+void Assets::PerformPostDeserializationAction<Model>(const UUID uuid) noexcept;
 
 template<AssetType T>
 T& Asset::DataAs() {
