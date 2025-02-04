@@ -13,6 +13,7 @@
 #include <Engine/GPUShader.hpp>
 #include <Engine/GPUTexture.hpp>
 #include <Engine/GPUFrameBuffer.hpp>
+#include <Engine/GPUBuffer.hpp>
 
 struct AssetGPUBridge;
 
@@ -86,6 +87,7 @@ ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUShaders, GPUShader, ShaderCompilerMessage);
 ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUShaderPrograms, GPUShaderProgram, ShaderLinkerMessage);
 ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUSamplers, GPUSampler, SamplerAllocatorMessage);
 ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUTextures, GPUTexture, TextureAllocatorMessage); ND_EXPLICIT_SPECIALIZE_ALLOCATOR_SPECIALIZE_MISSING(GPUTextures, GPUTexture);
+ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUBuffers, GPUBuffer, BufferAllocatorMessage);
 #undef ND_EXPLICIT_SPECIALIZE_ALLOCATOR
 #undef ND_EXPLICIT_SPECIALIZE_ALLOCATOR_SPECIALIZE_MISSING
 
@@ -101,6 +103,8 @@ struct AssetGPUBridge {
     const GPUShaderPrograms& GetShaderPrograms() const noexcept;
     GPUFrameBuffers& GetFrameBuffers() noexcept;
     const GPUFrameBuffers& GetFrameBuffers() const noexcept;
+    GPUBuffers& GetBuffers() noexcept;
+    const GPUBuffers& GetBuffers() const noexcept;
 
     void Clear() noexcept;
 
@@ -110,6 +114,7 @@ private:
     GPUShaders gpuShaders{ *this };
     GPUShaderPrograms gpuShaderPrograms{ *this };
     GPUFrameBuffers gpuFrameBuffers{ *this };
+    GPUBuffers gpuBuffers{ *this };
 
 public:
     AssetGPUBridge() noexcept = default;

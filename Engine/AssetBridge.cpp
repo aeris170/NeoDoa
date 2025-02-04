@@ -295,6 +295,26 @@ const GPUTexture& GPUTextures::Missing() const noexcept {
     return missing;
 }
 
+// GPUBuffer
+template<>
+std::vector<BufferAllocatorMessage> GPUBuffers::Allocate(const Assets& assets, const UUID asset) noexcept {
+    AssetHandle handle{ assets.FindAsset(asset) };
+    assert(handle && handle->IsMesh());
+    const Mesh& mesh{ handle->DataAs<Mesh>() };
+
+    GPUBufferBuilder builder;
+    builder.SetName(mesh.Name)
+        .SetStorage(std::as_bytes(std::span{ mesh.Vertices }));
+
+    auto [gpuBuffer, messages] = builder.Build();
+    if (gpuBuffer.has_value()) {
+        database[asset] = std::move(gpuBuffer.value());
+    } else {
+        DOA_LOG_ERROR("Buffer allocation failed for %s (UUID: %s). Aborting.", mesh.Name.c_str(), asset.AsString().c_str());
+    }
+    return messages;
+}
+
 GPUSamplers& AssetGPUBridge::GetSamplers() noexcept                         { return gpuSamplers;       }
 const GPUSamplers& AssetGPUBridge::GetSamplers() const noexcept             { return gpuSamplers;       }
 GPUTextures& AssetGPUBridge::GetTextures() noexcept                         { return gpuTextures;       }
@@ -305,6 +325,8 @@ GPUShaderPrograms& AssetGPUBridge::GetShaderPrograms() noexcept             { re
 const GPUShaderPrograms& AssetGPUBridge::GetShaderPrograms() const noexcept { return gpuShaderPrograms; }
 GPUFrameBuffers& AssetGPUBridge::GetFrameBuffers() noexcept                 { return gpuFrameBuffers;   }
 const GPUFrameBuffers& AssetGPUBridge::GetFrameBuffers() const noexcept     { return gpuFrameBuffers;   }
+GPUBuffers& AssetGPUBridge::GetBuffers() noexcept                           { return gpuBuffers;        }
+const GPUBuffers& AssetGPUBridge::GetBuffers() const noexcept               { return gpuBuffers;        }
 
 void AssetGPUBridge::Clear() noexcept {
     gpuSamplers.Clear();
@@ -312,4 +334,5 @@ void AssetGPUBridge::Clear() noexcept {
     gpuShaders.Clear();
     gpuShaderPrograms.Clear();
     gpuFrameBuffers.Clear();
+    gpuBuffers.Clear();
 }

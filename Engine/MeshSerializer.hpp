@@ -23,6 +23,7 @@ namespace MeshSerializer {
     }
     namespace Indices {
         using SerializeFunction = std::function<void(tinyxml2::XMLPrinter& printer, const Mesh::IndexList& indices)>;
+        using SerializeIndexFunction = std::function<void(tinyxml2::XMLPrinter& printer, const Mesh::IndexList::value_type& index)>;
     }
 
 
@@ -37,23 +38,20 @@ namespace MeshSerializer {
     }
     namespace Indices {
         void DefaultSerialize(tinyxml2::XMLPrinter& printer, const Mesh::IndexList& indices);
+        void DefaultSerializeIndex(tinyxml2::XMLPrinter& printer, const Mesh::IndexList::value_type& index);
     }
 
 
     /* ----- Serializer Functions ----- */
-    inline HeaderCommentFunction HeaderComment{ DefaultHeaderComment }; /* Feel free to assign this your own function, if you need custom serialization */
-    inline SerializeFunction Serialize{ DefaultSerialize };             /* Feel free to assign this your own function, if you need custom serialization */
-    inline SerializeNameFunction SerializeName{ DefaultSerializeName }; /* Feel free to assign this your own function, if you need custom serialization */
+    inline HeaderCommentFunction HeaderComment{ DefaultHeaderComment };           /* Feel free to assign this your own function, if you need custom serialization */
+    inline SerializeFunction Serialize{ DefaultSerialize };                       /* Feel free to assign this your own function, if you need custom serialization */
+    inline SerializeNameFunction SerializeName{ DefaultSerializeName };           /* Feel free to assign this your own function, if you need custom serialization */
     namespace Vertices {
-        inline SerializeFunction Serialize{ DefaultSerialize };
-        inline SerializeVertexFunction SerializeVertex{ DefaultSerializeVertex };
+        inline SerializeFunction Serialize{ DefaultSerialize };                   /* Feel free to assign this your own function, if you need custom deserialization */
+        inline SerializeVertexFunction SerializeVertex{ DefaultSerializeVertex }; /* Feel free to assign this your own function, if you need custom deserialization */
     }
     namespace Indices {
-        inline SerializeFunction Serialize{ DefaultSerialize };
+        inline SerializeFunction Serialize{ DefaultSerialize };                   /* Feel free to assign this your own function, if you need custom deserialization */
+        inline SerializeIndexFunction SerializeIndex{ DefaultSerializeIndex };    /* Feel free to assign this your own function, if you need custom deserialization */
     }
-}
-
-/* Some Helper functions to trivially serialize (not-so) trivial data types */
-namespace MeshSerializer::Helpers {
-
 }

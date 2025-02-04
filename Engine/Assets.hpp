@@ -26,13 +26,14 @@
 #include <Engine/Shader.hpp>
 #include <Engine/Material.hpp>
 #include <Engine/FrameBuffer.hpp>
+#include <Engine/Mesh.hpp>
 #include <Engine/Model.hpp>
 
 struct Assets;
 struct SubAssetList;
 struct AssetGPUBridge;
 
-#define ASSET_TYPE Scene, Component, Sampler, Texture, Shader, ShaderProgram, Material, FrameBuffer, Model
+#define ASSET_TYPE Scene, Component, Sampler, Texture, Shader, ShaderProgram, Material, FrameBuffer, Mesh, Model
 template<typename T>
 concept AssetType = concepts::IsAnyOf<T, ASSET_TYPE> && concepts::Copyable<T> && concepts::Serializable<T> && std::movable<T>;
 using AssetData = std::variant<std::monostate, ASSET_TYPE>;
@@ -78,6 +79,7 @@ struct Asset final {
     bool IsMaterial() const noexcept;
     bool IsFrameBuffer() const noexcept;
     bool IsScript() const noexcept;
+    bool IsMesh() const noexcept;
     bool IsModel() const noexcept;
 
     bool HasInfoMessages() const;
@@ -235,6 +237,7 @@ struct Assets {
     inline static std::string ShaderProgramExtension{ ".prog" };
     inline static std::string MaterialExtension{ ".mat" };
     inline static std::string FrameBufferExtension{ ".fbo" };
+    inline static std::string MeshExtension{ ".omf" };
     inline static std::string SCRIPT_EXT{ ".scrpt" };
     inline static std::string MODEL_EXT{ ".mdl" };
     inline static std::string AssetIDExtension{ ".id" };
@@ -254,8 +257,9 @@ struct Assets {
     static bool IsShaderProgramFile(const FNode& file) noexcept;
     static bool IsMaterialFile(const FNode& file) noexcept;
     static bool IsFrameBufferFile(const FNode& file) noexcept;
-    static bool IsScriptFile(const FNode& file) noexcept;
+    static bool IsMeshFile(const FNode& file) noexcept;
     static bool IsModelFile(const FNode& file) noexcept;
+    static bool IsScriptFile(const FNode& file) noexcept;
 
     explicit Assets(const Project& project, AssetGPUBridge& bridge) noexcept;
     ~Assets() = default;
@@ -311,8 +315,9 @@ struct Assets {
     bool IsShaderProgramAsset(const UUID uuid) const noexcept;
     bool IsMaterialAsset(const UUID uuid) const noexcept;
     bool IsFrameBufferAsset(const UUID uuid) const noexcept;
-    bool IsScriptAsset(const UUID uuid) const noexcept;
+    bool IsMeshAsset(const UUID uuid) const noexcept;
     bool IsModelAsset(const UUID uuid) const noexcept;
+    bool IsScriptAsset(const UUID uuid) const noexcept;
 
     bool AssetHasInfoMessages(const UUID uuid) const noexcept;
     const std::vector<std::any>& GetInfoMessagesOfAsset(const UUID uuid) const noexcept;
@@ -332,11 +337,12 @@ struct Assets {
     const UUIDCollection& SamplerAssetIDs() const noexcept;
     const UUIDCollection& TextureAssetIDs() const noexcept;
     const UUIDCollection& ComponentDefinitionAssetIDs() const noexcept;
-    const UUIDCollection& ModelAssetIDs() const noexcept;
     const UUIDCollection& ShaderAssetIDs() const noexcept;
     const UUIDCollection& ShaderProgramAssetIDs() const noexcept;
     const UUIDCollection& MaterialAssetIDs() const noexcept;
     const UUIDCollection& FrameBufferAssetIDs() const noexcept;
+    const UUIDCollection& MeshAssetIDs() const noexcept;
+    const UUIDCollection& ModelAssetIDs() const noexcept;
 
     const AssetGPUBridge& GPUBridge() const noexcept;
 
@@ -374,7 +380,6 @@ private:
 
     UUIDCollection allAssets{};
     UUIDCollection sceneAssets{};
-    UUIDCollection scriptAssets{};
     UUIDCollection samplerAssets{};
     UUIDCollection textureAssets{};
     UUIDCollection componentDefinitionAssets{};
@@ -382,7 +387,9 @@ private:
     UUIDCollection shaderProgramAssets{};
     UUIDCollection materialAssets{};
     UUIDCollection frameBufferAssets{};
+    UUIDCollection meshAssets{};
     UUIDCollection modelAssets{};
+    UUIDCollection scriptAssets{};
 
     AdjacencyList<UUID> dependencyGraph{};
 
@@ -423,6 +430,8 @@ template<>
 void Assets::PerformPostDeserializationAction<Material>(const UUID uuid) noexcept;
 template<>
 void Assets::PerformPostDeserializationAction<FrameBuffer>(const UUID uuid) noexcept;
+template<>
+void Assets::PerformPostDeserializationAction<Mesh>(const UUID uuid) noexcept;
 template<>
 void Assets::PerformPostDeserializationAction<Model>(const UUID uuid) noexcept;
 

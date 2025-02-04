@@ -72,10 +72,13 @@ void MeshSerializer::Indices::DefaultSerialize(tinyxml2::XMLPrinter& printer, co
     printer.OpenElement("indices");
     {
         for (const auto index : indices) {
-            printer.OpenElement("index");
-            printer.PushText(index);
-            printer.CloseElement();
+            SerializeIndex(printer, index);
         }
     }
+    printer.CloseElement();
+}
+void MeshSerializer::Indices::DefaultSerializeIndex(tinyxml2::XMLPrinter& printer, const Mesh::IndexList::value_type& index) {
+    printer.OpenElement("index");
+    printer.PushText(index);
     printer.CloseElement();
 }

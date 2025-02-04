@@ -41,8 +41,9 @@ bool Asset::IsShader()              const noexcept { return owningManager.get().
 bool Asset::IsShaderProgram()       const noexcept { return owningManager.get().IsShaderProgramAsset(id);       }
 bool Asset::IsMaterial()            const noexcept { return owningManager.get().IsMaterialAsset(id);            }
 bool Asset::IsFrameBuffer()         const noexcept { return owningManager.get().IsFrameBufferAsset(id);         }
-bool Asset::IsScript()              const noexcept { return owningManager.get().IsScriptAsset(id);              }
+bool Asset::IsMesh()                const noexcept { return owningManager.get().IsMeshAsset(id);                }
 bool Asset::IsModel()               const noexcept { return owningManager.get().IsModelAsset(id);               }
+bool Asset::IsScript()              const noexcept { return owningManager.get().IsScriptAsset(id);              }
 
 bool Asset::HasInfoMessages() const { return owningManager.get().AssetHasInfoMessages(id); }
 const std::vector<std::any>& Asset::InfoMessages() const { return owningManager.get().GetInfoMessagesOfAsset(id); }
