@@ -536,7 +536,7 @@ bool Assets::IsScriptAsset(const UUID uuid) const noexcept {
 
 bool Assets::AssetHasInfoMessages(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
-    return const_cast<AssetDatabase&>(database).infoLists[uuid].empty();
+    return !const_cast<AssetDatabase&>(database).infoLists[uuid].empty();
 }
 const std::vector<std::any>& Assets::GetInfoMessagesOfAsset(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
@@ -545,7 +545,7 @@ const std::vector<std::any>& Assets::GetInfoMessagesOfAsset(const UUID uuid) con
 
 bool Assets::AssetHasWarningMessages(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
-    return const_cast<AssetDatabase&>(database).warningLists[uuid].empty();
+    return !const_cast<AssetDatabase&>(database).warningLists[uuid].empty();
 }
 const std::vector<std::any>& Assets::GetWarningMessagesOfAsset(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
@@ -554,7 +554,7 @@ const std::vector<std::any>& Assets::GetWarningMessagesOfAsset(const UUID uuid) 
 
 bool Assets::AssetHasErrorMessages(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
-    return const_cast<AssetDatabase&>(database).errorLists[uuid].empty();
+    return !const_cast<AssetDatabase&>(database).errorLists[uuid].empty();
 }
 const std::vector<std::any>& Assets::GetErrorMessagesOfAsset(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
