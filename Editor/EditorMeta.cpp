@@ -16,6 +16,7 @@ EditorMeta::EditorMeta(GUI& gui) noexcept :
     gui.Events.OnProjectLoaded   += std::bind_front(&EditorMeta::OnProjectLoaded,   this);
     gui.Events.OnProjectSaved    += std::bind_front(&EditorMeta::OnProjectSaved,    this);
     gui.Events.OnProjectUnloaded += std::bind_front(&EditorMeta::OnProjectUnloaded, this);
+    gui.Events.OnReimport        += std::bind_front(&EditorMeta::OnReimport,        this);
 }
 
 GUI& EditorMeta::GetEditorGUI() const noexcept { return editorGUI; }
@@ -43,7 +44,7 @@ void EditorMeta::CreateMetaAssetInfoBank() noexcept {
 void EditorMeta::OnProjectLoaded([[maybe_unused]] const Project& project) noexcept {
     static const auto& Core = Core::GetCore();
     const auto& assets = Core->GetAssets();
-    CreateHiddenMetaDataFolderIfNotExists(assets->Root());
+    FindOrCreateHiddenMetaDataFolder(assets->Root());
     CreateMetaAssetInfoBank();
 
     auto current = std::filesystem::current_path();
@@ -60,6 +61,10 @@ void EditorMeta::OnProjectUnloaded() noexcept {
     editorMetaFolder = nullptr;
     metaAssetInfoBank = nullptr;
 }
+void EditorMeta::OnReimport(Assets& assets) noexcept {
+    FindOrCreateHiddenMetaDataFolder(assets.Root());
+    MetaAssetInfoBank::LoadFromDisk(*metaAssetInfoBank.get(), *editorMetaFolder);
+}
 
 #ifdef _WIN64
 // Do not move this include! Windows.h defines a lot of junk and it seeps into other .h files, causing lots of bizarre errors.
@@ -67,7 +72,7 @@ void EditorMeta::OnProjectUnloaded() noexcept {
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #endif
-void EditorMeta::CreateHiddenMetaDataFolderIfNotExists(FNode& root) noexcept {
+void EditorMeta::FindOrCreateHiddenMetaDataFolder(FNode& root) noexcept {
     FNode* folder = root.CreateChildFolderIfNotExists({
         .name = EditorMeta::MetaFolderName
     });

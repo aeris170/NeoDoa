@@ -378,7 +378,6 @@ void GUI::OnSceneClosed() {
     scene = std::nullopt;
 }
 void GUI::OnReimport(Assets& assets) {
-    meta.GetMetaAssetInfoBank().Clear();
     if (sceneUUID != UUID::Empty()) {
         AssetHandle currentSceneHandle = assets.FindAsset(sceneUUID);
         if (!currentSceneHandle.HasValue()) {

@@ -587,6 +587,7 @@ void Assets::ReimportAll() noexcept {
         Events.OnAssetDataDeleted(uuid);
     }
     database.Clear();
+    files.clear();
     allAssets.clear();
     sceneAssets.clear();
     componentDefinitionAssets.clear();
