@@ -55,6 +55,10 @@ struct GUI {
             Event<void()>       OnEntityDeselected{};
         } SceneHierarchy{};
 
+        struct Observer {
+            Event<void(AssetHandle)> OnAssetRefreshed{};
+        } Observer{};
+
         struct AssetManager {
             Event<void(AssetHandle)> OnAssetFocused {};
             Event<void(FNode&)>      OnFolderFocused{};

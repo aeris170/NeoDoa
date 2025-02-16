@@ -113,6 +113,8 @@ GPUPipelineBuilder& GPUPipelineBuilder::SetBlendEnabled(bool enabled) noexcept {
 GPUPipelineBuilder& GPUPipelineBuilder::SetBlendFunction(BlendFactor srcFactor, BlendFactor dstFactor) noexcept {
     srcRGBFactor = srcFactor;
     dstRGBFactor = dstFactor;
+    srcAlphaFactor = srcFactor;
+    dstAlphaFactor = dstFactor;
     return *this;
 }
 GPUPipelineBuilder& GPUPipelineBuilder::SetBlendFunctionSeparate(BlendFactor srcRGBFactor, BlendFactor dstRGBFactor, BlendFactor srcAlphaFactor, BlendFactor dstAlphaFactor) noexcept {

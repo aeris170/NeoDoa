@@ -104,6 +104,8 @@ set(GROUP_LIST
     "UI/GUI/Observer/Displays/FrameBufferDisplay/FrameBufferDisplay.hpp"
     "UI/GUI/Observer/Displays/MaterialDisplay/MaterialDisplay.cpp"
     "UI/GUI/Observer/Displays/MaterialDisplay/MaterialDisplay.hpp"
+	"UI/GUI/Observer/Displays/MeshDisplay/MeshDisplay.cpp"
+	"UI/GUI/Observer/Displays/MeshDisplay/MeshDisplay.hpp"
     "UI/GUI/Observer/Displays/SamplerDisplay/SamplerDisplay.cpp"
     "UI/GUI/Observer/Displays/SamplerDisplay/SamplerDisplay.hpp"
     "UI/GUI/Observer/Displays/SceneDisplay/SceneDisplay.cpp"

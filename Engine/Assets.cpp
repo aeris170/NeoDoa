@@ -1,5 +1,6 @@
 #include <Engine/Assets.hpp>
 
+#include <format>
 #include <string>
 #include <utility>
 
@@ -589,11 +590,11 @@ void Assets::ReimportAll() noexcept {
     allAssets.clear();
     sceneAssets.clear();
     componentDefinitionAssets.clear();
+    samplerAssets.clear();
+    textureAssets.clear();
     shaderAssets.clear();
     shaderProgramAssets.clear();
     materialAssets.clear();
-    samplerAssets.clear();
-    textureAssets.clear();
     frameBufferAssets.clear();
     meshAssets.clear();
     modelAssets.clear();
@@ -607,6 +608,7 @@ void Assets::ReimportAll() noexcept {
 }
 // donkey donk
 void Assets::EnsureDeserialization() noexcept {
+    // ORDER MATTERS
     Deserialize(componentDefinitionAssets);
     Deserialize(sceneAssets);
     Deserialize(textureAssets);
@@ -834,6 +836,7 @@ void Assets::ReBuildDependencyGraph() noexcept {
             }
         }
         if (asset.IsFrameBuffer()) {}
+        if (asset.IsMesh()) {}
         if (asset.IsModel()) {}
     }
 }
@@ -844,16 +847,16 @@ void Assets::DeleteOtherResourcesCorrespondingToDeletedAsset(const UUID uuid) no
     // texture object deletion on GPU. This functionality is performed
     // via AssetGPUBridge.
     if (uuid == UUID::Empty()) { return; }
-    if (IsSceneAsset(uuid))               {                                              }
-    if (IsComponentDefinitionAsset(uuid)) {                                              }
-    if (IsSamplerAsset(uuid))             { bridge.GetSamplers().Deallocate(uuid);       }
-    if (IsTextureAsset(uuid))             { bridge.GetTextures().Deallocate(uuid);       }
-    if (IsShaderAsset(uuid))              { bridge.GetShaders().Deallocate(uuid);        }
-    if (IsShaderProgramAsset(uuid))       { bridge.GetShaderPrograms().Deallocate(uuid); }
-    if (IsMaterialAsset(uuid))            {                                              }
-    if (IsFrameBufferAsset(uuid))         { bridge.GetFrameBuffers().Deallocate(uuid);   }
-    if (IsMeshAsset(uuid))                { bridge.GetBuffers().Deallocate(uuid);        }
-    if (IsModelAsset(uuid))               {                                              }
+    if (IsSceneAsset(uuid))               {                                                                                        }
+    if (IsComponentDefinitionAsset(uuid)) {                                                                                        }
+    if (IsSamplerAsset(uuid))             { bridge.GetSamplers().Deallocate(uuid);                                                 }
+    if (IsTextureAsset(uuid))             { bridge.GetTextures().Deallocate(uuid);                                                 }
+    if (IsShaderAsset(uuid))              { bridge.GetShaders().Deallocate(uuid);                                                  }
+    if (IsShaderProgramAsset(uuid))       { bridge.GetShaderPrograms().Deallocate(uuid);                                           }
+    if (IsMaterialAsset(uuid))            {                                                                                        }
+    if (IsFrameBufferAsset(uuid))         { bridge.GetFrameBuffers().Deallocate(uuid);                                             }
+    if (IsMeshAsset(uuid))                { bridge.GetVertexBuffers().Deallocate(uuid); bridge.GetIndexBuffers().Deallocate(uuid); }
+    if (IsModelAsset(uuid))               {                                                                                        }
 }
 
 template<>
@@ -1166,12 +1169,34 @@ void Assets::PerformPostDeserializationAction<FrameBuffer>(const UUID uuid) noex
 }
 template<>
 void Assets::PerformPostDeserializationAction<Mesh>(const UUID uuid) noexcept {
-    bridge.GetBuffers().Deallocate(uuid);
-    std::vector<BufferAllocatorMessage> messages = bridge.GetBuffers().Allocate(*this, uuid);
+    bridge.GetVertexBuffers().Deallocate(uuid);
+    bridge.GetIndexBuffers().Deallocate(uuid);
+    std::vector<BufferAllocatorMessage> vMessages = bridge.GetVertexBuffers().Allocate(*this, uuid);
+    std::vector<BufferAllocatorMessage> iMessages = bridge.GetIndexBuffers().Allocate(*this, uuid);
 
+    std::vector<std::any>& infoMessages = database.infoLists[uuid];
+    std::vector<std::any>& warningMessages = database.warningLists[uuid];
     std::vector<std::any>& errorMessages = database.errorLists[uuid];
-    for (auto& message : messages) {
+    for (auto& message : vMessages) {
         errorMessages.emplace_back(std::move(message));
+    }
+    for (auto& message : iMessages) {
+        errorMessages.emplace_back(std::move(message));
+    }
+    if (errorMessages.empty()) {
+        Mesh& mesh = GetDataOfAssetAs<Mesh>(uuid);
+
+        infoMessages.emplace_back(std::string("Mesh deserialized successfully."));
+        infoMessages.emplace_back(std::format("\t Vertex Count: {}", mesh.Vertices.size()));
+        infoMessages.emplace_back(std::format("\t\t Vertex Buffer Size: {} bytes (VRAM)", std::span{ mesh.Vertices }.size_bytes()));
+        infoMessages.emplace_back(std::format("\t Index Count: {}", mesh.Indices.size()));
+        infoMessages.emplace_back(std::format("\t\t Index Buffer Size: {} bytes (VRAM)", std::span{ mesh.Indices }.size_bytes()));
+        if (mesh.Indices.empty()) {
+            warningMessages.emplace_back(std::string("Mesh has no index table. This may affect performance."));
+        }
+        if (mesh.Indices.size() % 3 != 0) {
+            warningMessages.emplace_back(std::string("Index count not divisible by 3. Mesh faces might be ill-formed."));
+        }
     }
 }
 template<>

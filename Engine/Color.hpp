@@ -53,6 +53,7 @@ struct Color {
     constexpr explicit Color(const float* data) noexcept : r(data[0]), g(data[1]), b(data[2]), a(data[3]) {}
     constexpr explicit Color(const glm::vec3& color) noexcept : Color(color.r, color.g, color.b) {}
     constexpr explicit Color(const glm::vec4& color) noexcept : Color(color.r, color.g, color.b, color.a) {}
+    constexpr explicit Color(const ImVec4& color) noexcept : Color(color.x, color.y, color.z, color.w) {}
 
     constexpr Color& operator=(const Color& rhs) noexcept = default;
     constexpr bool operator==(const Color& rhs) const { return r == rhs.r && g == rhs.g && b == rhs.b && a == rhs.a; }

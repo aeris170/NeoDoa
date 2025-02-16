@@ -173,9 +173,9 @@ void MeshDeserializer::Indices::DefaultDeserialize(tinyxml2::XMLElement& indices
     }
 }
 void MeshDeserializer::Indices::DefaultDeserializeIndex(tinyxml2::XMLElement& indexElem, MeshDeserializationResult& mdr) {
-    uint64_t index{ std::numeric_limits<uint64_t>::max() };
-    indexElem.QueryUnsigned64Text(&index);
-    if (index == std::numeric_limits<uint64_t>::max()) {
+    Mesh::IndexList::value_type index{ std::numeric_limits<Mesh::IndexList::value_type>::max() };
+    indexElem.QueryUnsignedText(&index);
+    if (index == std::numeric_limits<Mesh::IndexList::value_type>::max()) {
         mdr.erred = true;
         mdr.errors.emplace_back(std::format("Couldn't deserialize index! Line: {}", indexElem.GetLineNum()));
         return;

@@ -243,6 +243,11 @@ namespace FileIcons {
         std::pair{ FRAMEBUFFER_ICON, "gallery-thumbnails" }
     };
 
+    inline constexpr const char MESH_ICON[]{ ICON_FA_CUBE };
+    inline std::array<ElementType, 1> MeshIcons{
+        std::pair{ MESH_ICON, "cube" }
+    };
+
     inline constexpr const char FILE_ICON[]                    { ICON_FA_FILE                    };
     inline constexpr const char FILE_ICON_MULTIPLE[]           { ICON_FA_FILES                   };
     inline constexpr const char FILE_ICON_ARROW_DOWN[]         { ICON_FA_FILE_ARROW_DOWN         };

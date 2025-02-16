@@ -20,7 +20,7 @@ struct Mesh {
         //std::array<float, MAX_BONE_PER_VERTEX> BoneWeights;
     };
     using VertexList = std::vector<Vertex>;
-    using IndexList = std::vector<uint64_t>;
+    using IndexList = std::vector<uint32_t>;
 
     std::string Name{};
     VertexList Vertices{};

@@ -16,6 +16,7 @@
 #include <Editor/Observer.hpp>
 #include <Editor/ComponentUI.hpp>
 #include <Editor/MetaAssetInfo.hpp>
+#include <Editor/ComponentWidgets.hpp>
 #include <Editor/UserDefinedComponentStorage.hpp>
 
 DisplayTargetRenderer::DisplayTargetRenderer(Observer& observer) noexcept :
@@ -26,7 +27,8 @@ DisplayTargetRenderer::DisplayTargetRenderer(Observer& observer) noexcept :
     shaderDisplay(observer),
     shaderProgramDisplay(observer),
     materialDisplay(observer),
-    frameBufferDisplay(observer) {
+    frameBufferDisplay(observer),
+    meshDisplay(observer) {
     GUI& gui = observer.gui;
     gui.Events.OnProjectUnloaded                 += std::bind_front(&DisplayTargetRenderer::OnProjectUnloaded,  this);
     gui.Events.OnReimport                        += std::bind_front(&DisplayTargetRenderer::OnReimport,         this);
@@ -206,6 +208,10 @@ void DisplayTargetRenderer::RenderIconChangePopup(const FNode& file, MetaAssetIn
             auto& items = FileIcons::FrameBufferIcons;
             begin = &items.front();
             end = &items.back() + 1;
+        } else if (Assets::IsMeshFile(file)) {
+            auto& items = FileIcons::MeshIcons;
+            begin = &items.front();
+            end = &items.back() + 1;
         } else {
             auto& items = FileIcons::RegularFileIcons;
             begin = &items.front();
@@ -282,6 +288,10 @@ void DisplayTargetRenderer::RenderAssetView(AssetHandle h) {
         RenderMaterialView(h);
     } else if (h->IsFrameBuffer()) {
         RenderFrameBufferView(h);
+    } else if (h->IsMesh()) {
+        RenderMeshView(h);
+    } else if (h->IsModel()) {
+
     } else {
         RenderTextView(h);
     }
@@ -318,6 +328,7 @@ void DisplayTargetRenderer::RenderComponentDefinitionView(AssetHandle h) {
 
     if (ImGui::Button("Refresh", { ImGui::GetContentRegionAvail().x, 0 })) {
         h->ForceDeserialize();
+        observer.get().gui.get().Events.Observer.OnAssetRefreshed(h);
     }
 
     if (ImGui::IsItemHovered()) {
@@ -348,6 +359,7 @@ void DisplayTargetRenderer::RenderSamplerView(AssetHandle h) {
 
     if (ImGui::Button("Refresh", { ImGui::GetContentRegionAvail().x, 0 })) {
         h->ForceDeserialize();
+        observer.get().gui.get().Events.Observer.OnAssetRefreshed(h);
     }
     if (ImGui::IsItemHovered()) {
         ImGui::BeginTooltip();
@@ -375,8 +387,9 @@ void DisplayTargetRenderer::RenderTextureView(AssetHandle h) {
     windowHeight = windowHeight - totalBottomPadding;
 
     if (h->HasDeserializedData()) {
-        const GPUTexture* gpuTex = observer.get().gui.get().CORE->GetAssetGPUBridge()->GetTextures().Query(h->ID());
-        assert(gpuTex);
+        assert(observer.get().gui.get().CORE->GetAssetGPUBridge()->GetTextures().Query(h->ID()));
+        const GPUTexture& gpuTex = observer.get().gui.get().CORE->GetAssetGPUBridge()->GetTextures().Fetch(h->ID());
+
         const Texture& tex = h->DataAs<Texture>();
 
         float w = static_cast<float>(tex.Width);
@@ -395,7 +408,7 @@ void DisplayTargetRenderer::RenderTextureView(AssetHandle h) {
             w = h * aspect;
         }
 
-        ImGui::Image(*gpuTex, { w, h }, { 0, 1 }, { 1, 0 }, { (float) r, (float) g, (float) b, (float) a }, { 1, 1, 0, 1 });
+        ImGui::Image(gpuTex, { w, h }, { 0, 1 }, { 1, 0 }, { (float) r, (float) g, (float) b, (float) a }, { 1, 1, 0, 1 });
 
         if (drawInspector) {
             ImRect rc = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
@@ -405,10 +418,8 @@ void DisplayTargetRenderer::RenderTextureView(AssetHandle h) {
                 mouseUVCoord.y >= 0.0f &&
                 mouseUVCoord.x <= 1.0f &&
                 mouseUVCoord.y <= 1.0f) {
-                float w = static_cast<float>(tex.Width);
-                float h = static_cast<float>(tex.Height);
                 auto pixels = reinterpret_cast<const unsigned char*>(tex.PixelData.data());
-                ImageInspect::inspect(static_cast<int>(w), static_cast<int>(h), pixels, mouseUVCoord, { w, h }, drawNormals, drawHistogram);
+                ImageInspect::inspect(tex.Width, tex.Height, pixels, mouseUVCoord, { w, h }, drawNormals, drawHistogram);
             }
         }
     } else {
@@ -427,6 +438,7 @@ void DisplayTargetRenderer::RenderTextureView(AssetHandle h) {
     ImGui::SameLine(); ImGui::Text("Histogram:");  ImGui::SameLine(); ImGui::Checkbox("##histogram", &drawHistogram);
     if (ImGui::Button("Refresh", { ImGui::GetContentRegionAvail().x, 0 })) {
         h->ForceDeserialize();
+        observer.get().gui.get().Events.Observer.OnAssetRefreshed(h);
     }
     if (ImGui::IsItemHovered()) {
         ImGui::BeginTooltip();
@@ -460,6 +472,7 @@ void DisplayTargetRenderer::RenderShaderView(AssetHandle h) {
 
     if (ImGui::Button("Refresh", { ImGui::GetContentRegionAvail().x, 0 })) {
         h->ForceDeserialize();
+        observer.get().gui.get().Events.Observer.OnAssetRefreshed(h);
     }
     if (ImGui::IsItemHovered()) {
         ImGui::BeginTooltip();
@@ -489,6 +502,7 @@ void DisplayTargetRenderer::RenderShaderProgramView(AssetHandle h) {
 
     if (ImGui::Button("Refresh", { ImGui::GetContentRegionAvail().x, 0 })) {
         h->ForceDeserialize();
+        observer.get().gui.get().Events.Observer.OnAssetRefreshed(h);
     }
     if (ImGui::IsItemHovered()) {
         ImGui::BeginTooltip();
@@ -520,6 +534,7 @@ void DisplayTargetRenderer::RenderMaterialView(AssetHandle h) {
 
     if (ImGui::Button("Refresh", { ImGui::GetContentRegionAvail().x, 0 })) {
         h->ForceDeserialize();
+        observer.get().gui.get().Events.Observer.OnAssetRefreshed(h);
     }
     if (ImGui::IsItemHovered()) {
         ImGui::BeginTooltip();
@@ -553,12 +568,54 @@ void DisplayTargetRenderer::RenderFrameBufferView(AssetHandle h) {
 
     if (ImGui::Button("Refresh", { ImGui::GetContentRegionAvail().x, 0 })) {
         h->ForceDeserialize();
+        observer.get().gui.get().Events.Observer.OnAssetRefreshed(h);
     }
 
     if (ImGui::IsItemHovered()) {
         ImGui::BeginTooltip();
         ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
         ImGui::TextUnformatted("Forces deserialization on this frame buffer object. All data in VRAM is purged, and new data is allocated.");
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
+}
+void DisplayTargetRenderer::RenderMeshView(AssetHandle h) {
+    assert(h->IsMesh());
+
+    meshDisplay.SetDisplayTarget(h);
+    meshDisplay.RenderMessagesTable();
+    ImGui::Separator();
+
+    static int bottomContentLineCount = 3;
+    float lineHeight = ImGui::GetFrameHeight() + ImGui::GetStyle().CellPadding.y * 2;
+    static float extraPadding = 34; /* pad by an extra amount to remove scroll bar, don't pad and see the scroll bar appear on right side */
+    //ImGui::SliderFloat("label", &extraPadding, 0, 50); /* was used to test padding amount, not deleted to easily re-test in future */
+    float totalBottomPadding = lineHeight * bottomContentLineCount + extraPadding;
+
+    auto [windowWidth, windowHeight] = ImGui::GetContentRegionAvail();
+    windowWidth = windowWidth - ImGui::GetStyle().FramePadding.x;
+    windowHeight = windowHeight - totalBottomPadding;
+
+    if (h->HasDeserializedData()) {
+        meshDisplay.RenderMeshPreview({ static_cast<unsigned>(windowWidth), static_cast<unsigned>(windowHeight) });
+        meshDisplay.RenderPreviewSettings();
+    } else {
+        ImGui::Text("Mesh is not deserialized...");
+    }
+
+    if (ImGui::GetContentRegionAvail().y > 34.0f) {
+        ImGui::SetCursorPosY(ImGui::GetWindowHeight() - ImGui::GetFrameHeight() - extraPadding);
+    }
+
+    if (ImGui::Button("Refresh", { ImGui::GetContentRegionAvail().x, 0 })) {
+        h->ForceDeserialize();
+        observer.get().gui.get().Events.Observer.OnAssetRefreshed(h);
+    }
+
+    if (ImGui::IsItemHovered()) {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted("Forces deserialization on this mesh object. All data in VRAM is purged, and new data is allocated.");
         ImGui::PopTextWrapPos();
         ImGui::EndTooltip();
     }

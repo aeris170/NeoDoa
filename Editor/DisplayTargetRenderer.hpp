@@ -14,6 +14,7 @@
 #include <Editor/ShaderProgramDisplay.hpp>
 #include <Editor/MaterialDisplay.hpp>
 #include <Editor/FrameBufferDisplay.hpp>
+#include <Editor/MeshDisplay.hpp>
 
 struct Scene;
 
@@ -46,6 +47,7 @@ private:
     ShaderProgramDisplay shaderProgramDisplay;
     MaterialDisplay materialDisplay;
     FrameBufferDisplay frameBufferDisplay;
+    MeshDisplay meshDisplay;
 
     void HandleTargetWhenEmpty();
     void HandleTargetWhenEntity(Scene& scene, const Entity entt);
@@ -62,6 +64,7 @@ private:
     void RenderShaderProgramView(AssetHandle h);
     void RenderMaterialView(AssetHandle h);
     void RenderFrameBufferView(AssetHandle h);
+    void RenderMeshView(AssetHandle h);
     void RenderTextView(AssetHandle h);
 
     void OnProjectUnloaded();

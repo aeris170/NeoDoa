@@ -833,8 +833,10 @@ bool ImGui::NeoDoaColorPickerPopup(const char* label, float col[4], ImGuiColorEd
             value_changed |= FancyVectorPiece<Display::XYZW>(settings, 1, denorm);
             SameLine();
             value_changed |= FancyVectorPiece<Display::XYZW>(settings, 2, denorm);
-            SameLine();
-            value_changed |= FancyVectorPiece<Display::XYZW>(settings, 3, denorm);
+            if (components == 4) {
+                SameLine();
+                value_changed |= FancyVectorPiece<Display::XYZW>(settings, 3, denorm);
+            }
 
             if (value_changed) {
                 // FIXME: Hackily differentiating using the DragInt (ActiveId != 0 && !ActiveIdAllowOverlap) vs. using the InputText or DropTarget.
