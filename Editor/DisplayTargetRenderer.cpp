@@ -419,7 +419,7 @@ void DisplayTargetRenderer::RenderTextureView(AssetHandle h) {
                 mouseUVCoord.x <= 1.0f &&
                 mouseUVCoord.y <= 1.0f) {
                 auto pixels = reinterpret_cast<const unsigned char*>(tex.PixelData.data());
-                ImageInspect::inspect(tex.Width, tex.Height, pixels, mouseUVCoord, { w, h }, drawNormals, drawHistogram);
+                ImageInspect::inspect(tex.Width, tex.Height, pixels, mouseUVCoord, { w, h }, drawNormals, drawHistogram, tex.Channels);
             }
         }
     } else {
