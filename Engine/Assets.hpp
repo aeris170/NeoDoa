@@ -34,9 +34,13 @@ struct SubAssetList;
 struct AssetGPUBridge;
 
 #define ASSET_TYPE Scene, Component, Sampler, Texture, Shader, ShaderProgram, Material, FrameBuffer, Mesh, Model
+struct EmptyAssetData {
+    std::string Name; // asset name, generally file name itself
+    HashedString Type; // one of ASSET_TYPE
+};
 template<typename T>
 concept AssetType = concepts::IsAnyOf<T, ASSET_TYPE> && concepts::Copyable<T> && concepts::Serializable<T> && std::movable<T>;
-using AssetData = std::variant<std::monostate, ASSET_TYPE>;
+using AssetData = std::variant<EmptyAssetData, ASSET_TYPE>;
 #undef ASSET_TYPE
 
 struct Asset final {
@@ -58,6 +62,8 @@ struct Asset final {
     SubAssetList SubAssets();
     const SubAssetList SubAssets() const;
     uint64_t Version() const;
+    std::optional<std::string_view> TryGetName() const;
+    HashedString TypeName() const;
 
     void Serialize();
     void Deserialize();
@@ -161,6 +167,10 @@ private:
     const Assets& owningManager;
 };
 
+// TODO: When this assertion fails, change Assets::XXXExtension
+// variables from std::string to std::string_view
+static_assert(__cpp_lib_string_view < 202403);
+
 /* Data-Oriented Asset Database Layout */
 struct AssetDatabase {
 #if DEBUG
@@ -219,6 +229,18 @@ struct Assets {
 
     using UUIDCollection = std::vector<UUID>;
 
+    inline static HashedString SceneTypeName{ "Scene" };
+    inline static HashedString ComponentTypeName{ "Component" };
+    inline static HashedString SamplerTypeName{ "Sampler" };
+    inline static HashedString TextureTypeName{ "Texture" };
+    inline static HashedString ShaderTypeName{ "Shader" };
+    inline static HashedString ShaderProgramTypeName{ "ShaderProgram" };
+    inline static HashedString MaterialTypeName{ "Material" };
+    inline static HashedString FrameBufferTypeName{ "FrameBuffer" };
+    inline static HashedString MeshTypeName{ "Mesh" };
+    inline static HashedString ModelTypeName{ "Model" };
+    inline static HashedString GenericAssetTypeName{ "Generic" };
+
     inline static std::string ProjectExtension{ ".doa" };
     inline static std::string SceneExtension{ ".scn" };
     inline static std::string ComponentDefinitionExtension{ ".ncd" };
@@ -261,6 +283,8 @@ struct Assets {
     static bool IsModelFile(const FNode& file) noexcept;
     static bool IsScriptFile(const FNode& file) noexcept;
 
+    static EmptyAssetData CreateEmptyAssetData(const FNode& file) noexcept;
+
     explicit Assets(const Project& project, AssetGPUBridge& bridge) noexcept;
     ~Assets() = default;
     Assets(const Assets&) = delete;
@@ -294,6 +318,8 @@ struct Assets {
     }
     SubAssetList GetSubAssetsOfAsset(const UUID uuid) const noexcept;
     uint64_t GetVersionOfAsset(const UUID uuid) const noexcept;
+    std::optional<std::string_view> TryGetNameOfAsset(const UUID uuid) const noexcept;
+    HashedString GetTypeNameOfAsset(const UUID uuid) const noexcept;
 
     void SerializeAsset(const UUID uuid) noexcept;
     void DeserializeAsset(const UUID uuid) noexcept;

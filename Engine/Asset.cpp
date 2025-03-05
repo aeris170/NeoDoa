@@ -24,6 +24,8 @@ const AssetData& Asset::Data() const { return owningManager.get().GetDataOfAsset
 SubAssetList Asset::SubAssets() { return owningManager.get().GetSubAssetsOfAsset(id); }
 const SubAssetList Asset::SubAssets() const { return owningManager.get().GetSubAssetsOfAsset(id); }
 uint64_t Asset::Version() const { return owningManager.get().GetVersionOfAsset(id); }
+std::optional<std::string_view> Asset::TryGetName() const { return owningManager.get().TryGetNameOfAsset(id); };
+HashedString Asset::TypeName() const { return owningManager.get().GetTypeNameOfAsset(id); };
 
 void Asset::Serialize() { owningManager.get().SerializeAsset(id); }
 void Asset::Deserialize() { owningManager.get().DeserializeAsset(id); }

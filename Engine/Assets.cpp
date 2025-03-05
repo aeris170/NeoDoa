@@ -50,7 +50,7 @@ AssetDatabase::UUIDMap<Asset>::const_iterator AssetDatabase::end()    const noex
 Asset& AssetDatabase::Emplace(UUID uuid, FNode* file, Assets& owningManager) noexcept {
     auto& asset = assets.try_emplace(uuid, uuid, owningManager).first->second;
     files.try_emplace(uuid, file);
-    data.try_emplace(uuid);
+    data.try_emplace(uuid, Assets::CreateEmptyAssetData(*file));
     versions.try_emplace(uuid);
     infoLists.try_emplace(uuid);
     warningLists.try_emplace(uuid);
@@ -116,6 +116,20 @@ bool Assets::IsFrameBufferFile(const FNode& file)                  noexcept { re
 bool Assets::IsMeshFile(const FNode& file)                         noexcept { return file.ext == MeshExtension;                         }
 bool Assets::IsModelFile(const FNode& file)                        noexcept { return file.ext == MODEL_EXT;                             }
 bool Assets::IsScriptFile(const FNode& file)                       noexcept { return file.ext == SCRIPT_EXT;                            }
+
+EmptyAssetData Assets::CreateEmptyAssetData(const FNode& file) noexcept {
+    if (Assets::IsSceneFile(file))               { return { file.Name(), Assets::SceneTypeName };         }
+    if (Assets::IsComponentDefinitionFile(file)) { return { file.Name(), Assets::ComponentTypeName };     }
+    if (Assets::IsShaderFile(file))              { return { file.Name(), Assets::ShaderTypeName };        }
+    if (Assets::IsShaderProgramFile(file))       { return { file.Name(), Assets::ShaderProgramTypeName }; }
+    if (Assets::IsMaterialFile(file))            { return { file.Name(), Assets::MaterialTypeName };      }
+    if (Assets::IsSamplerFile(file))             { return { file.Name(), Assets::SamplerTypeName };       }
+    if (Assets::IsTextureFile(file))             { return { file.Name(), Assets::TextureTypeName };       }
+    if (Assets::IsFrameBufferFile(file))         { return { file.Name(), Assets::FrameBufferTypeName };   }
+    if (Assets::IsMeshFile(file))                { return { file.Name(), Assets::MeshTypeName };          }
+    if (Assets::IsModelFile(file))               { return { file.Name(), Assets::ModelTypeName };         }
+    return { file.Name(), Assets::GenericAssetTypeName };
+}
 
 Assets::Assets(const Project& project, AssetGPUBridge& bridge) noexcept :
     _root({ &project, nullptr, "", "", "", true }),
@@ -225,15 +239,56 @@ SubAssetList Assets::GetSubAssetsOfAsset(const UUID uuid) const noexcept {
     auto index = database.subAssets.FindNodeIndexBFS(uuid, AssetDatabase::SubAssetTree::Root);
     if (index == AssetDatabase::SubAssetTree::Invalid) {
         // No such entry at sub-asset tree? Ok, then it has no sub-assets!
-        // Simply create a ChildrenList with 0 indices (second parameter, this -> {})
+        // Simply create a ChildrenList with 0 indices
         // and use that "empty" ChildrenList to create SubAssetList.
-        return { AssetDatabase::SubAssetTree::ChildrenList(const_cast<AssetDatabase&>(database).subAssets, {}), *this };
+        static const std::vector<AssetDatabase::SubAssetTree::NodeIndex>& EmptyList{};
+        return { AssetDatabase::SubAssetTree::ChildrenList(const_cast<AssetDatabase&>(database).subAssets, EmptyList), *this };
     }
     return { database.subAssets.ChildrenOfNodeAt(index), *this};
 }
 uint64_t Assets::GetVersionOfAsset(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
     return const_cast<AssetDatabase&>(database).versions[uuid];
+}
+std::optional<std::string_view> Assets::TryGetNameOfAsset(const UUID uuid) const noexcept {
+    assert(database.Contains(uuid));
+    const AssetData& data = const_cast<AssetDatabase&>(database).data[uuid];
+    return std::visit(overloaded::lambda {
+        [] (const EmptyAssetData& empty) -> std::optional<std::string_view> {
+            if (empty.Name == "") {
+                return std::nullopt;
+            }
+            return empty.Name;
+        },
+        [] (const Scene& scene)            -> std::optional<std::string_view> { return scene.Name;       },
+        [](const Component& component)     -> std::optional<std::string_view> { return component.Name;   },
+        [](const Sampler& sampler)         -> std::optional<std::string_view> { return sampler.Name;     },
+        [](const Texture& texture)         -> std::optional<std::string_view> { return texture.Name;     },
+        [](const Shader& shader)           -> std::optional<std::string_view> { return shader.Name;      },
+        [](const ShaderProgram& program)   -> std::optional<std::string_view> { return program.Name;     },
+        [](const Material& material)       -> std::optional<std::string_view> { return material.Name;    },
+        [](const FrameBuffer& framebuffer) -> std::optional<std::string_view> { return framebuffer.Name; },
+        [](const Mesh& mesh)               -> std::optional<std::string_view> { return mesh.Name;        },
+        [](const Model& model)             -> std::optional<std::string_view> { return model.Name;       },
+    }, data);
+}
+HashedString Assets::GetTypeNameOfAsset(const UUID uuid) const noexcept {
+    assert(database.Contains(uuid));
+    const AssetData& data = const_cast<AssetDatabase&>(database).data[uuid];
+    using namespace entt::literals;
+    return std::visit(overloaded::lambda{
+        [](const EmptyAssetData& empty)                     -> HashedString { return empty.Type;            },
+        []([[maybe_unused]] const Scene& scene)             -> HashedString { return SceneTypeName;         },
+        []([[maybe_unused]] const Component& component)     -> HashedString { return ComponentTypeName;     },
+        []([[maybe_unused]] const Sampler& sampler)         -> HashedString { return SamplerTypeName;       },
+        []([[maybe_unused]] const Texture& texture)         -> HashedString { return TextureTypeName;       },
+        []([[maybe_unused]] const Shader& shader)           -> HashedString { return ShaderTypeName;        },
+        []([[maybe_unused]] const ShaderProgram& program)   -> HashedString { return ShaderProgramTypeName; },
+        []([[maybe_unused]] const Material& material)       -> HashedString { return MaterialTypeName;      },
+        []([[maybe_unused]] const FrameBuffer& framebuffer) -> HashedString { return FrameBufferTypeName;   },
+        []([[maybe_unused]] const Mesh& mesh)               -> HashedString { return MeshTypeName;          },
+        []([[maybe_unused]] const Model& model)             -> HashedString { return ModelTypeName;         },
+    }, data);
 }
 
 void Assets::SerializeAsset(const UUID uuid) noexcept {
@@ -472,7 +527,7 @@ void Assets::ForceDeserializeAsset(const UUID uuid) noexcept {
 }
 void Assets::DeleteDeserializedDataOfAsset(const UUID uuid) noexcept {
     assert(database.Contains(uuid));
-    database.data[uuid] = std::monostate{};
+    database.data[uuid] = CreateEmptyAssetData(*database.files[uuid]);
     database.infoLists[uuid].clear();
     database.warningLists[uuid].clear();
     database.errorLists[uuid].clear();
@@ -483,7 +538,7 @@ void Assets::DeleteDeserializedDataOfAsset(const UUID uuid) noexcept {
 }
 bool Assets::AssetHasDeserializedData(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
-    return !std::holds_alternative<std::monostate>(const_cast<AssetDatabase&>(database).data[uuid]);
+    return !std::holds_alternative<EmptyAssetData>(const_cast<AssetDatabase&>(database).data[uuid]);
 }
 UUID Assets::InstantiateAsset(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
@@ -492,47 +547,48 @@ UUID Assets::InstantiateAsset(const UUID uuid) const noexcept {
 
 bool Assets::IsSceneAsset(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
-    return IsSceneFile(*const_cast<AssetDatabase&>(database).files[uuid]);
+    return GetTypeNameOfAsset(uuid) == SceneTypeName;
 }
 bool Assets::IsComponentDefinitionAsset(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
-    return IsComponentDefinitionFile(*const_cast<AssetDatabase&>(database).files[uuid]);
+    return GetTypeNameOfAsset(uuid) == ComponentTypeName;
 }
 bool Assets::IsSamplerAsset(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
-    return IsSamplerFile(*const_cast<AssetDatabase&>(database).files[uuid]);
+    return GetTypeNameOfAsset(uuid) == SamplerTypeName;
 }
 bool Assets::IsTextureAsset(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
-    return IsTextureFile(*const_cast<AssetDatabase&>(database).files[uuid]);
+    return GetTypeNameOfAsset(uuid) == TextureTypeName;
 }
 bool Assets::IsShaderAsset(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
-    return IsShaderFile(*const_cast<AssetDatabase&>(database).files[uuid]);
+    return GetTypeNameOfAsset(uuid) == ShaderTypeName;
 }
 bool Assets::IsShaderProgramAsset(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
-    return IsShaderProgramFile(*const_cast<AssetDatabase&>(database).files[uuid]);
+    return GetTypeNameOfAsset(uuid) == ShaderProgramTypeName;
 }
 bool Assets::IsMaterialAsset(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
-    return IsMaterialFile(*const_cast<AssetDatabase&>(database).files[uuid]);
+    return GetTypeNameOfAsset(uuid) == MaterialTypeName;
 }
 bool Assets::IsFrameBufferAsset(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
-    return IsFrameBufferFile(*const_cast<AssetDatabase&>(database).files[uuid]);
+    return GetTypeNameOfAsset(uuid) == FrameBufferTypeName;
 }
 bool Assets::IsMeshAsset(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
-    return IsMeshFile(*const_cast<AssetDatabase&>(database).files[uuid]);
+    return GetTypeNameOfAsset(uuid) == MeshTypeName;
 }
 bool Assets::IsModelAsset(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
-    return IsModelFile(*const_cast<AssetDatabase&>(database).files[uuid]);
+    return GetTypeNameOfAsset(uuid) == ModelTypeName;
 }
 bool Assets::IsScriptAsset(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
-    return IsScriptFile(*const_cast<AssetDatabase&>(database).files[uuid]);
+    return GetTypeNameOfAsset(uuid) == "Script";
+}
 }
 
 bool Assets::AssetHasInfoMessages(const UUID uuid) const noexcept {
@@ -721,6 +777,12 @@ std::pair<UUID, AssetHandle> Assets::ImportFile(AssetDatabase& database, const F
         if (asset.IsComponentDefinition()) {
             componentDefinitionAssets.push_back(uuid);
         }
+        if (asset.IsSampler()) {
+            samplerAssets.push_back(uuid);
+        }
+        if (asset.IsTexture()) {
+            textureAssets.push_back(uuid);
+        }
         if (asset.IsShader()) {
             shaderAssets.push_back(uuid);
         }
@@ -729,12 +791,6 @@ std::pair<UUID, AssetHandle> Assets::ImportFile(AssetDatabase& database, const F
         }
         if (asset.IsMaterial()) {
             materialAssets.push_back(uuid);
-        }
-        if (asset.IsSampler()) {
-            samplerAssets.push_back(uuid);
-        }
-        if (asset.IsTexture()) {
-            textureAssets.push_back(uuid);
         }
         if (asset.IsFrameBuffer()) {
             frameBufferAssets.push_back(uuid);
