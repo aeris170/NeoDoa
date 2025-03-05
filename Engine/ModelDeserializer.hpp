@@ -3,16 +3,22 @@
 #include <string>
 #include <vector>
 
-#include <Engine/Model.hpp>
 #include <Engine/Mesh.hpp>
-#include <Engine/Material.hpp>
+#include <Engine/Model.hpp>
 #include <Engine/Texture.hpp>
+#include <Engine/Material.hpp>
+#include <Engine/TextureDeserializer.hpp>
 
-struct ModelDeserializer {
+struct FNode;
+
+struct ModelDeserializationResult {
     bool erred{ false };
     std::vector<std::string> errors{};
     Model deserializedModel{};
     std::vector<Mesh> deserializedMeshes{};
-    std::vector<Material> deserializedMaterials{};
-    std::vector<Texture> deserializedTextures{};
+    std::vector<size_t> meshMaterialIndices{};
+    std::vector<TextureDeserializationResult> deserializedTextures{};
 };
+
+ModelDeserializationResult DeserializeModel(const FNode& file) noexcept;
+ModelDeserializationResult DeserializeModel(const std::string_view data) noexcept;

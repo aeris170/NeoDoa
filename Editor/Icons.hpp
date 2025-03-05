@@ -248,6 +248,11 @@ namespace FileIcons {
         std::pair{ MESH_ICON, "cube" }
     };
 
+    inline constexpr const char MODEL_ICON[]{ ICON_FA_CUBES };
+    inline std::array<ElementType, 1> ModelIcons{
+        std::pair{ MODEL_ICON, "cubes" }
+    };
+
     inline constexpr const char FILE_ICON[]                    { ICON_FA_FILE                    };
     inline constexpr const char FILE_ICON_MULTIPLE[]           { ICON_FA_FILES                   };
     inline constexpr const char FILE_ICON_ARROW_DOWN[]         { ICON_FA_FILE_ARROW_DOWN         };

@@ -47,6 +47,8 @@ bool Asset::IsMesh()                const noexcept { return owningManager.get().
 bool Asset::IsModel()               const noexcept { return owningManager.get().IsModelAsset(id);               }
 bool Asset::IsScript()              const noexcept { return owningManager.get().IsScriptAsset(id);              }
 
+bool Asset::IsSubAsset() const noexcept { return owningManager.get().IsSubAsset(id); }
+
 bool Asset::HasInfoMessages() const { return owningManager.get().AssetHasInfoMessages(id); }
 const std::vector<std::any>& Asset::InfoMessages() const { return owningManager.get().GetInfoMessagesOfAsset(id); }
 

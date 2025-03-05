@@ -319,6 +319,26 @@ ImGuiIO* GUI::IO() const { return io; }
 ImFont* GUI::GetFont() const { return font; }
 ImFont* GUI::GetFontBold() const { return fontBold; }
 
+TextureHandle GUI::FindSVGIconForAssetType(const UUID uuid, const TextureSize size) {
+    static const CorePtr& Core{ Core::GetCore() };
+
+    AssetHandle handle = Core->GetAssets()->FindAsset(uuid);
+    assert(handle);
+
+    if (handle->IsScene())               { return SVGPathway::Get(FileIcons::SceneIcons[0].second,         TextureStyle::PADDED, size); }
+    if (handle->IsComponentDefinition()) { return SVGPathway::Get(FileIcons::ComponentIcons[0].second,     TextureStyle::PADDED, size); }
+    if (handle->IsSampler())             { return SVGPathway::Get(FileIcons::SamplerIcons[0].second,       TextureStyle::PADDED, size); }
+    if (handle->IsTexture())             { return SVGPathway::Get(FileIcons::TextureIcons[0].second,       TextureStyle::PADDED, size); }
+    if (handle->IsShader())              { return SVGPathway::Get(FileIcons::ShaderIcons[0].second,        TextureStyle::PADDED, size); }
+    if (handle->IsShaderProgram())       { return SVGPathway::Get(FileIcons::ShaderProgramIcons[0].second, TextureStyle::PADDED, size); }
+    if (handle->IsMaterial())            { return SVGPathway::Get(FileIcons::MaterialIcons[0].second,      TextureStyle::PADDED, size); }
+    if (handle->IsFrameBuffer())         { return SVGPathway::Get(FileIcons::FrameBufferIcons[0].second,   TextureStyle::PADDED, size); }
+    if (handle->IsMesh())                { return SVGPathway::Get(FileIcons::MeshIcons[0].second,          TextureStyle::PADDED, size); }
+    if (handle->IsModel())               { return SVGPathway::Get(FileIcons::ModelIcons[0].second,         TextureStyle::PADDED, size); }
+    // if (handle->IsScript())              { return SVGPathway::Get(SCENE_ICON_KEY, TextureStyle::PADDED, size); }
+    return SVGPathway::Get(FileIcons::RegularFileIcons[0].second, TextureStyle::PADDED, size);
+}
+
 MetaAssetInfo& GUI::GetMetaInfoOf(const FNode& file) { return meta.GetMetaAssetInfoBank().GetMetaInfoOf(file); }
 MetaAssetInfoBank& GUI::GetMetaAssetInfoBank() noexcept { return meta.GetMetaAssetInfoBank(); }
 

@@ -52,6 +52,11 @@ void DisplayTargetRenderer::SetDisplayTarget(FNode& file) {
     displayTarget = &file;
     renderTargetTitleText = hypen + file.Name().data();
 }
+void DisplayTargetRenderer::SetDisplayTarget(FNode& file, const UUID subAssetID) {
+    static std::string hypen(" - ");
+    displayTarget = std::pair{ &file, subAssetID };
+    renderTargetTitleText = hypen + file.Name().data();
+}
 void DisplayTargetRenderer::ResetDisplayTarget() {
     displayTarget = std::monostate{};
     renderTargetTitleText = "";
@@ -71,6 +76,9 @@ void DisplayTargetRenderer::Render() {
         },
         [this](FNode* file) {
             HandleTargetWhenFile(*file);
+        },
+        [this](std::pair<FNode*, UUID> pair) {
+            HandleTargetWhenSubAsset(*pair.first, pair.second);
         }
     }, displayTarget);
 }
@@ -167,6 +175,43 @@ void DisplayTargetRenderer::HandleTargetWhenFile(FNode& file) {
         if (h.HasValue()) {
             RenderAssetView(h);
         }
+    }
+}
+void DisplayTargetRenderer::HandleTargetWhenSubAsset(FNode& file, const UUID subAssetID) {
+    GUI& gui = observer.get().gui;
+
+    static const ImVec2 iconSize{ 60.0f, 60.0f };
+    ImGui::Columns(2);
+    ImGui::SetColumnWidth(0, iconSize.x * 1.25f);
+    ImGui::PushFont(gui.GetFontBold());
+
+    ImGui::PushStyleColor(ImGuiCol_Button, {});
+    ImGui::BeginDisabled();
+    ImGui::ImageButton("DTR_ASSET_ICON", gui.FindSVGIconForAssetType(subAssetID), iconSize);
+    ImGui::EndDisabled();
+    ImGui::PopStyleColor();
+
+    ImGui::SameLine();
+    ImGui::NextColumn();
+
+    ImGui::TextUnformatted(file.Name().data());
+
+    ImGui::PopFont();
+    ImGui::PushFont(gui.GetFont());
+
+    std::string path = file.Path().string();
+    ImGui::TextUnformatted(std::string("Path: ROOT").append(sizeof(char), static_cast<char>(std::filesystem::path::preferred_separator)).append(path).c_str());
+    std::string absolutePath = file.AbsolutePath().string();
+    ImGui::TextUnformatted(std::string("Absolute Path: ").append(absolutePath).c_str());
+
+    ImGui::PopFont();
+
+    ImGui::Columns(1);
+    ImGui::Separator();
+
+    AssetHandle h = gui.CORE->GetAssets()->FindAsset(subAssetID);
+    if (h.HasValue()) {
+        RenderAssetView(h);
     }
 }
 void DisplayTargetRenderer::RenderIconChangePopup(const FNode& file, MetaAssetInfo& meta) {
@@ -656,7 +701,11 @@ void DisplayTargetRenderer::OnAssetDeleted(AssetHandle asset) {
     }
 }
 void DisplayTargetRenderer::OnAssetFocused(AssetHandle asset) {
-    SetDisplayTarget(asset->File());
+    if (!asset->IsSubAsset()) {
+        SetDisplayTarget(asset->File());
+    } else {
+        SetDisplayTarget(asset->File(), asset->ID());
+    }
 }
 void DisplayTargetRenderer::OnFolderFocused(FNode& folder) {
     SetDisplayTarget(folder);

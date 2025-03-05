@@ -1,5 +1,6 @@
 #pragma once
 
+#include <utility>
 #include <variant>
 
 #include <Engine/Scene.hpp>
@@ -21,7 +22,7 @@ struct Scene;
 struct Observer;
 struct MetaAssetInfo;
 
-#define DISPLAYABLE Entity, FNode*
+#define DISPLAYABLE Entity, FNode*, std::pair<FNode*, UUID>
 using DisplayTarget = std::variant<std::monostate, DISPLAYABLE>;
 #undef DISPLAYABLE
 
@@ -31,6 +32,7 @@ struct DisplayTargetRenderer {
 
     void SetDisplayTarget(Entity entity);
     void SetDisplayTarget(FNode& file);
+    void SetDisplayTarget(FNode& file, const UUID subAssetID);
     void ResetDisplayTarget();
 
     void Render();
@@ -52,6 +54,7 @@ private:
     void HandleTargetWhenEmpty();
     void HandleTargetWhenEntity(Scene& scene, const Entity entt);
     void HandleTargetWhenFile(FNode& file);
+    void HandleTargetWhenSubAsset(FNode& file, const UUID subAssetID);
     void RenderIconChangePopup(const FNode& file, MetaAssetInfo& meta);
 
     void RenderFolderView(FNode& folder);

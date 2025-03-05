@@ -159,6 +159,8 @@ struct GUI {
     ImFont* GetFont() const;
     ImFont* GetFontBold() const;
 
+    TextureHandle FindSVGIconForAssetType(const UUID uuid, const TextureSize size = TextureSize::MEDIUM);
+
     MetaAssetInfo& GetMetaInfoOf(const FNode& file);
     MetaAssetInfoBank& GetMetaAssetInfoBank() noexcept;
 

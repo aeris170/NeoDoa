@@ -1,7 +1,10 @@
 #include <Editor/AssetManager.hpp>
 
+#include <format>
 #include <algorithm>
+
 #include <imgui_internal.h>
+
 #include <Submodules/detector/detector.hpp>
 
 #include <Engine/Texture.hpp>
@@ -302,7 +305,7 @@ void AssetManager::RenderSelectedFolderContent() {
                 }
                 ImGui::TableSetColumnIndex(i++ % columns);
 
-                TextureHandle icon = gui.GetMetaInfoOf(child).GetSVGIcon();
+                TextureHandle icon = gui.GetMetaInfoOf(child).GetSVGIcon(TextureSize::LARGE);
 
                 ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
                 ImGui::ImageButton("ASSET_ICON", icon, { currentFolderContentSettings.thumbnailSize, currentFolderContentSettings.thumbnailSize });
@@ -376,29 +379,75 @@ void AssetManager::RenderSelectedFolderContent() {
                 bool visible = fileFilter.CheckVisibility(child);
                 if (!visible) { continue; }
 
-                TextureHandle icon = gui.GetMetaInfoOf(child).GetSVGIcon();
-
-                if (ImGui::TreeNodeEx(child.Name().data(), ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf)) {
-                    if (ImGui::IsItemHovered()) {
-                        if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-                            OpenFileAtFileNode(child);
-                        } else if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-                            SetSelectedNode(&child);
-                        }
-                    }
-
-                    ImGui::TreePop();
-                }
-
-                float textHeight = ImGui::GetTextLineHeight();
-                ImVec2 min = ImGui::GetItemRectMin();
-                ImVec2 max = { min.x + textHeight, min.y + textHeight };
-                ImGui::GetWindowDrawList()->AddImage(icon, min, max);
+                RenderListItem(child);
             }
         }
     }
 }
+void AssetManager::RenderListItem(FNode& file) noexcept {
+    GUI& gui = this->gui;
 
+    static auto RenderIconAtNormallyWhereArrowIsAt = [](TextureHandle icon, std::string_view title) {
+        ImVec2 textSize = ImGui::CalcTextSize(title.data());
+        float textHeight = ImGui::GetTextLineHeight();
+        ImVec2 min = ImGui::GetItemRectMin();
+        ImVec2 max = { min.x + textSize.y, min.y + textSize.y };
+        ImGui::GetWindowDrawList()->AddImage(icon, min, max);
+    };
+
+    SubAssetList subAssets = assets->GetSubAssetsOfAsset(assets->FindAssetAt(file)->ID());
+
+    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf;
+    bool open = ImGui::TreeNodeEx(file.Name().data(), flags);
+    RenderIconAtNormallyWhereArrowIsAt(gui.GetMetaInfoOf(file).GetSVGIcon(), file.Name());
+
+    if (subAssets.size() > 0) {
+        ImGuiStyle& style{ ImGui::GetStyle() };
+        ImVec2 textSize = ImGui::CalcTextSize(file.Name().data());
+        ImVec2 pos = {
+            ImGui::GetItemRectMin().x + style.FramePadding.x * 2 + textSize.x + textSize.y, // textSize.y is size of icon
+            ImGui::GetItemRectMin().y
+        };
+        ImU32 color = ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_TextDisabled]);
+        ImGui::GetWindowDrawList()->AddText(pos, color, std::format(" ({} SubAssets)", subAssets.size()).c_str());
+    }
+
+    if (open) {
+        if (ImGui::IsItemHovered()) {
+            if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+                OpenFileAtFileNode(file);
+            } else if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+                SetSelectedNode(&file);
+            }
+        }
+
+        for (Asset& subAsset : subAssets) {
+            if (!subAsset.IsTexture() && !subAsset.IsMesh()) { continue; }
+            TextureHandle icon = gui.FindSVGIconForAssetType(subAsset.ID());
+            std::string title;
+
+            std::optional<std::string_view> result = subAsset.TryGetName();
+            if (result.has_value() && !result.value().empty()) {
+                title = std::format("{} (UUID: {})", result.value(), subAsset.ID().AsString());
+            } else {
+                title = std::format("[MISSING NAME] (UUID: {})", subAsset.ID().AsString());
+            }
+            if (ImGui::TreeNodeEx(title.c_str(), flags)) {
+                if (ImGui::IsItemHovered()) {
+                    if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+                        OpenFileAtFileNode(file);
+                    } else if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+                        SetSelectedSubAssetNode(&file, subAsset.ID());
+                    }
+                }
+                ImGui::TreePop();
+            }
+            RenderIconAtNormallyWhereArrowIsAt(icon, title);
+        }
+
+        ImGui::TreePop();
+    }
+}
 void AssetManager::RenderContextMenu() {
     GUI& gui = this->gui.get();
     [[maybe_unused]] Assets& assets = *gui.CORE->GetAssets();
@@ -519,6 +568,16 @@ void AssetManager::SetSelectedNode(FNode* node) {
     } else {
         gui.Events.AssetManager.OnFocusLost();
     }
+}
+void AssetManager::SetSelectedSubAssetNode(FNode* node, const UUID subAssetID) {
+    GUI& gui = this->gui;
+
+    assert(node);
+    selectedNode = node;
+
+    AssetHandle handle = assets->FindAsset(subAssetID);
+    assert(handle);
+    gui.Events.AssetManager.OnAssetFocused(handle);
 }
 void AssetManager::SetCurrentFolder(FNode* folder) {
     if (folder == nullptr) {

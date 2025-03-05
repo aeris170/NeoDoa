@@ -114,7 +114,10 @@ bool Assets::IsShaderProgramFile(const FNode& file)                noexcept { re
 bool Assets::IsMaterialFile(const FNode& file)                     noexcept { return file.ext == MaterialExtension;                     }
 bool Assets::IsFrameBufferFile(const FNode& file)                  noexcept { return file.ext == FrameBufferExtension;                  }
 bool Assets::IsMeshFile(const FNode& file)                         noexcept { return file.ext == MeshExtension;                         }
-bool Assets::IsModelFile(const FNode& file)                        noexcept { return file.ext == MODEL_EXT;                             }
+bool Assets::IsModelFile(const FNode& file) noexcept {
+    return file.ext == ModelExtensionFBX ||
+        file.ext == ModelExtensionGLB;
+}
 bool Assets::IsScriptFile(const FNode& file)                       noexcept { return file.ext == SCRIPT_EXT;                            }
 
 EmptyAssetData Assets::CreateEmptyAssetData(const FNode& file) noexcept {
@@ -464,33 +467,34 @@ void Assets::DeserializeAsset(const UUID uuid) noexcept {
         data = std::move(result.deserializedMesh);
     }
     if (IsModelAsset(uuid)) {
-        /*
         ModelDeserializationResult result = DeserializeModel(*file);
         for (auto& error : result.errors) {
             errorList.emplace_back(std::move(error));
         }
         data = std::move(result.deserializedModel);
+        Model& model = std::get<Model>(data);
 
         auto index = database.subAssets.EmplaceNode(AssetDatabase::SubAssetTree::Root, uuid);
-        for (auto& mesh : result.deserializedMeshes) {
+        for (size_t i = 0; i < result.deserializedMeshes.size(); i++) {
+            Mesh& mesh = result.deserializedMeshes[i];
             UUID meshID = GenerateUUID();
             database.Emplace(meshID, file, *this);
+            std::get<EmptyAssetData>(database.data[meshID]).Type = MeshTypeName;
             database.data[meshID] = std::move(mesh);
             database.subAssets.EmplaceNode(index, meshID);
+            model.Meshes.emplace_back(meshID, result.meshMaterialIndices[i]);
+            //TryRegisterDependencyBetween(uuid, meshID);
         }
-        for (auto& material : result.deserializedMaterials) {
-            UUID materialID = GenerateUUID();
-            database.Emplace(materialID, file, *this);
-            database.data[materialID] = std::move(material);
-            database.subAssets.EmplaceNode(index, materialID);
-        }
-        for (auto& texture : result.deserializedTextures) {
+        for (auto& tdr : result.deserializedTextures) {
+            if (tdr.erred) { continue; }
             UUID textureID = GenerateUUID();
             database.Emplace(textureID, file, *this);
-            database.data[textureID] = std::move(texture);
+            std::get<EmptyAssetData>(database.data[textureID]).Type = TextureTypeName;
+            database.data[textureID] = std::move(tdr.deserializedTexture);
             database.subAssets.EmplaceNode(index, textureID);
+            model.Textures.push_back(textureID);
+            //TryRegisterDependencyBetween(uuid, textureID);
         }
-        */
     }
     /*
     * TODO others
@@ -589,6 +593,12 @@ bool Assets::IsScriptAsset(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
     return GetTypeNameOfAsset(uuid) == "Script";
 }
+
+bool Assets::IsSubAsset(const UUID uuid) const noexcept {
+    assert(database.Contains(uuid));
+    FNode* file = const_cast<AssetDatabase&>(database).files[uuid];
+    UUID id = const_cast<Assets&>(*this).files[file];
+    return id != uuid; // id is own-id if not sub asset. parent-id if otherwise.
 }
 
 bool Assets::AssetHasInfoMessages(const UUID uuid) const noexcept {
@@ -1258,5 +1268,14 @@ void Assets::PerformPostDeserializationAction<Mesh>(const UUID uuid) noexcept {
 }
 template<>
 void Assets::PerformPostDeserializationAction<Model>(const UUID uuid) noexcept {
+    AssetData& data = database.data[uuid];
+    Model& model = std::get<Model>(data);
+
+    for (const auto& mmesh : model.Meshes) {
+        PerformPostDeserializationAction<Mesh>(mmesh.MeshUUID);
+    }
+    for (const auto& textureUUID : model.Textures) {
+        PerformPostDeserializationAction<Texture>(textureUUID);
+    }
 }
 

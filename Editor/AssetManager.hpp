@@ -70,10 +70,12 @@ private:
     void RenderTreeViewRecursive(FNode& current);
 
     void RenderSelectedFolderContent();
+    void RenderListItem(FNode& file) noexcept;
     void RenderContextMenu();
     void OpenFileAtFileNode(FNode& file);
 
     void SetSelectedNode(FNode* node);
+    void SetSelectedSubAssetNode(FNode* node, const UUID subAssetID);
     void SetCurrentFolder(FNode* folder);
 
     void OnProjectLoaded(Project& project);
