@@ -167,7 +167,7 @@ template<typename... Args>
     requires std::constructible_from<NodeData, Args...>
 inline auto Tree<NodeData, InitialNodeCapacity, InitialChildCapacity>::EmplaceNode(const NodeIndex parentIndex, Args&&... args) noexcept -> NodeIndex {
     assert(parentIndex < data.size());
-    data.emplace_back(std::forward<Args>(args)..., decltype(Node::Children){}).Children.reserve(InitialChildCapacity);
+    data.emplace_back(NodeData{ std::forward<Args>(args)...}, decltype(Node::Children){}).Children.reserve(InitialChildCapacity);
     data[parentIndex].Children.emplace_back(data.size() - 1);
     return data.size() - 1;
 }
