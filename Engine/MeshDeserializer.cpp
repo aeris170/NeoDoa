@@ -64,6 +64,7 @@ void MeshDeserializer::Vertices::DefaultDeserialize(tinyxml2::XMLElement& vertic
         DeserializeVertex(*vertexElem, mdr);
         vertexElem = vertexElem->NextSiblingElement("vertex");
     }
+    mdr.deserializedMesh.CalculateAABBProperties();
 }
 void MeshDeserializer::Vertices::DefaultDeserializeVertex(tinyxml2::XMLElement& vertexElem, MeshDeserializationResult& mdr) {
     const tinyxml2::XMLElement* positionElem  = vertexElem.FirstChildElement("position");

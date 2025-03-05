@@ -49,7 +49,6 @@ namespace MeshDeserializer {
         void DefaultDeserializeIndex(tinyxml2::XMLElement& indexElem, MeshDeserializationResult& mdr);
     }
 
-
     /* ----- Serializer Functions ----- */
     inline DeserializeFunction Deserialize{ DefaultDeserialize };                     /* Feel free to assign this your own function, if you need custom deserialization */
     inline DeserializeNameFunction DeserializeName{ DefaultDeserializeName };         /* Feel free to assign this your own function, if you need custom deserialization */
@@ -61,5 +60,4 @@ namespace MeshDeserializer {
         inline DeserializeFunction Deserialize{ DefaultDeserialize };                   /* Feel free to assign this your own function, if you need custom deserialization */
         inline DeserializeIndexFunction DeserializeIndex{ DefaultDeserializeIndex };    /* Feel free to assign this your own function, if you need custom deserialization */
     }
-
 }
