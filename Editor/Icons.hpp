@@ -193,22 +193,22 @@ namespace FileIcons {
     };
 
     inline constexpr const char SCENE_ICON[]{ ICON_FA_CUBES_STACKED };
-    inline std::array<ElementType, 1> SceneIcons{
+    inline std::array<ElementType, 1> SceneIcons {
         std::pair{ SCENE_ICON, "cubes-stacked" }
     };
 
     inline constexpr const char COMPONENT_ICON[]{ ICON_FA_GEAR };
-    inline std::array<ElementType, 1> ComponentIcons{
+    inline std::array<ElementType, 1> ComponentIcons {
         std::pair{ COMPONENT_ICON, "gear" }
     };
 
     inline constexpr const char SAMPLER_ICON[]{ ICON_FA_LOADER };
-    inline std::array<ElementType, 1> SamplerIcons{
+    inline std::array<ElementType, 1> SamplerIcons {
         std::pair{ SAMPLER_ICON, "loader" }
     };
 
     inline constexpr const char TEXTURE_ICON[]{ ICON_FA_IMAGE };
-    inline std::array<ElementType, 1> TextureIcons{
+    inline std::array<ElementType, 1> TextureIcons {
         std::pair{ TEXTURE_ICON, "image" }
     };
 
@@ -219,7 +219,7 @@ namespace FileIcons {
     inline constexpr const char GEOMETRY_SHADER_ICON[]  { ICON_FA_CIRCLE_G };
     inline constexpr const char FRAGMENT_SHADER_ICON[]  { ICON_FA_CIRCLE_F };
     inline constexpr const char COMPUTE_SHADER_ICON[]   { ICON_FA_CIRCLE_C };
-    inline std::array<ElementType, 7> ShaderIcons{
+    inline std::array<ElementType, 7> ShaderIcons {
         std::pair{ SHADER_ICON,           "circle-s" },
         std::pair{ VERTEX_SHADER_ICON,    "circle-v" },
         std::pair{ TESS_CTRL_SHADER_ICON, "circle-t" },
@@ -229,22 +229,22 @@ namespace FileIcons {
         std::pair{ COMPUTE_SHADER_ICON,   "circle-c" }
     };
     inline constexpr const char SHADER_PROGRAM_ICON[]{ ICON_FA_TRIANGLE };
-    inline std::array<ElementType, 1> ShaderProgramIcons{
+    inline std::array<ElementType, 1> ShaderProgramIcons {
         std::pair{ SHADER_PROGRAM_ICON, "triangle" }
     };
 
     inline constexpr const char MATERIAL_ICON[]{ ICON_FA_CIRCLE };
-    inline std::array<ElementType, 1> MaterialIcons{
+    inline std::array<ElementType, 1> MaterialIcons {
         std::pair{ MATERIAL_ICON, "circle" }
     };
 
     inline constexpr const char FRAMEBUFFER_ICON[]{ ICON_FA_GALLERY_THUMBNAILS };
-    inline std::array<ElementType, 1> FrameBufferIcons{
+    inline std::array<ElementType, 1> FrameBufferIcons {
         std::pair{ FRAMEBUFFER_ICON, "gallery-thumbnails" }
     };
 
     inline constexpr const char MESH_ICON[]{ ICON_FA_CUBE };
-    inline std::array<ElementType, 1> MeshIcons{
+    inline std::array<ElementType, 1> MeshIcons {
         std::pair{ MESH_ICON, "cube" }
     };
 
@@ -300,7 +300,7 @@ namespace FileIcons {
     inline constexpr const char FILE_ICON_WORD[]               { ICON_FA_FILE_WORD               };
     inline constexpr const char FILE_ICON_XMARK[]              { ICON_FA_FILE_XMARK              };
     inline constexpr const char FILE_ICON_ZIPPER[]             { ICON_FA_FILE_ZIPPER             };
-    inline std::array<ElementType, 52> RegularFileIcons{
+    inline std::array<ElementType, 52> RegularFileIcons {
         std::pair{ FILE_ICON,                    "file"                    },
         std::pair{ FILE_ICON_MULTIPLE,           "files"                   },
         std::pair{ FILE_ICON_ARROW_DOWN,         "file-arrow-down"         },

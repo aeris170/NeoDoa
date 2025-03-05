@@ -232,8 +232,8 @@ ComponentDeserializationResult DeserializeComponent(const FNode& file) {
             );
         }
 
-        rv.deserializedComponent.name = typeInfo->GetName();
-        rv.deserializedComponent.declaration = content;
+        rv.deserializedComponent.Name = typeInfo->GetName();
+        rv.deserializedComponent.Declaration = content;
 
         int fieldCount = typeInfo->GetPropertyCount();
         for (int j = 0; j < fieldCount; j++) {
@@ -266,7 +266,7 @@ ComponentDeserializationResult DeserializeComponent(const FNode& file) {
                 default: d.typeName = scriptEngine.GetTypeInfoById(d.typeId)->GetName(); break;
             }
 
-            rv.deserializedComponent.fields.emplace_back(d.typeName, d.name);
+            rv.deserializedComponent.Fields.emplace_back(d.typeName, d.name);
         }
     }
 
@@ -313,7 +313,7 @@ ComponentDeserializationResult DeserializeComponent(const std::string_view data)
     for (decltype(declaredObjectCount) i = 0; i < declaredObjectCount; i++) {
         auto typeInfo = scriptModule->GetObjectTypeByIndex(i);
         if (!angel->IsComponentDefinition(typeInfo)) {
-            rv.deserializedComponent.name = typeInfo->GetName();
+            rv.deserializedComponent.Name = typeInfo->GetName();
 
             int fieldCount = typeInfo->GetPropertyCount();
             for (int j = 0; j < fieldCount; j++) {
@@ -346,11 +346,11 @@ ComponentDeserializationResult DeserializeComponent(const std::string_view data)
                 default: d.typeName = scriptEngine.GetTypeInfoById(d.typeId)->GetName(); break;
                 }
 
-                rv.deserializedComponent.fields.emplace_back(d.typeName, d.name);
+                rv.deserializedComponent.Fields.emplace_back(d.typeName, d.name);
             }
         }
     }
 
-    rv.deserializedComponent.declaration = content;
+    rv.deserializedComponent.Declaration = content;
     return rv;
 }

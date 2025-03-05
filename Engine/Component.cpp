@@ -2,7 +2,7 @@
 
 #include "ComponentDeserializer.hpp"
 
-std::string Component::Serialize() const { return declaration; }
+std::string Component::Serialize() const { return Declaration; }
 Component Component::Deserialize(const std::string_view data) { return DeserializeComponent(data).deserializedComponent; }
 
 Component Component::Copy(const Component& component) {
