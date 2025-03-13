@@ -247,42 +247,42 @@ void UserDefinedComponentStorageUI::RenderComponentInstance(const ComponentInsta
     AssetHandle cmpAsset{ Core::GetCore()->GetAssets()->FindAsset(instance.ComponentAssetID()) };
     const auto& component{ cmpAsset->DataAs<Component>() };
     if (!cmpAsset.HasValue() || cmpAsset->HasErrorMessages()) { return; }
-    for (size_t i = 0; i < component.fields.size(); i++) {
-        auto& field{ component.fields[i] };
-        const auto& type{ field.typeName };
+    for (size_t i = 0; i < component.Fields.size(); i++) {
+        auto& field{ component.Fields[i] };
+        const auto& type{ field.TypeName };
         auto& value{ instance.MemberValues()[i] };
         if (type == "bool") {
-            BoolWidget(field.name, value.As<bool&>());
+            BoolWidget(field.Name, value.As<bool&>());
         }
         if (type == "int8") {
-            Int8Widget(field.name, value.As<int8_t&>());
+            Int8Widget(field.Name, value.As<int8_t&>());
         }
         if (type == "int16") {
-            Int16Widget(field.name, value.As<int16_t&>());
+            Int16Widget(field.Name, value.As<int16_t&>());
         }
         if (type == "int") {
-            Int32Widget(field.name, value.As<int32_t&>());
+            Int32Widget(field.Name, value.As<int32_t&>());
         }
         if (type == "long") {
-            Int64Widget(field.name, value.As<int64_t&>());
+            Int64Widget(field.Name, value.As<int64_t&>());
         }
         if (type == "uint8") {
-            UInt8Widget(field.name, value.As<uint8_t&>());
+            UInt8Widget(field.Name, value.As<uint8_t&>());
         }
         if (type == "uint16") {
-            UInt16Widget(field.name, value.As<uint16_t&>());
+            UInt16Widget(field.Name, value.As<uint16_t&>());
         }
         if (type == "unsigned int") {
-            UInt32Widget(field.name, value.As<uint32_t&>());
+            UInt32Widget(field.Name, value.As<uint32_t&>());
         }
         if (type == "unsigned long") {
-            UInt64Widget(field.name, value.As<uint64_t&>());
+            UInt64Widget(field.Name, value.As<uint64_t&>());
         }
         if (type == "float") {
-            FloatWidget(field.name, value.As<float_t&>());
+            FloatWidget(field.Name, value.As<float_t&>());
         }
         if (type == "double") {
-            DoubleWidget(field.name, value.As<double_t&>());
+            DoubleWidget(field.Name, value.As<double_t&>());
         }
     }
 }

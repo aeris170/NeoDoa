@@ -31,7 +31,7 @@ ComponentInstance::ComponentInstance(const UUID uuid, Assets& assets) noexcept :
 
     if (assets.IsComponentDefinitionAsset(uuid)) {
         if (assets.AssetHasDeserializedData(uuid)) {
-            ReConstructData(assets.GetDataOfAssetAs<Component>(uuid).fields, memberValues);
+            ReConstructData(assets.GetDataOfAssetAs<Component>(uuid).Fields, memberValues);
         } else {
             error = InstantiationError::DEFINITION_NOT_DESERIALIZED;
         }
@@ -39,7 +39,7 @@ ComponentInstance::ComponentInstance(const UUID uuid, Assets& assets) noexcept :
         error = InstantiationError::NON_DEFITION_INSTANTIATION;
     }
     if (assets.AssetHasDeserializedData(uuid)) {
-        FillData(assets.GetDataOfAssetAs<Component>(uuid).fields, memberValues);
+        FillData(assets.GetDataOfAssetAs<Component>(uuid).Fields, memberValues);
     } else {
         error = InstantiationError::DEFINITION_NOT_DESERIALIZED;
     }
@@ -55,7 +55,7 @@ ComponentInstance::ComponentInstance(const UUID uuid, Assets& assets, std::vecto
 
     if (assets.IsComponentDefinitionAsset(uuid)) {
         if (assets.AssetHasDeserializedData(uuid)) {
-            ReConstructData(assets.GetDataOfAssetAs<Component>(uuid).fields, memberValues);
+            ReConstructData(assets.GetDataOfAssetAs<Component>(uuid).Fields, memberValues);
         } else {
             error = InstantiationError::DEFINITION_NOT_DESERIALIZED;
         }
@@ -134,7 +134,7 @@ void ComponentInstance::OnAssetDeserialized(const UUID uuid) noexcept {
     } else {
         /* if there aren't any we potentially have new/reorganized fields so we must */
         /* reorganize/reconstruct our instance data to reflect the changes on component */
-        ReConstructData(referenceScriptsOwningManager.get().GetDataOfAssetAs<Component>(uuid).fields, memberValues);
+        ReConstructData(referenceScriptsOwningManager.get().GetDataOfAssetAs<Component>(uuid).Fields, memberValues);
         /* we also must clean-up the error */
         error = InstantiationError::OK;
     }
@@ -154,8 +154,8 @@ void ComponentInstance::OnAssetDestructed(const UUID uuid) noexcept {
 void ComponentInstance::FillData(const std::vector<Component::Field>& fields, std::vector<ComponentInstance::Field>& data) {
     data.clear();
     for (const auto& field : fields) {
-        const auto& type{ field.typeName };
-        const auto& name{ field.name };
+        const auto& type{ field.TypeName };
+        const auto& name{ field.Name };
         CreateNewEntry(type, name, data);
     }
 }
@@ -171,8 +171,8 @@ void ComponentInstance::ReConstructData(const std::vector<Component::Field>& fie
     */
     std::vector<ComponentInstance::Field> newData{};
     for (const auto& field : fields) {
-        const auto& type{ field.typeName };
-        const auto& name{ field.name };
+        const auto& type{ field.TypeName };
+        const auto& name{ field.Name };
 
         auto search = std::ranges::find_if(data, [&name](ComponentInstance::Field& f) {
             return name == f.Name();

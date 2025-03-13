@@ -23,7 +23,7 @@ void ComponentDefinitionDisplay::SetDisplayTarget(const AssetHandle componentDef
         componentDefAsset = componentDefAssetHandle;
         if (componentDefAsset->HasDeserializedData() && !componentDefAsset->HasErrorMessages()) {
             const auto& componentDef = componentDefAsset->DataAs<Component>();
-            textEditorInstance.SetText(componentDef.declaration);
+            textEditorInstance.SetText(componentDef.Declaration);
         }
     }
 }
@@ -102,18 +102,18 @@ void ComponentDefinitionDisplay::RenderFields() noexcept {
     const auto& componentDef = componentDefAsset->DataAs<Component>();
 
     ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders;
-    if (ImGui::CollapsingHeader(componentDef.name.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
+    if (ImGui::CollapsingHeader(componentDef.Name.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
         if (ImGui::BeginTable("component_fields", 2, flags)) {
             ImGui::TableSetupColumn("Field", ImGuiTableColumnFlags_WidthStretch);
             ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_WidthStretch);
             ImGui::TableHeadersRow();
 
-            for (auto& field : componentDef.fields) {
+            for (auto& field : componentDef.Fields) {
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);
-                ImGui::TextUnformatted(field.name.c_str());
+                ImGui::TextUnformatted(field.Name.c_str());
                 ImGui::TableSetColumnIndex(1);
-                ImGui::TextUnformatted(field.typeName.c_str());
+                ImGui::TextUnformatted(field.TypeName.c_str());
             }
             ImGui::EndTable();
         }

@@ -43,9 +43,9 @@ ComponentInstance* UserDefinedComponentStorage::AttachComponent(UUID component, 
     const Component& cmp = handle->DataAs<Component>();
     if (handle->HasErrorMessages()) {
         DOA_LOG_ERROR("Something went wrong! Tried to instantiate a component with compiler errors!");
-        return &components.try_emplace(cmp.name, component, assets, InstantiationError::DEFINITION_COMPILE_ERROR).first->second;
+        return &components.try_emplace(cmp.Name, component, assets, InstantiationError::DEFINITION_COMPILE_ERROR).first->second;
     }
-    return &components.try_emplace(cmp.name, component, assets).first->second;
+    return &components.try_emplace(cmp.Name, component, assets).first->second;
 }
 ComponentInstance* UserDefinedComponentStorage::AttachComponentWithData(UUID component, Assets& assets, std::vector<ComponentInstance::Field>&& data) {
     AssetHandle handle{ assets.FindAsset(component) };
@@ -64,9 +64,9 @@ ComponentInstance* UserDefinedComponentStorage::AttachComponentWithData(UUID com
     const Component& cmp = handle->DataAs<Component>();
     if (handle->HasErrorMessages()) {
         DOA_LOG_ERROR("Something went wrong! Tried to instantiate a component with compiler errors!");
-        return &components.try_emplace(cmp.name, component, assets, InstantiationError::DEFINITION_COMPILE_ERROR).first->second;
+        return &components.try_emplace(cmp.Name, component, assets, InstantiationError::DEFINITION_COMPILE_ERROR).first->second;
     }
-    return &components.try_emplace(cmp.name, component, assets, std::move(data)).first->second;
+    return &components.try_emplace(cmp.Name, component, assets, std::move(data)).first->second;
 }
 
 void UserDefinedComponentStorage::DetachComponent(UUID component) {
