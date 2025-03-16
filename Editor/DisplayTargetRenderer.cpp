@@ -194,7 +194,14 @@ void DisplayTargetRenderer::HandleTargetWhenSubAsset(FNode& file, const UUID sub
     ImGui::SameLine();
     ImGui::NextColumn();
 
-    ImGui::TextUnformatted(file.Name().data());
+    AssetHandle h = gui.CORE->GetAssets()->FindAsset(subAssetID);
+
+    std::optional<std::string_view> result = h->TryGetName();
+    if (result.has_value() && !result.value().empty()) {
+        ImGui::Text("%s (SubAsset of %s)", h->TryGetName().value().data(), file.Name().data());
+    } else {
+        ImGui::Text("[MISSING NAME] (SubAsset of %s)", file.Name().data());
+    }
 
     ImGui::PopFont();
     ImGui::PushFont(gui.GetFont());
@@ -209,7 +216,6 @@ void DisplayTargetRenderer::HandleTargetWhenSubAsset(FNode& file, const UUID sub
     ImGui::Columns(1);
     ImGui::Separator();
 
-    AssetHandle h = gui.CORE->GetAssets()->FindAsset(subAssetID);
     if (h.HasValue()) {
         RenderAssetView(h);
     }
