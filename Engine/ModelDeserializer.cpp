@@ -74,10 +74,32 @@ ModelDeserializationResult DeserializeModel(const std::string_view data) noexcep
     auto* a = Assimp::DefaultLogger::create("", Assimp::Logger::VERBOSE);
     Assimp::DefaultLogger::get()->attachStream(new ConsoleLogStream, Assimp::Logger::VERBOSE);
 
-    Assimp::Importer importer;
+    Assimp::Importer importer{};
 
-    auto flags = aiProcess_Triangulate |
-        aiProcess_FlipUVs;
+    auto flags = aiProcess_CalcTangentSpace |
+        aiProcess_GenSmoothNormals          |
+        aiProcess_JoinIdenticalVertices     |
+        aiProcess_ImproveCacheLocality      |
+        aiProcess_LimitBoneWeights          |
+        aiProcess_RemoveRedundantMaterials  |
+        aiProcess_SplitLargeMeshes          |
+        aiProcess_Triangulate               |
+        aiProcess_GenUVCoords               |
+        aiProcess_SortByPType               |
+        aiProcess_FindDegenerates           |
+        aiProcess_FindInvalidData           |
+        aiProcess_FindInstances             |
+        aiProcess_ValidateDataStructure     |
+        aiProcess_OptimizeMeshes            |
+        aiProcess_FlipUVs                   |
+        aiProcess_RemoveComponent           |
+        aiProcess_OptimizeGraph;
+
+    flags = aiProcess_FlipUVs | aiProcess_Triangulate;
+
+    importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS, aiComponent_COLORS | aiComponent_LIGHTS | aiComponent_CAMERAS);
+    importer.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_POINT | aiPrimitiveType_LINE);
+
     const aiScene* scene = importer.ReadFileFromMemory(data.data(), data.size(), flags, "fbx");
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
         rv.erred = true;
@@ -133,6 +155,8 @@ std::pair<std::vector<Mesh>, std::vector<size_t>> processMeshes(const aiScene& s
     for (size_t i = 0; i < scene.mNumMeshes; i++) {
         Mesh& m = meshes[i];
         const aiMesh& mesh = *scene.mMeshes[i];
+
+        m.Name = mesh.mName.C_Str();
 
         m.Vertices.resize(mesh.mNumVertices);
         for (size_t j = 0; j < mesh.mNumVertices; j++) {
