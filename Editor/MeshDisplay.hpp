@@ -19,14 +19,14 @@ struct MeshDisplay {
     struct WireframeSettingsData {
         bool renderWireframe{ true };
         std::byte padding[15];
-        Color wireframeColor{ 1.0f, 1.0f, 1.0f, 1.0f };
+        Color wireframeColor{ 0.0f, 0.0f, 0.0f, 1.0f };
         float wireframeThicknessCoefficient{ 1.5f };
     } WireframeSettings{};
     struct NormalVisualizationSettingsData {
-        bool renderNormals{ true };
+        bool renderNormals{ false };
         std::byte padding[15];
         Color normalColor{ 1.0f, 1.0f, 0.0f, 1.0f };
-        float normalMagnitude{ 0.4f };
+        float normalMagnitude{ 0.1f };
     } NormalVisualizationSettings{};
 
     explicit MeshDisplay(Observer& observer) noexcept;
@@ -71,6 +71,8 @@ private:
     } controls{};
 
     void HandleMouseControls() noexcept;
+
+    void ResetCamera() noexcept;
 
     // context: the thing which we're editing the color of.
     // Like, if we're editing "Wireframe Color", context is "Wirefra"

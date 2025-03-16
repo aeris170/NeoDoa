@@ -22,7 +22,7 @@ MeshDisplay::MeshDisplay(Observer& observer) noexcept :
     camera.Eye = { 0, 0, 1 };
 
     GPUBufferBuilder bBuilder;
-    projViewBuffer = bBuilder.SetProperties(BufferProperties::DynamicStorage).SetStorage(sizeof(glm::mat4) * 2, nullptr).Build().first.value();
+    projViewBuffer = bBuilder.SetProperties(BufferProperties::DynamicStorage).SetStorage(sizeof(glm::mat4) * 3, nullptr).Build().first.value();
     wireframeBuffer = bBuilder.SetProperties(BufferProperties::DynamicStorage).SetStorage(sizeof(WireframeSettingsData), nullptr).Build().first.value();
     normalVisualizationBuffer = bBuilder.SetProperties(BufferProperties::DynamicStorage).SetStorage(sizeof(NormalVisualizationSettingsData), nullptr).Build().first.value();
 
@@ -41,13 +41,14 @@ out VS_OUT {
     vec2 UV;
 } vs_out;
 
-layout(std140, binding = 0) uniform ProjViewBuffer {
+layout(std140, binding = 0) uniform ProjViewModelBuffer {
     mat4 projection;
     mat4 view;
+    mat4 model;
 };
 
 void main() {
-    gl_Position = projection * view * vec4(vPos, 1.0);
+    gl_Position = projection * view * model * vec4(vPos, 1.0);
     vs_out.normal = vNormal;
     vs_out.color = vColor;
     vs_out.UV = vUV;
@@ -139,14 +140,15 @@ out VS_OUT {
     vec2 UV;
 } vs_out;
 
-layout(std140, binding = 0) uniform ProjViewBuffer {
+layout(std140, binding = 0) uniform ProjViewModelBuffer {
     mat4 projection;
     mat4 view;
+    mat4 model;
 };
 
 void main() {
-    gl_Position = view * vec4(vPos, 1.0);
-    mat3 normalMatrix = mat3(transpose(inverse(view)));
+    gl_Position = view * model * vec4(vPos, 1.0);
+    mat3 normalMatrix = mat3(transpose(inverse(view * model)));
     vs_out.normal = normalize(vec3(vec4(normalMatrix * vNormal, 0.0)));
     vs_out.color = vColor;
     vs_out.UV = vUV;
@@ -164,9 +166,10 @@ in VS_OUT {
     vec2 UV;
 } gs_in[];
 
-layout(std140, binding = 0) uniform ProjViewBuffer {
+layout(std140, binding = 0) uniform ProjViewModelBuffer {
     mat4 projection;
     mat4 view;
+    mat4 model;
 };
 layout(std140, binding = 1) uniform NormalBuffer {
     bool renderNormals;
@@ -250,6 +253,8 @@ void MeshDisplay::SetDisplayTarget(const AssetHandle meshAssetHandle) noexcept {
         aBuilder.SetName("NeoDoa MeshDisplay Normal Visualization Pipeline")
             .SetShaderProgram(normalVisualizationProgram);
         normalVisualizationPipeline = aBuilder.Build().first.value();
+
+        ResetCamera();
     }
 }
 void MeshDisplay::RenderMessagesTable() noexcept {
@@ -448,18 +453,27 @@ void MeshDisplay::RenderMeshToOffscreenBuffer() noexcept {
     Graphics::SetRenderTarget(framebufferMultisampled, targets);
     Graphics::ClearRenderTarget(framebufferMultisampled, { 0.3f, 0.3f, 0.3f, 1.0f });
 
-    // Bind per-frame uniform
+    // Allocate and fill per-frame uniform
     camera.UpdateView();
     camera.UpdateProjection();
-    std::array<glm::mat4, 2> matrices {
+    std::array<glm::mat4, 3> matrices {
         camera.GetProjectionMatrix(),
-        camera.GetViewMatrix()
+        camera.GetViewMatrix(),
+        glm::identity<glm::mat4>()
     };
+    // Calculate model matrix - fit object into default zoom level and center it.
+    const Mesh& m = meshAsset->DataAs<Mesh>();
+    glm::vec3 halfExtents = (m.Max - m.Min) * 0.5f;
+    float scaleFactor = 1.0f / glm::compMax(halfExtents); // Use the largest half extent
+    glm::mat4& model{ matrices[2] };
+    model = glm::scale(model, { scaleFactor, scaleFactor, scaleFactor });
+    model = glm::translate(model, -m.Origin);
+
+    // Bind per-frame uniform
     Graphics::BufferSubData(projViewBuffer, sizeof(matrices), reinterpret_cast<NonOwningPointerToConstRawData>(glm::value_ptr(matrices[0])));
     Graphics::BufferSubData(wireframeBuffer, sizeof(WireframeSettingsData), reinterpret_cast<NonOwningPointerToConstRawData>(&WireframeSettings));
     Graphics::BufferSubData(normalVisualizationBuffer, sizeof(NormalVisualizationSettingsData), reinterpret_cast<NonOwningPointerToConstRawData>(&NormalVisualizationSettings));
 
-    const Mesh& m = meshAsset->DataAs<Mesh>();
     int count = !m.Indices.empty() ? m.Indices.size() : m.Vertices.size();
 
     Graphics::BindPipeline(mainPipeline);
@@ -521,6 +535,18 @@ void MeshDisplay::HandleMouseControls() noexcept {
         controls.r * std::sin(glm::radians(controls.theta)) * std::cos(glm::radians(controls.phi))
     };
     forward = glm::normalize(-eye); // Make camera look at origin by setting forward to norm(origin - eye);
+}
+
+void MeshDisplay::ResetCamera() noexcept {
+    controls.r = 1;
+    controls.phi = 0;
+    controls.theta = 90;
+
+    glm::vec3& eye = camera.Eye;
+    glm::vec3& forward = camera.Forward;
+
+    eye = { 0, 0, 1 };
+    forward = { 0, 0, -1 };
 }
 
 void MeshDisplay::RenderColorButton(std::string_view label, std::string_view colorButtonID, std::string_view popupName, std::string_view popupTitle, Color& color, ImGuiColorEditFlags pickerFlags) noexcept {
