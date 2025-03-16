@@ -19,6 +19,7 @@ Asset& Asset::operator=(Asset&& other) noexcept {
 }
 
 UUID Asset::ID() const { return id; }
+const Assets& Asset::OwningManager() const { return owningManager; }
 FNode& Asset::File() const { return owningManager.get().GetFileOfAsset(id); }
 const AssetData& Asset::Data() const { return owningManager.get().GetDataOfAsset(id); }
 SubAssetList Asset::SubAssets() { return owningManager.get().GetSubAssetsOfAsset(id); }

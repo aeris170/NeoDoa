@@ -53,6 +53,7 @@ struct Asset final {
     Asset& operator=(Asset&& other) noexcept;
 
     UUID ID() const;
+    const Assets& OwningManager() const;
     FNode& File() const;
     const AssetData& Data() const;
     template<AssetType T>
@@ -196,6 +197,7 @@ struct AssetDatabase {
     UUIDMap<Asset>::const_iterator end() const noexcept;
 
     Asset& Emplace(UUID uuid, FNode* file, Assets& owningManager) noexcept;
+    AssetData& EmplaceAsSubAsset(UUID uuid, UUID owner, SubAssetTree::NodeIndex ownerIndex = SubAssetTree::Root) noexcept;
     bool Contains(UUID uuid) const noexcept;
     Asset& At(UUID uuid) noexcept;
     const Asset& At(UUID uuid) const noexcept;
@@ -285,8 +287,6 @@ struct Assets {
     static bool IsMeshFile(const FNode& file) noexcept;
     static bool IsModelFile(const FNode& file) noexcept;
     static bool IsScriptFile(const FNode& file) noexcept;
-
-    static EmptyAssetData CreateEmptyAssetData(const FNode& file) noexcept;
 
     explicit Assets(const Project& project, AssetGPUBridge& bridge) noexcept;
     ~Assets() = default;
@@ -387,6 +387,11 @@ struct Assets {
 
 private:
 
+    static EmptyAssetData CreateEmptyAssetDataUsingFile(const FNode& file) noexcept;
+    static EmptyAssetData CreateEmptyAssetDataUsingData(const AssetData& data) noexcept;
+    template<AssetType T> // Specialize this template for your asset type!
+    static constexpr EmptyAssetData CreateEmptyAssetDataUsingType([[maybe_unused]] std::string_view name = "") noexcept { std::unreachable(); }
+
 #if DEBUG
     using AssetFileDatabase = std::unordered_map<const FNode*, UUID>;
 #elif NDEBUG
@@ -427,6 +432,7 @@ private:
     AssetGPUBridge& bridge;
 
     UUID GenerateUUID() const noexcept;
+    UUID FindOrGenerateUUIDForSubAsset(UUID owner, std::string_view subAssetName, HashedString subAssetType) noexcept;
 
     std::pair<UUID, AssetHandle> ImportFile(AssetDatabase& database, const FNode& file) noexcept;
     void ImportAllFiles(AssetDatabase& database, const FNode& root) noexcept;
@@ -439,7 +445,30 @@ private:
 
     template<AssetType T>
     void PerformPostDeserializationAction([[maybe_unused]] const UUID uuid) noexcept {}
+
+    friend struct AssetDatabase;
 };
+
+template<>
+EmptyAssetData Assets::CreateEmptyAssetDataUsingType<Scene>(std::string_view name) noexcept;
+template<>
+EmptyAssetData Assets::CreateEmptyAssetDataUsingType<Component>(std::string_view name) noexcept;
+template<>
+EmptyAssetData Assets::CreateEmptyAssetDataUsingType<Sampler>(std::string_view name) noexcept;
+template<>
+EmptyAssetData Assets::CreateEmptyAssetDataUsingType<Texture>(std::string_view name) noexcept;
+template<>
+EmptyAssetData Assets::CreateEmptyAssetDataUsingType<Shader>(std::string_view name) noexcept;
+template<>
+EmptyAssetData Assets::CreateEmptyAssetDataUsingType<ShaderProgram>(std::string_view name) noexcept;
+template<>
+EmptyAssetData Assets::CreateEmptyAssetDataUsingType<Material>(std::string_view name) noexcept;
+template<>
+EmptyAssetData Assets::CreateEmptyAssetDataUsingType<FrameBuffer>(std::string_view name) noexcept;
+template<>
+EmptyAssetData Assets::CreateEmptyAssetDataUsingType<Mesh>(std::string_view name) noexcept;
+template<>
+EmptyAssetData Assets::CreateEmptyAssetDataUsingType<Model>(std::string_view name) noexcept;
 
 template<>
 void Assets::PerformPostDeserializationAction<Sampler>(const UUID uuid) noexcept;

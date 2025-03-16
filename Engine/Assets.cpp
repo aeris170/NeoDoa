@@ -50,12 +50,29 @@ AssetDatabase::UUIDMap<Asset>::const_iterator AssetDatabase::end()    const noex
 Asset& AssetDatabase::Emplace(UUID uuid, FNode* file, Assets& owningManager) noexcept {
     auto& asset = assets.try_emplace(uuid, uuid, owningManager).first->second;
     files.try_emplace(uuid, file);
-    data.try_emplace(uuid, Assets::CreateEmptyAssetData(*file));
+    data.try_emplace(uuid, Assets::CreateEmptyAssetDataUsingFile(*file));
     versions.try_emplace(uuid);
     infoLists.try_emplace(uuid);
     warningLists.try_emplace(uuid);
     errorLists.try_emplace(uuid);
     return asset;
+}
+AssetData& AssetDatabase::EmplaceAsSubAsset(UUID uuid, UUID owner, SubAssetTree::NodeIndex ownerIndex) noexcept {
+    assets.try_emplace(uuid, uuid, assets[owner].OwningManager());
+    auto empty = Assets::CreateEmptyAssetDataUsingFile(*files[owner]);
+    empty.Type = Assets::GenericAssetTypeName;
+    auto& data = this->data.try_emplace(uuid, empty).first->second;
+    versions.try_emplace(uuid);
+    infoLists.try_emplace(uuid);
+    warningLists.try_emplace(uuid);
+    errorLists.try_emplace(uuid);
+
+    if (ownerIndex == SubAssetTree::Root) {
+        ownerIndex = subAssets.FindNodeIndexDFS(owner);
+    }
+    subAssets.EmplaceNode(ownerIndex, uuid);
+
+    return data;
 }
 bool AssetDatabase::Contains(UUID uuid) const noexcept {
     return assets.contains(uuid);
@@ -119,20 +136,6 @@ bool Assets::IsModelFile(const FNode& file) noexcept {
         file.ext == ModelExtensionGLB;
 }
 bool Assets::IsScriptFile(const FNode& file)                       noexcept { return file.ext == SCRIPT_EXT;                            }
-
-EmptyAssetData Assets::CreateEmptyAssetData(const FNode& file) noexcept {
-    if (Assets::IsSceneFile(file))               { return { file.Name(), Assets::SceneTypeName };         }
-    if (Assets::IsComponentDefinitionFile(file)) { return { file.Name(), Assets::ComponentTypeName };     }
-    if (Assets::IsShaderFile(file))              { return { file.Name(), Assets::ShaderTypeName };        }
-    if (Assets::IsShaderProgramFile(file))       { return { file.Name(), Assets::ShaderProgramTypeName }; }
-    if (Assets::IsMaterialFile(file))            { return { file.Name(), Assets::MaterialTypeName };      }
-    if (Assets::IsSamplerFile(file))             { return { file.Name(), Assets::SamplerTypeName };       }
-    if (Assets::IsTextureFile(file))             { return { file.Name(), Assets::TextureTypeName };       }
-    if (Assets::IsFrameBufferFile(file))         { return { file.Name(), Assets::FrameBufferTypeName };   }
-    if (Assets::IsMeshFile(file))                { return { file.Name(), Assets::MeshTypeName };          }
-    if (Assets::IsModelFile(file))               { return { file.Name(), Assets::ModelTypeName };         }
-    return { file.Name(), Assets::GenericAssetTypeName };
-}
 
 Assets::Assets(const Project& project, AssetGPUBridge& bridge) noexcept :
     _root({ &project, nullptr, "", "", "", true }),
@@ -493,18 +496,15 @@ void Assets::DeserializeAsset(const UUID uuid) noexcept {
         for (auto& error : result.errors) {
             errorList.emplace_back(std::move(error));
         }
-        data = std::move(result.deserializedModel);
-        Model& model = std::get<Model>(data);
+        Model& model{ result.deserializedModel };
 
         auto index = database.subAssets.EmplaceNode(AssetDatabase::SubAssetTree::Root, uuid);
+        model.Meshes.resize(result.deserializedMeshes.size());
         for (size_t i = 0; i < result.deserializedMeshes.size(); i++) {
             Mesh& mesh = result.deserializedMeshes[i];
-            UUID meshID = GenerateUUID();
-            database.Emplace(meshID, file, *this);
-            std::get<EmptyAssetData>(database.data[meshID]).Type = MeshTypeName;
-            database.data[meshID] = std::move(mesh);
-            database.subAssets.EmplaceNode(index, meshID);
-            model.Meshes.emplace_back(meshID, result.meshMaterialIndices[i]);
+            UUID meshID = FindOrGenerateUUIDForSubAsset(uuid, mesh.Name, MeshTypeName);
+            database.EmplaceAsSubAsset(meshID, uuid, index) = std::move(mesh);
+            model.Meshes[i] = { meshID, result.meshMaterialIndices[i] };
         }
         for (auto& tdr : result.deserializedTextures) {
             if (tdr.erred) { continue; }
@@ -515,6 +515,10 @@ void Assets::DeserializeAsset(const UUID uuid) noexcept {
             database.subAssets.EmplaceNode(index, textureID);
             model.Textures.push_back(textureID);
         }
+
+        // Must re-bind as erratic additions in the above loops may (or not) cause re-alloc on database...
+        AssetData& data = database.data[uuid];
+        data = std::move(model);
     }
     /*
     * TODO others
@@ -553,13 +557,18 @@ void Assets::ForceDeserializeAsset(const UUID uuid) noexcept {
 }
 void Assets::DeleteDeserializedDataOfAsset(const UUID uuid) noexcept {
     assert(database.Contains(uuid));
-    database.data[uuid] = CreateEmptyAssetData(*database.files[uuid]);
+    if (IsSubAsset(uuid)) {
+        DOA_LOG_WARNING("Assets::DeleteDeserializedDataOfAsset called with UUID: %s\n. SubAsset data cannot be deleted by itself. Try deleting parent data.");
+        return;
+    }
+    DeleteOtherResourcesCorrespondingToDeletedAsset(uuid);
+
+    database.data[uuid] = CreateEmptyAssetDataUsingData(database.data[uuid]);
     database.infoLists[uuid].clear();
     database.warningLists[uuid].clear();
     database.errorLists[uuid].clear();
     database.versions[uuid]++;
 
-    DeleteOtherResourcesCorrespondingToDeletedAsset(uuid);
     Events.OnAssetDataDeleted(uuid);
 }
 bool Assets::AssetHasDeserializedData(const UUID uuid) const noexcept {
@@ -723,6 +732,36 @@ void Assets::TryDeleteDependencyBetween(UUID dependent, UUID dependency) noexcep
     }
 }
 
+EmptyAssetData Assets::CreateEmptyAssetDataUsingFile(const FNode& file) noexcept {
+    if (Assets::IsSceneFile(file))               { return { file.Name(), Assets::SceneTypeName };         }
+    if (Assets::IsComponentDefinitionFile(file)) { return { file.Name(), Assets::ComponentTypeName };     }
+    if (Assets::IsShaderFile(file))              { return { file.Name(), Assets::ShaderTypeName };        }
+    if (Assets::IsShaderProgramFile(file))       { return { file.Name(), Assets::ShaderProgramTypeName }; }
+    if (Assets::IsMaterialFile(file))            { return { file.Name(), Assets::MaterialTypeName };      }
+    if (Assets::IsSamplerFile(file))             { return { file.Name(), Assets::SamplerTypeName };       }
+    if (Assets::IsTextureFile(file))             { return { file.Name(), Assets::TextureTypeName };       }
+    if (Assets::IsFrameBufferFile(file))         { return { file.Name(), Assets::FrameBufferTypeName };   }
+    if (Assets::IsMeshFile(file))                { return { file.Name(), Assets::MeshTypeName };          }
+    if (Assets::IsModelFile(file))               { return { file.Name(), Assets::ModelTypeName };         }
+    return { file.Name(), Assets::GenericAssetTypeName };
+}
+EmptyAssetData Assets::CreateEmptyAssetDataUsingData(const AssetData& data) noexcept {
+    return std::visit(overloaded::lambda {
+        [](const EmptyAssetData& empty)    -> EmptyAssetData { return empty; },
+        [](const Scene& scene)             -> EmptyAssetData { return { scene.Name,       SceneTypeName         }; },
+        [](const Component& component)     -> EmptyAssetData { return { component.Name,   ComponentTypeName     }; },
+        [](const Sampler& sampler)         -> EmptyAssetData { return { sampler.Name,     SamplerTypeName       }; },
+        [](const Texture& texture)         -> EmptyAssetData { return { texture.Name,     TextureTypeName       }; },
+        [](const Shader& shader)           -> EmptyAssetData { return { shader.Name,      ShaderTypeName        }; },
+        [](const ShaderProgram& program)   -> EmptyAssetData { return { program.Name,     ShaderProgramTypeName }; },
+        [](const Material& material)       -> EmptyAssetData { return { material.Name,    MaterialTypeName      }; },
+        [](const FrameBuffer& frameBuffer) -> EmptyAssetData { return { frameBuffer.Name, FrameBufferTypeName   }; },
+        [](const Mesh& mesh)               -> EmptyAssetData { return { mesh.Name,        MeshTypeName          }; },
+        [](const Model& model)             -> EmptyAssetData { return { model.Name,       ModelTypeName         }; },
+    }, data);
+    std::unreachable();
+}
+
 UUID Assets::GenerateUUID() const noexcept {
     UUID uuid{};
     while (database.Contains(uuid) || uuid == UUID::Empty()) {
@@ -730,6 +769,113 @@ UUID Assets::GenerateUUID() const noexcept {
         uuid = UUID();
     }
     return uuid;
+}
+UUID Assets::FindOrGenerateUUIDForSubAsset(UUID owner, std::string_view subAssetName, HashedString subAssetType) noexcept {
+    /* Find or Generate a UUID for a SubAsset:
+        * Step 1: Get the owner import data file: fileName.fileExtension.id
+        * Step 2: Read the file for "subAssets" element
+            * Step 2a: If not exists, create the element, generate UUID and add it to the "subAssets" element
+            * Step 2b: Else, if exists, look for all children, try to match the information in children with queried name and type
+                * Step 2ba: If can match, read UUID from the node
+                * Step 2bb: Else, if cant' match, genereate UUID and add it to the "subAssets" element
+    */
+    UUID rv{ UUID::Empty() };
+
+    // Step 1
+    FNode& ownerFile = *database.files[owner];
+    FNode importData = FNode::HollowCopy();
+    importData.ext.append(AssetIDExtension);
+    importData.fullName.append(AssetIDExtension);
+
+    // Step 2
+    tinyxml2::XMLDocument doc;
+    tinyxml2::XMLError err = doc.LoadFile(importData.AbsolutePath().string().c_str());
+    assert(err != tinyxml2::XMLError::XML_ERROR_FILE_NOT_FOUND);
+    assert(err == tinyxml2::XMLError::XML_SUCCESS);
+
+    tinyxml2::XMLElement* subAssetsElement = doc.RootElement()->FirstChildElement("subAssets");
+    if (!subAssetsElement) {
+        // Step 2a
+        tinyxml2::XMLPrinter printer;
+        printer.PushComment("WARNING!! This file is not for editing! Don't!");
+        printer.OpenElement("importData");
+        printer.OpenElement("uuid");
+        printer.PushText(owner);
+        printer.CloseElement();
+
+        printer.OpenElement("subAssets"); {
+            printer.OpenElement("subAsset"); {
+                printer.OpenElement("type");
+                printer.PushText(subAssetType.data());
+                printer.CloseElement();
+
+                printer.OpenElement("name");
+                printer.PushText(subAssetName.data());
+                printer.CloseElement();
+
+                rv = GenerateUUID();
+                printer.OpenElement("uuid");
+                printer.PushText(rv);
+                printer.CloseElement();
+            }
+            printer.CloseElement();
+        }
+        printer.CloseElement();
+        printer.CloseElement();
+
+        doc.Parse(printer.CStr());
+        doc.SaveFile(importData.AbsolutePath().string().c_str());
+
+        if (ownerFile.HasContent()) {
+            ownerFile.DisposeContent();
+            ownerFile.ReadContent();
+        }
+    } else {
+        // Step 2b
+        assert(subAssetsElement->ChildElementCount() > 0);
+        for (const tinyxml2::XMLElement* child = subAssetsElement->FirstChildElement(); child != nullptr; child = child->NextSiblingElement()) {
+            // Step 2ba
+            assert(child->Name() == "subAsset");
+
+            const tinyxml2::XMLElement* typeElement = child->FirstChildElement("type");
+            const tinyxml2::XMLElement* nameElement = child->FirstChildElement("name");
+            const tinyxml2::XMLElement* uuidElement = child->FirstChildElement("uuid");
+            assert(typeElement && nameElement && uuidElement &&
+                   typeElement->GetText() && nameElement->GetText());
+
+            if (std::string_view{ subAssetType.data() }.compare(typeElement->GetText()) == 0 &&
+                subAssetName.compare(nameElement->GetText()) == 0) {
+                uint64_t val;
+                tinyxml2::XMLError error = uuidElement->QueryUnsigned64Text(&val);
+                assert(error == tinyxml2::XMLError::XML_SUCCESS);
+                rv = val;
+            }
+        }
+        if (rv == UUID::Empty()) {
+            // Step 2bb
+            tinyxml2::XMLElement& newChild = *subAssetsElement->InsertNewChildElement("subAsset");
+
+            tinyxml2::XMLElement& typeElement = *newChild.InsertNewChildElement("type");
+            tinyxml2::XMLElement& nameElement = *newChild.InsertNewChildElement("name");
+            tinyxml2::XMLElement& uuidElement = *newChild.InsertNewChildElement("uuid");
+
+            typeElement.SetText(subAssetType.data());
+            nameElement.SetText(subAssetName.data());
+
+            rv = GenerateUUID();
+            uuidElement.SetText(rv.AsString().c_str());
+
+            doc.SaveFile(importData.AbsolutePath().string().c_str());
+
+            if (ownerFile.HasContent()) {
+                ownerFile.DisposeContent();
+                ownerFile.ReadContent();
+            }
+        }
+    }
+
+    assert(rv != UUID::Empty());
+    return rv;
 }
 
 std::pair<UUID, AssetHandle> Assets::ImportFile(AssetDatabase& database, const FNode& file) noexcept {
@@ -937,7 +1083,7 @@ void Assets::DeleteOtherResourcesCorrespondingToDeletedAsset(const UUID uuid) no
     // For example: A texture asset being deleted, must trigger a
     // texture object deletion on GPU. This functionality is performed
     // via AssetGPUBridge.
-    if (uuid == UUID::Empty()) { return; }
+    if (uuid == UUID::Empty() || !AssetHasDeserializedData(uuid)) { return; }
     if (IsSceneAsset(uuid))               {                                                                                        }
     if (IsComponentDefinitionAsset(uuid)) {                                                                                        }
     if (IsSamplerAsset(uuid))             { bridge.GetSamplers().Deallocate(uuid);                                                 }
@@ -947,7 +1093,59 @@ void Assets::DeleteOtherResourcesCorrespondingToDeletedAsset(const UUID uuid) no
     if (IsMaterialAsset(uuid))            {                                                                                        }
     if (IsFrameBufferAsset(uuid))         { bridge.GetFrameBuffers().Deallocate(uuid);                                             }
     if (IsMeshAsset(uuid))                { bridge.GetVertexBuffers().Deallocate(uuid); bridge.GetIndexBuffers().Deallocate(uuid); }
-    if (IsModelAsset(uuid))               {                                                                                        }
+    if (IsModelAsset(uuid))               {
+        AssetData& data = database.data[uuid];
+        Model& model = std::get<Model>(data);
+
+        for (const auto& mmesh : model.Meshes) {
+            bridge.GetVertexBuffers().Deallocate(mmesh.MeshUUID);
+            bridge.GetIndexBuffers().Deallocate(mmesh.MeshUUID);
+        }
+        for (const auto& textureUUID : model.Textures) {
+            bridge.GetTextures().Deallocate(textureUUID);
+        }
+    }
+}
+
+template<>
+EmptyAssetData Assets::CreateEmptyAssetDataUsingType<Scene>(std::string_view name) noexcept {
+    return { name.data(), SceneTypeName };
+}
+template<>
+EmptyAssetData Assets::CreateEmptyAssetDataUsingType<Component>(std::string_view name) noexcept {
+    return { name.data(), ComponentTypeName };
+}
+template<>
+EmptyAssetData Assets::CreateEmptyAssetDataUsingType<Sampler>(std::string_view name) noexcept {
+    return { name.data(), SamplerTypeName };
+}
+template<>
+EmptyAssetData Assets::CreateEmptyAssetDataUsingType<Texture>(std::string_view name) noexcept {
+    return { name.data(), TextureTypeName };
+}
+template<>
+EmptyAssetData Assets::CreateEmptyAssetDataUsingType<Shader>(std::string_view name) noexcept {
+    return { name.data(), ShaderTypeName };
+}
+template<>
+EmptyAssetData Assets::CreateEmptyAssetDataUsingType<ShaderProgram>(std::string_view name) noexcept {
+    return { name.data(), ShaderProgramTypeName };
+}
+template<>
+EmptyAssetData Assets::CreateEmptyAssetDataUsingType<Material>(std::string_view name) noexcept {
+    return { name.data(), MaterialTypeName };
+}
+template<>
+EmptyAssetData Assets::CreateEmptyAssetDataUsingType<FrameBuffer>(std::string_view name) noexcept {
+    return { name.data(), FrameBufferTypeName };
+}
+template<>
+EmptyAssetData Assets::CreateEmptyAssetDataUsingType<Mesh>(std::string_view name) noexcept {
+    return { name.data(), MeshTypeName };
+}
+template<>
+EmptyAssetData Assets::CreateEmptyAssetDataUsingType<Model>(std::string_view name) noexcept {
+    return { name.data(), ModelTypeName };
 }
 
 template<>
