@@ -370,12 +370,20 @@ void Assets::DeserializeAsset(const UUID uuid) noexcept {
     auto& warningList = database.warningLists[uuid];
     auto& errorList = database.errorLists[uuid];
 
-    if (AssetHasDeserializedData(uuid)) { return; }
+    DOA_LOG_TRACE("Deserializing asset \"%s\" with UUID: %s", file->Name().data(), uuid.AsString().c_str());
+
+    if (AssetHasDeserializedData(uuid)) {
+        DOA_LOG_INFO("Didn't deserialize asset \"%s\" with UUID: %s.", file->Name().data(), uuid.AsString().c_str());
+        DOA_LOG_INFO("\tAsset already has deserialized data.");
+        return;
+    }
 
     if (IsSceneAsset(uuid)) {
+        DOA_LOG_TRACE("\tDetected as a Scene asset.");
         data = DeserializeScene(*file);
     }
     if (IsComponentDefinitionAsset(uuid)) {
+        DOA_LOG_TRACE("\tDetected as a Component Definition asset.");
         auto result = DeserializeComponent(*file);
         for (auto& message : result.messages) {
             switch (message.messageType) {
@@ -393,6 +401,7 @@ void Assets::DeserializeAsset(const UUID uuid) noexcept {
         data = std::move(result.deserializedComponent);
     }
     if (IsSamplerAsset(uuid)) {
+        DOA_LOG_TRACE("\tDetected as a Sampler asset.");
         SamplerDeserializationResult result = DeserializeSampler(*file);
         for (auto& error : result.errors) {
             errorList.emplace_back(std::move(error));
@@ -400,6 +409,7 @@ void Assets::DeserializeAsset(const UUID uuid) noexcept {
         data = std::move(result.deserializedSampler);
     }
     if (IsTextureAsset(uuid)) {
+        DOA_LOG_TRACE("\tDetected as a Texture asset.");
         TextureDeserializationResult result = DeserializeTexture(*file);
         for (auto& error : result.errors) {
             errorList.emplace_back(std::move(error));
@@ -407,23 +417,30 @@ void Assets::DeserializeAsset(const UUID uuid) noexcept {
         data = std::move(result.deserializedTexture);
     }
     if (IsShaderAsset(uuid)) {
+        DOA_LOG_TRACE("\tDetected as a Shader asset.");
         ShaderDeserializationResult result;
         if (Assets::IsVertexShaderFile(*file)) {
+            DOA_LOG_TRACE("\t\tExtra, detected as a Vertex Shader asset.");
             result = DeserializeVertexShader(*file);
         }
         if (Assets::IsTessellationControlShaderFile(*file)) {
+            DOA_LOG_TRACE("\t\tExtra, detected as a Tessellation Control Shader asset.");
             result = DeserializeTessellationControlShader(*file);
         }
         if (Assets::IsTessellationEvaluationShaderFile(*file)) {
+            DOA_LOG_TRACE("\t\tExtra, detected as a Tessellation Evaluation Shader asset.");
             result = DeserializeTessellationEvaluationShader(*file);
         }
         if (Assets::IsGeometryShaderFile(*file)) {
+            DOA_LOG_TRACE("\t\tExtra, detected as a Geometry Shader asset.");
             result = DeserializeGeometryShader(*file);
         }
         if (Assets::IsFragmentShaderFile(*file)) {
+            DOA_LOG_TRACE("\t\tExtra, detected as a Fragment Shader asset.");
             result = DeserializeFragmentShader(*file);
         }
         if (Assets::IsComputeShaderFile(*file)) {
+            DOA_LOG_TRACE("\t\tExtra, detected as a Compute Shader asset.");
             result = DeserializeComputeShader(*file);
         }
         for (auto& error : result.errors) {
@@ -432,6 +449,7 @@ void Assets::DeserializeAsset(const UUID uuid) noexcept {
         data = std::move(result.deserializedShader);
     }
     if (IsShaderProgramAsset(uuid)) {
+        DOA_LOG_TRACE("\tDetected as a Shader Program asset.");
         ShaderProgramDeserializationResult result = DeserializeShaderProgram(*file);
         if (result.erred) {
             for (auto& error : result.errors) {
@@ -443,6 +461,7 @@ void Assets::DeserializeAsset(const UUID uuid) noexcept {
         data = std::move(result.deserializedShaderProgram);
     }
     if (IsMaterialAsset(uuid)) {
+        DOA_LOG_TRACE("\tDetected as a Material asset.");
         MaterialDeserializationResult result = DeserializeMaterial(*file);
         for (auto& error : result.errors) {
             errorList.emplace_back(std::move(error));
@@ -450,6 +469,7 @@ void Assets::DeserializeAsset(const UUID uuid) noexcept {
         data = std::move(result.deserializedMaterial);
     }
     if (IsFrameBufferAsset(uuid)) {
+        DOA_LOG_TRACE("\tDetected as a Frame Buffer asset.");
         FrameBufferDeserializationResult result = DeserializeFrameBuffer(*file);
         for (auto& error : result.errors) {
             errorList.emplace_back(std::move(error));
@@ -457,6 +477,7 @@ void Assets::DeserializeAsset(const UUID uuid) noexcept {
         data = std::move(result.deserializedFrameBuffer);
     }
     if (IsMeshAsset(uuid)) {
+        DOA_LOG_TRACE("\tDetected as a Mesh asset.");
         MeshDeserializationResult result = DeserializeMesh(*file);
         for (auto& warning : result.warnings) {
             warningList.emplace_back(std::move(warning));
@@ -467,6 +488,7 @@ void Assets::DeserializeAsset(const UUID uuid) noexcept {
         data = std::move(result.deserializedMesh);
     }
     if (IsModelAsset(uuid)) {
+        DOA_LOG_TRACE("\tDetected as a Model asset.");
         ModelDeserializationResult result = DeserializeModel(*file);
         for (auto& error : result.errors) {
             errorList.emplace_back(std::move(error));
@@ -483,7 +505,6 @@ void Assets::DeserializeAsset(const UUID uuid) noexcept {
             database.data[meshID] = std::move(mesh);
             database.subAssets.EmplaceNode(index, meshID);
             model.Meshes.emplace_back(meshID, result.meshMaterialIndices[i]);
-            //TryRegisterDependencyBetween(uuid, meshID);
         }
         for (auto& tdr : result.deserializedTextures) {
             if (tdr.erred) { continue; }
@@ -493,7 +514,6 @@ void Assets::DeserializeAsset(const UUID uuid) noexcept {
             database.data[textureID] = std::move(tdr.deserializedTexture);
             database.subAssets.EmplaceNode(index, textureID);
             model.Textures.push_back(textureID);
-            //TryRegisterDependencyBetween(uuid, textureID);
         }
     }
     /*
@@ -523,6 +543,8 @@ void Assets::DeserializeAsset(const UUID uuid) noexcept {
     }
 
     Events.OnAssetDeserialized(uuid);
+
+    DOA_LOG_TRACE("Deserialized asset \"%s\" with UUID: %s", file->Name().data(), uuid.AsString().c_str());
 }
 void Assets::ForceDeserializeAsset(const UUID uuid) noexcept {
     assert(database.Contains(uuid));
@@ -726,6 +748,7 @@ std::pair<UUID, AssetHandle> Assets::ImportFile(AssetDatabase& database, const F
     if (IsProjectFile(file)) { return { UUID::Empty(), nullptr }; }
     if (file.IsDirectory()) { return { UUID::Empty(), nullptr }; }
     if (file.ext == AssetIDExtension) { return { UUID::Empty(), nullptr }; }
+    DOA_LOG_TRACE("Importing asset at \"%ls\"", file.Path().c_str());
     // Step 1
     FNode importData = FNode::HollowCopy(file);
     importData.ext.append(AssetIDExtension);
@@ -813,9 +836,10 @@ std::pair<UUID, AssetHandle> Assets::ImportFile(AssetDatabase& database, const F
         }
 
         dependencyGraph.AddVertex(uuid);
+        DOA_LOG_TRACE("Imported asset at \"%ls\"", file.Path().c_str());
         return { uuid, &asset };
     } else {
-        DOA_LOG_ERROR("Failed to import asset at %s do you have read/write access to the directory?", std::quoted(file.Path().c_str()));
+        DOA_LOG_ERROR("Failed to import asset at \"%ls\" do you have read/write access to the directory?", file.Path().c_str());
         return { UUID::Empty(), nullptr };
     }
 }
