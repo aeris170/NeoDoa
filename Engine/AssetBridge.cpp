@@ -266,13 +266,14 @@ std::vector<TextureAllocatorMessage> GPUTextures::Allocate(const Assets& assets,
     AssetHandle handle{ assets.FindAsset(asset) };
     assert(handle && handle->IsTexture());
     const Texture& texture{ handle->DataAs<Texture>() };
+    assert(texture.PixelData.has_value());
 
     GPUTextureBuilder builder;
     builder.SetName(texture.Name)
         .SetWidth(texture.Width)
         .SetHeight(texture.Height)
         .SetDepth(1)
-        .SetData(texture.Format, texture.PixelData);
+        .SetData(texture.Format, texture.PixelData.value());
 
     auto [gpuTexture, messages] = builder.Build();
     if (gpuTexture.has_value()) {
@@ -285,12 +286,13 @@ std::vector<TextureAllocatorMessage> GPUTextures::Allocate(const Assets& assets,
 template<>
 const GPUTexture& GPUTextures::Missing() const noexcept {
     static const Texture& missingTexture = Texture::Missing();
+    assert(missingTexture.PixelData.has_value());
 
     static GPUTexture missing = GPUTextureBuilder()
         .SetName(missingTexture.Name)
         .SetWidth(missingTexture.Width)
         .SetHeight(missingTexture.Height)
-        .SetData(missingTexture.Format, missingTexture.PixelData)
+        .SetData(missingTexture.Format, missingTexture.PixelData.value())
         .Build().first.value();
     return missing;
 }
@@ -301,10 +303,11 @@ std::vector<BufferAllocatorMessage> GPUVertexBuffers::Allocate(const Assets& ass
     AssetHandle handle{ assets.FindAsset(asset) };
     assert(handle && handle->IsMesh());
     const Mesh& mesh{ handle->DataAs<Mesh>() };
+    assert(mesh.Vertices.has_value());
 
     GPUBufferBuilder builder;
     builder.SetName(mesh.Name)
-        .SetStorage(std::as_bytes(std::span{ mesh.Vertices }));
+        .SetStorage(std::as_bytes(std::span{ mesh.Vertices.value() }));
 
     auto [gpuBuffer, messages] = builder.Build();
     if (gpuBuffer.has_value()) {
@@ -321,11 +324,11 @@ std::vector<BufferAllocatorMessage> GPUIndexBuffers::Allocate(const Assets& asse
     AssetHandle handle{ assets.FindAsset(asset) };
     assert(handle && handle->IsMesh());
     const Mesh& mesh{ handle->DataAs<Mesh>() };
-    assert(!mesh.Indices.empty());
+    assert(mesh.Indices.has_value());
 
     GPUBufferBuilder builder;
     builder.SetName(mesh.Name)
-        .SetStorage(std::as_bytes(std::span{ mesh.Indices }));
+        .SetStorage(std::as_bytes(std::span{ mesh.Indices.value() }));
 
     auto [gpuBuffer, messages] = builder.Build();
     if (gpuBuffer.has_value()) {

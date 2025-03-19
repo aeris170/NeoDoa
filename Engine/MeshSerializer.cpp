@@ -20,8 +20,8 @@ void MeshSerializer::DefaultSerialize(tinyxml2::XMLPrinter& printer, const Mesh&
     printer.OpenElement("mesh");
     {
         SerializeName(printer, mesh.Name);
-        Vertices::Serialize(printer, mesh.Vertices);
-        Indices::Serialize(printer, mesh.Indices);
+        Vertices::Serialize(printer, mesh.Vertices.value_or(Mesh::VertexList{}));
+        Indices::Serialize(printer, mesh.Indices.value_or(Mesh::IndexList{}));
     }
     printer.CloseElement();
 }
@@ -51,13 +51,6 @@ void MeshSerializer::Vertices::DefaultSerializeVertex(tinyxml2::XMLPrinter& prin
         printer.PushAttribute("x", vertex.Normal.x);
         printer.PushAttribute("y", vertex.Normal.y);
         printer.PushAttribute("z", vertex.Normal.z);
-        printer.CloseElement();
-
-        printer.OpenElement("color");
-        printer.PushAttribute("r", vertex.Color.r);
-        printer.PushAttribute("g", vertex.Color.g);
-        printer.PushAttribute("b", vertex.Color.b);
-        printer.PushAttribute("a", vertex.Color.a);
         printer.CloseElement();
 
         printer.OpenElement("texCoords");

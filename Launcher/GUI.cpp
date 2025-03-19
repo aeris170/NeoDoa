@@ -45,7 +45,7 @@ GUI::GUI(const CorePtr& core) noexcept :
             const Texture& texture = Texture::Missing();
             builder.SetWidth(texture.Width)
                 .SetHeight(texture.Height)
-                .SetData(texture.Format, texture.PixelData);
+                .SetData(texture.Format, texture.PixelData.value());
         }
         auto [tex, _] = builder.Build();
         launcherLogo = std::move(tex.value());
@@ -67,7 +67,7 @@ GUI::GUI(const CorePtr& core) noexcept :
             const Texture& texture = Texture::Missing();
             builder.SetWidth(texture.Width)
                 .SetHeight(texture.Height)
-                .SetData(texture.Format, texture.PixelData);
+                .SetData(texture.Format, texture.PixelData.value());
         }
         auto [texVivid, __] = builder.Build();
         launcherLogoVivid = std::move(texVivid.value());

@@ -3,6 +3,9 @@
 #include <format>
 #include <string>
 #include <utility>
+#include <algorithm>
+
+#include <Utility/FormatBytes.hpp>
 
 #include <Engine/Core.hpp>
 #include <Engine/ProjectDeserializer.hpp>
@@ -58,7 +61,8 @@ Asset& AssetDatabase::Emplace(UUID uuid, FNode* file, Assets& owningManager) noe
     return asset;
 }
 AssetData& AssetDatabase::EmplaceAsSubAsset(UUID uuid, UUID owner, SubAssetTree::NodeIndex ownerIndex) noexcept {
-    assets.try_emplace(uuid, uuid, assets[owner].OwningManager());
+    assert(Contains(owner));
+    assets.try_emplace(uuid, uuid, const_cast<Assets&>(assets.at(owner).OwningManager()));
     auto empty = Assets::CreateEmptyAssetDataUsingFile(*files[owner]);
     empty.Type = Assets::GenericAssetTypeName;
     auto& data = this->data.try_emplace(uuid, empty).first->second;
@@ -300,25 +304,40 @@ HashedString Assets::GetTypeNameOfAsset(const UUID uuid) const noexcept {
 void Assets::SerializeAsset(const UUID uuid) noexcept {
     assert(database.Contains(uuid));
 
+    if (!AssetHasDeserializedData(uuid)) {
+        DOA_LOG_WARNING("Couldn't serialize asset. Asset is not deserialized.");
+        return;
+    }
+    if (!AssetHasContentInSystemMemory(uuid)) {
+        DOA_LOG_WARNING("Couldn't serialize asset. Asset's must have content in system memory! Content is unloaded, you can load it by calling Assets::ReadContentOfAssetIntoSystemMemory");
+        return;
+    }
+
     FNode* file = database.files[uuid];
 
     if (IsSceneAsset(uuid)) {
         std::string serializedData;
-        serializedData = SerializeScene(GetDataOfAssetAs<Scene>(uuid));
+        serializedData = GetDataOfAssetAs<Scene>(uuid).Serialize();
         tinyxml2::XMLDocument doc;
         doc.Parse(serializedData.c_str());
         doc.SaveFile(file->AbsolutePath().string().c_str());
         return;
     }
+    if (IsComponentDefinitionAsset(uuid)) {
+        std::string serializedData;
+        serializedData = GetDataOfAssetAs<Component>(uuid).Serialize();
+        file->ModifyContent(std::move(serializedData));
+        file->DisposeContent();
+    }
     if (IsSamplerAsset(uuid)) {
         std::string serializedData;
-        serializedData = SerializeSampler(GetDataOfAssetAs<Sampler>(uuid));
+        serializedData = GetDataOfAssetAs<Sampler>(uuid).Serialize();
         file->ModifyContent(std::move(serializedData));
         file->DisposeContent();
     }
     if (IsTextureAsset(uuid)) {
         EncodedTextureData serializedData;
-        serializedData = SerializeTexture(GetDataOfAssetAs<Texture>(uuid), ExtToEncoding(file->Extension()));
+        serializedData = SerializeTexture(GetDataOfAssetAs<Texture>(uuid), ExtToEncoding(file->Extension())).value();
 
         std::string stringified;
         stringified.reserve(serializedData.EncodedData.size());
@@ -329,34 +348,42 @@ void Assets::SerializeAsset(const UUID uuid) noexcept {
         file->ModifyContent(std::move(stringified));
         file->DisposeContent();
     }
-    /*
-    * TODO others
-    */
+    if (IsShaderAsset(uuid)) {
+        std::string serializedData;
+        serializedData = GetDataOfAssetAs<Shader>(uuid).Serialize();
+        file->ModifyContent(std::move(serializedData));
+        file->DisposeContent();
+    }
     if (IsShaderProgramAsset(uuid)) {
         std::string serializedData;
-        serializedData = SerializeShaderProgram(GetDataOfAssetAs<ShaderProgram>(uuid));
+        serializedData = GetDataOfAssetAs<ShaderProgram>(uuid).Serialize();
         file->ModifyContent(std::move(serializedData));
         file->DisposeContent();
     }
     if (IsMaterialAsset(uuid)) {
         std::string serializedData;
-        serializedData = SerializeMaterial(GetDataOfAssetAs<Material>(uuid));
+        serializedData = GetDataOfAssetAs<Material>(uuid).Serialize();
         file->ModifyContent(std::move(serializedData));
         file->DisposeContent();
     }
     if (IsFrameBufferAsset(uuid)) {
         std::string serializedData;
-        serializedData = SerializeFrameBuffer(GetDataOfAssetAs<FrameBuffer>(uuid));
+        serializedData = GetDataOfAssetAs<FrameBuffer>(uuid).Serialize();
         file->ModifyContent(std::move(serializedData));
         file->DisposeContent();
     }
     if (IsMeshAsset(uuid)) {
         std::string serializedData;
-        serializedData = SerializeMesh(GetDataOfAssetAs<Mesh>(uuid));
+        serializedData = GetDataOfAssetAs<Mesh>(uuid).Serialize();
         file->ModifyContent(std::move(serializedData));
         file->DisposeContent();
     }
     if (IsModelAsset(uuid)) {
+        DOA_LOG_ERROR("MODEL ASSET SERIALIZATION NOT IMPLEMENTED YET!");
+        DOA_LOG_ERROR("MODEL ASSET SERIALIZATION NOT IMPLEMENTED YET!");
+        DOA_LOG_ERROR("MODEL ASSET SERIALIZATION NOT IMPLEMENTED YET!");
+        DOA_LOG_ERROR("MODEL ASSET SERIALIZATION NOT IMPLEMENTED YET!");
+        DOA_LOG_ERROR("MODEL ASSET SERIALIZATION NOT IMPLEMENTED YET!");
         // TODO oof...
         //std::string serializedData;
         //serializedData = SerializeModel(GetDataOfAssetAs<Model>(uuid));
@@ -506,15 +533,35 @@ void Assets::DeserializeAsset(const UUID uuid) noexcept {
             database.EmplaceAsSubAsset(meshID, uuid, index) = std::move(mesh);
             model.Meshes[i] = { meshID, result.meshMaterialIndices[i] };
         }
-        for (auto& tdr : result.deserializedTextures) {
-            if (tdr.erred) { continue; }
-            UUID textureID = GenerateUUID();
-            database.Emplace(textureID, file, *this);
-            std::get<EmptyAssetData>(database.data[textureID]).Type = TextureTypeName;
-            database.data[textureID] = std::move(tdr.deserializedTexture);
-            database.subAssets.EmplaceNode(index, textureID);
-            model.Textures.push_back(textureID);
+        model.Textures.reserve(result.deserializedTextures.size());
+        for (auto& var : result.deserializedTextures) {
+            Model::Texture texture;
+            texture = std::visit(overloaded::lambda {
+                [this, uuid](const std::filesystem::path& path) -> Model::Texture {
+                    auto search = std::ranges::find_if(files, [&path](const auto& elem) {
+                        return elem.first->Path() == path;
+                    });
+                    assert(search != files.end());
+
+                    UUID textureUUID = search->second;
+                    TryRegisterDependencyBetween(uuid, textureUUID);
+                    return { textureUUID, false };
+                },
+                [this, uuid, index](TextureDeserializationResult& tdr) -> Model::Texture {
+                    if (tdr.erred) { return { UUID::Empty(), false }; }
+
+                    Texture& texture = tdr.deserializedTexture;
+                    UUID textureUUID = FindOrGenerateUUIDForSubAsset(uuid, texture.Name, TextureTypeName);
+                    database.EmplaceAsSubAsset(textureUUID, uuid, index) = std::move(texture);
+                    return { textureUUID, true };
+                }
+            }, var);
+
+            if (texture.TextureUUID != UUID::Empty()) {
+                model.Textures.push_back(texture);
+            }
         }
+        model.Textures.shrink_to_fit();
 
         // Must re-bind as erratic additions in the above loops may (or not) cause re-alloc on database...
         AssetData& data = database.data[uuid];
@@ -548,6 +595,8 @@ void Assets::DeserializeAsset(const UUID uuid) noexcept {
 
     Events.OnAssetDeserialized(uuid);
 
+    ReleaseContentOfAssetInSystemMemory(uuid);
+
     DOA_LOG_TRACE("Deserialized asset \"%s\" with UUID: %s", file->Name().data(), uuid.AsString().c_str());
 }
 void Assets::ForceDeserializeAsset(const UUID uuid) noexcept {
@@ -578,6 +627,248 @@ bool Assets::AssetHasDeserializedData(const UUID uuid) const noexcept {
 UUID Assets::InstantiateAsset(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
     return UUID(); // TODO instatiate
+}
+bool Assets::AssetHasContentInSystemMemory(const UUID uuid) const noexcept {
+    assert(database.Contains(uuid));
+
+    if (!AssetHasDeserializedData(uuid)) { return false; }
+
+    if (IsSceneAsset(uuid))               { return true; }
+    if (IsComponentDefinitionAsset(uuid)) { return true; }
+    if (IsSamplerAsset(uuid))             { return true; }
+    if (IsTextureAsset(uuid))             { return GetDataOfAssetAs<Texture>(uuid).PixelData.has_value(); }
+    if (IsShaderAsset(uuid))              { return true; }
+    if (IsShaderProgramAsset(uuid))       { return true; }
+    if (IsMaterialAsset(uuid))            { return true; }
+    if (IsFrameBufferAsset(uuid))         { return true; }
+    if (IsMeshAsset(uuid))                { return GetDataOfAssetAs<Mesh>(uuid).Vertices.has_value(); }
+    if (IsModelAsset(uuid))               {
+        const Model& model = GetDataOfAssetAs<Model>(uuid);
+        for (const auto& mMesh : model.Meshes) {
+            const Mesh& mesh = GetDataOfAssetAs<Mesh>(mMesh.MeshUUID);
+
+            if (!mesh.Vertices.has_value()) { return false; }
+        }
+        for (const auto& mTexture : model.Textures) {
+            if (!mTexture.Embedded) { continue; }
+
+            const Texture& texture = GetDataOfAssetAs<Texture>(mTexture.TextureUUID);
+
+            if (!texture.PixelData.has_value()) { return false; }
+        }
+        return true;
+    }
+    std::unreachable(); // forgot to check an asset type...
+}
+bool Assets::AssetHasContentInVideoMemory(const UUID uuid) const noexcept {
+    assert(database.Contains(uuid));
+
+    if (!AssetHasDeserializedData(uuid)) { return false; }
+
+    if (IsSceneAsset(uuid))               { return false; }
+    if (IsComponentDefinitionAsset(uuid)) { return false; }
+    if (IsSamplerAsset(uuid))             { return bridge.GetSamplers().Exists(uuid); }
+    if (IsTextureAsset(uuid))             { return bridge.GetTextures().Exists(uuid); }
+    if (IsShaderAsset(uuid))              { return bridge.GetShaders().Exists(uuid); }
+    if (IsShaderProgramAsset(uuid))       { return bridge.GetShaderPrograms().Exists(uuid); }
+    if (IsMaterialAsset(uuid))            { return false; }
+    if (IsFrameBufferAsset(uuid))         { return bridge.GetFrameBuffers().Exists(uuid); }
+    if (IsMeshAsset(uuid))                { return bridge.GetVertexBuffers().Exists(uuid); }
+    if (IsModelAsset(uuid))               {
+        const Model& model = GetDataOfAssetAs<Model>(uuid);
+        for (const auto& mMesh : model.Meshes) {
+            if (!bridge.GetVertexBuffers().Exists(mMesh.MeshUUID)) { return false; }
+        }
+        for (const auto& mTexture : model.Textures) {
+            if (!mTexture.Embedded) { continue; }
+
+            if (!bridge.GetTextures().Exists(mTexture.TextureUUID)) { return false; }
+        }
+        return true;
+    }
+    std::unreachable(); // forgot to check an asset type...
+}
+void Assets::ReadContentOfAssetIntoSystemMemory(const UUID uuid) noexcept {
+    assert(database.Contains(uuid));
+
+    FNode* file = database.files[uuid];
+    AssetData& data = database.data[uuid];
+    auto& infoList = database.infoLists[uuid];
+    auto& warningList = database.warningLists[uuid];
+    auto& errorList = database.errorLists[uuid];
+
+    if (IsTextureAsset(uuid)) {
+        TextureDeserializationResult result = DeserializeTexture(*file);
+        for (auto& error : result.errors) {
+            errorList.emplace_back(std::move(error));
+        }
+        data = std::move(result.deserializedTexture);
+    }
+    if (IsMeshAsset(uuid)) {
+        MeshDeserializationResult result = DeserializeMesh(*file);
+        for (auto& warning : result.warnings) {
+            warningList.emplace_back(std::move(warning));
+        }
+        for (auto& error : result.errors) {
+            errorList.emplace_back(std::move(error));
+        }
+        data = std::move(result.deserializedMesh);
+    }
+    if (IsModelAsset(uuid)) {
+        ModelDeserializationResult result = DeserializeModel(*file);
+        for (auto& error : result.errors) {
+            errorList.emplace_back(std::move(error));
+        }
+        Model& model{ result.deserializedModel };
+
+        auto index = database.subAssets.EmplaceNode(AssetDatabase::SubAssetTree::Root, uuid);
+        model.Meshes.resize(result.deserializedMeshes.size());
+        for (size_t i = 0; i < result.deserializedMeshes.size(); i++) {
+            Mesh& mesh = result.deserializedMeshes[i];
+            UUID meshID = FindOrGenerateUUIDForSubAsset(uuid, mesh.Name, MeshTypeName);
+            database.EmplaceAsSubAsset(meshID, uuid, index) = std::move(mesh);
+            model.Meshes[i] = { meshID, result.meshMaterialIndices[i] };
+        }
+        model.Textures.reserve(result.deserializedTextures.size());
+        for (auto& var : result.deserializedTextures) {
+            Model::Texture texture;
+            texture = std::visit(overloaded::lambda{
+                [this, uuid](const std::filesystem::path& path) -> Model::Texture {
+                    auto search = std::ranges::find_if(files, [&path](const auto& elem) {
+                        return elem.first->Path() == path;
+                    });
+                    assert(search != files.end());
+
+                    UUID textureUUID = search->second;
+                    TryRegisterDependencyBetween(uuid, textureUUID);
+                    return { textureUUID, false };
+                },
+                [this, uuid, index](TextureDeserializationResult& tdr) -> Model::Texture {
+                    if (tdr.erred) { return { UUID::Empty(), false }; }
+
+                    Texture& texture = tdr.deserializedTexture;
+                    UUID textureUUID = FindOrGenerateUUIDForSubAsset(uuid, texture.Name, TextureTypeName);
+                    database.EmplaceAsSubAsset(textureUUID, uuid, index) = std::move(texture);
+                    return { textureUUID, true };
+                }
+            }, var);
+
+            if (texture.TextureUUID != UUID::Empty()) {
+                model.Textures.push_back(texture);
+            }
+        }
+        model.Textures.shrink_to_fit();
+
+        // Must re-bind as erratic additions in the above loops may (or not) cause re-alloc on database...
+        AssetData& data = database.data[uuid];
+        data = std::move(model);
+    }
+}
+void Assets::ReleaseContentOfAssetInSystemMemory(const UUID uuid) noexcept {
+    assert(database.Contains(uuid));
+
+    if (!AssetHasDeserializedData(uuid)) { return; }
+
+    if (IsTextureAsset(uuid)) {
+        GetDataOfAssetAs<Texture>(uuid).PixelData.reset();
+    }
+    if (IsMeshAsset(uuid)) {
+        Mesh& mesh = GetDataOfAssetAs<Mesh>(uuid);
+        mesh.Vertices.reset();
+        mesh.Indices.reset();
+    }
+    if (IsModelAsset(uuid)) {
+        Model& model = GetDataOfAssetAs<Model>(uuid);
+        for (auto& mMesh : model.Meshes) {
+            ReleaseContentOfAssetInSystemMemory(mMesh.MeshUUID);
+        }
+        for (auto& mTexture : model.Textures) {
+            if (!mTexture.Embedded) { continue; }
+
+            ReleaseContentOfAssetInSystemMemory(mTexture.TextureUUID);
+        }
+    }
+}
+void Assets::UploadContentOfAssetIntoVideoMemory(const UUID uuid) noexcept {
+    assert(database.Contains(uuid));
+
+    if (!AssetHasDeserializedData(uuid)) { return; }
+
+    if (IsTextureAsset(uuid)) {
+        std::vector<TextureAllocatorMessage> messages = bridge.GetTextures().Allocate(*this, uuid);
+
+        std::vector<std::any>& errorMessages = database.errorLists[uuid];
+        for (auto& message : messages) {
+            errorMessages.emplace_back(std::move(message));
+        }
+    }
+    if (IsMeshAsset(uuid)) {
+        std::vector<BufferAllocatorMessage> vMessages = bridge.GetVertexBuffers().Allocate(*this, uuid);
+        std::vector<BufferAllocatorMessage> iMessages = bridge.GetIndexBuffers().Allocate(*this, uuid);
+
+        std::vector<std::any>& infoMessages = database.infoLists[uuid];
+        std::vector<std::any>& warningMessages = database.warningLists[uuid];
+        std::vector<std::any>& errorMessages = database.errorLists[uuid];
+        for (auto& message : vMessages) {
+            errorMessages.emplace_back(std::move(message));
+        }
+        for (auto& message : iMessages) {
+            errorMessages.emplace_back(std::move(message));
+        }
+        if (errorMessages.empty()) {
+            Mesh& mesh = GetDataOfAssetAs<Mesh>(uuid);
+
+            assert(mesh.Vertices.has_value());
+            Mesh::VertexList& vertices = mesh.Vertices.value();
+            infoMessages.emplace_back(std::string("Mesh deserialized successfully."));
+            infoMessages.emplace_back(std::format("\tVertex Count: {}", vertices.size()));
+            infoMessages.emplace_back(std::format("\t\tVertex Buffer Size: {} bytes (VRAM)", std::span{ vertices }.size_bytes()));
+            if (mesh.Indices.has_value()) {
+                Mesh::IndexList& indices = mesh.Indices.value();
+                infoMessages.emplace_back(std::format("\tIndex Count: {}", indices.size()));
+                infoMessages.emplace_back(std::format("\t\tIndex Buffer Size: {} bytes (VRAM)", std::span{ indices }.size_bytes()));
+
+                if (indices.size() % 3 != 0) {
+                    warningMessages.emplace_back(std::string("Index count not divisible by 3. Mesh faces might be ill-formed."));
+                }
+            } else {
+                warningMessages.emplace_back(std::string("Mesh has no index table. This may affect performance."));
+            }
+        }
+    }
+    if (IsModelAsset(uuid)) {
+        Model& model = GetDataOfAssetAs<Model>(uuid);
+        for (auto& mMesh : model.Meshes) {
+            UploadContentOfAssetIntoVideoMemory(mMesh.MeshUUID);
+        }
+        for (auto& mTexture : model.Textures) {
+            if (!mTexture.Embedded) { continue; }
+
+            UploadContentOfAssetIntoVideoMemory(mTexture.TextureUUID);
+        }
+    }
+}
+void Assets::ReleaseContentOfAssetInVideoMemory(const UUID uuid) noexcept {
+    assert(database.Contains(uuid));
+
+    if (IsTextureAsset(uuid)) {
+        bridge.GetTextures().Deallocate(uuid);
+    }
+    if (IsMeshAsset(uuid)) {
+        bridge.GetVertexBuffers().Deallocate(uuid);
+        bridge.GetIndexBuffers().Deallocate(uuid);
+    }
+    if (IsModelAsset(uuid)) {
+        Model& model = GetDataOfAssetAs<Model>(uuid);
+        for (auto& mMesh : model.Meshes) {
+            ReleaseContentOfAssetInVideoMemory(mMesh.MeshUUID);
+        }
+        for (auto& mTexture : model.Textures) {
+            if (!mTexture.Embedded) { continue; }
+
+            ReleaseContentOfAssetInVideoMemory(mTexture.TextureUUID);
+        }
+    }
 }
 
 bool Assets::IsSceneAsset(const UUID uuid) const noexcept {
@@ -772,7 +1063,7 @@ UUID Assets::GenerateUUID() const noexcept {
 }
 UUID Assets::FindOrGenerateUUIDForSubAsset(UUID owner, std::string_view subAssetName, HashedString subAssetType) noexcept {
     /* Find or Generate a UUID for a SubAsset:
-        * Step 1: Get the owner import data file: fileName.fileExtension.id
+        * Step 1: Get the owner's import data file: fileName.fileExtension.id
         * Step 2: Read the file for "subAssets" element
             * Step 2a: If not exists, create the element, generate UUID and add it to the "subAssets" element
             * Step 2b: Else, if exists, look for all children, try to match the information in children with queried name and type
@@ -783,7 +1074,7 @@ UUID Assets::FindOrGenerateUUIDForSubAsset(UUID owner, std::string_view subAsset
 
     // Step 1
     FNode& ownerFile = *database.files[owner];
-    FNode importData = FNode::HollowCopy();
+    FNode importData = FNode::HollowCopy(ownerFile);
     importData.ext.append(AssetIDExtension);
     importData.fullName.append(AssetIDExtension);
 
@@ -835,7 +1126,7 @@ UUID Assets::FindOrGenerateUUIDForSubAsset(UUID owner, std::string_view subAsset
         assert(subAssetsElement->ChildElementCount() > 0);
         for (const tinyxml2::XMLElement* child = subAssetsElement->FirstChildElement(); child != nullptr; child = child->NextSiblingElement()) {
             // Step 2ba
-            assert(child->Name() == "subAsset");
+            assert(std::string_view{ "subAsset" }.compare(child->Name()) == 0);
 
             const tinyxml2::XMLElement* typeElement = child->FirstChildElement("type");
             const tinyxml2::XMLElement* nameElement = child->FirstChildElement("name");
@@ -846,7 +1137,7 @@ UUID Assets::FindOrGenerateUUIDForSubAsset(UUID owner, std::string_view subAsset
             if (std::string_view{ subAssetType.data() }.compare(typeElement->GetText()) == 0 &&
                 subAssetName.compare(nameElement->GetText()) == 0) {
                 uint64_t val;
-                tinyxml2::XMLError error = uuidElement->QueryUnsigned64Text(&val);
+                [[maybe_unused]] tinyxml2::XMLError error = uuidElement->QueryUnsigned64Text(&val);
                 assert(error == tinyxml2::XMLError::XML_SUCCESS);
                 rv = val;
             }
@@ -1097,12 +1388,14 @@ void Assets::DeleteOtherResourcesCorrespondingToDeletedAsset(const UUID uuid) no
         AssetData& data = database.data[uuid];
         Model& model = std::get<Model>(data);
 
-        for (const auto& mmesh : model.Meshes) {
-            bridge.GetVertexBuffers().Deallocate(mmesh.MeshUUID);
-            bridge.GetIndexBuffers().Deallocate(mmesh.MeshUUID);
+        for (const auto& mMesh : model.Meshes) {
+            bridge.GetVertexBuffers().Deallocate(mMesh.MeshUUID);
+            bridge.GetIndexBuffers().Deallocate(mMesh.MeshUUID);
         }
-        for (const auto& textureUUID : model.Textures) {
-            bridge.GetTextures().Deallocate(textureUUID);
+        for (const auto& mTexture : model.Textures) {
+            if (!mTexture.Embedded) { continue; }
+
+            bridge.GetTextures().Deallocate(mTexture.TextureUUID);
         }
     }
 }
@@ -1475,16 +1768,21 @@ void Assets::PerformPostDeserializationAction<Mesh>(const UUID uuid) noexcept {
     if (errorMessages.empty()) {
         Mesh& mesh = GetDataOfAssetAs<Mesh>(uuid);
 
+        assert(mesh.Vertices.has_value());
+        Mesh::VertexList& vertices = mesh.Vertices.value();
         infoMessages.emplace_back(std::string("Mesh deserialized successfully."));
-        infoMessages.emplace_back(std::format("\t Vertex Count: {}", mesh.Vertices.size()));
-        infoMessages.emplace_back(std::format("\t\t Vertex Buffer Size: {} bytes (VRAM)", std::span{ mesh.Vertices }.size_bytes()));
-        infoMessages.emplace_back(std::format("\t Index Count: {}", mesh.Indices.size()));
-        infoMessages.emplace_back(std::format("\t\t Index Buffer Size: {} bytes (VRAM)", std::span{ mesh.Indices }.size_bytes()));
-        if (mesh.Indices.empty()) {
+        infoMessages.emplace_back(std::format("\tVertex Count: {}", vertices.size()));
+        infoMessages.emplace_back(std::format("\t\tVertex Buffer Size: {} (VRAM)", FormatBytes(static_cast<float>(std::span{ vertices }.size_bytes()))));
+        if (mesh.Indices.has_value()) {
+            Mesh::IndexList& indices = mesh.Indices.value();
+            infoMessages.emplace_back(std::format("\tIndex Count: {}", indices.size()));
+            infoMessages.emplace_back(std::format("\t\tIndex Buffer Size: {} (VRAM)", FormatBytes(static_cast<float>(std::span{ indices }.size_bytes()))));
+
+            if (indices.size() % 3 != 0) {
+                warningMessages.emplace_back(std::string("Index count not divisible by 3. Mesh faces might be ill-formed."));
+            }
+        } else {
             warningMessages.emplace_back(std::string("Mesh has no index table. This may affect performance."));
-        }
-        if (mesh.Indices.size() % 3 != 0) {
-            warningMessages.emplace_back(std::string("Index count not divisible by 3. Mesh faces might be ill-formed."));
         }
     }
 }
@@ -1493,11 +1791,13 @@ void Assets::PerformPostDeserializationAction<Model>(const UUID uuid) noexcept {
     AssetData& data = database.data[uuid];
     Model& model = std::get<Model>(data);
 
-    for (const auto& mmesh : model.Meshes) {
-        PerformPostDeserializationAction<Mesh>(mmesh.MeshUUID);
+    for (const auto& mMesh : model.Meshes) {
+        PerformPostDeserializationAction<Mesh>(mMesh.MeshUUID);
     }
-    for (const auto& textureUUID : model.Textures) {
-        PerformPostDeserializationAction<Texture>(textureUUID);
+    for (const auto& mTexture : model.Textures) {
+        if (!mTexture.Embedded) { continue; }
+
+        PerformPostDeserializationAction<Texture>(mTexture.TextureUUID);
     }
 }
 

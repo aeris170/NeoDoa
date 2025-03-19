@@ -1,5 +1,7 @@
 #pragma once
 
+#include <optional>
+
 #include <Engine/Texture.hpp>
 
-EncodedTextureData SerializeTexture(const Texture& texture, TextureEncoding encoding = TextureEncoding::PNG);
+std::optional<EncodedTextureData> SerializeTexture(const Texture& texture, TextureEncoding encoding = TextureEncoding::PNG);

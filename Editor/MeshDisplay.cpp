@@ -32,12 +32,10 @@ MeshDisplay::MeshDisplay(Observer& observer) noexcept :
 
 layout(location = 0) in vec3 vPos;
 layout(location = 1) in vec3 vNormal;
-layout(location = 2) in vec4 vColor;
 layout(location = 3) in vec2 vUV;
 
 out VS_OUT {
     vec3 normal;
-    vec4 color;
     vec2 UV;
 } vs_out;
 
@@ -50,7 +48,6 @@ layout(std140, binding = 0) uniform ProjViewModelBuffer {
 void main() {
     gl_Position = projection * view * model * vec4(vPos, 1.0);
     vs_out.normal = vNormal;
-    vs_out.color = vColor;
     vs_out.UV = vUV;
 }
     )").Build().first;
@@ -62,13 +59,11 @@ layout(triangle_strip, max_vertices = 3) out;
 
 in VS_OUT {
     vec3 normal;
-    vec4 color;
     vec2 UV;
 } gs_in[];
 
 out GS_OUT {
     vec3 normal;
-    vec4 color;
     vec2 UV;
 
     vec3 wireframeDist;
@@ -79,7 +74,6 @@ void main() {
         gl_Position = gl_in[i].gl_Position;
 
         gs_out.normal = gs_in[i].normal;
-        gs_out.color = gs_in[i].color;
         gs_out.UV = gs_in[i].UV;
 
         // This is the easiest scheme I could think of. The attribute will be interpolated, so
@@ -98,7 +92,6 @@ void main() {
 
 in GS_OUT {
     vec3 normal;
-    vec4 color;
     vec2 UV;
 
     vec3 wireframeDist;
@@ -118,7 +111,7 @@ void main() {
     vec3 a3 = smoothstep(vec3(0), thickness, fs_in.wireframeDist);
     float edgeFactor = mix(min(min(a3.x, a3.y), a3.z), 1, !renderWireframe);
 
-    vec4 frontFacingColor = mix(wireframeColor, fs_in.color, edgeFactor);
+    vec4 frontFacingColor = mix(wireframeColor, vec4(1), edgeFactor);
     vec4 backFacingColor  = vec4(wireframeColor.rgb, wireframeColor.a * (1 - edgeFactor));
     FragColor = mix(backFacingColor, frontFacingColor, gl_FrontFacing);
 }
@@ -229,7 +222,6 @@ void MeshDisplay::SetDisplayTarget(const AssetHandle meshAssetHandle) noexcept {
         GPUVertexAttribLayout layout;
         layout.Define<float>(3); // Position
         layout.Define<float>(3); // Normal
-        layout.Define<float>(4); // Color
         layout.Define<float>(2); // UV
 
         GPUPipelineBuilder aBuilder;
@@ -244,7 +236,7 @@ void MeshDisplay::SetDisplayTarget(const AssetHandle meshAssetHandle) noexcept {
             .SetBlendFunction(BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha)
             .SetShaderProgram(mainProgram);
 
-        if (!m.Indices.empty()) {
+        if (m.IndexCount > 0) {
             assert(bridge->GetIndexBuffers().Query(meshAsset->ID()));
             aBuilder.SetIndexBuffer(bridge->GetIndexBuffers().Fetch(meshAsset->ID()), DataType::UnsignedInt);
         }
@@ -474,7 +466,7 @@ void MeshDisplay::RenderMeshToOffscreenBuffer() noexcept {
     Graphics::BufferSubData(wireframeBuffer, sizeof(WireframeSettingsData), reinterpret_cast<NonOwningPointerToConstRawData>(&WireframeSettings));
     Graphics::BufferSubData(normalVisualizationBuffer, sizeof(NormalVisualizationSettingsData), reinterpret_cast<NonOwningPointerToConstRawData>(&NormalVisualizationSettings));
 
-    int count = !m.Indices.empty() ? m.Indices.size() : m.Vertices.size();
+    int count = m.IndexCount != 0 ? m.IndexCount : m.VertexCount;
 
     Graphics::BindPipeline(mainPipeline);
     Graphics::BindDescriptorSet(mainPerFrame);

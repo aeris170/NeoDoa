@@ -73,6 +73,12 @@ struct Asset final {
     bool HasDeserializedData() const;
 
     UUID Instantiate() const;
+    bool HasContentInSystemMemory() const noexcept;
+    bool HasContentInVideoMemory() const noexcept;
+    void ReadContentIntoSystemMemory() noexcept;
+    void ReleaseContentInSystemMemory() noexcept;
+    void UploadContentIntoVideoMemory() noexcept;
+    void ReleaseContentInVideoMemory() noexcept;
 
     template<AssetType T>
     void UpdateData(T&& newData);
@@ -330,6 +336,12 @@ struct Assets {
     void DeleteDeserializedDataOfAsset(const UUID uuid) noexcept;
     bool AssetHasDeserializedData(const UUID uuid) const noexcept;
     UUID InstantiateAsset(const UUID uuid) const noexcept;
+    bool AssetHasContentInSystemMemory(const UUID uuid) const noexcept;
+    bool AssetHasContentInVideoMemory(const UUID uuid) const noexcept;
+    void ReadContentOfAssetIntoSystemMemory(const UUID uuid) noexcept;
+    void ReleaseContentOfAssetInSystemMemory(const UUID uuid) noexcept;
+    void UploadContentOfAssetIntoVideoMemory(const UUID uuid) noexcept;
+    void ReleaseContentOfAssetInVideoMemory(const UUID uuid) noexcept;
 
     template<AssetType T>
     void UpdateDataOfAsset(const UUID uuid, T&& newData) noexcept {

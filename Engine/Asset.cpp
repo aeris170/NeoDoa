@@ -35,6 +35,12 @@ void Asset::DeleteDeserializedData() { owningManager.get().DeleteDeserializedDat
 bool Asset::HasDeserializedData() const { return owningManager.get().AssetHasDeserializedData(id); }
 
 UUID Asset::Instantiate() const { return owningManager.get().InstantiateAsset(id); }
+bool Asset::HasContentInSystemMemory() const noexcept { return owningManager.get().AssetHasContentInSystemMemory(id);}
+bool Asset::HasContentInVideoMemory() const noexcept { return owningManager.get().AssetHasContentInVideoMemory(id); }
+void Asset::ReadContentIntoSystemMemory()  noexcept { owningManager.get().ReadContentOfAssetIntoSystemMemory(id);  }
+void Asset::ReleaseContentInSystemMemory() noexcept { owningManager.get().ReleaseContentOfAssetInSystemMemory(id); }
+void Asset::UploadContentIntoVideoMemory() noexcept { owningManager.get().UploadContentOfAssetIntoVideoMemory(id); }
+void Asset::ReleaseContentInVideoMemory()  noexcept { owningManager.get().ReleaseContentOfAssetInVideoMemory(id);  }
 
 bool Asset::IsScene()               const noexcept { return owningManager.get().IsSceneAsset(id);               }
 bool Asset::IsComponentDefinition() const noexcept { return owningManager.get().IsComponentDefinitionAsset(id); }

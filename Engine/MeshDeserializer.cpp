@@ -36,6 +36,7 @@ void MeshDeserializer::DefaultDeserialize(tinyxml2::XMLElement& rootElem, MeshDe
         mdr.erred = true;
         mdr.errors.emplace_back("Couldn't deserialize vertices! No \"vertices\" element.");
     } else {
+        mdr.deserializedMesh.Vertices.emplace();
         Vertices::Deserialize(*verticesElem, mdr);
     }
 
@@ -44,6 +45,7 @@ void MeshDeserializer::DefaultDeserialize(tinyxml2::XMLElement& rootElem, MeshDe
         mdr.warnings.emplace_back("Couldn't deserialize indices! No \"indices\" element.");
         mdr.warnings.emplace_back("Using indices may help reducing the vertex count for better performance.");
     } else {
+        mdr.deserializedMesh.Indices.emplace();
         Indices::Deserialize(*indicesElem, mdr);
     }
 }
@@ -67,6 +69,8 @@ void MeshDeserializer::Vertices::DefaultDeserialize(tinyxml2::XMLElement& vertic
     mdr.deserializedMesh.CalculateAABBProperties();
 }
 void MeshDeserializer::Vertices::DefaultDeserializeVertex(tinyxml2::XMLElement& vertexElem, MeshDeserializationResult& mdr) {
+    assert(mdr.deserializedMesh.Vertices.has_value());
+
     const tinyxml2::XMLElement* positionElem  = vertexElem.FirstChildElement("position");
     const tinyxml2::XMLElement* normalElem    = vertexElem.FirstChildElement("normal");
     const tinyxml2::XMLElement* colorElem     = vertexElem.FirstChildElement("color");
@@ -124,28 +128,6 @@ void MeshDeserializer::Vertices::DefaultDeserializeVertex(tinyxml2::XMLElement& 
         vertex.Normal = { x, y, z };
     }
 
-    { // Deserialize color
-        float r{ std::numeric_limits<float>::quiet_NaN() };
-        float g{ std::numeric_limits<float>::quiet_NaN() };
-        float b{ std::numeric_limits<float>::quiet_NaN() };
-        float a{ std::numeric_limits<float>::quiet_NaN() };
-        colorElem->QueryFloatAttribute("r", &r);
-        colorElem->QueryFloatAttribute("g", &g);
-        colorElem->QueryFloatAttribute("b", &b);
-        colorElem->QueryFloatAttribute("a", &a);
-        if (std::isnan(r) || std::isnan(g) || std::isnan(b) || std::isnan(a)) {
-            mdr.erred = true;
-            mdr.errors.emplace_back(std::format("Couldn't deserialize vertex color! Line: {}", colorElem->GetLineNum()));
-            mdr.errors.emplace_back("Missing or ill-formed: ");
-            if (std::isnan(r)) { mdr.errors.emplace_back("\tr"); }
-            if (std::isnan(g)) { mdr.errors.emplace_back("\tg"); }
-            if (std::isnan(b)) { mdr.errors.emplace_back("\tb"); }
-            if (std::isnan(a)) { mdr.errors.emplace_back("\ta"); }
-            return;
-        }
-        vertex.Color = { r, g, b, a };
-    }
-
     { // Deserialize texCoords
         float u{ std::numeric_limits<float>::quiet_NaN() };
         float v{ std::numeric_limits<float>::quiet_NaN() };
@@ -162,7 +144,8 @@ void MeshDeserializer::Vertices::DefaultDeserializeVertex(tinyxml2::XMLElement& 
         vertex.TexCoords = { u, v };
     }
 
-    mdr.deserializedMesh.Vertices.push_back(vertex);
+    mdr.deserializedMesh.Vertices.value().push_back(vertex);
+    mdr.deserializedMesh.VertexCount++;
 }
 
 
@@ -174,6 +157,8 @@ void MeshDeserializer::Indices::DefaultDeserialize(tinyxml2::XMLElement& indices
     }
 }
 void MeshDeserializer::Indices::DefaultDeserializeIndex(tinyxml2::XMLElement& indexElem, MeshDeserializationResult& mdr) {
+    assert(mdr.deserializedMesh.Indices.has_value());
+
     Mesh::IndexList::value_type index{ std::numeric_limits<Mesh::IndexList::value_type>::max() };
     indexElem.QueryUnsignedText(&index);
     if (index == std::numeric_limits<Mesh::IndexList::value_type>::max()) {
@@ -182,5 +167,6 @@ void MeshDeserializer::Indices::DefaultDeserializeIndex(tinyxml2::XMLElement& in
         return;
     }
 
-    mdr.deserializedMesh.Indices.push_back(index);
+    mdr.deserializedMesh.Indices.value().push_back(index);
+    mdr.deserializedMesh.IndexCount++;
 }

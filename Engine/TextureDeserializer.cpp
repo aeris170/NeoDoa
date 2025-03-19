@@ -79,9 +79,11 @@ TextureDeserializationResult DeserializeTexture(const EncodedTextureData& data) 
         } else {
             std::unreachable();
         }
-        rv.deserializedTexture.PixelData.resize(width * height * nrChannels);
-        for (size_t i = 0; i < rv.deserializedTexture.PixelData.size(); i++) {
-            rv.deserializedTexture.PixelData[i] = static_cast<std::byte>(pixelData[i]);
+
+        auto& data = rv.deserializedTexture.PixelData.emplace();
+        data.resize(width * height * nrChannels);
+        for (size_t i = 0; i < data.size(); i++) {
+            data[i] = static_cast<std::byte>(pixelData[i]);
         }
     }
 

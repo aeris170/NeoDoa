@@ -20,7 +20,7 @@ struct Texture {
     unsigned Width{ 1 }, Height{ 1 };
     unsigned Channels{};
     DataFormat Format{};
-    RawData PixelData{};
+    std::optional<RawData> PixelData{};
 
     bool HasTransparency() const noexcept;
 

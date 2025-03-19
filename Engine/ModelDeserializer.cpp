@@ -50,25 +50,25 @@ static_assert(textureTypes.back() != 0 && textureTypes.back() == AI_TEXTURE_TYPE
 class ConsoleLogStream : public Assimp::LogStream {
 public:
     void write(const char* message) override {
-        DOA_LOG_FATAL("[Assimp] %s", message);
+        DOA_LOG_TRACE("[Assimp] %s", message);
     }
 };
 
 
 Tree<Model::Node> processNodeTree(const aiScene& scene);
 std::pair<std::vector<Mesh>, std::vector<size_t>> processMeshes(const aiScene& scene);
-std::vector<TextureDeserializationResult> processTextures(const aiScene& scene);
+std::vector<std::variant<std::filesystem::path, TextureDeserializationResult>> processTextures(const aiScene& scene);
 std::vector<Model::Material> processMaterials(const aiScene& scene);
 
 ModelDeserializationResult DeserializeModel(const FNode& file) noexcept {
     file.ReadContent();
-    auto rv = DeserializeModel(file.DisposeContent());
+    auto rv = DeserializeModel(file.DisposeContent(), { file.RootNode()->AbsolutePath(), file.FolderPath() });
     if (!rv.erred) {
         rv.deserializedModel.Name = file.Name();
     }
     return rv;
 }
-ModelDeserializationResult DeserializeModel(const std::string_view data) noexcept {
+ModelDeserializationResult DeserializeModel(const std::string_view data, const ModelDeserializationResult::PathInfo paths) noexcept {
     ModelDeserializationResult rv;
 
     auto* a = Assimp::DefaultLogger::create("", Assimp::Logger::VERBOSE);
@@ -111,6 +111,23 @@ ModelDeserializationResult DeserializeModel(const std::string_view data) noexcep
         rv.deserializedModel.Nodes = processNodeTree(*scene);
         std::tie(rv.deserializedMeshes, rv.meshMaterialIndices) = processMeshes(*scene);
         rv.deserializedTextures = processTextures(*scene);
+        if (!paths.root.empty() && !paths.fileRelative.empty()) {
+            for (auto& var : rv.deserializedTextures) {
+                if (std::filesystem::path* relative = std::get_if<std::filesystem::path>(&var)) {
+                    std::filesystem::path absolute_first = paths.root / paths.fileRelative;
+                    std::filesystem::path absolute_final = absolute_first / *relative;
+
+                    *relative = std::filesystem::relative(absolute_final, paths.root);
+
+                    if (!std::filesystem::exists(*relative)) {
+                        TextureDeserializationResult tdr{};
+                        tdr.erred = true;
+                        tdr.errors.emplace_back(std::format("Couldn't deserialize texture at {}. File doesn't exist or you have not permission to read it.", relative->string()));
+                        var = tdr;
+                    }
+                }
+            }
+        }
         rv.deserializedModel.Materials = processMaterials(*scene);
     }
 
@@ -158,46 +175,46 @@ std::pair<std::vector<Mesh>, std::vector<size_t>> processMeshes(const aiScene& s
 
         m.Name = mesh.mName.C_Str();
 
-        m.Vertices.resize(mesh.mNumVertices);
-        for (size_t j = 0; j < mesh.mNumVertices; j++) {
-            if (mesh.HasPositions()) {
-                auto& position = m.Vertices[j].Position;
-                position.x = mesh.mVertices[j].x;
-                position.y = mesh.mVertices[j].y;
-                position.z = mesh.mVertices[j].z;
-            }
-            if (mesh.HasNormals()) {
-                auto& normal = m.Vertices[j].Normal;
-                normal.x = mesh.mNormals[j].x;
-                normal.y = mesh.mNormals[j].y;
-                normal.z = mesh.mNormals[j].z;
-            }
-            if (mesh.HasTextureCoords(0)) {
-                auto& texCoords = m.Vertices[j].TexCoords;
-                texCoords.x = mesh.mTextureCoords[0][j].x;
-                texCoords.y = mesh.mTextureCoords[0][j].y;
-            }
-            if (mesh.HasVertexColors(0)) {
-                auto& color = m.Vertices[j].Color;
-                color.r = mesh.mTextureCoords[0][j].x;
-                color.g = mesh.mTextureCoords[0][j].y;
-                color.b = mesh.mTextureCoords[0][j].z;
-                color.a = 1;
-            } else {
-                auto& color = m.Vertices[j].Color;
-                color = { 1.0f, 1.0f, 1.0f, 1.0f };
+        if (mesh.mNumVertices > 0) {
+            Mesh::VertexList& vertices = m.Vertices.emplace();
+            m.VertexCount = mesh.mNumVertices;
+            vertices.resize(m.VertexCount);
+
+            for (size_t j = 0; j < mesh.mNumVertices; j++) {
+                if (mesh.HasPositions()) {
+                    auto& position = vertices[j].Position;
+                    position.x = mesh.mVertices[j].x;
+                    position.y = mesh.mVertices[j].y;
+                    position.z = mesh.mVertices[j].z;
+                }
+                if (mesh.HasNormals()) {
+                    auto& normal = vertices[j].Normal;
+                    normal.x = mesh.mNormals[j].x;
+                    normal.y = mesh.mNormals[j].y;
+                    normal.z = mesh.mNormals[j].z;
+                }
+                if (mesh.HasTextureCoords(0)) {
+                    auto& texCoords = vertices[j].TexCoords;
+                    texCoords.x = mesh.mTextureCoords[0][j].x;
+                    texCoords.y = mesh.mTextureCoords[0][j].y;
+                }
             }
         }
 
-        m.Indices.resize(mesh.mNumFaces * 3); // all faces are triangles
-        for (size_t j = 0; j < mesh.mNumFaces; j++) {
-            aiFace face = mesh.mFaces[j];
-            assert(face.mNumIndices == 3);
+        if (mesh.mNumFaces > 0) {
+            Mesh::IndexList& indices = m.Indices.emplace();
+            m.IndexCount = mesh.mNumFaces * 3; // all faces are triangles
+            indices.resize(m.IndexCount);
 
-            const size_t base = j * 3;
-            m.Indices[base + 0] = face.mIndices[0];
-            m.Indices[base + 1] = face.mIndices[1];
-            m.Indices[base + 2] = face.mIndices[2];
+            for (size_t j = 0; j < mesh.mNumFaces; j++) {
+                aiFace face = mesh.mFaces[j];
+                assert(face.mNumIndices == 3);
+
+                const size_t base = j * 3;
+                indices[base + 0] = face.mIndices[0];
+                indices[base + 1] = face.mIndices[1];
+                indices[base + 2] = face.mIndices[2];
+            }
         }
 
         materialIndices[i] = mesh.mMaterialIndex;
@@ -528,8 +545,8 @@ std::vector<Model::Material> processMaterials(const aiScene& scene) {
     return rv;
 }
 
-std::vector<TextureDeserializationResult> processTextures(const aiScene& scene) {
-    std::vector<TextureDeserializationResult> rv{};
+std::vector<std::variant<std::filesystem::path, TextureDeserializationResult>> processTextures(const aiScene& scene) {
+    std::vector<std::variant<std::filesystem::path, TextureDeserializationResult>> rv{};
 
     unsigned textureCount{};
     for (size_t i = 0; i < scene.mNumMaterials; i++) {
@@ -547,7 +564,7 @@ std::vector<TextureDeserializationResult> processTextures(const aiScene& scene) 
             aiString texturePath;
 
             for (size_t j = 0; j < mat.GetTextureCount(textureType); j++) {
-                TextureDeserializationResult& tdr = rv.emplace_back();
+                auto& variant = rv.emplace_back();
 
                 aiReturn ret = mat.GetTexture(textureType, static_cast<unsigned>(j), &texturePath);
                 assert(ret != AI_FAILURE);
@@ -565,48 +582,29 @@ std::vector<TextureDeserializationResult> processTextures(const aiScene& scene) 
                             raw
                         };
 
-                        tdr = DeserializeTexture(data);
+                        variant = DeserializeTexture(data);
                     } else {
+                        auto& tdr = variant.emplace<TextureDeserializationResult>();
                         tdr.deserializedTexture.Name = std::format("{} (Embedded)", embedded->mFilename.C_Str());
                         tdr.deserializedTexture.Width = embedded->mWidth;
                         tdr.deserializedTexture.Height = embedded->mHeight;
                         tdr.deserializedTexture.Channels = 4;
                         tdr.deserializedTexture.Format = DataFormat::RGBA8;
+                        RawData& pixelData = tdr.deserializedTexture.PixelData.emplace();
 
                         const size_t pixelCount = static_cast<size_t>(embedded->mWidth * embedded->mHeight);
-                        tdr.deserializedTexture.PixelData.resize(pixelCount * 4);
+                        pixelData.resize(pixelCount * 4);
                         for (size_t k = 0; k < pixelCount; k++) {
                             const aiTexel& texel = embedded->pcData[k];
                             const size_t base = k * 4;
-                            tdr.deserializedTexture.PixelData[base + 0] = static_cast<std::byte>(texel.r);
-                            tdr.deserializedTexture.PixelData[base + 1] = static_cast<std::byte>(texel.g);
-                            tdr.deserializedTexture.PixelData[base + 2] = static_cast<std::byte>(texel.b);
-                            tdr.deserializedTexture.PixelData[base + 3] = static_cast<std::byte>(texel.a);
+                            pixelData[base + 0] = static_cast<std::byte>(texel.r);
+                            pixelData[base + 1] = static_cast<std::byte>(texel.g);
+                            pixelData[base + 2] = static_cast<std::byte>(texel.b);
+                            pixelData[base + 3] = static_cast<std::byte>(texel.a);
                         }
                     }
-                } else if(std::filesystem::exists(texturePath.C_Str())) {
-                    std::ifstream file(texturePath.C_Str(), std::ios::in | std::ios::binary);
-                    assert(file);
-
-                    std::stringstream buffer;
-                    buffer << file.rdbuf();
-
-                    std::string content = buffer.str();
-                    RawData raw;
-                    raw.resize(content.size());
-                    for (auto c : content) {
-                        raw.push_back(static_cast<std::byte>(c));
-                    }
-
-                    EncodedTextureData data{
-                        texturePath.C_Str(),
-                        raw
-                    };
-
-                    tdr = DeserializeTexture(data);
                 } else {
-                    tdr.erred = true;
-                    tdr.errors.emplace_back(std::format("Couldn't deserialize texture at {}. File doesn't exist or you have not permission to read it.", texturePath.C_Str()));
+                    variant = texturePath.C_Str();
                 }
 
                 texturePath.Clear();

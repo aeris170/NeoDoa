@@ -438,39 +438,57 @@ void DisplayTargetRenderer::RenderTextureView(AssetHandle h) {
     windowHeight = windowHeight - totalBottomPadding;
 
     if (h->HasDeserializedData()) {
-        assert(observer.get().gui.get().CORE->GetAssetGPUBridge()->GetTextures().Query(h->ID()));
-        const GPUTexture& gpuTex = observer.get().gui.get().CORE->GetAssetGPUBridge()->GetTextures().Fetch(h->ID());
+        if (!h->HasContentInVideoMemory()) {
+            if (!h->HasContentInSystemMemory()) {
+                h->ReadContentIntoSystemMemory();
+            }
+            h->UploadContentIntoVideoMemory();
+            h->ReleaseContentInSystemMemory();
 
-        const Texture& tex = h->DataAs<Texture>();
+            ImGui::Text("Texture is not deserialized...");
+        } else {
+            assert(observer.get().gui.get().CORE->GetAssetGPUBridge()->GetTextures().Query(h->ID()));
+            const GPUTexture& gpuTex = observer.get().gui.get().CORE->GetAssetGPUBridge()->GetTextures().Fetch(h->ID());
 
-        float w = static_cast<float>(tex.Width);
-        float h = static_cast<float>(tex.Height);
-        float aspect = w / h;
+            const Texture& tex = h->DataAs<Texture>();
 
-        float maxWidth = windowWidth;
-        float maxHeight = windowHeight;
+            float w = static_cast<float>(tex.Width);
+            float h = static_cast<float>(tex.Height);
+            float aspect = w / h;
 
-        w = maxWidth;
-        h = w / aspect;
+            float maxWidth = windowWidth;
+            float maxHeight = windowHeight;
 
-        if (h > maxHeight) {
-            aspect = w / h;
-            h = maxHeight;
-            w = h * aspect;
-        }
+            w = maxWidth;
+            h = w / aspect;
 
-        ImGui::Image(gpuTex, { w, h }, { 0, 1 }, { 1, 0 }, { (float) r, (float) g, (float) b, (float) a }, { 1, 1, 0, 1 });
+            if (h > maxHeight) {
+                aspect = w / h;
+                h = maxHeight;
+                w = h * aspect;
+            }
 
-        if (drawInspector) {
-            ImRect rc = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
-            ImVec2 mouseUVCoord = (ImGui::GetIO().MousePos - rc.Min) / rc.GetSize();
-            mouseUVCoord.y = 1.f - mouseUVCoord.y;
-            if (mouseUVCoord.x >= 0.0f &&
-                mouseUVCoord.y >= 0.0f &&
-                mouseUVCoord.x <= 1.0f &&
-                mouseUVCoord.y <= 1.0f) {
-                auto pixels = reinterpret_cast<const unsigned char*>(tex.PixelData.data());
-                ImageInspect::inspect(tex.Width, tex.Height, pixels, mouseUVCoord, { w, h }, drawNormals, drawHistogram, tex.Channels);
+            ImGui::Image(gpuTex, { w, h }, { 0, 1 }, { 1, 0 }, { (float) r, (float) g, (float) b, (float) a }, { 1, 1, 0, 1 });
+
+            if (drawInspector) {
+                if (tex.PixelData.has_value()) {
+                    ImRect rc = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+                    ImVec2 mouseUVCoord = (ImGui::GetIO().MousePos - rc.Min) / rc.GetSize();
+                    mouseUVCoord.y = 1.f - mouseUVCoord.y;
+                    if (mouseUVCoord.x >= 0.0f &&
+                        mouseUVCoord.y >= 0.0f &&
+                        mouseUVCoord.x <= 1.0f &&
+                        mouseUVCoord.y <= 1.0f) {
+                        auto pixels = reinterpret_cast<const unsigned char*>(tex.PixelData.value().data());
+                        ImageInspect::inspect(tex.Width, tex.Height, pixels, mouseUVCoord, { w, h }, drawNormals, drawHistogram, tex.Channels);
+                    }
+                } else if (ImGui::IsItemHovered()) {
+                    ImGui::BeginTooltip();
+                    ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+                    ImGui::TextUnformatted("Texture has no data in system memory.");
+                    ImGui::PopTextWrapPos();
+                    ImGui::EndTooltip();
+                }
             }
         }
     } else {
@@ -487,7 +505,9 @@ void DisplayTargetRenderer::RenderTextureView(AssetHandle h) {
     ImGui::AlignTextToFramePadding(); ImGui::Text("Image Inspect:");   ImGui::SameLine(); ImGui::Checkbox("##inspect", &drawInspector);
     ImGui::SameLine(); ImGui::Text("Normals:");    ImGui::SameLine(); ImGui::Checkbox("##normals", &drawNormals);
     ImGui::SameLine(); ImGui::Text("Histogram:");  ImGui::SameLine(); ImGui::Checkbox("##histogram", &drawHistogram);
-    if (ImGui::Button("Refresh", { ImGui::GetContentRegionAvail().x, 0 })) {
+
+    float availX = ImGui::GetContentRegionAvail().x;
+    if (ImGui::Button("Refresh", { availX / 2, 0 })) {
         h->ForceDeserialize();
         observer.get().gui.get().Events.Observer.OnAssetRefreshed(h);
     }
@@ -497,6 +517,32 @@ void DisplayTargetRenderer::RenderTextureView(AssetHandle h) {
         ImGui::TextUnformatted("Forces deserialization on this texture. All data in RAM/VRAM is purged, and new data is read from disk.");
         ImGui::PopTextWrapPos();
         ImGui::EndTooltip();
+    }
+    ImGui::SameLine();
+
+    bool hasContent = observer.get().gui.get().CORE->GetAssets()->AssetHasContentInSystemMemory(h->ID());
+    if (!hasContent) {
+        if (ImGui::Button("Load into system memory", { availX / 2, 0 })) {
+            h->ReadContentIntoSystemMemory();
+        }
+        if (ImGui::IsItemHovered()) {
+            ImGui::BeginTooltip();
+            ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+            ImGui::TextUnformatted("Loads asset's data from disk into RAM. May result in high RAM usage.");
+            ImGui::PopTextWrapPos();
+            ImGui::EndTooltip();
+        }
+    } else {
+        if (ImGui::Button("Release from system memory", { availX / 2, 0 })) {
+            h->ReleaseContentInSystemMemory();
+        }
+        if (ImGui::IsItemHovered()) {
+            ImGui::BeginTooltip();
+            ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+            ImGui::TextUnformatted("Releases asset's data from RAM. Helps with high RAM usage.");
+            ImGui::PopTextWrapPos();
+            ImGui::EndTooltip();
+        }
     }
 }
 void DisplayTargetRenderer::RenderShaderView(AssetHandle h) {
@@ -658,7 +704,8 @@ void DisplayTargetRenderer::RenderMeshView(AssetHandle h) {
         ImGui::SetCursorPosY(ImGui::GetWindowHeight() - ImGui::GetFrameHeight() - extraPadding);
     }
 
-    if (ImGui::Button("Refresh", { ImGui::GetContentRegionAvail().x, 0 })) {
+    float availX = ImGui::GetContentRegionAvail().x;
+    if (ImGui::Button("Refresh", { availX / 2, 0 })) {
         h->ForceDeserialize();
         observer.get().gui.get().Events.Observer.OnAssetRefreshed(h);
     }
@@ -666,9 +713,35 @@ void DisplayTargetRenderer::RenderMeshView(AssetHandle h) {
     if (ImGui::IsItemHovered()) {
         ImGui::BeginTooltip();
         ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-        ImGui::TextUnformatted("Forces deserialization on this mesh object. All data in VRAM is purged, and new data is allocated.");
+        ImGui::TextUnformatted("Forces deserialization on this mesh object. All data in RAM/VRAM is purged, and new data is allocated.");
         ImGui::PopTextWrapPos();
         ImGui::EndTooltip();
+    }
+    ImGui::SameLine();
+
+    bool hasContent = observer.get().gui.get().CORE->GetAssets()->AssetHasContentInSystemMemory(h->ID());
+    if (!hasContent) {
+        if (ImGui::Button("Load into system memory", { availX / 2, 0 })) {
+            h->ReadContentIntoSystemMemory();
+        }
+        if (ImGui::IsItemHovered()) {
+            ImGui::BeginTooltip();
+            ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+            ImGui::TextUnformatted("Loads asset's data from disk into RAM. May result in high RAM usage.");
+            ImGui::PopTextWrapPos();
+            ImGui::EndTooltip();
+        }
+    } else {
+        if (ImGui::Button("Release from system memory", { availX / 2, 0 })) {
+            h->ReleaseContentInSystemMemory();
+        }
+        if (ImGui::IsItemHovered()) {
+            ImGui::BeginTooltip();
+            ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+            ImGui::TextUnformatted("Releases asset's data from RAM. Helps with high RAM usage.");
+            ImGui::PopTextWrapPos();
+            ImGui::EndTooltip();
+        }
     }
 }
 void DisplayTargetRenderer::RenderTextView(AssetHandle h) {

@@ -20,6 +20,10 @@ struct Model {
         UUID MeshUUID;
         size_t MaterialIndex;
     };
+    struct Texture {
+        UUID TextureUUID;
+        bool Embedded;
+    };
     struct Material {
         enum class TextureOperation : uint8_t {
             Multiply,  /* T = T1 * T2 */
@@ -131,7 +135,7 @@ struct Model {
     std::string Name{};
     Tree<Node> Nodes{};
     std::vector<Mesh> Meshes{};
-    std::vector<UUID> Textures{};
+    std::vector<Texture> Textures{};
     std::vector<Material> Materials{};
 
     std::string Serialize() const noexcept;

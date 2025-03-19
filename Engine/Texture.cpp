@@ -47,7 +47,7 @@ const Texture& Texture::Missing() noexcept {
 
 bool Texture::HasTransparency() const noexcept { return Channels == 4; }
 
-EncodedTextureData Texture::Serialize(TextureEncoding encoding) const noexcept { return SerializeTexture(*this, encoding); }
+EncodedTextureData Texture::Serialize(TextureEncoding encoding) const noexcept { return SerializeTexture(*this, encoding).value_or(EncodedTextureData{}); }
 Texture Texture::Deserialize(const EncodedTextureData& data) noexcept { return DeserializeTexture(data).deserializedTexture; }
 
 Texture Texture::Copy(const Texture& texture) noexcept { return texture; }
