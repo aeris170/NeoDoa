@@ -243,7 +243,7 @@ FNode& Assets::GetFileOfAsset(const UUID uuid) const noexcept {
 }
 const AssetData& Assets::GetDataOfAsset(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
-    return const_cast<AssetDatabase&>(database).data[uuid];
+    return database.data.at(uuid);
 }
 SubAssetList Assets::GetSubAssetsOfAsset(const UUID uuid) const noexcept {
     auto index = database.subAssets.FindNodeIndexBFS(uuid, AssetDatabase::SubAssetTree::Root);
@@ -258,11 +258,11 @@ SubAssetList Assets::GetSubAssetsOfAsset(const UUID uuid) const noexcept {
 }
 uint64_t Assets::GetVersionOfAsset(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
-    return const_cast<AssetDatabase&>(database).versions[uuid];
+    return database.versions.at(uuid);
 }
 std::optional<std::string_view> Assets::TryGetNameOfAsset(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
-    const AssetData& data = const_cast<AssetDatabase&>(database).data[uuid];
+    const AssetData& data = database.data.at(uuid);
     return std::visit(overloaded::lambda {
         [] (const EmptyAssetData& empty) -> std::optional<std::string_view> {
             if (empty.Name == "") {
@@ -284,7 +284,7 @@ std::optional<std::string_view> Assets::TryGetNameOfAsset(const UUID uuid) const
 }
 HashedString Assets::GetTypeNameOfAsset(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
-    const AssetData& data = const_cast<AssetDatabase&>(database).data[uuid];
+    const AssetData& data = database.data.at(uuid);
     using namespace entt::literals;
     return std::visit(overloaded::lambda{
         [](const EmptyAssetData& empty)                     -> HashedString { return empty.Type;            },
@@ -622,7 +622,7 @@ void Assets::DeleteDeserializedDataOfAsset(const UUID uuid) noexcept {
 }
 bool Assets::AssetHasDeserializedData(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
-    return !std::holds_alternative<EmptyAssetData>(const_cast<AssetDatabase&>(database).data[uuid]);
+    return !std::holds_alternative<EmptyAssetData>(database.data.at(uuid));
 }
 UUID Assets::InstantiateAsset(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
@@ -918,36 +918,36 @@ bool Assets::IsScriptAsset(const UUID uuid) const noexcept {
 
 bool Assets::IsSubAsset(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
-    FNode* file = const_cast<AssetDatabase&>(database).files[uuid];
-    UUID id = const_cast<Assets&>(*this).files[file];
+    FNode* file = database.files.at(uuid);
+    UUID id = files.at(file);
     return id != uuid; // id is own-id if not sub asset. parent-id if otherwise.
 }
 
 bool Assets::AssetHasInfoMessages(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
-    return !const_cast<AssetDatabase&>(database).infoLists[uuid].empty();
+    return !database.infoLists.at(uuid).empty();
 }
 const std::vector<std::any>& Assets::GetInfoMessagesOfAsset(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
-    return const_cast<AssetDatabase&>(database).infoLists[uuid];
+    return database.infoLists.at(uuid);
 }
 
 bool Assets::AssetHasWarningMessages(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
-    return !const_cast<AssetDatabase&>(database).warningLists[uuid].empty();
+    return !database.warningLists.at(uuid).empty();
 }
 const std::vector<std::any>& Assets::GetWarningMessagesOfAsset(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
-    return const_cast<AssetDatabase&>(database).warningLists[uuid];
+    return database.warningLists.at(uuid);
 }
 
 bool Assets::AssetHasErrorMessages(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
-    return !const_cast<AssetDatabase&>(database).errorLists[uuid].empty();
+    return !database.errorLists.at(uuid).empty();
 }
 const std::vector<std::any>& Assets::GetErrorMessagesOfAsset(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
-    return const_cast<AssetDatabase&>(database).errorLists[uuid];
+    return database.errorLists.at(uuid);
 }
 
 FNode& Assets::Root() noexcept { return _root; }
