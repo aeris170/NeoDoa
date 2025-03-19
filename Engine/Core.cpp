@@ -342,4 +342,5 @@ void Core::DeleteCore(Core* core) { delete core; }
 void Core::HandleNew() {
     DOA_LOG_FATAL("Memory allocation failed, terminating");
     std::set_new_handler(nullptr);
+    std::terminate();
 }
