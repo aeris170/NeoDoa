@@ -72,7 +72,7 @@ if (Test-Path -Path $path) {
         'glfw3',
         'glm',
         'icu',
-        'imgui[core,docking-experimental,glfw-binding,sdl2-binding,opengl3-binding,vulkan-binding,dx11-binding,dx12-binding]',
+        'imgui[core,docking-experimental,glfw-binding,sdl3-binding,opengl3-binding,vulkan-binding,dx11-binding,dx12-binding]',
         'imguizmo',
         'lunasvg',
         'stb',

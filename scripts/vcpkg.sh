@@ -127,7 +127,7 @@ else
 		'glfw3' \
 		'glm' \
 		'icu' \
-		'imgui[core,docking-experimental,glfw-binding,sdl2-binding,opengl3-binding,vulkan-binding]' \
+		'imgui[core,docking-experimental,glfw-binding,sdl3-binding,opengl3-binding,vulkan-binding]' \
 		'imguizmo' \
 		'lunasvg' \
 		'stb' \
