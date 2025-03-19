@@ -355,7 +355,7 @@ bool MultiAssetWidget(std::string_view label, std::vector<UUID>& uuids, const As
         std::string_view assetIcon;
         std::string_view assetName;
         if (id != UUID::Empty()) {
-            AssetHandle handle = assets.FindAsset(id);
+            ConstAssetHandle handle = assets.FindAsset(id);
             if (handle.HasValue()) {
                 textColor = ImGui::GetStyleColorVec4(ImGuiCol_Text);
                 assetIcon = metaBank.GetMetaInfoOf(handle->File()).fa_icon;
@@ -383,7 +383,7 @@ bool MultiAssetWidget(std::string_view label, std::vector<UUID>& uuids, const As
         if (ImGui::BeginDragDropTarget()) {
             if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DND_DEMO_CELL")) {
                 UUID data = *(const UUID*) payload->Data;
-                AssetHandle handle = assets.FindAsset(data);
+                ConstAssetHandle handle = assets.FindAsset(data);
                 assert(handle.HasValue());
                 if (filter(data, assets)) {
                     uuids[i] = data;

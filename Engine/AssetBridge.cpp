@@ -3,7 +3,7 @@
 // GPUFrameBuffer
 template<>
 std::vector<FrameBufferAllocatorMessage> GPUFrameBuffers::Allocate(const Assets& assets, const UUID asset) noexcept {
-    AssetHandle handle{ assets.FindAsset(asset) };
+    ConstAssetHandle handle{ assets.FindAsset(asset) };
     assert(handle && handle->IsFrameBuffer());
     const FrameBuffer& frameBuffer{ handle->DataAs<FrameBuffer>() };
 
@@ -133,7 +133,7 @@ std::vector<FrameBufferAllocatorMessage> GPUFrameBuffers::Allocate(const Assets&
 // GPUShader
 template<>
 std::vector<ShaderCompilerMessage> GPUShaders::Allocate(const Assets& assets, const UUID asset) noexcept {
-    AssetHandle handle{ assets.FindAsset(asset) };
+    ConstAssetHandle handle{ assets.FindAsset(asset) };
     assert(handle && handle->IsShader());
     const Shader& shader{ handle->DataAs<Shader>() };
 
@@ -152,7 +152,7 @@ std::vector<ShaderCompilerMessage> GPUShaders::Allocate(const Assets& assets, co
 // GPUShaderProgram
 template<>
 std::vector<ShaderLinkerMessage> GPUShaderPrograms::Allocate(const Assets& assets, const UUID asset) noexcept {
-    AssetHandle handle{ assets.FindAsset(asset) };
+    ConstAssetHandle handle{ assets.FindAsset(asset) };
     assert(handle && handle->IsShaderProgram());
     const ShaderProgram& program{ handle->DataAs<ShaderProgram>() };
 
@@ -231,7 +231,7 @@ std::vector<ShaderLinkerMessage> GPUShaderPrograms::Allocate(const Assets& asset
 // GPUSampler
 template<>
 std::vector<SamplerAllocatorMessage> GPUSamplers::Allocate(const Assets& assets, const UUID asset) noexcept {
-    AssetHandle handle{ assets.FindAsset(asset) };
+    ConstAssetHandle handle{ assets.FindAsset(asset) };
     assert(handle && handle->IsSampler());
     const Sampler& sampler{ handle->DataAs<Sampler>() };
 
@@ -263,7 +263,7 @@ std::vector<SamplerAllocatorMessage> GPUSamplers::Allocate(const Assets& assets,
 // GPUTexture
 template<>
 std::vector<TextureAllocatorMessage> GPUTextures::Allocate(const Assets& assets, const UUID asset) noexcept {
-    AssetHandle handle{ assets.FindAsset(asset) };
+    ConstAssetHandle handle{ assets.FindAsset(asset) };
     assert(handle && handle->IsTexture());
     const Texture& texture{ handle->DataAs<Texture>() };
     assert(texture.PixelData.has_value());
@@ -300,7 +300,7 @@ const GPUTexture& GPUTextures::Missing() const noexcept {
 // GPUBuffer (Vertex)
 template<>
 std::vector<BufferAllocatorMessage> GPUVertexBuffers::Allocate(const Assets& assets, const UUID asset) noexcept {
-    AssetHandle handle{ assets.FindAsset(asset) };
+    ConstAssetHandle handle{ assets.FindAsset(asset) };
     assert(handle && handle->IsMesh());
     const Mesh& mesh{ handle->DataAs<Mesh>() };
     assert(mesh.Vertices.has_value());
@@ -321,7 +321,7 @@ std::vector<BufferAllocatorMessage> GPUVertexBuffers::Allocate(const Assets& ass
 // GPUBuffer (Index)
 template<>
 std::vector<BufferAllocatorMessage> GPUIndexBuffers::Allocate(const Assets& assets, const UUID asset) noexcept {
-    AssetHandle handle{ assets.FindAsset(asset) };
+    ConstAssetHandle handle{ assets.FindAsset(asset) };
     assert(handle && handle->IsMesh());
     const Mesh& mesh{ handle->DataAs<Mesh>() };
     assert(mesh.Indices.has_value());
@@ -342,7 +342,7 @@ std::vector<BufferAllocatorMessage> GPUIndexBuffers::Allocate(const Assets& asse
 // GPUBuffer (General)
 template<>
 std::vector<BufferAllocatorMessage> GPUBuffers::Allocate(const Assets& assets, const UUID asset) noexcept {
-    AssetHandle handle{ assets.FindAsset(asset) };
+    ConstAssetHandle handle{ assets.FindAsset(asset) };
     // TODO implement for types requesting buffers for general uses.
     return {};
 }

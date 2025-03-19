@@ -111,7 +111,7 @@ private:
     std::reference_wrapper<Assets> owningManager;
 };
 
-// Encapsulates Asset*. AssetHandle's are fundamentally unsafe to
+// Encapsulates Asset*. AssetHandles are fundamentally unsafe to
 // hold onto. DON'T cache AssetHandle objects as they are no different
 // than pointers. The underlying pointer is susceptible to dangling as
 // additions/removals may shift where the actual data is stored. If you
@@ -136,6 +136,24 @@ struct AssetHandle {
 private:
     Asset* _asset;
 };
+struct ConstAssetHandle {
+
+    ConstAssetHandle() noexcept;
+    ConstAssetHandle(const Asset* const asset) noexcept;
+    const Asset& operator*() const noexcept;
+    const Asset* operator->() const noexcept;
+    operator const Asset*() const noexcept;
+    operator bool() const noexcept;
+
+    bool HasValue() const noexcept;
+    const Asset& Value() const noexcept;
+    void Reset() noexcept;
+
+    friend bool operator==(const ConstAssetHandle& handle1, const ConstAssetHandle& handle2) = default;
+
+private:
+    const Asset* _asset;
+};
 
 // Zero overhead facade into Tree<UUID>::ChildrenList. Tree<UUID> is how NeoDoa stores sub-asset
 // relationships. Tree<UUID> provides ChildrenList as the way to retrieve "children" of tree nodes.
@@ -148,7 +166,7 @@ struct SubAssetList {
         using pointer = AssetHandle;
         using reference = value_type&;
 
-        Iterator(Tree<UUID>::ChildrenList::NodeIterator itr, const Assets& owningManager) noexcept;
+        Iterator(Tree<UUID>::ChildrenList::NodeIterator itr, Assets& owningManager) noexcept;
 
         reference operator*() const noexcept;
         pointer operator->() const noexcept;
@@ -158,10 +176,10 @@ struct SubAssetList {
 
     private:
         Tree<UUID>::ChildrenList::NodeIterator itr;
-        const Assets& owningManager;
+        Assets& owningManager;
     };
 
-    SubAssetList(Tree<UUID>::ChildrenList childrenList, const Assets& owningManager) noexcept;
+    SubAssetList(Tree<UUID>::ChildrenList childrenList, Assets& owningManager) noexcept;
 
     Asset& operator[](std::size_t idx) noexcept;
     const Asset& operator[](std::size_t idx) const noexcept;
@@ -173,7 +191,7 @@ struct SubAssetList {
 
 private:
     Tree<UUID>::ChildrenList childrenList;
-    const Assets& owningManager;
+    Assets& owningManager;
 };
 
 // TODO: When this assertion fails, change Assets::XXXExtension
@@ -309,8 +327,10 @@ struct Assets {
     void MoveAsset(const UUID uuid, FNode& targetParentFolder) noexcept;
     void DeleteAsset(const UUID uuid) noexcept;
 
-    AssetHandle FindAsset(const UUID uuid) const noexcept;
-    AssetHandle FindAssetAt(const FNode& file) const noexcept;
+    AssetHandle FindAsset(const UUID uuid) noexcept;
+    AssetHandle FindAssetAt(const FNode& file) noexcept;
+    ConstAssetHandle FindAsset(const UUID uuid) const noexcept;
+    ConstAssetHandle FindAssetAt(const FNode& file) const noexcept;
     bool IsAssetExistsAt(const FNode& file) const noexcept;
 
     FNode& GetFileOfAsset(const UUID uuid) const noexcept;

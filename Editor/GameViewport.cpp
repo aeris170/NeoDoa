@@ -34,7 +34,7 @@ void GameViewport::Render() {
     const Assets& assets = *gui.CORE->GetAssets();
     std::string_view selectedFrameBufferName{ "<<SELECT A FRAME BUFFER ASSET>>" };
     if (selectedFrameBufferID != UUID::Empty()) {
-        AssetHandle handle = assets.FindAsset(selectedFrameBufferID);
+        ConstAssetHandle handle = assets.FindAsset(selectedFrameBufferID);
         assert(handle.HasValue());
         assert(handle->IsFrameBuffer());
         selectedFrameBufferName = handle->DataAs<FrameBuffer>().Name;
@@ -49,7 +49,7 @@ void GameViewport::Render() {
             bool is_selected = (selectedFrameBufferName == currentName);
             if (ImGui::Selectable(currentName.data(), is_selected) && !is_selected) {
                 for (UUID id : assets.FrameBufferAssetIDs()) {
-                    AssetHandle handle = assets.FindAsset(id);
+                    ConstAssetHandle handle = assets.FindAsset(id);
                     assert(handle.HasValue());
                     assert(handle->IsFrameBuffer());
 
@@ -69,11 +69,11 @@ void GameViewport::Render() {
         selectedAttachmentIndex = 0;
         displayableAttachmentNames.clear();
     } else {
-        AssetHandle handle = assets.FindAsset(selectedFrameBufferID);
+        ConstAssetHandle handle = assets.FindAsset(selectedFrameBufferID);
         assert(handle.HasValue());
         assert(handle->IsFrameBuffer());
 
-        FrameBuffer& fb = handle->DataAs<FrameBuffer>();
+        const FrameBuffer& fb = handle->DataAs<FrameBuffer>();
         displayableAttachmentNames.clear();
 
         if (0 < fb.ColorAttachments.size() && fb.ColorAttachments[0].HasReadbackSupport)            { displayableAttachmentNames.push_back(ColorAttachment0);       }
@@ -185,7 +185,7 @@ const GPUTexture& GameViewport::FetchAttachmentTexture(const Assets& assets, UUI
 void GameViewport::OnProjectLoaded([[maybe_unused]] Project& project) noexcept {
     const Assets& assets = *gui.get().CORE->GetAssets();
     for (UUID id : assets.FrameBufferAssetIDs()) {
-        AssetHandle handle = assets.FindAsset(id);
+        ConstAssetHandle handle = assets.FindAsset(id);
         assert(handle.HasValue());
         assert(handle->IsFrameBuffer());
 

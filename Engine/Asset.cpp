@@ -65,17 +65,17 @@ const std::vector<std::any>& Asset::WarningMessages() const { return owningManag
 bool Asset::HasErrorMessages() const { return owningManager.get().AssetHasErrorMessages(id); }
 const std::vector<std::any>& Asset::ErrorMessages() const { return owningManager.get().GetErrorMessagesOfAsset(id); }
 
-SubAssetList::Iterator::Iterator(Tree<UUID>::ChildrenList::NodeIterator itr, const Assets& owningManager)  noexcept :
+SubAssetList::Iterator::Iterator(Tree<UUID>::ChildrenList::NodeIterator itr, Assets& owningManager)  noexcept :
     itr(itr),
     owningManager(owningManager) {}
 
-SubAssetList::Iterator::reference SubAssetList::Iterator::operator*() const  noexcept { return owningManager.FindAsset(*itr).Value(); }
+SubAssetList::Iterator::reference SubAssetList::Iterator::operator*() const noexcept { return owningManager.FindAsset(*itr).Value(); }
 SubAssetList::Iterator::pointer SubAssetList::Iterator::operator->() const noexcept { return owningManager.FindAsset(*itr); }
 
 SubAssetList::Iterator& SubAssetList::Iterator::operator++()  noexcept { ++itr; return *this; }
 SubAssetList::Iterator SubAssetList::Iterator::operator++(int) noexcept { Iterator tmp = *this; ++(*this); return tmp; }
 
-SubAssetList::SubAssetList(Tree<UUID>::ChildrenList childrenList, const Assets& owningManager) noexcept :
+SubAssetList::SubAssetList(Tree<UUID>::ChildrenList childrenList, Assets& owningManager) noexcept :
     childrenList(childrenList),
     owningManager(owningManager) {};
 
