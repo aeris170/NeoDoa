@@ -8,6 +8,8 @@
 #include <concepts>
 #include <type_traits>
 
+#include <detector.hpp>
+
 template<typename NodeData, size_t InitialNodeCapacity = 512, size_t InitialChildCapacity = 8>
 struct Tree {
 
@@ -62,7 +64,8 @@ struct Tree {
         const std::vector<NodeIndex>& indices;
     };
 
-    Tree() noexcept requires(std::is_nothrow_default_constructible_v<NodeData>);
+    Tree() noexcept requires detect::is_clang_v;
+    Tree() noexcept requires(!detect::is_clang_v && std::is_nothrow_default_constructible_v<NodeData>);
     explicit Tree(const NodeData& rootData) noexcept;
 
     /// <summary>
@@ -152,7 +155,12 @@ private:
 };
 
 template<typename NodeData, size_t InitialNodeCapacity, size_t InitialChildCapacity>
-inline Tree<NodeData, InitialNodeCapacity, InitialChildCapacity>::Tree() noexcept requires(std::is_nothrow_default_constructible_v<NodeData>) {
+inline Tree<NodeData, InitialNodeCapacity, InitialChildCapacity>::Tree() noexcept requires detect::is_clang_v {
+    data.reserve(InitialNodeCapacity);
+    data.emplace_back(NodeData{}, decltype(Node::Children){}).Children.reserve(InitialChildCapacity);
+}
+template<typename NodeData, size_t InitialNodeCapacity, size_t InitialChildCapacity>
+inline Tree<NodeData, InitialNodeCapacity, InitialChildCapacity>::Tree() noexcept requires(!detect::is_clang_v && std::is_nothrow_default_constructible_v<NodeData>) {
     data.reserve(InitialNodeCapacity);
     data.emplace_back(NodeData{}, decltype(Node::Children){}).Children.reserve(InitialChildCapacity);
 }
