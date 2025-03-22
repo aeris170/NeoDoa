@@ -1,6 +1,7 @@
 #include <Engine/TextureDeserializer.hpp>
 
 #include <format>
+#include <cstring>
 #include <utility>
 
 #include <stb_image.h>
