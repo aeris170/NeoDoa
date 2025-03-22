@@ -694,8 +694,18 @@ void DisplayTargetRenderer::RenderMeshView(AssetHandle h) {
     windowHeight = windowHeight - totalBottomPadding;
 
     if (h->HasDeserializedData()) {
-        meshDisplay.RenderMeshPreview({ static_cast<unsigned>(windowWidth), static_cast<unsigned>(windowHeight) });
-        meshDisplay.RenderPreviewSettings();
+        if (!h->HasContentInVideoMemory()) {
+            if (!h->HasContentInSystemMemory()) {
+                h->ReadContentIntoSystemMemory();
+            }
+            h->UploadContentIntoVideoMemory();
+            h->ReleaseContentInSystemMemory();
+
+            ImGui::Text("Texture is not deserialized...");
+        } else {
+            meshDisplay.RenderMeshPreview({ static_cast<unsigned>(windowWidth), static_cast<unsigned>(windowHeight) });
+            meshDisplay.RenderPreviewSettings();
+        }
     } else {
         ImGui::Text("Mesh is not deserialized...");
     }

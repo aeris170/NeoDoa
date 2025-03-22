@@ -1,9 +1,11 @@
 #include <Engine/Assets.hpp>
 
 #include <format>
+#include <ranges>
 #include <string>
 #include <utility>
 #include <algorithm>
+#include <execution>
 
 #include <Utility/FormatBytes.hpp>
 
@@ -64,6 +66,8 @@ AssetDatabase::UUIDMap<Asset>::const_iterator AssetDatabase::begin()  const noex
 AssetDatabase::UUIDMap<Asset>::const_iterator AssetDatabase::end()    const noexcept { return assets.end();    }
 
 Asset& AssetDatabase::Emplace(UUID uuid, FNode* file, Assets& owningManager) noexcept {
+    const std::lock_guard lock{ mutex };
+
     auto& asset = assets.try_emplace(uuid, uuid, owningManager).first->second;
     files.try_emplace(uuid, file);
     data.try_emplace(uuid, Assets::CreateEmptyAssetDataUsingFile(*file));
@@ -75,7 +79,11 @@ Asset& AssetDatabase::Emplace(UUID uuid, FNode* file, Assets& owningManager) noe
 }
 AssetData& AssetDatabase::EmplaceAsSubAsset(UUID uuid, UUID owner, SubAssetTree::NodeIndex ownerIndex) noexcept {
     assert(Contains(owner));
+
+    const std::lock_guard lock{ mutex };
+
     assets.try_emplace(uuid, uuid, const_cast<Assets&>(assets.at(owner).OwningManager()));
+    files.try_emplace(uuid, files.at(owner));
     auto empty = Assets::CreateEmptyAssetDataUsingFile(*files.at(owner));
     empty.Type = Assets::GenericAssetTypeName;
     auto& data = this->data.try_emplace(uuid, empty).first->second;
@@ -85,7 +93,7 @@ AssetData& AssetDatabase::EmplaceAsSubAsset(UUID uuid, UUID owner, SubAssetTree:
     errorLists.try_emplace(uuid);
 
     if (ownerIndex == SubAssetTree::Root) {
-        ownerIndex = subAssets.FindNodeIndexDFS(owner);
+        ownerIndex = subAssets.FindNodeIndexBFS(owner);
     }
     subAssets.EmplaceNode(ownerIndex, uuid);
 
@@ -301,7 +309,7 @@ HashedString Assets::GetTypeNameOfAsset(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
     const AssetData& data = database.data.at(uuid);
     using namespace entt::literals;
-    return std::visit(overloaded::lambda{
+    return std::visit(overloaded::lambda {
         [](const EmptyAssetData& empty)                     -> HashedString { return empty.Type;            },
         []([[maybe_unused]] const Scene& scene)             -> HashedString { return SceneTypeName;         },
         []([[maybe_unused]] const Component& component)     -> HashedString { return ComponentTypeName;     },
@@ -417,128 +425,120 @@ void Assets::DeserializeAsset(const UUID uuid) noexcept {
     DOA_LOG_TRACE("Deserializing asset \"%s\" with UUID: %s", file->Name().data(), uuid.AsString().c_str());
 
     if (AssetHasDeserializedData(uuid)) {
-        DOA_LOG_INFO("Didn't deserialize asset \"%s\" with UUID: %s.", file->Name().data(), uuid.AsString().c_str());
-        DOA_LOG_INFO("\tAsset already has deserialized data.");
+        DOA_LOG_INFO("Didn't deserialize asset \"%s\" with UUID: %s.\n\tAsset already has deserialized data.", file->Name().data(), uuid.AsString().c_str());
         return;
     }
 
     if (IsSceneAsset(uuid)) {
-        DOA_LOG_TRACE("\tDetected as a Scene asset.");
         database.data.at(uuid) = DeserializeScene(*file);
     }
     if (IsComponentDefinitionAsset(uuid)) {
-        DOA_LOG_TRACE("\tDetected as a Component Definition asset.");
         auto result = DeserializeComponent(*file);
         for (auto& message : result.messages) {
             switch (message.messageType) {
             case ComponentCompilerMessageType::Info:
-                infoList.emplace_back(std::move(message));
+                infoList.emplace_back(std::move(message.message), "CPU");
                 break;
             case ComponentCompilerMessageType::Warning:
-                warningList.emplace_back(std::move(message));
+                warningList.emplace_back(std::move(message.message), "CPU");
                 break;
             case ComponentCompilerMessageType::Error:
-                errorList.emplace_back(std::move(message));
+                errorList.emplace_back(std::move(message.message), "CPU");
                 break;
             }
         }
         database.data.at(uuid) = std::move(result.deserializedComponent);
     }
     if (IsSamplerAsset(uuid)) {
-        DOA_LOG_TRACE("\tDetected as a Sampler asset.");
         SamplerDeserializationResult result = DeserializeSampler(*file);
-        for (auto& error : result.errors) {
-            errorList.emplace_back(std::move(error));
+        for (auto& errorMessage : result.errors) {
+            errorList.emplace_back(std::move(errorMessage), "CPU");
         }
         database.data.at(uuid) = std::move(result.deserializedSampler);
     }
     if (IsTextureAsset(uuid)) {
-        DOA_LOG_TRACE("\tDetected as a Texture asset.");
         TextureDeserializationResult result = DeserializeTexture(*file);
-        for (auto& error : result.errors) {
-            errorList.emplace_back(std::move(error));
+        for (auto& errorMessage : result.errors) {
+            errorList.emplace_back(std::move(errorMessage), "CPU");
         }
         database.data.at(uuid) = std::move(result.deserializedTexture);
     }
     if (IsShaderAsset(uuid)) {
-        DOA_LOG_TRACE("\tDetected as a Shader asset.");
         ShaderDeserializationResult result;
         if (Assets::IsVertexShaderFile(*file)) {
-            DOA_LOG_TRACE("\t\tExtra, detected as a Vertex Shader asset.");
             result = DeserializeVertexShader(*file);
         }
         if (Assets::IsTessellationControlShaderFile(*file)) {
-            DOA_LOG_TRACE("\t\tExtra, detected as a Tessellation Control Shader asset.");
             result = DeserializeTessellationControlShader(*file);
         }
         if (Assets::IsTessellationEvaluationShaderFile(*file)) {
-            DOA_LOG_TRACE("\t\tExtra, detected as a Tessellation Evaluation Shader asset.");
             result = DeserializeTessellationEvaluationShader(*file);
         }
         if (Assets::IsGeometryShaderFile(*file)) {
-            DOA_LOG_TRACE("\t\tExtra, detected as a Geometry Shader asset.");
             result = DeserializeGeometryShader(*file);
         }
         if (Assets::IsFragmentShaderFile(*file)) {
-            DOA_LOG_TRACE("\t\tExtra, detected as a Fragment Shader asset.");
             result = DeserializeFragmentShader(*file);
         }
         if (Assets::IsComputeShaderFile(*file)) {
-            DOA_LOG_TRACE("\t\tExtra, detected as a Compute Shader asset.");
             result = DeserializeComputeShader(*file);
         }
-        for (auto& error : result.errors) {
-            errorList.emplace_back(std::move(error));
+        for (auto& errorMessage : result.errors) {
+            errorList.emplace_back(std::move(errorMessage.ShortMessage), "CPU");
         }
         database.data.at(uuid) = std::move(result.deserializedShader);
     }
     if (IsShaderProgramAsset(uuid)) {
-        DOA_LOG_TRACE("\tDetected as a Shader Program asset.");
         ShaderProgramDeserializationResult result = DeserializeShaderProgram(*file);
         if (result.erred) {
-            for (auto& error : result.errors) {
-                errorList.emplace_back(std::move(error));
+            for (auto& errorMessage : result.errors) {
+                errorList.emplace_back(std::move(errorMessage), "CPU");
             }
         } else {
-            infoList.emplace_back(std::string("Shader Program is complete and ready for use."));
+            infoList.emplace_back("Shader Program is complete.", "CPU");
         }
         database.data.at(uuid) = std::move(result.deserializedShaderProgram);
     }
     if (IsMaterialAsset(uuid)) {
-        DOA_LOG_TRACE("\tDetected as a Material asset.");
         MaterialDeserializationResult result = DeserializeMaterial(*file);
-        for (auto& error : result.errors) {
-            errorList.emplace_back(std::move(error));
+        for (auto& errorMessage : result.errors) {
+            errorList.emplace_back(std::move(errorMessage), "CPU");
         }
         database.data.at(uuid) = std::move(result.deserializedMaterial);
     }
     if (IsFrameBufferAsset(uuid)) {
-        DOA_LOG_TRACE("\tDetected as a Frame Buffer asset.");
         FrameBufferDeserializationResult result = DeserializeFrameBuffer(*file);
-        for (auto& error : result.errors) {
-            errorList.emplace_back(std::move(error));
+        for (auto& errorMessage : result.errors) {
+            errorList.emplace_back(std::move(errorMessage), "CPU");
         }
         database.data.at(uuid) = std::move(result.deserializedFrameBuffer);
     }
     if (IsMeshAsset(uuid)) {
-        DOA_LOG_TRACE("\tDetected as a Mesh asset.");
         MeshDeserializationResult result = DeserializeMesh(*file);
-        for (auto& warning : result.warnings) {
-            warningList.emplace_back(std::move(warning));
+        for (auto& warningMessage : result.warnings) {
+            warningList.emplace_back(std::move(warningMessage), "CPU");
         }
-        for (auto& error : result.errors) {
-            errorList.emplace_back(std::move(error));
+        for (auto& errorMessage : result.errors) {
+            errorList.emplace_back(std::move(errorMessage), "CPU");
         }
         database.data.at(uuid) = std::move(result.deserializedMesh);
     }
     if (IsModelAsset(uuid)) {
-        DOA_LOG_TRACE("\tDetected as a Model asset.");
+        // Model deserialization causes emergent inserts into asset database
+        // depending on the availability of sub-asset's UUID in the import data
+        // sibling file. These emergent inserts may shift elements, invalidate
+        // references, pointers and iterators. Therefore, we will lock the
+        // "critical section", where emergent inserts happen to provide thread
+        // safety.
+        static std::mutex mutex;
+
         ModelDeserializationResult result = DeserializeModel(*file);
-        for (auto& error : result.errors) {
-            errorList.emplace_back(std::move(error));
+        for (auto& errorMessage : result.errors) {
+            errorList.emplace_back(std::move(errorMessage), "CPU");
         }
         Model& model{ result.deserializedModel };
 
+        std::lock_guard lock{ mutex }; // will release mutex on scope end.
         auto index = database.subAssets.EmplaceNode(AssetDatabase::SubAssetTree::Root, uuid);
         model.Meshes.resize(result.deserializedMeshes.size());
         for (size_t i = 0; i < result.deserializedMeshes.size(); i++) {
@@ -606,8 +606,6 @@ void Assets::DeserializeAsset(const UUID uuid) noexcept {
     }
 
     Events.OnAssetDeserialized(uuid);
-
-    ReleaseContentOfAssetInSystemMemory(uuid);
 
     DOA_LOG_TRACE("Deserialized asset \"%s\" with UUID: %s", file->Name().data(), uuid.AsString().c_str());
 }
@@ -806,50 +804,93 @@ void Assets::UploadContentOfAssetIntoVideoMemory(const UUID uuid) noexcept {
 
     if (!AssetHasDeserializedData(uuid)) { return; }
 
-    if (IsTextureAsset(uuid)) {
-        std::vector<TextureAllocatorMessage> messages = bridge.GetTextures().Allocate(*this, uuid);
+    auto& infoList = database.infoLists.at(uuid);
+    auto& warningList = database.warningLists.at(uuid);
+    auto& errorList = database.errorLists.at(uuid);
 
-        std::vector<std::any>& errorMessages = database.errorLists[uuid];
+    if (IsSamplerAsset(uuid)) {
+        bridge.GetSamplers().Deallocate(uuid);
+        std::vector<SamplerAllocatorMessage> messages = bridge.GetSamplers().Allocate(*this, uuid);
+        for (auto& errorMessage : messages) {
+            errorList.emplace_back(std::move(errorMessage), "GPU");
+        }
+    }
+    if (IsTextureAsset(uuid)) {
+        bridge.GetTextures().Deallocate(uuid);
+        std::vector<TextureAllocatorMessage> messages = bridge.GetTextures().Allocate(*this, uuid);
+        for (auto& errorMessage : messages) {
+            errorList.emplace_back(std::move(errorMessage), "GPU");
+        }
+    }
+    if (IsShaderAsset(uuid)) {
+        bridge.GetShaders().Deallocate(uuid);
+        std::vector<ShaderCompilerMessage> messages = bridge.GetShaders().Allocate(*this, uuid);
         for (auto& message : messages) {
-            errorMessages.emplace_back(std::move(message));
+            switch (message.MessageType) {
+                using enum ShaderCompilerMessage::Type;
+            case Info:
+                infoList.emplace_back(std::move(message.ShortMessage), "GPU");
+                break;
+            case Warning:
+                warningList.emplace_back(std::move(message.ShortMessage), "GPU");
+                break;
+            case Error:
+                errorList.emplace_back(std::move(message.ShortMessage), "GPU");
+                break;
+            default:
+                std::unreachable();
+            }
+        }
+    }
+    if (IsShaderProgramAsset(uuid)) {
+        bridge.GetShaderPrograms().Deallocate(uuid);
+        std::vector<ShaderLinkerMessage> messages = bridge.GetShaderPrograms().Allocate(*this, uuid);
+        for (auto& errorMessage : messages) {
+            errorList.emplace_back(std::move(errorMessage), "GPU");
+        }
+    }
+    if (IsFrameBufferAsset(uuid)) {
+        bridge.GetFrameBuffers().Deallocate(uuid);
+        std::vector<FrameBufferAllocatorMessage> messages = bridge.GetFrameBuffers().Allocate(*this, uuid);
+        for (auto& errorMessage : messages) {
+            errorList.emplace_back(std::move(errorMessage), "GPU");
         }
     }
     if (IsMeshAsset(uuid)) {
+        bridge.GetVertexBuffers().Deallocate(uuid);
+        bridge.GetIndexBuffers().Deallocate(uuid);
         std::vector<BufferAllocatorMessage> vMessages = bridge.GetVertexBuffers().Allocate(*this, uuid);
         std::vector<BufferAllocatorMessage> iMessages = bridge.GetIndexBuffers().Allocate(*this, uuid);
 
-        std::vector<std::any>& infoMessages = database.infoLists[uuid];
-        std::vector<std::any>& warningMessages = database.warningLists[uuid];
-        std::vector<std::any>& errorMessages = database.errorLists[uuid];
-        for (auto& message : vMessages) {
-            errorMessages.emplace_back(std::move(message));
+        for (auto& errorMessage : vMessages) {
+            errorList.emplace_back(std::move(errorMessage), "GPU");
         }
-        for (auto& message : iMessages) {
-            errorMessages.emplace_back(std::move(message));
+        for (auto& errorMessage : iMessages) {
+            errorList.emplace_back(std::move(errorMessage), "GPU");
         }
-        if (errorMessages.empty()) {
+        if (errorList.empty()) {
             Mesh& mesh = GetDataOfAssetAs<Mesh>(uuid);
 
             assert(mesh.Vertices.has_value());
             Mesh::VertexList& vertices = mesh.Vertices.value();
-            infoMessages.emplace_back(std::string("Mesh deserialized successfully."));
-            infoMessages.emplace_back(std::format("\tVertex Count: {}", vertices.size()));
-            infoMessages.emplace_back(std::format("\t\tVertex Buffer Size: {} bytes (VRAM)", std::span{ vertices }.size_bytes()));
+            infoList.emplace_back("Mesh deserialized successfully.", "GPU");
+            infoList.emplace_back(std::format("\tVertex Count: {}", vertices.size()), "GPU");
+            infoList.emplace_back(std::format("\t\tVertex Buffer Size: {} bytes (VRAM)", std::span{ vertices }.size_bytes()), "GPU");
             if (mesh.Indices.has_value()) {
                 Mesh::IndexList& indices = mesh.Indices.value();
-                infoMessages.emplace_back(std::format("\tIndex Count: {}", indices.size()));
-                infoMessages.emplace_back(std::format("\t\tIndex Buffer Size: {} bytes (VRAM)", std::span{ indices }.size_bytes()));
+                infoList.emplace_back(std::format("\tIndex Count: {}", indices.size()), "GPU");
+                infoList.emplace_back(std::format("\t\tIndex Buffer Size: {} bytes (VRAM)", std::span{ indices }.size_bytes()), "GPU");
 
                 if (indices.size() % 3 != 0) {
-                    warningMessages.emplace_back(std::string("Index count not divisible by 3. Mesh faces might be ill-formed."));
+                    warningList.emplace_back(std::string("Index count not divisible by 3. Mesh faces might be ill-formed."), "GPU");
                 }
             } else {
-                warningMessages.emplace_back(std::string("Mesh has no index table. This may affect performance."));
+                warningList.emplace_back(std::string("Mesh has no index table. This may affect performance."), "GPU");
             }
         }
     }
     if (IsModelAsset(uuid)) {
-        Model& model = GetDataOfAssetAs<Model>(uuid);
+        const Model& model = GetDataOfAssetAs<Model>(uuid);
         for (auto& mMesh : model.Meshes) {
             UploadContentOfAssetIntoVideoMemory(mMesh.MeshUUID);
         }
@@ -863,6 +904,9 @@ void Assets::UploadContentOfAssetIntoVideoMemory(const UUID uuid) noexcept {
 void Assets::ReleaseContentOfAssetInVideoMemory(const UUID uuid) noexcept {
     assert(database.Contains(uuid));
 
+    if (IsSamplerAsset(uuid)) {
+        bridge.GetSamplers().Deallocate(uuid);
+    }
     if (IsTextureAsset(uuid)) {
         bridge.GetTextures().Deallocate(uuid);
     }
@@ -881,6 +925,13 @@ void Assets::ReleaseContentOfAssetInVideoMemory(const UUID uuid) noexcept {
             ReleaseContentOfAssetInVideoMemory(mTexture.TextureUUID);
         }
     }
+
+    auto& infoList = database.infoLists.at(uuid);
+    auto& warningList = database.warningLists.at(uuid);
+    auto& errorList = database.errorLists.at(uuid);
+    infoList.erase(std::ranges::remove_if(infoList, [](const AssetMessage& m) { return m.MessageContext == "GPU"; }).begin(), infoList.end());
+    warningList.erase(std::ranges::remove_if(warningList, [](const AssetMessage& m) { return m.MessageContext == "GPU"; }).begin(), warningList.end());
+    errorList.erase(std::ranges::remove_if(errorList, [](const AssetMessage& m) { return m.MessageContext == "GPU"; }).begin(), errorList.end());
 }
 
 bool Assets::IsSceneAsset(const UUID uuid) const noexcept {
@@ -930,7 +981,7 @@ bool Assets::IsScriptAsset(const UUID uuid) const noexcept {
 
 bool Assets::IsSubAsset(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
-    FNode* file = database.files.at(uuid);
+    const FNode* file = database.files.at(uuid);
     UUID id = files.at(file);
     return id != uuid; // id is own-id if not sub asset. parent-id if otherwise.
 }
@@ -939,7 +990,7 @@ bool Assets::AssetHasInfoMessages(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
     return !database.infoLists.at(uuid).empty();
 }
-const std::vector<std::any>& Assets::GetInfoMessagesOfAsset(const UUID uuid) const noexcept {
+const std::vector<AssetMessage>& Assets::GetInfoMessagesOfAsset(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
     return database.infoLists.at(uuid);
 }
@@ -948,7 +999,7 @@ bool Assets::AssetHasWarningMessages(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
     return !database.warningLists.at(uuid).empty();
 }
-const std::vector<std::any>& Assets::GetWarningMessagesOfAsset(const UUID uuid) const noexcept {
+const std::vector<AssetMessage>& Assets::GetWarningMessagesOfAsset(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
     return database.warningLists.at(uuid);
 }
@@ -957,7 +1008,7 @@ bool Assets::AssetHasErrorMessages(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
     return !database.errorLists.at(uuid).empty();
 }
-const std::vector<std::any>& Assets::GetErrorMessagesOfAsset(const UUID uuid) const noexcept {
+const std::vector<AssetMessage>& Assets::GetErrorMessagesOfAsset(const UUID uuid) const noexcept {
     assert(database.Contains(uuid));
     return database.errorLists.at(uuid);
 }
@@ -1010,16 +1061,67 @@ void Assets::ReimportAll() noexcept {
 // donkey donk
 void Assets::EnsureDeserialization() noexcept {
     // ORDER MATTERS
+    std::chrono::system_clock::time_point start, end;
+    start = std::chrono::system_clock::now();
+    DOA_LOG_INFO("Deserializing Component Definition Assets...");
     Deserialize(componentDefinitionAssets);
+    end = std::chrono::system_clock::now();
+    DOA_LOG_INFO("Deserialized %d Component Definition Assets. Took: %d ms", componentDefinitionAssets.size(), static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()));
+
+    start = std::chrono::system_clock::now();
+    DOA_LOG_INFO("Deserializing Scene Assets...");
     Deserialize(sceneAssets);
+    end = std::chrono::system_clock::now();
+    DOA_LOG_INFO("Deserialized %d Scene Assets. Took: %d ms", sceneAssets.size(), static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()));
+
+    start = std::chrono::system_clock::now();
+    DOA_LOG_INFO("Deserializing Texture Assets...");
     Deserialize(textureAssets);
+    end = std::chrono::system_clock::now();
+    DOA_LOG_INFO("Deserialized %d Texture Assets. Took: %d ms", textureAssets.size(), static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()));
+
+    start = std::chrono::system_clock::now();
+    DOA_LOG_INFO("Deserializing Sampler Assets...");
     Deserialize(samplerAssets);
+    end = std::chrono::system_clock::now();
+    DOA_LOG_INFO("Deserialized %d Sampler Assets. Took: %d ms", samplerAssets.size(), static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()));
+
+    start = std::chrono::system_clock::now();
+    DOA_LOG_INFO("Deserializing Shader Assets...");
     Deserialize(shaderAssets);
+    end = std::chrono::system_clock::now();
+    DOA_LOG_INFO("Deserialized %d Shader Assets. Took: %d ms", shaderAssets.size(), static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()));
+
+    start = std::chrono::system_clock::now();
+    DOA_LOG_INFO("Deserializing Shader Program Assets...");
     Deserialize(shaderProgramAssets);
+    end = std::chrono::system_clock::now();
+    DOA_LOG_INFO("Deserialized %d Shader Program Assets. Took: %d ms", shaderProgramAssets.size(), static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()));
+
+    start = std::chrono::system_clock::now();
+    DOA_LOG_INFO("Deserializing Material Assets...");
     Deserialize(materialAssets);
+    end = std::chrono::system_clock::now();
+    DOA_LOG_INFO("Deserialized %d Material Assets. Took: %d ms", materialAssets.size(), static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()));
+
+    start = std::chrono::system_clock::now();
+    DOA_LOG_INFO("Deserializing Frame Buffer Assets...");
     Deserialize(frameBufferAssets);
+    end = std::chrono::system_clock::now();
+    DOA_LOG_INFO("Deserialized %d Frame Buffer Assets. Took: %d ms", frameBufferAssets.size(), static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()));
+
+    start = std::chrono::system_clock::now();
+    DOA_LOG_INFO("Deserializing Mesh Assets...");
     Deserialize(meshAssets);
+    end = std::chrono::system_clock::now();
+    DOA_LOG_INFO("Deserialized %d Mesh Assets. Took: %d ms", meshAssets.size(), static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()));
+
+    start = std::chrono::system_clock::now();
+    DOA_LOG_INFO("Deserializing Model Assets...");
     Deserialize(modelAssets);
+    end = std::chrono::system_clock::now();
+    DOA_LOG_INFO("Deserialized %d Model Assets. Took: %d ms", modelAssets.size(), static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()));
+
 
     ReBuildDependencyGraph();
 }
@@ -1303,10 +1405,10 @@ void Assets::ImportAllFiles(AssetDatabase& database, const FNode& root) noexcept
     }
 }
 void Assets::Deserialize(const UUIDCollection& assets) noexcept {
-    for (const UUID id : assets) {
+    std::for_each(std::execution::par, assets.begin(), assets.end(), [this] (const UUID id) {
         DeleteDeserializedDataOfAsset(id);
         ForceDeserializeAsset(id);
-    }
+    });
 }
 
 void Assets::BuildFileNodeTree(const Project& project, FNode& root) noexcept {
@@ -1440,60 +1542,13 @@ template<>
 EmptyAssetData Assets::CreateEmptyAssetDataUsingType<Model>(std::string_view name)         noexcept { return { name.data(), ModelTypeName         }; }
 
 template<>
-void Assets::PerformPostDeserializationAction<Sampler>(const UUID uuid) noexcept {
-    bridge.GetSamplers().Deallocate(uuid);
-    std::vector<SamplerAllocatorMessage> messages = bridge.GetSamplers().Allocate(*this, uuid);
-
-    std::vector<std::any>& errorMessages = database.errorLists.at(uuid);
-    for (auto& message : messages) {
-        errorMessages.emplace_back(std::move(message));
-    }
-}
+void Assets::PerformPostDeserializationAction<Sampler>(const UUID uuid) noexcept {}
 template<>
-void Assets::PerformPostDeserializationAction<Texture>(const UUID uuid) noexcept {
-    bridge.GetTextures().Deallocate(uuid);
-    std::vector<TextureAllocatorMessage> messages = bridge.GetTextures().Allocate(*this, uuid);
-
-    std::vector<std::any>& errorMessages = database.errorLists.at(uuid);
-    for (auto& message : messages) {
-        errorMessages.emplace_back(std::move(message));
-    }
-}
+void Assets::PerformPostDeserializationAction<Texture>(const UUID uuid) noexcept {}
 template<>
-void Assets::PerformPostDeserializationAction<Shader>(const UUID uuid) noexcept {
-    bridge.GetShaders().Deallocate(uuid);
-    std::vector<ShaderCompilerMessage> messages = bridge.GetShaders().Allocate(*this, uuid);
-
-    std::vector<std::any>& infoMessages = database.infoLists.at(uuid);
-    std::vector<std::any>& warningMessages = database.warningLists.at(uuid);
-    std::vector<std::any>& errorMessages = database.errorLists.at(uuid);
-    for (auto& message : messages) {
-        switch (message.MessageType) {
-        using enum ShaderCompilerMessage::Type;
-        case Info:
-            infoMessages.emplace_back(std::move(message));
-            break;
-        case Warning:
-            warningMessages.emplace_back(std::move(message));
-            break;
-        case Error:
-            errorMessages.emplace_back(std::move(message));
-            break;
-        default:
-            std::unreachable();
-        }
-    }
-}
+void Assets::PerformPostDeserializationAction<Shader>(const UUID uuid) noexcept {}
 template<>
-void Assets::PerformPostDeserializationAction<ShaderProgram>(const UUID uuid) noexcept {
-    bridge.GetShaderPrograms().Deallocate(uuid);
-    std::vector<ShaderLinkerMessage> messages = bridge.GetShaderPrograms().Allocate(*this, uuid);
-
-    std::vector<std::any>& errorMessages = database.errorLists.at(uuid);
-    for (auto& message : messages) {
-        errorMessages.emplace_back(std::move(message));
-    }
-}
+void Assets::PerformPostDeserializationAction<ShaderProgram>(const UUID uuid) noexcept {}
 
 size_t MaterialPostDeserialization::TypeNameToVariantIndex(std::string_view typeName) noexcept {
     // TODO refactor this to remove the magic numbers, see https://stackoverflow.com/questions/52303316/get-index-by-type-in-stdvariant
@@ -1732,68 +1787,14 @@ void Assets::PerformPostDeserializationAction<Material>(const UUID uuid) noexcep
         algorithm(asset.GeometryUniforms, ShaderType::Geometry, *program);
         algorithm(asset.FragmentUniforms, ShaderType::Fragment, *program);
     } else {
-        std::vector<std::any>& errorMessages = database.errorLists[uuid];
-        errorMessages.emplace_back(std::string("Material deserialization failed."));
-        errorMessages.emplace_back(std::string("Referenced shader program failed to allocate. Check for errors in program!"));
+        auto& errorMessages = database.errorLists.at(uuid);
+        errorMessages.emplace_back("Material deserialization failed.", "CPU");
+        errorMessages.emplace_back("Referenced shader program failed to allocate. Check for errors in program!", "CPU");
     }
 }
 template<>
-void Assets::PerformPostDeserializationAction<FrameBuffer>(const UUID uuid) noexcept {
-    bridge.GetFrameBuffers().Deallocate(uuid);
-    std::vector<FrameBufferAllocatorMessage> messages = bridge.GetFrameBuffers().Allocate(*this, uuid);
-
-    std::vector<std::any>& errorMessages = database.errorLists.at(uuid);
-    for (auto& message : messages) {
-        errorMessages.emplace_back(std::move(message));
-    }
-}
+void Assets::PerformPostDeserializationAction<FrameBuffer>(const UUID uuid) noexcept {}
 template<>
-void Assets::PerformPostDeserializationAction<Mesh>(const UUID uuid) noexcept {
-    bridge.GetVertexBuffers().Deallocate(uuid);
-    bridge.GetIndexBuffers().Deallocate(uuid);
-    std::vector<BufferAllocatorMessage> vMessages = bridge.GetVertexBuffers().Allocate(*this, uuid);
-    std::vector<BufferAllocatorMessage> iMessages = bridge.GetIndexBuffers().Allocate(*this, uuid);
-
-    std::vector<std::any>& infoMessages = database.infoLists.at(uuid);
-    std::vector<std::any>& warningMessages = database.warningLists.at(uuid);
-    std::vector<std::any>& errorMessages = database.errorLists.at(uuid);
-    for (auto& message : vMessages) {
-        errorMessages.emplace_back(std::move(message));
-    }
-    for (auto& message : iMessages) {
-        errorMessages.emplace_back(std::move(message));
-    }
-    if (errorMessages.empty()) {
-        const Mesh& mesh = GetDataOfAssetAs<Mesh>(uuid);
-
-        assert(mesh.Vertices.has_value());
-        const Mesh::VertexList& vertices = mesh.Vertices.value();
-        infoMessages.emplace_back(std::string("Mesh deserialized successfully."));
-        infoMessages.emplace_back(std::format("\tVertex Count: {}", vertices.size()));
-        infoMessages.emplace_back(std::format("\t\tVertex Buffer Size: {} (VRAM)", FormatBytes(static_cast<float>(std::span{ vertices }.size_bytes()))));
-        if (mesh.Indices.has_value()) {
-            const Mesh::IndexList& indices = mesh.Indices.value();
-            infoMessages.emplace_back(std::format("\tIndex Count: {}", indices.size()));
-            infoMessages.emplace_back(std::format("\t\tIndex Buffer Size: {} (VRAM)", FormatBytes(static_cast<float>(std::span{ indices }.size_bytes()))));
-
-            if (indices.size() % 3 != 0) {
-                warningMessages.emplace_back(std::string("Index count not divisible by 3. Mesh faces might be ill-formed."));
-            }
-        } else {
-            warningMessages.emplace_back(std::string("Mesh has no index table. This may affect performance."));
-        }
-    }
-}
+void Assets::PerformPostDeserializationAction<Mesh>(const UUID uuid) noexcept {}
 template<>
-void Assets::PerformPostDeserializationAction<Model>(const UUID uuid) noexcept {
-    const Model& model = GetDataOfAssetAs<Model>(uuid);;
-
-    for (const auto& mMesh : model.Meshes) {
-        PerformPostDeserializationAction<Mesh>(mMesh.MeshUUID);
-    }
-    for (const auto& mTexture : model.Textures) {
-        if (!mTexture.Embedded) { continue; }
-
-        PerformPostDeserializationAction<Texture>(mTexture.TextureUUID);
-    }
-}
+void Assets::PerformPostDeserializationAction<Model>(const UUID uuid) noexcept {}

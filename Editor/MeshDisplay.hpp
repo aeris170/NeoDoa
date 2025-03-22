@@ -54,7 +54,9 @@ private:
     GPUDescriptorSet normalVisualizationPerFrame;
     GPUFrameBuffer framebufferMultisampled;
     GPUFrameBuffer framebuffer;
+    bool shouldBuildPipeline{};
 
+    void BuildPipelineIfNeeded() noexcept;
     void ReallocFrameBufferIfNeeded(Resolution size) noexcept;
     void RenderMeshToOffscreenBuffer() noexcept;
 

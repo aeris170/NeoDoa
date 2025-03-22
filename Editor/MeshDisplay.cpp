@@ -210,42 +210,10 @@ void main() {
 }
 
 void MeshDisplay::SetDisplayTarget(const AssetHandle meshAssetHandle) noexcept {
-    static auto& Core{ Core::GetCore() };
-
     assert(meshAssetHandle->IsMesh());
     if (meshAsset != meshAssetHandle) {
         meshAsset = meshAssetHandle;
-        const Mesh& m = meshAsset->DataAs<Mesh>();
-
-        const auto& bridge{ Core->GetAssetGPUBridge() };
-        assert(bridge->GetVertexBuffers().Query(meshAsset->ID()));
-        GPUVertexAttribLayout layout;
-        layout.Define<float>(3); // Position
-        layout.Define<float>(3); // Normal
-        layout.Define<float>(2); // UV
-
-        GPUPipelineBuilder aBuilder;
-        aBuilder.SetName("NeoDoa MeshDisplay Main Pipeline")
-            .SetArrayBuffer(0, bridge->GetVertexBuffers().Fetch(meshAsset->ID()), layout)
-            .SetViewport({ 0, 0, availableSize.Width, availableSize.Height })
-            .SetDepthTestEnabled(true)
-            .SetDepthWriteEnabled(true)
-            .SetDepthClampEnabled(true)
-            .SetMultisampleEnabled(true)
-            .SetBlendEnabled(true)
-            .SetBlendFunction(BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha)
-            .SetShaderProgram(mainProgram);
-
-        if (m.IndexCount > 0) {
-            assert(bridge->GetIndexBuffers().Query(meshAsset->ID()));
-            aBuilder.SetIndexBuffer(bridge->GetIndexBuffers().Fetch(meshAsset->ID()), DataType::UnsignedInt);
-        }
-        mainPipeline = aBuilder.Build().first.value();
-
-        aBuilder.SetName("NeoDoa MeshDisplay Normal Visualization Pipeline")
-            .SetShaderProgram(normalVisualizationProgram);
-        normalVisualizationPipeline = aBuilder.Build().first.value();
-
+        shouldBuildPipeline = true;
         ResetCamera();
     }
 }
@@ -267,7 +235,7 @@ void MeshDisplay::RenderMessagesTable() noexcept {
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
 
     ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::ERROR_COLOR);
-    for (auto& message : meshAsset->ErrorMessages()) {
+    for (const auto& message : meshAsset->ErrorMessages()) {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
 
@@ -277,13 +245,12 @@ void MeshDisplay::RenderMessagesTable() noexcept {
 
         ImGui::TableSetColumnIndex(1);
 
-        const std::string& m{ std::any_cast<const std::string&>(message) };
-        ImGui::TextWrapped("%s", m.c_str());
+        ImGui::TextWrapped("%s", message.Message.c_str());
     }
     ImGui::PopStyleColor();
 
     ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::WARNING_COLOR);
-    for (auto& message : meshAsset->WarningMessages()) {
+    for (const auto& message : meshAsset->WarningMessages()) {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
 
@@ -293,13 +260,12 @@ void MeshDisplay::RenderMessagesTable() noexcept {
 
         ImGui::TableSetColumnIndex(1);
 
-        const std::string& m{ std::any_cast<const std::string&>(message) };
-        ImGui::TextWrapped("%s", m.c_str());
+        ImGui::TextWrapped("%s", message.Message.c_str());
     }
     ImGui::PopStyleColor();
 
     ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::INFO_COLOR);
-    for (auto& message : meshAsset->InfoMessages()) {
+    for (const auto& message : meshAsset->InfoMessages()) {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
 
@@ -309,8 +275,7 @@ void MeshDisplay::RenderMessagesTable() noexcept {
 
         ImGui::TableSetColumnIndex(1);
 
-        const std::string& m{ std::any_cast<const std::string&>(message) };
-        ImGui::TextWrapped("%s", m.c_str());
+        ImGui::TextWrapped("%s", message.Message.c_str());
     }
     ImGui::PopStyleColor();
 
@@ -318,9 +283,12 @@ void MeshDisplay::RenderMessagesTable() noexcept {
     ImGui::EndTable();
 }
 void MeshDisplay::RenderMeshPreview(Resolution size) noexcept {
+    BuildPipelineIfNeeded();
     ReallocFrameBufferIfNeeded(size);
 
-    RenderMeshToOffscreenBuffer();
+    if (meshAsset->HasContentInVideoMemory()) {
+        RenderMeshToOffscreenBuffer();
+    }
 
     ImGui::Image(
         std::get<GPUTexture>(framebuffer.ColorAttachments[0].value()),
@@ -384,6 +352,45 @@ void MeshDisplay::RenderPreviewSettings() noexcept {
     }
 }
 
+void MeshDisplay::BuildPipelineIfNeeded() noexcept {
+    if (!shouldBuildPipeline) { return; }
+    if (!meshAsset->HasContentInVideoMemory()) { return; }
+
+    static auto& Core{ Core::GetCore() };
+
+    const Mesh& m = meshAsset->DataAs<Mesh>();
+
+    const auto& bridge{ Core->GetAssetGPUBridge() };
+    assert(bridge->GetVertexBuffers().Query(meshAsset->ID()));
+    GPUVertexAttribLayout layout;
+    layout.Define<float>(3); // Position
+    layout.Define<float>(3); // Normal
+    layout.Define<float>(2); // UV
+
+    GPUPipelineBuilder aBuilder;
+    aBuilder.SetName("NeoDoa MeshDisplay Main Pipeline")
+        .SetArrayBuffer(0, bridge->GetVertexBuffers().Fetch(meshAsset->ID()), layout)
+        .SetViewport({ 0, 0, availableSize.Width, availableSize.Height })
+        .SetDepthTestEnabled(true)
+        .SetDepthWriteEnabled(true)
+        .SetDepthClampEnabled(true)
+        .SetMultisampleEnabled(true)
+        .SetBlendEnabled(true)
+        .SetBlendFunction(BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha)
+        .SetShaderProgram(mainProgram);
+
+    if (m.IndexCount > 0) {
+        assert(bridge->GetIndexBuffers().Query(meshAsset->ID()));
+        aBuilder.SetIndexBuffer(bridge->GetIndexBuffers().Fetch(meshAsset->ID()), DataType::UnsignedInt);
+    }
+    mainPipeline = aBuilder.Build().first.value();
+
+    aBuilder.SetName("NeoDoa MeshDisplay Normal Visualization Pipeline")
+        .SetShaderProgram(normalVisualizationProgram);
+    normalVisualizationPipeline = aBuilder.Build().first.value();
+
+    shouldBuildPipeline = false;
+}
 void MeshDisplay::ReallocFrameBufferIfNeeded(Resolution size) noexcept {
     if (availableSize == size) { return; }
     availableSize = size;

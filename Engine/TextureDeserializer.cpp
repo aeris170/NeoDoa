@@ -10,11 +10,8 @@
 #include <Engine/FileNode.hpp>
 
 static RawData ToRawData(const std::string_view str) {
-    RawData raw;
-    raw.reserve(str.size());
-    for (auto c : str) {
-        raw.push_back(static_cast<std::byte>(c));
-    }
+    RawData raw(str.size());
+    std::memcpy(raw.data(), str.data(), str.size());
     return raw;
 }
 TextureEncoding ExtToEncoding(const std::string_view ext) noexcept {

@@ -50,7 +50,9 @@ static_assert(textureTypes.back() != 0 && textureTypes.back() == AI_TEXTURE_TYPE
 class ConsoleLogStream : public Assimp::LogStream {
 public:
     void write(const char* message) override {
-        DOA_LOG_TRACE("[Assimp] %s", message);
+        std::string m(message);
+        std::erase(m, '\n');
+        DOA_LOG_TRACE("[Model Importer] %s", m.c_str());
     }
 };
 
@@ -71,7 +73,7 @@ ModelDeserializationResult DeserializeModel(const FNode& file) noexcept {
 ModelDeserializationResult DeserializeModel(const std::string_view data, const ModelDeserializationResult::PathInfo paths) noexcept {
     ModelDeserializationResult rv;
 
-    auto* a = Assimp::DefaultLogger::create("", Assimp::Logger::VERBOSE);
+    auto* logger = Assimp::DefaultLogger::create("", Assimp::Logger::DEBUGGING);
     Assimp::DefaultLogger::get()->attachStream(new ConsoleLogStream, Assimp::Logger::VERBOSE);
 
     Assimp::Importer importer{};
@@ -82,7 +84,6 @@ ModelDeserializationResult DeserializeModel(const std::string_view data, const M
         aiProcess_ImproveCacheLocality      |
         aiProcess_LimitBoneWeights          |
         aiProcess_RemoveRedundantMaterials  |
-        aiProcess_SplitLargeMeshes          |
         aiProcess_Triangulate               |
         aiProcess_GenUVCoords               |
         aiProcess_SortByPType               |
@@ -90,10 +91,9 @@ ModelDeserializationResult DeserializeModel(const std::string_view data, const M
         aiProcess_FindInvalidData           |
         aiProcess_FindInstances             |
         aiProcess_ValidateDataStructure     |
-        aiProcess_OptimizeMeshes            |
         aiProcess_FlipUVs                   |
-        aiProcess_RemoveComponent           |
-        aiProcess_OptimizeGraph;
+        aiProcess_OptimizeMeshes            |
+        aiProcess_RemoveComponent;
 
     flags = aiProcess_FlipUVs | aiProcess_Triangulate;
 
@@ -173,7 +173,12 @@ std::pair<std::vector<Mesh>, std::vector<size_t>> processMeshes(const aiScene& s
         Mesh& m = meshes[i];
         const aiMesh& mesh = *scene.mMeshes[i];
 
-        m.Name = mesh.mName.C_Str();
+        std::string materialIndex = std::to_string(mesh.mMaterialIndex);
+        m.Name.reserve(mesh.mName.length + 2 + materialIndex.size());
+        m.Name.insert(0, mesh.mName.C_Str());
+        m.Name.append(1, '[');
+        m.Name.append(materialIndex);
+        m.Name.append(1, ']');
 
         if (mesh.mNumVertices > 0) {
             Mesh::VertexList& vertices = m.Vertices.emplace();

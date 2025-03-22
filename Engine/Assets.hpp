@@ -1,6 +1,7 @@
 #pragma once
 
 #include <any>
+#include <mutex>
 #include <string>
 #include <cstdlib>
 #include <variant>
@@ -32,6 +33,12 @@
 struct Assets;
 struct SubAssetList;
 struct AssetGPUBridge;
+
+struct AssetMessage {
+    std::string Message{};
+    std::string MessageContext{};
+    std::any Data{};
+};
 
 #define ASSET_TYPE Scene, Component, Sampler, Texture, Shader, ShaderProgram, Material, FrameBuffer, Mesh, Model
 struct EmptyAssetData {
@@ -98,13 +105,13 @@ struct Asset final {
     bool IsSubAsset() const noexcept;
 
     bool HasInfoMessages() const;
-    const std::vector<std::any>& InfoMessages() const;
+    const std::vector<AssetMessage>& InfoMessages() const;
 
     bool HasWarningMessages() const;
-    const std::vector<std::any>& WarningMessages() const;
+    const std::vector<AssetMessage>& WarningMessages() const;
 
     bool HasErrorMessages() const;
-    const std::vector<std::any>& ErrorMessages() const;
+    const std::vector<AssetMessage>& ErrorMessages() const;
 
 private:
     UUID id{ UUID::Empty() };
@@ -238,10 +245,11 @@ private:
     UUIDMap<FNode*> files{};
     UUIDMap<AssetData> data{};
     UUIDMap<uint64_t> versions{};
-    UUIDMap<std::vector<std::any>> infoLists{};
-    UUIDMap<std::vector<std::any>> warningLists{};
-    UUIDMap<std::vector<std::any>> errorLists{};
+    UUIDMap<std::vector<AssetMessage>> infoLists{};
+    UUIDMap<std::vector<AssetMessage>> warningLists{};
+    UUIDMap<std::vector<AssetMessage>> errorLists{};
     SubAssetTree subAssets{ UUID::Empty() };
+    std::mutex mutex{};
 
     friend struct Assets;
 };
@@ -383,13 +391,13 @@ struct Assets {
     bool IsSubAsset(const UUID uuid) const noexcept;
 
     bool AssetHasInfoMessages(const UUID uuid) const noexcept;
-    const std::vector<std::any>& GetInfoMessagesOfAsset(const UUID uuid) const noexcept;
+    const std::vector<AssetMessage>& GetInfoMessagesOfAsset(const UUID uuid) const noexcept;
 
     bool AssetHasWarningMessages(const UUID uuid) const noexcept;
-    const std::vector<std::any>& GetWarningMessagesOfAsset(const UUID uuid) const noexcept;
+    const std::vector<AssetMessage>& GetWarningMessagesOfAsset(const UUID uuid) const noexcept;
 
     bool AssetHasErrorMessages(const UUID uuid) const noexcept;
-    const std::vector<std::any>& GetErrorMessagesOfAsset(const UUID uuid) const noexcept;
+    const std::vector<AssetMessage>& GetErrorMessagesOfAsset(const UUID uuid) const noexcept;
 
     FNode& Root() noexcept;
     const FNode& Root() const noexcept;

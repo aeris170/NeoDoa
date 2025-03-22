@@ -57,13 +57,13 @@ bool Asset::IsScript()              const noexcept { return owningManager.get().
 bool Asset::IsSubAsset() const noexcept { return owningManager.get().IsSubAsset(id); }
 
 bool Asset::HasInfoMessages() const { return owningManager.get().AssetHasInfoMessages(id); }
-const std::vector<std::any>& Asset::InfoMessages() const { return owningManager.get().GetInfoMessagesOfAsset(id); }
+const std::vector<AssetMessage>& Asset::InfoMessages() const { return owningManager.get().GetInfoMessagesOfAsset(id); }
 
 bool Asset::HasWarningMessages() const { return owningManager.get().AssetHasWarningMessages(id); }
-const std::vector<std::any>& Asset::WarningMessages() const { return owningManager.get().GetWarningMessagesOfAsset(id); }
+const std::vector<AssetMessage>& Asset::WarningMessages() const { return owningManager.get().GetWarningMessagesOfAsset(id); }
 
 bool Asset::HasErrorMessages() const { return owningManager.get().AssetHasErrorMessages(id); }
-const std::vector<std::any>& Asset::ErrorMessages() const { return owningManager.get().GetErrorMessagesOfAsset(id); }
+const std::vector<AssetMessage>& Asset::ErrorMessages() const { return owningManager.get().GetErrorMessagesOfAsset(id); }
 
 SubAssetList::Iterator::Iterator(Tree<UUID>::ChildrenList::NodeIterator itr, Assets& owningManager)  noexcept :
     itr(itr),

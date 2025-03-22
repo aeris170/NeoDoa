@@ -45,7 +45,7 @@ void ComponentDefinitionDisplay::RenderMessagesTable() noexcept {
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
 
     ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::ERROR_COLOR);
-    for (auto& message : componentDefAsset->ErrorMessages()) {
+    for (const auto& message : componentDefAsset->ErrorMessages()) {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
 
@@ -55,13 +55,12 @@ void ComponentDefinitionDisplay::RenderMessagesTable() noexcept {
 
         ImGui::TableSetColumnIndex(1);
 
-        const ComponentCompilerMessage& m{ std::any_cast<const ComponentCompilerMessage&>(message) };
-        ImGui::TextWrapped("%s", m.message.c_str());
+        ImGui::TextWrapped("%s", message.Message.c_str());
     }
     ImGui::PopStyleColor();
 
     ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::WARNING_COLOR);
-    for (auto& message : componentDefAsset->WarningMessages()) {
+    for (const auto& message : componentDefAsset->WarningMessages()) {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
 
@@ -71,13 +70,12 @@ void ComponentDefinitionDisplay::RenderMessagesTable() noexcept {
 
         ImGui::TableSetColumnIndex(1);
 
-        const ComponentCompilerMessage& m{ std::any_cast<const ComponentCompilerMessage&>(message) };
-        ImGui::TextWrapped("%s", m.message.c_str());
+        ImGui::TextWrapped("%s", message.Message.c_str());
     }
     ImGui::PopStyleColor();
 
     ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::INFO_COLOR);
-    for (auto& message : componentDefAsset->InfoMessages()) {
+    for (const auto& message : componentDefAsset->InfoMessages()) {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
 
@@ -87,8 +85,7 @@ void ComponentDefinitionDisplay::RenderMessagesTable() noexcept {
 
         ImGui::TableSetColumnIndex(1);
 
-        const ComponentCompilerMessage& m{ std::any_cast<const ComponentCompilerMessage&>(message) };
-        ImGui::TextWrapped("%s", m.message.c_str());
+        ImGui::TextWrapped("%s", message.Message.c_str());
     }
     ImGui::PopStyleColor();
 
