@@ -1521,23 +1521,23 @@ void Assets::DeleteOtherResourcesCorrespondingToDeletedAsset(const UUID uuid) no
 }
 
 template<>
-constexpr EmptyAssetData Assets::CreateEmptyAssetDataUsingType<Scene>(std::string_view name)         noexcept { return { name.data(), SceneTypeName }; }
+constexpr EmptyAssetData Assets::CreateEmptyAssetDataUsingType<Scene>(std::string_view name)         noexcept { return { name.data(), SceneTypeName         }; }
 template<>
-constexpr EmptyAssetData Assets::CreateEmptyAssetDataUsingType<Component>(std::string_view name)     noexcept { return { name.data(), ComponentTypeName }; }
+constexpr EmptyAssetData Assets::CreateEmptyAssetDataUsingType<Component>(std::string_view name)     noexcept { return { name.data(), ComponentTypeName     }; }
 template<>
-constexpr EmptyAssetData Assets::CreateEmptyAssetDataUsingType<Sampler>(std::string_view name)       noexcept { return { name.data(), SamplerTypeName }; }
+constexpr EmptyAssetData Assets::CreateEmptyAssetDataUsingType<Sampler>(std::string_view name)       noexcept { return { name.data(), SamplerTypeName       }; }
 template<>
-constexpr EmptyAssetData Assets::CreateEmptyAssetDataUsingType<Texture>(std::string_view name)       noexcept { return { name.data(), TextureTypeName }; }
+constexpr EmptyAssetData Assets::CreateEmptyAssetDataUsingType<Texture>(std::string_view name)       noexcept { return { name.data(), TextureTypeName       }; }
 template<>
-constexpr EmptyAssetData Assets::CreateEmptyAssetDataUsingType<Shader>(std::string_view name)        noexcept { return { name.data(), ShaderTypeName }; }
+constexpr EmptyAssetData Assets::CreateEmptyAssetDataUsingType<Shader>(std::string_view name)        noexcept { return { name.data(), ShaderTypeName        }; }
 template<>
 constexpr EmptyAssetData Assets::CreateEmptyAssetDataUsingType<ShaderProgram>(std::string_view name) noexcept { return { name.data(), ShaderProgramTypeName }; }
 template<>
-constexpr EmptyAssetData Assets::CreateEmptyAssetDataUsingType<Material>(std::string_view name)      noexcept { return { name.data(), MaterialTypeName }; }
+constexpr EmptyAssetData Assets::CreateEmptyAssetDataUsingType<Material>(std::string_view name)      noexcept { return { name.data(), MaterialTypeName      }; }
 template<>
-constexpr EmptyAssetData Assets::CreateEmptyAssetDataUsingType<FrameBuffer>(std::string_view name)   noexcept { return { name.data(), FrameBufferTypeName }; }
+constexpr EmptyAssetData Assets::CreateEmptyAssetDataUsingType<FrameBuffer>(std::string_view name)   noexcept { return { name.data(), FrameBufferTypeName   }; }
 template<>
-constexpr EmptyAssetData Assets::CreateEmptyAssetDataUsingType<Mesh>(std::string_view name)          noexcept { return { name.data(), MeshTypeName }; }
+constexpr EmptyAssetData Assets::CreateEmptyAssetDataUsingType<Mesh>(std::string_view name)          noexcept { return { name.data(), MeshTypeName          }; }
 template<>
 constexpr EmptyAssetData Assets::CreateEmptyAssetDataUsingType<Model>(std::string_view name)         noexcept { return { name.data(), ModelTypeName         }; }
 
