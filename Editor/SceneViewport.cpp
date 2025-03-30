@@ -117,7 +117,7 @@ layout(std140, binding = 1) uniform ModelBuffer {
 };
 
 void main() {
-	gl_Position = projection * view * model * vec4(vPos, 1.0);
+    gl_Position = projection * view * model * vec4(vPos, 1.0);
     fUV = vUV;
 }
     )").Build().first;
@@ -131,7 +131,7 @@ layout (binding = 0) uniform sampler2D tex;
 out vec4 FragColor;
 
 void main() {
-	FragColor = texture(tex, fUV) * vec4(1,1,1,1);
+    FragColor = texture(tex, fUV) * vec4(1,1,1,1);
 }
 )").Build().first;
 
