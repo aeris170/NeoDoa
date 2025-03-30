@@ -10,6 +10,8 @@
 #include <assimp/postprocess.h>
 #include <assimp/DefaultLogger.hpp>
 
+#include <detector.hpp>
+
 #include <Engine/Log.hpp>
 #include <Engine/Texture.hpp>
 #include <Engine/FileNode.hpp>
@@ -103,7 +105,11 @@ ModelDeserializationResult DeserializeModel(const FNode& file) noexcept {
 ModelDeserializationResult DeserializeModel(const std::string_view data, const ModelDeserializationResult::PathInfo paths) noexcept {
     ModelDeserializationResult rv;
 
-    auto* logger = Assimp::DefaultLogger::create("", Assimp::Logger::DEBUGGING);
+    if constexpr (detect::is_debug_v) {
+        Assimp::DefaultLogger::create("", Assimp::Logger::VERBOSE);
+    } else {
+        Assimp::DefaultLogger::create("", Assimp::Logger::NORMAL);
+    }
     Assimp::DefaultLogger::get()->attachStream(new ConsoleLogStream, Assimp::Logger::VERBOSE);
 
     Assimp::Importer importer{};
@@ -462,6 +468,8 @@ std::vector<Model::Material> processMaterials(const aiScene& scene) {
                     case aiShadingMode_PBR_BRDF:
                         m.Shading = Model::Material::ShadingMode::PBRBRDF;
                         break;
+                    default:
+                        std::unreachable();
                 }
             }
         }
@@ -475,6 +483,8 @@ std::vector<Model::Material> processMaterials(const aiScene& scene) {
                 case aiBlendMode_Additive:
                     m.Blend = Model::Material::BlendMode::Additive;
                     break;
+                default:
+                    std::unreachable();
                 }
             }
         }

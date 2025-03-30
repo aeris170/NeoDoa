@@ -118,7 +118,7 @@ void ModelDisplay::RenderModelContents() noexcept {
                 if (node.MeshIndices.size() > 0) {
                     if (ImGui::TreeNodeEx("Mesh Index - Mesh Name", ImGuiTreeNodeFlags_DefaultOpen)) {
                         for (const auto meshIndex : node.MeshIndices) {
-                            ImGui::Text(std::format("[{}] - {}", meshIndex, meshNames[meshIndex]).c_str());
+                            ImGui::TextUnformatted(std::format("[{}] - {}", meshIndex, meshNames[meshIndex]).c_str());
                         }
                         ImGui::TreePop();
                     }
@@ -247,26 +247,26 @@ void ModelDisplay::RenderMeshInfo(std::span<const Model::Mesh> meshes, std::span
         if (ImGui::CollapsingHeader(meshName.c_str())) {
             ImGui::Indent();
             if (ImGui::TreeNodeEx("Render Command", ImGuiTreeNodeFlags_DefaultOpen)) {
-                ImGui::Text("Count:");          ImGui::SameLine(200); ImGui::Text(std::format("{}", mesh.Count).c_str());
-                ImGui::Text("Base Vertex:");    ImGui::SameLine(200); ImGui::Text(std::format("{}", mesh.BaseVertex).c_str());
-                ImGui::Text("Base Index:");     ImGui::SameLine(200); ImGui::Text(std::format("{}", mesh.BaseIndex).c_str());
-                ImGui::Text("Material Index:"); ImGui::SameLine(200); ImGui::Text(std::format("{}", mesh.MaterialIndex).c_str());
+                ImGui::TextUnformatted("Count:");          ImGui::SameLine(200); ImGui::TextUnformatted(std::format("{}", mesh.Count).c_str());
+                ImGui::TextUnformatted("Base Vertex:");    ImGui::SameLine(200); ImGui::TextUnformatted(std::format("{}", mesh.BaseVertex).c_str());
+                ImGui::TextUnformatted("Base Index:");     ImGui::SameLine(200); ImGui::TextUnformatted(std::format("{}", mesh.BaseIndex).c_str());
+                ImGui::TextUnformatted("Material Index:"); ImGui::SameLine(200); ImGui::TextUnformatted(std::format("{}", mesh.MaterialIndex).c_str());
                 ImGui::TreePop();
             }
-            ImGui::Text("Vertex Count:"); ImGui::SameLine(200); ImGui::Text(std::format("{}", meshAsset.VertexCount).c_str());
-            ImGui::Text("Index Count:");  ImGui::SameLine(200); ImGui::Text(std::format("{}", meshAsset.IndexCount).c_str());
+            ImGui::TextUnformatted("Vertex Count:"); ImGui::SameLine(200); ImGui::TextUnformatted(std::format("{}", meshAsset.VertexCount).c_str());
+            ImGui::TextUnformatted("Index Count:");  ImGui::SameLine(200); ImGui::TextUnformatted(std::format("{}", meshAsset.IndexCount).c_str());
             if (ImGui::TreeNodeEx("AABB")) {
-                ImGui::Text("Minimum:");   ImGui::SameLine(200); ImGui::Text(std::format("{{ {}, {}, {} }}", meshAsset.Min.x, meshAsset.Min.y, meshAsset.Min.z).c_str());
-                ImGui::Text("Maximum:");   ImGui::SameLine(200); ImGui::Text(std::format("{{ {}, {}, {} }}", meshAsset.Max.x, meshAsset.Max.y, meshAsset.Max.z).c_str());
-                ImGui::Text("Origin:");    ImGui::SameLine(200); ImGui::Text(std::format("{{ {}, {}, {} }}", meshAsset.Origin.x, meshAsset.Origin.y, meshAsset.Origin.z).c_str());
-                ImGui::Text("Centeroid:"); ImGui::SameLine(200); ImGui::Text(std::format("{{ {}, {}, {} }}", meshAsset.Centeroid.x, meshAsset.Centeroid.y, meshAsset.Centeroid.z).c_str());
+                ImGui::TextUnformatted("Minimum:");   ImGui::SameLine(200); ImGui::TextUnformatted(std::format("{{ {}, {}, {} }}", meshAsset.Min.x, meshAsset.Min.y, meshAsset.Min.z).c_str());
+                ImGui::TextUnformatted("Maximum:");   ImGui::SameLine(200); ImGui::TextUnformatted(std::format("{{ {}, {}, {} }}", meshAsset.Max.x, meshAsset.Max.y, meshAsset.Max.z).c_str());
+                ImGui::TextUnformatted("Origin:");    ImGui::SameLine(200); ImGui::TextUnformatted(std::format("{{ {}, {}, {} }}", meshAsset.Origin.x, meshAsset.Origin.y, meshAsset.Origin.z).c_str());
+                ImGui::TextUnformatted("Centeroid:"); ImGui::SameLine(200); ImGui::TextUnformatted(std::format("{{ {}, {}, {} }}", meshAsset.Centeroid.x, meshAsset.Centeroid.y, meshAsset.Centeroid.z).c_str());
                 ImGui::TreePop();
             }
 
             bool hasRAMContent = assets.AssetHasContentInSystemMemory(meshUUID);
             bool hasVRAMContent = assets.AssetHasContentInVideoMemory(meshUUID);
-            ImGui::Text("Has Data In RAM:");  ImGui::SameLine(200); ImGui::Text(std::format("{}", hasRAMContent).c_str());
-            ImGui::Text("Has Data In VRAM:"); ImGui::SameLine(200); ImGui::Text(std::format("{}", hasVRAMContent).c_str());
+            ImGui::TextUnformatted("Has Data In RAM:");  ImGui::SameLine(200); ImGui::TextUnformatted(std::format("{}", hasRAMContent).c_str());
+            ImGui::TextUnformatted("Has Data In VRAM:"); ImGui::SameLine(200); ImGui::TextUnformatted(std::format("{}", hasVRAMContent).c_str());
 
             float availX = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x;
             if (!hasRAMContent) {
@@ -338,16 +338,16 @@ void ModelDisplay::RenderTextureInfo(std::span<const Model::Texture> textures) n
         const FNode& textureFNode = assets.GetFileOfAsset(texture.TextureUUID);
         if (ImGui::CollapsingHeader(textureData.Name.c_str())) {
             ImGui::Indent();
-            ImGui::Text("Path:");       ImGui::SameLine(200); ImGui::Text(textureFNode.Path().string().c_str());
-            ImGui::Text("Embedded:");   ImGui::SameLine(200); ImGui::Text(std::format("{}", texture.Embedded).c_str());
-            ImGui::Text("Channels:");   ImGui::SameLine(200); ImGui::Text(std::format("{}", textureData.Channels).c_str());
-            ImGui::Text("Dimensions:"); ImGui::SameLine(200); ImGui::Text(std::format("{}x{}", textureData.Width, textureData.Height).c_str());
+            ImGui::TextUnformatted("Path:");       ImGui::SameLine(200); ImGui::TextUnformatted(textureFNode.Path().string().c_str());
+            ImGui::TextUnformatted("Embedded:");   ImGui::SameLine(200); ImGui::TextUnformatted(std::format("{}", texture.Embedded).c_str());
+            ImGui::TextUnformatted("Channels:");   ImGui::SameLine(200); ImGui::TextUnformatted(std::format("{}", textureData.Channels).c_str());
+            ImGui::TextUnformatted("Dimensions:"); ImGui::SameLine(200); ImGui::TextUnformatted(std::format("{}x{}", textureData.Width, textureData.Height).c_str());
             if (assets.AssetHasContentInVideoMemory(texture.TextureUUID)) {
                 const GPUTexture& gpuTexture = assets.GPUBridge().GetTextures().Fetch(texture.TextureUUID);
                 float scale = 256.0f / textureData.Height;
                 ImGui::Image(gpuTexture, { textureData.Width * scale, textureData.Height * scale }, { 0, 1 }, { 1, 0 });
             } else {
-                ImGui::Text("Texture has no data in video memory...");
+                ImGui::TextUnformatted("Texture has no data in video memory...");
             }
 
             float availX = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x;
@@ -459,16 +459,16 @@ void ModelDisplay::RenderMaterialInfo(std::span<const Model::Material> materials
 void ModelDisplay::RenderMaterialColorInfo(std::string_view name, const std::optional<Color>& color) noexcept {
     ImGui::PushID(name.data());
 
-    ImGui::Text(std::format("{}:", name).c_str());
+    ImGui::TextUnformatted(std::format("{}:", name).c_str());
     ImGui::SameLine(200);
     if (color.has_value()) {
         const Color& c = color.value();
         ImGui::ColorButton(name.data(), c.ToImVec4(), ImGuiColorEditFlags_AlphaPreviewHalf, { ImGui::GetTextLineHeight(), ImGui::GetTextLineHeight() });
         ImGui::SameLine();
-        ImGui::Text(c.ToString().c_str());
+        ImGui::TextUnformatted(c.ToString().c_str());
     } else {
         ImGui::BeginDisabled();
-        ImGui::Text("Missing Value");
+        ImGui::TextUnformatted("Missing Value");
         ImGui::EndDisabled();
     }
 
@@ -477,13 +477,13 @@ void ModelDisplay::RenderMaterialColorInfo(std::string_view name, const std::opt
 void ModelDisplay::RenderMaterialFloatInfo(std::string_view name, const std::optional<float>& floatValue) noexcept {
     ImGui::PushID(name.data());
 
-    ImGui::Text(std::format("{}:", name).c_str());
+    ImGui::TextUnformatted(std::format("{}:", name).c_str());
     ImGui::SameLine(200);
     if (floatValue.has_value()) {
-        ImGui::Text(std::format("{}", floatValue.value()).c_str());
+        ImGui::TextUnformatted(std::format("{}", floatValue.value()).c_str());
     } else {
         ImGui::BeginDisabled();
-        ImGui::Text("Missing Value");
+        ImGui::TextUnformatted("Missing Value");
         ImGui::EndDisabled();
     }
 
@@ -492,13 +492,13 @@ void ModelDisplay::RenderMaterialFloatInfo(std::string_view name, const std::opt
 void ModelDisplay::RenderMaterialBoolInfo(std::string_view name, const std::optional<bool>& boolValue) noexcept {
     ImGui::PushID(name.data());
 
-    ImGui::Text(std::format("{}:", name).c_str());
+    ImGui::TextUnformatted(std::format("{}:", name).c_str());
     ImGui::SameLine(200);
     if (boolValue.has_value()) {
-        ImGui::Text(std::format("{}", boolValue.value()).c_str());
+        ImGui::TextUnformatted(std::format("{}", boolValue.value()).c_str());
     } else {
         ImGui::BeginDisabled();
-        ImGui::Text("Missing Value");
+        ImGui::TextUnformatted("Missing Value");
         ImGui::EndDisabled();
     }
 
@@ -507,13 +507,13 @@ void ModelDisplay::RenderMaterialBoolInfo(std::string_view name, const std::opti
 void ModelDisplay::RenderMaterialShadingModeInfo(std::string_view name, const std::optional<Model::Material::ShadingMode>& shading) noexcept {
     ImGui::PushID(name.data());
 
-    ImGui::Text(std::format("{}:", name).c_str());
+    ImGui::TextUnformatted(std::format("{}:", name).c_str());
     ImGui::SameLine(200);
     if (shading.has_value()) {
-        ImGui::Text(ToString(shading.value()).data());
+        ImGui::TextUnformatted(ToString(shading.value()).data());
     } else {
         ImGui::BeginDisabled();
-        ImGui::Text("Missing Value");
+        ImGui::TextUnformatted("Missing Value");
         ImGui::EndDisabled();
     }
 
@@ -522,13 +522,13 @@ void ModelDisplay::RenderMaterialShadingModeInfo(std::string_view name, const st
 void ModelDisplay::RenderMaterialBlendModeInfo(std::string_view name, const std::optional<Model::Material::BlendMode>& blend) noexcept {
     ImGui::PushID(name.data());
 
-    ImGui::Text(std::format("{}:", name).c_str());
+    ImGui::TextUnformatted(std::format("{}:", name).c_str());
     ImGui::SameLine(200);
     if (blend.has_value()) {
-        ImGui::Text(ToString(blend.value()).data());
+        ImGui::TextUnformatted(ToString(blend.value()).data());
     } else {
         ImGui::BeginDisabled();
-        ImGui::Text("Missing Value");
+        ImGui::TextUnformatted("Missing Value");
         ImGui::EndDisabled();
     }
 
@@ -549,15 +549,15 @@ void ModelDisplay::RenderMaterialTextureStack(const Model::Material::TextureStac
     }
 }
 void ModelDisplay::RenderMaterialTextureInfo(const Model::Material::TextureInfo& info) noexcept {
-    ImGui::Text("Relative Path:");  ImGui::SameLine(200); ImGui::Text(info.Path.c_str());
-    ImGui::Text("BlendAmount:");    ImGui::SameLine(200); ImGui::Text(std::to_string(info.BlendAmount).c_str());
-    ImGui::Text("Operation:");      ImGui::SameLine(200); ImGui::Text(ToString(info.Operation).data());
-    ImGui::Text("Mapping:");        ImGui::SameLine(200); ImGui::Text(ToString(info.Mapping).data());
-    ImGui::Text("UVWSource:");      ImGui::SameLine(200); ImGui::Text(std::to_string(info.UVWSource).data());
-    ImGui::Text("MapModeU:");       ImGui::SameLine(200); ImGui::Text(ToString(info.MapModeU).data());
-    ImGui::Text("MapModeV:");       ImGui::SameLine(200); ImGui::Text(ToString(info.MapModeV).data());
-    ImGui::Text("MappingAxis:");    ImGui::SameLine(200); ImGui::Text(glm::to_string(info.MappingAxis).c_str());
-    ImGui::Text("Flags:");          ImGui::SameLine(200); ImGui::Text(ToString(info.Flags).c_str());
+    ImGui::TextUnformatted("Relative Path:");  ImGui::SameLine(200); ImGui::TextUnformatted(info.Path.c_str());
+    ImGui::TextUnformatted("BlendAmount:");    ImGui::SameLine(200); ImGui::TextUnformatted(std::to_string(info.BlendAmount).c_str());
+    ImGui::TextUnformatted("Operation:");      ImGui::SameLine(200); ImGui::TextUnformatted(ToString(info.Operation).data());
+    ImGui::TextUnformatted("Mapping:");        ImGui::SameLine(200); ImGui::TextUnformatted(ToString(info.Mapping).data());
+    ImGui::TextUnformatted("UVWSource:");      ImGui::SameLine(200); ImGui::TextUnformatted(std::to_string(info.UVWSource).data());
+    ImGui::TextUnformatted("MapModeU:");       ImGui::SameLine(200); ImGui::TextUnformatted(ToString(info.MapModeU).data());
+    ImGui::TextUnformatted("MapModeV:");       ImGui::SameLine(200); ImGui::TextUnformatted(ToString(info.MapModeV).data());
+    ImGui::TextUnformatted("MappingAxis:");    ImGui::SameLine(200); ImGui::TextUnformatted(glm::to_string(info.MappingAxis).c_str());
+    ImGui::TextUnformatted("Flags:");          ImGui::SameLine(200); ImGui::TextUnformatted(ToString(info.Flags).c_str());
 }
 
 void ModelDisplay::OnAssetRefreshed(AssetHandle handle) noexcept {
