@@ -317,7 +317,7 @@ void DisplayTargetRenderer::RenderFolderView(FNode& folder) {
             ImGui::TableSetColumnIndex(1);
             ImGui::TextUnformatted(child.FullName().data());
             ImGui::TableSetColumnIndex(2);
-            std::string size = FormatBytes(static_cast<float>(child.Size()));
+            std::string size = FormatBytes(child.Size());
             ImGui::TextUnformatted(size.c_str());
         }
         ImGui::EndTable();

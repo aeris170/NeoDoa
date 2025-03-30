@@ -10,7 +10,7 @@ namespace detail {
         virtual std::string do_grouping() const;
     };
 
-    std::string comma_format(float bytes);
+    std::string comma_format(double bytes);
 }
 
-std::string FormatBytes(float bytes);
+std::string FormatBytes(size_t bytes);
