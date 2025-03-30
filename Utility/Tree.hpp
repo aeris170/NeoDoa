@@ -59,6 +59,8 @@ struct Tree {
 
         size_t size() const { return indices.size(); }
 
+        std::span<const NodeIndex> ChildIndices() const noexcept { return indices; }
+
     private:
         Tree& tree;
         const std::vector<NodeIndex>& indices;
@@ -149,6 +151,13 @@ struct Tree {
     /// Postcondition: Node at index and it's children aren't present.
     /// </summary>
     void DeleteNode(const NodeIndex index) noexcept;
+
+    /// <summary>
+    /// Return the number of elements present in the tree.
+    /// Precondition: None.
+    /// Postcondition: None.
+    /// </summary>
+    size_t Size() const noexcept;
 
 private:
     DataStructure data;
@@ -344,4 +353,9 @@ inline void Tree<NodeData, InitialNodeCapacity, InitialChildCapacity>::DeleteNod
             }
         });
     }
+}
+
+template<typename NodeData, size_t InitialNodeCapacity, size_t InitialChildCapacity>
+inline size_t Tree<NodeData, InitialNodeCapacity, InitialChildCapacity>::Size() const noexcept {
+    return data.size();
 }
