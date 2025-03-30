@@ -56,9 +56,39 @@ public:
     }
 };
 
+template <typename T>
+void sortLinkedVectors(std::vector<T>& tVec, std::vector<unsigned>& indexVec) {
+    // Ensure that the two vectors have the same size
+    assert(tVec.size() == indexVec.size());
+
+    // Create an index vector from 0 to size-1
+    std::vector<size_t> indices(tVec.size());
+    for (size_t i = 0; i < tVec.size(); ++i) {
+        indices[i] = i;
+    }
+
+    // Sort the indices based on the values in indexVec
+    std::sort(indices.begin(), indices.end(), [&indexVec](size_t i1, size_t i2) {
+        return indexVec[i1] < indexVec[i2];
+    });
+
+    // Create temporary sorted vectors
+    std::vector<T> sortedTVector(tVec.size());
+    std::vector<unsigned> sortedIndexVector(indexVec.size());
+
+    // Rearrange both vectors based on the sorted indices
+    for (size_t i = 0; i < indices.size(); ++i) {
+        sortedTVector[i] = std::move(tVec[indices[i]]);
+        sortedIndexVector[i] = indexVec[indices[i]];
+    }
+
+    // Replace original vectors with the sorted ones
+    tVec = std::move(sortedTVector);
+    indexVec = std::move(sortedIndexVector);
+}
 
 Tree<Model::Node> processNodeTree(const aiScene& scene);
-std::pair<std::vector<Mesh>, std::vector<size_t>> processMeshes(const aiScene& scene);
+std::pair<std::vector<Mesh>, std::vector<unsigned>> processMeshes(const aiScene& scene);
 std::vector<std::variant<std::filesystem::path, TextureDeserializationResult>> processTextures(const aiScene& scene);
 std::vector<Model::Material> processMaterials(const aiScene& scene);
 
@@ -108,9 +138,63 @@ ModelDeserializationResult DeserializeModel(const std::string_view data, const M
         rv.errors.emplace_back(importer.GetErrorString());
         DOA_LOG_ERROR("Couldn't deserialize model!\n\n%s", data);
     } else {
-        rv.deserializedModel.Nodes = processNodeTree(*scene);
-        std::tie(rv.deserializedMeshes, rv.meshMaterialIndices) = processMeshes(*scene);
-        rv.deserializedTextures = processTextures(*scene);
+        Model& model{ rv.deserializedModel };
+        model.Nodes = processNodeTree(*scene);
+
+        std::vector<unsigned> meshMaterialIndices{};
+        std::tie(rv.deserializedMeshes, meshMaterialIndices) = processMeshes(*scene);
+        sortLinkedVectors(rv.deserializedMeshes, meshMaterialIndices);
+
+        // Unify meshes into a single mesh for multi-indirect rendering
+        Mesh& unified{ model.UnifiedModelMesh };
+        unsigned totalVertexCount{ 0 }, totalIndexCount{ 0 };
+        for (const Mesh& mesh : rv.deserializedMeshes) {
+            totalVertexCount += mesh.VertexCount;
+            totalIndexCount += mesh.IndexCount;
+        }
+        model.MeshNames.resize(rv.deserializedMeshes.size());
+        model.Meshes.resize(rv.deserializedMeshes.size());
+        unified.Vertices.emplace(totalVertexCount);
+        unified.Indices.emplace(totalIndexCount);
+        Mesh::VertexList& unifiedVertexList{ unified.Vertices.value() };
+        Mesh::IndexList& unifiedIndexList{ unified.Indices.value() };
+        unified.VertexCount = totalVertexCount;
+        unified.IndexCount = totalIndexCount;
+
+        unsigned baseVertex{ 0 }, baseIndex{ 0 };
+        for (size_t i = 0; i < rv.deserializedMeshes.size(); i++) {
+            const Mesh& mesh{ rv.deserializedMeshes[i] };
+            const Mesh::VertexList& meshVertices{ mesh.Vertices.value() };
+            const Mesh::IndexList& meshIndices{ mesh.Indices.value() };
+
+            model.MeshNames[i] = mesh.Name;
+
+            Model::Mesh& mMesh{ model.Meshes[i] };
+            mMesh.Count = mesh.IndexCount;
+            mMesh.BaseVertex = baseVertex;
+            mMesh.BaseIndex = baseIndex;
+            mMesh.MaterialIndex = meshMaterialIndices[i];
+
+            std::copy_n(meshVertices.begin(), mesh.VertexCount, unifiedVertexList.begin() + baseVertex);
+            std::copy_n(meshIndices.begin(), mesh.IndexCount, unifiedIndexList.begin() + baseIndex);
+
+            baseVertex += mesh.VertexCount;
+            baseIndex += mesh.IndexCount;
+        }
+        assert(baseVertex == totalVertexCount);
+        assert(baseIndex == totalIndexCount);
+
+        auto processedTextures = processTextures(*scene);
+        std::unordered_set<std::filesystem::path> seenPaths{}; // remove duplicate paths using a set
+        for (auto& var : processedTextures) {
+            if (std::filesystem::path* relative = std::get_if<std::filesystem::path>(&var)) {
+                if (!seenPaths.insert(*relative).second) { continue; }
+                rv.deserializedTextures.emplace_back(std::move(var));
+            } else {
+                rv.deserializedTextures.emplace_back(std::move(var));
+            }
+        }
+        // convert model-relative paths to root-relative paths
         if (!paths.root.empty() && !paths.fileRelative.empty()) {
             for (auto& var : rv.deserializedTextures) {
                 if (std::filesystem::path* relative = std::get_if<std::filesystem::path>(&var)) {
@@ -128,7 +212,20 @@ ModelDeserializationResult DeserializeModel(const std::string_view data, const M
                 }
             }
         }
-        rv.deserializedModel.Materials = processMaterials(*scene);
+        model.Materials = processMaterials(*scene);
+        // post-process materials because importer assigns the same texture to multiple texture stacks.
+        // Base Color - Diffuse Map
+        // Rouguness Map - Shininess Map are assigned to same texture.
+        // overwrite non-PBR in favor of PBR stacks
+        // the data is still there but no sane person would read it because count is set to 0
+        for (auto& var : model.Materials) {
+            if (var.TextureStacks[static_cast<int>(Model::Material::TextureType::BaseColor)].TextureCount > 0) {
+                var.TextureStacks[static_cast<int>(Model::Material::TextureType::Diffuse)].TextureCount = 0;
+            }
+            if (var.TextureStacks[static_cast<int>(Model::Material::TextureType::DiffuseRougness)].TextureCount > 0) {
+                var.TextureStacks[static_cast<int>(Model::Material::TextureType::Shininess)].TextureCount = 0;
+            }
+        }
     }
 
     Assimp::DefaultLogger::kill();
@@ -163,8 +260,8 @@ Tree<Model::Node> processNodeTree(const aiScene& scene) {
     return rv;
 }
 
-std::pair<std::vector<Mesh>, std::vector<size_t>> processMeshes(const aiScene& scene) {
-    std::pair<std::vector<Mesh>, std::vector<size_t>> rv{};
+std::pair<std::vector<Mesh>, std::vector<unsigned>> processMeshes(const aiScene& scene) {
+    std::pair<std::vector<Mesh>, std::vector<unsigned>> rv{};
     auto& [meshes, materialIndices] = rv;
 
     meshes.resize(scene.mNumMeshes);
@@ -333,37 +430,37 @@ std::vector<Model::Material> processMaterials(const aiScene& scene) {
             if (mat.Get(AI_MATKEY_SHADING_MODEL, shadingModel) == aiReturn_SUCCESS) {
                 switch(shadingModel) {
                     case aiShadingMode_Flat:
-                        m.ShadingMode = Model::Material::ShadingMode::Flat;
+                        m.Shading = Model::Material::ShadingMode::Flat;
                         break;
                     case aiShadingMode_Gouraud:
-                        m.ShadingMode = Model::Material::ShadingMode::Gouraud;
+                        m.Shading = Model::Material::ShadingMode::Gouraud;
                         break;
                     case aiShadingMode_Phong:
-                        m.ShadingMode = Model::Material::ShadingMode::Phong;
+                        m.Shading = Model::Material::ShadingMode::Phong;
                         break;
                     case aiShadingMode_Blinn:
-                        m.ShadingMode = Model::Material::ShadingMode::Blinn;
+                        m.Shading = Model::Material::ShadingMode::Blinn;
                         break;
                     case aiShadingMode_Toon:
-                        m.ShadingMode = Model::Material::ShadingMode::Toon;
+                        m.Shading = Model::Material::ShadingMode::Toon;
                         break;
                     case aiShadingMode_OrenNayar:
-                        m.ShadingMode = Model::Material::ShadingMode::OrenNayar;
+                        m.Shading = Model::Material::ShadingMode::OrenNayar;
                         break;
                     case aiShadingMode_Minnaert:
-                        m.ShadingMode = Model::Material::ShadingMode::Minnaert;
+                        m.Shading = Model::Material::ShadingMode::Minnaert;
                         break;
                     case aiShadingMode_CookTorrance:
-                        m.ShadingMode = Model::Material::ShadingMode::CookTorrance;
+                        m.Shading = Model::Material::ShadingMode::CookTorrance;
                         break;
                     case aiShadingMode_NoShading: // also aiShadingMode_Unlit
-                        m.ShadingMode = Model::Material::ShadingMode::Unlit;
+                        m.Shading = Model::Material::ShadingMode::Unlit;
                         break;
                     case aiShadingMode_Fresnel:
-                        m.ShadingMode = Model::Material::ShadingMode::Fresnel;
+                        m.Shading = Model::Material::ShadingMode::Fresnel;
                         break;
                     case aiShadingMode_PBR_BRDF:
-                        m.ShadingMode = Model::Material::ShadingMode::PBRBRDF;
+                        m.Shading = Model::Material::ShadingMode::PBRBRDF;
                         break;
                 }
             }
@@ -373,10 +470,10 @@ std::vector<Model::Material> processMaterials(const aiScene& scene) {
             if (mat.Get(AI_MATKEY_BLEND_FUNC, blendFunc) == aiReturn_SUCCESS) {
                 switch (blendFunc) {
                 case aiBlendMode_Default:
-                    m.BlendMode = Model::Material::BlendMode::Default;
+                    m.Blend = Model::Material::BlendMode::Default;
                     break;
                 case aiBlendMode_Additive:
-                    m.BlendMode = Model::Material::BlendMode::Additive;
+                    m.Blend = Model::Material::BlendMode::Additive;
                     break;
                 }
             }
@@ -418,19 +515,19 @@ std::vector<Model::Material> processMaterials(const aiScene& scene) {
 
                 {
                     aiString texturePath;
-                    if (mat.Get(AI_MATKEY_TEXTURE(textureType, j), texturePath) == aiReturn_SUCCESS) {
+                    if (mat.Get(AI_MATKEY_TEXTURE(textureType, static_cast<unsigned>(j)), texturePath) == aiReturn_SUCCESS) {
                         textureInfo.Path = texturePath.C_Str();
                     }
                 }
                 {
                     float textureBlend;
-                    if (mat.Get(AI_MATKEY_TEXBLEND(textureType, j), textureBlend) == aiReturn_SUCCESS) {
+                    if (mat.Get(AI_MATKEY_TEXBLEND(textureType, static_cast<unsigned>(j)), textureBlend) == aiReturn_SUCCESS) {
                         textureInfo.BlendAmount = textureBlend;
                     }
                 }
                 {
                     aiTextureOp textureOp;
-                    if (mat.Get(AI_MATKEY_TEXOP(textureType, j), textureOp) == aiReturn_SUCCESS) {
+                    if (mat.Get(AI_MATKEY_TEXOP(textureType, static_cast<unsigned>(j)), textureOp) == aiReturn_SUCCESS) {
                         switch (textureOp) {
                             case aiTextureOp_Multiply:
                                 textureInfo.Operation = Model::Material::TextureOperation::Multiply;
@@ -455,7 +552,7 @@ std::vector<Model::Material> processMaterials(const aiScene& scene) {
                 }
                 {
                     aiTextureMapping mapping;
-                    if (mat.Get(AI_MATKEY_MAPPING(textureType, j), mapping) == aiReturn_SUCCESS) {
+                    if (mat.Get(AI_MATKEY_MAPPING(textureType, static_cast<unsigned>(j)), mapping) == aiReturn_SUCCESS) {
                         switch (mapping) {
                         case aiTextureMapping_UV:
                             textureInfo.Mapping = Model::Material::TextureMapping::UV;
@@ -480,13 +577,13 @@ std::vector<Model::Material> processMaterials(const aiScene& scene) {
                 }
                 {
                     int uvwsrc;
-                    if (mat.Get(AI_MATKEY_UVWSRC(textureType, j), uvwsrc) == aiReturn_SUCCESS) {
+                    if (mat.Get(AI_MATKEY_UVWSRC(textureType, static_cast<unsigned>(j)), uvwsrc) == aiReturn_SUCCESS) {
                         textureInfo.UVWSource = uvwsrc;
                     }
                 }
                 {
                     aiTextureMapMode mappingModeU, mappingModeV;
-                    if (mat.Get(AI_MATKEY_MAPPINGMODE_U(textureType, j), mappingModeU) == aiReturn_SUCCESS) {
+                    if (mat.Get(AI_MATKEY_MAPPINGMODE_U(textureType, static_cast<unsigned>(j)), mappingModeU) == aiReturn_SUCCESS) {
                         switch (mappingModeU) {
                             case aiTextureMapMode_Wrap:
                                 textureInfo.MapModeU = Model::Material::TextureMapMode::Wrap;
@@ -502,7 +599,7 @@ std::vector<Model::Material> processMaterials(const aiScene& scene) {
                                 break;
                         }
                     }
-                    if (mat.Get(AI_MATKEY_MAPPINGMODE_V(textureType, j), mappingModeV) == aiReturn_SUCCESS) {
+                    if (mat.Get(AI_MATKEY_MAPPINGMODE_V(textureType, static_cast<unsigned>(j)), mappingModeV) == aiReturn_SUCCESS) {
                         switch (mappingModeV) {
                         case aiTextureMapMode_Wrap:
                             textureInfo.MapModeV = Model::Material::TextureMapMode::Wrap;
@@ -521,7 +618,7 @@ std::vector<Model::Material> processMaterials(const aiScene& scene) {
                 }
                 {
                     aiVector3D texmapAxis;
-                    if (mat.Get(AI_MATKEY_TEXMAP_AXIS(textureType, j), texmapAxis) == aiReturn_SUCCESS) {
+                    if (mat.Get(AI_MATKEY_TEXMAP_AXIS(textureType, static_cast<unsigned>(j)), texmapAxis) == aiReturn_SUCCESS) {
                         textureInfo.MappingAxis = {
                             texmapAxis.x,
                             texmapAxis.y,
@@ -531,7 +628,7 @@ std::vector<Model::Material> processMaterials(const aiScene& scene) {
                 }
                 {
                     aiTextureFlags texFlags;
-                    if (mat.Get(AI_MATKEY_TEXFLAGS(textureType, j), texFlags) == aiReturn_SUCCESS) {
+                    if (mat.Get(AI_MATKEY_TEXFLAGS(textureType, static_cast<unsigned>(j)), texFlags) == aiReturn_SUCCESS) {
                         if (static_cast<bool>(texFlags & aiTextureFlags_Invert)) {
                             textureInfo.Flags = textureInfo.Flags | Model::Material::TextureFlags::Invert;
                         }
@@ -571,7 +668,7 @@ std::vector<std::variant<std::filesystem::path, TextureDeserializationResult>> p
             for (size_t j = 0; j < mat.GetTextureCount(textureType); j++) {
                 auto& variant = rv.emplace_back();
 
-                aiReturn ret = mat.GetTexture(textureType, static_cast<unsigned>(j), &texturePath);
+                [[maybe_unused]] aiReturn ret = mat.GetTexture(textureType, static_cast<unsigned>(j), &texturePath);
                 assert(ret != AI_FAILURE);
 
                 if (const aiTexture* embedded = scene.GetEmbeddedTexture(texturePath.C_Str())) {

@@ -139,6 +139,10 @@ void MetaAssetInfoBank::TryEmplace(const FNode& file, const MetaAssetInfo& empla
             const auto& [_fa_icon, _svg_icon_key] = FileIcons::MeshIcons[icon_index];
             fa_icon = _fa_icon;
             svg_icon_key = _svg_icon_key;
+        } else if (handle->IsModel()) {
+            const auto& [_fa_icon, _svg_icon_key] = FileIcons::ModelIcons[icon_index];
+            fa_icon = _fa_icon;
+            svg_icon_key = _svg_icon_key;
         } else {
             fa_icon = ICON_FA_FILE;
             svg_icon_key = GUI::FILE_ICON_KEY;

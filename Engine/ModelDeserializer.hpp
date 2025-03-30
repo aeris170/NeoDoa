@@ -23,7 +23,6 @@ struct ModelDeserializationResult {
     std::vector<std::string> errors{};
     Model deserializedModel{};
     std::vector<Mesh> deserializedMeshes{};
-    std::vector<size_t> meshMaterialIndices{};
     std::vector<std::variant<std::filesystem::path, TextureDeserializationResult>> deserializedTextures{};
 };
 

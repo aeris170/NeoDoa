@@ -581,5 +581,7 @@ void MeshDisplay::OnAssetRefreshed(AssetHandle handle) noexcept {
 
         meshAsset = {}; // SetDisplayTarget returns if meshAsset == handle. Force it to do work.
         SetDisplayTarget(handle);
+        shouldBuildPipeline = true;
+        BuildPipelineIfNeeded();
     }
 }

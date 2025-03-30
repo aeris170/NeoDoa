@@ -34,6 +34,7 @@ static std::vector<GPUShaderProgram::Uniform> ExtractActiveProgramUniforms(GLuin
 namespace {
 
     std::optional<std::reference_wrapper<const GPUPipeline>> currentPipeline;
+    std::optional<std::reference_wrapper<const GPUBuffer>> currentCommandBuffer;
 
     Resolution GetAttachmentDimensions(const std::variant<GPUTexture, GPURenderBuffer>& attachment) noexcept {
         return std::visit(overloaded::lambda{
@@ -392,6 +393,31 @@ void Graphics::OpenGL::RenderInstanced(int instanceCount, int count, int first) 
         glDrawArraysInstanced(ToGLTopology(pipeline.Topology), first, count, instanceCount);
     }
 }
+void Graphics::OpenGL::RenderMultiIndirect(int count, int first) noexcept {
+    const GPUPipeline& pipeline = currentPipeline->get();
+    if (pipeline.IndexBuffer) {
+        static constexpr size_t RenderElementsCommandSize{ sizeof(RenderMultiIndirectElementsCommand) };
+
+        GLintptr start = static_cast<GLintptr>(first * RenderElementsCommandSize);
+        glMultiDrawElementsIndirect(
+            ToGLTopology(pipeline.Topology),
+            ToGLDataType(pipeline.IndexType),
+            reinterpret_cast<void*>(start),
+            count,
+            RenderElementsCommandSize
+        );
+    } else {
+        static constexpr size_t RenderArraysCommandSize{ sizeof(RenderMultiIndirectArraysCommand) };
+
+        GLintptr start = static_cast<GLintptr>(first * RenderArraysCommandSize);
+        glMultiDrawArraysIndirect(
+            ToGLTopology(pipeline.Topology),
+            reinterpret_cast<void*>(start),
+            count,
+            RenderArraysCommandSize
+        );
+    }
+}
 
 void Graphics::OpenGL::SetRenderTarget(const GPUFrameBuffer& renderTarget) noexcept {
     if (renderTarget.GLObjectID != 0) {
@@ -479,6 +505,10 @@ void Graphics::OpenGL::BindPipeline(const GPUPipeline& pipeline) noexcept {
     assert(pipeline.ShaderProgram);
     glUseProgram(pipeline.ShaderProgram->get().GLObjectID);
     glBindVertexArray(pipeline.GLObjectID);
+}
+void Graphics::OpenGL::BindCommandBuffer(const GPUBuffer& commandBuffer) noexcept {
+    currentCommandBuffer.emplace(commandBuffer);
+    glBindBuffer(GL_DRAW_INDIRECT_BUFFER, commandBuffer.GLObjectID);
 }
 
 void Graphics::OpenGL::BindDescriptorSet(const GPUDescriptorSet& descriptorSet) noexcept {

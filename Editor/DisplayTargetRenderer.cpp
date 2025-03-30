@@ -28,7 +28,8 @@ DisplayTargetRenderer::DisplayTargetRenderer(Observer& observer) noexcept :
     shaderProgramDisplay(observer),
     materialDisplay(observer),
     frameBufferDisplay(observer),
-    meshDisplay(observer) {
+    meshDisplay(observer),
+    modelDisplay(observer) {
     GUI& gui = observer.gui;
     gui.Events.OnProjectUnloaded                 += std::bind_front(&DisplayTargetRenderer::OnProjectUnloaded,  this);
     gui.Events.OnReimport                        += std::bind_front(&DisplayTargetRenderer::OnReimport,         this);
@@ -342,7 +343,7 @@ void DisplayTargetRenderer::RenderAssetView(AssetHandle h) {
     } else if (h->IsMesh()) {
         RenderMeshView(h);
     } else if (h->IsModel()) {
-
+        RenderModelView(h);
     } else {
         RenderTextView(h);
     }
@@ -752,6 +753,90 @@ void DisplayTargetRenderer::RenderMeshView(AssetHandle h) {
             ImGui::PopTextWrapPos();
             ImGui::EndTooltip();
         }
+    }
+}
+void DisplayTargetRenderer::RenderModelView(AssetHandle h) {
+    assert(h->IsModel());
+    const ImGuiStyle& style{ ImGui::GetStyle() };
+
+    modelDisplay.SetDisplayTarget(h);
+    modelDisplay.RenderMessagesTable();
+    ImGui::Separator();
+    if (ImGui::BeginChild("###modelContentsHolder", { 0, ImGui::GetContentRegionAvail().y - ImGui::GetFrameHeight() - style.FramePadding.y * 2 })) {
+        modelDisplay.RenderModelContents();
+    }
+    ImGui::EndChild();
+
+    if (ImGui::BeginTable("modelDisplayButtonsTable", 3)) {
+        ImGui::TableNextColumn();
+        if (ImGui::Button("Refresh", ImGui::GetContentRegionAvail())) {
+            h->ForceDeserialize();
+            observer.get().gui.get().Events.Observer.OnAssetRefreshed(h);
+        }
+
+        if (ImGui::IsItemHovered()) {
+            ImGui::BeginTooltip();
+            ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+            ImGui::TextUnformatted("Forces deserialization on this model object. All data in RAM/VRAM is purged, and new data is allocated.");
+            ImGui::PopTextWrapPos();
+            ImGui::EndTooltip();
+        }
+
+        ImGui::TableNextColumn();
+        Assets& assets = *observer.get().gui.get().CORE->GetAssets();
+        bool hasRAMContent = assets.AssetHasContentInSystemMemory(h->ID());
+        if (!hasRAMContent) {
+            if (ImGui::Button("Load into system memory", ImGui::GetContentRegionAvail())) {
+                assets.ReadContentOfAssetIntoSystemMemory(h->ID());
+            }
+            if (ImGui::IsItemHovered()) {
+                ImGui::BeginTooltip();
+                ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+                ImGui::TextUnformatted("Loads asset's data from disk into RAM. May result in high RAM usage.");
+                ImGui::PopTextWrapPos();
+                ImGui::EndTooltip();
+            }
+        } else {
+            if (ImGui::Button("Release from system memory", ImGui::GetContentRegionAvail())) {
+                assets.ReleaseContentOfAssetInSystemMemory(h->ID());
+            }
+            if (ImGui::IsItemHovered()) {
+                ImGui::BeginTooltip();
+                ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+                ImGui::TextUnformatted("Releases asset's data from RAM. Helps with high RAM usage.");
+                ImGui::PopTextWrapPos();
+                ImGui::EndTooltip();
+            }
+        }
+
+        ImGui::TableNextColumn();
+        bool hasVRAMContent = assets.AssetHasContentInVideoMemory(h->ID());
+        if (!hasVRAMContent) {
+            ImGui::BeginDisabled(!hasRAMContent);
+            if (ImGui::Button("Load into video memory", ImGui::GetContentRegionAvail())) {
+                assets.UploadContentOfAssetIntoVideoMemory(h->ID());
+            }
+            ImGui::EndDisabled();
+            if (ImGui::IsItemHovered()) {
+                ImGui::BeginTooltip();
+                ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+                ImGui::TextUnformatted("Loads asset's data from system memory into into VRAM. May result in high VRAM usage.");
+                ImGui::PopTextWrapPos();
+                ImGui::EndTooltip();
+            }
+        } else {
+            if (ImGui::Button("Release from video memory", ImGui::GetContentRegionAvail())) {
+                assets.ReleaseContentOfAssetInVideoMemory(h->ID());
+            }
+            if (ImGui::IsItemHovered()) {
+                ImGui::BeginTooltip();
+                ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+                ImGui::TextUnformatted("Releases asset's data from VRAM. Helps with high VRAM usage.");
+                ImGui::PopTextWrapPos();
+                ImGui::EndTooltip();
+            }
+        }
+        ImGui::EndTable();
     }
 }
 void DisplayTargetRenderer::RenderTextView(AssetHandle h) {

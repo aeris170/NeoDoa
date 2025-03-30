@@ -301,8 +301,12 @@ const GPUTexture& GPUTextures::Missing() const noexcept {
 template<>
 std::vector<BufferAllocatorMessage> GPUVertexBuffers::Allocate(const Assets& assets, const UUID asset) noexcept {
     ConstAssetHandle handle{ assets.FindAsset(asset) };
-    assert(handle && handle->IsMesh());
-    const Mesh& mesh{ handle->DataAs<Mesh>() };
+    assert(handle && handle->IsMesh() || handle->IsModel());
+    const Mesh& mesh {
+        handle->IsMesh() ?
+        handle->DataAs<Mesh>() :
+        handle->DataAs<Model>().UnifiedModelMesh
+    };
     assert(mesh.Vertices.has_value());
 
     GPUBufferBuilder builder;
@@ -322,8 +326,12 @@ std::vector<BufferAllocatorMessage> GPUVertexBuffers::Allocate(const Assets& ass
 template<>
 std::vector<BufferAllocatorMessage> GPUIndexBuffers::Allocate(const Assets& assets, const UUID asset) noexcept {
     ConstAssetHandle handle{ assets.FindAsset(asset) };
-    assert(handle && handle->IsMesh());
-    const Mesh& mesh{ handle->DataAs<Mesh>() };
+    assert(handle && handle->IsMesh() || handle->IsModel());
+    const Mesh& mesh {
+        handle->IsMesh() ?
+        handle->DataAs<Mesh>() :
+        handle->DataAs<Model>().UnifiedModelMesh
+    };
     assert(mesh.Indices.has_value());
 
     GPUBufferBuilder builder;
@@ -335,6 +343,38 @@ std::vector<BufferAllocatorMessage> GPUIndexBuffers::Allocate(const Assets& asse
         database[asset] = std::move(gpuBuffer.value());
     } else {
         DOA_LOG_ERROR("Index buffer allocation failed for %s (UUID: %s). Aborting.", mesh.Name.c_str(), asset.AsString().c_str());
+    }
+    return messages;
+}
+
+// GPUBuffer (Command)
+template<>
+std::vector<BufferAllocatorMessage> GPUCommandBuffers::Allocate(const Assets& assets, const UUID asset) noexcept {
+    ConstAssetHandle handle{ assets.FindAsset(asset) };
+    assert(handle && handle->IsModel());
+    const Model& model{ handle->DataAs<Model>() };
+
+    std::vector<RenderMultiIndirectElementsCommand> commands;
+    commands.reserve(model.Meshes.size());
+    for (const Model::Mesh& mMesh : model.Meshes) {
+        commands.emplace_back(
+            mMesh.Count,
+            1u,
+            mMesh.BaseIndex,
+            mMesh.BaseVertex,
+            0u
+        );
+    }
+
+    GPUBufferBuilder builder;
+    builder.SetName(model.Name)
+        .SetStorage(std::as_bytes(std::span{ commands }));
+
+    auto [gpuBuffer, messages] = builder.Build();
+    if (gpuBuffer.has_value()) {
+        database[asset] = std::move(gpuBuffer.value());
+    } else {
+        DOA_LOG_ERROR("Command buffer allocation failed for %s (UUID: %s). Aborting.", model.Name.c_str(), asset.AsString().c_str());
     }
     return messages;
 }
@@ -361,6 +401,8 @@ GPUVertexBuffers& AssetGPUBridge::GetVertexBuffers() noexcept               { re
 const GPUVertexBuffers& AssetGPUBridge::GetVertexBuffers() const noexcept   { return gpuVertexBuffers;  }
 GPUIndexBuffers& AssetGPUBridge::GetIndexBuffers() noexcept                 { return gpuIndexBuffers;   }
 const GPUIndexBuffers& AssetGPUBridge::GetIndexBuffers() const noexcept     { return gpuIndexBuffers;   }
+GPUCommandBuffers& AssetGPUBridge::GetCommandBuffers() noexcept             { return gpuCommandBuffers; }
+const GPUCommandBuffers& AssetGPUBridge::GetCommandBuffers() const noexcept { return gpuCommandBuffers; }
 GPUBuffers& AssetGPUBridge::GetBuffers() noexcept                           { return gpuBuffers;        }
 const GPUBuffers& AssetGPUBridge::GetBuffers() const noexcept               { return gpuBuffers;        }
 
@@ -372,5 +414,6 @@ void AssetGPUBridge::Clear() noexcept {
     gpuFrameBuffers.Clear();
     gpuVertexBuffers.Clear();
     gpuIndexBuffers.Clear();
+    gpuCommandBuffers.Clear();
     gpuBuffers.Clear();
 }

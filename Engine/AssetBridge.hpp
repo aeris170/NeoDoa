@@ -89,6 +89,7 @@ ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUSamplers, GPUSampler, SamplerAllocatorMessag
 ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUTextures, GPUTexture, TextureAllocatorMessage); ND_EXPLICIT_SPECIALIZE_ALLOCATOR_SPECIALIZE_MISSING(GPUTextures, GPUTexture);
 ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUVertexBuffers, GPUBuffer, BufferAllocatorMessage);
 ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUIndexBuffers, GPUBuffer, BufferAllocatorMessage);
+ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUCommandBuffers, GPUBuffer, BufferAllocatorMessage);
 ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUBuffers, GPUBuffer, BufferAllocatorMessage);
 #undef ND_EXPLICIT_SPECIALIZE_ALLOCATOR
 #undef ND_EXPLICIT_SPECIALIZE_ALLOCATOR_SPECIALIZE_MISSING
@@ -109,6 +110,8 @@ struct AssetGPUBridge {
     const GPUVertexBuffers& GetVertexBuffers() const noexcept;
     GPUIndexBuffers& GetIndexBuffers() noexcept;
     const GPUIndexBuffers& GetIndexBuffers() const noexcept;
+    GPUCommandBuffers& GetCommandBuffers() noexcept;
+    const GPUCommandBuffers& GetCommandBuffers() const noexcept;
     GPUBuffers& GetBuffers() noexcept;
     const GPUBuffers& GetBuffers() const noexcept;
 
@@ -122,6 +125,7 @@ private:
     GPUFrameBuffers gpuFrameBuffers{ *this };
     GPUVertexBuffers gpuVertexBuffers{ *this };
     GPUIndexBuffers gpuIndexBuffers{ *this };
+    GPUCommandBuffers gpuCommandBuffers{ *this };
     GPUBuffers gpuBuffers{ *this };
 
 public:

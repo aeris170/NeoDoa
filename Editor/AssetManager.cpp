@@ -395,13 +395,16 @@ void AssetManager::RenderListItem(FNode& file) noexcept {
         ImGui::GetWindowDrawList()->AddImage(icon, min, max);
     };
 
-    SubAssetList subAssets = assets->GetSubAssetsOfAsset(assets->FindAssetAt(file)->ID());
+    size_t subAssetsSize = 0;
+    if (!file.IsDirectory()) {
+        subAssetsSize = assets->GetSubAssetsOfAsset(assets->FindAssetAt(file)->ID()).size();
+    }
 
     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf;
     bool open = ImGui::TreeNodeEx(file.Name().data(), flags);
     RenderIconAtNormallyWhereArrowIsAt(gui.GetMetaInfoOf(file).GetSVGIcon(), file.Name());
 
-    if (subAssets.size() > 0) {
+    if (subAssetsSize > 0) {
         ImGuiStyle& style{ ImGui::GetStyle() };
         ImVec2 textSize = ImGui::CalcTextSize(file.Name().data());
         ImVec2 pos = {
@@ -409,7 +412,7 @@ void AssetManager::RenderListItem(FNode& file) noexcept {
             ImGui::GetItemRectMin().y
         };
         ImU32 color = ImGui::ColorConvertFloat4ToU32(style.Colors[ImGuiCol_TextDisabled]);
-        ImGui::GetWindowDrawList()->AddText(pos, color, std::format(" ({} SubAssets)", subAssets.size()).c_str());
+        ImGui::GetWindowDrawList()->AddText(pos, color, std::format(" ({} SubAssets)", subAssetsSize).c_str());
     }
 
     if (open) {
@@ -421,28 +424,31 @@ void AssetManager::RenderListItem(FNode& file) noexcept {
             }
         }
 
-        for (Asset& subAsset : subAssets) {
-            if (!subAsset.IsTexture() && !subAsset.IsMesh()) { continue; }
-            TextureHandle icon = gui.FindSVGIconForAssetType(subAsset.ID());
-            std::string title;
+        if (!file.IsDirectory()) {
+            SubAssetList subAssets = assets->GetSubAssetsOfAsset(assets->FindAssetAt(file)->ID());
+            for (Asset& subAsset : subAssets) {
+                if (!subAsset.IsTexture() && !subAsset.IsMesh()) { continue; }
+                TextureHandle icon = gui.FindSVGIconForAssetType(subAsset.ID());
+                std::string title;
 
-            std::optional<std::string_view> result = subAsset.TryGetName();
-            if (result.has_value() && !result.value().empty()) {
-                title = std::format("{} (UUID: {})", result.value(), subAsset.ID().AsString());
-            } else {
-                title = std::format("[MISSING NAME] (UUID: {})", subAsset.ID().AsString());
-            }
-            if (ImGui::TreeNodeEx(title.c_str(), flags)) {
-                if (ImGui::IsItemHovered()) {
-                    if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-                        OpenFileAtFileNode(file);
-                    } else if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-                        SetSelectedSubAssetNode(&file, subAsset.ID());
-                    }
+                std::optional<std::string_view> result = subAsset.TryGetName();
+                if (result.has_value() && !result.value().empty()) {
+                    title = std::format("{} (UUID: {})", result.value(), subAsset.ID().AsString());
+                } else {
+                    title = std::format("[MISSING NAME] (UUID: {})", subAsset.ID().AsString());
                 }
-                ImGui::TreePop();
+                if (ImGui::TreeNodeEx(title.c_str(), flags)) {
+                    if (ImGui::IsItemHovered()) {
+                        if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+                            OpenFileAtFileNode(file);
+                        } else if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+                            SetSelectedSubAssetNode(&file, subAsset.ID());
+                        }
+                    }
+                    ImGui::TreePop();
+                }
+                RenderIconAtNormallyWhereArrowIsAt(icon, title);
             }
-            RenderIconAtNormallyWhereArrowIsAt(icon, title);
         }
 
         ImGui::TreePop();

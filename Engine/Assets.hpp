@@ -389,6 +389,7 @@ struct Assets {
     bool IsScriptAsset(const UUID uuid) const noexcept;
 
     bool IsSubAsset(const UUID uuid) const noexcept;
+    UUID FindSuperAssetID(const UUID uuid) const noexcept;
 
     bool AssetHasInfoMessages(const UUID uuid) const noexcept;
     const std::vector<AssetMessage>& GetInfoMessagesOfAsset(const UUID uuid) const noexcept;

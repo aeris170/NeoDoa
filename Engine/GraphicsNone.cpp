@@ -28,6 +28,7 @@ void Graphics::None::BlitDepthStencil(const GPUFrameBuffer& source, GPUFrameBuff
 
 void Graphics::None::Render(int count, int first) noexcept {}
 void Graphics::None::RenderInstanced(int instanceCount, int count, int first) noexcept {}
+void Graphics::None::RenderMultiIndirect(int count, int first) noexcept {};
 
 void Graphics::None::SetRenderTarget(const GPUFrameBuffer& renderTarget) noexcept {}
 void Graphics::None::SetRenderTarget(const GPUFrameBuffer& renderTarget, std::span<unsigned> targets) noexcept {}
@@ -38,6 +39,7 @@ void Graphics::None::ClearRenderTargetStencil(const GPUFrameBuffer& renderTarget
 void Graphics::None::ClearRenderTarget(const GPUFrameBuffer& renderTarget, std::array<float, 4> color, float depth, int stencil) noexcept {}
 
 void Graphics::None::BindPipeline(const GPUPipeline& pipeline) noexcept {}
+void Graphics::None::BindCommandBuffer(const GPUBuffer& commandBuffer) noexcept {}
 
 void Graphics::None::BindDescriptorSet(const GPUDescriptorSet& descriptorSet) noexcept {}
 
