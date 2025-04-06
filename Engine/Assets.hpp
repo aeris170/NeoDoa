@@ -257,6 +257,14 @@ private:
 
 struct Assets {
 
+    enum class MemoryPolicy {
+        DontCare,
+        KeepInSystemMemoryUploadToVideoMemory,
+        KeepInSystemMemoryDontUploadToVideoMemory,
+        ReleaseFromSystemMemoryUploadToVideoMemory,
+        ReleaseFromSystemMemoryDontUploadToVideoMemory
+    };
+
     struct Events {
         Event<void(const UUID uuid)> OnAssetDeserialized{};
         Event<void(const UUID uuid)> OnAssetDataDeleted{};
@@ -359,7 +367,7 @@ struct Assets {
     HashedString GetTypeNameOfAsset(const UUID uuid) const noexcept;
 
     void SerializeAsset(const UUID uuid) noexcept;
-    void DeserializeAsset(const UUID uuid) noexcept;
+    void DeserializeAsset(const UUID uuid, MemoryPolicy policy = MemoryPolicy::DontCare) noexcept;
     void ForceDeserializeAsset(const UUID uuid) noexcept;
     void DeleteDeserializedDataOfAsset(const UUID uuid) noexcept;
     bool AssetHasDeserializedData(const UUID uuid) const noexcept;

@@ -247,9 +247,11 @@ void ModelDisplay::RenderMeshInfo(std::span<const Model::Mesh> meshes, std::span
         if (ImGui::CollapsingHeader(meshName.c_str())) {
             ImGui::Indent();
             if (ImGui::TreeNodeEx("Render Command", ImGuiTreeNodeFlags_DefaultOpen)) {
-                ImGui::TextUnformatted("Count:");          ImGui::SameLine(200); ImGui::TextUnformatted(std::format("{}", mesh.Count).c_str());
-                ImGui::TextUnformatted("Base Vertex:");    ImGui::SameLine(200); ImGui::TextUnformatted(std::format("{}", mesh.BaseVertex).c_str());
+                ImGui::TextUnformatted("Index Count:");    ImGui::SameLine(200); ImGui::TextUnformatted(std::format("{}", mesh.IndexCount).c_str());
+                ImGui::TextUnformatted("Instance Count:"); ImGui::SameLine(200); ImGui::TextUnformatted(std::format("{}", mesh.InstanceCount).c_str());
                 ImGui::TextUnformatted("Base Index:");     ImGui::SameLine(200); ImGui::TextUnformatted(std::format("{}", mesh.BaseIndex).c_str());
+                ImGui::TextUnformatted("Base Vertex:");    ImGui::SameLine(200); ImGui::TextUnformatted(std::format("{}", mesh.BaseVertex).c_str());
+                ImGui::TextUnformatted("Base Instance:");  ImGui::SameLine(200); ImGui::TextUnformatted(std::format("{}", mesh.BaseInstance).c_str());
                 ImGui::TextUnformatted("Material Index:"); ImGui::SameLine(200); ImGui::TextUnformatted(std::format("{}", mesh.MaterialIndex).c_str());
                 ImGui::TreePop();
             }

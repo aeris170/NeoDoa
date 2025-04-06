@@ -11,6 +11,7 @@
 #include <Engine/TransformComponent.hpp>
 #include <Engine/ParentComponent.hpp>
 #include <Engine/ChildComponent.hpp>
+#include <Engine/RigidModelComponent.hpp>
 #include <Engine/MultiMaterialComponent.hpp>
 #include <Engine/CameraComponent.hpp>
 
@@ -146,6 +147,28 @@ void MultiMaterialComponentUI::RenderContextMenu(GUI& gui, const MultiMaterialCo
         }
         if (ImGui::MenuItem(cat(ObserverIcons::ContextMenu::DETACH_COMPONENT_ICON, "Detach Component"))) {
             gui.ExecuteCommand<RemoveComponentCommand<MultiMaterialComponent>>(multiMaterialComponent.GetEntity(), Prettify(nameof(MultiMaterialComponent)));
+        }
+        ImGui::EndPopup();
+    }
+    ImGui::PopFont();
+}
+
+void RigidModelComponentUI::Render(GUI& gui, const RigidModelComponent& rigidModelComponent) {
+    static unordered_string_map<std::string> UINames = {
+        { nameof(MultiMaterialComponent::modelAssetID), "Model Asset" }
+    };
+
+    RigidModelComponent& rmc = const_cast<RigidModelComponent&>(rigidModelComponent);
+    SingleAssetWidget(UINames[nameof(MultiMaterialComponent::modelAssetID)], rmc.GetModelUUID(), *Core::GetCore()->GetAssets().get(), gui.GetMetaAssetInfoBank(), AssetFilters::IncludeModelAssets());
+}
+void RigidModelComponentUI::RenderContextMenu(GUI& gui, const RigidModelComponent& rigidModelComponent) {
+    ImGui::PushFont(gui.GetFontBold());
+    if (ImGui::BeginPopupContextItem(nullptr, ImGuiPopupFlags_MouseButtonRight)) {
+        if (ImGui::MenuItem(cat(ObserverIcons::ContextMenu::RESET_COMPONENT_DATA_ICON, "Reset Component Data"))) {
+            gui.ExecuteCommand<ResetComponentCommand<RigidModelComponent>>(rigidModelComponent.GetEntity(), Prettify(nameof(MultiMaterialComponent)));
+        }
+        if (ImGui::MenuItem(cat(ObserverIcons::ContextMenu::DETACH_COMPONENT_ICON, "Detach Component"))) {
+            gui.ExecuteCommand<RemoveComponentCommand<RigidModelComponent>>(rigidModelComponent.GetEntity(), Prettify(nameof(MultiMaterialComponent)));
         }
         ImGui::EndPopup();
     }
@@ -335,6 +358,14 @@ void ComponentUI::RenderMultiMaterialComponent(const Observer& observer, const M
     MultiMaterialComponentUI::RenderContextMenu(observer.gui, multiMaterialComponent);
     if (show) {
         MultiMaterialComponentUI::Render(observer.gui, multiMaterialComponent);
+    }
+    ComponentUI::End(show);
+}
+void ComponentUI::RenderRigidModelComponent(const Observer& observer, const RigidModelComponent& rigidModelComponent) {
+    bool show = ComponentUI::Begin(observer, nameof(RigidModelComponent));
+    RigidModelComponentUI::RenderContextMenu(observer.gui, rigidModelComponent);
+    if (show) {
+        RigidModelComponentUI::Render(observer.gui, rigidModelComponent);
     }
     ComponentUI::End(show);
 }

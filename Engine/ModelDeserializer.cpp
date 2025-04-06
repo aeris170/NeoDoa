@@ -1,14 +1,20 @@
 #include <Engine/ModelDeserializer.hpp>
 
+#include <limits>
 #include <fstream>
+#include <numeric>
 #include <sstream>
 #include <algorithm>
+#include <execution>
 #include <functional>
 
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/DefaultLogger.hpp>
+
+#include <glm/glm.hpp>
+#include <glm/ext.hpp>
 
 #include <detector.hpp>
 
@@ -89,7 +95,7 @@ void sortLinkedVectors(std::vector<T>& tVec, std::vector<unsigned>& indexVec) {
     indexVec = std::move(sortedIndexVector);
 }
 
-Tree<Model::Node> processNodeTree(const aiScene& scene);
+std::pair<Tree<Model::Node>, std::vector<unsigned>> processNodeTree(const aiScene& scene);
 std::pair<std::vector<Mesh>, std::vector<unsigned>> processMeshes(const aiScene& scene);
 std::vector<std::variant<std::filesystem::path, TextureDeserializationResult>> processTextures(const aiScene& scene);
 std::vector<Model::Material> processMaterials(const aiScene& scene);
@@ -125,16 +131,17 @@ ModelDeserializationResult DeserializeModel(const std::string_view data, const M
         aiProcess_SortByPType               |
         aiProcess_FindDegenerates           |
         aiProcess_FindInvalidData           |
-        aiProcess_FindInstances             |
+        //aiProcess_FindInstances             |
         aiProcess_ValidateDataStructure     |
         aiProcess_FlipUVs                   |
         aiProcess_OptimizeMeshes            |
+        aiProcess_OptimizeGraph             |
+        aiProcess_GlobalScale               |
         aiProcess_RemoveComponent;
-
-    flags = aiProcess_FlipUVs | aiProcess_Triangulate;
 
     importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS, aiComponent_COLORS | aiComponent_LIGHTS | aiComponent_CAMERAS);
     importer.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_POINT | aiPrimitiveType_LINE);
+    importer.SetPropertyFloat(AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY, 1.0f);
 
     const aiScene* scene = importer.ReadFileFromMemory(data.data(), data.size(), flags, "fbx");
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
@@ -145,7 +152,8 @@ ModelDeserializationResult DeserializeModel(const std::string_view data, const M
         DOA_LOG_ERROR("Couldn't deserialize model!\n\n%s", data);
     } else {
         Model& model{ rv.deserializedModel };
-        model.Nodes = processNodeTree(*scene);
+        std::vector<unsigned> meshInstanceCounts{};
+        std::tie(model.Nodes, meshInstanceCounts) = processNodeTree(*scene);
 
         std::vector<unsigned> meshMaterialIndices{};
         std::tie(rv.deserializedMeshes, meshMaterialIndices) = processMeshes(*scene);
@@ -176,9 +184,11 @@ ModelDeserializationResult DeserializeModel(const std::string_view data, const M
             model.MeshNames[i] = mesh.Name;
 
             Model::Mesh& mMesh{ model.Meshes[i] };
-            mMesh.Count = mesh.IndexCount;
-            mMesh.BaseVertex = baseVertex;
+            mMesh.IndexCount = mesh.IndexCount;
+            mMesh.InstanceCount = meshInstanceCounts[i];
             mMesh.BaseIndex = baseIndex;
+            mMesh.BaseVertex = baseVertex;
+            mMesh.BaseInstance = i == 0 ? 0 : model.Meshes[i - 1].BaseInstance + model.Meshes[i - 1].InstanceCount;
             mMesh.MaterialIndex = meshMaterialIndices[i];
 
             std::copy_n(meshVertices.begin(), mesh.VertexCount, unifiedVertexList.begin() + baseVertex);
@@ -188,7 +198,45 @@ ModelDeserializationResult DeserializeModel(const std::string_view data, const M
             baseIndex += mesh.IndexCount;
         }
         assert(baseVertex == totalVertexCount);
-        assert(baseIndex == totalIndexCount);
+        assert(baseIndex == totalIndexCount); // Perform sanity check to ensure we included all vertices and indices
+
+        // Pre-flatten transform buffers from the node tree for faster rendering
+        model.MeshLocalTransforms.resize(model.Meshes.back().BaseInstance + model.Meshes.back().InstanceCount);
+        model.MeshWorldTransforms.resize(model.Meshes.back().BaseInstance + model.Meshes.back().InstanceCount);
+        std::vector<unsigned> processedInstanceCounts{};
+        processedInstanceCounts.resize(model.Meshes.size());
+        if constexpr (detect::is_debug_v) {
+            static constexpr auto NaN = std::numeric_limits<float>::quiet_NaN();
+            static constexpr glm::mat4 invalidMatrix {
+                NaN, NaN, NaN, NaN,
+                NaN, NaN, NaN, NaN,
+                NaN, NaN, NaN, NaN,
+                NaN, NaN, NaN, NaN
+            };
+            std::ranges::fill(model.MeshLocalTransforms, invalidMatrix);
+            std::ranges::fill(model.MeshWorldTransforms, invalidMatrix);
+        }
+        for (Tree<Model::Node>::NodeIndex i = 0; i < model.Nodes.Size(); i++) {
+            const auto& meshIndices = model.Nodes.NodeAt(i).MeshIndices;
+            for (const auto meshIndex : meshIndices) {
+                unsigned& offset = processedInstanceCounts[meshIndex];
+                assert(offset <= model.Meshes[meshIndex].InstanceCount);
+                size_t base = static_cast<size_t>(model.Meshes[meshIndex].BaseInstance);
+                model.MeshLocalTransforms[base + offset] = model.Nodes.NodeAt(i).LocalTransform;
+                model.MeshWorldTransforms[base + offset] = model.Nodes.NodeAt(i).WorldTransform;
+                offset++;
+            }
+        }
+        if constexpr (detect::is_debug_v) {
+            static constexpr auto isMatrixValid = [](const glm::mat4& m) -> bool {
+                return glm::all(glm::isfinite(m[0])) &&
+                    glm::all(glm::isfinite(m[1])) &&
+                    glm::all(glm::isfinite(m[2])) &&
+                    glm::all(glm::isfinite(m[3]));
+            };
+            assert(std::ranges::all_of(model.MeshLocalTransforms, isMatrixValid));
+            assert(std::ranges::all_of(model.MeshWorldTransforms, isMatrixValid));
+        }
 
         auto processedTextures = processTextures(*scene);
         std::unordered_set<std::filesystem::path> seenPaths{}; // remove duplicate paths using a set
@@ -239,31 +287,54 @@ ModelDeserializationResult DeserializeModel(const std::string_view data, const M
     return rv;
 }
 
-Tree<Model::Node> processNodeTree(const aiScene& scene) {
-    static auto ProcessNodeRecursive = [](Tree<Model::Node>& tree, size_t parentIndex, const aiNode& node, auto&& selfReference) -> void {
+std::pair<Tree<Model::Node>, std::vector<unsigned>> processNodeTree(const aiScene& scene) {
+    static auto CreateNode = [](std::vector<unsigned>& meshInstanceCounts, const aiNode& node, glm::mat4 parentTransform = glm::identity<glm::mat4>()) -> Model::Node {
         std::vector<size_t> meshIndices{};
 
         meshIndices.reserve(node.mNumMeshes);
         for (size_t i = 0; i < node.mNumMeshes; i++) {
-            meshIndices.push_back(node.mMeshes[i]);
+            auto meshIndex = node.mMeshes[i];
+            meshIndices.push_back(meshIndex);
+            meshInstanceCounts[meshIndex]++;
         }
+
+        glm::mat4 transform;
+        aiMatrix4x4 aiTransform = node.mTransformation;
+        //the a,b,c,d in assimp is the row ; the 1,2,3,4 is the column
+        transform[0][0] = aiTransform.a1; transform[1][0] = aiTransform.a2; transform[2][0] = aiTransform.a3; transform[3][0] = aiTransform.a4;
+        transform[0][1] = aiTransform.b1; transform[1][1] = aiTransform.b2; transform[2][1] = aiTransform.b3; transform[3][1] = aiTransform.b4;
+        transform[0][2] = aiTransform.c1; transform[1][2] = aiTransform.c2; transform[2][2] = aiTransform.c3; transform[3][2] = aiTransform.c4;
+        transform[0][3] = aiTransform.d1; transform[1][3] = aiTransform.d2; transform[2][3] = aiTransform.d3; transform[3][3] = aiTransform.d4;
 
         std::string_view nodeName = node.mName.C_Str();
         if (nodeName.empty()) {
             nodeName = "Root";
         }
 
-        size_t selfIndex = tree.EmplaceNode(parentIndex, nodeName.data(), std::move(meshIndices));
+        return {
+            nodeName.data(),
+            transform,
+            parentTransform * transform,
+            std::move(meshIndices)
+        };
+    };
+    static auto ProcessNodeRecursive = [](Tree<Model::Node>& tree, size_t parentIndex, std::vector<unsigned>& meshInstanceCounts, const aiNode& node, auto&& selfReference) -> void {
+        size_t selfIndex = tree.EmplaceNode(parentIndex, CreateNode(meshInstanceCounts, node, tree.NodeAt(parentIndex).WorldTransform));
         for (size_t i = 0; i < node.mNumChildren; i++) {
-            selfReference(tree, selfIndex, *node.mChildren[i], selfReference);
+            selfReference(tree, selfIndex, meshInstanceCounts, *node.mChildren[i], selfReference);
         }
     };
 
-    Tree<Model::Node> rv{};
+    std::vector<unsigned> meshInstanceCounts{};
+    meshInstanceCounts.resize(scene.mNumMeshes);
+
+    Model::Node rootNode = CreateNode(meshInstanceCounts, *scene.mRootNode);
+    Tree<Model::Node> nodeTree{ rootNode };
+
     for (size_t i = 0; i < scene.mRootNode->mNumChildren; i++) {
-        ProcessNodeRecursive(rv, rv.Root, *scene.mRootNode->mChildren[i], ProcessNodeRecursive);
+        ProcessNodeRecursive(nodeTree, nodeTree.Root, meshInstanceCounts, *scene.mRootNode->mChildren[i], ProcessNodeRecursive);
     }
-    return rv;
+    return { nodeTree, meshInstanceCounts };
 }
 
 std::pair<std::vector<Mesh>, std::vector<unsigned>> processMeshes(const aiScene& scene) {

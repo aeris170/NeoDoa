@@ -414,7 +414,7 @@ void Assets::SerializeAsset(const UUID uuid) noexcept {
         //file->DisposeContent();
     }
 }
-void Assets::DeserializeAsset(const UUID uuid) noexcept {
+void Assets::DeserializeAsset(const UUID uuid, MemoryPolicy policy) noexcept {
     assert(database.Contains(uuid));
 
     FNode* file = database.files.at(uuid);
@@ -583,6 +583,30 @@ void Assets::DeserializeAsset(const UUID uuid) noexcept {
     * TODO others
     */
     database.versions.at(uuid)++;
+
+    if (policy == MemoryPolicy::DontCare) {
+        // Handle RAM-VRAM transactions and clean-up VRAM. Samplers, Textures, Shaders, Programs and FrameBuffers are on VRAM on deserialization.
+        if (IsSceneAsset(uuid))               {}
+        if (IsComponentDefinitionAsset(uuid)) {}
+        if (IsSamplerAsset(uuid))             { UploadContentOfAssetIntoVideoMemory(uuid); }
+        if (IsTextureAsset(uuid))             { UploadContentOfAssetIntoVideoMemory(uuid); ReleaseContentOfAssetInSystemMemory(uuid); }
+        if (IsShaderAsset(uuid))              { UploadContentOfAssetIntoVideoMemory(uuid); }
+        if (IsShaderProgramAsset(uuid))       { UploadContentOfAssetIntoVideoMemory(uuid); }
+        if (IsMaterialAsset(uuid))            {}
+        if (IsFrameBufferAsset(uuid))         { UploadContentOfAssetIntoVideoMemory(uuid); }
+        if (IsMeshAsset(uuid))                { UploadContentOfAssetIntoVideoMemory(uuid); ReleaseContentOfAssetInSystemMemory(uuid); }
+        if (IsModelAsset(uuid))               { UploadContentOfAssetIntoVideoMemory(uuid); ReleaseContentOfAssetInSystemMemory(uuid); }
+        // Here, we could add an "unload unused assets" step... Loop through scenes, check if scene uses said asset. If no scene uses it, unload it. (or never load it)
+    } else if (policy == MemoryPolicy::KeepInSystemMemoryUploadToVideoMemory) {
+        UploadContentOfAssetIntoVideoMemory(uuid);
+    } else if (policy == MemoryPolicy::KeepInSystemMemoryDontUploadToVideoMemory) {
+
+    } else if (policy == MemoryPolicy::ReleaseFromSystemMemoryUploadToVideoMemory) {
+        UploadContentOfAssetIntoVideoMemory(uuid);
+        ReleaseContentOfAssetInSystemMemory(uuid);
+    } else if (policy == MemoryPolicy::ReleaseFromSystemMemoryDontUploadToVideoMemory) {
+        ReleaseContentOfAssetInSystemMemory(uuid);
+    }
 
     // Handle post deserialization actions (if any needed)
     if (IsSceneAsset(uuid))               { PerformPostDeserializationAction<Scene>(uuid);         }
@@ -1493,8 +1517,16 @@ void Assets::ImportAllFiles(AssetDatabase& database, const FNode& root) noexcept
 void Assets::Deserialize(const UUIDCollection& assets) noexcept {
     std::for_each(std::execution::par, assets.begin(), assets.end(), [this] (const UUID id) {
         DeleteDeserializedDataOfAsset(id);
-        ForceDeserializeAsset(id);
+        DeserializeAsset(id, MemoryPolicy::KeepInSystemMemoryDontUploadToVideoMemory);
     });
+
+    for (const UUID uuid : assets) {
+        // Handle RAM-VRAM transactions and clean-up VRAM.
+        UploadContentOfAssetIntoVideoMemory(uuid);
+        ReleaseContentOfAssetInSystemMemory(uuid);
+    }
+    // Here, we could add an "unload unused assets" step... Loop through scenes, check if scene uses said asset. If no scene uses it, unload it.
+    // We could also be clever and never load redundant assets...
 }
 
 void Assets::BuildFileNodeTree(const Project& project, FNode& root) noexcept {

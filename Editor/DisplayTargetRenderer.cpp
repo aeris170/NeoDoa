@@ -9,6 +9,7 @@
 #include <Engine/ParentComponent.hpp>
 #include <Engine/CameraComponent.hpp>
 #include <Engine/TransformComponent.hpp>
+#include <Engine/RigidModelComponent.hpp>
 #include <Engine/MultiMaterialComponent.hpp>
 
 #include <Editor/GUI.hpp>
@@ -119,6 +120,11 @@ void DisplayTargetRenderer::HandleTargetWhenEntity(Scene& scene, const Entity en
     if (scene.HasComponent<PerspectiveCameraComponent>(entt)) {
         const auto& perspectiveCameraComponent = scene.GetComponent<PerspectiveCameraComponent>(entt);
         ComponentUI::RenderPerspectiveCameraComponent(observer, perspectiveCameraComponent);
+    }
+
+    if (scene.HasComponent<RigidModelComponent>(entt)) {
+        const auto& rigidModelComponent = scene.GetComponent<RigidModelComponent>(entt);
+        ComponentUI::RenderRigidModelComponent(observer, rigidModelComponent);
     }
 
     if (scene.HasComponent<MultiMaterialComponent>(entt)) {

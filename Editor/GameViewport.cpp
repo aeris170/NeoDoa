@@ -108,35 +108,41 @@ void GameViewport::Render() {
         }
 
         ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal, 4);
-        const GPUTexture& selectedAttachmentToDisplay = FetchAttachmentTexture(assets, selectedFrameBufferID, displayableAttachmentNames[selectedAttachmentIndex]);
 
-        static float extraPadding = 4; /* pad by an extra amount to remove scroll bar, don't pad and see the scroll bar appear on right side */
-        auto [availableWidth, availableHeight] = ImGui::GetContentRegionAvail();
-        availableWidth = availableWidth - ImGui::GetStyle().FramePadding.x;
-        availableHeight = availableHeight - extraPadding;
+        if (assets.AssetHasContentInVideoMemory(selectedFrameBufferID)) {
+            const GPUTexture& selectedAttachmentToDisplay = FetchAttachmentTexture(assets, selectedFrameBufferID, displayableAttachmentNames[selectedAttachmentIndex]);
 
-        float w = static_cast<float>(selectedAttachmentToDisplay.Width);
-        float h = static_cast<float>(selectedAttachmentToDisplay.Height);
-        float aspect = w / h;
+            static float extraPadding = 4; /* pad by an extra amount to remove scroll bar, don't pad and see the scroll bar appear on right side */
+            auto [availableWidth, availableHeight] = ImGui::GetContentRegionAvail();
+            availableWidth = availableWidth - ImGui::GetStyle().FramePadding.x;
+            availableHeight = availableHeight - extraPadding;
 
-        float maxWidth = availableWidth;
-        float maxHeight = availableHeight;
+            float w = static_cast<float>(selectedAttachmentToDisplay.Width);
+            float h = static_cast<float>(selectedAttachmentToDisplay.Height);
+            float aspect = w / h;
 
-        w = maxWidth;
-        h = w / aspect;
+            float maxWidth = availableWidth;
+            float maxHeight = availableHeight;
 
-        if (h > maxHeight) {
-            aspect = w / h;
-            h = maxHeight;
-            w = h * aspect;
+            w = maxWidth;
+            h = w / aspect;
+
+            if (h > maxHeight) {
+                aspect = w / h;
+                h = maxHeight;
+                w = h * aspect;
+            }
+
+            auto [posX, posY] = ImGui::GetCursorPos();
+            if (w < maxWidth) { posX += (maxWidth - w) / 2.0f; }
+            if (h < maxHeight) { posY += (maxHeight - h) / 2.0f; }
+
+            ImGui::SetCursorPos({ posX, posY });
+            ImGui::Image(selectedAttachmentToDisplay, { w, h }, { 0, 1 }, { 1, 0 }, { 1, 1, 1, 1 }, { 0, 1, 0, 1 });
+        } else {
+            ImGui::TextUnformatted("FrameBuffer has no data in VRAM. You explicitly requested this FrameBuffer to relinquish it's resource.");
+            ImGui::TextUnformatted("Find this asset in Asset Manager window and explicitly request it to obtain VRAM resource by clicking ....");
         }
-
-        auto [posX, posY] = ImGui::GetCursorPos();
-        if (w < maxWidth)  { posX += (maxWidth - w) / 2.0f; }
-        if (h < maxHeight) { posY += (maxHeight - h) / 2.0f; }
-
-        ImGui::SetCursorPos({ posX, posY });
-        ImGui::Image(selectedAttachmentToDisplay, { w, h }, { 0, 1 }, { 1, 0 }, { 1, 1, 1, 1 }, { 0, 1, 0, 1 });
     }
 }
 

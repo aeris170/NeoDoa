@@ -27,6 +27,7 @@ struct SVGPathway {
 
     static void Initialize(const std::filesystem::path& directory, Color color = { 1, 1, 1, 1 });
     static void Initialize(std::filesystem::path&& directory, Color color = { 1, 1, 1, 1 });
+    static void Destroy();
 
     static const GPUTexture& Get(const std::string& key, const TextureStyle style = TextureStyle::NONE, const TextureSize size = TextureSize::MEDIUM);
 

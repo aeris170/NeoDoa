@@ -358,11 +358,11 @@ std::vector<BufferAllocatorMessage> GPUCommandBuffers::Allocate(const Assets& as
     commands.reserve(model.Meshes.size());
     for (const Model::Mesh& mMesh : model.Meshes) {
         commands.emplace_back(
-            mMesh.Count,
-            1u,
+            mMesh.IndexCount,
+            mMesh.InstanceCount,
             mMesh.BaseIndex,
             mMesh.BaseVertex,
-            0u
+            mMesh.BaseInstance
         );
     }
 

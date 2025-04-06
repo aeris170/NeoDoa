@@ -131,6 +131,8 @@ set(GROUP_LIST
     "ECS/Components/MultiMaterialComponent.hpp"
     "ECS/Components/ParentComponent.cpp"
     "ECS/Components/ParentComponent.hpp"
+	"ECS/Components/RigidModelComponent.cpp"
+	"ECS/Components/RigidModelComponent.hpp"
     "ECS/Components/TransformComponent.cpp"
     "ECS/Components/TransformComponent.hpp"
     "ECS/Entity/Entity.cpp"

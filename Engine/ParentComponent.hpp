@@ -21,7 +21,6 @@ struct ParentComponent {
 private:
     Entity entity{ NULL_ENTT };
     std::vector<Entity> children{};
-
 };
 
 static_assert(ECSComponent<ParentComponent>);

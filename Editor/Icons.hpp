@@ -66,7 +66,7 @@ namespace ComponentIcons {
         { nameof(ChildComponent), ICON_FA_USER "  " },
         { nameof(OrthoCameraComponent), ICON_FA_VIDEO "  " },
         { nameof(PerspectiveCameraComponent), ICON_FA_CAMERA_MOVIE "  " },
-        { nameof(ModelRenderer), ICON_FA_MARTINI_GLASS_CITRUS "  " }
+        { nameof(RigidModelComponent), ICON_FA_SHOP_LOCK "  " }
     };
 
     inline const std::string& FindIconByComponentName(std::string_view componentName) {

@@ -7,9 +7,17 @@
 #include <imgui.h>
 #include <ImGuizmo.h>
 
+#include <Engine/UUID.hpp>
 #include <Engine/Scene.hpp>
 #include <Engine/Resolution.hpp>
+
+#include <Engine/Graphics.hpp>
+#include <Engine/GPUBuffer.hpp>
+#include <Engine/GPUShader.hpp>
+#include <Engine/GPUPipeline.hpp>
 #include <Engine/GPUFrameBuffer.hpp>
+#include <Engine/GPUDescriptorSet.hpp>
+#include <Engine/GPUVertexAttribLayout.hpp>
 
 #include <Editor/Gizmos.hpp>
 
@@ -31,7 +39,7 @@ struct SceneViewport {
         bool IsPerspective() const;
 
     private:
-        ACamera* activeCamera{ &ortho };
+        ACamera* activeCamera{ &perspective };
         OrthoCamera ortho{ -1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f };
         PerspectiveCamera perspective{ 110.0f, 19.0f / 9.0f, 0.001f, 1000.0f };
     };
@@ -75,6 +83,29 @@ private:
         float yaw{ 0 };
         float pitch{ 0 };
     } controls{};
+
+    struct ObjectState {
+        GPUPipeline pipeline;
+        GPUBuffer uniformModelBuffer;
+        GPUBuffer uniformInstanceTransformsBuffer;
+        GPUDescriptorSet descriptorSet;
+        const GPUBuffer* commandBuffer;
+        unsigned count;
+    };
+    struct Renderer {
+        GPUVertexAttribLayout layout;
+        GPUShaderProgram program;
+
+        GPUBuffer perFrameUniformBuffer;
+        GPUDescriptorSet perFrame;
+
+        const GPUTexture* missingTexture;
+        GPUSampler defaultSampler;
+        GPUBuffer buf;
+
+        std::vector<Entity> objectIDs{};
+        std::vector<ObjectState> objectStates{};
+    } renderer{};
 
     void HandleMouseControls();
 };

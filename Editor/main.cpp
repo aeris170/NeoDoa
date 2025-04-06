@@ -90,9 +90,10 @@ int main(int argc, char* argv[]) {
 
     core->CreateAttachment<OutlineAttachment>(gui_ptr);
     core->Start();
-    Core::DestroyCore();
 
     gui_ptr.reset();
+    SVGPathway::Destroy();
+    Core::DestroyCore();
 
     return 0;
 }

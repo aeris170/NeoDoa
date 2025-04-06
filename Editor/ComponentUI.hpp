@@ -34,6 +34,12 @@ namespace MultiMaterialComponentUI {
     void RenderContextMenu(GUI& gui, const MultiMaterialComponent& multiMaterialComponent);
 };
 
+struct RigidModelComponent;
+namespace RigidModelComponentUI {
+    void Render(GUI& gui, const RigidModelComponent& rigidModelComponent);
+    void RenderContextMenu(GUI& gui, const RigidModelComponent& rigidModelComponent);
+};
+
 struct OrthoCameraComponent;
 namespace OrthoCameraComponentUI {
     void Render(GUI& gui, const OrthoCameraComponent& orthoCameraComponent);
@@ -65,6 +71,7 @@ namespace ComponentUI {
     void RenderParentComponent(const Observer& observer, const ParentComponent& parentComponent);
     void RenderChildComponent(const Observer& observer, const ChildComponent& childComponent);
     void RenderMultiMaterialComponent(const Observer& observer, const MultiMaterialComponent& multiMaterialComponent);
+    void RenderRigidModelComponent(const Observer& observer, const RigidModelComponent& rigidModelComponent);
     void RenderOrthoCameraComponent(const Observer& observer, const OrthoCameraComponent& orthoCameraComponent);
     void RenderPerspectiveCameraComponent(const Observer& observer, const PerspectiveCameraComponent& perspectiveCameraComponent);
     void RenderUserDefinedComponentStorage(const Observer& observer, const UserDefinedComponentStorage& storageComponent);

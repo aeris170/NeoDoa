@@ -7,6 +7,8 @@
 #include <optional>
 #include <string_view>
 
+#include <glm/glm.hpp>
+
 #include <Engine/Mesh.hpp>
 #include <Engine/UUID.hpp>
 #include <Engine/Color.hpp>
@@ -16,12 +18,16 @@
 struct Model {
     struct Node {
         std::string Name{};
+        glm::mat4 LocalTransform{}; // zero'd matrix - NOT identity
+        glm::mat4 WorldTransform{}; // zero'd matrix - NOT identity
         std::vector<size_t> MeshIndices{};
     };
     struct Mesh {
-        unsigned Count;
-        int BaseVertex;
+        unsigned IndexCount;
+        unsigned InstanceCount;
         unsigned BaseIndex;
+        int BaseVertex;
+        unsigned BaseInstance;
         unsigned MaterialIndex;
     };
     struct Texture {
@@ -139,6 +145,8 @@ struct Model {
     Tree<Node> Nodes{};
     std::vector<std::string> MeshNames{};
     std::vector<UUID> MeshUUIDs{};
+    std::vector<glm::mat4> MeshLocalTransforms{};
+    std::vector<glm::mat4> MeshWorldTransforms{};
     std::vector<Mesh> Meshes{};
     std::vector<Texture> Textures{};
     std::vector<Material> Materials{};
