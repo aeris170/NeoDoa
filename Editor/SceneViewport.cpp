@@ -1,6 +1,7 @@
 #include <Editor/SceneViewport.hpp>
 
 #include <utility>
+#include <execution>
 
 #include <imgui.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -9,17 +10,68 @@
 
 #include <Engine/Core.hpp>
 #include <Engine/Input.hpp>
+#include <Engine/Model.hpp>
+#include <Engine/Scene.hpp>
 #include <Engine/Window.hpp>
-#include <Engine/Graphics.hpp>
+#include <Engine/ChildComponent.hpp>
+#include <Engine/ParentComponent.hpp>
 #include <Engine/TransformComponent.hpp>
-#include <Engine/GPUBuffer.hpp>
-#include <Engine/GPUVertexAttribLayout.hpp>
-#include <Engine/GPUPipeline.hpp>
-#include <Engine/GPUDescriptorSet.hpp>
+#include <Engine/RigidModelComponent.hpp>
 
 #include <Editor/GUI.hpp>
 #include <Editor/Icons.hpp>
 #include <Editor/Strings.hpp>
+/*
+void AddModelToScene(Scene& scene, const Model& model) {
+    static constexpr auto recurse = [](Scene& scene, Entity parentEntity, const Model& model, size_t nodeIndex, auto&& selfReference) -> void {
+        assert(model.Nodes.HasNodeAt(nodeIndex));
+        const Model::Node& node = model.Nodes.NodeAt(nodeIndex);
+
+        Entity thisEntity = scene.CreateEntity(node.Name);
+
+        assert(scene.HasComponent<ParentComponent>(parentEntity));
+        scene.GetComponent<ParentComponent>(parentEntity).GetChildren().push_back(thisEntity);
+
+        scene.EmplaceComponent<ChildComponent>(thisEntity, parentEntity);
+
+        glm::vec3 translation;
+        glm::quat rotation;
+        glm::vec3 scale;
+        TransformComponent::Decompose(node.LocalTransformation, &translation, &rotation, &scale);
+
+        TransformComponent& transform = scene.GetComponent<TransformComponent>(thisEntity);
+        transform.SetLocalTranslation(translation);
+        transform.SetLocalRotation(rotation);
+        transform.SetLocalScale(scale);
+
+        const auto childIndices = model.Nodes.ChildrenOfNodeAt(nodeIndex).ChildIndices();
+        if (childIndices.size() > 0 || node.MeshIndices.size() > 0) {
+            std::vector<Entity> childrens{};
+            childrens.reserve(childIndices.size() + node.MeshIndices.size());
+            scene.EmplaceComponent<ParentComponent>(thisEntity, std::move(childrens));
+        }
+        for (auto childIndex : childIndices) {
+            selfReference(scene, thisEntity, model, childIndex, selfReference);
+        }
+        for (auto meshIndex : node.MeshIndices) {
+            assert(meshIndex >= 0 && meshIndex < model.Meshes.size());
+            Entity meshEntity = scene.CreateEntity(model.MeshNames[meshIndex]);
+            scene.GetComponent<ParentComponent>(thisEntity).GetChildren().push_back(meshEntity);
+            scene.EmplaceComponent<ChildComponent>(meshEntity, thisEntity);
+        }
+    };
+    Entity rootEntity = scene.CreateEntity(model.Name);
+    const auto childIndices = model.Nodes.ChildrenOfNodeAt(model.Nodes.Root).ChildIndices();
+    if (childIndices.size() > 0) {
+        std::vector<Entity> childrens{};
+        childrens.reserve(childIndices.size());
+        scene.EmplaceComponent<ParentComponent>(rootEntity, std::move(childrens));
+    }
+    for (auto childIndex : childIndices) {
+        recurse(scene, rootEntity, model, childIndex, recurse);
+    }
+}
+*/
 
 void SceneViewport::ViewportCamera::SwitchToOrtho() { activeCamera = &ortho; }
 void SceneViewport::ViewportCamera::SwitchToPerspective() { activeCamera = &perspective; }
@@ -31,80 +83,23 @@ PerspectiveCamera& SceneViewport::ViewportCamera::GetPerspectiveCamera() { retur
 bool SceneViewport::ViewportCamera::IsOrtho() const { return activeCamera == &ortho; }
 bool SceneViewport::ViewportCamera::IsPerspective() const { return activeCamera == &perspective; }
 
-GPUPipeline pipeline;
-GPUShaderProgram prog;
-GPUDescriptorSet perFrame;
-GPUDescriptorSet perObject;
-const GPUTexture* tex;
-GPUSampler sampler;
-GPUBuffer buf;
-GPUBuffer perFrameUniformBuffer;
-GPUBuffer perObjectUniformBuffer;
 SceneViewport::SceneViewport(GUI& gui) noexcept :
     gui(gui),
     gizmos(*this) {
 
-    float vertices[] = {
-    // Back face
-    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, // Bottom-left
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // top-right
-     0.5f, -0.5f, -0.5f,  1.0f, 0.0f, // bottom-right
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // top-right
-    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, // bottom-left
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f, // top-left
-    // Front face
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f, // bottom-right
-     0.5f,  0.5f,  0.5f,  1.0f, 1.0f, // top-right
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // bottom-left
-     0.5f,  0.5f,  0.5f,  1.0f, 1.0f, // top-right
-    -0.5f,  0.5f,  0.5f,  0.0f, 1.0f, // top-left
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // bottom-left
-    // Left face
-    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // top-right
-    -0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // top-left
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // bottom-left
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // bottom-left
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // bottom-right
-    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // top-right
-    // Right face
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // top-left
-     0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // bottom-right
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // top-right
-     0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // bottom-right
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // top-left
-     0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // bottom-left
-    // Bottom face
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // top-right
-     0.5f, -0.5f, -0.5f,  1.0f, 1.0f, // top-left
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f, // bottom-left
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f, // bottom-left
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // bottom-right
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // top-right
-    // Top face
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f, // top-left
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // bottom-right
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // top-right
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // bottom-right
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  // top-left
-    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f, // bottom-left
-    };
-    std::byte* bytePtr = reinterpret_cast<std::byte*>(vertices);
-
-    GPUBufferBuilder bBuilder;
-    buf = bBuilder.SetStorage(std::span<std::byte>(bytePtr, 180 * sizeof(float))).Build().first.value();
-    perFrameUniformBuffer = bBuilder.SetProperties(BufferProperties::DynamicStorage).SetStorage(sizeof(glm::mat4) * 2, nullptr).Build().first.value(); // proj and view
-    perObjectUniformBuffer = bBuilder.SetProperties(BufferProperties::DynamicStorage).SetStorage(sizeof(glm::mat4), nullptr).Build().first.value(); // model
-    GPUVertexAttribLayout layout;
-    layout.Define<float>(3);
-    layout.Define<float>(2);
+    renderer.layout.Define<float>(3);
+    renderer.layout.Define<float>(3);
+    renderer.layout.Define<float>(2);
 
     GPUShaderBuilder sBuilder;
     auto v = sBuilder.SetType(ShaderType::Vertex).SetSourceCode(R"(
 #version 460 core
 
 layout(location = 0) in vec3 vPos;
-layout(location = 1) in vec2 vUV;
+layout(location = 1) in vec3 vNormal;
+layout(location = 2) in vec2 vUV;
 
+out vec3 fNormal;
 out vec2 fUV;
 
 layout(std140, binding = 0) uniform ProjViewBuffer {
@@ -116,62 +111,63 @@ layout(std140, binding = 1) uniform ModelBuffer {
     mat4 model;
 };
 
+layout(std140, binding = 2) restrict readonly buffer InstanceTransformBuffer {
+    mat4 instanceTransforms[];
+};
+
 void main() {
-	gl_Position = projection * view * model * vec4(vPos, 1.0);
+    int globalInstance = gl_BaseInstance + gl_InstanceID;
+    gl_Position = projection * view * model * instanceTransforms[globalInstance] * vec4(vPos, 1.0);
+    fNormal = transpose(inverse(mat3(instanceTransforms[globalInstance]))) * vNormal;
     fUV = vUV;
 }
     )").Build().first;
     auto f = sBuilder.SetType(ShaderType::Fragment).SetSourceCode(R"(
 #version 460 core
 
+in vec3 fNormal;
 in vec2 fUV;
 
-layout (binding = 0) uniform sampler2D tex;
+layout(binding = 0) uniform sampler2D albedo;
+layout(binding = 1) uniform sampler2D roughnessMap;
+layout(binding = 2) uniform sampler2D normalMap;
+layout(binding = 3) uniform sampler2D metallicMap;
 
 out vec4 FragColor;
 
 void main() {
-	FragColor = texture(tex, fUV) * vec4(1,1,1,1);
+    //FragColor = texture(albedo, fUV) * vec4(1, 1, 1, 1);
+    FragColor = vec4(fNormal, 1);
 }
 )").Build().first;
 
     GPUShaderProgramBuilder spBuilder;
-    prog = spBuilder.SetVertexShader(v.value()).SetFragmentShader(f.value()).Build().first.value();
+    renderer.program = spBuilder
+        .SetVertexShader(v.value())
+        .SetFragmentShader(f.value()).Build()
+        .first.value();
 
-    GPUPipelineBuilder aBuilder;
-    pipeline = aBuilder
-        .SetFaceCullEnabled(true)
-        .SetCullMode(CullMode::Back)
-        .SetArrayBuffer(0, buf, layout)
-        .SetTopology(TopologyType::Triangles)
-        .SetPolygonMode(PolygonMode::Fill)
-        .SetViewport({ 0, 0, viewportSize.Width, viewportSize.Height })
-        .SetDepthTestEnabled(true)
-        .SetDepthWriteEnabled(true)
-        .SetMultisampleEnabled(true)
-        .SetShaderProgram(prog)
+    GPUBufferBuilder bBuilder;
+    renderer.perFrameUniformBuffer = bBuilder
+        .SetProperties(BufferProperties::DynamicStorage)
+        .SetStorage(sizeof(glm::mat4) * 2, nullptr)
+        .Build().first.value(); // proj and view
+
+    GPUDescriptorSetBuilder dsBuilder;
+    renderer.perFrame = dsBuilder
+        .SetUniformBufferBinding(0, renderer.perFrameUniformBuffer)
         .Build().first.value();
 
-    tex = &Core::GetCore()->GetAssetGPUBridge()->GetTextures().Missing();
+    renderer.missingTexture = &Core::GetCore()->GetAssetGPUBridge()->GetTextures().Missing();
 
     GPUSamplerBuilder saBuilder;
-    sampler = saBuilder
-        .SetMagnificationFilter(TextureMagnificationMode::Nearest)
+    renderer.defaultSampler = saBuilder
+        .SetMinificationFilter(TextureMinificationMode::LinearMipmapLinear)
+        .SetMagnificationFilter(TextureMagnificationMode::Linear)
         .SetWrapS(TextureWrappingMode::ClampToEdge)
         .SetWrapT(TextureWrappingMode::ClampToEdge)
         .Build().first.value();
-
-    GPUDescriptorSetBuilder dsBuilder;
-    perFrame = dsBuilder
-        .SetUniformBufferBinding(0, perFrameUniformBuffer)
-        .Build().first.value();
-
-    perObject = dsBuilder
-        .SetUniformBufferBinding(1, perObjectUniformBuffer)
-        .SetCombinedImageSamplerBinding(0, *tex, sampler)
-        .Build().first.value();
 }
-
 
 bool SceneViewport::Begin() {
     GUI& gui = this->gui;
@@ -199,6 +195,69 @@ void SceneViewport::Render() {
 
     ImVec2 size{ static_cast<float>(viewportSize.Width), static_cast<float>(viewportSize.Height) };
     ImGui::Image(std::get<GPUTexture>(viewportFramebuffer.ColorAttachments[0].value()), size, { 0, 1 }, { 1, 0 });
+    if (ImGui::BeginDragDropTarget()) {
+        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DND_DEMO_CELL")) {
+            Assets& assets = *Core::GetCore()->GetAssets();
+
+            UUID droppedAssetID = *reinterpret_cast<UUID*>(payload->Data);
+            if (assets.IsModelAsset(droppedAssetID)) {
+                const Model& model = assets.GetDataOfAssetAs<Model>(droppedAssetID);
+                Entity entt = scene.CreateEntity(model.Name);
+                scene.EmplaceComponent<RigidModelComponent>(entt, droppedAssetID);
+
+                renderer.objectIDs.emplace_back(entt);
+                ObjectState& state = renderer.objectStates.emplace_back();
+
+                GPUPipelineBuilder pBuilder;
+                state.pipeline = pBuilder
+                    .SetFaceCullEnabled(true)
+                    .SetCullMode(CullMode::Back)
+                    .SetArrayBuffer(0, assets.GPUBridge().GetVertexBuffers().Fetch(droppedAssetID), renderer.layout)
+                    .SetIndexBuffer(assets.GPUBridge().GetIndexBuffers().Fetch(droppedAssetID), DataType::UnsignedInt)
+                    .SetTopology(TopologyType::Triangles)
+                    .SetPolygonMode(PolygonMode::Fill)
+                    .SetViewport({ 0, 0, viewportSize.Width, viewportSize.Height })
+                    .SetDepthTestEnabled(true)
+                    .SetDepthWriteEnabled(true)
+                    .SetMultisampleEnabled(true)
+                    .SetShaderProgram(renderer.program)
+                    .Build().first.value();
+
+                GPUBufferBuilder bBuilder;
+                state.uniformModelBuffer = bBuilder
+                    .SetProperties(BufferProperties::DynamicStorage)
+                    .SetStorage(
+                        sizeof(glm::mat4),
+                        nullptr
+                    )
+                    .Build().first.value();
+
+                state.uniformInstanceTransformsBuffer = bBuilder
+                    .SetProperties(BufferProperties::DynamicStorage)
+                    .SetStorage(
+                        sizeof(glm::mat4) * model.MeshWorldTransforms.size(),
+                        reinterpret_cast<const std::byte*>(model.MeshWorldTransforms.data())
+                    )
+                    .Build().first.value();
+
+                GPUDescriptorSetBuilder dBuilder;
+                // re-create descriptor sets because renderer.objectStates.emplace_back(); moves around elements.
+                for (auto& state : renderer.objectStates) {
+                    state.descriptorSet = dBuilder
+                        .SetUniformBufferBinding(1, state.uniformModelBuffer)
+                        .SetStorageBufferBinding(2, state.uniformInstanceTransformsBuffer)
+                        .Build().first.value();
+                }
+                // TODO bind textures etc. to this set too
+
+                // TODO use assets
+                state.commandBuffer = assets.GPUBridge().GetCommandBuffers().Query(droppedAssetID);
+
+                state.count = model.MeshWorldTransforms.size();
+            }
+        }
+        ImGui::EndDragDropTarget();
+    }
 
     ImGui::PushClipRect({ viewportPosition.x, viewportPosition.y }, { viewportPosition.x + size.x, viewportPosition.y + size.y }, false);
     gizmos.settings.viewportSize = viewportSize;
@@ -273,37 +332,49 @@ void SceneViewport::ReallocBufferIfNeeded(Resolution size) {
         viewportFramebuffer = std::move(fb.value());
     }
 
-    pipeline.Viewport = { 0, 0, viewportSize.Width, viewportSize.Height };
+    for (auto& state : renderer.objectStates) {
+        state.pipeline.Viewport = { 0, 0, viewportSize.Width, viewportSize.Height };
+    }
 }
 void SceneViewport::RenderSceneToBuffer(Scene& scene) {
-    //scene.Update(gui.get().delta);
-    //scene.Render();
-
     std::array<unsigned, 1> targets{ 0 };
     Graphics::SetRenderTarget(viewportFramebufferMultisampled, targets);
-    Graphics::BindPipeline(pipeline);
     Graphics::ClearRenderTarget(viewportFramebufferMultisampled, { scene.ClearColor.r, scene.ClearColor.g, scene.ClearColor.b, scene.ClearColor.a });
 
-    // Bind per-frame uniform
+    // Bind per-frame uniforms
     viewportCamera.GetPerspectiveCamera().UpdateView();
     viewportCamera.GetPerspectiveCamera().UpdateProjection();
     glm::mat4 matrices[2] {
         viewportCamera.GetPerspectiveCamera().GetProjectionMatrix(),
         viewportCamera.GetPerspectiveCamera().GetViewMatrix()
     };
-    Graphics::BufferSubData(perFrameUniformBuffer, sizeof(matrices), reinterpret_cast<NonOwningPointerToConstRawData>(glm::value_ptr(matrices[0])));
-    Graphics::BindDescriptorSet(perFrame);
-    // ---
+    Graphics::BufferSubData(renderer.perFrameUniformBuffer, sizeof(matrices), reinterpret_cast<NonOwningPointerToConstRawData>(glm::value_ptr(matrices[0])));
+    Graphics::BindDescriptorSet(renderer.perFrame);
 
-    // Bind per-object uniform
-    for (const auto& e : scene.GetRegistry().view<TransformComponent>()) {
-        glm::mat4 model = TransformComponent::ComputeWorldMatrix(e, scene);
-        Graphics::BufferSubData(perObjectUniformBuffer, sizeof(model), reinterpret_cast<NonOwningPointerToConstRawData>(glm::value_ptr(model)));
-        Graphics::BindDescriptorSet(perObject);
+    // Render rigid model objects
+    for (auto [entity, transform, rigidModel] : scene.GetRegistry().view<TransformComponent, RigidModelComponent>().each()) {
+        auto search = std::ranges::find(renderer.objectIDs, entity);
+        assert(search != renderer.objectIDs.end()); // TODO this will crash in the future if someone else adds into the scene, handle appropriately with events idgaf
 
-        Graphics::Render(36);
+        auto index = search - renderer.objectIDs.begin();
+        assert(index >= 0 && index < renderer.objectStates.size());
+
+        // Update model matrix data...
+        ObjectState& state = renderer.objectStates[index];
+        auto data = transform.ComputeWorldMatrix(entity, scene);
+        std::span<const std::byte> dataView{
+            reinterpret_cast<const std::byte*>(&data),
+            sizeof(data)
+        };
+        Graphics::BufferSubData(state.uniformModelBuffer, dataView);
+
+        // Bind required structs and render object
+        Graphics::BindPipeline(state.pipeline);
+        Graphics::BindDescriptorSet(state.descriptorSet);
+        Graphics::BindCommandBuffer(*state.commandBuffer); // Required for multi indirect rendering...
+        Graphics::RenderMultiIndirect(state.count);
     }
-    // ---
+
     Graphics::SetRenderTarget({});
 
     std::array<unsigned, 1> dst{ 0 };

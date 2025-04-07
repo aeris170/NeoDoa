@@ -8,6 +8,8 @@
 
 struct ImGuiContext;
 
+using TextureHandle = ImTextureID;
+
 using ImGuiFunction = std::function<void(float)>;
 
 inline const ImVec4 WINDOW_BG{ 0.1f, 0.105f, 0.11f, 1.0f };

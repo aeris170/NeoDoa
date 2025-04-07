@@ -1,9 +1,10 @@
 #pragma once
 
+#include <array>
 #include <string>
-#include <sstream>
 #include <vector>
-#include <stdexcept>
+#include <sstream>
+#include <string_view>
 
 #include <Engine/NeoDoa.hpp>
 
@@ -96,25 +97,25 @@ inline constexpr FancyVectorWidgetSettings<Display::XY> defaultFancyVectorSettin
 inline constexpr FancyVectorWidgetSettings<Display::XYZ> defaultFancyVectorSettingsXYZ;
 inline constexpr FancyVectorWidgetSettings<Display::XYZW> defaultFancyVectorSettingsXYZW;
 
-bool FancyVector1Widget(const std::string& label, glm::vec1& vec, FancyVectorWidgetSettings<Display::X> settings = defaultFancyVectorSettingsX);
-bool FancyVector2Widget(const std::string& label, glm::vec2& vec, FancyVectorWidgetSettings<Display::XY> settings = defaultFancyVectorSettingsXY);
-bool FancyVector3Widget(const std::string& label, glm::vec3& vec, FancyVectorWidgetSettings<Display::XYZ> settings = defaultFancyVectorSettingsXYZ);
-bool FancyVector4Widget(const std::string& label, glm::vec4& vec, FancyVectorWidgetSettings<Display::XYZW> settings = defaultFancyVectorSettingsXYZW);
+bool FancyVector1Widget(std::string_view label, glm::vec1& vec, FancyVectorWidgetSettings<Display::X> settings = defaultFancyVectorSettingsX);
+bool FancyVector2Widget(std::string_view label, glm::vec2& vec, FancyVectorWidgetSettings<Display::XY> settings = defaultFancyVectorSettingsXY);
+bool FancyVector3Widget(std::string_view label, glm::vec3& vec, FancyVectorWidgetSettings<Display::XYZ> settings = defaultFancyVectorSettingsXYZ);
+bool FancyVector4Widget(std::string_view label, glm::vec4& vec, FancyVectorWidgetSettings<Display::XYZW> settings = defaultFancyVectorSettingsXYZW);
 
-bool FancyVectori1Widget(const std::string& label, glm::ivec1& vec, FancyVectorWidgetSettings<Display::X> settings = defaultFancyVectorSettingsX);
-bool FancyVectori2Widget(const std::string& label, glm::ivec2& vec, FancyVectorWidgetSettings<Display::XY> settings = defaultFancyVectorSettingsXY);
-bool FancyVectori3Widget(const std::string& label, glm::ivec3& vec, FancyVectorWidgetSettings<Display::XYZ> settings = defaultFancyVectorSettingsXYZ);
-bool FancyVectori4Widget(const std::string& label, glm::ivec4& vec, FancyVectorWidgetSettings<Display::XYZW> settings = defaultFancyVectorSettingsXYZW);
+bool FancyVectori1Widget(std::string_view label, glm::ivec1& vec, FancyVectorWidgetSettings<Display::X> settings = defaultFancyVectorSettingsX);
+bool FancyVectori2Widget(std::string_view label, glm::ivec2& vec, FancyVectorWidgetSettings<Display::XY> settings = defaultFancyVectorSettingsXY);
+bool FancyVectori3Widget(std::string_view label, glm::ivec3& vec, FancyVectorWidgetSettings<Display::XYZ> settings = defaultFancyVectorSettingsXYZ);
+bool FancyVectori4Widget(std::string_view label, glm::ivec4& vec, FancyVectorWidgetSettings<Display::XYZW> settings = defaultFancyVectorSettingsXYZW);
 
-bool FancyVectorui1Widget(const std::string& label, glm::uvec1& vec, FancyVectorWidgetSettings<Display::X> settings = defaultFancyVectorSettingsX);
-bool FancyVectorui2Widget(const std::string& label, glm::uvec2& vec, FancyVectorWidgetSettings<Display::XY> settings = defaultFancyVectorSettingsXY);
-bool FancyVectorui3Widget(const std::string& label, glm::uvec3& vec, FancyVectorWidgetSettings<Display::XYZ> settings = defaultFancyVectorSettingsXYZ);
-bool FancyVectorui4Widget(const std::string& label, glm::uvec4& vec, FancyVectorWidgetSettings<Display::XYZW> settings = defaultFancyVectorSettingsXYZW);
+bool FancyVectorui1Widget(std::string_view label, glm::uvec1& vec, FancyVectorWidgetSettings<Display::X> settings = defaultFancyVectorSettingsX);
+bool FancyVectorui2Widget(std::string_view label, glm::uvec2& vec, FancyVectorWidgetSettings<Display::XY> settings = defaultFancyVectorSettingsXY);
+bool FancyVectorui3Widget(std::string_view label, glm::uvec3& vec, FancyVectorWidgetSettings<Display::XYZ> settings = defaultFancyVectorSettingsXYZ);
+bool FancyVectorui4Widget(std::string_view label, glm::uvec4& vec, FancyVectorWidgetSettings<Display::XYZW> settings = defaultFancyVectorSettingsXYZW);
 
-bool FancyVectorb1Widget(const std::string& label, glm::ivec1& vec, FancyVectorWidgetSettings<Display::X> settings = defaultFancyVectorSettingsX);
-bool FancyVectorb2Widget(const std::string& label, glm::ivec2& vec, FancyVectorWidgetSettings<Display::XY> settings = defaultFancyVectorSettingsXY);
-bool FancyVectorb3Widget(const std::string& label, glm::ivec3& vec, FancyVectorWidgetSettings<Display::XYZ> settings = defaultFancyVectorSettingsXYZ);
-bool FancyVectorb4Widget(const std::string& label, glm::ivec4& vec, FancyVectorWidgetSettings<Display::XYZW> settings = defaultFancyVectorSettingsXYZW);
+bool FancyVectorb1Widget(std::string_view label, glm::ivec1& vec, FancyVectorWidgetSettings<Display::X> settings = defaultFancyVectorSettingsX);
+bool FancyVectorb2Widget(std::string_view label, glm::ivec2& vec, FancyVectorWidgetSettings<Display::XY> settings = defaultFancyVectorSettingsXY);
+bool FancyVectorb3Widget(std::string_view label, glm::ivec3& vec, FancyVectorWidgetSettings<Display::XYZ> settings = defaultFancyVectorSettingsXYZ);
+bool FancyVectorb4Widget(std::string_view label, glm::ivec4& vec, FancyVectorWidgetSettings<Display::XYZW> settings = defaultFancyVectorSettingsXYZW);
 
 template<Display dsp>
 bool FancyVectorPiece(FancyVectorWidgetSettings<dsp>& settings, size_t idx, float* vec, ImFont* buttonFont = nullptr, ImVec2 buttonSize = { 0, 0 }) {
@@ -183,7 +184,7 @@ bool FancyVectorPiece(FancyVectorWidgetSettings<dsp>& settings, size_t idx, floa
 }
 
 template<Display dsp>
-bool FancyVectorWidget(const std::string& label, float* vec, FancyVectorWidgetSettings<dsp> settings = defaultFancyVectorSettingsXYZW) {
+bool FancyVectorWidget(std::string_view label, float* vec, FancyVectorWidgetSettings<dsp> settings = defaultFancyVectorSettingsXYZW) {
     bool rv{ false };
 
     float w = ImGui::GetContentRegionAvail().x;
@@ -193,15 +194,15 @@ bool FancyVectorWidget(const std::string& label, float* vec, FancyVectorWidgetSe
     ImGuiIO& io = ImGui::GetIO();
     auto boldFont = io.Fonts->Fonts[1];
 
-    ImGui::PushID(label.c_str());
+    ImGui::PushID(label.data());
 
     ImGui::Columns(2, nullptr, false);
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { ImGui::GetStyle().ItemSpacing.x, 0 });
     ImGui::SetColumnWidth(0, w - compFieldWidth);
     ImGui::AlignTextToFramePadding();
     //ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f);
-    ImGui::TextUnformatted(label.c_str());
-    if (ImGui::BeginPopupContextItem(label.c_str(), ImGuiPopupFlags_MouseButtonRight)) {
+    ImGui::TextUnformatted(label.data());
+    if (ImGui::BeginPopupContextItem(label.data(), ImGuiPopupFlags_MouseButtonRight)) {
         if (ImGui::MenuItem(cat(ComponentWidgetIcons::ContextMenu::ResetIcon, ComponentWidgetStrings::ContextMenu::Reset))) {
             rv = true;
             if (settings.resetAllToSame) {
@@ -276,50 +277,50 @@ bool FancyVectorWidget(const std::string& label, float* vec, FancyVectorWidgetSe
 }
 
 namespace detail {
-    void BeginWidget(const std::string& label);
+    void BeginWidget(std::string_view label);
     void EndWidget();
 }
 
-bool EnumWidget(const std::string& label, int& value, const std::vector<EnumValue>& values);
+bool EnumWidget(std::string_view label, int& value, const std::vector<EnumValue>& values);
 
-bool EntityWidget(const std::string& label, Entity& value);
+bool EntityWidget(std::string_view label, Entity& value);
 
-void UneditableEntityWidget(const std::string& label, const Entity value);
+void UneditableEntityWidget(std::string_view label, const Entity value);
 
-bool Int8Widget(const std::string& label, int8_t& value);
-bool Int16Widget(const std::string& label, int16_t& value);
-bool Int32Widget(const std::string& label, int32_t& value);
-bool Int64Widget(const std::string& label, int64_t& value);
-bool UInt8Widget(const std::string& label, uint8_t& value);
-bool UInt16Widget(const std::string& label, uint16_t& value);
-bool UInt32Widget(const std::string& label, uint32_t& value);
-bool UInt64Widget(const std::string& label, uint64_t& value);
-bool IntWidget(const std::string& label, int& value);
-bool LongWidget(const std::string& label, long& value);
+bool Int8Widget(std::string_view label, int8_t& value);
+bool Int16Widget(std::string_view label, int16_t& value);
+bool Int32Widget(std::string_view label, int32_t& value);
+bool Int64Widget(std::string_view label, int64_t& value);
+bool UInt8Widget(std::string_view label, uint8_t& value);
+bool UInt16Widget(std::string_view label, uint16_t& value);
+bool UInt32Widget(std::string_view label, uint32_t& value);
+bool UInt64Widget(std::string_view label, uint64_t& value);
+bool IntWidget(std::string_view label, int& value);
+bool LongWidget(std::string_view label, long& value);
 
-bool FloatWidget(const std::string& label, float& value, float step = 0.1f, float min = 0.0f, float max = 0.0f);
+bool FloatWidget(std::string_view label, float& value, float step = 0.1f, float min = 0.0f, float max = 0.0f);
 
-bool DoubleWidget(const std::string& label, double& value);
+bool DoubleWidget(std::string_view label, double& value);
 
-bool BoolWidget(const std::string& label, bool& value);
+bool BoolWidget(std::string_view label, bool& value);
 
-bool StringWidget(const std::string& label, std::string& value);
+bool StringWidget(std::string_view label, std::string& value);
 
-void UneditableStringWidget(const std::string& label, const std::string& value);
+void UneditableStringWidget(std::string_view label, const std::string& value);
 
-bool ColorWidget(const std::string& label, Color& value);
+bool ColorWidget(std::string_view label, Color& value);
 
-bool ResolutionWidget(const std::string& label, Resolution& resolution);
+bool ResolutionWidget(std::string_view label, Resolution& resolution);
 
 bool OrthoCameraWidget(OrthoCamera& cameraData);
 
 bool PerspectiveCameraWidget(PerspectiveCamera& cameraData);
 
-bool Image2DButtonWidget(const std::string& label, ImTextureID texture);
+bool Image2DButtonWidget(std::string_view label, ImTextureID texture);
 
 void Space();
 
-void Header(const std::string& label);
+void Header(std::string_view label);
 
 void Separator();
 
@@ -330,12 +331,80 @@ namespace ImGui {
 using namespace detail;
 
 template<typename T> requires concepts::ConvertibleToString<T>
-void UneditableArrayWidget(const std::string& label, const std::vector<T>& array) {
+void UneditableArrayWidget(std::string_view label, const std::vector<T>& array) {
     BeginWidget(label);
     for (size_t i = 0; i < array.size(); i++) {
         ImGui::TextUnformatted(std::to_string(array[i]).c_str());
     }
     EndWidget();
+}
+
+template<AssetFilter Filter>
+bool SingleAssetWidget(std::string_view label, UUID& uuid, const Assets& assets, MetaAssetInfoBank& metaBank, Filter filter) {
+    ImGuiIO& io = ImGui::GetIO();
+    auto boldFont = io.Fonts->Fonts[1];
+    float lineHeight = boldFont->FontSize + ImGui::GetStyle().FramePadding.y * 2.0f;
+    ImVec2 buttonSize = { lineHeight, lineHeight };
+    float margin = 3.0f;
+
+    BeginWidget(label);
+
+    ImVec4 textColor;
+    std::string_view assetIcon;
+    std::string_view assetName;
+    if (uuid != UUID::Empty()) {
+        ConstAssetHandle handle = assets.FindAsset(uuid);
+        if (handle.HasValue()) {
+            textColor = ImGui::GetStyleColorVec4(ImGuiCol_Text);
+            assetIcon = metaBank.GetMetaInfoOf(handle->File()).fa_icon;
+            assetName = handle->File().Name();
+        } else {
+            textColor = MultiAssetWidgetColors::DeletedOrUnloadedColor;
+            assetIcon = ICON_FA_CIRCLE_EXCLAMATION;
+            assetName = "Deleted or unloaded";
+        }
+    } else {
+        textColor = MultiAssetWidgetColors::EmptyColor;
+        assetIcon = ICON_FA_TRIANGLE_EXCLAMATION;
+        assetName = "Empty";
+    }
+
+    std::string name{ std::format("{} {} (UUID: {})", assetIcon, assetName.data(), uuid.AsString()) };
+
+    float x = ImGui::GetCursorPosX();
+    ImGui::SetNextItemWidth(compFieldWidth - margin - buttonSize.x);
+    float oldDisabledAlpha = ImGui::GetStyle().DisabledAlpha;
+    ImGui::GetStyle().DisabledAlpha = 1.0f;
+    ImGui::BeginDisabled();
+    ImGui::PushStyleColor(ImGuiCol_Text, textColor);
+    ImGui::InputText("", name.data(), name.size(), ImGuiInputTextFlags_ReadOnly); // TODO accept drag-drop if (filter(dropped, assets))
+    if (ImGui::BeginDragDropTarget()) {
+        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DND_DEMO_CELL")) {
+            UUID data = *(const UUID*) payload->Data;
+            if constexpr (detect::is_debug_v) {
+                ConstAssetHandle handle = assets.FindAsset(data);
+                assert(handle.HasValue());
+            }
+            if (filter(data, assets)) {
+                uuid = data;
+            }
+        }
+        ImGui::EndDragDropTarget();
+    }
+    ImGui::PopStyleColor();
+    ImGui::EndDisabled();
+    ImGui::GetStyle().DisabledAlpha = oldDisabledAlpha;
+    x += compFieldWidth - buttonSize.x;
+
+    ImGui::PushFont(boldFont);
+    ImGui::SameLine();
+    ImGui::SetCursorPosX(x);
+    ImGui::Button(ICON_FA_BULLSEYE_POINTER, buttonSize); // TODO open popup. pass filter
+
+    ImGui::PopFont();
+    EndWidget();
+
+    return true;
 }
 
 template<AssetFilter Filter>
@@ -355,7 +424,7 @@ bool MultiAssetWidget(std::string_view label, std::vector<UUID>& uuids, const As
         std::string_view assetIcon;
         std::string_view assetName;
         if (id != UUID::Empty()) {
-            AssetHandle handle = assets.FindAsset(id);
+            ConstAssetHandle handle = assets.FindAsset(id);
             if (handle.HasValue()) {
                 textColor = ImGui::GetStyleColorVec4(ImGuiCol_Text);
                 assetIcon = metaBank.GetMetaInfoOf(handle->File()).fa_icon;
@@ -383,8 +452,10 @@ bool MultiAssetWidget(std::string_view label, std::vector<UUID>& uuids, const As
         if (ImGui::BeginDragDropTarget()) {
             if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DND_DEMO_CELL")) {
                 UUID data = *(const UUID*) payload->Data;
-                AssetHandle handle = assets.FindAsset(data);
-                assert(handle.HasValue());
+                if constexpr (detect::is_debug_v) {
+                    ConstAssetHandle handle = assets.FindAsset(data);
+                    assert(handle.HasValue());
+                }
                 if (filter(data, assets)) {
                     uuids[i] = data;
                 }

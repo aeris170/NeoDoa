@@ -36,8 +36,8 @@ namespace std {
 
 #ifdef DEBUG
 #include <type_traits>
-static_assert(std::is_copy_constructible_v<UUID>);
-static_assert(std::is_copy_assignable_v<UUID>);
-static_assert(std::is_move_constructible_v<UUID>);
-static_assert(std::is_move_assignable_v<UUID>);
+static_assert(std::is_nothrow_copy_constructible_v<UUID>);
+static_assert(std::is_nothrow_copy_assignable_v<UUID>);
+static_assert(std::is_nothrow_move_constructible_v<UUID>);
+static_assert(std::is_nothrow_move_assignable_v<UUID>);
 #endif

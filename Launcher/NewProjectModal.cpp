@@ -122,7 +122,7 @@ void NewProjectModal::RenderConfirmationDialog() noexcept {
 
 		Core->CreateAndLoadProject(newProjectData.path, newProjectData.name);
 		Project& project = *Core->LoadedProject().get();
-		AssetHandle handle = Core->GetAssets()->CreateAssetAt<Scene>(Core->GetAssets()->Root(), "Sample Scene.scn", Scene("Sample Scene").Serialize());
+		AssetHandle handle = Core->GetAssets()->CreateAssetAt(Core->GetAssets()->Root(), "Sample Scene.scn", Scene("Sample Scene").Serialize());
 		project.SetStartupScene(handle->ID());
 		Core->SaveLoadedProjectToDisk();
 

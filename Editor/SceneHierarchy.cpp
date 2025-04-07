@@ -304,7 +304,7 @@ void SceneHierarchy::RenderContextMenu(const Entity entity) {
                 if (!handle->HasDeserializedData()) { continue; }
 
                 const Component& cmp = handle->DataAs<Component>();
-                std::string name = cmp.name;
+                std::string name = cmp.Name;
                 auto icon = ComponentIcons::DEFINED_COMPONENT_ICONS.find(name);
                 if (icon != ComponentIcons::DEFINED_COMPONENT_ICONS.end()) {
                     name.insert(0, icon->second);
@@ -313,7 +313,7 @@ void SceneHierarchy::RenderContextMenu(const Entity entity) {
                 }
                 name.insert(0, " ");
                 if (ImGui::MenuItem(name.c_str())) {
-                    storage.AttachComponent(cmpid);
+                    storage.AttachComponent(cmpid, *assets);
                 }
             }
             //script components end

@@ -3,20 +3,20 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
-bool FancyVector1Widget(const std::string& label, glm::vec1& vec, FancyVectorWidgetSettings<Display::X> settings) {
+bool FancyVector1Widget(std::string_view label, glm::vec1& vec, FancyVectorWidgetSettings<Display::X> settings) {
     return FancyVectorWidget(label, &vec.x, settings);
 }
-bool FancyVector2Widget(const std::string& label, glm::vec2& vec, FancyVectorWidgetSettings<Display::XY> settings) {
+bool FancyVector2Widget(std::string_view label, glm::vec2& vec, FancyVectorWidgetSettings<Display::XY> settings) {
     return FancyVectorWidget(label, &vec.x, settings);
 }
-bool FancyVector3Widget(const std::string& label, glm::vec3& vec, FancyVectorWidgetSettings<Display::XYZ> settings) {
+bool FancyVector3Widget(std::string_view label, glm::vec3& vec, FancyVectorWidgetSettings<Display::XYZ> settings) {
     return FancyVectorWidget(label, &vec.x, settings);
 }
-bool FancyVector4Widget(const std::string& label, glm::vec4& vec, FancyVectorWidgetSettings<Display::XYZW> settings) {
+bool FancyVector4Widget(std::string_view label, glm::vec4& vec, FancyVectorWidgetSettings<Display::XYZW> settings) {
     return FancyVectorWidget(label, &vec.x, settings);
 }
 
-bool FancyVectori1Widget(const std::string& label, glm::ivec1& vec, FancyVectorWidgetSettings<Display::X> settings) {
+bool FancyVectori1Widget(std::string_view label, glm::ivec1& vec, FancyVectorWidgetSettings<Display::X> settings) {
     settings.speed = std::clamp(std::round(settings.speed), 1.0f, static_cast<float>(std::numeric_limits<int>::max()));
     settings.fmt = "%.0f";
 
@@ -28,7 +28,7 @@ bool FancyVectori1Widget(const std::string& label, glm::ivec1& vec, FancyVectorW
 
     return rv;
 }
-bool FancyVectori2Widget(const std::string& label, glm::ivec2& vec, FancyVectorWidgetSettings<Display::XY> settings) {
+bool FancyVectori2Widget(std::string_view label, glm::ivec2& vec, FancyVectorWidgetSettings<Display::XY> settings) {
     settings.speed = std::clamp(std::round(settings.speed), 1.0f, static_cast<float>(std::numeric_limits<int>::max()));
     settings.fmt = "%.0f";
 
@@ -42,7 +42,7 @@ bool FancyVectori2Widget(const std::string& label, glm::ivec2& vec, FancyVectorW
 
     return rv;
 }
-bool FancyVectori3Widget(const std::string& label, glm::ivec3& vec, FancyVectorWidgetSettings<Display::XYZ> settings) {
+bool FancyVectori3Widget(std::string_view label, glm::ivec3& vec, FancyVectorWidgetSettings<Display::XYZ> settings) {
     settings.speed = std::clamp(std::round(settings.speed), 1.0f, static_cast<float>(std::numeric_limits<int>::max()));
     settings.fmt = "%.0f";
 
@@ -58,7 +58,7 @@ bool FancyVectori3Widget(const std::string& label, glm::ivec3& vec, FancyVectorW
 
     return rv;
 }
-bool FancyVectori4Widget(const std::string& label, glm::ivec4& vec, FancyVectorWidgetSettings<Display::XYZW> settings) {
+bool FancyVectori4Widget(std::string_view label, glm::ivec4& vec, FancyVectorWidgetSettings<Display::XYZW> settings) {
     settings.speed = std::clamp(std::round(settings.speed), 1.0f, static_cast<float>(std::numeric_limits<int>::max()));
     settings.fmt = "%.0f";
 
@@ -77,7 +77,7 @@ bool FancyVectori4Widget(const std::string& label, glm::ivec4& vec, FancyVectorW
     return rv;
 }
 
-bool FancyVectorui1Widget(const std::string& label, glm::uvec1& vec, FancyVectorWidgetSettings<Display::X> settings) {
+bool FancyVectorui1Widget(std::string_view label, glm::uvec1& vec, FancyVectorWidgetSettings<Display::X> settings) {
     settings.speed = std::clamp(std::round(settings.speed), 1.0f, static_cast<float>(std::numeric_limits<int>::max()));
     settings.min = 0.0f;
     settings.max = static_cast<float>(std::numeric_limits<unsigned>::max());
@@ -89,7 +89,7 @@ bool FancyVectorui1Widget(const std::string& label, glm::uvec1& vec, FancyVector
 
     return rv;
 }
-bool FancyVectorui2Widget(const std::string& label, glm::uvec2& vec, FancyVectorWidgetSettings<Display::XY> settings) {
+bool FancyVectorui2Widget(std::string_view label, glm::uvec2& vec, FancyVectorWidgetSettings<Display::XY> settings) {
     settings.speed = std::clamp(std::round(settings.speed), 1.0f, static_cast<float>(std::numeric_limits<int>::max()));
     settings.min = 0.0f;
     settings.max = static_cast<float>(std::numeric_limits<unsigned>::max());
@@ -105,7 +105,7 @@ bool FancyVectorui2Widget(const std::string& label, glm::uvec2& vec, FancyVector
 
     return rv;
 }
-bool FancyVectorui3Widget(const std::string& label, glm::uvec3& vec, FancyVectorWidgetSettings<Display::XYZ> settings) {
+bool FancyVectorui3Widget(std::string_view label, glm::uvec3& vec, FancyVectorWidgetSettings<Display::XYZ> settings) {
     settings.speed = std::clamp(std::round(settings.speed), 1.0f, static_cast<float>(std::numeric_limits<int>::max()));
     settings.min = 0.0f;
     settings.max = static_cast<float>(std::numeric_limits<unsigned>::max());
@@ -123,7 +123,7 @@ bool FancyVectorui3Widget(const std::string& label, glm::uvec3& vec, FancyVector
 
     return rv;
 }
-bool FancyVectorui4Widget(const std::string& label, glm::uvec4& vec, FancyVectorWidgetSettings<Display::XYZW> settings) {
+bool FancyVectorui4Widget(std::string_view label, glm::uvec4& vec, FancyVectorWidgetSettings<Display::XYZW> settings) {
     settings.speed = std::clamp(std::round(settings.speed), 1.0f, static_cast<float>(std::numeric_limits<int>::max()));
     settings.min = 0.0f;
     settings.max = static_cast<float>(std::numeric_limits<unsigned>::max());
@@ -144,7 +144,7 @@ bool FancyVectorui4Widget(const std::string& label, glm::uvec4& vec, FancyVector
     return rv;
 }
 
-bool FancyVectorb1Widget(const std::string& label, glm::ivec1& vec, FancyVectorWidgetSettings<Display::X> settings) {
+bool FancyVectorb1Widget(std::string_view label, glm::ivec1& vec, FancyVectorWidgetSettings<Display::X> settings) {
     settings.min = 0.0f;
     settings.max = 1.0f;
     settings.displayLabelOverride[0] = "B";
@@ -153,7 +153,7 @@ bool FancyVectorb1Widget(const std::string& label, glm::ivec1& vec, FancyVectorW
 
     return FancyVectori1Widget(label, vec, settings);
 }
-bool FancyVectorb2Widget(const std::string& label, glm::ivec2& vec, FancyVectorWidgetSettings<Display::XY> settings) {
+bool FancyVectorb2Widget(std::string_view label, glm::ivec2& vec, FancyVectorWidgetSettings<Display::XY> settings) {
     settings.min = 0.0f;
     settings.max = 1.0f;
     settings.displayLabelOverride[0] = "B";
@@ -165,7 +165,7 @@ bool FancyVectorb2Widget(const std::string& label, glm::ivec2& vec, FancyVectorW
 
     return FancyVectori2Widget(label, vec, settings);
 }
-bool FancyVectorb3Widget(const std::string& label, glm::ivec3& vec, FancyVectorWidgetSettings<Display::XYZ> settings) {
+bool FancyVectorb3Widget(std::string_view label, glm::ivec3& vec, FancyVectorWidgetSettings<Display::XYZ> settings) {
     settings.min = 0.0f;
     settings.max = 1.0f;
     settings.displayLabelOverride[0] = "B";
@@ -180,7 +180,7 @@ bool FancyVectorb3Widget(const std::string& label, glm::ivec3& vec, FancyVectorW
 
     return FancyVectori3Widget(label, vec, settings);
 }
-bool FancyVectorb4Widget(const std::string& label, glm::ivec4& vec, FancyVectorWidgetSettings<Display::XYZW> settings) {
+bool FancyVectorb4Widget(std::string_view label, glm::ivec4& vec, FancyVectorWidgetSettings<Display::XYZW> settings) {
     settings.min = 0.0f;
     settings.max = 1.0f;
     settings.displayLabelOverride[0] = "B";
@@ -199,15 +199,15 @@ bool FancyVectorb4Widget(const std::string& label, glm::ivec4& vec, FancyVectorW
     return FancyVectori4Widget(label, vec, settings);
 }
 
-void detail::BeginWidget(const std::string& label) {
+void detail::BeginWidget(std::string_view label) {
     float w = ImGui::GetContentRegionAvail().x;
 
-    ImGui::PushID(label.c_str());
+    ImGui::PushID(label.data());
     ImGui::Columns(2, nullptr, false);
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { ImGui::GetStyle().ItemSpacing.x, 0 });
     ImGui::SetColumnWidth(0, w - compFieldWidth);
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f + 3);
-    ImGui::TextUnformatted(label.c_str());
+    ImGui::TextUnformatted(label.data());
     ImGui::NextColumn();
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y * 0.5f);
@@ -226,7 +226,7 @@ void detail::EndWidget() {
     ImGui::PopID();
 }
 
-bool EnumWidget(const std::string& label, int& value, const std::vector<EnumValue>& values) {
+bool EnumWidget(std::string_view label, int& value, const std::vector<EnumValue>& values) {
     BeginWidget(label);
     std::stringstream ss;
     ss << "##" << label;
@@ -259,7 +259,7 @@ bool EnumWidget(const std::string& label, int& value, const std::vector<EnumValu
     return rv;
 }
 
-bool EntityWidget(const std::string& label, Entity& value) {
+bool EntityWidget(std::string_view label, Entity& value) {
     BeginWidget(label);
     std::stringstream ss;
     ss << "##" << label;
@@ -270,14 +270,14 @@ bool EntityWidget(const std::string& label, Entity& value) {
     return rv;
 }
 
-void UneditableEntityWidget(const std::string& label, const Entity value) {
+void UneditableEntityWidget(std::string_view label, const Entity value) {
     BeginWidget(label);
     int val = EntityTo<int>(value);
     ImGui::TextUnformatted(std::to_string(val).c_str());
     EndWidget();
 }
 
-bool Int8Widget(const std::string& label, int8_t& value) {
+bool Int8Widget(std::string_view label, int8_t& value) {
     BeginWidget(label);
     std::stringstream ss;
     ss << "##" << label;
@@ -285,7 +285,7 @@ bool Int8Widget(const std::string& label, int8_t& value) {
     EndWidget();
     return rv;
 }
-bool Int16Widget(const std::string& label, int16_t& value) {
+bool Int16Widget(std::string_view label, int16_t& value) {
     BeginWidget(label);
     std::stringstream ss;
     ss << "##" << label;
@@ -293,7 +293,7 @@ bool Int16Widget(const std::string& label, int16_t& value) {
     EndWidget();
     return rv;
 }
-bool Int32Widget(const std::string& label, int32_t& value) {
+bool Int32Widget(std::string_view label, int32_t& value) {
     BeginWidget(label);
     std::stringstream ss;
     ss << "##" << label;
@@ -301,7 +301,7 @@ bool Int32Widget(const std::string& label, int32_t& value) {
     EndWidget();
     return rv;
 }
-bool Int64Widget(const std::string& label, int64_t& value) {
+bool Int64Widget(std::string_view label, int64_t& value) {
     BeginWidget(label);
     std::stringstream ss;
     ss << "##" << label;
@@ -309,7 +309,7 @@ bool Int64Widget(const std::string& label, int64_t& value) {
     EndWidget();
     return rv;
 }
-bool UInt8Widget(const std::string& label, uint8_t& value) {
+bool UInt8Widget(std::string_view label, uint8_t& value) {
     BeginWidget(label);
     std::stringstream ss;
     ss << "##" << label;
@@ -317,7 +317,7 @@ bool UInt8Widget(const std::string& label, uint8_t& value) {
     EndWidget();
     return rv;
 }
-bool UInt16Widget(const std::string& label, uint16_t& value) {
+bool UInt16Widget(std::string_view label, uint16_t& value) {
     BeginWidget(label);
     std::stringstream ss;
     ss << "##" << label;
@@ -325,7 +325,7 @@ bool UInt16Widget(const std::string& label, uint16_t& value) {
     EndWidget();
     return rv;
 }
-bool UInt32Widget(const std::string& label, uint32_t& value) {
+bool UInt32Widget(std::string_view label, uint32_t& value) {
     BeginWidget(label);
     std::stringstream ss;
     ss << "##" << label;
@@ -333,7 +333,7 @@ bool UInt32Widget(const std::string& label, uint32_t& value) {
     EndWidget();
     return rv;
 }
-bool UInt64Widget(const std::string& label, uint64_t& value) {
+bool UInt64Widget(std::string_view label, uint64_t& value) {
     BeginWidget(label);
     std::stringstream ss;
     ss << "##" << label;
@@ -341,7 +341,7 @@ bool UInt64Widget(const std::string& label, uint64_t& value) {
     EndWidget();
     return rv;
 }
-bool IntWidget(const std::string& label, int& value) {
+bool IntWidget(std::string_view label, int& value) {
     BeginWidget(label);
     std::stringstream ss;
     ss << "##" << label;
@@ -349,7 +349,7 @@ bool IntWidget(const std::string& label, int& value) {
     EndWidget();
     return rv;
 }
-bool LongWidget(const std::string& label, long& value) {
+bool LongWidget(std::string_view label, long& value) {
     BeginWidget(label);
     std::stringstream ss;
     ss << "##" << label;
@@ -358,7 +358,7 @@ bool LongWidget(const std::string& label, long& value) {
     return rv;
 }
 
-bool FloatWidget(const std::string& label, float& value, float step, float min, float max) {
+bool FloatWidget(std::string_view label, float& value, float step, float min, float max) {
     BeginWidget(label);
     std::stringstream ss;
     ss << "##" << label;
@@ -367,7 +367,7 @@ bool FloatWidget(const std::string& label, float& value, float step, float min, 
     return rv;
 }
 
-bool DoubleWidget(const std::string& label, double& value) {
+bool DoubleWidget(std::string_view label, double& value) {
     BeginWidget(label);
     std::stringstream ss;
     ss << "##" << label;
@@ -376,7 +376,7 @@ bool DoubleWidget(const std::string& label, double& value) {
     return rv;
 }
 
-bool BoolWidget(const std::string& label, bool& value) {
+bool BoolWidget(std::string_view label, bool& value) {
     BeginWidget(label);
     std::stringstream ss;
     ss << "##" << label;
@@ -387,14 +387,14 @@ bool BoolWidget(const std::string& label, bool& value) {
     return rv;
 }
 
-bool StringWidget(const std::string& label, std::string& value) {
+bool StringWidget(std::string_view label, std::string& value) {
     BeginWidget(label);
     std::stringstream ss;
     ss << "##" << label;
-    std::array<char, 128> buf{};
+    std::array<char, 1024> buf{};
     std::copy(value.begin(), value.end(), buf.begin());
     bool rv{ false };
-    if (ImGui::InputText(ss.str().c_str(), buf.data(), 128, ImGuiInputTextFlags_EnterReturnsTrue)) {
+    if (ImGui::InputText(ss.str().c_str(), buf.data(), buf.size(), ImGuiInputTextFlags_EnterReturnsTrue)) {
         rv = true;
         value = std::string(buf.data());
     }
@@ -402,13 +402,13 @@ bool StringWidget(const std::string& label, std::string& value) {
     return rv;
 }
 
-void UneditableStringWidget(const std::string& label, const std::string& value) {
+void UneditableStringWidget(std::string_view label, const std::string& value) {
     BeginWidget(label);
     ImGui::TextUnformatted(value.c_str());
     EndWidget();
 }
 
-bool ColorWidget(const std::string& label, Color& value) {
+bool ColorWidget(std::string_view label, Color& value) {
     BeginWidget(label);
     std::stringstream ss;
     ss << "##" << label;
@@ -443,7 +443,7 @@ bool ColorWidget(const std::string& label, Color& value) {
     return rv;
 }
 
-bool ResolutionWidget(const std::string& label, Resolution& resolution) {
+bool ResolutionWidget(std::string_view label, Resolution& resolution) {
     glm::vec2 res{ resolution.Width, resolution.Height };
     FancyVectorWidgetSettings<Display::XY> settingsFBO;
     settingsFBO.resetEnabled = false;
@@ -531,12 +531,12 @@ bool PerspectiveCameraWidget(PerspectiveCamera& cameraData) {
     return rv;
 }
 
-bool Image2DButtonWidget(const std::string& label, ImTextureID texture) {
+bool Image2DButtonWidget(std::string_view label, ImTextureID texture) {
     BeginWidget(label);
     ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x - 128 - ImGui::GetStyle().FramePadding.x);
     std::stringstream ss;
     ss << "##" << label;
-    bool rv = ImGui::ImageButton(label.c_str(), texture, { 128, 128 }, { 0, 1 }, { 1, 0 });
+    bool rv = ImGui::ImageButton(label.data(), texture, { 128, 128 }, { 0, 1 }, { 1, 0 });
     EndWidget();
     return rv;
 }
@@ -545,14 +545,14 @@ void Space() {
     ImGui::NewLine();
 }
 
-void Header(const std::string& label) {
-    ImGui::PushID(label.c_str());
+void Header(std::string_view label) {
+    ImGui::PushID(label.data());
 
     ImGuiIO& io = ImGui::GetIO();
     auto boldFont = io.Fonts->Fonts[1];
     ImGui::PushFont(boldFont);
 
-    ImGui::TextUnformatted(label.c_str());
+    ImGui::TextUnformatted(label.data());
     ImGui::Separator();
 
     ImGui::PopFont();
@@ -833,8 +833,10 @@ bool ImGui::NeoDoaColorPickerPopup(const char* label, float col[4], ImGuiColorEd
             value_changed |= FancyVectorPiece<Display::XYZW>(settings, 1, denorm);
             SameLine();
             value_changed |= FancyVectorPiece<Display::XYZW>(settings, 2, denorm);
-            SameLine();
-            value_changed |= FancyVectorPiece<Display::XYZW>(settings, 3, denorm);
+            if (components == 4) {
+                SameLine();
+                value_changed |= FancyVectorPiece<Display::XYZW>(settings, 3, denorm);
+            }
 
             if (value_changed) {
                 // FIXME: Hackily differentiating using the DragInt (ActiveId != 0 && !ActiveIdAllowOverlap) vs. using the InputText or DropTarget.

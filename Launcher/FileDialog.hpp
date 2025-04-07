@@ -11,6 +11,7 @@
 #include <algorithm>
 
 #include <Engine/Log.hpp>
+#include <Engine/ImGuiRenderer.hpp>
 #include <GL/glew.h> // TODO change this to use engine
 
 #define IFD_DIALOG_FILE			0
@@ -20,7 +21,7 @@
 class FileDialog {
 public:
 	static inline void Initialize() {
-		Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
+		Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> TextureHandle {
 			GLuint tex;
 			glGenTextures(1, &tex);
 			glBindTexture(GL_TEXTURE_2D, tex);
@@ -31,10 +32,10 @@ public:
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, (fmt == 0) ? GL_BGRA : GL_RGBA, GL_UNSIGNED_BYTE, data);
 			glGenerateMipmap(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, 0);
-			return reinterpret_cast<void*>(static_cast<uint64_t>(tex));
+			return static_cast<TextureHandle>(tex);
 		};
-		Instance().DeleteTexture = [](void* tex) {
-			GLuint texID = static_cast<GLuint>(reinterpret_cast<uint64_t>(tex));
+		Instance().DeleteTexture = [](TextureHandle tex) {
+			GLuint texID = static_cast<GLuint>(tex);
 			glDeleteTextures(1, &texID);
 		};
 	}
@@ -69,8 +70,8 @@ public:
 	}
 	inline float GetZoom() { return m_zoom; }
 
-	std::function<void*(uint8_t*, int, int, char)> CreateTexture; // char -> fmt -> { 0 = BGRA, 1 = RGBA }
-	std::function<void(void*)> DeleteTexture;
+	std::function<TextureHandle(uint8_t*, int, int, char)> CreateTexture; // char -> fmt -> { 0 = BGRA, 1 = RGBA }
+	std::function<void(TextureHandle)> DeleteTexture;
 
 	class FileTreeNode {
 	public:
@@ -99,7 +100,7 @@ public:
 		time_t DateModified;
 
 		bool HasIconPreview;
-		void* IconPreview;
+		TextureHandle IconPreview;
 		uint8_t* IconPreviewData;
 		int IconPreviewWidth, IconPreviewHeight;
 	};
@@ -134,8 +135,8 @@ private:
 
 	std::vector<int> m_iconIndices;
 	std::vector<std::string> m_iconFilepaths; // m_iconIndices[x] <-> m_iconFilepaths[x]
-	std::unordered_map<std::string, void*> m_icons;
-	void* m_getIcon(const std::filesystem::path& path);
+	std::unordered_map<std::string, TextureHandle> m_icons;
+	TextureHandle m_getIcon(const std::filesystem::path& path);
 	void m_clearIcons();
 	void m_refreshIconPreview();
 	void m_clearIconPreview();

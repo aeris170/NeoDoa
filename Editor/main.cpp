@@ -42,8 +42,9 @@ int main(int argc, char* argv[]) {
         path = program.get("project_path");
     } catch (const std::exception& err) {
         DOA_LOG_FATAL("FATAL ERROR: %s\n", err.what());
-        std::cerr << program << std::endl;
-        std::exit(1);
+        path = "C:\\NeoDoaTestProjects\\AA\\UltimateTest.doa";
+        //std::cerr << program << std::endl;
+        //std::exit(1);
     }
     //- Parse Command Line Arguments -//
 
@@ -89,9 +90,10 @@ int main(int argc, char* argv[]) {
 
     core->CreateAttachment<OutlineAttachment>(gui_ptr);
     core->Start();
-    Core::DestroyCore();
 
     gui_ptr.reset();
+    SVGPathway::Destroy();
+    Core::DestroyCore();
 
     return 0;
 }

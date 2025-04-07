@@ -40,7 +40,7 @@ GPUPipeline& GPUPipeline::operator=(GPUPipeline&& other) noexcept {
     return *this;
 }
 
-GPUPipelineBuilder& GPUPipelineBuilder::SetName(std::string_view name) noexcept {
+GPUPipelineBuilder& GPUPipelineBuilder::SetName([[maybe_unused]] std::string_view name) noexcept {
 #ifdef DEBUG
     this->name = name;
 #endif
@@ -113,6 +113,8 @@ GPUPipelineBuilder& GPUPipelineBuilder::SetBlendEnabled(bool enabled) noexcept {
 GPUPipelineBuilder& GPUPipelineBuilder::SetBlendFunction(BlendFactor srcFactor, BlendFactor dstFactor) noexcept {
     srcRGBFactor = srcFactor;
     dstRGBFactor = dstFactor;
+    srcAlphaFactor = srcFactor;
+    dstAlphaFactor = dstFactor;
     return *this;
 }
 GPUPipelineBuilder& GPUPipelineBuilder::SetBlendFunctionSeparate(BlendFactor srcRGBFactor, BlendFactor dstRGBFactor, BlendFactor srcAlphaFactor, BlendFactor dstAlphaFactor) noexcept {

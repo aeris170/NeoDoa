@@ -6,13 +6,13 @@
 struct Component {
 
     struct Field {
-        std::string typeName;
-        std::string name;
+        std::string TypeName;
+        std::string Name;
     };
 
-    std::string name;
-    std::string declaration;
-    std::vector<Field> fields;
+    std::string Name;
+    std::string Declaration;
+    std::vector<Field> Fields;
 
     std::string Serialize() const;
     static Component Deserialize(const std::string_view data);

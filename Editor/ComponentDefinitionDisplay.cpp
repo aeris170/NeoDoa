@@ -23,7 +23,7 @@ void ComponentDefinitionDisplay::SetDisplayTarget(const AssetHandle componentDef
         componentDefAsset = componentDefAssetHandle;
         if (componentDefAsset->HasDeserializedData() && !componentDefAsset->HasErrorMessages()) {
             const auto& componentDef = componentDefAsset->DataAs<Component>();
-            textEditorInstance.SetText(componentDef.declaration);
+            textEditorInstance.SetText(componentDef.Declaration);
         }
     }
 }
@@ -45,7 +45,7 @@ void ComponentDefinitionDisplay::RenderMessagesTable() noexcept {
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
 
     ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::ERROR_COLOR);
-    for (auto& message : componentDefAsset->ErrorMessages()) {
+    for (const auto& message : componentDefAsset->ErrorMessages()) {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
 
@@ -55,13 +55,12 @@ void ComponentDefinitionDisplay::RenderMessagesTable() noexcept {
 
         ImGui::TableSetColumnIndex(1);
 
-        const ComponentCompilerMessage& m{ std::any_cast<const ComponentCompilerMessage&>(message) };
-        ImGui::TextWrapped("%s", m.message.c_str());
+        ImGui::TextWrapped("%s", message.Message.c_str());
     }
     ImGui::PopStyleColor();
 
     ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::WARNING_COLOR);
-    for (auto& message : componentDefAsset->WarningMessages()) {
+    for (const auto& message : componentDefAsset->WarningMessages()) {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
 
@@ -71,13 +70,12 @@ void ComponentDefinitionDisplay::RenderMessagesTable() noexcept {
 
         ImGui::TableSetColumnIndex(1);
 
-        const ComponentCompilerMessage& m{ std::any_cast<const ComponentCompilerMessage&>(message) };
-        ImGui::TextWrapped("%s", m.message.c_str());
+        ImGui::TextWrapped("%s", message.Message.c_str());
     }
     ImGui::PopStyleColor();
 
     ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::INFO_COLOR);
-    for (auto& message : componentDefAsset->InfoMessages()) {
+    for (const auto& message : componentDefAsset->InfoMessages()) {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
 
@@ -87,8 +85,7 @@ void ComponentDefinitionDisplay::RenderMessagesTable() noexcept {
 
         ImGui::TableSetColumnIndex(1);
 
-        const ComponentCompilerMessage& m{ std::any_cast<const ComponentCompilerMessage&>(message) };
-        ImGui::TextWrapped("%s", m.message.c_str());
+        ImGui::TextWrapped("%s", message.Message.c_str());
     }
     ImGui::PopStyleColor();
 
@@ -102,18 +99,18 @@ void ComponentDefinitionDisplay::RenderFields() noexcept {
     const auto& componentDef = componentDefAsset->DataAs<Component>();
 
     ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders;
-    if (ImGui::CollapsingHeader(componentDef.name.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
+    if (ImGui::CollapsingHeader(componentDef.Name.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
         if (ImGui::BeginTable("component_fields", 2, flags)) {
             ImGui::TableSetupColumn("Field", ImGuiTableColumnFlags_WidthStretch);
             ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_WidthStretch);
             ImGui::TableHeadersRow();
 
-            for (auto& field : componentDef.fields) {
+            for (auto& field : componentDef.Fields) {
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);
-                ImGui::TextUnformatted(field.name.c_str());
+                ImGui::TextUnformatted(field.Name.c_str());
                 ImGui::TableSetColumnIndex(1);
-                ImGui::TextUnformatted(field.typeName.c_str());
+                ImGui::TextUnformatted(field.TypeName.c_str());
             }
             ImGui::EndTable();
         }

@@ -106,6 +106,16 @@ static const char* FindIconInIcons(const char* icon) {
             return fa_icon;
         }
     }
+    for (const auto& [fa_icon, _] : FileIcons::MeshIcons) {
+        if (std::strcmp(fa_icon, icon) == 0) {
+            return fa_icon;
+        }
+    }
+    for (const auto& [fa_icon, _] : FileIcons::ModelIcons) {
+        if (std::strcmp(fa_icon, icon) == 0) {
+            return fa_icon;
+        }
+    }
     for (const auto& [fa_icon, _] : FileIcons::RegularFileIcons) {
         if (std::strcmp(fa_icon, icon) == 0) {
             return fa_icon;

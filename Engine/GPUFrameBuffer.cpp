@@ -21,7 +21,7 @@ GPURenderBuffer& GPURenderBuffer::operator=(GPURenderBuffer&& other) noexcept {
     return *this;
 }
 
-GPURenderBufferBuilder& GPURenderBufferBuilder::SetName(std::string_view name) noexcept {
+GPURenderBufferBuilder& GPURenderBufferBuilder::SetName([[maybe_unused]] std::string_view name) noexcept {
 #ifdef DEBUG
     this->name = name;
 #endif
@@ -71,7 +71,7 @@ GPUFrameBuffer& GPUFrameBuffer::operator=(GPUFrameBuffer&& other) noexcept {
     return *this;
 }
 
-GPUFrameBufferBuilder& GPUFrameBufferBuilder::SetName(std::string_view name) noexcept {
+GPUFrameBufferBuilder& GPUFrameBufferBuilder::SetName([[maybe_unused]] std::string_view name) noexcept {
 #ifdef DEBUG
     this->name = name;
 #endif

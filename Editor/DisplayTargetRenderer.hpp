@@ -1,5 +1,6 @@
 #pragma once
 
+#include <utility>
 #include <variant>
 
 #include <Engine/Scene.hpp>
@@ -14,13 +15,15 @@
 #include <Editor/ShaderProgramDisplay.hpp>
 #include <Editor/MaterialDisplay.hpp>
 #include <Editor/FrameBufferDisplay.hpp>
+#include <Editor/MeshDisplay.hpp>
+#include <Editor/ModelDisplay.hpp>
 
 struct Scene;
 
 struct Observer;
 struct MetaAssetInfo;
 
-#define DISPLAYABLE Entity, FNode*
+#define DISPLAYABLE Entity, FNode*, std::pair<FNode*, UUID>
 using DisplayTarget = std::variant<std::monostate, DISPLAYABLE>;
 #undef DISPLAYABLE
 
@@ -30,6 +33,7 @@ struct DisplayTargetRenderer {
 
     void SetDisplayTarget(Entity entity);
     void SetDisplayTarget(FNode& file);
+    void SetDisplayTarget(FNode& file, const UUID subAssetID);
     void ResetDisplayTarget();
 
     void Render();
@@ -46,10 +50,13 @@ private:
     ShaderProgramDisplay shaderProgramDisplay;
     MaterialDisplay materialDisplay;
     FrameBufferDisplay frameBufferDisplay;
+    MeshDisplay meshDisplay;
+    ModelDisplay modelDisplay;
 
     void HandleTargetWhenEmpty();
     void HandleTargetWhenEntity(Scene& scene, const Entity entt);
     void HandleTargetWhenFile(FNode& file);
+    void HandleTargetWhenSubAsset(FNode& file, const UUID subAssetID);
     void RenderIconChangePopup(const FNode& file, MetaAssetInfo& meta);
 
     void RenderFolderView(FNode& folder);
@@ -62,6 +69,8 @@ private:
     void RenderShaderProgramView(AssetHandle h);
     void RenderMaterialView(AssetHandle h);
     void RenderFrameBufferView(AssetHandle h);
+    void RenderMeshView(AssetHandle h);
+    void RenderModelView(AssetHandle h);
     void RenderTextView(AssetHandle h);
 
     void OnProjectUnloaded();

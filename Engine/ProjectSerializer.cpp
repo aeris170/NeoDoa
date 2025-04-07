@@ -2,7 +2,6 @@
 
 #include <tinyxml2.h>
 
-#include "Asset.hpp"
 #include "Project.hpp"
 #include "Scene.hpp"
 

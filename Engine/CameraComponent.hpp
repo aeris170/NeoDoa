@@ -3,12 +3,12 @@
 #include <memory>
 #include <optional>
 
-#include "ACamera.hpp"
-#include "OrthoCamera.hpp"
-#include "PerspectiveCamera.hpp"
+#include <Engine/ACamera.hpp>
+#include <Engine/OrthoCamera.hpp>
+#include <Engine/PerspectiveCamera.hpp>
 
-#include "Resolution.hpp"
-#include "Entity.hpp"
+#include <Engine/Resolution.hpp>
+#include <Engine/ECSComponent.hpp>
 
 struct Scene;
 namespace tinyxml2 {
@@ -18,7 +18,7 @@ namespace tinyxml2 {
 
 struct OrthoCameraComponent {
 private:
-    Entity entity;
+    Entity entity{ NULL_ENTT };
 
     bool isActiveAndRendering{ true };
     OrthoCamera data {
@@ -30,6 +30,11 @@ private:
 public:
     OrthoCameraComponent(const Entity owner) noexcept;
     OrthoCameraComponent(const Entity owner, const OrthoCamera& matrix) noexcept;
+    ~OrthoCameraComponent() noexcept = default;
+    OrthoCameraComponent(const OrthoCameraComponent& other) noexcept;
+    OrthoCameraComponent(OrthoCameraComponent&& other) noexcept;
+    OrthoCameraComponent& operator=(const OrthoCameraComponent& other) noexcept;
+    OrthoCameraComponent& operator=(OrthoCameraComponent&& other) noexcept;
 
     Entity GetEntity() const;
 
@@ -48,7 +53,7 @@ public:
 
 struct PerspectiveCameraComponent {
 private:
-    Entity entity;
+    Entity entity{ NULL_ENTT };
 
     bool isActiveAndRendering{ true };
     PerspectiveCamera data {
@@ -61,6 +66,11 @@ private:
 public:
     PerspectiveCameraComponent(const Entity owner) noexcept;
     PerspectiveCameraComponent(const Entity owner, const PerspectiveCamera& data) noexcept;
+    ~PerspectiveCameraComponent() noexcept = default;
+    PerspectiveCameraComponent(const PerspectiveCameraComponent& other) noexcept;
+    PerspectiveCameraComponent(PerspectiveCameraComponent&& other) noexcept;
+    PerspectiveCameraComponent& operator=(const PerspectiveCameraComponent& other) noexcept;
+    PerspectiveCameraComponent& operator=(PerspectiveCameraComponent&& other) noexcept;
 
     Entity GetEntity() const;
 
@@ -76,3 +86,6 @@ public:
     friend void SerializePerspectiveCameraComponent(tinyxml2::XMLPrinter& printer, const PerspectiveCameraComponent& camera);
     friend PerspectiveCameraComponent DeserializePerspectiveCameraComponent(tinyxml2::XMLElement* component, const Entity entity, const Scene& scene);
 };
+
+static_assert(ECSComponent<OrthoCameraComponent>);
+static_assert(ECSComponent<PerspectiveCameraComponent>);

@@ -3,7 +3,7 @@
 #include <format>
 #include <cassert>
 
-GPUDescriptorSetBuilder& GPUDescriptorSetBuilder::SetName(std::string_view name) noexcept {
+GPUDescriptorSetBuilder& GPUDescriptorSetBuilder::SetName([[maybe_unused]] std::string_view name) noexcept {
 #ifdef DEBUG
     this->name = name;
 #endif

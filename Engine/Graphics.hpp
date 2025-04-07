@@ -25,6 +25,25 @@ struct GPURenderBuffer;  struct GPURenderBufferBuilder;
 struct GPUShaderProgram; struct GPUShaderProgramBuilder;
 struct GPUDescriptorSet; struct GPUDescriptorSetBuilder;
 
+// Struct for MultiDrawArrays
+struct RenderMultiIndirectArraysCommand {
+    unsigned Count;
+    unsigned InstanceCount;
+    unsigned FirstVertex;
+    unsigned BaseInstance;
+};
+static_assert(sizeof(RenderMultiIndirectArraysCommand) == 16);
+
+// Struct for MultiDrawElements
+struct RenderMultiIndirectElementsCommand {
+    unsigned Count;
+    unsigned InstanceCount;
+    unsigned FirstIndex;
+    int      BaseVertex;
+    unsigned BaseInstance;
+};
+static_assert(sizeof(RenderMultiIndirectElementsCommand) == 20);
+
 #pragma region Graphics Messages
 using BufferAllocatorMessage = std::string;
 
@@ -336,6 +355,7 @@ namespace base {                                                                
                                                                                                                                                                                 \
     void Render(int count, int first = 0) noexcept;                                                                                                                             \
     void RenderInstanced(int instanceCount, int count, int first = 0) noexcept;                                                                                                 \
+    void RenderMultiIndirect(int count, int first = 0) noexcept;                                                                                                                                        \
                                                                                                                                                                                 \
     void SetRenderTarget(const GPUFrameBuffer& renderTarget) noexcept;                                                                                                          \
     void SetRenderTarget(const GPUFrameBuffer& renderTarget, std::span<unsigned> targets) noexcept;                                                                             \
@@ -346,6 +366,7 @@ namespace base {                                                                
     void ClearRenderTarget(const GPUFrameBuffer& renderTarget, std::array<float, 4> color = { 0, 0, 0, 0 }, float depth = 1, int stencil = 0) noexcept;                         \
                                                                                                                                                                                 \
     void BindPipeline(const GPUPipeline& pipeline) noexcept;                                                                                                                    \
+    void BindCommandBuffer(const GPUBuffer& commandBuffer) noexcept;                                                                                                            \
                                                                                                                                                                                 \
     void BindDescriptorSet(const GPUDescriptorSet& descriptorSet) noexcept;                                                                                                     \
 }                                                                                                                                                                               \

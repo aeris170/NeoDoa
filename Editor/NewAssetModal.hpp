@@ -5,7 +5,6 @@
 
 #include <imgui.h>
 
-#include <Engine/Asset.hpp>
 #include <Engine/Shader.hpp>
 #include <Engine/FileNode.hpp>
 

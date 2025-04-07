@@ -3,47 +3,47 @@
 #include <Engine/Assets.hpp>
 
 bool AssetFilters::IncludeSceneAssets::operator()(UUID assetID, const Assets& assets) const noexcept {
-    AssetHandle handle = assets.FindAsset(assetID);
+    ConstAssetHandle handle = assets.FindAsset(assetID);
     assert(handle.HasValue());
     return handle->IsScene();
 }
 bool AssetFilters::IncludeComponentAssets::operator()(UUID assetID, const Assets& assets) const noexcept {
-    AssetHandle handle = assets.FindAsset(assetID);
+    ConstAssetHandle handle = assets.FindAsset(assetID);
     assert(handle.HasValue());
     return handle->IsComponentDefinition();
 }
 bool AssetFilters::IncludeSamplerAssets::operator()(UUID assetID, const  Assets& assets) const noexcept {
-    AssetHandle handle = assets.FindAsset(assetID);
+    ConstAssetHandle handle = assets.FindAsset(assetID);
     assert(handle.HasValue());
     return handle->IsSampler();
 }
 bool AssetFilters::IncludeTextureAssets::operator()(UUID assetID, const  Assets& assets) const noexcept {
-    AssetHandle handle = assets.FindAsset(assetID);
+    ConstAssetHandle handle = assets.FindAsset(assetID);
     assert(handle.HasValue());
     return handle->IsTexture();
 }
 bool AssetFilters::IncludeShaderAssets::operator()(UUID assetID, const Assets& assets) const noexcept {
-    AssetHandle handle = assets.FindAsset(assetID);
+    ConstAssetHandle handle = assets.FindAsset(assetID);
     assert(handle.HasValue());
     return handle->IsShader();
 }
 bool AssetFilters::IncludeShaderProgramAssets::operator()(UUID assetID, const Assets& assets) const noexcept {
-    AssetHandle handle = assets.FindAsset(assetID);
+    ConstAssetHandle handle = assets.FindAsset(assetID);
     assert(handle.HasValue());
     return handle->IsShaderProgram();
 }
 bool AssetFilters::IncludeMaterialAssets::operator()(UUID assetID, const Assets& assets) const noexcept {
-    AssetHandle handle = assets.FindAsset(assetID);
+    ConstAssetHandle handle = assets.FindAsset(assetID);
     assert(handle.HasValue());
     return handle->IsMaterial();
 }
 bool AssetFilters::IncludeFrameBufferAssets::operator()(UUID assetID, const Assets& assets) const noexcept {
-    AssetHandle handle = assets.FindAsset(assetID);
+    ConstAssetHandle handle = assets.FindAsset(assetID);
     assert(handle.HasValue());
     return handle->IsFrameBuffer();
 }
 bool AssetFilters::IncludeModelAssets::operator()(UUID assetID, const Assets& assets) const noexcept {
-    AssetHandle handle = assets.FindAsset(assetID);
+    ConstAssetHandle handle = assets.FindAsset(assetID);
     assert(handle.HasValue());
     return handle->IsModel();
 }

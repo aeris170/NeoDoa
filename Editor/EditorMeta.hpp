@@ -31,6 +31,7 @@ private:
     void OnProjectLoaded(const Project& project) noexcept;
     void OnProjectSaved(const Project& project) noexcept;
     void OnProjectUnloaded() noexcept;
+    void OnReimport(Assets& assets) noexcept;
 
-    void CreateHiddenMetaDataFolderIfNotExists(FNode& root) noexcept;
+    void FindOrCreateHiddenMetaDataFolder(FNode& root) noexcept;
 };

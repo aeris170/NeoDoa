@@ -15,6 +15,20 @@ OrthoCameraComponent::OrthoCameraComponent(const Entity owner, const OrthoCamera
     data(data) {
     UpdateMatrices();
 }
+OrthoCameraComponent::OrthoCameraComponent(const OrthoCameraComponent& other) noexcept {
+    *this = other;
+}
+OrthoCameraComponent::OrthoCameraComponent(OrthoCameraComponent&& other) noexcept {
+    *this = std::move(other);
+}
+OrthoCameraComponent& OrthoCameraComponent::operator=(const OrthoCameraComponent& other) noexcept {
+    data = other.data;
+    return *this;
+}
+OrthoCameraComponent& OrthoCameraComponent::operator=(OrthoCameraComponent&& other) noexcept {
+    data = std::move(other.data);
+    return *this;
+}
 
 Entity OrthoCameraComponent::GetEntity() const { return entity; }
 
@@ -41,6 +55,20 @@ PerspectiveCameraComponent::PerspectiveCameraComponent(const Entity owner, const
     entity(owner),
     data(data) {
     UpdateMatrices();
+}
+PerspectiveCameraComponent::PerspectiveCameraComponent(const PerspectiveCameraComponent& other) noexcept {
+    *this = other;
+}
+PerspectiveCameraComponent::PerspectiveCameraComponent(PerspectiveCameraComponent&& other) noexcept {
+    *this = std::move(other);
+}
+PerspectiveCameraComponent& PerspectiveCameraComponent::operator=(const PerspectiveCameraComponent& other) noexcept {
+    data = other.data;
+    return *this;
+}
+PerspectiveCameraComponent& PerspectiveCameraComponent::operator=(PerspectiveCameraComponent&& other) noexcept {
+    data = std::move(other.data);
+    return *this;
 }
 
 Entity PerspectiveCameraComponent::GetEntity() const { return entity; }

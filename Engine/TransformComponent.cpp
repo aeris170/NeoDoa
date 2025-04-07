@@ -9,6 +9,24 @@
 
 TransformComponent::TransformComponent(const Entity owner) noexcept :
     entity(owner) {}
+TransformComponent::TransformComponent(const TransformComponent& other) noexcept {
+    *this = other;
+}
+TransformComponent::TransformComponent(TransformComponent&& other) noexcept {
+    *this = std::move(other);
+}
+TransformComponent& TransformComponent::operator=(const TransformComponent& other) noexcept {
+    localTranslation = other.localTranslation;
+    localRotation = other.localRotation;
+    localScale = other.localScale;
+    return *this;
+}
+TransformComponent& TransformComponent::operator=(TransformComponent&& other) noexcept {
+    localTranslation = std::exchange(other.localTranslation, decltype(localTranslation)());
+    localRotation = std::exchange(other.localRotation, decltype(localRotation)());
+    localScale = std::exchange(other.localScale, decltype(localScale)());
+    return *this;
+}
 
 glm::vec3 TransformComponent::ComputeWorldTranslation(const Entity entity, const Scene& scene) {
     glm::vec3 translation{};

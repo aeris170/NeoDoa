@@ -32,6 +32,7 @@ namespace {
 
     std::function<void(int, int)> render;
     std::function<void(int, int, int)> renderInstanced;
+    std::function<void(int, int)> renderMultiIndirect;
 
     std::function<void(const GPUFrameBuffer&)> setRenderTarget;
     std::function<void(const GPUFrameBuffer&, std::span<unsigned>)> setRenderTargetPartial;
@@ -42,6 +43,7 @@ namespace {
     std::function<void(const GPUFrameBuffer&, std::array<float, 4>, float, int)> clearRenderTarget;
 
     std::function<void(const GPUPipeline&)> bindPipeline;
+    std::function<void(const GPUBuffer&)> bindCommandBuffer;
 
     std::function<void(const GPUDescriptorSet&)> bindDescriptorSet;
 
@@ -83,8 +85,9 @@ void Graphics::ChangeGraphicsBackend(GraphicsBackend backend) noexcept {
         blitStencil      = Graphics::None::BlitStencil;
         blitDepthStencil = Graphics::None::BlitDepthStencil;
 
-        render          = Graphics::None::Render;
-        renderInstanced = Graphics::None::RenderInstanced;
+        render              = Graphics::None::Render;
+        renderInstanced     = Graphics::None::RenderInstanced;
+        renderMultiIndirect = Graphics::None::RenderMultiIndirect;
 
         setRenderTarget          = static_cast<void(*)(const GPUFrameBuffer&)>                     (Graphics::OpenGL::SetRenderTarget);
         setRenderTargetPartial   = static_cast<void(*)(const GPUFrameBuffer&, std::span<unsigned>)>(Graphics::OpenGL::SetRenderTarget);
@@ -95,6 +98,7 @@ void Graphics::ChangeGraphicsBackend(GraphicsBackend backend) noexcept {
         clearRenderTarget        = Graphics::None::ClearRenderTarget;
 
         bindPipeline = Graphics::None::BindPipeline;
+        bindCommandBuffer = Graphics::None::BindCommandBuffer;
 
         bindDescriptorSet = Graphics::None::BindDescriptorSet;
 
@@ -139,8 +143,9 @@ void Graphics::ChangeGraphicsBackend(GraphicsBackend backend) noexcept {
         blitStencil      = Graphics::OpenGL::BlitStencil;
         blitDepthStencil = Graphics::OpenGL::BlitDepthStencil;
 
-        render          = Graphics::OpenGL::Render;
-        renderInstanced = Graphics::OpenGL::RenderInstanced;
+        render              = Graphics::OpenGL::Render;
+        renderInstanced     = Graphics::OpenGL::RenderInstanced;
+        renderMultiIndirect = Graphics::OpenGL::RenderMultiIndirect;
 
         setRenderTarget          = static_cast<void(*)(const GPUFrameBuffer&)>                     (Graphics::OpenGL::SetRenderTarget);
         setRenderTargetPartial   = static_cast<void(*)(const GPUFrameBuffer&, std::span<unsigned>)>(Graphics::OpenGL::SetRenderTarget);
@@ -151,6 +156,7 @@ void Graphics::ChangeGraphicsBackend(GraphicsBackend backend) noexcept {
         clearRenderTarget        = Graphics::OpenGL::ClearRenderTarget;
 
         bindPipeline = Graphics::OpenGL::BindPipeline;
+        bindCommandBuffer = Graphics::OpenGL::BindCommandBuffer;
 
         bindDescriptorSet = Graphics::OpenGL::BindDescriptorSet;
 
@@ -258,6 +264,10 @@ void Graphics::RenderInstanced(int instanceCount, int count, int first) noexcept
     assert(renderInstanced && "Did you forget to call Graphics::ChangeGraphicsBackend()?");
     renderInstanced(instanceCount, count, first);
 }
+void Graphics::RenderMultiIndirect(int count, int first) noexcept {
+    assert(renderMultiIndirect && "Did you forget to call Graphics::ChangeGraphicsBackend()?");
+    renderMultiIndirect(count, first);
+}
 
 void Graphics::SetRenderTarget(const GPUFrameBuffer& renderTarget) noexcept {
     assert(setRenderTarget && "Did you forget to call Graphics::ChangeGraphicsBackend()?");
@@ -291,6 +301,10 @@ void Graphics::ClearRenderTarget(const GPUFrameBuffer& renderTarget, std::array<
 void Graphics::BindPipeline(const GPUPipeline& pipeline) noexcept {
     assert(bindPipeline && "Did you forget to call Graphics::ChangeGraphicsBackend()?");
     bindPipeline(pipeline);
+}
+void Graphics::BindCommandBuffer(const GPUBuffer& commandBuffer) noexcept {
+    assert(bindCommandBuffer && "Did you forget to call Graphics::ChangeGraphicsBackend()?");
+    bindCommandBuffer(commandBuffer);
 }
 
 void Graphics::BindDescriptorSet(const GPUDescriptorSet& descriptorSet) noexcept {

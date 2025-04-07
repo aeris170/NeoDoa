@@ -7,6 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 add_library(Utility STATIC)
 target_include_directories(Utility PUBLIC ..)
 
+target_link_libraries(Utility PUBLIC detector)
+
 find_package(EnTT CONFIG REQUIRED)
 find_package(ICU REQUIRED COMPONENTS uc dt i18n)
 find_package(cppzmq CONFIG REQUIRED)
@@ -39,6 +41,7 @@ set(GROUP_LIST
     "StringTransform.cpp"
     "StringTransform.hpp"
     "TemplateUtilities.hpp"
+	"Tree.hpp"
     "Trim.cpp"
     "Trim.hpp"
     "UndoRedoStack.cpp"

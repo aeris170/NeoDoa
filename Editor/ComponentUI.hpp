@@ -7,36 +7,49 @@ struct GUI;
 struct IDComponent;
 namespace IDComponentUI {
     void Render(GUI& gui, const IDComponent& idComponent);
+    void RenderContextMenu(GUI& gui, const IDComponent& idComponent);
 };
 
 struct TransformComponent;
 namespace TransformComponentUI {
     void Render(GUI& gui, const TransformComponent& transformComponent);
+    void RenderContextMenu(GUI& gui, const TransformComponent& transformComponent);
 }
 
 struct ParentComponent;
 namespace ParentComponentUI {
-    void Render(const ParentComponent& parentComponent);
+    void Render(GUI& gui, const ParentComponent& parentComponent);
+    void RenderContextMenu(GUI& gui, const ParentComponent& parentComponent);
 }
 
 struct ChildComponent;
 namespace ChildComponentUI {
-    void Render(const ChildComponent& childComponent);
+    void Render(GUI& gui, const ChildComponent& childComponent);
+    void RenderContextMenu(GUI& gui, const ChildComponent& childComponent);
 };
 
 struct MultiMaterialComponent;
 namespace MultiMaterialComponentUI {
     void Render(GUI& gui, const MultiMaterialComponent& multiMaterialComponent);
+    void RenderContextMenu(GUI& gui, const MultiMaterialComponent& multiMaterialComponent);
+};
+
+struct RigidModelComponent;
+namespace RigidModelComponentUI {
+    void Render(GUI& gui, const RigidModelComponent& rigidModelComponent);
+    void RenderContextMenu(GUI& gui, const RigidModelComponent& rigidModelComponent);
 };
 
 struct OrthoCameraComponent;
 namespace OrthoCameraComponentUI {
-    void Render(const OrthoCameraComponent& orthoCameraComponent);
+    void Render(GUI& gui, const OrthoCameraComponent& orthoCameraComponent);
+    void RenderContextMenu(GUI& gui, const OrthoCameraComponent& orthoCameraComponent);
 };
 
 struct PerspectiveCameraComponent;
 namespace PerspectiveCameraComponentUI {
-    void Render(const PerspectiveCameraComponent& perspectiveCameraComponent);
+    void Render(GUI& gui, const PerspectiveCameraComponent& perspectiveCameraComponent);
+    void RenderContextMenu(GUI& gui, const PerspectiveCameraComponent& perspectiveCameraComponent);
 };
 
 
@@ -58,6 +71,7 @@ namespace ComponentUI {
     void RenderParentComponent(const Observer& observer, const ParentComponent& parentComponent);
     void RenderChildComponent(const Observer& observer, const ChildComponent& childComponent);
     void RenderMultiMaterialComponent(const Observer& observer, const MultiMaterialComponent& multiMaterialComponent);
+    void RenderRigidModelComponent(const Observer& observer, const RigidModelComponent& rigidModelComponent);
     void RenderOrthoCameraComponent(const Observer& observer, const OrthoCameraComponent& orthoCameraComponent);
     void RenderPerspectiveCameraComponent(const Observer& observer, const PerspectiveCameraComponent& perspectiveCameraComponent);
     void RenderUserDefinedComponentStorage(const Observer& observer, const UserDefinedComponentStorage& storageComponent);

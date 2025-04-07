@@ -1,6 +1,7 @@
 #include "Log.hpp"
 
 #include <ctime>
+#include <mutex>
 #include <cstdarg>
 
 LogMessage::LogMessage(LogSeverity severity, const std::string& message) noexcept :
@@ -34,6 +35,9 @@ void Log::SaveMessage(LogSource src, LogSeverity sev, const char* fmt, ...) {
         break;
     };
     ss.append(buffer);
+
+    static std::mutex mutex;
+    std::lock_guard lock{ mutex };
     _messages.emplace_back(sev, std::move(ss));
 }
 

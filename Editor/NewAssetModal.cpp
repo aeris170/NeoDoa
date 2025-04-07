@@ -290,7 +290,7 @@ void NewAssetModal::CreateSceneAsset() {
 void NewAssetModal::CreateComponentAsset() {
 	GUI& gui = this->gui.get();
 	const auto sourceCode = CodeGenerator::GenerateComponentDeclaration(newAssetData.name);
-	auto handle = gui.CORE->GetAssets()->CreateAssetAt<Component>(*newAssetData.currentFolder, newAssetData.name + Assets::ComponentDefinitionExtension, sourceCode);
+	auto handle = gui.CORE->GetAssets()->CreateAssetAt(*newAssetData.currentFolder, newAssetData.name + Assets::ComponentDefinitionExtension, sourceCode);
 	DOA_LOG_INFO("Succesfully created a new component asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
 	gui.Events.OnAssetCreated(handle);
 }
@@ -298,42 +298,42 @@ void NewAssetModal::CreateSamplerAsset() {
 	GUI& gui = this->gui.get();
 	Sampler temporary{ .Name = newAssetData.name };
 	const auto data = temporary.Serialize();
-	auto handle = gui.CORE->GetAssets()->CreateAssetAt<Sampler>(*newAssetData.currentFolder, newAssetData.name + Assets::SamplerExtension, data);
+	auto handle = gui.CORE->GetAssets()->CreateAssetAt(*newAssetData.currentFolder, newAssetData.name + Assets::SamplerExtension, data);
 	DOA_LOG_INFO("Succesfully created a sampler asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
 	gui.Events.OnAssetCreated(handle);
 }
 void NewAssetModal::CreateVertexShaderAsset() {
 	GUI& gui = this->gui.get();
 	const auto sourceCode = CodeGenerator::GenerateVertexShaderCode();
-	auto handle = gui.CORE->GetAssets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.name + Assets::VertexShaderExtension, sourceCode);
+	auto handle = gui.CORE->GetAssets()->CreateAssetAt(*newAssetData.currentFolder, newAssetData.name + Assets::VertexShaderExtension, sourceCode);
 	DOA_LOG_INFO("Succesfully created a new vertex shader asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
 	gui.Events.OnAssetCreated(handle);
 }
 void NewAssetModal::CreateTessellationControlAsset() {
 	GUI& gui = this->gui.get();
 	const auto sourceCode = CodeGenerator::GenerateTessellationControlShaderCode();
-	auto handle = gui.CORE->GetAssets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.name + Assets::TessellationControlShaderExtension, sourceCode);
+	auto handle = gui.CORE->GetAssets()->CreateAssetAt(*newAssetData.currentFolder, newAssetData.name + Assets::TessellationControlShaderExtension, sourceCode);
 	DOA_LOG_INFO("Succesfully created a new tessellation control shader asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
 	gui.Events.OnAssetCreated(handle);
 }
 void NewAssetModal::CreateTessellationEvaluationAsset() {
 	GUI& gui = this->gui.get();
 	const auto sourceCode = CodeGenerator::GenerateTessellationEvaluationShaderCode();
-	auto handle = gui.CORE->GetAssets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.name + Assets::TessellationEvaluationShaderExtension, sourceCode);
+	auto handle = gui.CORE->GetAssets()->CreateAssetAt(*newAssetData.currentFolder, newAssetData.name + Assets::TessellationEvaluationShaderExtension, sourceCode);
 	DOA_LOG_INFO("Succesfully created a new tessellation evaluation shader asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
 	gui.Events.OnAssetCreated(handle);
 }
 void NewAssetModal::CreateGeometryShaderAsset() {
 	GUI& gui = this->gui.get();
 	const auto sourceCode = CodeGenerator::GenerateGeometryShaderCode();
-	auto handle = gui.CORE->GetAssets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.name + Assets::GeometryShaderExtension, sourceCode);
+	auto handle = gui.CORE->GetAssets()->CreateAssetAt(*newAssetData.currentFolder, newAssetData.name + Assets::GeometryShaderExtension, sourceCode);
 	DOA_LOG_INFO("Succesfully created a new geometry shader asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
 	gui.Events.OnAssetCreated(handle);
 }
 void NewAssetModal::CreateFragmentShaderAsset() {
 	GUI& gui = this->gui.get();
 	const auto sourceCode = CodeGenerator::GenerateFragmentShaderCode();
-	auto handle = gui.CORE->GetAssets()->CreateAssetAt<Shader>(*newAssetData.currentFolder, newAssetData.name + Assets::FragmentShaderExtension, sourceCode);
+	auto handle = gui.CORE->GetAssets()->CreateAssetAt(*newAssetData.currentFolder, newAssetData.name + Assets::FragmentShaderExtension, sourceCode);
 	DOA_LOG_INFO("Succesfully created a new fragment shader asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
 	gui.Events.OnAssetCreated(handle);
 }
@@ -341,7 +341,7 @@ void NewAssetModal::CreateShaderProgramAsset() {
 	GUI& gui = this->gui.get();
 	ShaderProgram temporary{ .Name = newAssetData.name };
 	const auto data = temporary.Serialize();
-	auto handle = gui.CORE->GetAssets()->CreateAssetAt<ShaderProgram>(*newAssetData.currentFolder, newAssetData.name + Assets::ShaderProgramExtension, data);
+	auto handle = gui.CORE->GetAssets()->CreateAssetAt(*newAssetData.currentFolder, newAssetData.name + Assets::ShaderProgramExtension, data);
 	DOA_LOG_INFO("Succesfully created a new shader program asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
 	gui.Events.OnAssetCreated(handle);
 }
@@ -349,7 +349,7 @@ void NewAssetModal::CreateMaterialAsset() {
 	GUI& gui = this->gui.get();
 	Material temporary{ newAssetData.name };
 	const auto data = temporary.Serialize();
-	auto handle = gui.CORE->GetAssets()->CreateAssetAt<Material>(*newAssetData.currentFolder, newAssetData.name + Assets::MaterialExtension, data);
+	auto handle = gui.CORE->GetAssets()->CreateAssetAt(*newAssetData.currentFolder, newAssetData.name + Assets::MaterialExtension, data);
 	DOA_LOG_INFO("Succesfully created a material asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
 	gui.Events.OnAssetCreated(handle);
 }
@@ -357,7 +357,7 @@ void NewAssetModal::CreateFrameBufferAsset() {
 	GUI& gui = this->gui.get();
 	FrameBuffer temporary{ .Name = newAssetData.name };
 	const auto data = temporary.Serialize();
-	auto handle = gui.CORE->GetAssets()->CreateAssetAt<FrameBuffer>(*newAssetData.currentFolder, newAssetData.name + Assets::FrameBufferExtension, data);
+	auto handle = gui.CORE->GetAssets()->CreateAssetAt(*newAssetData.currentFolder, newAssetData.name + Assets::FrameBufferExtension, data);
 	DOA_LOG_INFO("Succesfully created a frame buffer asset named %s at %s", newAssetData.name.c_str(), newAssetData.path.c_str());
 	gui.Events.OnAssetCreated(handle);
 }

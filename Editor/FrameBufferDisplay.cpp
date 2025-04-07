@@ -120,7 +120,7 @@ void FrameBufferDisplay::RenderMessagesTable() noexcept {
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
 
     ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::ERROR_COLOR);
-    for (auto& message : frameBufferAsset->ErrorMessages()) {
+    for (const auto& message : frameBufferAsset->ErrorMessages()) {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
 
@@ -130,13 +130,12 @@ void FrameBufferDisplay::RenderMessagesTable() noexcept {
 
         ImGui::TableSetColumnIndex(1);
 
-        const std::string& m{ std::any_cast<const std::string&>(message) };
-        ImGui::TextWrapped("%s", m.c_str());
+        ImGui::TextWrapped("%s", message.Message.c_str());
     }
     ImGui::PopStyleColor();
 
     ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::WARNING_COLOR);
-    for (auto& message : frameBufferAsset->WarningMessages()) {
+    for (const auto& message : frameBufferAsset->WarningMessages()) {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
 
@@ -146,13 +145,12 @@ void FrameBufferDisplay::RenderMessagesTable() noexcept {
 
         ImGui::TableSetColumnIndex(1);
 
-        const std::string& m{ std::any_cast<const std::string&>(message) };
-        ImGui::TextWrapped("%s", m.c_str());
+        ImGui::TextWrapped("%s", message.Message.c_str());
     }
     ImGui::PopStyleColor();
 
     ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::INFO_COLOR);
-    for (auto& message : frameBufferAsset->InfoMessages()) {
+    for (const auto& message : frameBufferAsset->InfoMessages()) {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
 
@@ -162,8 +160,7 @@ void FrameBufferDisplay::RenderMessagesTable() noexcept {
 
         ImGui::TableSetColumnIndex(1);
 
-        const std::string& m{ std::any_cast<const std::string&>(message) };
-        ImGui::TextWrapped("%s", m.c_str());
+        ImGui::TextWrapped("%s", message.Message.c_str());
     }
     ImGui::PopStyleColor();
 

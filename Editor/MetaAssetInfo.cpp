@@ -10,7 +10,7 @@
 #include <Editor/MetaAssetInfoSerializer.hpp>
 #include <Editor/MetaAssetInfoDeserializer.hpp>
 
-void* MetaAssetInfo::GetSVGIcon(TextureSize size, TextureStyle style) const { return SVGPathway::Get(svg_icon_key, style, size); }
+TextureHandle MetaAssetInfo::GetSVGIcon(TextureSize size, TextureStyle style) const { return SVGPathway::Get(svg_icon_key, style, size); }
 
 void MetaAssetInfoBank::SaveToDisk(const MetaAssetInfoBank& bank, const FNode& editorMetaFolder) noexcept {
     tinyxml2::XMLDocument doc;
@@ -18,10 +18,15 @@ void MetaAssetInfoBank::SaveToDisk(const MetaAssetInfoBank& bank, const FNode& e
     doc.SaveFile((editorMetaFolder.AbsolutePath() / BankFileName).string().c_str());
 }
 void MetaAssetInfoBank::LoadFromDisk(MetaAssetInfoBank& bank, FNode& editorMetaFolder) noexcept {
+    static auto& Core = Core::GetCore();
+    const auto& assets = Core->GetAssets();
+
     auto bankFile = editorMetaFolder.CreateChildFileIfNotExists({
         .name = BankFileName,
     });
-    if (!bankFile) {
+    if (bankFile) {
+        assets->Import(*bankFile);
+    } else {
         bankFile = &editorMetaFolder.FindChild(BankFileName);
     }
 
@@ -30,8 +35,6 @@ void MetaAssetInfoBank::LoadFromDisk(MetaAssetInfoBank& bank, FNode& editorMetaF
     if (!result.erred) {
         bank = std::move(result.bank);
     } else {
-        static auto& Core = Core::GetCore();
-        const auto& assets = Core->GetAssets();
         for (const auto& assetID : assets->AllAssetsIDs()) {
             AssetHandle handle = assets->FindAsset(assetID);
             assert(handle.HasValue());
@@ -130,6 +133,14 @@ void MetaAssetInfoBank::TryEmplace(const FNode& file, const MetaAssetInfo& empla
             svg_icon_key = _svg_icon_key;
         } else if (handle->IsFrameBuffer()) {
             const auto& [_fa_icon, _svg_icon_key] = FileIcons::FrameBufferIcons[icon_index];
+            fa_icon = _fa_icon;
+            svg_icon_key = _svg_icon_key;
+        } else if (handle->IsMesh()) {
+            const auto& [_fa_icon, _svg_icon_key] = FileIcons::MeshIcons[icon_index];
+            fa_icon = _fa_icon;
+            svg_icon_key = _svg_icon_key;
+        } else if (handle->IsModel()) {
+            const auto& [_fa_icon, _svg_icon_key] = FileIcons::ModelIcons[icon_index];
             fa_icon = _fa_icon;
             svg_icon_key = _svg_icon_key;
         } else {

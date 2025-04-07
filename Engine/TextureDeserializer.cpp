@@ -1,6 +1,7 @@
 #include <Engine/TextureDeserializer.hpp>
 
 #include <format>
+#include <cstring>
 #include <utility>
 
 #include <stb_image.h>
@@ -10,11 +11,8 @@
 #include <Engine/FileNode.hpp>
 
 static RawData ToRawData(const std::string_view str) {
-    RawData raw;
-    raw.reserve(str.size());
-    for (auto c : str) {
-        raw.push_back(static_cast<std::byte>(c));
-    }
+    RawData raw(str.size());
+    std::memcpy(raw.data(), str.data(), str.size());
     return raw;
 }
 TextureEncoding ExtToEncoding(const std::string_view ext) noexcept {
@@ -79,9 +77,11 @@ TextureDeserializationResult DeserializeTexture(const EncodedTextureData& data) 
         } else {
             std::unreachable();
         }
-        rv.deserializedTexture.PixelData.resize(width * height * nrChannels);
-        for (size_t i = 0; i < rv.deserializedTexture.PixelData.size(); i++) {
-            rv.deserializedTexture.PixelData[i] = static_cast<std::byte>(pixelData[i]);
+
+        auto& data = rv.deserializedTexture.PixelData.emplace();
+        data.resize(width * height * nrChannels);
+        for (size_t i = 0; i < data.size(); i++) {
+            data[i] = static_cast<std::byte>(pixelData[i]);
         }
     }
 

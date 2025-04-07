@@ -41,7 +41,7 @@ void MaterialDisplay::RenderMessagesTable() noexcept {
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
 
     ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::ERROR_COLOR);
-    for (auto& message : materialAsset->ErrorMessages()) {
+    for (const auto& message : materialAsset->ErrorMessages()) {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
 
@@ -51,13 +51,12 @@ void MaterialDisplay::RenderMessagesTable() noexcept {
 
         ImGui::TableSetColumnIndex(1);
 
-        const std::string& m{ std::any_cast<const std::string&>(message) };
-        ImGui::TextWrapped("%s", m.c_str());
+        ImGui::TextWrapped("%s", message.Message.c_str());
     }
     ImGui::PopStyleColor();
 
     ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::WARNING_COLOR);
-    for (auto& message : materialAsset->WarningMessages()) {
+    for (const auto& message : materialAsset->WarningMessages()) {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
 
@@ -67,13 +66,12 @@ void MaterialDisplay::RenderMessagesTable() noexcept {
 
         ImGui::TableSetColumnIndex(1);
 
-        const std::string& m{ std::any_cast<const std::string&>(message) };
-        ImGui::TextWrapped("%s", m.c_str());
+        ImGui::TextWrapped("%s", message.Message.c_str());
     }
     ImGui::PopStyleColor();
 
     ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::INFO_COLOR);
-    for (auto& message : materialAsset->InfoMessages()) {
+    for (const auto& message : materialAsset->InfoMessages()) {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
 
@@ -83,8 +81,7 @@ void MaterialDisplay::RenderMessagesTable() noexcept {
 
         ImGui::TableSetColumnIndex(1);
 
-        const std::string& m{ std::any_cast<const std::string&>(message) };
-        ImGui::TextWrapped("%s", m.c_str());
+        ImGui::TextWrapped("%s", message.Message.c_str());
     }
     ImGui::PopStyleColor();
 
@@ -457,17 +454,23 @@ void MaterialDisplay::TextureView::Render() noexcept {
     ImGui::Image(*gpuTexture, { w, h }, { 0, 1 }, { 1, 0 }, { (float) r, (float) g, (float) b, (float) a }, { 1, 1, 0, 1 });
 
     if (drawInspector) {
-        ImRect rc = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
-        ImVec2 mouseUVCoord = (ImGui::GetIO().MousePos - rc.Min) / rc.GetSize();
-        mouseUVCoord.y = 1.f - mouseUVCoord.y;
-        if (mouseUVCoord.x >= 0.0f &&
-            mouseUVCoord.y >= 0.0f &&
-            mouseUVCoord.x <= 1.0f &&
-            mouseUVCoord.y <= 1.0f) {
-            float w = static_cast<float>(texture->Width);
-            float h = static_cast<float>(texture->Height);
-            auto pixels = reinterpret_cast<const unsigned char*>(texture->PixelData.data());
-            ImageInspect::inspect(static_cast<int>(w), static_cast<int>(h), pixels, mouseUVCoord, { w, h }, drawNormals, drawHistogram);
+        if (texture->PixelData.has_value()) {
+            ImRect rc = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+            ImVec2 mouseUVCoord = (ImGui::GetIO().MousePos - rc.Min) / rc.GetSize();
+            mouseUVCoord.y = 1.f - mouseUVCoord.y;
+            if (mouseUVCoord.x >= 0.0f &&
+                mouseUVCoord.y >= 0.0f &&
+                mouseUVCoord.x <= 1.0f &&
+                mouseUVCoord.y <= 1.0f) {
+                float w = static_cast<float>(texture->Width);
+                float h = static_cast<float>(texture->Height);
+                auto pixels = reinterpret_cast<const unsigned char*>(texture->PixelData.value().data());
+                ImageInspect::inspect(static_cast<int>(w), static_cast<int>(h), pixels, mouseUVCoord, { w, h }, drawNormals, drawHistogram);
+            }
+        } else {
+            ImGui::BeginTooltip();
+            ImGui::TextUnformatted("Texture has no data in system memory.");
+            ImGui::EndTooltip();
         }
     }
 

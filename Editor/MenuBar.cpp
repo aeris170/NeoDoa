@@ -573,7 +573,7 @@ Licensee: Licensee)")},
 		const Texture& texture = Texture::Missing();
 		builder.SetWidth(texture.Width)
 			.SetHeight(texture.Height)
-			.SetData(texture.Format, texture.PixelData);
+			.SetData(texture.Format, texture.PixelData.value());
 	}
 	auto [tex, _] = builder.Build();
 	neodoaBanner = std::move(tex.value());

@@ -11,6 +11,7 @@
 #include <Engine/TransformComponent.hpp>
 #include <Engine/ParentComponent.hpp>
 #include <Engine/ChildComponent.hpp>
+#include <Engine/RigidModelComponent.hpp>
 #include <Engine/MultiMaterialComponent.hpp>
 #include <Engine/CameraComponent.hpp>
 
@@ -25,6 +26,8 @@
 #include <Editor/TranslateEntityCommand.hpp>
 #include <Editor/RotateEntityCommand.hpp>
 #include <Editor/ScaleEntityCommand.hpp>
+#include <Editor/RemoveComponentCommand.hpp>
+#include <Editor/ResetComponentCommand.hpp>
 
 void IDComponentUI::Render(GUI& gui, const IDComponent& idComponent) {
     static unordered_string_map<std::string> UINames = {
@@ -37,6 +40,15 @@ void IDComponentUI::Render(GUI& gui, const IDComponent& idComponent) {
     if (StringWidget(UINames[nameof_c(IDComponent::tag)], newName)) {
         gui.ExecuteCommand<RenameEntityCommand>(idComponent.GetEntity(), newName);
     }
+}
+void IDComponentUI::RenderContextMenu([[maybe_unused]] GUI& gui, [[maybe_unused]] const IDComponent& idComponent) {
+    ImGui::PushFont(gui.GetFontBold());
+    if (ImGui::BeginPopupContextItem(nullptr, ImGuiPopupFlags_MouseButtonRight)) {
+        ImGui::MenuItem(cat(ObserverIcons::ContextMenu::RESET_COMPONENT_DATA_ICON, "Reset Component Data"), nullptr, false, false);
+        ImGui::MenuItem(cat(ObserverIcons::ContextMenu::DETACH_COMPONENT_ICON, "Detach Component"), nullptr, false, false);
+        ImGui::EndPopup();
+    }
+    ImGui::PopFont();
 }
 
 void TransformComponentUI::Render(GUI& gui, const TransformComponent& transformComponent) {
@@ -71,8 +83,19 @@ void TransformComponentUI::Render(GUI& gui, const TransformComponent& transformC
         }
     }
 }
+void TransformComponentUI::RenderContextMenu(GUI& gui, const TransformComponent& transformComponent) {
+    ImGui::PushFont(gui.GetFontBold());
+    if (ImGui::BeginPopupContextItem(nullptr, ImGuiPopupFlags_MouseButtonRight)) {
+        if (ImGui::MenuItem(cat(ObserverIcons::ContextMenu::RESET_COMPONENT_DATA_ICON, "Reset Component Data"))) {
+            gui.ExecuteCommand<ResetComponentCommand<TransformComponent>>(transformComponent.GetEntity(), Prettify(nameof(TransformComponent)));
+        }
+        ImGui::MenuItem(cat(ObserverIcons::ContextMenu::DETACH_COMPONENT_ICON, "Detach Component"), nullptr, false, false);
+        ImGui::EndPopup();
+    }
+    ImGui::PopFont();
+}
 
-void ParentComponentUI::Render(const ParentComponent& parentComponent) {
+void ParentComponentUI::Render([[maybe_unused]] GUI& gui, const ParentComponent& parentComponent) {
     static unordered_string_map<std::string> UINames = {
         { nameof(ParentComponent::children), Prettify(nameof(ParentComponent::children)) }
     };
@@ -80,14 +103,32 @@ void ParentComponentUI::Render(const ParentComponent& parentComponent) {
     ParentComponent& parent = const_cast<ParentComponent&>(parentComponent);
     UneditableArrayWidget<Entity>(UINames[nameof(ParentComponent::children)], parent.GetChildren());
 }
+void ParentComponentUI::RenderContextMenu([[maybe_unused]] GUI& gui, [[maybe_unused]] const ParentComponent& parentComponent) {
+    ImGui::PushFont(gui.GetFontBold());
+    if (ImGui::BeginPopupContextItem(nullptr, ImGuiPopupFlags_MouseButtonRight)) {
+        ImGui::MenuItem(cat(ObserverIcons::ContextMenu::RESET_COMPONENT_DATA_ICON, "Reset Component Data"), nullptr, false, false);
+        ImGui::MenuItem(cat(ObserverIcons::ContextMenu::DETACH_COMPONENT_ICON, "Detach Component"), nullptr, false, false);
+        ImGui::EndPopup();
+    }
+    ImGui::PopFont();
+}
 
-void ChildComponentUI::Render(const ChildComponent& childComponent) {
+void ChildComponentUI::Render([[maybe_unused]] GUI& gui, const ChildComponent& childComponent) {
     static unordered_string_map<std::string> UINames = {
         { nameof(ChildComponent::parent), Prettify(nameof(ChildComponent::parent)) }
     };
 
     [[maybe_unused]] ChildComponent& child = const_cast<ChildComponent&>(childComponent);
     UneditableEntityWidget(UINames[nameof(ChildComponent::parent)], childComponent.GetParent());
+}
+void ChildComponentUI::RenderContextMenu([[maybe_unused]] GUI& gui, [[maybe_unused]] const ChildComponent& childComponent) {
+    ImGui::PushFont(gui.GetFontBold());
+    if (ImGui::BeginPopupContextItem(nullptr, ImGuiPopupFlags_MouseButtonRight)) {
+        ImGui::MenuItem(cat(ObserverIcons::ContextMenu::RESET_COMPONENT_DATA_ICON, "Reset Component Data"), nullptr, false, false);
+        ImGui::MenuItem(cat(ObserverIcons::ContextMenu::DETACH_COMPONENT_ICON, "Detach Component"), nullptr, false, false);
+        ImGui::EndPopup();
+    }
+    ImGui::PopFont();
 }
 
 void MultiMaterialComponentUI::Render(GUI& gui, const MultiMaterialComponent& multiMaterialComponent) {
@@ -98,8 +139,43 @@ void MultiMaterialComponentUI::Render(GUI& gui, const MultiMaterialComponent& mu
     MultiMaterialComponent& mmc = const_cast<MultiMaterialComponent&>(multiMaterialComponent);
     MultiAssetWidget(UINames[nameof(MultiMaterialComponent::materials)], mmc.GetMaterials(), *Core::GetCore()->GetAssets().get(), gui.GetMetaAssetInfoBank(), AssetFilters::IncludeMaterialAssets() | AssetFilters::IncludeTextureAssets());
 }
+void MultiMaterialComponentUI::RenderContextMenu(GUI& gui, const MultiMaterialComponent& multiMaterialComponent) {
+    ImGui::PushFont(gui.GetFontBold());
+    if (ImGui::BeginPopupContextItem(nullptr, ImGuiPopupFlags_MouseButtonRight)) {
+        if (ImGui::MenuItem(cat(ObserverIcons::ContextMenu::RESET_COMPONENT_DATA_ICON, "Reset Component Data"))) {
+            gui.ExecuteCommand<ResetComponentCommand<MultiMaterialComponent>>(multiMaterialComponent.GetEntity(), Prettify(nameof(MultiMaterialComponent)));
+        }
+        if (ImGui::MenuItem(cat(ObserverIcons::ContextMenu::DETACH_COMPONENT_ICON, "Detach Component"))) {
+            gui.ExecuteCommand<RemoveComponentCommand<MultiMaterialComponent>>(multiMaterialComponent.GetEntity(), Prettify(nameof(MultiMaterialComponent)));
+        }
+        ImGui::EndPopup();
+    }
+    ImGui::PopFont();
+}
 
-void OrthoCameraComponentUI::Render(const OrthoCameraComponent& orthoCameraComponent) {
+void RigidModelComponentUI::Render(GUI& gui, const RigidModelComponent& rigidModelComponent) {
+    static unordered_string_map<std::string> UINames = {
+        { nameof(MultiMaterialComponent::modelAssetID), "Model Asset" }
+    };
+
+    RigidModelComponent& rmc = const_cast<RigidModelComponent&>(rigidModelComponent);
+    SingleAssetWidget(UINames[nameof(MultiMaterialComponent::modelAssetID)], rmc.GetModelUUID(), *Core::GetCore()->GetAssets().get(), gui.GetMetaAssetInfoBank(), AssetFilters::IncludeModelAssets());
+}
+void RigidModelComponentUI::RenderContextMenu(GUI& gui, const RigidModelComponent& rigidModelComponent) {
+    ImGui::PushFont(gui.GetFontBold());
+    if (ImGui::BeginPopupContextItem(nullptr, ImGuiPopupFlags_MouseButtonRight)) {
+        if (ImGui::MenuItem(cat(ObserverIcons::ContextMenu::RESET_COMPONENT_DATA_ICON, "Reset Component Data"))) {
+            gui.ExecuteCommand<ResetComponentCommand<RigidModelComponent>>(rigidModelComponent.GetEntity(), Prettify(nameof(MultiMaterialComponent)));
+        }
+        if (ImGui::MenuItem(cat(ObserverIcons::ContextMenu::DETACH_COMPONENT_ICON, "Detach Component"))) {
+            gui.ExecuteCommand<RemoveComponentCommand<RigidModelComponent>>(rigidModelComponent.GetEntity(), Prettify(nameof(MultiMaterialComponent)));
+        }
+        ImGui::EndPopup();
+    }
+    ImGui::PopFont();
+}
+
+void OrthoCameraComponentUI::Render([[maybe_unused]] GUI& gui, const OrthoCameraComponent& orthoCameraComponent) {
     static unordered_string_map<std::string> UINames = {
         { nameof(OrthoCameraComponent::isActiveAndRendering), Prettify(nameof(OrthoCameraComponent::isActiveAndRendering)) },
         { nameof(OrthoCameraComponent::data), Prettify("orthoCameraProperties") },
@@ -130,8 +206,21 @@ void OrthoCameraComponentUI::Render(const OrthoCameraComponent& orthoCameraCompo
         orthoCamera.SetData(std::move(cam));
     }
 }
+void OrthoCameraComponentUI::RenderContextMenu(GUI& gui, const OrthoCameraComponent& orthoCameraComponent) {
+    ImGui::PushFont(gui.GetFontBold());
+    if (ImGui::BeginPopupContextItem(nullptr, ImGuiPopupFlags_MouseButtonRight)) {
+        if (ImGui::MenuItem(cat(ObserverIcons::ContextMenu::RESET_COMPONENT_DATA_ICON, "Reset Component Data"))) {
+            gui.ExecuteCommand<ResetComponentCommand<OrthoCameraComponent>>(orthoCameraComponent.GetEntity(), Prettify(nameof(OrthoCameraComponent)));
+        }
+        if (ImGui::MenuItem(cat(ObserverIcons::ContextMenu::DETACH_COMPONENT_ICON, "Detach Component"))) {
+            gui.ExecuteCommand<RemoveComponentCommand<OrthoCameraComponent>>(orthoCameraComponent.GetEntity(), Prettify(nameof(OrthoCameraComponent)));
+        }
+        ImGui::EndPopup();
+    }
+    ImGui::PopFont();
+}
 
-void PerspectiveCameraComponentUI::Render(const PerspectiveCameraComponent& perspectiveCameraComponent) {
+void PerspectiveCameraComponentUI::Render([[maybe_unused]] GUI& gui, const PerspectiveCameraComponent& perspectiveCameraComponent) {
     static unordered_string_map<std::string> UINames = {
         { nameof(PerspectiveCameraComponent::isActiveAndRendering), Prettify(nameof(PerspectiveCameraComponent::isActiveAndRendering)) },
         { nameof(PerspectiveCameraComponent::data), Prettify("orthoCameraProperties") },
@@ -162,48 +251,61 @@ void PerspectiveCameraComponentUI::Render(const PerspectiveCameraComponent& pers
         perspectiveCamera.SetData(std::move(cam));
     }
 }
+void PerspectiveCameraComponentUI::RenderContextMenu(GUI& gui, const PerspectiveCameraComponent& perspectiveCameraComponent) {
+    ImGui::PushFont(gui.GetFontBold());
+    if (ImGui::BeginPopupContextItem(nullptr, ImGuiPopupFlags_MouseButtonRight)) {
+        if (ImGui::MenuItem(cat(ObserverIcons::ContextMenu::RESET_COMPONENT_DATA_ICON, "Reset Component Data"))) {
+            gui.ExecuteCommand<ResetComponentCommand<PerspectiveCameraComponent>>(perspectiveCameraComponent.GetEntity(), Prettify(nameof(PerspectiveCameraComponent)));
+        }
+        if (ImGui::MenuItem(cat(ObserverIcons::ContextMenu::DETACH_COMPONENT_ICON, "Detach Component"))) {
+            gui.ExecuteCommand<RemoveComponentCommand<PerspectiveCameraComponent>>(perspectiveCameraComponent.GetEntity(), Prettify(nameof(PerspectiveCameraComponent)));
+        }
+        ImGui::EndPopup();
+    }
+    ImGui::PopFont();
+}
 
 void UserDefinedComponentStorageUI::RenderComponentInstance(const ComponentInstance& componentInstance) {
     ComponentInstance& instance = const_cast<ComponentInstance&>(componentInstance);
     AssetHandle cmpAsset{ Core::GetCore()->GetAssets()->FindAsset(instance.ComponentAssetID()) };
     const auto& component{ cmpAsset->DataAs<Component>() };
     if (!cmpAsset.HasValue() || cmpAsset->HasErrorMessages()) { return; }
-    for (size_t i = 0; i < component.fields.size(); i++) {
-        auto& field{ component.fields[i] };
-        const auto& type{ field.typeName };
+    for (size_t i = 0; i < component.Fields.size(); i++) {
+        auto& field{ component.Fields[i] };
+        const auto& type{ field.TypeName };
         auto& value{ instance.MemberValues()[i] };
         if (type == "bool") {
-            BoolWidget(field.name, value.As<bool&>());
+            BoolWidget(field.Name, value.As<bool&>());
         }
         if (type == "int8") {
-            Int8Widget(field.name, value.As<int8_t&>());
+            Int8Widget(field.Name, value.As<int8_t&>());
         }
         if (type == "int16") {
-            Int16Widget(field.name, value.As<int16_t&>());
+            Int16Widget(field.Name, value.As<int16_t&>());
         }
         if (type == "int") {
-            Int32Widget(field.name, value.As<int32_t&>());
+            Int32Widget(field.Name, value.As<int32_t&>());
         }
         if (type == "long") {
-            Int64Widget(field.name, value.As<int64_t&>());
+            Int64Widget(field.Name, value.As<int64_t&>());
         }
         if (type == "uint8") {
-            UInt8Widget(field.name, value.As<uint8_t&>());
+            UInt8Widget(field.Name, value.As<uint8_t&>());
         }
         if (type == "uint16") {
-            UInt16Widget(field.name, value.As<uint16_t&>());
+            UInt16Widget(field.Name, value.As<uint16_t&>());
         }
         if (type == "unsigned int") {
-            UInt32Widget(field.name, value.As<uint32_t&>());
+            UInt32Widget(field.Name, value.As<uint32_t&>());
         }
         if (type == "unsigned long") {
-            UInt64Widget(field.name, value.As<uint64_t&>());
+            UInt64Widget(field.Name, value.As<uint64_t&>());
         }
         if (type == "float") {
-            FloatWidget(field.name, value.As<float_t&>());
+            FloatWidget(field.Name, value.As<float_t&>());
         }
         if (type == "double") {
-            DoubleWidget(field.name, value.As<double_t&>());
+            DoubleWidget(field.Name, value.As<double_t&>());
         }
     }
 }
@@ -221,6 +323,7 @@ bool ComponentUI::Begin(const Observer& observer, std::string_view componentType
 }
 void ComponentUI::RenderIDComponent(const Observer& observer, const IDComponent& idComponent) {
     bool show = ComponentUI::Begin(observer, nameof(IDComponent));
+    IDComponentUI::RenderContextMenu(observer.gui, idComponent);
     if (show) {
         IDComponentUI::Render(observer.gui, idComponent);
     }
@@ -228,6 +331,7 @@ void ComponentUI::RenderIDComponent(const Observer& observer, const IDComponent&
 }
 void ComponentUI::RenderTransformComponent(const Observer& observer, const TransformComponent& transformComponent) {
     bool show = ComponentUI::Begin(observer, nameof(TransformComponent));
+    TransformComponentUI::RenderContextMenu(observer.gui, transformComponent);
     if (show) {
         TransformComponentUI::Render(observer.gui, transformComponent);
     }
@@ -235,36 +339,49 @@ void ComponentUI::RenderTransformComponent(const Observer& observer, const Trans
 }
 void ComponentUI::RenderParentComponent(const Observer& observer, const ParentComponent& parentComponent) {
     bool show = ComponentUI::Begin(observer, nameof(ParentComponent));
+    ParentComponentUI::RenderContextMenu(observer.gui, parentComponent);
     if (show) {
-        ParentComponentUI::Render(parentComponent);
+        ParentComponentUI::Render(observer.gui, parentComponent);
     }
     ComponentUI::End(show);
 }
 void ComponentUI::RenderChildComponent(const Observer& observer, const ChildComponent& childComponent) {
     bool show = ComponentUI::Begin(observer, nameof(ChildComponent));
+    ChildComponentUI::RenderContextMenu(observer.gui, childComponent);
     if (show) {
-        ChildComponentUI::Render(childComponent);
+        ChildComponentUI::Render(observer.gui, childComponent);
     }
     ComponentUI::End(show);
 }
 void ComponentUI::RenderMultiMaterialComponent(const Observer& observer, const MultiMaterialComponent& multiMaterialComponent) {
     bool show = ComponentUI::Begin(observer, nameof(MultiMaterialComponent));
+    MultiMaterialComponentUI::RenderContextMenu(observer.gui, multiMaterialComponent);
     if (show) {
         MultiMaterialComponentUI::Render(observer.gui, multiMaterialComponent);
     }
     ComponentUI::End(show);
 }
+void ComponentUI::RenderRigidModelComponent(const Observer& observer, const RigidModelComponent& rigidModelComponent) {
+    bool show = ComponentUI::Begin(observer, nameof(RigidModelComponent));
+    RigidModelComponentUI::RenderContextMenu(observer.gui, rigidModelComponent);
+    if (show) {
+        RigidModelComponentUI::Render(observer.gui, rigidModelComponent);
+    }
+    ComponentUI::End(show);
+}
 void ComponentUI::RenderOrthoCameraComponent(const Observer& observer, const OrthoCameraComponent& orthoCameraComponent) {
     bool show = ComponentUI::Begin(observer, nameof(OrthoCameraComponent));
+    OrthoCameraComponentUI::RenderContextMenu(observer.gui, orthoCameraComponent);
     if (show) {
-        OrthoCameraComponentUI::Render(orthoCameraComponent);
+        OrthoCameraComponentUI::Render(observer.gui, orthoCameraComponent);
     }
     ComponentUI::End(show);
 }
 void ComponentUI::RenderPerspectiveCameraComponent(const Observer& observer, const PerspectiveCameraComponent& perspectiveCameraComponent) {
     bool show = ComponentUI::Begin(observer, nameof(PerspectiveCameraComponent));
+    PerspectiveCameraComponentUI::RenderContextMenu(observer.gui, perspectiveCameraComponent);
     if (show) {
-        PerspectiveCameraComponentUI::Render(perspectiveCameraComponent);
+        PerspectiveCameraComponentUI::Render(observer.gui, perspectiveCameraComponent);
     }
     ComponentUI::End(show);
 }

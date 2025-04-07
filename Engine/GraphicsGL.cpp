@@ -34,6 +34,7 @@ static std::vector<GPUShaderProgram::Uniform> ExtractActiveProgramUniforms(GLuin
 namespace {
 
     std::optional<std::reference_wrapper<const GPUPipeline>> currentPipeline;
+    std::optional<std::reference_wrapper<const GPUBuffer>> currentCommandBuffer;
 
     Resolution GetAttachmentDimensions(const std::variant<GPUTexture, GPURenderBuffer>& attachment) noexcept {
         return std::visit(overloaded::lambda{
@@ -46,7 +47,7 @@ namespace {
         }, attachment);
     }
 
-    std::pair<std::optional<GPUShaderProgram>, std::vector<ShaderLinkerMessage>> BuildGraphicsPipeline(std::string& name, std::array<GPUShader*, 5> pipelineStages) noexcept {
+    std::pair<std::optional<GPUShaderProgram>, std::vector<ShaderLinkerMessage>> BuildGraphicsPipeline([[maybe_unused]] std::string& name, std::array<GPUShader*, 5> pipelineStages) noexcept {
         const GPUShader* vertShader = pipelineStages[0];
         const GPUShader* tessCtrlShader = pipelineStages[1];
         const GPUShader* tessEvalShader = pipelineStages[2];
@@ -87,6 +88,7 @@ namespace {
             gpuShaderProgram->GLObjectID = program;
 #ifdef DEBUG
             gpuShaderProgram->Name = std::move(name);
+            glObjectLabel(GL_PROGRAM, program, -1, gpuShaderProgram->Name.c_str());
 #endif
             gpuShaderProgram->Uniforms = ExtractActiveProgramUniforms(program, messages);
         }
@@ -106,7 +108,7 @@ namespace {
 
         return { std::move(gpuShaderProgram), std::move(messages) };
     }
-    std::pair<std::optional<::GPUShaderProgram>, std::vector<ShaderLinkerMessage>> BuildComputePipeline(std::string& name, GPUShader* computeStage) noexcept {
+    std::pair<std::optional<::GPUShaderProgram>, std::vector<ShaderLinkerMessage>> BuildComputePipeline([[maybe_unused]] std::string& name, GPUShader* computeStage) noexcept {
         std::vector<ShaderLinkerMessage> messages{};
         if (!computeStage) {
             messages.emplace_back("Compute shader cannot be null while building a compute pipeline.");
@@ -392,6 +394,31 @@ void Graphics::OpenGL::RenderInstanced(int instanceCount, int count, int first) 
         glDrawArraysInstanced(ToGLTopology(pipeline.Topology), first, count, instanceCount);
     }
 }
+void Graphics::OpenGL::RenderMultiIndirect(int count, int first) noexcept {
+    const GPUPipeline& pipeline = currentPipeline->get();
+    if (pipeline.IndexBuffer) {
+        static constexpr size_t RenderElementsCommandSize{ sizeof(RenderMultiIndirectElementsCommand) };
+
+        GLintptr start = static_cast<GLintptr>(first * RenderElementsCommandSize);
+        glMultiDrawElementsIndirect(
+            ToGLTopology(pipeline.Topology),
+            ToGLDataType(pipeline.IndexType),
+            reinterpret_cast<void*>(start),
+            count,
+            RenderElementsCommandSize
+        );
+    } else {
+        static constexpr size_t RenderArraysCommandSize{ sizeof(RenderMultiIndirectArraysCommand) };
+
+        GLintptr start = static_cast<GLintptr>(first * RenderArraysCommandSize);
+        glMultiDrawArraysIndirect(
+            ToGLTopology(pipeline.Topology),
+            reinterpret_cast<void*>(start),
+            count,
+            RenderArraysCommandSize
+        );
+    }
+}
 
 void Graphics::OpenGL::SetRenderTarget(const GPUFrameBuffer& renderTarget) noexcept {
     if (renderTarget.GLObjectID != 0) {
@@ -480,6 +507,10 @@ void Graphics::OpenGL::BindPipeline(const GPUPipeline& pipeline) noexcept {
     glUseProgram(pipeline.ShaderProgram->get().GLObjectID);
     glBindVertexArray(pipeline.GLObjectID);
 }
+void Graphics::OpenGL::BindCommandBuffer(const GPUBuffer& commandBuffer) noexcept {
+    currentCommandBuffer.emplace(commandBuffer);
+    glBindBuffer(GL_DRAW_INDIRECT_BUFFER, commandBuffer.GLObjectID);
+}
 
 void Graphics::OpenGL::BindDescriptorSet(const GPUDescriptorSet& descriptorSet) noexcept {
     for (const DescriptorBinding& binding : descriptorSet.Bindings) {
@@ -512,6 +543,7 @@ std::pair<std::optional<::GPUBuffer>, std::vector<BufferAllocatorMessage>> Graph
     gpuBuffer->GLObjectID = buffer;
 #ifdef DEBUG
     gpuBuffer->Name = std::move(builder.name);
+    glObjectLabel(GL_BUFFER, buffer, -1, gpuBuffer->Name.c_str());
 #endif
     gpuBuffer->Properties = builder.properties;
     gpuBuffer->SizeBytes = builder.size;
@@ -549,6 +581,7 @@ std::pair<std::optional<::GPURenderBuffer>, std::vector<RenderBufferAllocatorMes
     gpuRenderBuffer->GLObjectID = renderBuffer;
 #ifdef DEBUG
     gpuRenderBuffer->Name = std::move(builder.name);
+    glObjectLabel(GL_RENDERBUFFER, renderBuffer, -1, gpuRenderBuffer->Name.c_str());
 #endif
     gpuRenderBuffer->Width = builder.width;
     gpuRenderBuffer->Height = builder.height;
@@ -650,6 +683,7 @@ std::pair<std::optional<::GPUFrameBuffer>, std::vector<FrameBufferAllocatorMessa
     gpuFrameBuffer->GLObjectID = frameBuffer;
 #ifdef DEBUG
     gpuFrameBuffer->Name = std::move(builder.name);
+    glObjectLabel(GL_FRAMEBUFFER, frameBuffer, -1, gpuFrameBuffer->Name.c_str());
 #endif
     gpuFrameBuffer->ColorAttachments = std::move(builder.colorAttachments);
     gpuFrameBuffer->DepthAttachment = std::move(builder.depthAttachment);
@@ -707,6 +741,7 @@ std::pair<std::optional<::GPUPipeline>, std::vector<PipelineAllocatorMessage>> G
     gpuPipeline->GLObjectID = vertexArray;
 #ifdef DEBUG
     gpuPipeline->Name = std::move(builder.name);
+    glObjectLabel(GL_VERTEX_ARRAY, vertexArray, -1, gpuPipeline->Name.c_str());
 #endif
     gpuPipeline->VertexBuffers = std::move(builder.vertexBuffers);
     gpuPipeline->VertexLayouts = std::move(builder.vertexLayouts);
@@ -775,6 +810,7 @@ std::pair<std::optional<::GPUShader>, std::vector<ShaderCompilerMessage>> Graphi
         gpuShader->Type = builder.type;
 #ifdef DEBUG
         gpuShader->Name = std::move(builder.name);
+        glObjectLabel(GL_SHADER, shader, -1, gpuShader->Name.c_str());
 #endif
     }
 
@@ -829,6 +865,7 @@ std::pair<std::optional<::GPUSampler>, std::vector<SamplerAllocatorMessage>> Gra
     gpuSampler->GLObjectID = sampler;
 #ifdef DEBUG
     gpuSampler->Name = std::move(builder.name);
+    glObjectLabel(GL_SAMPLER, sampler, -1, gpuSampler->Name.c_str());
 #endif
 
     return { std::move(gpuSampler), {} };
@@ -874,40 +911,40 @@ std::pair<std::optional<::GPUTexture>, std::vector<TextureAllocatorMessage>> Gra
         );
     }
 
-    if (!builder.pixels.empty()) {
-        if (builder.depth > 1) {
-            glTextureSubImage3D(
-                texture,
-                0,
-                0, 0, 0,
-                builder.width, builder.height, builder.depth,
-                ToGLBaseFormat(builder.format),
-                GL_UNSIGNED_BYTE,
-                builder.pixels.data()
-            );
-        } else if (builder.width > 1) {
-            glTextureSubImage2D(
-                texture,
-                0,
-                0, 0,
-                builder.width, builder.height,
-                ToGLBaseFormat(builder.format),
-                GL_UNSIGNED_BYTE,
-                builder.pixels.data()
-            );
-        } else {
-            glTextureSubImage1D(
-                texture,
-                0,
-                0,
-                builder.width,
-                ToGLBaseFormat(builder.format),
-                GL_UNSIGNED_BYTE,
-                builder.pixels.data()
-            );
-        }
-        if (builder.samples == Multisample::None) {
-            glGenerateTextureMipmap(texture); // Mipmaps are not allowed on multisampled textures.
+    if (builder.samples == Multisample::None) {
+        if (!builder.pixels.empty()) {
+            if (builder.depth > 1) {
+                glTextureSubImage3D(
+                    texture,
+                    0,
+                    0, 0, 0,
+                    builder.width, builder.height, builder.depth,
+                    ToGLBaseFormat(builder.format),
+                    GL_UNSIGNED_BYTE,
+                    builder.pixels.data()
+                );
+            } else if (builder.width > 1) {
+                glTextureSubImage2D(
+                    texture,
+                    0,
+                    0, 0,
+                    builder.width, builder.height,
+                    ToGLBaseFormat(builder.format),
+                    GL_UNSIGNED_BYTE,
+                    builder.pixels.data()
+                );
+            } else {
+                glTextureSubImage1D(
+                    texture,
+                    0,
+                    0,
+                    builder.width,
+                    ToGLBaseFormat(builder.format),
+                    GL_UNSIGNED_BYTE,
+                    builder.pixels.data()
+                );
+            }
+            glGenerateTextureMipmap(texture);
         }
     }
 
@@ -916,6 +953,7 @@ std::pair<std::optional<::GPUTexture>, std::vector<TextureAllocatorMessage>> Gra
     gpuTexture->GLObjectID = texture;
 #ifdef DEBUG
     gpuTexture->Name = std::move(builder.name);
+    glObjectLabel(GL_TEXTURE, texture, -1, gpuTexture->Name.c_str());
 #endif
     gpuTexture->Width = builder.width;
     gpuTexture->Height = builder.height;

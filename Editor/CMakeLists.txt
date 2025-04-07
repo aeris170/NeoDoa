@@ -13,12 +13,12 @@ target_link_libraries(Editor PUBLIC Engine)
 find_package(argparse CONFIG REQUIRED)
 find_package(cppzmq CONFIG REQUIRED)
 find_package(imguizmo CONFIG REQUIRED)
-find_package(unofficial-lunasvg CONFIG REQUIRED)
+find_package(lunasvg CONFIG REQUIRED)
 
 target_link_libraries(Editor PUBLIC argparse::argparse)
 target_link_libraries(Editor PUBLIC cppzmq cppzmq-static)
 target_link_libraries(Editor PUBLIC imguizmo::imguizmo)
-target_link_libraries(Editor PUBLIC unofficial::lunasvg::lunasvg)
+target_link_libraries(Editor PUBLIC lunasvg::lunasvg)
 
 set(GROUP_LIST
     "main.cpp"
@@ -72,6 +72,8 @@ set(GROUP_LIST
     "UI/GUI/Commands/GUICommand.hpp"
     "UI/GUI/Commands/AddEntityCommand.cpp"
     "UI/GUI/Commands/AddEntityCommand.hpp"
+    "UI/GUI/Commands/RemoveComponentCommand.hpp"
+	"UI/GUI/Commands/ResetComponentCommand.hpp"
     "UI/GUI/Commands/RemoveEntityCommand.cpp"
     "UI/GUI/Commands/RemoveEntityCommand.hpp"
     "UI/GUI/Commands/RenameEntityCommand.cpp"
@@ -102,6 +104,10 @@ set(GROUP_LIST
     "UI/GUI/Observer/Displays/FrameBufferDisplay/FrameBufferDisplay.hpp"
     "UI/GUI/Observer/Displays/MaterialDisplay/MaterialDisplay.cpp"
     "UI/GUI/Observer/Displays/MaterialDisplay/MaterialDisplay.hpp"
+	"UI/GUI/Observer/Displays/MeshDisplay/MeshDisplay.cpp"
+	"UI/GUI/Observer/Displays/MeshDisplay/MeshDisplay.hpp"
+    "UI/GUI/Observer/Displays/ModelDisplay/ModelDisplay.cpp"
+    "UI/GUI/Observer/Displays/ModelDisplay/ModelDisplay.hpp"
     "UI/GUI/Observer/Displays/SamplerDisplay/SamplerDisplay.cpp"
     "UI/GUI/Observer/Displays/SamplerDisplay/SamplerDisplay.hpp"
     "UI/GUI/Observer/Displays/SceneDisplay/SceneDisplay.cpp"

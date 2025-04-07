@@ -25,6 +25,12 @@ void SVGPathway::Initialize(std::filesystem::path&& directory, Color color) {
     SVGPathway::color = color;
     Initialized = true;
 }
+void SVGPathway::Destroy() {
+    Textures.clear();
+    TexturesPadded.clear();
+    TexturesScaled.clear();
+    Initialized = false;
+};
 
 const GPUTexture& SVGPathway::Get(const std::string& key, const TextureStyle style, const TextureSize size) {
     assert(Initialized);

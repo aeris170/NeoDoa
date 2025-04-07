@@ -9,6 +9,7 @@
 #include <Engine/ParentComponent.hpp>
 #include <Engine/CameraComponent.hpp>
 #include <Engine/TransformComponent.hpp>
+#include <Engine/RigidModelComponent.hpp>
 #include <Engine/MultiMaterialComponent.hpp>
 
 #include <Editor/GUI.hpp>
@@ -16,6 +17,7 @@
 #include <Editor/Observer.hpp>
 #include <Editor/ComponentUI.hpp>
 #include <Editor/MetaAssetInfo.hpp>
+#include <Editor/ComponentWidgets.hpp>
 #include <Editor/UserDefinedComponentStorage.hpp>
 
 DisplayTargetRenderer::DisplayTargetRenderer(Observer& observer) noexcept :
@@ -26,7 +28,9 @@ DisplayTargetRenderer::DisplayTargetRenderer(Observer& observer) noexcept :
     shaderDisplay(observer),
     shaderProgramDisplay(observer),
     materialDisplay(observer),
-    frameBufferDisplay(observer) {
+    frameBufferDisplay(observer),
+    meshDisplay(observer),
+    modelDisplay(observer) {
     GUI& gui = observer.gui;
     gui.Events.OnProjectUnloaded                 += std::bind_front(&DisplayTargetRenderer::OnProjectUnloaded,  this);
     gui.Events.OnReimport                        += std::bind_front(&DisplayTargetRenderer::OnReimport,         this);
@@ -50,6 +54,11 @@ void DisplayTargetRenderer::SetDisplayTarget(FNode& file) {
     displayTarget = &file;
     renderTargetTitleText = hypen + file.Name().data();
 }
+void DisplayTargetRenderer::SetDisplayTarget(FNode& file, const UUID subAssetID) {
+    static std::string hypen(" - ");
+    displayTarget = std::pair{ &file, subAssetID };
+    renderTargetTitleText = hypen + file.Name().data();
+}
 void DisplayTargetRenderer::ResetDisplayTarget() {
     displayTarget = std::monostate{};
     renderTargetTitleText = "";
@@ -69,6 +78,9 @@ void DisplayTargetRenderer::Render() {
         },
         [this](FNode* file) {
             HandleTargetWhenFile(*file);
+        },
+        [this](std::pair<FNode*, UUID> pair) {
+            HandleTargetWhenSubAsset(*pair.first, pair.second);
         }
     }, displayTarget);
 }
@@ -110,6 +122,11 @@ void DisplayTargetRenderer::HandleTargetWhenEntity(Scene& scene, const Entity en
         ComponentUI::RenderPerspectiveCameraComponent(observer, perspectiveCameraComponent);
     }
 
+    if (scene.HasComponent<RigidModelComponent>(entt)) {
+        const auto& rigidModelComponent = scene.GetComponent<RigidModelComponent>(entt);
+        ComponentUI::RenderRigidModelComponent(observer, rigidModelComponent);
+    }
+
     if (scene.HasComponent<MultiMaterialComponent>(entt)) {
         const auto& multiMaterialComponent = scene.GetComponent<MultiMaterialComponent>(entt);
         ComponentUI::RenderMultiMaterialComponent(observer, multiMaterialComponent);
@@ -131,7 +148,7 @@ void DisplayTargetRenderer::HandleTargetWhenFile(FNode& file) {
     ImGui::PushStyleColor(ImGuiCol_Button, {});
     auto prePos = ImGui::GetCursorPos();
     auto& meta{ gui.GetMetaInfoOf(file) };
-    if (ImGui::ImageButton(meta.GetSVGIcon(), iconSize)) {
+    if (ImGui::ImageButton("DTR_ASSET_ICON", meta.GetSVGIcon(), iconSize)) {
         ImGui::OpenPopup("assetIconCombo");
     }
     auto afterPos = ImGui::GetCursorPos();
@@ -165,6 +182,49 @@ void DisplayTargetRenderer::HandleTargetWhenFile(FNode& file) {
         if (h.HasValue()) {
             RenderAssetView(h);
         }
+    }
+}
+void DisplayTargetRenderer::HandleTargetWhenSubAsset(FNode& file, const UUID subAssetID) {
+    GUI& gui = observer.get().gui;
+
+    static const ImVec2 iconSize{ 60.0f, 60.0f };
+    ImGui::Columns(2);
+    ImGui::SetColumnWidth(0, iconSize.x * 1.25f);
+    ImGui::PushFont(gui.GetFontBold());
+
+    ImGui::PushStyleColor(ImGuiCol_Button, {});
+    ImGui::BeginDisabled();
+    ImGui::ImageButton("DTR_ASSET_ICON", gui.FindSVGIconForAssetType(subAssetID), iconSize);
+    ImGui::EndDisabled();
+    ImGui::PopStyleColor();
+
+    ImGui::SameLine();
+    ImGui::NextColumn();
+
+    AssetHandle h = gui.CORE->GetAssets()->FindAsset(subAssetID);
+
+    std::optional<std::string_view> result = h->TryGetName();
+    if (result.has_value() && !result.value().empty()) {
+        ImGui::Text("%s (SubAsset of %s)", h->TryGetName().value().data(), file.Name().data());
+    } else {
+        ImGui::Text("[MISSING NAME] (SubAsset of %s)", file.Name().data());
+    }
+
+    ImGui::PopFont();
+    ImGui::PushFont(gui.GetFont());
+
+    std::string path = file.Path().string();
+    ImGui::TextUnformatted(std::string("Path: ROOT").append(sizeof(char), static_cast<char>(std::filesystem::path::preferred_separator)).append(path).c_str());
+    std::string absolutePath = file.AbsolutePath().string();
+    ImGui::TextUnformatted(std::string("Absolute Path: ").append(absolutePath).c_str());
+
+    ImGui::PopFont();
+
+    ImGui::Columns(1);
+    ImGui::Separator();
+
+    if (h.HasValue()) {
+        RenderAssetView(h);
     }
 }
 void DisplayTargetRenderer::RenderIconChangePopup(const FNode& file, MetaAssetInfo& meta) {
@@ -204,6 +264,10 @@ void DisplayTargetRenderer::RenderIconChangePopup(const FNode& file, MetaAssetIn
             end = &items.back() + 1;
         } else if (Assets::IsFrameBufferFile(file)) {
             auto& items = FileIcons::FrameBufferIcons;
+            begin = &items.front();
+            end = &items.back() + 1;
+        } else if (Assets::IsMeshFile(file)) {
+            auto& items = FileIcons::MeshIcons;
             begin = &items.front();
             end = &items.back() + 1;
         } else {
@@ -259,7 +323,7 @@ void DisplayTargetRenderer::RenderFolderView(FNode& folder) {
             ImGui::TableSetColumnIndex(1);
             ImGui::TextUnformatted(child.FullName().data());
             ImGui::TableSetColumnIndex(2);
-            std::string size = FormatBytes(static_cast<float>(child.Size()));
+            std::string size = FormatBytes(child.Size());
             ImGui::TextUnformatted(size.c_str());
         }
         ImGui::EndTable();
@@ -282,6 +346,10 @@ void DisplayTargetRenderer::RenderAssetView(AssetHandle h) {
         RenderMaterialView(h);
     } else if (h->IsFrameBuffer()) {
         RenderFrameBufferView(h);
+    } else if (h->IsMesh()) {
+        RenderMeshView(h);
+    } else if (h->IsModel()) {
+        RenderModelView(h);
     } else {
         RenderTextView(h);
     }
@@ -318,6 +386,7 @@ void DisplayTargetRenderer::RenderComponentDefinitionView(AssetHandle h) {
 
     if (ImGui::Button("Refresh", { ImGui::GetContentRegionAvail().x, 0 })) {
         h->ForceDeserialize();
+        observer.get().gui.get().Events.Observer.OnAssetRefreshed(h);
     }
 
     if (ImGui::IsItemHovered()) {
@@ -348,6 +417,7 @@ void DisplayTargetRenderer::RenderSamplerView(AssetHandle h) {
 
     if (ImGui::Button("Refresh", { ImGui::GetContentRegionAvail().x, 0 })) {
         h->ForceDeserialize();
+        observer.get().gui.get().Events.Observer.OnAssetRefreshed(h);
     }
     if (ImGui::IsItemHovered()) {
         ImGui::BeginTooltip();
@@ -375,40 +445,57 @@ void DisplayTargetRenderer::RenderTextureView(AssetHandle h) {
     windowHeight = windowHeight - totalBottomPadding;
 
     if (h->HasDeserializedData()) {
-        const GPUTexture* gpuTex = observer.get().gui.get().CORE->GetAssetGPUBridge()->GetTextures().Query(h->ID());
-        assert(gpuTex);
-        const Texture& tex = h->DataAs<Texture>();
+        if (!h->HasContentInVideoMemory()) {
+            if (!h->HasContentInSystemMemory()) {
+                h->ReadContentIntoSystemMemory();
+            }
+            h->UploadContentIntoVideoMemory();
+            h->ReleaseContentInSystemMemory();
 
-        float w = static_cast<float>(tex.Width);
-        float h = static_cast<float>(tex.Height);
-        float aspect = w / h;
+            ImGui::Text("Texture is not deserialized...");
+        } else {
+            assert(observer.get().gui.get().CORE->GetAssetGPUBridge()->GetTextures().Query(h->ID()));
+            const GPUTexture& gpuTex = observer.get().gui.get().CORE->GetAssetGPUBridge()->GetTextures().Fetch(h->ID());
 
-        float maxWidth = windowWidth;
-        float maxHeight = windowHeight;
+            const Texture& tex = h->DataAs<Texture>();
 
-        w = maxWidth;
-        h = w / aspect;
+            float w = static_cast<float>(tex.Width);
+            float h = static_cast<float>(tex.Height);
+            float aspect = w / h;
 
-        if (h > maxHeight) {
-            aspect = w / h;
-            h = maxHeight;
-            w = h * aspect;
-        }
+            float maxWidth = windowWidth;
+            float maxHeight = windowHeight;
 
-        ImGui::Image(*gpuTex, { w, h }, { 0, 1 }, { 1, 0 }, { (float) r, (float) g, (float) b, (float) a }, { 1, 1, 0, 1 });
+            w = maxWidth;
+            h = w / aspect;
 
-        if (drawInspector) {
-            ImRect rc = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
-            ImVec2 mouseUVCoord = (ImGui::GetIO().MousePos - rc.Min) / rc.GetSize();
-            mouseUVCoord.y = 1.f - mouseUVCoord.y;
-            if (mouseUVCoord.x >= 0.0f &&
-                mouseUVCoord.y >= 0.0f &&
-                mouseUVCoord.x <= 1.0f &&
-                mouseUVCoord.y <= 1.0f) {
-                float w = static_cast<float>(tex.Width);
-                float h = static_cast<float>(tex.Height);
-                auto pixels = reinterpret_cast<const unsigned char*>(tex.PixelData.data());
-                ImageInspect::inspect(static_cast<int>(w), static_cast<int>(h), pixels, mouseUVCoord, { w, h }, drawNormals, drawHistogram);
+            if (h > maxHeight) {
+                aspect = w / h;
+                h = maxHeight;
+                w = h * aspect;
+            }
+
+            ImGui::Image(gpuTex, { w, h }, { 0, 1 }, { 1, 0 }, { (float) r, (float) g, (float) b, (float) a }, { 1, 1, 0, 1 });
+
+            if (drawInspector) {
+                if (tex.PixelData.has_value()) {
+                    ImRect rc = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+                    ImVec2 mouseUVCoord = (ImGui::GetIO().MousePos - rc.Min) / rc.GetSize();
+                    mouseUVCoord.y = 1.f - mouseUVCoord.y;
+                    if (mouseUVCoord.x >= 0.0f &&
+                        mouseUVCoord.y >= 0.0f &&
+                        mouseUVCoord.x <= 1.0f &&
+                        mouseUVCoord.y <= 1.0f) {
+                        auto pixels = reinterpret_cast<const unsigned char*>(tex.PixelData.value().data());
+                        ImageInspect::inspect(tex.Width, tex.Height, pixels, mouseUVCoord, { w, h }, drawNormals, drawHistogram, tex.Channels);
+                    }
+                } else if (ImGui::IsItemHovered()) {
+                    ImGui::BeginTooltip();
+                    ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+                    ImGui::TextUnformatted("Texture has no data in system memory.");
+                    ImGui::PopTextWrapPos();
+                    ImGui::EndTooltip();
+                }
             }
         }
     } else {
@@ -425,8 +512,11 @@ void DisplayTargetRenderer::RenderTextureView(AssetHandle h) {
     ImGui::AlignTextToFramePadding(); ImGui::Text("Image Inspect:");   ImGui::SameLine(); ImGui::Checkbox("##inspect", &drawInspector);
     ImGui::SameLine(); ImGui::Text("Normals:");    ImGui::SameLine(); ImGui::Checkbox("##normals", &drawNormals);
     ImGui::SameLine(); ImGui::Text("Histogram:");  ImGui::SameLine(); ImGui::Checkbox("##histogram", &drawHistogram);
-    if (ImGui::Button("Refresh", { ImGui::GetContentRegionAvail().x, 0 })) {
+
+    float availX = ImGui::GetContentRegionAvail().x;
+    if (ImGui::Button("Refresh", { availX / 2, 0 })) {
         h->ForceDeserialize();
+        observer.get().gui.get().Events.Observer.OnAssetRefreshed(h);
     }
     if (ImGui::IsItemHovered()) {
         ImGui::BeginTooltip();
@@ -434,6 +524,32 @@ void DisplayTargetRenderer::RenderTextureView(AssetHandle h) {
         ImGui::TextUnformatted("Forces deserialization on this texture. All data in RAM/VRAM is purged, and new data is read from disk.");
         ImGui::PopTextWrapPos();
         ImGui::EndTooltip();
+    }
+    ImGui::SameLine();
+
+    bool hasContent = observer.get().gui.get().CORE->GetAssets()->AssetHasContentInSystemMemory(h->ID());
+    if (!hasContent) {
+        if (ImGui::Button("Load into system memory", { availX / 2, 0 })) {
+            h->ReadContentIntoSystemMemory();
+        }
+        if (ImGui::IsItemHovered()) {
+            ImGui::BeginTooltip();
+            ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+            ImGui::TextUnformatted("Loads asset's data from disk into RAM. May result in high RAM usage.");
+            ImGui::PopTextWrapPos();
+            ImGui::EndTooltip();
+        }
+    } else {
+        if (ImGui::Button("Release from system memory", { availX / 2, 0 })) {
+            h->ReleaseContentInSystemMemory();
+        }
+        if (ImGui::IsItemHovered()) {
+            ImGui::BeginTooltip();
+            ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+            ImGui::TextUnformatted("Releases asset's data from RAM. Helps with high RAM usage.");
+            ImGui::PopTextWrapPos();
+            ImGui::EndTooltip();
+        }
     }
 }
 void DisplayTargetRenderer::RenderShaderView(AssetHandle h) {
@@ -460,6 +576,7 @@ void DisplayTargetRenderer::RenderShaderView(AssetHandle h) {
 
     if (ImGui::Button("Refresh", { ImGui::GetContentRegionAvail().x, 0 })) {
         h->ForceDeserialize();
+        observer.get().gui.get().Events.Observer.OnAssetRefreshed(h);
     }
     if (ImGui::IsItemHovered()) {
         ImGui::BeginTooltip();
@@ -489,6 +606,7 @@ void DisplayTargetRenderer::RenderShaderProgramView(AssetHandle h) {
 
     if (ImGui::Button("Refresh", { ImGui::GetContentRegionAvail().x, 0 })) {
         h->ForceDeserialize();
+        observer.get().gui.get().Events.Observer.OnAssetRefreshed(h);
     }
     if (ImGui::IsItemHovered()) {
         ImGui::BeginTooltip();
@@ -520,6 +638,7 @@ void DisplayTargetRenderer::RenderMaterialView(AssetHandle h) {
 
     if (ImGui::Button("Refresh", { ImGui::GetContentRegionAvail().x, 0 })) {
         h->ForceDeserialize();
+        observer.get().gui.get().Events.Observer.OnAssetRefreshed(h);
     }
     if (ImGui::IsItemHovered()) {
         ImGui::BeginTooltip();
@@ -553,6 +672,7 @@ void DisplayTargetRenderer::RenderFrameBufferView(AssetHandle h) {
 
     if (ImGui::Button("Refresh", { ImGui::GetContentRegionAvail().x, 0 })) {
         h->ForceDeserialize();
+        observer.get().gui.get().Events.Observer.OnAssetRefreshed(h);
     }
 
     if (ImGui::IsItemHovered()) {
@@ -561,6 +681,168 @@ void DisplayTargetRenderer::RenderFrameBufferView(AssetHandle h) {
         ImGui::TextUnformatted("Forces deserialization on this frame buffer object. All data in VRAM is purged, and new data is allocated.");
         ImGui::PopTextWrapPos();
         ImGui::EndTooltip();
+    }
+}
+void DisplayTargetRenderer::RenderMeshView(AssetHandle h) {
+    assert(h->IsMesh());
+
+    meshDisplay.SetDisplayTarget(h);
+    meshDisplay.RenderMessagesTable();
+    ImGui::Separator();
+
+    static int bottomContentLineCount = 3;
+    float lineHeight = ImGui::GetFrameHeight() + ImGui::GetStyle().CellPadding.y * 2;
+    static float extraPadding = 34; /* pad by an extra amount to remove scroll bar, don't pad and see the scroll bar appear on right side */
+    //ImGui::SliderFloat("label", &extraPadding, 0, 50); /* was used to test padding amount, not deleted to easily re-test in future */
+    float totalBottomPadding = lineHeight * bottomContentLineCount + extraPadding;
+
+    auto [windowWidth, windowHeight] = ImGui::GetContentRegionAvail();
+    windowWidth = windowWidth - ImGui::GetStyle().FramePadding.x;
+    windowHeight = windowHeight - totalBottomPadding;
+
+    if (h->HasDeserializedData()) {
+        if (!h->HasContentInVideoMemory()) {
+            if (!h->HasContentInSystemMemory()) {
+                h->ReadContentIntoSystemMemory();
+            }
+            h->UploadContentIntoVideoMemory();
+            h->ReleaseContentInSystemMemory();
+
+            ImGui::Text("Texture is not deserialized...");
+        } else {
+            meshDisplay.RenderMeshPreview({ static_cast<unsigned>(windowWidth), static_cast<unsigned>(windowHeight) });
+            meshDisplay.RenderPreviewSettings();
+        }
+    } else {
+        ImGui::Text("Mesh is not deserialized...");
+    }
+
+    if (ImGui::GetContentRegionAvail().y > 34.0f) {
+        ImGui::SetCursorPosY(ImGui::GetWindowHeight() - ImGui::GetFrameHeight() - extraPadding);
+    }
+
+    float availX = ImGui::GetContentRegionAvail().x;
+    if (ImGui::Button("Refresh", { availX / 2, 0 })) {
+        h->ForceDeserialize();
+        observer.get().gui.get().Events.Observer.OnAssetRefreshed(h);
+    }
+
+    if (ImGui::IsItemHovered()) {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted("Forces deserialization on this mesh object. All data in RAM/VRAM is purged, and new data is allocated.");
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
+    ImGui::SameLine();
+
+    bool hasContent = observer.get().gui.get().CORE->GetAssets()->AssetHasContentInSystemMemory(h->ID());
+    if (!hasContent) {
+        if (ImGui::Button("Load into system memory", { availX / 2, 0 })) {
+            h->ReadContentIntoSystemMemory();
+        }
+        if (ImGui::IsItemHovered()) {
+            ImGui::BeginTooltip();
+            ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+            ImGui::TextUnformatted("Loads asset's data from disk into RAM. May result in high RAM usage.");
+            ImGui::PopTextWrapPos();
+            ImGui::EndTooltip();
+        }
+    } else {
+        if (ImGui::Button("Release from system memory", { availX / 2, 0 })) {
+            h->ReleaseContentInSystemMemory();
+        }
+        if (ImGui::IsItemHovered()) {
+            ImGui::BeginTooltip();
+            ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+            ImGui::TextUnformatted("Releases asset's data from RAM. Helps with high RAM usage.");
+            ImGui::PopTextWrapPos();
+            ImGui::EndTooltip();
+        }
+    }
+}
+void DisplayTargetRenderer::RenderModelView(AssetHandle h) {
+    assert(h->IsModel());
+    const ImGuiStyle& style{ ImGui::GetStyle() };
+
+    modelDisplay.SetDisplayTarget(h);
+    modelDisplay.RenderMessagesTable();
+    ImGui::Separator();
+    if (ImGui::BeginChild("###modelContentsHolder", { 0, ImGui::GetContentRegionAvail().y - ImGui::GetFrameHeight() - style.FramePadding.y * 2 })) {
+        modelDisplay.RenderModelContents();
+    }
+    ImGui::EndChild();
+
+    if (ImGui::BeginTable("modelDisplayButtonsTable", 3)) {
+        ImGui::TableNextColumn();
+        if (ImGui::Button("Refresh", ImGui::GetContentRegionAvail())) {
+            h->ForceDeserialize();
+            observer.get().gui.get().Events.Observer.OnAssetRefreshed(h);
+        }
+
+        if (ImGui::IsItemHovered()) {
+            ImGui::BeginTooltip();
+            ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+            ImGui::TextUnformatted("Forces deserialization on this model object. All data in RAM/VRAM is purged, and new data is allocated.");
+            ImGui::PopTextWrapPos();
+            ImGui::EndTooltip();
+        }
+
+        ImGui::TableNextColumn();
+        Assets& assets = *observer.get().gui.get().CORE->GetAssets();
+        bool hasRAMContent = assets.AssetHasContentInSystemMemory(h->ID());
+        if (!hasRAMContent) {
+            if (ImGui::Button("Load into system memory", ImGui::GetContentRegionAvail())) {
+                assets.ReadContentOfAssetIntoSystemMemory(h->ID());
+            }
+            if (ImGui::IsItemHovered()) {
+                ImGui::BeginTooltip();
+                ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+                ImGui::TextUnformatted("Loads asset's data from disk into RAM. May result in high RAM usage.");
+                ImGui::PopTextWrapPos();
+                ImGui::EndTooltip();
+            }
+        } else {
+            if (ImGui::Button("Release from system memory", ImGui::GetContentRegionAvail())) {
+                assets.ReleaseContentOfAssetInSystemMemory(h->ID());
+            }
+            if (ImGui::IsItemHovered()) {
+                ImGui::BeginTooltip();
+                ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+                ImGui::TextUnformatted("Releases asset's data from RAM. Helps with high RAM usage.");
+                ImGui::PopTextWrapPos();
+                ImGui::EndTooltip();
+            }
+        }
+
+        ImGui::TableNextColumn();
+        bool hasVRAMContent = assets.AssetHasContentInVideoMemory(h->ID());
+        if (!hasVRAMContent) {
+            ImGui::BeginDisabled(!hasRAMContent);
+            if (ImGui::Button("Load into video memory", ImGui::GetContentRegionAvail())) {
+                assets.UploadContentOfAssetIntoVideoMemory(h->ID());
+            }
+            ImGui::EndDisabled();
+            if (ImGui::IsItemHovered()) {
+                ImGui::BeginTooltip();
+                ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+                ImGui::TextUnformatted("Loads asset's data from system memory into into VRAM. May result in high VRAM usage.");
+                ImGui::PopTextWrapPos();
+                ImGui::EndTooltip();
+            }
+        } else {
+            if (ImGui::Button("Release from video memory", ImGui::GetContentRegionAvail())) {
+                assets.ReleaseContentOfAssetInVideoMemory(h->ID());
+            }
+            if (ImGui::IsItemHovered()) {
+                ImGui::BeginTooltip();
+                ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+                ImGui::TextUnformatted("Releases asset's data from VRAM. Helps with high VRAM usage.");
+                ImGui::PopTextWrapPos();
+                ImGui::EndTooltip();
+            }
+        }
+        ImGui::EndTable();
     }
 }
 void DisplayTargetRenderer::RenderTextView(AssetHandle h) {
@@ -599,7 +881,11 @@ void DisplayTargetRenderer::OnAssetDeleted(AssetHandle asset) {
     }
 }
 void DisplayTargetRenderer::OnAssetFocused(AssetHandle asset) {
-    SetDisplayTarget(asset->File());
+    if (!asset->IsSubAsset()) {
+        SetDisplayTarget(asset->File());
+    } else {
+        SetDisplayTarget(asset->File(), asset->ID());
+    }
 }
 void DisplayTargetRenderer::OnFolderFocused(FNode& folder) {
     SetDisplayTarget(folder);

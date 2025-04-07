@@ -223,7 +223,7 @@ FNode::ChildrenList FNode::Children() { return children; }
 FNode::ChildrenList FNode::Children() const { return const_cast<decltype(children)&>(children); }
 
 FNode FNode::HollowCopy(const FNode& other) {
-    return { { other.OwningProject(), other.ParentNode(), other.Name(), other.Extension(), "", other.IsDirectory() } };
+    return { { other.OwningProject(), other.ParentNode(), other.Name(), other.Extension(), {}, other.IsDirectory() } };
 }
 
 FNode* FNode::CreateChildFile(FNodeCreationParams&& params) {

@@ -66,7 +66,7 @@ void SamplerDisplay::RenderMessagesTable() noexcept {
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
 
     ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::ERROR_COLOR);
-    for (auto& message : samplerAsset->ErrorMessages()) {
+    for (const auto& message : samplerAsset->ErrorMessages()) {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
 
@@ -76,13 +76,12 @@ void SamplerDisplay::RenderMessagesTable() noexcept {
 
         ImGui::TableSetColumnIndex(1);
 
-        const std::string& m{ std::any_cast<const std::string&>(message) };
-        ImGui::TextWrapped("%s", m.c_str());
+        ImGui::TextWrapped("%s", message.Message.c_str());
     }
     ImGui::PopStyleColor();
 
     ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::WARNING_COLOR);
-    for (auto& message : samplerAsset->WarningMessages()) {
+    for (const auto& message : samplerAsset->WarningMessages()) {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
 
@@ -92,13 +91,12 @@ void SamplerDisplay::RenderMessagesTable() noexcept {
 
         ImGui::TableSetColumnIndex(1);
 
-        const std::string& m{ std::any_cast<const std::string&>(message) };
-        ImGui::TextWrapped("%s", m.c_str());
+        ImGui::TextWrapped("%s", message.Message.c_str());
     }
     ImGui::PopStyleColor();
 
     ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::INFO_COLOR);
-    for (auto& message : samplerAsset->InfoMessages()) {
+    for (const auto& message : samplerAsset->InfoMessages()) {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
 
@@ -108,8 +106,7 @@ void SamplerDisplay::RenderMessagesTable() noexcept {
 
         ImGui::TableSetColumnIndex(1);
 
-        const std::string& m{ std::any_cast<const std::string&>(message) };
-        ImGui::TextWrapped("%s", m.c_str());
+        ImGui::TextWrapped("%s", message.Message.c_str());
     }
     ImGui::PopStyleColor();
 

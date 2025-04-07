@@ -14,7 +14,8 @@ static void WriteFunction(void* ctx, void* data, int size) {
     std::ranges::copy(pixels, etd->EncodedData.begin());
 }
 
-EncodedTextureData SerializeTexture(const Texture& texture, TextureEncoding encoding) {
+std::optional<EncodedTextureData> SerializeTexture(const Texture& texture, TextureEncoding encoding) {
+    if (!texture.PixelData.has_value()) { return {}; }
     stbi_flip_vertically_on_write(true);
 
     EncodedTextureData rv;
@@ -24,7 +25,7 @@ EncodedTextureData SerializeTexture(const Texture& texture, TextureEncoding enco
     int texW = static_cast<int>(texture.Width);
     int texH = static_cast<int>(texture.Height);
     int stride = texture.Channels;
-    auto& pixel = texture.PixelData;
+    auto& pixel = texture.PixelData.value();
 
     switch (encoding) {
     using enum TextureEncoding;

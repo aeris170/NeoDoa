@@ -33,5 +33,5 @@ void DeserializeUserDefinedComponentStorage(tinyxml2::XMLElement& componentNode,
         fields.emplace_back(typeName, name, value);
     }
 
-    storage.AttachComponentWithData(id, std::move(fields));
+    storage.AttachComponentWithData(id, *Core::GetCore()->GetAssets(), std::move(fields));
 }

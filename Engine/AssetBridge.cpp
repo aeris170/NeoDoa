@@ -3,7 +3,7 @@
 // GPUFrameBuffer
 template<>
 std::vector<FrameBufferAllocatorMessage> GPUFrameBuffers::Allocate(const Assets& assets, const UUID asset) noexcept {
-    AssetHandle handle{ assets.FindAsset(asset) };
+    ConstAssetHandle handle{ assets.FindAsset(asset) };
     assert(handle && handle->IsFrameBuffer());
     const FrameBuffer& frameBuffer{ handle->DataAs<FrameBuffer>() };
 
@@ -133,7 +133,7 @@ std::vector<FrameBufferAllocatorMessage> GPUFrameBuffers::Allocate(const Assets&
 // GPUShader
 template<>
 std::vector<ShaderCompilerMessage> GPUShaders::Allocate(const Assets& assets, const UUID asset) noexcept {
-    AssetHandle handle{ assets.FindAsset(asset) };
+    ConstAssetHandle handle{ assets.FindAsset(asset) };
     assert(handle && handle->IsShader());
     const Shader& shader{ handle->DataAs<Shader>() };
 
@@ -152,7 +152,7 @@ std::vector<ShaderCompilerMessage> GPUShaders::Allocate(const Assets& assets, co
 // GPUShaderProgram
 template<>
 std::vector<ShaderLinkerMessage> GPUShaderPrograms::Allocate(const Assets& assets, const UUID asset) noexcept {
-    AssetHandle handle{ assets.FindAsset(asset) };
+    ConstAssetHandle handle{ assets.FindAsset(asset) };
     assert(handle && handle->IsShaderProgram());
     const ShaderProgram& program{ handle->DataAs<ShaderProgram>() };
 
@@ -231,7 +231,7 @@ std::vector<ShaderLinkerMessage> GPUShaderPrograms::Allocate(const Assets& asset
 // GPUSampler
 template<>
 std::vector<SamplerAllocatorMessage> GPUSamplers::Allocate(const Assets& assets, const UUID asset) noexcept {
-    AssetHandle handle{ assets.FindAsset(asset) };
+    ConstAssetHandle handle{ assets.FindAsset(asset) };
     assert(handle && handle->IsSampler());
     const Sampler& sampler{ handle->DataAs<Sampler>() };
 
@@ -263,16 +263,17 @@ std::vector<SamplerAllocatorMessage> GPUSamplers::Allocate(const Assets& assets,
 // GPUTexture
 template<>
 std::vector<TextureAllocatorMessage> GPUTextures::Allocate(const Assets& assets, const UUID asset) noexcept {
-    AssetHandle handle{ assets.FindAsset(asset) };
+    ConstAssetHandle handle{ assets.FindAsset(asset) };
     assert(handle && handle->IsTexture());
     const Texture& texture{ handle->DataAs<Texture>() };
+    assert(texture.PixelData.has_value());
 
     GPUTextureBuilder builder;
     builder.SetName(texture.Name)
         .SetWidth(texture.Width)
         .SetHeight(texture.Height)
         .SetDepth(1)
-        .SetData(texture.Format, texture.PixelData);
+        .SetData(texture.Format, texture.PixelData.value());
 
     auto [gpuTexture, messages] = builder.Build();
     if (gpuTexture.has_value()) {
@@ -285,14 +286,105 @@ std::vector<TextureAllocatorMessage> GPUTextures::Allocate(const Assets& assets,
 template<>
 const GPUTexture& GPUTextures::Missing() const noexcept {
     static const Texture& missingTexture = Texture::Missing();
+    assert(missingTexture.PixelData.has_value());
 
     static GPUTexture missing = GPUTextureBuilder()
         .SetName(missingTexture.Name)
         .SetWidth(missingTexture.Width)
         .SetHeight(missingTexture.Height)
-        .SetData(missingTexture.Format, missingTexture.PixelData)
+        .SetData(missingTexture.Format, missingTexture.PixelData.value())
         .Build().first.value();
     return missing;
+}
+
+// GPUBuffer (Vertex)
+template<>
+std::vector<BufferAllocatorMessage> GPUVertexBuffers::Allocate(const Assets& assets, const UUID asset) noexcept {
+    ConstAssetHandle handle{ assets.FindAsset(asset) };
+    assert(handle && handle->IsMesh() || handle->IsModel());
+    const Mesh& mesh {
+        handle->IsMesh() ?
+        handle->DataAs<Mesh>() :
+        handle->DataAs<Model>().UnifiedModelMesh
+    };
+    assert(mesh.Vertices.has_value());
+
+    GPUBufferBuilder builder;
+    builder.SetName(mesh.Name)
+        .SetStorage(std::as_bytes(std::span{ mesh.Vertices.value() }));
+
+    auto [gpuBuffer, messages] = builder.Build();
+    if (gpuBuffer.has_value()) {
+        database[asset] = std::move(gpuBuffer.value());
+    } else {
+        DOA_LOG_ERROR("Vertex buffer allocation failed for %s (UUID: %s). Aborting.", mesh.Name.c_str(), asset.AsString().c_str());
+    }
+    return messages;
+}
+
+// GPUBuffer (Index)
+template<>
+std::vector<BufferAllocatorMessage> GPUIndexBuffers::Allocate(const Assets& assets, const UUID asset) noexcept {
+    ConstAssetHandle handle{ assets.FindAsset(asset) };
+    assert(handle && handle->IsMesh() || handle->IsModel());
+    const Mesh& mesh {
+        handle->IsMesh() ?
+        handle->DataAs<Mesh>() :
+        handle->DataAs<Model>().UnifiedModelMesh
+    };
+    assert(mesh.Indices.has_value());
+
+    GPUBufferBuilder builder;
+    builder.SetName(mesh.Name)
+        .SetStorage(std::as_bytes(std::span{ mesh.Indices.value() }));
+
+    auto [gpuBuffer, messages] = builder.Build();
+    if (gpuBuffer.has_value()) {
+        database[asset] = std::move(gpuBuffer.value());
+    } else {
+        DOA_LOG_ERROR("Index buffer allocation failed for %s (UUID: %s). Aborting.", mesh.Name.c_str(), asset.AsString().c_str());
+    }
+    return messages;
+}
+
+// GPUBuffer (Command)
+template<>
+std::vector<BufferAllocatorMessage> GPUCommandBuffers::Allocate(const Assets& assets, const UUID asset) noexcept {
+    ConstAssetHandle handle{ assets.FindAsset(asset) };
+    assert(handle && handle->IsModel());
+    const Model& model{ handle->DataAs<Model>() };
+
+    std::vector<RenderMultiIndirectElementsCommand> commands;
+    commands.reserve(model.Meshes.size());
+    for (const Model::Mesh& mMesh : model.Meshes) {
+        commands.emplace_back(
+            mMesh.IndexCount,
+            mMesh.InstanceCount,
+            mMesh.BaseIndex,
+            mMesh.BaseVertex,
+            mMesh.BaseInstance
+        );
+    }
+
+    GPUBufferBuilder builder;
+    builder.SetName(model.Name)
+        .SetStorage(std::as_bytes(std::span{ commands }));
+
+    auto [gpuBuffer, messages] = builder.Build();
+    if (gpuBuffer.has_value()) {
+        database[asset] = std::move(gpuBuffer.value());
+    } else {
+        DOA_LOG_ERROR("Command buffer allocation failed for %s (UUID: %s). Aborting.", model.Name.c_str(), asset.AsString().c_str());
+    }
+    return messages;
+}
+
+// GPUBuffer (General)
+template<>
+std::vector<BufferAllocatorMessage> GPUBuffers::Allocate(const Assets& assets, const UUID asset) noexcept {
+    ConstAssetHandle handle{ assets.FindAsset(asset) };
+    // TODO implement for types requesting buffers for general uses.
+    return {};
 }
 
 GPUSamplers& AssetGPUBridge::GetSamplers() noexcept                         { return gpuSamplers;       }
@@ -305,3 +397,23 @@ GPUShaderPrograms& AssetGPUBridge::GetShaderPrograms() noexcept             { re
 const GPUShaderPrograms& AssetGPUBridge::GetShaderPrograms() const noexcept { return gpuShaderPrograms; }
 GPUFrameBuffers& AssetGPUBridge::GetFrameBuffers() noexcept                 { return gpuFrameBuffers;   }
 const GPUFrameBuffers& AssetGPUBridge::GetFrameBuffers() const noexcept     { return gpuFrameBuffers;   }
+GPUVertexBuffers& AssetGPUBridge::GetVertexBuffers() noexcept               { return gpuVertexBuffers;  }
+const GPUVertexBuffers& AssetGPUBridge::GetVertexBuffers() const noexcept   { return gpuVertexBuffers;  }
+GPUIndexBuffers& AssetGPUBridge::GetIndexBuffers() noexcept                 { return gpuIndexBuffers;   }
+const GPUIndexBuffers& AssetGPUBridge::GetIndexBuffers() const noexcept     { return gpuIndexBuffers;   }
+GPUCommandBuffers& AssetGPUBridge::GetCommandBuffers() noexcept             { return gpuCommandBuffers; }
+const GPUCommandBuffers& AssetGPUBridge::GetCommandBuffers() const noexcept { return gpuCommandBuffers; }
+GPUBuffers& AssetGPUBridge::GetBuffers() noexcept                           { return gpuBuffers;        }
+const GPUBuffers& AssetGPUBridge::GetBuffers() const noexcept               { return gpuBuffers;        }
+
+void AssetGPUBridge::Clear() noexcept {
+    gpuSamplers.Clear();
+    gpuTextures.Clear();
+    gpuShaders.Clear();
+    gpuShaderPrograms.Clear();
+    gpuFrameBuffers.Clear();
+    gpuVertexBuffers.Clear();
+    gpuIndexBuffers.Clear();
+    gpuCommandBuffers.Clear();
+    gpuBuffers.Clear();
+}

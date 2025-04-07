@@ -13,10 +13,11 @@
 #include <Engine/GPUShader.hpp>
 #include <Engine/GPUTexture.hpp>
 #include <Engine/GPUFrameBuffer.hpp>
+#include <Engine/GPUBuffer.hpp>
 
 struct AssetGPUBridge;
 
-template<typename T, typename ErrorMessageType>
+template<typename T, typename ErrorMessageType, entt::hashed_string::hash_type U>
 struct GPUObjectDatabase {
 #if DEBUG
     using Database = std::unordered_map<UUID, T>;
@@ -65,13 +66,17 @@ struct GPUObjectDatabase {
         DOA_LOG_FATAL("Illegal missing resource!"); std::unreachable();
     }
 
+    void Clear() noexcept {
+        database.clear();
+    }
+
 private:
     AssetGPUBridge& bridge;
     Database database{};
 };
 
 #define ND_EXPLICIT_SPECIALIZE_ALLOCATOR(Name, T, ErrorMessageType) \
-using Name = GPUObjectDatabase<T, ErrorMessageType>; \
+using Name = GPUObjectDatabase<T, ErrorMessageType, entt::hashed_string{#Name}>; \
 template<> \
 std::vector<ErrorMessageType> Name::Allocate(const Assets& assets, const UUID asset) noexcept
 #define ND_EXPLICIT_SPECIALIZE_ALLOCATOR_SPECIALIZE_MISSING(Name, T) \
@@ -82,6 +87,10 @@ ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUShaders, GPUShader, ShaderCompilerMessage);
 ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUShaderPrograms, GPUShaderProgram, ShaderLinkerMessage);
 ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUSamplers, GPUSampler, SamplerAllocatorMessage);
 ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUTextures, GPUTexture, TextureAllocatorMessage); ND_EXPLICIT_SPECIALIZE_ALLOCATOR_SPECIALIZE_MISSING(GPUTextures, GPUTexture);
+ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUVertexBuffers, GPUBuffer, BufferAllocatorMessage);
+ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUIndexBuffers, GPUBuffer, BufferAllocatorMessage);
+ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUCommandBuffers, GPUBuffer, BufferAllocatorMessage);
+ND_EXPLICIT_SPECIALIZE_ALLOCATOR(GPUBuffers, GPUBuffer, BufferAllocatorMessage);
 #undef ND_EXPLICIT_SPECIALIZE_ALLOCATOR
 #undef ND_EXPLICIT_SPECIALIZE_ALLOCATOR_SPECIALIZE_MISSING
 
@@ -97,6 +106,16 @@ struct AssetGPUBridge {
     const GPUShaderPrograms& GetShaderPrograms() const noexcept;
     GPUFrameBuffers& GetFrameBuffers() noexcept;
     const GPUFrameBuffers& GetFrameBuffers() const noexcept;
+    GPUVertexBuffers& GetVertexBuffers() noexcept;
+    const GPUVertexBuffers& GetVertexBuffers() const noexcept;
+    GPUIndexBuffers& GetIndexBuffers() noexcept;
+    const GPUIndexBuffers& GetIndexBuffers() const noexcept;
+    GPUCommandBuffers& GetCommandBuffers() noexcept;
+    const GPUCommandBuffers& GetCommandBuffers() const noexcept;
+    GPUBuffers& GetBuffers() noexcept;
+    const GPUBuffers& GetBuffers() const noexcept;
+
+    void Clear() noexcept;
 
 private:
     GPUSamplers gpuSamplers{ *this };
@@ -104,6 +123,10 @@ private:
     GPUShaders gpuShaders{ *this };
     GPUShaderPrograms gpuShaderPrograms{ *this };
     GPUFrameBuffers gpuFrameBuffers{ *this };
+    GPUVertexBuffers gpuVertexBuffers{ *this };
+    GPUIndexBuffers gpuIndexBuffers{ *this };
+    GPUCommandBuffers gpuCommandBuffers{ *this };
+    GPUBuffers gpuBuffers{ *this };
 
 public:
     AssetGPUBridge() noexcept = default;

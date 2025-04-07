@@ -354,4 +354,7 @@ void ImGuiClean() {
     }
     ImGui::DestroyContext();
     context = nullptr;
+
+    commands.clear();
+    commands.shrink_to_fit();
 }

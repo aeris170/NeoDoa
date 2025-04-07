@@ -46,7 +46,7 @@ void ShaderDisplay::RenderMessagesTable() noexcept {
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
 
     ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::ERROR_COLOR);
-    for (auto& message : shaderAsset->ErrorMessages()) {
+    for (const auto& message : shaderAsset->ErrorMessages()) {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
 
@@ -56,13 +56,12 @@ void ShaderDisplay::RenderMessagesTable() noexcept {
 
         ImGui::TableSetColumnIndex(1);
 
-        const ShaderCompilerMessage& m{ std::any_cast<const ShaderCompilerMessage&>(message) };
-        ImGui::TextWrapped("%s", m.ShortMessage.c_str());
+        ImGui::TextWrapped("%s", message.Message.c_str());
     }
     ImGui::PopStyleColor();
 
     ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::WARNING_COLOR);
-    for (auto& message : shaderAsset->WarningMessages()) {
+    for (const auto& message : shaderAsset->WarningMessages()) {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
 
@@ -72,13 +71,12 @@ void ShaderDisplay::RenderMessagesTable() noexcept {
 
         ImGui::TableSetColumnIndex(1);
 
-        const ShaderCompilerMessage& m{ std::any_cast<const ShaderCompilerMessage&>(message) };
-        ImGui::TextWrapped("%s", m.ShortMessage.c_str());
+        ImGui::TextWrapped("%s", message.Message.c_str());
     }
     ImGui::PopStyleColor();
 
     ImGui::PushStyleColor(ImGuiCol_Text, ComponentDefinitionViewColors::INFO_COLOR);
-    for (auto& message : shaderAsset->InfoMessages()) {
+    for (const auto& message : shaderAsset->InfoMessages()) {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
 
@@ -88,8 +86,7 @@ void ShaderDisplay::RenderMessagesTable() noexcept {
 
         ImGui::TableSetColumnIndex(1);
 
-        const ShaderCompilerMessage& m{ std::any_cast<const ShaderCompilerMessage&>(message) };
-        ImGui::TextWrapped("%s", m.ShortMessage.c_str());
+        ImGui::TextWrapped("%s", message.Message.c_str());
     }
     ImGui::PopStyleColor();
 

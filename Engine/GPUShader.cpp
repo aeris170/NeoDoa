@@ -24,7 +24,7 @@ GPUShaderBuilder& GPUShaderBuilder::SetType(ShaderType shaderType) noexcept {
     type = shaderType;
     return *this;
 }
-GPUShaderBuilder& GPUShaderBuilder::SetName(std::string_view shaderName) noexcept {
+GPUShaderBuilder& GPUShaderBuilder::SetName([[maybe_unused]] std::string_view shaderName) noexcept {
 #ifdef DEBUG
     name = shaderName;
 #endif
@@ -65,7 +65,7 @@ int GPUShaderProgram::GetUniformLocation(std::string_view name) const noexcept {
     return search->Location;
 }
 
-GPUShaderProgramBuilder& GPUShaderProgramBuilder::SetName(const std::string_view programName) noexcept {
+GPUShaderProgramBuilder& GPUShaderProgramBuilder::SetName([[maybe_unused]] const std::string_view programName) noexcept {
 #ifdef DEBUG
     name = programName;
 #endif
