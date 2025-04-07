@@ -449,7 +449,7 @@ void GUI::RenderProjectData(ProjectDataCollection& projectDataCollectionSorted) 
 
         // Here, we open context menu on hovered row and save into contextMenuOwner. Search and read [context] now!
         //  (i + 1) because first element is at row 1. row 0 is title bar.
-        if ((i + 1) == ImGui::TableGetHoveredRow() && ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
+        if ((i + 1) == static_cast<size_t>(ImGui::TableGetHoveredRow()) && ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
             if (!errorModal.IsVisible() && !newProjectModal.IsVisible() && !importProjectModal.IsVisible()) {
                 ImGui::OpenPopup(ProjectsTableContextMenuID);
                 contextMenuOwner = data;

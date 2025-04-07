@@ -381,8 +381,10 @@ bool SingleAssetWidget(std::string_view label, UUID& uuid, const Assets& assets,
     if (ImGui::BeginDragDropTarget()) {
         if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DND_DEMO_CELL")) {
             UUID data = *(const UUID*) payload->Data;
-            ConstAssetHandle handle = assets.FindAsset(data);
-            assert(handle.HasValue());
+            if constexpr (detect::is_debug_v) {
+                ConstAssetHandle handle = assets.FindAsset(data);
+                assert(handle.HasValue());
+            }
             if (filter(data, assets)) {
                 uuid = data;
             }
@@ -450,8 +452,10 @@ bool MultiAssetWidget(std::string_view label, std::vector<UUID>& uuids, const As
         if (ImGui::BeginDragDropTarget()) {
             if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DND_DEMO_CELL")) {
                 UUID data = *(const UUID*) payload->Data;
-                ConstAssetHandle handle = assets.FindAsset(data);
-                assert(handle.HasValue());
+                if constexpr (detect::is_debug_v) {
+                    ConstAssetHandle handle = assets.FindAsset(data);
+                    assert(handle.HasValue());
+                }
                 if (filter(data, assets)) {
                     uuids[i] = data;
                 }
